@@ -1,0 +1,71 @@
+# Book settings
+# Learn more at https://jupyterbook.org/customize/config.html
+
+title: Applied Soft Computing
+author: Sadamori Kojaku
+logo: logo.jpg
+
+# Force re-execution of notebooks on each build.
+# See https://jupyterbook.org/content/execute.html
+execute:
+  execute_notebooks: auto
+
+launch_buttons:
+  notebook_interface: "classic"
+  thebe: true
+  binderhub_url: "https://mybinder.org"  # The URL for your BinderHub (e.g., https://mybinder.org)
+  binder_repo_base                 : "https://github.com/"  # The site on which the textbook repository is hosted
+  binder_repo_org                  : "skojaku"  # The username or organization that owns this repository
+  binder_repo_name                 : "applied-soft-comp"  # The name of the repository on the web
+  binder_repo_branch               : "main"  # The branch on which your textbook is hosted.
+  binderhub_interact_text          : "Interact"  # The text that interact buttons will contain.
+
+# Execute notebooks on each build
+sphinx:
+  config:
+    nb_custom_formats:
+        .Rmd:
+            - jupytext.reads
+            - fmt: Rmd
+        .md:
+            - jupytext.reads
+            - fmt: md
+    suppress_warnings: ["myst.footnote", "autosectionlabel.*"]
+    myst_footnote_transition: false
+    nb_execution_mode: auto
+    html_show_copyright: false
+    html_extra_path: ['files']
+    myst_enable_extensions:
+      - amsmath
+      - colon_fence
+      - deflist
+      - dollarmath
+      - html_image
+      - linkify
+      - replacements
+      - smartquotes
+      - substitution
+    myst_substitutions:
+      base_url: 'https://skojaku.github.io/applied-soft-comp'
+    html_extra_path: ['assets', "environment.yml"]
+
+# Define the name of the latex output file for PDF builds
+latex:
+  latex_documents:
+    targetname: book.tex
+
+# Add a bibtex file so that we can create citations
+bibtex_bibfiles:
+  - references.bib
+
+# Information about where the book exists on the web
+repository:
+  url: https://github.com/skojaku/applied-soft-comp  # Online location of your book
+  path_to_book: docs/lecture-note  # Optional path to your book, relative to the repository root
+  branch: gh-pages  # Which branch of the repository should be used when creating links (optional)
+
+# Add GitHub buttons to your book
+# See https://jupyterbook.org/customize/config.html#add-a-link-to-your-repository
+html:
+  use_issues_button: true
+  use_repository_button: true
