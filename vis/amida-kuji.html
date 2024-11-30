@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corrected D3.js Amidakuji Game with Aligned Trophy</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            background-color: #FF69B4;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-family: 'Comic Sans MS', cursive;
+            font-size: 16px;
+            border-radius: 25px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background-color: #FF1493;
+            transform: scale(1.05);
+        }
+        #result {
+            margin-top: 10px;
+            font-size: 24px;
+        }
+        .explanation {
+            max-width: 600px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        .emoji {
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎲 Ladder Lottery 🎲</h1>
+    <div class="explanation">
+        Ladder Lottery is a fun East Asian game, also known as "鬼腳圖" (Guijiaotu) in China, "阿弥陀籤" (Amida-kuzi) in Japan, "사다리타기" (Sadaritagi) in Korea.
+        Click on a fruit emoji at the top to choose a path and see where you end up! 🚀
+        Your path will be shown in yellow, and the winning path in red.
+        You can change the winning position by clicking on the bottom flags. Can you find the lucky path? 🍀
+    </div>
+    <div id="game-container">
+        <div>
+            <label for="lines">Number of horizontal lines: </label>
+            <input type="range" id="lines" min="5" max="500" value="10">
+            <span id="lines-value">10</span>
+        </div>
+        <button id="auto-play">🤖 Play 1000 Times</button>
+        <button id="reset-stats">🔄 Reset Statistics</button>
+        <div id="stats"></div>
+        <div id="amidakuji"></div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const width = 480;
+        const height = 400;
+        const margin = { top: 40, right: 10, bottom: 40, left: 10 };
+        const gameWidth = width - margin.left - margin.right;
+        const gameHeight = height - margin.top - margin.bottom;
+
+        const svg = d3.select("#amidakuji")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const gameArea = svg.append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        let horizontalLines = [];
+        const verticalLines = 7; // 6 paths + 1 (for spacing)
+        let cellWidth, cellHeight;
+        let gameState = 'ready';
+        let currentPath = [];
+        let winningStats = [0, 0, 0, 0, 0, 0];
+        let winningColumn = 5; // Default to the second from the right (5th out of 6)
+        let totalGames = 0;
+
+        const linesSlider = document.getElementById('lines');
+        const linesValue = document.getElementById('lines-value');
+        const autoPlayButton = document.getElementById('auto-play');
+        const resetStatsButton = document.getElementById('reset-stats');
+        const resultDiv = document.getElementById('result');
+
+        const emojis = ['🍎', '🍌', '🍇', '🍊', '🍓', '🍉'];
+        const flagEmoji = '🚩';
+        const trophyEmoji = '🏆';
+
+        function initGame() {
+            gameState = 'ready';
+            resultDiv.textContent = '';
+            generateHorizontalLines();
+            calculateWinningStart();
+            totalGames++;
+            drawGame();
+            updateStats();
+        }
+
+        function generateHorizontalLines() {
+            horizontalLines = [];
+            const lineCount = parseInt(linesSlider.value);
+            for (let i = 0; i < lineCount; i++) {
+                const x = Math.floor(Math.random() * (verticalLines - 2)) + 1;
+                horizontalLines.push({ x: x, y: (i + 1) / (lineCount + 1) });
+            }
+        }
+
+        function calculateWinningStart() {
+            let x = winningColumn;
+            for (let i = horizontalLines.length - 1; i >= 0; i--) {
+                if (x === horizontalLines[i].x + 1) {
+                    x--;
+                } else if (x === horizontalLines[i].x) {
+                    x++;
+                }
+            }
+            winningStats[x - 1]++;
+        }
+
+        function drawGame() {
+            gameArea.selectAll("*").remove();
+
+            cellWidth = gameWidth / verticalLines;
+            cellHeight = gameHeight / (horizontalLines.length + 2);
+
+            // Draw vertical lines
+            for (let i = 1; i < verticalLines; i++) {
+                gameArea.append("line")
+                    .attr("x1", i * cellWidth)
+                    .attr("y1", 0)
+                    .attr("x2", i * cellWidth)
+                    .attr("y2", gameHeight)
+                    .attr("stroke", "#ffffff")
+                    .attr("stroke-width", 2);
+            }
+
+            // Draw horizontal lines
+            horizontalLines.forEach(line => {
+                const y = line.y * gameHeight;
+                gameArea.append("line")
+                    .attr("x1", line.x * cellWidth)
+                    .attr("y1", y)
+                    .attr("x2", (line.x + 1) * cellWidth)
+                    .attr("y2", y)
+                    .attr("stroke", "#ffffff")
+                    .attr("stroke-width", 2);
+            });
+
+            // Draw clickable path selectors at the top
+            for (let i = 1; i < verticalLines; i++) {
+                gameArea.append("text")
+                    .attr("x", i * cellWidth)
+                    .attr("y", -10)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "#ffffff")
+                    .attr("font-size", "24px")
+                    .text(emojis[i-1])
+                    .on("click", () => handleClick(i))
+                    .style("cursor", "pointer");
+            }
+
+            // Draw clickable winner selectors and trophies at the bottom
+            for (let i = 1; i < verticalLines; i++) {
+                gameArea.append("text")
+                    .attr("x", i * cellWidth)
+                    .attr("y", gameHeight + 30)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", i === winningColumn ? "#FFD700" : "#ffffff")
+                    .attr("font-size", "24px")
+                    .text(flagEmoji)
+                    .on("click", () => setWinningColumn(i))
+                    .style("cursor", "pointer");
+
+                // Draw trophy for the winning column
+                if (i === winningColumn) {
+                    gameArea.append("text")
+                        .attr("x", i * cellWidth)
+                        .attr("y", gameHeight + 20)
+                        .attr("text-anchor", "middle")
+                        .attr("fill", "#FFD700")
+                        .attr("font-size", "32px")
+                        .text(trophyEmoji);
+                }
+            }
+        }
+
+        function setWinningColumn(column) {
+            winningColumn = column;
+            initGame();
+        }
+
+        function drawPath(column, color) {
+            let x = column;
+            let y = 0;
+            currentPath = [{x, y}];
+
+            const path = d3.path();
+            path.moveTo(x * cellWidth, 0);
+
+            horizontalLines.forEach(line => {
+                y = line.y * gameHeight;
+                path.lineTo(x * cellWidth, y);
+
+                if (x === line.x) {
+                    x++;
+                    path.lineTo(x * cellWidth, y);
+                } else if (x === line.x + 1) {
+                    x--;
+                    path.lineTo(x * cellWidth, y);
+                }
+            });
+
+            path.lineTo(x * cellWidth, gameHeight);
+
+            gameArea.append("path")
+                .attr("d", path.toString())
+                .attr("fill", "none")
+                .attr("stroke", color)
+                .attr("stroke-width", 3);
+
+            return x;
+        }
+
+        function handleClick(column) {
+            if (gameState !== 'ready') return;
+
+            gameState = 'drawing';
+            const userEndColumn = drawPath(column, "yellow");
+            const winningStartColumn = winningStats.indexOf(Math.max(...winningStats)) + 1;
+            drawPath(winningStartColumn, "red");
+
+            setTimeout(() => {
+                checkResult(column, userEndColumn);
+            }, 500);
+        }
+
+        function checkResult(startColumn, endColumn) {
+            if (endColumn === winningColumn) {
+                resultDiv.innerHTML = `${emojis[startColumn-1]} Path ${startColumn} is a winner! 🎉 Congratulations! 🎊`;
+            } else {
+                resultDiv.innerHTML = `${emojis[startColumn-1]} Path ${startColumn} is not a winner. 😢 Try again! 🍀`;
+            }
+            updateStats();
+            setTimeout(initGame, 1500);
+        }
+
+        function updateStats() {
+            const data = winningStats.map((value, index) => ({ path: index + 1, count: value, percentage: (value / totalGames) * 100 }));
+
+            d3.select("#stats").selectAll("*").remove();
+
+            const statsWidth = 480;
+            const statsHeight = 220;
+            const statsMargin = { top: 40, right: 20, bottom: 30, left: 40 };
+            const chartWidth = statsWidth - statsMargin.left - statsMargin.right;
+            const chartHeight = statsHeight - statsMargin.top - statsMargin.bottom;
+
+            const statsSvg = d3.select("#stats")
+                .append("svg")
+                .attr("width", statsWidth)
+                .attr("height", statsHeight)
+                .append("g")
+                .attr("transform", `translate(${statsMargin.left},${statsMargin.top})`);
+
+            const x = d3.scaleBand()
+                .range([0, chartWidth])
+                .padding(0.1);
+
+            const y = d3.scaleLinear()
+                .range([chartHeight, 0]);
+
+            x.domain(data.map(d => d.path));
+            y.domain([0, d3.max(data, d => d.percentage)]);
+
+            statsSvg.selectAll(".bar")
+                .data(data)
+                .enter().append("rect")
+                .attr("class", "bar")
+                .attr("x", d => x(d.path))
+                .attr("width", x.bandwidth())
+                .attr("y", d => y(d.percentage))
+                .attr("height", d => chartHeight - y(d.percentage))
+                .attr("fill", (d, i) => d3.schemeCategory10[i]);
+
+            statsSvg.selectAll(".label")
+                .data(data)
+                .enter().append("text")
+                .attr("class", "label")
+                .attr("x", d => x(d.path) + x.bandwidth() / 2)
+                .attr("y", d => y(d.percentage) - 5)
+                .attr("text-anchor", "middle")
+                .attr("fill", "#ffffff")
+                .text(d => `${d.percentage.toFixed(1)}%`);
+
+            statsSvg.append("g")
+                .attr("transform", `translate(0,${chartHeight})`)
+                .call(d3.axisBottom(x))
+                .attr("color", "#ffffff");
+
+            statsSvg.append("g")
+                .call(d3.axisLeft(y).ticks(5).tickFormat(d => d.toFixed(1) + "%"))
+                .attr("color", "#ffffff");
+
+            statsSvg.append("text")
+                .attr("x", chartWidth / 2)
+                .attr("y", -20)
+                .attr("text-anchor", "middle")
+                .attr("fill", "#ffffff")
+                .text("🏆 Winning Path Distribution (%) 🏆");
+        }
+
+        function autoPlay() {
+            let count = 0;
+            function playOne() {
+                if (count < 1000) {
+                    initGame();
+                    const randomColumn = Math.floor(Math.random() * 6) + 1;
+                    const endColumn = drawPath(randomColumn, `rgba(255, 255, 0, 0.1)`);
+                    drawPath(winningColumn, `rgba(255, 0, 0, 0.1)`);
+                    winningStats[randomColumn - 1] += (endColumn === winningColumn ? 1 : 0);
+                    count++;
+                    if (count % 10 === 0) {
+                        updateStats();
+                    }
+                    setTimeout(playOne, 10);
+                } else {
+                    updateStats();
+                    resultDiv.innerHTML = '1000 random plays completed! 🎉🤖';
+                    setTimeout(initGame, 1500);
+                }
+            }
+            playOne();
+        }
+
+        function resetStats() {
+            winningStats = [0, 0, 0, 0, 0, 0];
+            totalGames = 0;
+            updateStats();
+            resultDiv.innerHTML = 'Statistics have been reset! 🔄';
+        }
+
+        linesSlider.addEventListener('input', () => {
+            linesValue.textContent = linesSlider.value;
+            initGame();
+        });
+
+        autoPlayButton.addEventListener('click', autoPlay);
+        resetStatsButton.addEventListener('click', resetStats);
+
+        initGame();
+    </script>
+</body>
+</html>
