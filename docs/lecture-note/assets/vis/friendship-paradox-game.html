@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friendship Paradox Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000000;
+            color: #FFFFFF;
+        }
+        .container {
+            text-align: center;
+        }
+        svg {
+            background-color: #333333;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        #score {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #FFD700;
+        }
+        #averages {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #FFFFFF;
+        }
+        #instructions {
+            margin-bottom: 10px;
+            max-width: 800px; /* Increased max-width */
+            text-align: left;
+            color: #FFFFFF;
+            font-size: 20px; /* Decreased font size */
+            border: 2px solid #FFFFFF;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        #celebration {
+            font-size: 48px;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            background-color: #000000; /* Added black background */
+            padding: 20px; /* Added padding for better appearance */
+            border-radius: 8px; /* Added border-radius for rounded corners */
+        }
+        #warning {
+            font-size: 24px;
+            color: #FF0000;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Friendship Paradox Game</h2>
+        <div id="score">Gap Score: 0.00</div>
+        <div id="averages"></div>
+        <div id="instructions">
+            <ul>
+                <li>🤝 <b>Goal:</b> Make your friends have more friends than you!</li>
+                <li>📈 <b>Task:</b> Maximize the gap between nodes' average friend count and their friends' average friend count.</li>
+                <li>🔗 Click two nodes to add/remove connections between them.</li>
+                <li>🔔 You will be notified when you achieve the goal.</li>
+            </ul>
+        </div>
+        <div id="visualization"></div>
+    </div>
+    <div id="celebration">Congratulations! You've reached the maximum score!</div>
+    <div id="warning">Warning: Each node must have at least one edge!</div>
+
+    <script>
+        const width = 600;
+        const height = 400;
+        const radius = Math.min(width, height) / 2 - 50;
+
+        let nodes = d3.range(10).map(d => ({ id: d + 1, friends: 0 }));
+        let links = [];
+
+        const svg = d3.select("#visualization")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const g = svg.append("g")
+            .attr("transform", `translate(${width/2},${height/2})`);
+
+        let link = g.append("g")
+            .selectAll("line");
+
+        let node = g.append("g")
+            .selectAll("circle");
+
+        let selectedNodes = [];
+
+        function initializeLinks() {
+            const shuffled = d3.shuffle(nodes.slice());
+            for (let i = 0; i < shuffled.length; i++) {
+                const numLinks = Math.floor(Math.random() * 2) + 1; // Random number of links between 1 and 3 for each node
+                for (let j = 0; j < numLinks; j++) {
+                    const targetIndex = (i + j + 1) % shuffled.length;
+                    links.push({ source: shuffled[i], target: shuffled[targetIndex] });
+                }
+            }
+        }
+
+        function updateVisualization() {
+            const angleStep = (2 * Math.PI) / nodes.length;
+
+            nodes.forEach((d, i) => {
+                d.x = radius * Math.cos(i * angleStep);
+                d.y = radius * Math.sin(i * angleStep);
+            });
+
+            link = link.data(links, d => `${d.source.id}-${d.target.id}`);
+            link.exit().remove();
+            link = link.enter().append("line")
+                .attr("stroke", "#FFFFFF")
+                .attr("stroke-width", 2)
+                .merge(link);
+
+            node = node.data(nodes, d => d.id);
+            node.exit().remove();
+            node = node.enter().append("circle")
+                .attr("r", 18)
+                .attr("fill", "#00FFFF") // Changed to cyan
+                .attr("stroke", "#FFFFFF")
+                .attr("stroke-width", 2)
+                .on("click", handleNodeClick)
+                .merge(node);
+
+            updatePositions();
+            updateFriendCounts();
+            updateAverages();
+        }
+
+        function updatePositions() {
+            link
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+
+            node
+                .attr("cx", d => d.x)
+                .attr("cy", d => d.y);
+        }
+
+        function updateFriendCounts() {
+            nodes.forEach(node => {
+                node.friends = links.filter(link =>
+                    link.source.id === node.id || link.target.id === node.id
+                ).length;
+            });
+        }
+
+        function updateAverages() {
+            const nodeAverage = d3.mean(nodes, d => d.friends);
+            const edgeAverage = d3.mean(links.flatMap(l => [l.source.friends, l.target.friends]));
+            const gap = edgeAverage - nodeAverage;
+
+            d3.select("#score").text(`Gap Score: ${gap.toFixed(2)}`);
+            d3.select("#averages").html(`
+                Node-level average: ${nodeAverage.toFixed(2)}<br>
+                Edge-level average: ${edgeAverage.toFixed(2)}<br>
+                <b>Calculation:</b> ${edgeAverage.toFixed(2)} (Edge-level average) - ${nodeAverage.toFixed(2)} (Node-level average) = ${gap.toFixed(2)}
+            `);
+
+            if (gap >= 3.2) {
+                d3.select("#celebration").style("display", "block");
+                setTimeout(() => {
+                    d3.select("#celebration").style("display", "none");
+                }, 3000);
+            }
+        }
+
+        function handleNodeClick(event, d) {
+            if (selectedNodes.includes(d)) {
+                selectedNodes = selectedNodes.filter(node => node !== d);
+            } else {
+                selectedNodes.push(d);
+                if (selectedNodes.length === 2) {
+                    toggleLink(selectedNodes[0], selectedNodes[1]);
+                    selectedNodes = [];
+                }
+            }
+
+            node.attr("stroke", d => selectedNodes.includes(d) ? "#FF0000" : "#FFFFFF")
+                .attr("stroke-width", d => selectedNodes.includes(d) ? 3 : 2);
+
+            updateVisualization();
+        }
+
+        function toggleLink(source, target) {
+            const linkIndex = links.findIndex(
+                l => (l.source === source && l.target === target) || (l.source === target && l.target === source)
+            );
+
+            if (linkIndex > -1) {
+                if (source.friends > 1 && target.friends > 1) {
+                    links.splice(linkIndex, 1);
+                } else {
+                    d3.select("#warning").style("display", "block");
+                    setTimeout(() => {
+                        d3.select("#warning").style("display", "none");
+                    }, 3000);
+                }
+            } else {
+                links.push({ source, target });
+            }
+        }
+
+        initializeLinks();
+        updateVisualization();
+    </script>
+</body>
+</html>
