@@ -1,0 +1,220 @@
+\documentclass[11pt, a4paper]{article}
+%\usepackage{geometry}
+\usepackage[inner=1.5cm,outer=1.5cm,top=2.5cm,bottom=2.5cm]{geometry}
+\pagestyle{empty}
+\usepackage{graphicx}
+\usepackage{fancyhdr, lastpage, bbding, pmboxdraw}
+\usepackage[usenames,dvipsnames]{color}
+\definecolor{darkblue}{rgb}{0,0,.6}
+\definecolor{darkred}{rgb}{.7,0,0}
+\definecolor{darkgreen}{rgb}{0,.6,0}
+\definecolor{red}{rgb}{.98,0,0}
+\usepackage[colorlinks,pagebackref,pdfusetitle,urlcolor=darkblue,citecolor=darkblue,linkcolor=darkred,bookmarksnumbered,plainpages=false]{hyperref}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\pagestyle{fancyplain}
+\fancyhf{}
+\lhead{ \fancyplain{}{Applied Soft Computing} }
+%\chead{ \fancyplain{}{} }
+\rhead{ \fancyplain{}{\today} }
+%\rfoot{\fancyplain{}{page \thepage\ of \pageref{LastPage}}}
+\fancyfoot[RO, LE] {page \thepage\ of \pageref{LastPage} }
+\thispagestyle{plain}
+
+%%%%%%%%%%%% LISTING %%%
+\usepackage{listings}
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
+\usepackage{verbatim} % used to display code
+\usepackage{fancyvrb}
+\usepackage{acronym}
+\usepackage{amsthm}
+\VerbatimFootnotes % Required, otherwise verbatim does not work in footnotes!
+
+
+
+\definecolor{OliveGreen}{cmyk}{0.64,0,0.95,0.40}
+\definecolor{CadetBlue}{cmyk}{0.62,0.57,0.23,0}
+\definecolor{lightlightgray}{gray}{0.93}
+
+
+
+\lstset{
+%language=bash,                          % Code langugage
+basicstyle=\ttfamily,                   % Code font, Examples: \footnotesize, \ttfamily
+keywordstyle=\color{OliveGreen},        % Keywords font ('*' = uppercase)
+commentstyle=\color{gray},              % Comments font
+numbers=left,                           % Line nums position
+numberstyle=\tiny,                      % Line-numbers fonts
+stepnumber=1,                           % Step between two line-numbers
+numbersep=5pt,                          % How far are line-numbers from code
+backgroundcolor=\color{lightlightgray}, % Choose background color
+frame=none,                             % A frame around the code
+tabsize=2,                              % Default tab size
+captionpos=t,                           % Caption-position = bottom
+breaklines=true,                        % Automatic line breaking?
+breakatwhitespace=false,                % Automatic breaks only at whitespace?
+showspaces=false,                       % Dont make spaces visible
+showtabs=false,                         % Dont make tabls visible
+columns=flexible,                       % Column format
+morekeywords={__global__, __device__},  % CUDA specific keywords
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\begin{center}
+{\Large \textsc{Applied Soft Computing}}
+\end{center}
+\begin{center}
+Spring 2025
+\end{center}
+%\date{September 26, 2014}
+
+\begin{center}
+\rule{6in}{0.4pt}
+\begin{minipage}[t]{.75\textwidth}
+\begin{tabular}{llcccll}
+\textbf{Instructor:} & Sadamori Kojaku & & &  & \textbf{Time:} & Tue \& Thur 1:15 -- 2:35 \\
+\textbf{Email:} &  \href{mailto:skojaku@binghamton.edu}{skojaku@binghamton.edu} & & & & \textbf{Place:} & G22 Engineering Bldg. \\
+\textbf{Office:} &  J19 Engineering Bldg. & & & & \textbf{Credit:} & 3 \\
+\textbf{Office Hour:} &  15:00-17:00 Tue \& Thur & & & & \textbf{Zoom:} & \href{https://binghamton.zoom.us/my/skojaku.zoom}{my/skojaku.zoom}
+\end{tabular}
+\end{minipage}
+\rule{6in}{0.4pt}
+\end{center}
+\vspace{.5cm}
+\setlength{\unitlength}{1in}
+\renewcommand{\arraystretch}{2}
+
+\noindent\textbf{Course Pages:} \begin{enumerate}
+\item Course Website \url{https://skojaku.github.io/applied-soft-computing}
+\item Course Github \url{http://github.com/skojaku/applied-soft-computing}
+\end{enumerate}
+
+\vskip.15in
+\noindent\textbf{Office Hours:} Tuesdays 15:00-17:00 and Thursdays 15:00-17:00 or by appointment (in person and online)
+
+\vskip.15in
+\noindent\textbf{Main References:} %\footnotemark
+Below is a curated list of essential books that will be referenced during the course.
+\begin{itemize}
+\item James, G., Witten, D., Hastie, T., \& Tibshirani, R. {\textit{An Introduction to Statistical Learning}}. Available at \url{https://www.statlearning.com/}
+\item Raschka, S., Liu, Y., \& Mirjalili, V. {\textit{Machine Learning with PyTorch and Scikit-Learn}}. Packt Publishing, 2022. Available at BU libraries.
+\item Bishop, C. M. {\textit{Pattern Recognition and Machine Learning}}. Springer, 2006. Available at BU libraries.
+\item Martin, R. C. {\textit{Clean Code: A Handbook of Agile Software Craftsmanship}}. Prentice Hall, 2008.
+\end{itemize}
+
+% \footnotetext{Downloadable ebook versions are available on AeLP.}
+
+\vskip.15in
+\noindent\textbf{Objectives:}
+This course introduces you to the emerging field of computational intelligence, a distinct approach to machine intelligence that diverges from traditional AI. The course encompasses artificial neural networks, evolutionary computing, and probabilistic reasoning.
+The soft computing approach offers numerous potential applications to nearly any field. The purpose of this course is to introduce the basic concepts briefly, and then to move quickly on to application techniques. We will not assume prior knowledge of the theory, but we will move quickly, so those new to the subject matter will need to study extra hard. Though this is a difficult subject to teach as a 500-level course, and even more so as a 400-level one, I will make every effort to structure the course in a way appropriate to those levels. Each student will be required to develop one significant application as a project during the semester.
+
+
+\vskip.15in
+\noindent\textbf{Expected Student Learning Outcomes:}
+After completing this course, students will:
+be able to interpret and evaluate modern soft computing literature, concepts, methodologies, tools, and recent research topics; be able to implement and apply machine learning models, neural networks, and other soft computing techniques using appropriate mathematical/computational means; be able to design and conduct original research using soft computing methods and tools; be able to demonstrate integration of artificial intelligence concepts and practical implementation skills through development of a significant application project.
+
+\vskip.15in
+\noindent\textbf{Prerequisites:}
+I try to manage the course in such a way to make it as open ended as possible.  By that I mean that on the one hand I try to make it possible for beginning graduate students and upper level undergraduates with no background in these areas to do well in the course if they apply themselves.  But on the other hand, I try to make it possible for already advanced students to expand their knowledge further.
+In practical terms, students will ideally come to the class with the following knowledge:
+1.	Basic competence in applied mathematics, which we will define here as calculus at least through partial derivatives and basic familiarity with concepts of optimization as well as discrete mathematics.
+2.	Enough computer competence and programming skill to implement their projects on the computer in some form.
+
+
+\clearpage
+
+%\vspace*{.25in}
+\noindent \textbf{Course Outline:}
+\begin{center}
+\begin{minipage}{5in}
+\begin{flushleft}
+Introduction to Neural Networks \dotfill ~ 01/20 (Week 1) \\
+Word2Vec: Learning Word Embeddings \dotfill ~ 01/27 (Week 2) \\
+Tokenization and Text Preprocessing \dotfill ~ 02/03 (Week 3) \\
+Transformers: Architecture and Attention Mechanism \dotfill ~ 02/10 (Week 4) \\
+BERT: Bidirectional Encoders for Language Understanding \dotfill ~ 02/17 (Week 5) \\
+Sentence Embeddings and Their Applications \dotfill ~ 02/24 (Week 6) \\
+Recurrent Neural Networks (RNNs) and LSTMs \dotfill ~ 03/03 (Week 7) \\
+(No Class - Spring Break) \dotfill ~ 03/10 (Week 8) \\
+Convolutional Neural Networks and Fourier Transforms \dotfill ~ 03/17 (Week 9) \\
+Topic Modeling with BERT \dotfill ~ 03/24 (Week 10) \\
+Generative Language Models: GPT and Beyond \dotfill ~ 03/31 (Week 11) \\
+Parameter-Efficient Fine-Tuning (PEFT) \dotfill ~ 04/07 (Week 12) \\
+Advanced Topics in Neural Networks \dotfill ~ 04/14 (Week 13) \\
+Project working session \dotfill ~ 04/21 (Week 14; no class on 04/22) \\
+Project Presentations \dotfill ~ 04/26 (Week 15) \\
+Course Wrap-up and Future Directions \dotfill ~ 05/05 (Week 16; no class on 05/08) \\
+Final Exam Week \dotfill ~ 05/12-05/19 (Week 17) \\
+\end{flushleft}
+\end{minipage}
+\end{center}
+
+\vspace*{.15in}
+\noindent\textbf{Grading Policy:}
+\begin{itemize}
+\item \textit{Grading Item}: Attendance and Quiz (20\%). Assignments (20\%). Exam (30\%). Project (30\%).
+\item \textit{Credits}: 3 credits.
+\item \textit{Grading}: Normal grading; A through F.
+\end{itemize}
+
+\vskip.15in
+\noindent\textbf{Course structure:}
+``Don't think! Feeeeeel'' is a famous quote by Bruce Lee in the movie \textit{Enter the Dragon}, and this is the guiding philosophy of this course.
+The primary goal of this course is to \textbf{feel} the concepts and tools of network science through pen-and-paper exercises and hands-on coding.
+The course will first cover the practical skills of network science, followed by their theoretical foundations.
+The course activities include:
+\begin{itemize}
+\item The class will begin with a weekly quiz on Brightspace about the lecture topics in the previous week. This quiz is intended to review the lecture topics and to test your understanding of the concepts and tools of network science.
+\item Biweekly coding assignemnt on Github Classroom. The assignments are intended for practicing and equipping you with the skills to analyze network data.
+\item A short lecture to cover the theoretical aspects.
+\end{itemize}
+
+\vskip.15in
+\noindent\textbf{Communications:}
+We use Discord for quicker informal communications, Q\&A, team discussions, and other casual conversations. We will send you an invitation link through Brightspace. Feel free to NOT use your full name (e.g., “Jane D.”)
+Announcements will be sent via Brightspace and Discord. Many course-related information will be shared on Discord. So, you will miss a lot of information if you are not on Discord.
+
+\vskip.15in
+\noindent\textbf{Office Hours:}
+\begin{itemize}
+    \item \textbf{Sadamori Kojaku:} 15:00-17:00 Tuesdays and Thursdays at J19 Engineering Building (in person) or Zoom (\url{https://binghamton.zoom.us/my/skojaku.zoom}).
+\end{itemize}
+
+\clearpage
+\noindent\textbf{Important Dates:}
+\begin{center} \begin{minipage}{3.8in}
+\begin{flushleft}
+Project Proposal \#1      \dotfill ~03/09 \\
+Project Final Paper \#2      \dotfill ~05/09 \\
+Project Presentation \#3      \dotfill ~05/06 \\
+Final Exam       \dotfill ~05/12-05/15 \\
+\end{flushleft}
+\end{minipage}
+\end{center}
+
+\vskip.15in
+\noindent\textbf{Course Policy:}
+
+\begin{itemize}
+    \item \textbf{Attendance}: If you are not able to attend the class in person, please request an excuse over email one day before the class. We may not accept excuses for reasons other than illness, accidents, job interviews, and conference travels. If you are not able to attend in person for more than two weeks due to illness or some other legitimate reason, please request an acceptable accommodation over email.
+    \item \textbf{Laptop and mobile}: We want to engage in-class activities with you together. Please refrain from using laptops and mobile phones unless instructed.
+    \item \textbf{Credit hours}: This course is a 3-credit course, which means that in addition to the scheduled lectures/discussions, students are expected to do at least 6.5 hours of course-related work each week during the semester. This includes things like: completing assigned readings, participating in lab sessions, studying for tests and examinations, preparing written assignments, completing internship or clinical placement requirements, and other tasks that must be completed to earn credit in the course.
+    \item \textbf{Generative AI}: You may use artificial intelligence tools as learning aids for understanding course materials. However, the final submitted assignment must be original work produced by the individual student alone. If parts of the assignments are produced by generative AIs, you must indicate the generated parts and cite the source AIs. Refer to this format guideline: \url{https://style.mla.org/citing-generative-ai/}
+    \item \textbf{Data backup}: You have the responsibility of backing up all your data and code. Always back up your code and data. You should at least use Google Drive or Dropbox at the minimum. You can also use cloud services like Google Colaboratory. Ideally, learn version control systems and use \url{https://github.com}. Loss of data, code, or papers (e.g. due to malfunction of your laptop) is not an acceptable excuse for delayed or missing submission.
+    \item \textbf{Graduate Academic Consultants}: Binghamton University's Graduate Academic Consultants can help you with projects in this course. This is a free service. \url{https://www.binghamton.edu/grad-school/academic-support/graduate-academic-consultants/}
+    \item \textbf{Disabilities}: Every attempt will be made to accommodate qualified students with disabilities (e.g. mental health, learning, chronic health, physical, hearing, vision, neurological, etc.). You must have established your eligibility for support services through Services for Students with Disabilities. Note that services are confidential, may take time to put into place, and are not retroactive. The office is located in the University Union, room 119. Captions and alternate media for print materials may take three or more weeks to get produced. Please contact Disability Services for Students at \url{https://www.binghamton.edu/ssd/index.html} or 607-777-2686 as soon as possible if accommodations are needed.
+    \item \textbf{Bias-based incidents}: Any act of discrimination or harassment based on race, ethnicity, religious affiliation, gender, gender identity, sexual orientation, or disability can be reported at \url{https://www.binghamton.edu/diversity-equity-inclusion/reportbias.html} or to the Binghamton University Affirmative Action Officer at 607-777-4775.
+    Sexual misconduct and Title IX
+    \item \textbf{Sexual misconduct and Title IX}: Title IX and BU’s Sexual Harassment Policy regard any form of sexual harassment as a violation of the standards of conduct required of all persons associated with the institution. If you have experienced sexual misconduct or know someone who has, you can ask support from the University Counseling Center at 607-777-2772 (counseling, advocacy, and advice services). It is also important that you know that Title IX and University policy require me to share any information brought to my attention about potential sexual misconduct with the campus Deputy Title IX Coordinator or BU’s Title IX Coordinator. In that event, those individuals will work to ensure that appropriate measures are taken and resources are made available. Protecting student privacy is of utmost concern, and information will only be shared with those that need to know to ensure the University can respond and assist. Visit \url{https://www.binghamton.edu/counseling/resources/faculty/assault.html} and \url{https://www.binghamton.edu/services/title-ix/index.html} to learn more.
+    \item \textbf{Mental health issues}: If you have any mental health issues, don’t hesitate to contact BU’s \href{https://www.binghamton.edu/counseling/index.html}{University Counseling Center}, which provides free counseling sessions. Also, please contact Disability Services for Students at \href{https://www.binghamton.edu/ssd/index.html}{Services for Students with Disabilities} or 607-777-6893 as soon as possible if accommodations are needed.
+    \item \textbf{Academic Integrity}: Academic integrity is fundamental to the mission of our university. All students are expected to uphold the highest standards of academic honesty in their coursework and research. Violations of academic integrity include plagiarism, cheating, unauthorized collaboration, fabrication, and misrepresentation. For full details on the Academic Honesty Code, procedures, and appeals process, please refer to \href{https://www.binghamton.edu/watson/about/academic-honesty.html}{the Student Academic Honesty Code}. If you are unsure about what constitutes academic dishonesty in any situation, ask your instructor for clarification.
+\end{itemize}
+
+%%%%%% THE END
+\end{document}
