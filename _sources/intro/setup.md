@@ -5,7 +5,6 @@
 
 Google Colab has many packages pre-installed. However, they do not include some pacages for network analysis like `igraph` and `graph-tool`.
 
-
 **Installing igraph**
 Create a cell on top of the notebook and run the following code to install the igraph.
 ```
