@@ -1,3 +1,22 @@
+# Set up
+
+
+![](https://lh6.googleusercontent.com/proxy/GZzRcuxWfjywsYP0tHbDXG9sd8M0X85QSE6cJ7XGnu3S1D63w81USLd3eCwjF_pNjvZko5fwCfRSoEE_f1G1sTgP8pCccUk9FI992V29BucEeeMiU_LvrA)
+
+
+In this course, we will use **Python** - a powerful and beginner-friendly programming language that's perfect for data science and AI. Python has become the go-to language for machine learning thanks to its:
+
+- Simple, readable syntax that's great for learning
+- Rich ecosystem of AI/ML libraries like TensorFlow and PyTorch
+- Huge community creating tools and tutorials
+- Free and open-source nature
+- Excellent data analysis and visualization capabilities
+
+Whether you're new to programming or experienced with other languages, Python will give us everything we need to explore applied soft computing.
+
+For most parts, we will use [Google Colab](https://colab.research.google.com/) to run a Jupyter notebook.
+This course involves a lot of coding and data analysis. For most parts, we will use [Google Colab](https://colab.research.google.com/) to run a Jupyter notebook.
+
 
 # Trouble shooting
 
