@@ -224,6 +224,31 @@ ax.set_axis_off()
 
 We can see that word2vec places the words representing countries close to each other and so do the words representing their capitals. The country-capital relationship is also roughly preserved, e.g., *Germany*-*Berlin* vector is roughly parallel to *France*-*Paris* vector.
 
+
+
+## 🔥🔥 Exercise 🔥🔥
+
+1. Using the word2vec model, find the 5 most similar words to "computer" and "science". What do you observe about the semantic relationships between these words?
+
+2. Perform the following word analogy tasks using word2vec and explain your findings:
+   - man : woman :: king : ?
+   - Paris : France :: Tokyo : ?
+   - car : cars :: child : ?
+
+3. Create a visualization similar to the country-capital example above but using:
+   - Different professions and their typical workplaces (e.g., doctor-hospital, teacher-school)
+   - Different languages and their countries (e.g., Spanish-Spain, French-France)
+
+   Compare the patterns you observe with the country-capital relationships.
+
+4. Advanced: Investigate the concept of "gender bias" in word embeddings:
+   - Find the vector difference between pairs like "he-she", "man-woman", "king-queen"
+   - Project profession words (e.g., "doctor", "nurse", "engineer", "teacher") onto these gender directions
+   - What does this tell us about potential biases in the training data?
+
+
+
+
 ```{footbibliography}
 
 ```
