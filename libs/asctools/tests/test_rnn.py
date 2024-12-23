@@ -64,6 +64,56 @@ class TestRNN(unittest.TestCase):
         self.assertIsInstance(losses[0], float)
         self.assertTrue(all(isinstance(loss, float) for loss in losses))
 
+    def test_sequence_prediction(self):
+        # Create sample sequence data
+        seq_length = 5
+        batch_size = 1
+        num_samples = 3
+
+        # Create a single input tensor and target tensor
+        # Modify to match expected dimensions
+        input_tensor = torch.randn(seq_length, batch_size, self.input_size)
+        target_tensor = torch.randn(seq_length, batch_size, self.output_size)
+
+        # Train model with MSE loss
+        losses = self.trainer.train(
+            input_tensors=input_tensor,  # Pass single tensor instead of list
+            task='sequence',
+            targets=target_tensor,
+            criterion=nn.MSELoss(),
+            max_epochs=10,
+            learning_rate=0.01,
+            teacher_forcing_ratio=0.5,
+            hidden_init_func=self.model.initHidden
+        )
+
+        self.assertTrue(len(losses) > 0)
+        self.assertIsInstance(losses[0], float)
+        self.assertTrue(all(isinstance(loss, float) for loss in losses))
+
+    def test_sequence_prediction_single_tensor(self):
+        # Test sequence prediction with single tensor input
+        seq_length = 5
+        batch_size = 1
+
+        # Create single continuous-valued sequence
+        input_tensor = torch.randn(seq_length, batch_size, self.input_size)
+        target_tensor = torch.randn(seq_length, batch_size, self.output_size)
+
+        losses = self.trainer.train(
+            input_tensors=input_tensor,
+            task='sequence',
+            targets=target_tensor,
+            criterion=nn.MSELoss(),
+            max_epochs=5,
+            learning_rate=0.01,
+            hidden_init_func=self.model.initHidden
+        )
+
+        self.assertTrue(len(losses) > 0)
+        self.assertIsInstance(losses[0], float)
+        self.assertTrue(all(isinstance(loss, float) for loss in losses))
+
     def test_classification(self):
         # Create sample sequence data with labels
         seq_length = 5

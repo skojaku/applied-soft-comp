@@ -21,11 +21,22 @@ class RNN(nn.Module):
         self.to(device)
 
     def forward(self, input: torch.Tensor, hidden: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        # Ensure input has shape (batch_size, input_size)
+        if input.dim() == 1:
+            input = input.unsqueeze(0)
+
+        # Ensure hidden has shape (batch_size, hidden_size)
+        if hidden.dim() == 1:
+            hidden = hidden.unsqueeze(0)
+
+        # Match batch sizes
+        if input.size(0) != hidden.size(0):
+            hidden = hidden.expand(input.size(0), -1)
+
         combined = torch.cat((input, hidden), 1)
-        hidden = self.i2h(combined)
+        hidden = self.tanh(self.i2h(combined))
         output = self.i2o(combined)
-        hidden = self.tanh(hidden)
         return output, hidden
 
-    def initHidden(self) -> torch.Tensor:
-        return torch.zeros(1, self.hidden_size, device=self.device)
+    def initHidden(self, batch_size: int = 1) -> torch.Tensor:
+        return torch.zeros(batch_size, self.hidden_size, device=self.device)
