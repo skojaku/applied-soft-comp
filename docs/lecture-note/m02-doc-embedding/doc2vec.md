@@ -152,7 +152,7 @@ model = Doc2Vec(tagged_docs,
                 vector_size=50, # dimension of the document vector
                 window=2, # context window size
                 min_count=1, # ignore words that appear less than this
-                epochs=100,
+                epochs=300,
                 dm=1, # 0: PV-DBOW, 1: PV-DM
                 )
 
