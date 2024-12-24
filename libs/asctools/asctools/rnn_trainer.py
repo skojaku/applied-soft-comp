@@ -46,7 +46,7 @@ class RNNTrainer:
 
         Args:
             input_tensors: Input sequence tensor(s) of shape (batch_size, seq_length, feature_size)
-            task: 'next_token', 'classification', or 'sequence'
+            task: 'next_token', 'classification', or 'sequence', 'many_to_many'
             labels: Class labels for classification task
             targets: Targets for next token prediction or sequence prediction
             criterion: Loss function
@@ -110,6 +110,14 @@ class RNNTrainer:
                         criterion,
                         teacher_forcing_ratio
                     )
+                elif task == 'many_to_many':
+                    sequence_loss = self._train_sequence_many_to_many(
+                        input_tensor,
+                        target,
+                        hidden,
+                        criterion,
+                        teacher_forcing_ratio
+                    )
                 elif task == 'next_token':
                     sequence_loss = self._train_next_token(
                         input_tensor,
@@ -157,29 +165,55 @@ class RNNTrainer:
         criterion: Module,
         teacher_forcing_ratio: float
     ) -> torch.Tensor:
+        """
+        Train for next token prediction task.
+
+        Args:
+            input_tensor: Shape (batch_size, seq_length) for indices or (batch_size, seq_length, vocab_size) for one-hot
+            target_tensor: Shape (batch_size, seq_length) containing target indices
+            hidden: Optional initial hidden state
+            criterion: Loss function (typically CrossEntropyLoss)
+            teacher_forcing_ratio: Probability of using teacher forcing
+        """
         sequence_loss = 0
+        batch_size = input_tensor.size(0)
+        seq_length = input_tensor.size(1)
+
+        # Determine if input is one-hot or indices
+        is_one_hot = input_tensor.dim() == 3
+        vocab_size = input_tensor.size(2) if is_one_hot else (input_tensor.max().item() + 1)
+
+        # Initialize hidden state if needed
+        if hidden is None:
+            hidden = self.model.initHidden(batch_size)
+
+        # Current input starts as first token
+        if is_one_hot:
+            curr_input = input_tensor[:, 0]
+        else:
+            curr_input = torch.zeros(batch_size, vocab_size, device=input_tensor.device)
+            curr_input.scatter_(1, input_tensor[:, 0].unsqueeze(1), 1)
+
         output = None
 
-        for i in range(len(input_tensor) - 1):
+        for t in range(seq_length - 1):
+            # Forward pass
+            output, hidden = self.model(curr_input, hidden)
+            sequence_loss += criterion(output, target_tensor[:, t])
+
+            # Determine next input (teacher forcing or predicted)
             use_teacher_forcing = torch.rand(1).item() < teacher_forcing_ratio
 
-            if use_teacher_forcing or i == 0:
-                curr_input = input_tensor[i]
+            if use_teacher_forcing:
+                if is_one_hot:
+                    curr_input = input_tensor[:, t + 1]
+                else:
+                    curr_input = torch.zeros(batch_size, vocab_size, device=input_tensor.device)
+                    curr_input.scatter_(1, input_tensor[:, t + 1].unsqueeze(1), 1)
             else:
-                # Create one-hot encoding from previous output
-                curr_input = torch.zeros_like(input_tensor[0])
+                # Use model's prediction
+                curr_input = torch.zeros(batch_size, vocab_size, device=input_tensor.device)
                 curr_input.scatter_(1, output.argmax(1).unsqueeze(1), 1)
-
-            if hidden is not None:
-                output, hidden = self.model(curr_input, hidden)
-            else:
-                output = self.model(curr_input)
-
-            # Ensure target is properly shaped for criterion
-            target = target_tensor[i]
-            if target.dim() == 0:  # If it's a scalar tensor
-                target = target.unsqueeze(0)
-            sequence_loss += criterion(output, target)
 
         return sequence_loss
 
@@ -239,3 +273,71 @@ class RNNTrainer:
                 output = self.model(input_tensor[i])
 
         return criterion(output, label.unsqueeze(0))
+
+    def _train_sequence_many_to_many(
+        self,
+        input_tensor: torch.Tensor,
+        target_tensor: torch.Tensor,
+        hidden: Optional[torch.Tensor],
+        criterion: Module,
+        teacher_forcing_ratio: float
+    ) -> torch.Tensor:
+        """
+        Train on many-to-many sequence tasks (e.g., copy task, translation)
+
+        Args:
+            input_tensor: Input sequence of shape (batch_size, seq_length) for indices
+                         or (batch_size, seq_length, feature_size) for one-hot
+            target_tensor: Target sequence of shape (batch_size, seq_length)
+            hidden: Optional initial hidden state
+            criterion: Loss function (typically CrossEntropyLoss)
+            teacher_forcing_ratio: Probability of using teacher forcing
+        """
+        sequence_loss = 0
+        batch_size = input_tensor.size(0)
+        seq_length = input_tensor.size(1)
+
+        # Determine if input is already one-hot
+        is_one_hot = input_tensor.dim() == 3
+        vocab_size = input_tensor.size(2) if is_one_hot else (input_tensor.max().item() + 1)
+
+        # Initialize hidden state if needed
+        if hidden is None:
+            hidden = self.model.initHidden(batch_size)
+
+        # First pass through the encoder/input sequence
+        encoder_hidden = hidden
+
+        for t in range(input_tensor.size(1)):
+            # Prepare input
+            if is_one_hot:
+                curr_input = input_tensor[:, t]
+            else:
+                curr_input = torch.zeros(batch_size, vocab_size, device=input_tensor.device)
+                curr_input.scatter_(1, input_tensor[:, t].unsqueeze(1), 1)
+
+            # Forward pass
+            output, encoder_hidden = self.model(curr_input, encoder_hidden)
+
+        # Decoder phase
+        decoder_hidden = encoder_hidden
+        decoder_input = curr_input  # Start with last encoder input
+
+        for t in range(target_tensor.size(1)):
+            # Generate output
+            output, decoder_hidden = self.model(decoder_input, decoder_hidden)
+            sequence_loss += criterion(output, target_tensor[:, t])
+
+            # Determine next input (teacher forcing or predicted)
+            use_teacher_forcing = torch.rand(1).item() < teacher_forcing_ratio
+
+            if use_teacher_forcing:
+                # Convert target index to one-hot
+                decoder_input = torch.zeros(batch_size, vocab_size, device=input_tensor.device)
+                decoder_input.scatter_(1, target_tensor[:, t].unsqueeze(1), 1)
+            else:
+                # Use model's prediction
+                decoder_input = torch.zeros(batch_size, vocab_size, device=input_tensor.device)
+                decoder_input.scatter_(1, output.argmax(1).unsqueeze(1), 1)
+
+        return sequence_loss
