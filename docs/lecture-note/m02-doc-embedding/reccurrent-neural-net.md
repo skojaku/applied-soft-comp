@@ -156,7 +156,7 @@ details, please refer to the [RNN implementation in the `asctools` library](http
 com/skojaku/applied-soft-comp/tree/master/libs/asctools/asctools/rnn.py).
 To use the library, please install it by `pip install git+https://github.com/skojaku/applied-soft-comp.git#subdirectory=libs/asctools`.
 
-Let us demonstrate RNN's capability with a task - predicting sine waves 🔥. This task requires the model to learn patterns in continuous sequences, which better showcases RNN's ability to capture temporal dependencies.
+Let us demonstrate RNN's capability with a task - predicting sine waves 🔥. We will generate two sine waves - one for training and one for testing.
 
 ```{code-cell} ipython
 import torch
@@ -164,78 +164,107 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Generate sine wave data
-t = torch.linspace(0, 25, 100)
-sine_wave = torch.sin(t).view(-1, 1)
+window_size = 15
+dt = 0.05
+tmax = 50
+
+# Training data
+t_data = torch.arange(0, tmax, dt)
+sine_wave = torch.sin(t_data).view(-1, 1)
+
+# Testing data
+t_ext = torch.arange(tmax, tmax+100, dt)
+sine_wave_ext = torch.sin(t_ext).view(-1, 1)
 ```
 
 Since the RNN is not good at learning a long sequence, we will chunk the sequence into shorter sequences.
 
 ```{code-cell} ipython
-# Reshape the sine wave into shorter sequences
-batch_size = 5
-train_sine_wave = sine_wave.view(batch_size, -1, 1)
-train_sine_wave.shape
+def to_sliding_window_form(sine_wave, window_size):
+    X, y = [], []
+    for _t in range(len(sine_wave)-window_size-1):
+        # Input is current window
+        X.append(sine_wave[_t:_t+window_size])
+        # Target is next single value
+        y.append(sine_wave[_t+window_size])
+
+    X = torch.stack(X)  # Shape: (n_samples, window_size, 1)
+    y = torch.stack(y).unsqueeze(1)  # Shape: (n_samples, 1, 1)
+    return X, y
+
+X_train, y_train = to_sliding_window_form(sine_wave, window_size)
+print("Shape of X_train (number of samples, sequence length, feature size):", X_train.shape)
+print("Shape of y_train (number of samples, sequence length, feature size):", y_train.shape)
 ```
 
-where the first dimension is the batch size, the second dimension is the sequence length, and the third dimension is the feature size.
+We have generated the training data in the shape of (number of samples, sequence length, feature size).
 
-Let us first see how the RNN takes the input and generates the output.
-
+Let us showcase how to feed the data to the RNN before training. We will use the pre-implemented RNN and RNNTrainer in the `asctools` library.
 
 ```{code-cell} ipython
 from asctools.rnn import RNN
 from asctools.rnn_trainer import RNNTrainer
 
-rnn = RNN(input_size=1, hidden_size=30, output_size=1)
-rnn.eval()
-hidden = rnn.initHidden()
+rnn = RNN(input_size=1, hidden_size=32, output_size=1)
 
-output_seq = []
-actual_seq = []
-test_sine_wave = train_sine_wave[0, :, :]
-for i in range(len(test_sine_wave) - 1):
-    output, hidden = rnn(test_sine_wave[i].unsqueeze(0), hidden)
-
-    # For recording
-    output_seq.append(output.item())
-    actual_seq.append(test_sine_wave[i+1].item())
 ```
 
-```{tip}
-The input is a single point at a time.
-.unsqueeze(0) adds a batch dimension to the input tensor. The RNN expects input shape (batch_size, feature_size).
-For example:
-  Input scalar: 1.0
-  After unsqueeze(0): tensor([[1.0]])
+In PyTorch, `model.eval()` is a method that sets the model to evaluation mode. This is important because it affects the behavior of the model.
+
+```{code-cell} ipython
+rnn.eval()
+```
+
+Now, let's feed the input data to the RNN.
+
+```{code-cell} ipython
+def feed_forward(rnn, seq, hidden):
+    for i in range(window_size):
+        output, hidden = rnn(seq[i].unsqueeze(0), hidden)
+    return output, hidden
+```
+
+Notice that we feed one point at a time to the RNN. The hidden state is updated in each step and is used as the input for the next step. With this, let us feed the data to a sequence of some number of points and predict the next point in the sequence. We do this autoregressively, meaning that we use the value predicted by the RNN at time t as the input for the model to predict the next time point t + 1.
+
+```{code-cell} ipython
+
+# We use the last training data as an input to the RNN for the initial prediction.
+pred_seq = sine_wave[-window_size:].view(-1).tolist()
+for _t in range(len(t_ext)):
+    # Feed the window sequence to the RNN
+    hidden = rnn.initHidden()
+    output, hidden = feed_forward(rnn, torch.tensor(pred_seq[_t: _t+window_size]), hidden)
+    pred_seq.append(output.squeeze().item())
 ```
 
 Let's plot the output sequence and the actual sequence.
 
 ```{code-cell} ipython
-plt.plot(np.arange(len(test_sine_wave) - 1), output_seq, label='RNN prediction')
-plt.plot(np.arange(len(test_sine_wave) - 1), actual_seq, label='Actual')
+pred_seq = torch.tensor(pred_seq)[window_size:]
+plt.plot(t_ext, pred_seq, label='RNN prediction')
+plt.plot(t_ext, sine_wave_ext, label='Actual')
+plt.xlabel('Time')
+plt.ylabel('Value')
+plt.title('RNN Sine Wave Prediction')
 plt.legend()
 plt.show()
 ```
 
-Notice that we feed one point at a time to the RNN. The hidden state is updated in each step and is used as the input for the next step.
 The output sequence appears to be not aligned with the actual sequence, since we have not trained the model yet. So, let us train the model. To this end, we will use the `RNNTrainer` class in the `asctools` library. This trainer will train the RNN model to predict the next point in the sequence.
 
 ```{code-cell} ipython
+from torch import nn
 rnn.train()
 trainer = RNNTrainer(rnn)
 losses = trainer.train(
-    input_tensors=train_sine_wave[:, :-1, :], # This is the input sequence.
-    targets=train_sine_wave[:, 1:, :], # This is the target sequence.
+    input_tensors=X_train, # This is the input sequence.
+    targets=y_train, # This is the target sequence.
     hidden_init_func=rnn.initHidden, # This is to initialize the hidden state.
-    task='sequence', # This is to tell the trainer that the task is sequence prediction.
-    max_epochs=1000,
-    clip_grad_norm = 1.0, # This is to prevent the gradient from exploding or vanishing.
+    criterion=nn.MSELoss(), # This is the loss function.
+    max_epochs=1000, # This is the maximum number of epochs.
+    learning_rate=0.01, # This is the learning rate.
+    clip_grad_norm=1.0, # This is to prevent the gradient from exploding or vanishing.
 )
-```
-
-```{note}
-We slice the input sequence and the target sequence to exclude the last point from the input sequence and the first point from the target sequence. This is because the RNN is supposed to predict the next point in the sequence. For example, if we have a sequence of [1, 2, 3, 4, 5], the input sequence should be [1, 2, 3, 4] and the target sequence should be [2, 3, 4, 5].
 ```
 
 ```{tip}
@@ -264,55 +293,27 @@ Always label the axes!!!! It is very common that a figure is not self-explanator
 
 Now, let us use the trained model to extrapolate the sine wave.
 
-We first set the model to evaluation mode, and then give the model the first 10 points of the sine wave to prepare the hidden state.
-
 ```{code-cell} ipython
+rnn.eval()
+pred_seq = sine_wave[-window_size:].view(-1).tolist()
+for _t in range(len(t_ext)):
+    # Feed the window sequence to the RNN
+    hidden = rnn.initHidden()
+    output, hidden = feed_forward(rnn, torch.tensor(pred_seq[_t: _t+window_size]), hidden)
+    pred_seq.append(output.squeeze().item())
 
-# Generate a sequence of points to predict
-t_extrapolated = torch.linspace(20, 35, 60)
-hidden = rnn.initHidden()
-output_seq = []
-
-rnn.eval() # Set the model to evaluation mode
-
-t_pred = []
-t0 = 10
-for i in range(t0-1):
-    output, hidden = rnn(sine_wave[i].unsqueeze(0), hidden)
+pred_seq = torch.tensor(pred_seq)[window_size:]
+plt.plot(t_ext, pred_seq, label='RNN prediction')
+plt.plot(t_ext, sine_wave_ext, label='Actual')
+plt.legend()
+plt.show()
 ```
 
 ```{tip}
 In PyTorch, `.eval()` is a method that sets the model to evaluation mode. Without this, the model might be in training mode, which affects the behavior of the model.
 ```
 
-Let us then predict the next 60 points, while keeping the hidden state updated.
-
-```{code-cell} ipython
-prev_output = sine_wave[i].unsqueeze(0)
-actual_seq = []
-for i in range(len(t_extrapolated)):
-    if i + t0 < len(sine_wave):
-        actual_seq.append(sine_wave[i + t0  + 1].item())
-
-    output, hidden = rnn(prev_output, hidden)
-    output_seq.append(output)
-    prev_output = output
-    t_pred.append(t_extrapolated[i])
-```
-
-
-Let's plot the predicted sequence and the actual sequence.
-
-```{code-cell} ipython
-output_seq = [o.item() for o in output_seq]
-plt.plot(t_pred, output_seq, label='RNN prediction')
-plt.plot(t_pred[:len(actual_seq)], actual_seq, label='Actual')
-plt.legend()
-plt.title('RNN Sine Wave Prediction')
-plt.xlabel('Time')
-plt.ylabel('Value')
-plt.show()
-```
+We observed that the RNN is able to predict the sine wave with a reasonable accuracy, with errors increasing over time. This is because, at each time step, the RNN made some errors, which were accumulated over time, resulting in a larger error.
 
 ## 🔥 Exercise 🔥
 

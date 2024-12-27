@@ -22,92 +22,44 @@ class TestRNN(unittest.TestCase):
         # Initialize trainer
         self.trainer = RNNTrainer(self.model, device=self.device)
 
-    def test_rnn_forward(self):
-        # Test single forward pass
-        batch_size = 1
-        input_tensor = torch.randn(batch_size, self.input_size).to(self.device)
-        hidden = self.model.initHidden()
-
-        output, new_hidden = self.model(input_tensor, hidden)
-
-        self.assertEqual(output.shape, (batch_size, self.output_size))
-        self.assertEqual(new_hidden.shape, (batch_size, self.hidden_size))
-        self.assertIsInstance(output, torch.Tensor)
-        self.assertIsInstance(new_hidden, torch.Tensor)
-
-    def test_next_token_prediction(self):
-        # Create sample sequence data
+    def test_many_to_many(self):
+        """Test sequence-to-sequence prediction with same length input/output"""
         seq_length = 5
-        batch_size = 1
+        batch_size = 2
 
-        # Create input sequence and targets
-        input_tensor = torch.randint(0, self.input_size, (seq_length, batch_size))
-        targets = torch.randint(0, self.output_size, (seq_length, batch_size))
-
-        # Convert to one-hot encoding
-        one_hot = torch.zeros(seq_length, batch_size, self.input_size)
-        for i in range(seq_length):
-            one_hot[i, 0, input_tensor[i]] = 1
+        # Create input and target sequences
+        input_tensor = torch.randn(batch_size, seq_length, self.input_size).to(self.device)
+        target_tensor = torch.randn(batch_size, seq_length, self.output_size).to(self.device)
 
         # Train model
         losses = self.trainer.train(
-            input_tensors=one_hot,
-            task='next_token',
-            targets=targets,
-            max_epochs=10,
-            learning_rate=0.01,
-            teacher_forcing_ratio=0.5,
-            hidden_init_func=self.model.initHidden
-        )
-
-        self.assertTrue(len(losses) > 0)
-        self.assertIsInstance(losses[0], float)
-        self.assertTrue(all(isinstance(loss, float) for loss in losses))
-
-    def test_sequence_prediction(self):
-        # Create sample sequence data
-        seq_length = 5
-        batch_size = 1
-        num_samples = 3
-
-        # Create a single input tensor and target tensor
-        # Modify to match expected dimensions
-        input_tensor = torch.randn(seq_length, batch_size, self.input_size)
-        target_tensor = torch.randn(seq_length, batch_size, self.output_size)
-
-        # Train model with MSE loss
-        losses = self.trainer.train(
-            input_tensors=input_tensor,  # Pass single tensor instead of list
-            task='sequence',
-            targets=target_tensor,
-            criterion=nn.MSELoss(),
-            max_epochs=10,
-            learning_rate=0.01,
-            teacher_forcing_ratio=0.5,
-            hidden_init_func=self.model.initHidden
-        )
-
-        self.assertTrue(len(losses) > 0)
-        self.assertIsInstance(losses[0], float)
-        self.assertTrue(all(isinstance(loss, float) for loss in losses))
-
-    def test_sequence_prediction_single_tensor(self):
-        # Test sequence prediction with single tensor input
-        seq_length = 5
-        batch_size = 1
-
-        # Create single continuous-valued sequence
-        input_tensor = torch.randn(seq_length, batch_size, self.input_size)
-        target_tensor = torch.randn(seq_length, batch_size, self.output_size)
-
-        losses = self.trainer.train(
             input_tensors=input_tensor,
-            task='sequence',
             targets=target_tensor,
             criterion=nn.MSELoss(),
             max_epochs=5,
-            learning_rate=0.01,
-            hidden_init_func=self.model.initHidden
+            learning_rate=0.01
+        )
+
+        self.assertTrue(len(losses) > 0)
+        self.assertIsInstance(losses[0], float)
+        self.assertTrue(all(isinstance(loss, float) for loss in losses))
+
+    def test_many_to_one(self):
+        """Test sequence to single output prediction"""
+        seq_length = 5
+        batch_size = 2
+
+        # Create input sequence and single target
+        input_tensor = torch.randn(batch_size, seq_length, self.input_size).to(self.device)
+        target_tensor = torch.randn(batch_size, 1, self.output_size).to(self.device)
+
+        # Train model
+        losses = self.trainer.train(
+            input_tensors=input_tensor,
+            targets=target_tensor,
+            criterion=nn.MSELoss(),
+            max_epochs=5,
+            learning_rate=0.01
         )
 
         self.assertTrue(len(losses) > 0)
@@ -115,59 +67,174 @@ class TestRNN(unittest.TestCase):
         self.assertTrue(all(isinstance(loss, float) for loss in losses))
 
     def test_classification(self):
-        # Create sample sequence data with labels
+        """Test sequence classification (special case of many-to-one)"""
         seq_length = 5
-        batch_size = 1
-        num_samples = 3
+        batch_size = 2
+        num_classes = self.output_size
 
-        input_tensors = []
-        labels = torch.zeros(num_samples, dtype=torch.long)
+        # Create input sequences
+        input_tensor = torch.randn(batch_size, seq_length, self.input_size).to(self.device)
 
-        for i in range(num_samples):
-            sequence = torch.randn(seq_length, batch_size, self.input_size)
-            input_tensors.append(sequence)
-            labels[i] = i % 2  # Binary classification labels
+        # Create one-hot encoded target classes
+        target_tensor = torch.zeros(batch_size, 1, num_classes).to(self.device)
+        for i in range(batch_size):
+            target_class = torch.randint(0, num_classes, (1,))
+            target_tensor[i, 0, target_class] = 1
 
         # Train model
         losses = self.trainer.train(
-            input_tensors=input_tensors,
-            task='classification',
-            labels=labels,
-            max_epochs=10,
-            learning_rate=0.01,
-            hidden_init_func=self.model.initHidden
+            input_tensors=input_tensor,
+            targets=target_tensor,
+            criterion=nn.BCEWithLogitsLoss(),  # or CrossEntropyLoss with proper reshaping
+            max_epochs=5,
+            learning_rate=0.01
         )
 
         self.assertTrue(len(losses) > 0)
         self.assertIsInstance(losses[0], float)
         self.assertTrue(all(isinstance(loss, float) for loss in losses))
 
-    def test_invalid_task(self):
-        # Test invalid task raises ValueError
-        with self.assertRaises(ValueError):
+    def test_batch_of_sequences(self):
+        """Test training with multiple sequences"""
+        seq_length = 5
+        batch_size = 2
+        num_sequences = 3
+
+        # Create list of input sequences and their targets
+        input_tensors = [
+            torch.randn(batch_size, seq_length, self.input_size).to(self.device)
+            for _ in range(num_sequences)
+        ]
+        target_tensor = torch.randn(batch_size, 1, self.output_size).to(self.device)
+
+        # Train model
+        losses = self.trainer.train(
+            input_tensors=input_tensors,
+            targets=target_tensor,
+            criterion=nn.MSELoss(),
+            max_epochs=5,
+            learning_rate=0.01
+        )
+
+        self.assertTrue(len(losses) > 0)
+        self.assertIsInstance(losses[0], float)
+        self.assertTrue(all(isinstance(loss, float) for loss in losses))
+
+    def test_invalid_target_shape(self):
+        """Test that invalid target shapes raise errors"""
+        seq_length = 5
+        batch_size = 2
+
+        input_tensor = torch.randn(batch_size, seq_length, self.input_size)
+        invalid_target = torch.randn(batch_size, seq_length)  # Missing feature dimension
+
+        with self.assertRaises(RuntimeError):
             self.trainer.train(
-                input_tensors=[torch.randn(5, 1, self.input_size)],
-                task='invalid_task',
+                input_tensors=input_tensor,
+                targets=invalid_target,
                 max_epochs=1
             )
 
-    def test_missing_targets(self):
-        # Test missing targets for next_token task raises ValueError
-        with self.assertRaises(ValueError):
-            self.trainer.train(
-                input_tensors=[torch.randn(5, 1, self.input_size)],
-                task='next_token',
-                max_epochs=1
-            )
+    def test_multiclass_classification(self):
+        """Test multi-class sequence classification"""
+        seq_length = 5
+        batch_size = 4
+        num_classes = 10  # More classes to test multi-class scenario
 
-    def test_missing_labels(self):
-        # Test missing labels for classification task raises ValueError
-        with self.assertRaises(ValueError):
-            self.trainer.train(
-                input_tensors=[torch.randn(5, 1, self.input_size)],
-                task='classification',
-                max_epochs=1
-            )
+        # Create input sequences
+        input_tensor = torch.randn(batch_size, seq_length, self.input_size).to(self.device)
+
+        # Create target classes (both one-hot and class index versions for different loss functions)
+        # One-hot encoded targets
+        onehot_targets = torch.zeros(batch_size, 1, num_classes).to(self.device)
+        class_indices = torch.randint(0, num_classes, (batch_size,))
+        for i in range(batch_size):
+            onehot_targets[i, 0, class_indices[i]] = 1
+
+        # Test with BCEWithLogitsLoss (one-hot targets)
+        losses_bce = self.trainer.train(
+            input_tensors=input_tensor,
+            targets=onehot_targets,
+            criterion=nn.BCEWithLogitsLoss(),
+            max_epochs=5,
+            learning_rate=0.01
+        )
+
+        self.assertTrue(len(losses_bce) > 0)
+        self.assertIsInstance(losses_bce[0], float)
+
+        # Test with CrossEntropyLoss (class indices)
+        # Reshape targets for CrossEntropyLoss: (batch_size, 1, num_classes) -> (batch_size, num_classes)
+        index_targets = class_indices.unsqueeze(1).to(self.device)
+        losses_ce = self.trainer.train(
+            input_tensors=input_tensor,
+            targets=index_targets,
+            criterion=nn.CrossEntropyLoss(),
+            max_epochs=5,
+            learning_rate=0.01
+        )
+
+        self.assertTrue(len(losses_ce) > 0)
+        self.assertIsInstance(losses_ce[0], float)
+
+        # Verify model outputs proper shape
+        with torch.no_grad():
+            hidden = self.model.initHidden(batch_size)
+            output, _ = self.model(input_tensor[:, 0], hidden)  # Test first timestep
+            self.assertEqual(output.shape, (batch_size, num_classes))
+
+    def test_next_token_prediction(self):
+        """Test next token prediction (predict only the next token)"""
+        seq_length = 5
+        batch_size = 2
+        vocab_size = self.output_size
+
+        # Create discrete input sequence (indices)
+        input_indices = torch.randint(0, vocab_size, (batch_size, seq_length)).to(self.device)
+        # Target is the next token for each sequence
+        target_indices = torch.randint(0, vocab_size, (batch_size, 1)).to(self.device)
+
+        # Convert to one-hot encoded tensors
+        input_tensor = torch.zeros(batch_size, seq_length, vocab_size).to(self.device)
+        target_tensor = torch.zeros(batch_size, 1, vocab_size).to(self.device)
+
+        # Create one-hot encodings
+        for b in range(batch_size):
+            for t in range(seq_length):
+                input_tensor[b, t, input_indices[b, t]] = 1
+            target_tensor[b, 0, target_indices[b]] = 1
+
+        # Train model
+        losses = self.trainer.train(
+            input_tensors=input_tensor,
+            targets=target_tensor,
+            criterion=nn.CrossEntropyLoss(),
+            max_epochs=5,
+            learning_rate=0.01
+        )
+
+        self.assertTrue(len(losses) > 0)
+        self.assertIsInstance(losses[0], float)
+
+        # Test prediction
+        with torch.no_grad():
+            # Process a sequence and predict the next token
+            hidden = self.model.initHidden(batch_size)
+
+            # Process the input sequence
+            for t in range(seq_length):
+                output, hidden = self.model(input_tensor[:, t], hidden)
+
+            # Output should be probabilities over vocabulary
+            self.assertEqual(output.shape, (batch_size, vocab_size))
+
+            # Convert to discrete token
+            predicted_token = torch.zeros_like(output)
+            predicted_token.scatter_(1, output.argmax(1, keepdim=True), 1)
+
+            # Verify it's a valid one-hot vector
+            self.assertTrue(torch.all(predicted_token.sum(dim=1) == 1))
+            self.assertTrue(torch.all((predicted_token == 0) | (predicted_token == 1)))
 
 if __name__ == '__main__':
     unittest.main()
