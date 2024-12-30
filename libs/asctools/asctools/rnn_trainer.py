@@ -5,6 +5,7 @@ from torch.optim import Optimizer
 from torch.nn import Module
 from tqdm import tqdm
 from torch.utils.data import TensorDataset, DataLoader
+import torch.nn.functional as F
 
 class RNNTrainer:
     def __init__(
@@ -39,7 +40,8 @@ class RNNTrainer:
         clip_grad_norm: Optional[float] = 1.0,
         lr_scheduler: Optional[str] = 'reduce_on_plateau',
         lr_patience: int = 5,
-        lr_factor: float = 0.5
+        lr_factor: float = 0.5,
+        show_progress: bool = True
     ) -> List[float]:
         """
         Train the sequence model
@@ -58,6 +60,7 @@ class RNNTrainer:
             lr_scheduler: Learning rate scheduler type
             lr_patience: Number of epochs to wait for improvement before reducing learning rate
             lr_factor: Factor by which to reduce learning rate
+            show_progress: Whether to show progress bar during training
 
         Returns:
             losses: List of losses during training
@@ -96,10 +99,13 @@ class RNNTrainer:
 
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-        for epoch in range(max_epochs):
+        pbar = tqdm(range(max_epochs), disable=not show_progress, desc="Training")
+        for epoch in pbar:
             epoch_loss = 0
+            batch_count = 0
 
-            for batch in dataloader:
+            epoch_pbar = tqdm(dataloader, disable=not show_progress, desc=f"Epoch {epoch+1} - Loss: {0:.4f}", leave=False)
+            for batch in epoch_pbar:
                 if isinstance(input_tensors, torch.Tensor):
                     input_batch = batch[0]
                     target_batch = batch[1] if targets is not None else None
@@ -124,8 +130,18 @@ class RNNTrainer:
                     torch.nn.utils.clip_grad_norm_(self.model.parameters(), clip_grad_norm)
                 optimizer.step()
                 epoch_loss += sequence_loss.item()
+                batch_count += 1
 
-            losses.append(epoch_loss)
+                if show_progress:
+                    # Update the progress bar description with current loss
+                    avg_loss = epoch_loss / batch_count
+                    epoch_pbar.set_description(f"Epoch {epoch+1} - Loss: {avg_loss:.4f}")
+
+            avg_epoch_loss = epoch_loss / len(dataloader)
+            if show_progress:
+                pbar.set_description(f"Training - Loss: {avg_epoch_loss:.4f}")
+
+            losses.append(avg_epoch_loss)
 
             # Early stopping check
             if losses[-1] < best_loss - min_delta:
@@ -157,39 +173,50 @@ class RNNTrainer:
 
         Args:
             input_tensor: Input sequence of shape (batch_size, seq_length, feature_size)
-            target_tensor: Target sequence of shape (batch_size, target_length, feature_size)
-                         where target_length can be:
-                         - seq_length for many-to-many (uses teacher forcing)
-                         - 1 for many-to-one or classification (no teacher forcing)
+            target_tensor: Target tensor, either:
+                          - (batch_size, target_length, feature_size) for sequence tasks
+                          - (batch_size,) for classification tasks
             hidden: Optional initial hidden state
             criterion: Loss function
             teacher_forcing_ratio: Probability of using teacher forcing (only for many-to-many)
         """
-        sequence_loss = 0
         batch_size = input_tensor.size(0)
         seq_length = input_tensor.size(1)
-        target_length = target_tensor.size(1)
 
         # Initialize hidden state if needed
         hidden = self._get_hidden_state(batch_size, hidden)
 
         # Process the entire input sequence
-        for t in range(seq_length):
-            output, hidden = self.model(input_tensor[:, t], hidden)
+        encoder_outputs, hidden = self.model(input_tensor, hidden, mode='encode')
 
-        # For many-to-one, only use final output
-        if target_length == 1:
-            sequence_loss = criterion(output, target_tensor[:, 0])
-        else:
-            # For many-to-many, compute loss for each target timestep
-            for t in range(target_length):
-                sequence_loss += criterion(output, target_tensor[:, t])
-                # Use teacher forcing for next input if enabled
+        # For classification tasks (target is 1D)
+        if target_tensor.dim() == 1:
+            return criterion(encoder_outputs[:, -1], target_tensor)
+
+        # For sequence tasks (target is 3D)
+        sequence_loss = 0
+        target_length = target_tensor.size(1)
+
+        # Initialize decoder input with first target token (teacher forcing for first step)
+        decoder_input = target_tensor[:, 0].unsqueeze(1)  # [batch_size, 1, feature_size]
+
+        for t in range(target_length):
+            decoder_output, hidden, _ = self.model(
+                decoder_input,
+                hidden,
+                encoder_outputs=encoder_outputs,
+                mode='decode'
+            )
+            sequence_loss += criterion(decoder_output.squeeze(1), target_tensor[:, t])
+
+            # Teacher forcing: use actual target tokens as next input
+            if t + 1 < target_length:  # Don't get next input for last iteration
                 use_teacher_forcing = torch.rand(1).item() < teacher_forcing_ratio
                 if use_teacher_forcing:
-                    output, hidden = self.model(target_tensor[:, t], hidden)
+                    decoder_input = target_tensor[:, t + 1].unsqueeze(1)
                 else:
-                    output, hidden = self.model(output, hidden)
+                    # Use model's predictions
+                    decoder_input = decoder_output
 
         return sequence_loss
 
@@ -203,7 +230,7 @@ class RNNTrainer:
         if hidden is not None:
             return hidden
         if hidden_init_func:
-            return hidden_init_func()
+            return hidden_init_func(batch_size)
         return self.model.initHidden(batch_size)
 
     def _setup_scheduler(

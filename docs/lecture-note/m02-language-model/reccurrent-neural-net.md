@@ -113,7 +113,7 @@ The $\tanh$ activation function is specifically chosen because:
 
 ### Optimization
 
-RNNs can be trained using backpropagation. An RNN is a chain of recurrent layers. One can think of the RNN as a chain of layers, where each layer shares the same weights and takes the previous layer's output as input.
+RNNs can be trained using backpropagation. One can think of the RNN as a chain of layers, where each layer shares the same weights and takes the previous layer's output as input.
 
 ```{figure} ../figs/rnn-expanded.jpg
 :alt: RNN expanded
@@ -278,8 +278,6 @@ The `train` function takes the input sequence and returns the losses during trai
 The loss should decrease as the model learns the sine wave pattern.
 
 ```{code-cell} ipython
-import matplotlib.pyplot as p
-
 plt.plot(losses)
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
