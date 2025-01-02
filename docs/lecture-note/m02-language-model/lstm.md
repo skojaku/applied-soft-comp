@@ -10,24 +10,32 @@ kernelspec:
   name: python3
 ---
 
-
 # Long Short-Term Memory (LSTM)
 
-When rememberig a long story, you would naturally focus on important details while letting less relevant information fade. This selective memory is exactly what Long Short-Term Memory (LSTM) networks aim to achieve in artificial neural networks. While standard RNNs struggle with long-term dependencies due to the vanishing gradient problem, LSTMs offer a sophisticated solution through controlled memory mechanisms.
+
+While the RNN model is able to handle the sequence data, it struggles with the long-term dependencies. Long Short-Term Memory (LSTM) model {footcite}`hochreiter1997long` is designed to overcome this limitation by introducing a "controlled" memory cell that can maintain information over long periods.
+
+## LSTM Architecture
 
 ```{figure} ../figs/lstm.jpg
 ---
-width: 500px
 name: lstm
 ---
 
 LSTM architecture showing the cell state (horizontal line at top) and the three gates: forget gate, input gate, and output gate. The cell state acts as a conveyor belt carrying information forward, while gates control information flow.
-
 ```
 
+The input and output of LSTM is fundamentally the same as the simple RNN we have seen before. The only difference is that LSTM has two kinds of hidden states: the hidden state $h_t$ and the cell state (or memory cell) $c_t$.
+The hidden state $h_t$ is the output of the LSTM, and it is used to predict the next state. The cell state $c_t$ is the internal state of the LSTM, and it is used to maintain the memory of the LSTM.
+Think of this cell as a conveyor belt that runs straight through the network, allowing information to flow forward largely unchanged. This cell state forms the backbone of the LSTM's memory system.
 
-At the heart of an LSTM lies a *memory cell* (or *cell state*, i.e., $c_{t}$) that can maintain information over long periods. Think of this cell as a conveyor belt that runs straight through the network, allowing information to flow forward largely unchanged. This cell state forms the backbone of the LSTM's memory system.
+### Deep Dive into LSTM
 
+Internally, LSTM controls the flow of information through the cell state by using three gates: the forget gate, the input gate, and the output gate. Let us break down each gate and see how they work.
+
+
+
+#### Forget Gate
 
 ```{figure} ../figs/lstm-forget-gate.jpg
 ---
@@ -39,9 +47,10 @@ align: center
 Forget gate. $\sigma(x_t, h_t)$ decides how much of the previous cell state $c_{t-1}$ to keep. For example, if $\sigma(x_t, h_t) = 0$, the forget gate will completely forget the previous cell state. If $\sigma(x_t, h_t) = 1$, the forget gate will keep the previous cell state. $\sigma$ is the sigmoid function which is bounded between 0 and 1.
 ```
 
-**Forget Gate:**
-The LSTM controls this memory through three specialized neural networks called *gates*. The *forget gate* examines the current input and the previous hidden state to decide what information to remove from the cell state. Like a selective eraser, it outputs values between 0 and 1 for each number in the cell state, where 0 means "completely forget this" and 1 means "keep this entirely."
+The *forget gate* examines the current input and the previous hidden state to decide what information to remove from the cell state. Like a selective eraser, it outputs values between 0 and 1 for each number in the cell state, where 0 means "completely forget this" and 1 means "keep this entirely."
 
+
+#### Input Gate
 
 ```{figure} ../figs/lstm-input-gate.jpg
 ---
@@ -56,6 +65,8 @@ Input gate. $\sigma(x_t, h_t)$ decides how much of the new information (that pas
 The input gate works together with a candidate memory generator to decide what new information to store. The input gate determines how much of the new candidate values should be added to the cell state, while the candidate memory proposes new values that could be added. This mechanism allows the network to selectively update its memory with new information.
 
 
+#### Output Gate
+
 ```{figure} ../figs/lstm-output-gate.jpg
 ---
 width: 400px
@@ -65,13 +76,13 @@ align: center
 Output gate. $\sigma(x_t, h_t)$ decides how much of the cell state to reveal as output. For example, if $\sigma(x_t, h_t) = 0$, the output gate will completely hide the cell state. If $\sigma(x_t, h_t) = 1$, the output gate will reveal the cell state.
 ```
 
-Finally, the output gate controls what parts of the cell state should be revealed as output. It applies a filtered version of the cell state to produce the hidden state, which serves as both the output for the current timestep and part of the input for the next timestep.
+The output gate controls what parts of the cell state should be revealed as output. It applies a filtered version of the cell state to produce the hidden state, which serves as both the output for the current timestep and part of the input for the next timestep.
 
 ```{note}
 The key innovation of LSTMs is not just having memory, but having controlled memory. The network learns what to remember and what to forget, rather than trying to remember everything.
 ```
 
-## Mathematical Framework
+### Mathematical Framework
 
 The LSTM's operation can be described through a series of equations that work together to process sequential data. The cell state $C_t$ evolves according to:
 
@@ -93,204 +104,299 @@ Finally, the hidden state is produced by:
 
 $$ h_t = o_t \odot \tanh(C_t) $$
 
-While we've covered the basic equations of LSTMs, let's explore the technical details more thoroughly. When we write $[h_{t-1}, x_t]$ in our equations, we're performing vector concatenation, combining the previous hidden state with our current input. This creates a rich representation that helps the network make decisions about its memory. The weight matrices in our equations ($W_f$, $W_i$, $W_o$, and $W_c$) transform this concatenated input into the appropriate dimensions for each gate. For instance, if we have an input dimension of d and a hidden state dimension of h, these weight matrices will have dimensions $h × (h+d)$, ensuring our outputs maintain the correct size throughout the network.
+## Hands on
 
-## Common Challenges and Solutions
+We will train an LSTM model to identify a wrapped character in a sequence. The task is to predict which character is enclosed in `<>` tags within a sequence of randomly ordered uppercase letters. For example,
 
-While LSTMs are powerful, they come with their own set of challenges. Despite being designed to handle the vanishing gradient problem better than vanilla RNNs, extremely long sequences can still pose difficulties. Practitioners often employ gradient clipping to maintain stable training. Memory consumption can become a bottleneck with very long sequences, but this can be addressed through techniques like truncated backpropagation or sequence chunking.
+- Input: `ABCDEFGHIJKLMNOPQRST<U>VWXYZ`
+- Output: `U`
 
-Overfitting is another common challenge, as LSTMs have numerous parameters to tune. To combat this, consider using dropout between LSTM layers, implementing layer normalization, or reducing model size if your task doesn't require the full complexity. Training speed can also be a concern due to the sequential nature of processing. Utilizing mini-batching and GPU acceleration can help, or you might consider using [Gated Recurrent Units (GRUs)](https://en.wikipedia.org/wiki/Gated_recurrent_unit) as a lighter alternative.
+This requires a selective memory that can remember the wrapped character and forget the rest of the characters, which is exactly what LSTM is designed for.
 
-## Hands-on Implementation
+Let us first import the necessary libraries.
 
-Let us implement a simple LSTM model. Here is the code:
-
-```{code-cell} ipython3
+```{code-cell} ipython
 import torch
 import torch.nn as nn
-from typing import Tuple
-
-class LSTM(nn.Module):
-    def __init__(
-        self,
-        input_size: int,
-        hidden_size: int,
-        output_size: int,
-        device: str = "cuda" if torch.cuda.is_available() else "cpu",
-    ):
-        super(LSTM, self).__init__()
-        self.hidden_size = hidden_size
-        self.device = device
-
-        # Linear layers for gates
-        combined_dim = input_size + hidden_size
-        self.forget_gate = nn.Linear(combined_dim, hidden_size)
-        self.input_gate = nn.Linear(combined_dim, hidden_size)
-        self.cell_gate = nn.Linear(combined_dim, hidden_size)
-        self.output_gate = nn.Linear(combined_dim, hidden_size)
-        self.i2o = nn.Linear(hidden_size, output_size)
-
-        # Initialize forget gate bias to 1
-        self.forget_gate.bias.data.fill_(1.0)
-
-        self.to(device)
-
-    def forward(
-        self,
-        input: torch.Tensor,
-        hidden: Tuple[torch.Tensor, torch.Tensor],
-    ) -> Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
-        # Process each timestep in the sequence
-        if input.dim() == 2:
-            batch_size, input_size = input.size()
-            seq_length = 1
-            input = input.unsqueeze(1)  # Add sequence dimension
-        else:
-            batch_size, seq_length, input_size = input.size()
-
-        outputs = torch.zeros(batch_size, seq_length, self.i2o.out_features, device=self.device)
-
-        # Unpack hidden state
-        h_t, c_t = hidden
-
-        # Ensure hidden states have shape (batch_size, hidden_size)
-        if h_t.dim() == 1:
-            h_t = h_t.unsqueeze(0)
-        if c_t.dim() == 1:
-            c_t = c_t.unsqueeze(0)
-
-        # Match batch sizes
-        if batch_size != h_t.size(0):
-            h_t = h_t.expand(batch_size, -1)
-            c_t = c_t.expand(batch_size, -1)
-
-        # Process sequence
-        for t in range(seq_length):
-            # Get current input timestep
-            current_input = input[:, t, :]
-
-            # Concatenate input and previous hidden state
-            combined = torch.cat((current_input, h_t), dim=1)
-
-            # Calculate gates
-            f_t = torch.sigmoid(self.forget_gate(combined))
-            i_t = torch.sigmoid(self.input_gate(combined))
-            c_tilde = torch.tanh(self.cell_gate(combined))
-            o_t = torch.sigmoid(self.output_gate(combined))
-
-            # Update cell state and hidden state
-            c_t = f_t * c_t + i_t * c_tilde
-            h_t = o_t * torch.tanh(c_t)
-
-            # Calculate output for this timestep
-            outputs[:, t, :] = self.i2o(h_t)
-
-        if seq_length == 1:
-            outputs = outputs.squeeze(1)
-
-        return outputs, (h_t, c_t)
-
-    def initHidden(self, batch_size: int = 1) -> Tuple[torch.Tensor, torch.Tensor]:
-        return (
-            torch.zeros(batch_size, self.hidden_size, device=self.device),
-            torch.zeros(batch_size, self.hidden_size, device=self.device),
-        )
+from torch.utils.data import TensorDataset, DataLoader
+import random
+import string
 ```
 
-To showcase the LSTM, let's consider a toy task, i.e., parentheses matching. In this task, we are given a sequence of characters, where each character is either a parenthesis or a regular character. We want to predict whether the parentheses are matched or not. For example, the sequence `(a(b)c)` is valid, while the sequence `(a(b)c` is invalid.
+Then, we define the data generation function.
 
-```{code-cell} ipython3
-from asctools.dataset import generate_parentheses_dataset
+```{code-cell} ipython
+:tags: [hide-input]
 
-sequences, y_valid = generate_parentheses_dataset(n_samples=1000, min_length=25, max_length=25)
+def generate_wrapped_char_data(n_samples=1000, seq_length=26):
+    """
+    Generate training data where one random character in a sequence is wrapped with <>.
 
-print("sequences[0]:", sequences[0])
-print("y_valid[0]:", y_valid[0])
+    Args:
+        n_samples (int): Number of sequences to generate
+        seq_length (int): Length of each sequence (default 26 for A-Z)
+
+    Returns:
+        list: List of input sequences
+        list: List of target characters (the wrapped characters)
+    """
+    sequences = []
+    targets = []
+
+    for _ in range(n_samples):
+        # Generate a random permutation of A-Z
+        chars = list(string.ascii_uppercase)
+        random.shuffle(chars)
+
+        # Choose a random position for the wrapped character
+        wrap_pos = random.randint(0, seq_length - 1)
+        target_char = chars[wrap_pos]
+
+        # Create the sequence with wrapped character
+        chars.insert(wrap_pos, "<")
+        chars.insert(wrap_pos + 2, ">")
+        sequence = "".join(chars)
+
+        sequences.append(sequence)
+        targets.append(target_char)
+
+    vocab = list(string.ascii_uppercase) + ["<", ">"]
+
+    return sequences, targets, vocab
+
+sequences, targets, vocab = generate_wrapped_char_data(n_samples = 3)
+
+for seq, target in zip(sequences, targets):
+    print(f"Sequence: {seq}, Target: {target}")
 ```
 
-The LSTM model cannot directly take alphabet as input. Instead, we need to convert the alphabet to one-hot encoding.
+This function generates our training data by creating n_samples sequences, where each sequence is a random permutation of A-Z letters. In each sequence, one random character is wrapped with <> tags. The function returns both the generated sequences and their corresponding target characters (the wrapped ones) as separate lists.
 
-```{code-cell} ipython3
-import torch
+The next step is to convert the sequences into tokenized representations that can be fed into the LSTM model.
 
-def to_one_hot(sequence):
-    alphabet = 'abcdefghijklmnopqrstuvwxyz)('
-    one_hot = torch.zeros((len(sequence), len(alphabet)))
-    for i in range(len(sequence)):
-        one_hot[i, alphabet.index(sequence[i])] = 1
-    return one_hot
+```{code-cell} ipython
+:tags: [hide-input]
 
-sequences_one_hot = torch.stack([to_one_hot(sequence) for sequence in sequences], dim = 0)
 
+def tokenize(sequences, vocab):
+    retval = []
+    for seq in sequences:
+        r = []
+        for char in seq:
+            r.append(vocab.index(char))
+        retval.append(r)
+    return torch.tensor(retval)
+
+X = tokenize(['ABCDEFGHIJKLMNOPQRST<U>VWXYZ', 'ABCDEFGHIJKLMNOPQRSTU<V>WXYZ'], vocab)
+print("X:", X)
+print("Shape of X:", X.shape)
 ```
 
-We also need to convert the target to a tensor of the proper shape.
+The output tensor `X` is of shape `(2, 28)`, where `2` is the number of samples, and `28` is the sequence length.
 
-```{code-cell} ipython3
-y_valid = torch.tensor(y_valid, dtype=torch.long)  # Shape should be (batch_size,)
-```
+Now, let's prepare the data and train the LSTM model. As before, we will use PyTorch's `TensorDataset` and `DataLoader` to handle the data.
 
-Now, we are ready to train the LSTM model.
+```{code-cell} ipython
+from torch.utils.data import Dataset
 
-```{code-cell} ipython3
-from asctools.rnn_trainer import RNNTrainer
-from torch import nn
-vocab_size = 28 # 26 characters + 2 parentheses
+# Generate data
+sequences, targets, vocab = generate_wrapped_char_data(n_samples=1000)
 
-lstm = LSTM(input_size=vocab_size, hidden_size=32, output_size=2)
-lstm.train()
-trainer = RNNTrainer(lstm)
-losses = trainer.train(
-    input_tensors=sequences_one_hot, # This is the input sequence.
-    targets=y_valid, # This is the target sequence.
-    criterion=nn.CrossEntropyLoss(), # This is the loss function.
-    max_epochs=300, # This is the maximum number of epochs.
-    learning_rate=0.01, # This is the learning rate.
-    clip_grad_norm=1.0, # This is to prevent the gradient from exploding or vanishing.
+# Tokenize data
+sequences = tokenize(sequences, vocab)
+targets = tokenize(targets, vocab)
+
+# Create dataset
+dataset = TensorDataset(sequences, targets)
+
+# Split dataset into train and validation
+train_frac = 0.8
+batch_size = 128
+train_size = int(train_frac * len(dataset))
+val_size = len(dataset) - train_size
+train_dataset, val_dataset = torch.utils.data.random_split(
+    dataset, [train_size, val_size]
+)
+
+# Create dataloaders
+train_dataloader = DataLoader(
+    train_dataset,
+    batch_size=batch_size,
+    shuffle=True,
+)
+val_dataloader = DataLoader(
+    val_dataset,
+    batch_size=batch_size,
+    shuffle=False,
 )
 ```
 
+This creates an efficient data loading pipeline that combines our features and targets into a unified dataset structure. The data loader then handles batching the data, with a batch size of 128 samples which is a common choice that balances between training speed and memory usage. The loader also shuffles the data between epochs, which helps prevent the model from learning any unintended patterns based on the order of samples and improves generalization.
 
-```{note}
-`nn.CrossEntropyLoss()` is a loss function that is commonly used for classification tasks. It combines `nn.LogSoftmax()` and `nn.NLLLoss()`. See [here](https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html) for more details.
+Now, let's define the model parameters and initialize the LSTM and output layer.
+
+```{code-cell} ipython
+:tags: [hide-input]
+
+import pytorch_lightning as pyl
+
+class CharDecoder(pyl.LightningModule):
+    def __init__(self, vocab_size, output_size, hidden_size, num_layers):
+        super().__init__()
+        self.lstm = nn.LSTM(
+            input_size=vocab_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            batch_first=True,
+        )
+        self.fc = nn.Linear(hidden_size, output_size)
+        self.embedding = nn.Embedding(vocab_size, vocab_size)
+
+        # One-hot encoding
+        self.embedding.weight.data = torch.eye(vocab_size)
+        self.embedding.weight.requires_grad = False
+
+        # Validation loss
+        self.val_losses = []
+
+    def forward(self, x):
+
+        # x is a tensor of shape (batch_size, seq_len)
+        batch_size, seq_len = x.shape
+
+        # To token index to one-hot encoding
+        x = self.embedding(x)
+
+        # To sentnece to sequence of chars
+        hidden = self.init_hidden(batch_size)
+        x, _ = self.lstm(x, hidden)
+        x = x[:, -1, :]
+        x = self.fc(x)
+        return x
+
+    def training_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self(x)
+        loss = torch.nn.functional.cross_entropy(y_hat, y.reshape(-1))
+        self.log("train_loss", loss)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        with torch.no_grad():
+            x, y = batch
+            y_hat = self(x)
+            loss = torch.nn.functional.cross_entropy(y_hat, y.reshape(-1))
+            self.log("val_loss", loss)
+            self.val_losses.append(loss.cpu().item())
+        return loss
+
+    def configure_optimizers(self):
+        return torch.optim.Adam(self.parameters(), lr=0.01)
+
+    def init_hidden(self, batch_size):
+        return (
+            torch.zeros(self.lstm.num_layers, batch_size, self.lstm.hidden_size, device=self.device),
+            torch.zeros(self.lstm.num_layers, batch_size, self.lstm.hidden_size, device=self.device),
+        )
 ```
 
-Let us confirm that the training loss is decreasing.
+```{code-cell} ipython
+model = CharDecoder(
+    vocab_size=28,
+    output_size=28,
+    hidden_size=32,
+    num_layers=1,
+)
+```
 
-```{code-cell} ipython3
+- `num_layers=1`: The model uses a single-layer LSTM architecture for sequence processing.
+- `vocab_size=28`: The input dimension matches the vocabulary size to handle the one-hot encoded characters.
+- `hidden_size=32`: The LSTM contains 32 hidden units per layer to learn complex sequential patterns in the data.
+- `output_size=28`: The output from the LSTM feeds into a final linear layer that performs classification over the vocabulary space.
+
+
+```{tip}
+The LSTM model can be stacked with multiple layers to learn more complex patterns {footcite:p}`irsoy2014opinion`. For example, `num_layers=2` will stack two LSTM layers on top of each other. The first layer will take the input and produce a hidden state, which will be used as the input for the second layer. The second layer will then produce the final hidden state and output. By stacking multiple layers, the model can learn more complex patterns in the data.
+
+```{figure} https://i.sstatic.net/QxzoG.png
+---
+width: 400px
+name: lstm-04
+align: center
+---
+
+LSTM with multiple layers.
+```
+
+```{tip}
+`torch.nn.Embedding` is a convenient way to convert token indices to vectors. By default, it uses random initialization, but we can use one-hot encoding by setting `self.embedding.weight.data = torch.eye(vocab_size)`, and fix the weights by setting `self.embedding.weight.requires_grad = False`.
+```
+
+```{tip}
+In PyTorch lightning, `configure_optimizers` is a method that returns the optimizer and the learning rate scheduler.
+We use ADAM {footcite}`kingma2014adam` as the optimizer. It is a popular optimizer for deep learning. It is a variant of stochastic gradient descent that can adaptively adjust the learning rate for each parameter using the first and second moments of the gradients.
+```
+
+Now, let's train the model.
+
+```{code-cell} ipython
+trainer = pyl.Trainer(
+    max_epochs=200,
+    enable_progress_bar=False,
+    enable_model_summary=False,
+)
+trainer.fit(model, train_dataloader, val_dataloader)
+```
+
+Let's plot the training loss.
+
+```{code-cell} ipython
 import matplotlib.pyplot as plt
-
-plt.plot(losses)
-plt.xlabel('Epoch')
-plt.ylabel('Loss')
-plt.title('Loss during training')
+fig, ax = plt.subplots(figsize = (5,5))
+ax.plot(model.val_losses)
+ax.set_title("Validation Loss")
+ax.set_xlabel("Epoch")
+ax.set_ylabel("Loss")
 plt.show()
 ```
 
-Using the trained LSTM model, we can now evaluate its performance on the test set.
+The loss did not decrease nicely. This is a sign of the struggle of the LSTM model to learn the data. If you see this, you might need to decrease the learning rate, increase the number of epochs untile the loss becomes stable, or re-design the model architecture.
 
-```{code-cell} ipython3
-import numpy as np
+Nevertheless, let's test the model.
 
-lstm.eval()
-eval_sequences, eval_y_valid = generate_parentheses_dataset(n_samples = 300)
-eval_sequences_one_hot = torch.stack([to_one_hot(sequence) for sequence in eval_sequences], dim = 0)
-outputs = []
-for sequence in eval_sequences_one_hot:
-    hidden = lstm.initHidden()
-    for i in range(len(sequence)):
-        output, hidden = lstm(sequence[i], hidden)
 
-    # Prediction
-    pred = torch.argmax(output, dim=1)
-    outputs.append(pred.item())
+```{code-cell} ipython
+eval_seq, eval_target, vocab = generate_wrapped_char_data(n_samples=5)
+X_eval = tokenize(eval_seq, vocab)
+y_eval = tokenize(eval_target, vocab)
 
-accuracy = np.sum(np.array(outputs) == np.array(eval_y_valid)) / len(eval_y_valid)
-print(f"Accuracy: {accuracy:.2f}")
+model.eval()
+with torch.no_grad():
+    y_hat = model(X_eval)
+    predicted_idx = torch.argmax(y_hat, dim=1)
+    predicted_char = [vocab[idx] for idx in predicted_idx]
+
+    for i in range(len(eval_seq)):
+        print(f"Sequence: {eval_seq[i]}, Target: {eval_target[i]}, Predicted: {predicted_char[i]}")
+    accuracy = (predicted_idx == y_eval).sum() / len(y_eval)
+    print(f"Accuracy: {accuracy}")
+
 ```
+
+We see that the model did NOT work well. This is a very common situation, where some tuning of the model architecture or hyperparameters is needed for the model to work well.
 
 ## 🔥 Exercise 🔥
 
-1. Make the problem more challenging by increasing the sequence length to 100.
-2. Try using a simple RNN model by importing `RNN` from `asctools.rnn`, and compare the performance with the LSTM model.
-3. The LSTM model uses a linear layer for producing the output (i.e., `self.i2o`). We can change it to a more complex, powerful function, such as a multilayer perceptron. Try implementing it by using `nn.Sequential`, e.g., `nn.Sequential(nn.Linear(hidden_size, hidden_size), nn.ReLU(), nn.Linear(hidden_size, output_size))`.
+Let's fix the model by doing the following:
+
+1. Try increasing the number of hidden units in the LSTM model.
+2. Bring back to the original number of hidden units, and try increasing the number of layers in the LSTM model.
+3. Try increasing the learning rate.
+4. Play with other hyperparameters, e.g., the number of epochs, batch size, etc.
+5. Change the model to `nn.RNN` instead of `nn.LSTM`. You should replace `(h_n, c_n)` with `hidden` in the training and evaluation since `nn.RNN` does not have a cell state.
+
+You should be able to see the model to correctly predict the wrapped character.
+
+```{footbibliography}
+:style: unsrt
+```

@@ -10,116 +10,91 @@ kernelspec:
   name: python3
 ---
 
-# Breaking the Code: From Enigma to Sequence-to-Sequence Models
+# Sequence-to-Sequence Models
 
-```{figure} https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/%27bombe%27.jpg/1500px-%27bombe%27.jpg
-:alt: Bombe
-:width: 100%
+A key limitation of LSTM networks is that they process text word-by-word, rather than considering the full context of a sentence. This becomes particularly problematic when translating between languages with different grammatical structures. For instance, English and Japanese have vastly different word orders - while English follows a subject-verb-object pattern, Japanese typically places the verb at the end of the sentence.
 
-Bombe, the codebreaking machine used by Alan Turing and his team at Bletchley Park.
+The need to transform sequences appears frequently in modern computing applications, from speech-to-text conversion to document summarization. To address these challenges and overcome the limitations of traditional LSTMs, researchers developed sequence-to-sequence models as a more effective solution.
 
-```
+## Overview
 
-During World War II, the German military used a sophisticated encryption device called the Enigma machine. This mechanical marvel could transform readable messages into seemingly random sequences of letters, which could only be deciphered by another Enigma machine set to the same configuration. Breaking this code was considered nearly impossible, since the machine could be configured in millions of different ways, and the settings were changed daily.
+Sequence-to-sequence (seq2seq) models {footcite:p}`sutskever2014sequence` are family of neural networks that take a sequence as input and generate another sequence as output. Sequence-to-sequence models consist of two parts: *the encoder* and *the decoder*.
 
-Alan Turing and his team at Bletchley Park realized that breaking Enigma required understanding how one sequence (the encrypted message) mapped to another sequence (the original text). Their groundbreaking work not only helped win the war but also laid the foundation for modern computing and, in many ways, foreshadowed one of the most powerful concepts in modern machine learning: *sequence-to-sequence transformation*.
+- **Encoder**: reads the input sequence and compresses it into a context vector, which captures the meaning and nuances of the input.
+- **Decoder**: takes this fixed-size context vector and generates a completely new sequence autoregressively, potentially of different length and in a different format altogether.
 
-```{note}
-The challenge faced at Bletchley Park was, in essence, a sequence-to-sequence problem: transforming a sequence of encrypted characters back into their original message. While the methods used were very different from today's neural networks, the fundamental goal was the same.
-```
+The encoder and decoder are connected through a context vector, which is a fixed-size vector that captures the meaning and nuances of the input sequence. The context vector is used to initialize the decoder state, and the decoder uses it to generate the output sequence. The encoder and decoder are recurrent neural networks that can be implemented using LSTM or similar RNN modles.
 
-Today's sequence-to-sequence (seq2seq) models {footcite:p}`sutskever2014sequence` tackle similar challenges, though at a far more sophisticated level. Like the codebreakers at Bletchley Park, these models learn to transform one sequence into another, whether it's translating languages, converting speech to text, or summarizing documents. The key difference is that instead of relying on mechanical rotors and manual computations (which are cool!!), modern seq2seq models use neural networks to learn these transformations automatically from data.
-
-## Model architecture
-
-```{figure} https://raw.githubusercontent.com/bentrevett/pytorch-seq2seq/eff9642693c3d83c497a791e80a34e740874f5cd/assets/seq2seq7.png
+```{figure} ../figs/seq2seq.jpg
 :alt: seq2seq model architecture
 :width: 100%
 
-seq2seq model architecture.
+seq2seq model architecture. The last hidden state of the encoder is used to initialize the decoder state. `[SOS]` is the start-of-sequence token that indicates the beginning of the output sequence.
 ```
 
-seq2seq models are based on a two-part architecture: the encoder and decoder.
+## Pay attention!
 
-- **Encoder** reads the input sequence and compresses it into a context vector, which captures the meaning and nuances of the input. The encoder processes the input sequence one by one, updating its internal state at each step. The final state becomes a context vector that contains a compressed version of the entire input sequence.
-- **Decoder** takes this fixed-size context vector and generates a completely new sequence autoregressively, potentially of different length and in a different format altogether.
+Two papers {footcite:p}`bahdanau2014neural` and {footcite:p}`luong2015effective` proposed what is now known as *the attention mechanism*, which is a key innovation of seq2seq models.
 
+One of the key limitation of the seq2seq model is that the context vector has a fixed size, which creates an information bottleneck, especially for long sequences where important details can be lost during compression.
 
-## Mathematical Framework
+In attention mechanism, we pass, instead of the last hidden state of the encoder, all the hidden states of the encoder to the decoder. This resolves the information bottleneck problem.
 
-Sequence-to-sequence models work by transforming sequences using probabilities. At their core, they ask: "Given this input sequence, what's the probability of generating each element in the output sequence?" During training, the model learns these probabilities by seeing many examples of input-output pairs. Then during inference, it uses what it learned to generate the most likely output sequence for a new input.
-
-Specifically, seq2seq model learns to model the conditional probability between input sequence $(x_1,...,x_n)$ of length $n$ and output sequence $(y_1,...,y_m)$ of length $m$. This probability is expressed as:
-
-$$
-P(y_1,...,y_m|x_1,...,x_n)
-$$
-
-The encoder processes the input sequence to create hidden states through the function $h_t = f(x_t, h_{t-1})$, where $f$ is typically an RNN function like LSTM or GRU. The final hidden state $h_n$ becomes the context vector $c$.
-
-The decoder generates the output sequence by modeling each element as $P(y_t|y_1,...,y_{t-1},c)$, effectively decomposing the joint probability using the chain rule:
-
-$$
-P(y_1,...,y_m|x_1,...,x_n) = \prod_{t=1}^m P(y_t|y_1,...,y_{t-1},c)
-$$
-
-The decoder updates its hidden state at each timestep $t$ using $s_t = g(y_{t-1}, s_{t-1}, c)$, where $g$ is another RNN function.
-
-```{note}
-The decoder takes two hidden states as input: the previous hidden state $s_{t-1}$ and the context vector $c$. Context vector $c$ is crucial for decoder to note the information from the encoder.
-```
-
-## Limitation of seq2seq
-
-The traditional seq2seq architecture faces several critical limitations.The most significant challenge is the **information bottleneck**: compressing the entire input sequence into a fixed-size context vector $c$. This becomes particularly problematic for *long sequences*, where crucial information may be lost during compression.
-
-A second major limitation is the **long-range dependencies** and the *vanishing gradient problem*. The model struggles to maintain relationships between distant elements in long sequences, as gradients become increasingly small during backpropagation through time, even with LSTM. This particularly hinders the learning of the earlier parts of input sequences, resulting in degraded performance for longer inputs.
-
-A third limitation is that the model treats all input elements equally when creating the context vector, despite the fact that *not all inputs are equally relevant* for each output element.
-
-
-## Attention Mechanism
-
-```{figure} https://lena-voita.github.io/resources/lectures/seq2seq/attention/attn_for_steps/6-min.png
-:alt: attention mechanism
+```{figure} ../figs/seq2seq-attention.jpg
+:alt: seq2seq model architecture
 :width: 100%
 
-The attention mechanism. The decoder can now see the output of the encoder at each step. Attention mechanism learns the "attention" the decoder should pay to the encoder at each step.
+seq2seq model architecture with attention mechanism. All the hidden states of the encoder are passed to the decoder.
 ```
 
-The attention mechanism solves these limitations by letting the decoder focus on specific parts of the input sequence as needed. Instead of using just one fixed context vector, the decoder can look back at different input elements while generating each output. It does this by calculating attention weights that show how important each input element is at each step. These weights are learned during training, so that the model can automatically figure out which parts of the input matter most when generating the output.
+Now, let's focus on the decoder processing the word at time $t$.
+While we give the decoder all the hidden states of the encoder, not all of them are relevant to the decoding process for the word at time $t$. Thus, the decoder first identifies the relevance between each hidden state $h_j$ of the encoder and the current hidden state $s_{t-1}$ of the decoder.
 
+$$
+e_{tj} = f(s_{t-1}, h_j)
+$$
 
-```{note}
-The attention mechanism was first introduced in neural machine translation but has since become a fundamental component in many deep learning architectures, including the transformer model that powers systems like GPT and BERT.
+where $f$ is a scoring function, often implemented as a neural network, that computes the relevance between the decoder hidden state $s_{t-1}$ and the encoder hidden state $h_j$. For example, the following figure represents a neural network consisting of one hidden layer with a tanh activation.
+
+```{figure} ../figs/seq2seq-attention-weight.jpg
+:alt: seq2seq model architecture
+:width: 100%
+
+The neural network that computes the relevance between the decoder hidden state $s_{t-1}$ and the encoder hidden state $h_j$.
 ```
 
-
-The attention mechanism works as follows. It first calculates the "unnormalized" attention weights $e_{tj}$ for each input $j$ at each step $t$ using a scoring function $a$, which can be a neural network or a simple dot product between the decoder hidden state $s_{t-1}$ and the encoder hidden state $h_j$.
-
-This "unnormalized" attention weights are then normalized using the softmax function to obtain the "normalized" attention weights $\alpha_{tj}$:
+$e_{tj}$ is then normalized using the softmax function to obtain the attention weights $\alpha_{tj}$:
 
 $$
 \alpha_{tj} = \frac{\exp(e_{tj})}{\sum_{k=1}^n \exp(e_{tk})}
 $$
 
-The context vector $c_t$ is then computed as a weighted sum of the encoder hidden states $h_j$ using the attention weights $\alpha_{tj}$:
+The attention weights $\alpha_{tj}$ are then used to compute the context vector $c_t$ as a weighted sum of the encoder hidden states $h_j$ using the attention weights $\alpha_{tj}$:
 
 $$
 c_t = \sum_{j=1}^n \alpha_{tj}h_j
 $$
 
-The training process minimizes the negative log-likelihood loss:
+```{figure} ../figs/seq2seq-attention-weighted-average.jpg
+:alt: seq2seq model architecture
+:width: 750%
 
-$$
-\mathcal{L} = -\sum_{t=1}^m \log P(y_t|y_1,...,y_{t-1},x_1,...,x_n)
-$$
 
+How the new context vector $c_t$ is computed as a weighted sum of the encoder hidden states $h_j$ using the attention weights $\alpha_{tj}$.
+
+```
 
 ```{note}
-Training a seq2seq model is a fun but challenging coding exercise that covers many technical topics in deep learning, such as padding, masking, teacher forcing, and more. While we will not cover these topics in this course due to technical complexity, I highly recommend you to try it out on your own.
-You can find good tutorials on seq2seq model implementation in [this blog](https://jaketae.github.io/study/seq2seq-attention/), [this blog](https://greydanus.github.io/2017/01/07/enigma-rnn/), and [this repo](https://github.com/hkhoont/scale_ai_engima_machine).
+This is a visualization of how sequence-to-sequence models with attention mechanism works.
+
+[Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time.](https://jalammar.github.io/visualizing-neural-machine-translation-mechanics-of-seq2seq-models-with-attention/)
 ```
+
+## Hands on
+
+Interested students can try the following hands on edxercise:
+
+[NLP From Scratch: Translation with a Sequence to Sequence Network and Attention — PyTorch Tutorials 2.5.0+cu124 documentation](https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html)
 
 
 ```{footbibliography}
