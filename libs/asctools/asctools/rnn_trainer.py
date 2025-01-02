@@ -3,7 +3,7 @@ import torch.nn as nn
 from typing import List, Optional, Union, Tuple, Callable
 from torch.optim import Optimizer
 from torch.nn import Module
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 from torch.utils.data import TensorDataset, DataLoader
 import torch.nn.functional as F
 
@@ -187,11 +187,20 @@ class RNNTrainer:
         hidden = self._get_hidden_state(batch_size, hidden)
 
         # Process the entire input sequence
-        encoder_outputs, hidden = self.model(input_tensor, hidden, mode='encode')
+        try:
+            encoder_outputs, hidden = self.model(input_tensor, hidden, mode='encode')
+        except Exception as e:
+            encoder_outputs, hidden = self.model(input_tensor, hidden)
 
-        # For classification tasks (target is 1D)
-        if target_tensor.dim() == 1:
-            return criterion(encoder_outputs[:, -1], target_tensor)
+        # If target is 1D
+        if target_tensor.size(2) == 1:
+            output = encoder_outputs[:, -1, :]
+            target = target_tensor.reshape(-1)
+
+            if output.size(1) == 1:
+                output = output.squeeze(1)
+
+            return criterion(output, target)
 
         # For sequence tasks (target is 3D)
         sequence_loss = 0
@@ -201,7 +210,7 @@ class RNNTrainer:
         decoder_input = target_tensor[:, 0].unsqueeze(1)  # [batch_size, 1, feature_size]
 
         for t in range(target_length):
-            decoder_output, hidden, _ = self.model(
+            decoder_output, hidden = self.model(
                 decoder_input,
                 hidden,
                 encoder_outputs=encoder_outputs,

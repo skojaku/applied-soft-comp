@@ -1,308 +1,193 @@
 # %%
 import torch
 import torch.nn as nn
-from torch.nn import functional as F
-import numpy as np
-from typing import List, Tuple, Optional, Union
-import math
-from asctools.rnn_trainer import RNNTrainer
+from torch.utils.data import TensorDataset, DataLoader
+import random
+import string
 
 
-class VigenereCipher:
-    def __init__(self):
-        self.alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ "
-        self.vocab_size = len(self.alphabet)
+def generate_wrapped_char_data(n_samples=1000, seq_length=26):
+    """
+    Generate training data where one random character in a sequence is wrapped with <>.
 
-    def _prepare_text(self, text):
-        """Remove non-alphabetic characters and convert to uppercase."""
-        return "".join(
-            char if char == " " else char
-            for char in text
-            if char in self.alphabet or char == " "
-        )
+    Args:
+        n_samples (int): Number of sequences to generate
+        seq_length (int): Length of each sequence (default 26 for A-Z)
 
-    def _prepare_key(self, key, text_length):
-        """Repeat the key to match the length of the text."""
-        key = self._prepare_text(key)
-        return (key * (text_length // len(key) + 1))[:text_length]
+    Returns:
+        list: List of input sequences
+        list: List of target characters (the wrapped characters)
+    """
+    sequences = []
+    targets = []
 
-    def encrypt(self, plaintext, key):
-        """
-        Encrypt the plaintext using Vigenère cipher.
+    for _ in range(n_samples):
+        # Generate a random permutation of A-Z
+        chars = list(string.ascii_uppercase)
+        random.shuffle(chars)
 
-        Args:
-            plaintext (str): The text to encrypt
-            key (str): The encryption key
+        # Choose a random position for the wrapped character
+        wrap_pos = random.randint(0, seq_length - 1)
+        target_char = chars[wrap_pos]
 
-        Returns:
-            str: The encrypted text
-        """
-        plaintext = self._prepare_text(plaintext)
-        key = self._prepare_key(key, len(plaintext))
-        ciphertext = ""
+        # Create the sequence with wrapped character
+        chars.insert(wrap_pos, "<")
+        chars.insert(wrap_pos + 2, ">")
+        sequence = "".join(chars)
 
-        for p, k in zip(plaintext, key):
-            # Convert letters to numbers (A=0, B=1, etc.)
-            p_idx = self.alphabet.index(p)
-            k_idx = self.alphabet.index(k)
+        sequences.append(sequence)
+        targets.append(target_char)
 
-            # Apply Vigenère encryption formula
-            c_idx = (
-                p_idx + k_idx
-            ) % self.vocab_size  # because we now have 26 letters + space + lowercase
+    vocab = list(string.ascii_uppercase) + ["<", ">"]
 
-            # Convert back to letter
-            ciphertext += self.alphabet[c_idx]
-
-        return ciphertext
-
-    def decrypt(self, ciphertext, key):
-        """
-        Decrypt the ciphertext using Vigenère cipher.
-
-        Args:
-            ciphertext (str): The text to decrypt
-            key (str): The decryption key
-
-        Returns:
-            str: The decrypted text
-        """
-        ciphertext = self._prepare_text(ciphertext)
-        key = self._prepare_key(key, len(ciphertext))
-        plaintext = ""
-
-        for c, k in zip(ciphertext, key):
-            # Convert letters to numbers (A=0, B=1, etc.)
-            c_idx = self.alphabet.index(c)
-            k_idx = self.alphabet.index(k)
-
-            # Apply Vigenère decryption formula
-            p_idx = (
-                c_idx - k_idx
-            ) % self.vocab_size  # 27 because we now have 26 letters + space
-
-            # Convert back to letter
-            plaintext += self.alphabet[p_idx]
-
-        return plaintext
+    return sequences, targets, vocab
 
 
-cipher = VigenereCipher()
-
-# Test the cipher
-message = "Hello World"
-key = "SECRET"
-
-# Encryption
-encrypted = cipher.encrypt(message, key)
-print(f"Original message: {message}")
-print(f"Key: {key}")
-print(f"Encrypted message: {encrypted}")
-
-# Decryption
-decrypted = cipher.decrypt(encrypted, key)
-print(f"Decrypted message: {decrypted}")
-
-seq_len = 5
-n_samples = 1000
-key = "PASSWORD"
-target_seq, input_seq = [], []
-for _ in range(n_samples):
-    target_seq.append(
-        "".join(
-            np.random.choice(
-                list("ABCDEFGHIJKLMNOPQRSTUVWXYZ "), size=seq_len, replace=True
-            )
-        )
-    )
-    input_seq.append(cipher.encrypt(target_seq[-1], key))
+def tokenize(sequences, vocab):
+    retval = []
+    for seq in sequences:
+        r = []
+        for char in seq:
+            r.append(vocab.index(char))
+        retval.append(r)
+    return torch.tensor(retval)
 
 
-def to_one_hot(sequences, seq_len, alphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZ "):
-    one_hot = torch.zeros((len(sequences), seq_len, len(alphabet)))
-    for i in range(len(sequences)):
-        for j in range(seq_len):
-            one_hot[i, j, alphabet.index(sequences[i][j])] = 1
-    return one_hot
+sequences, targets, vocab = generate_wrapped_char_data(n_samples=1000)
 
 
-input_tensor = to_one_hot(input_seq, seq_len)
-target_tensor = to_one_hot(target_seq, seq_len)
+sequences = tokenize(sequences, vocab)
+targets = tokenize(targets, vocab)
+dataset = TensorDataset(sequences, targets)
 
+from torch.utils.data import Dataset
 
-class AttentionLayer(nn.Module):
-    def __init__(self, hidden_size: int):
-        super().__init__()
-        self.attention = nn.Linear(hidden_size * 2, hidden_size)
-        self.v = nn.Parameter(torch.rand(hidden_size))
-        stdv = 1. / math.sqrt(self.v.size(0))
-        self.v.data.uniform_(-stdv, stdv)
+train_frac = 0.8
+batch_size = 128
 
-    def forward(self, hidden: torch.Tensor, encoder_outputs: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
-        # hidden: [batch_size, hidden_size]
-        # encoder_outputs: [batch_size, seq_len, hidden_size]
-
-        batch_size, seq_len, hidden_size = encoder_outputs.size()
-        hidden = hidden.unsqueeze(1).repeat(1, seq_len, 1)
-
-        # Calculate attention scores
-        energy = torch.tanh(self.attention(torch.cat((hidden, encoder_outputs), dim=2)))
-        energy = energy.permute(0, 2, 1)  # [batch_size, hidden_size, seq_len]
-        v = self.v.repeat(batch_size, 1).unsqueeze(1)  # [batch_size, 1, hidden_size]
-        attention_weights = F.softmax(torch.bmm(v, energy), dim=2)  # [batch_size, 1, seq_len]
-
-        # Apply attention to encoder outputs
-        context = torch.bmm(attention_weights, encoder_outputs)  # [batch_size, 1, hidden_size]
-
-        return context, attention_weights
-
-class EncoderDecoderLSTM(nn.Module):
-    def __init__(
-        self,
-        input_size: int = 27,
-        hidden_size: int = 256,
-        num_layers: int = 2,
-        dropout: float = 0.1,
-        device: str = "cpu" if not torch.cuda.is_available() else "cuda",
-    ):
-        super().__init__()
-        self.hidden_size = hidden_size
-        self.num_layers = num_layers
-        self.input_size = input_size
-
-        # Encoder LSTM
-        self.encoder = nn.LSTM(
-            input_size=input_size,
-            hidden_size=hidden_size,
-            num_layers=num_layers,
-            batch_first=True,
-            dropout=dropout if num_layers > 1 else 0,
-        )
-
-        # Decoder LSTM
-        self.decoder = nn.LSTM(
-            input_size=input_size,
-            hidden_size=hidden_size,
-            num_layers=num_layers,
-            batch_first=True,
-            dropout=dropout if num_layers > 1 else 0,
-        )
-
-        # Attention mechanism
-        self.attention = AttentionLayer(hidden_size)
-
-        # Additional layers
-        self.combine_context = nn.Linear(hidden_size * 2, hidden_size)
-        self.output = nn.Sequential(
-            nn.Linear(hidden_size, hidden_size),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(hidden_size, input_size)
-        )
-
-        self.device = device
-
-    def forward(
-        self,
-        x: torch.Tensor,
-        hidden: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,
-        encoder_outputs: Optional[torch.Tensor] = None,
-        mode: str = 'encode'
-    ) -> Union[
-        Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]],  # For encode mode
-        Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor], torch.Tensor]  # For decode mode
-    ]:
-        if mode == 'encode':
-            # Encode sequence
-            encoder_outputs, encoder_hidden = self.encoder(x, hidden)
-            return encoder_outputs, encoder_hidden
-
-        elif mode == 'decode':
-            if encoder_outputs is None:
-                raise ValueError("encoder_outputs is required for decode mode")
-
-            # Run decoder step
-            decoder_output, decoder_hidden = self.decoder(x, hidden)
-
-            # Calculate attention
-            context, attention_weights = self.attention(decoder_hidden[0][-1], encoder_outputs)
-
-            # Combine decoder output with context
-            combined = torch.cat([decoder_output, context], dim=2)
-            combined = self.combine_context(combined)
-
-            # Generate output
-            output = self.output(combined)
-            output = F.log_softmax(output, dim=-1)
-
-            return output, decoder_hidden, attention_weights
-
-        else:
-            raise ValueError(f"Invalid mode: {mode}. Must be 'encode' or 'decode'")
-
-    def initHidden(self, batch_size: int = 1) -> Tuple[torch.Tensor, torch.Tensor]:
-        return (
-            torch.zeros(
-                self.num_layers, batch_size, self.hidden_size, device=self.device
-            ),
-            torch.zeros(
-                self.num_layers, batch_size, self.hidden_size, device=self.device
-            ),
-        )
-
-    def generate(self, input_seq: torch.Tensor, seq_len: int = 20):
-        with torch.no_grad():
-            # Initial encoder pass
-            encoder_outputs, encoder_hidden = self.forward(input_seq, mode='encode')
-
-            # Initialize decoder
-            decoder_hidden = encoder_hidden
-            decoder_input = input_seq[:, :1, :]  # Start with first input token
-
-            generated_seq = []
-            for t in range(seq_len):
-                # Decode step
-                output, decoder_hidden, _ = self.forward(
-                    decoder_input,
-                    decoder_hidden,
-                    encoder_outputs=encoder_outputs,
-                    mode='decode'
-                )
-
-                # Sample from the output distribution instead of taking argmax
-                probs = torch.exp(output.squeeze(1))
-                pred = torch.multinomial(probs, 1)
-                decoder_input = F.one_hot(pred, num_classes=self.input_size).float()
-
-                generated_seq.append(pred.item())
-
-            return generated_seq
-
-# Initialize and train the model
-model = EncoderDecoderLSTM()
-trainer = RNNTrainer(model)
-losses = trainer.train(
-    input_tensors=input_tensor,
-    targets=target_tensor,
-    criterion=nn.CrossEntropyLoss(),
-    max_epochs=1000,
-    learning_rate=0.001,
-    batch_size=64,
-    patience=20,
-    clip_grad_norm=1.0,
+train_size = int(train_frac * len(dataset))
+val_size = len(dataset) - train_size
+train_dataset, val_dataset = torch.utils.data.random_split(
+    dataset, [train_size, val_size]
 )
 
-# %%
-import matplotlib.pyplot as plt
-plt.plot(losses)
-plt.show()
-# %%
-model.eval()
-eval_seq = input_seq[0]
-enc_seq = cipher.encrypt(eval_seq, key)
-eval_tensor = to_one_hot([enc_seq], seq_len=len(eval_seq))
+train_dataloader = DataLoader(
+    train_dataset,
+    batch_size=batch_size,
+    shuffle=True,
+)
+val_dataloader = DataLoader(
+    val_dataset,
+    batch_size=batch_size,
+    shuffle=False,
+)
 
-print(eval_seq)
-alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ "
-print(''.join([alphabet[i] for i in model.generate(eval_tensor, seq_len=len(eval_seq))]))
+#  Define model
+import pytorch_lightning as pyl
+
+
+class CharDecoder(pyl.LightningModule):
+    def __init__(self, vocab_size, output_size, hidden_size, num_layers=2):
+        super().__init__()
+        self.lstm = nn.LSTM(
+            input_size=vocab_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            batch_first=True,
+        )
+        self.fc = nn.Linear(hidden_size, output_size)
+        self.embedding = nn.Embedding(vocab_size, vocab_size)
+
+        # One-hot encoding
+        self.embedding.weight.data = torch.eye(vocab_size)
+        self.embedding.weight.requires_grad = False
+
+    def forward(self, x):
+        # x is a tensor of shape (batch_size, seq_len)
+        batch_size, seq_len = x.shape
+
+        # To token index to one-hot encoding
+        x = self.embedding(x)
+
+        # To sentnece to sequence of chars
+        hidden = self.init_hidden(batch_size)
+        x, _ = self.lstm(x, hidden)
+        x = x[:, -1, :]
+        x = self.fc(x)
+        return x
+
+    def training_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self(x)
+        loss = torch.nn.functional.cross_entropy(y_hat, y.reshape(-1))
+        self.log("train_loss", loss)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        with torch.no_grad():
+            x, y = batch
+            y_hat = self(x)
+            loss = torch.nn.functional.cross_entropy(y_hat, y.reshape(-1))
+            self.log("val_loss", loss)
+        return loss
+
+    def configure_optimizers(self):
+        return torch.optim.Adam(self.parameters(), lr=0.01)
+
+    def init_hidden(self, batch_size):
+        return (
+            torch.zeros(self.lstm.num_layers, batch_size, self.lstm.hidden_size, device=self.device),
+            torch.zeros(self.lstm.num_layers, batch_size, self.lstm.hidden_size, device=self.device),
+        )
+
+model = CharDecoder(
+    vocab_size=len(vocab),
+    output_size=len(vocab),
+    hidden_size=32
+)
+
+from pytorch_lightning import loggers as pl_loggers
+tb_logger = pl_loggers.TensorBoardLogger('logs/')
+
+trainer = pyl.Trainer(
+    max_epochs=200,
+    #enable_progress_bar=False,
+    enable_model_summary=False,
+    logger=tb_logger,
+)
+trainer.fit(model, train_dataloader, val_dataloader)
+# %%
+trainer.callback_metrics['val_loss']
+
+
+eval_seq, eval_target, vocab = generate_wrapped_char_data(n_samples=5)
+X_eval = tokenize(eval_seq, vocab)
+y_eval = tokenize(eval_target, vocab)
+
+model.eval()
+with torch.no_grad():
+    y_hat = model(X_eval)
+    predicted_idx = torch.argmax(y_hat, dim=1)
+    predicted_char = [vocab[idx] for idx in predicted_idx]
+
+    for i in range(len(eval_seq)):
+        print(f"Sequence: {eval_seq[i]}, Target: {eval_target[i]}, Predicted: {predicted_char[i]}")
+    accuracy = (predicted_idx == y_eval).sum() / len(y_eval)
+    print(f"Accuracy: {accuracy}")
+# %%
+
+
+def tokenize(sequences, vocab):
+    retval = []
+    for seq in sequences:
+        r = []
+        print(len(seq))
+        for char in seq:
+            r.append(vocab.index(char))
+        retval.append(r)
+    return torch.tensor(retval)
+
+X = tokenize(['ABCDEFGHIJKLMNOPQRST<U>VWXYZ', 'ABCDEFGHIJKLMNOPQRSTU<V>WXYZ'], vocab)
+print("X:", X)
+print("Shape of X:", X.shape)
 # %%
