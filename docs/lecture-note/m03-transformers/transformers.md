@@ -10,9 +10,6 @@ kernelspec:
   name: python3
 ---
 
-
-
-
 # The Transformer Architecture: Attention is All You Need
 
 What if we could process language the way we understand a painting - taking in all elements simultaneously rather than sequentially? This fundamental question led to the development of the Transformer architecture, a breakthrough that revolutionized how artificial intelligence processes sequential data.
