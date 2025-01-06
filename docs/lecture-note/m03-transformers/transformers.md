@@ -18,16 +18,39 @@ Transformers are the cornerstone of modern NLP that gives rise to the recent suc
 
 Many large language models (LLMs) including GPT-3, GPT-4, and Claude are built based on a stack of *transformer* blocks {footcite:p}`vaswani2017attention`.
 Each transformer block takes a sequence of token vectors as input and outputs a sequence of token vectors (sequence-to-sequence!).
-Inside each transformer block are essentially three components, i.e., *multi-head attention*, *layer normalization*, and *feed-forward networks*.
 
 ```{figure} ../figs/transformer-overview.jpg
 :name: transformer-overview
 :alt: Transformer Overview
-:width: 80%
+:width: 50%
 :align: center
 
 The basic architecture of the transformer-based LLMs.
 ```
+
+These transformer blocks can be further divided into encoder and decoder components.
+The encoder is used for encoding the input sequence, while the decoder is used for generating the output sequence. Like seq2se models with attention, the decoder can also see the encoder outputs for invidiual tokens, along with the previous output tokens. The output of the decoder is then passed through a linear layer to produce the probability distribution over the next token.
+
+```{figure} ../figs/transformer-encoder-decoder.jpg
+:name: transformer-encoder-decoder
+:alt: Transformer Encoder-Decoder
+:width: 80%
+:align: center
+
+The basic architecture of the transformer encoder-decoder. The encoder is used for encoding the input sequence, while the decoder is used for generating the output sequence. The encoder takes the input sequence as input and outputs a sequence of token vectors, which are then passed to the decoder. The decoder takes the encoder outputs, along with the previous output tokens, and outputs the probability distribution over the next token.
+```
+
+Inside the encoder and decoder transformer blocks are essentially three components, i.e., *multi-head attention*, *layer normalization*, and *feed-forward networks*. We will learn individual components in the following sections.
+
+```{figure} ../figs/transformer-component.jpg
+:name: transformer-wired-components
+:alt: Transformer Wired Components
+:width: 80%
+:align: center
+
+The encoder-decoder architecture of the transformer.
+```
+
 
 ## Attention Mechanism
 
@@ -107,11 +130,11 @@ where $\mu$ and $\sigma$ are the mean and standard deviation of the input, $\gam
 
 ## Wiring it all together
 
-### Structure of a Transformer Block
+### Encoder Transformer Block
 
 Now, we have all the components to build a transformer block. Let's wire them together.
 
-```{figure} ../figs/transformer-wired-components.jpg
+```{figure} ../figs/transformer-encoder.jpg
 :name: transformer-block
 :alt: Transformer Block
 :width: 50%
@@ -122,7 +145,7 @@ Input flows through multi-head attention, layer normalization, feed-forward netw
 
 Let us ignore the residual connection for now. The input is first passed through multi-head attention, followed by layer normalization. Then, the output of the normalization is passed through feed-forward networks and another layer normalization step.
 
-### Residual Connection
+#### Residual Connection
 
 ```{figure} https://i.sstatic.net/UcJSa.png
 :name: residual-connection
@@ -185,6 +208,85 @@ Residual connections are a architectural innovation that allows neural networks 
 
 Residual connections also help prevent gradient explosion, even though this may not be obvious from the chain rule perspective. As shown in {footcite:p}`philipp2017exploding`, the residual connection provides an alternative path for gradients to flow through. By distributing gradients between the residual path and the learning component path, the gradient is less likely to explode.
 ```
+
+## Decoder Transformer Block
+
+The decoder transformer block is similar to the encoder transformer block, but it also includes the *masked multi-head attention* and *cross-attention* components.
+
+```{figure} ../figs/transformer-decoder.jpg
+:name: transformer-decoder
+:alt: Transformer Decoder
+:width: 50%
+:align: center
+
+The decoder transformer block.
+```
+
+
+### Masked Multi-Head Attention
+
+The masked multi-head attention is used during training to prevent the decoder from seeing the future tokens. During inference, the masked mult-head attention acts as a regular attention module.
+
+The masked multi-head attention is crucial for enabling parallel training of the decoder. During training, we know the entire expected output sequence, but we need to ensure the model learns to generate tokens sequentially without "peeking" at future tokens.
+
+Let's understand this with an example. Suppose we're training a model to translate "I love you" to French "Je t'aime". The encoder processes the input sequence in parallel, producing vector representations (say 11, 12, 13 for simplicity). For the decoder training, we have two options:
+
+1. **Sequential Training (without masking)**: Process one token at a time
+   - Step 1: Input (11,12,13) → Predict "Je"
+   - Step 2: Input (11,12,13) + predicted "Je" → Predict "t'aime"
+   - Step 3: Input (11,12,13) + predicted "t'aime" → Predict final token
+
+   This is slow and errors accumulate across steps.
+
+2. **Parallel Training (with masking)**: Process all tokens simultaneously
+   - Operation A: Input (11,12,13) → Predict "Je" (mask out "t'aime")
+   - Operation B: Input (11,12,13) + "Je" → Predict "t'aime" (mask out final token)
+   - Operation C: Input (11,12,13) + "Je" + "t'aime" → Predict final token
+
+The parallel training is much faster and more efficient, since the model can process all tokens simultaneously. Additionally, the model does not suffer from the error accumulation problem, where the prediction error from one step is carried over to the next step.
+
+To implement the masking, we set the attention scores to negative infinity for future tokens before the softmax operation, effectively zeroing out their contribution:
+
+$$
+\text{Mask}(Q, K, V) = \text{softmax}\left(\frac{QK^T + M}{\sqrt{d_k}}\right)V
+$$
+
+where $M$ is a matrix with $-\infty$ for positions corresponding to future tokens. The result is the attention scores, where the tokens attend only to the previous tokens.
+
+```{figure} https://substackcdn.com/image/fetch/f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fe1317a05-3542-4158-94bf-085109a5793a_1220x702.png
+:name: transformer-masked-attention
+:alt: Masked Attention
+:width: 80%
+:align: center
+
+The masked attention mechanism.
+```
+
+### Cross-Attention
+
+Cross-attention is the second multi-head attention component in the decoder transformer block. It creates a connection between the decoder and encoder by allowing the decoder to access information from the encoder's output.
+
+The mechanism works by using queries (Q) from the decoder's previous layer and keys (K) and values (V) from the encoder's output. This enables each position in the decoder to attend to the full encoder sequence without any masking, since encoding is already complete.
+
+For instance, in translating "I love you" to "Je t'aime", cross-attention helps each French word focus on relevant English words - "Je" attending to "I", and "t'aime" to "love". This maintains semantic relationships between input and output.
+
+The cross-attention formula is:
+
+$$
+\text{CrossAttention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
+$$
+
+where Q comes from the decoder and K,V come from the encoder. This effectively bridges the encoding and decoding processes.
+
+```{figure}  ../figs/transformer-cross-attention.jpg
+:name: transformer-cross-attention
+:alt: Cross-Attention
+:width: 60%
+:align: center
+
+The cross-attention mechanism.
+```
+
 
 ## Other miscellaneous components
 
@@ -290,8 +392,12 @@ The sinusoidal position embedding is additive, which alter the token embedding. 
 One reason is that the concatenation requires a larger embedding dimension, which increases the number of parameters in the model.
 Instead, adding the position embedding creates an interesting effect in the attention mechanism.
 Interested readers can check out [this Reddit post](https://www.reddit.com/r/MachineLearning/comments/cttefo/comment/exs7d08/?utm_source=reddit&utm_medium=web2x&context=3).
-
 ```
+
+### Masked Multi-Head Attention
+
+When training a transformer model for generation
+
 
 ```{footbibliography}
 :style: unsrt
