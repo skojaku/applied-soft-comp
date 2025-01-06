@@ -16,7 +16,7 @@ Transformers are the cornerstone of modern NLP that gives rise to the recent suc
 
 ## A building block of LLMs
 
-Many large language models (LLMs) including GPT-3, GPT-4, and Claude are built based on a stack of *transformer* blocks {cite:p}`vaswani2017attention`.
+Many large language models (LLMs) including GPT-3, GPT-4, and Claude are built based on a stack of *transformer* blocks {footcite:p}`vaswani2017attention`.
 Each transformer block takes a sequence of token vectors as input and outputs a sequence of token vectors (sequence-to-sequence!).
 Inside each transformer block are essentially three components, i.e., *multi-head attention*, *layer normalization*, and *feed-forward networks*.
 
@@ -66,7 +66,7 @@ $$
 \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V,
 $$
 
-where $V \in \mathbb{R}^{n \times d_v}$ is the value matrix containing $n$ value vectors of dimension $d_v$. In the original paper on transformers {cite:p}`vaswani2017attention`, the dimension of the query, key, and value vectors are all set to be the same, i.e., $d_k = d_v = d_q = d / h$, where $h$ is the number of attention heads and $d$ is the dimension of the input vector, though this is not a strict requirement.
+where $V \in \mathbb{R}^{n \times d_v}$ is the value matrix containing $n$ value vectors of dimension $d_v$. In the original paper on transformers {footcite:p}`vaswani2017attention`, the dimension of the query, key, and value vectors are all set to be the same, i.e., $d_k = d_v = d_q = d / h$, where $h$ is the number of attention heads and $d$ is the dimension of the input vector, though this is not a strict requirement.
 
 ```{note}
 The output of the attention mechanism is the *contextualized vector*, meaning that the vector for a word can vary depending on other words input to the attention module. This is ideal for language modeling, since the meaning of a word can vary depending on the context, e.g., "bank" can mean "river bank" or "financial institution" depending on the words surrounding it.
@@ -77,7 +77,7 @@ The output of the attention mechanism is the *contextualized vector*, meaning th
 Multi-head attention consists of multiple attention heads to enable a model to pay attentions to multiple aspects of the input sequence. Each attention head can have different parameters and thus produces different "contextualized vectors." These different vector are then concatenated and fed into a feed-forward network to produce the final output.
 
 ```{figure} ../figs/transformer-multihead-attention.jpg
-:name: transformer-attention
+:name: transformer-multihead-attention
 :alt: Multi-Head Attention
 :width: 50%
 :align: center
@@ -176,14 +176,14 @@ Without the residual connection, we only have the $O_L$ terms for the network wi
 ```{admonition} Residual Connection
 :class: tip
 
-Residual connections are a architectural innovation that allows neural networks to be much deeper without degrading performance. It was proposed by He et al. {cite:p}`he2015deep` for image processing from Microsoft Research.
+Residual connections are a architectural innovation that allows neural networks to be much deeper without degrading performance. It was proposed by He et al. {footcite:p}`he2015deep` for image processing from Microsoft Research.
 ```
 
 
 ```{admonition} Residual connection mitigates gradient explosion
 :class: tip
 
-Residual connections also help prevent gradient explosion, even though this may not be obvious from the chain rule perspective. As shown in {cite:p}`philipp2017exploding`, the residual connection provides an alternative path for gradients to flow through. By distributing gradients between the residual path and the learning component path, the gradient is less likely to explode.
+Residual connections also help prevent gradient explosion, even though this may not be obvious from the chain rule perspective. As shown in {footcite:p}`philipp2017exploding`, the residual connection provides an alternative path for gradients to flow through. By distributing gradients between the residual path and the learning component path, the gradient is less likely to explode.
 ```
 
 ## Other miscellaneous components
