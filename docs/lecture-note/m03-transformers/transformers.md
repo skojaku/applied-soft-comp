@@ -10,449 +10,290 @@ kernelspec:
   name: python3
 ---
 
-# The Transformer Architecture: Attention is All You Need
+# Transformers
 
-What if we could process language the way we understand a painting - taking in all elements simultaneously rather than sequentially? This fundamental question led to the development of the Transformer architecture, a breakthrough that revolutionized how artificial intelligence processes sequential data.
+Transformers are the cornerstone of modern NLP that gives rise to the recent success of LLMs. We will learn how transformers work and how they are used to build LLMs.
 
-## The Big Picture
+## A building block of LLMs
 
-Consider a Transformer as a black box for a moment. At its most basic level, it takes in a sequence of tokens (like words in a sentence) and produces another sequence of tokens. But unlike previous approaches that processed tokens one at a time like a human reading word by word, a Transformer processes all tokens simultaneously. This parallel processing ability is what makes Transformers both faster and more effective at understanding relationships between distant elements in a sequence.
+Many large language models (LLMs) including GPT-3, GPT-4, and Claude are built based on a stack of *transformer* blocks {cite:p}`vaswani2017attention`.
+Each transformer block takes a sequence of token vectors as input and outputs a sequence of token vectors (sequence-to-sequence!).
+Inside each transformer block are essentially three components, i.e., *multi-head attention*, *layer normalization*, and *feed-forward networks*.
 
-```{note}
-The shift from sequential to parallel processing in Transformers is analogous to how our visual system processes images. When you look at a picture, you don't scan it pixel by pixel. Instead, you take in the entire image at once and understand the relationships between different elements simultaneously.
-```
-
-```{figure} https://lansinuote.com/img/transformer.png
+```{figure} ../figs/transformer-overview.jpg
 :name: transformer-overview
 :alt: Transformer Overview
 :width: 80%
 :align: center
 
-High-level overview of the Transformer architecture showing parallel processing capability
+The basic architecture of the transformer-based LLMs.
 ```
 
-This parallel processing capability leads to two key advantages. First, it enables significant speedup through parallelization - we can process all relationships simultaneously on modern hardware. Second, it eliminates the "distance problem" - relationships between elements can be captured regardless of how far apart they are in the sequence, as every element has direct access to every other element.
+## Attention Mechanism
 
-Think of it like a group conversation versus a chain of whispers. In a chain of whispers (like RNNs), information might get distorted as it passes through many people. In a group conversation (like Transformers), everyone can hear and respond to everyone else directly, enabling richer, more accurate communication.
+Perhaps the most crucial component of the transformer is the *attention mechanism*, which allows the model to pay attention to particular parts of the input sequence.
 
-The price we pay for these advantages is increased memory usage - we need to store relationships between all pairs of elements. However, this tradeoff has proven worthwhile, as evidenced by the Transformer's widespread adoption in state-of-the-art language models.
 
-```{tip}
-When considering whether to use a Transformer for your task, the key question isn't just whether you're working with sequential data, but whether understanding relationships between distant elements is crucial for your task.
-```
+### Self-Attention
+In transformers, the attention is called *self-attention*, since the attention is paid within the same sentence, unlike the sequence-to-sequence models that pays attention from one sentence to another. At its core, self-attention is about relationships. When you read the sentence "The cat sat on the mat because it was tired", how do you know what "it" refers to? You naturally look back at the previous words and determine that "it" refers to "the cat". Self-attention works similarly, but does this for every word in relation to every other word, simultaneously.
 
-In the following sections, we'll zoom in progressively on how Transformers achieve this remarkable capability, starting with how they represent and process information, then examining their core components, and finally diving deep into the mechanisms that make it all work.
-
-This introduction maintains a clear narrative flow while building concepts progressively, using concrete analogies to make abstract concepts more approachable. Would you like me to continue with the next section, or would you prefer to refine this section further?
-
-
-# The Transformer Architecture: Attention is All You Need
-
-The Transformer architecture revolutionized how AI processes text by enabling parallel processing of words. Unlike humans who read sequentially, Transformers can analyze an entire text simultaneously, understanding relationships between all words at once.
-
-The key idea behind Transformers is to get rid of the sequential processing altogether for the sake of efficiency. Instead, it uses "attention" mechanisms to process all words simultaneously.
-In transformers, the attention is called "self-attention", since the attention is paid within the same sentence, unlike the sequence-to-sequence models that pays attention from one sentence to another.
-
-## Self-Attention
-
-At its core, self-attention is about relationships. When you read the sentence "The cat sat on the mat because it was tired", how do you know what "it" refers to? You naturally look back at the previous words and determine that "it" refers to "the cat". Self-attention works similarly, but does this for every word in relation to every other word, simultaneously.
-
-To compute the attention between words, transformers create three types of vectors---**query, key, and value**---for each word. Each of these vectors are created by a neural network (w/ single linear layer) that takes the input word as input, and outputs a vector of the same dimension as the input.
-
-Think of this like a library system: The Query is what you're looking for, the Keys are like book titles, and the Values are the actual content of the books. When you search (Q) for a specific topic, you match it against book titles (K) to find the relevant content (V).
-
-```{figure} https://cdn-images-1.medium.com/max/2000/1*moKYjUdtx-uEyYMbhPWbIw.png
-:alt: Attention calculation
-:width: 100%
-
-Key, Query, and Value vectors
-```
-
-The vector of a word is then transformed into a new vector by the following formula:
-
-$$
-\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
-$$
-
-where $Q$ is the query vector, $K$ is the key vector, and $V$ is the value vector.
-
-Let us break down the formula as follows:
-
-
-```{code-cell} ipython3
-:tags: [remove-cell]
-from myst_nb import glue
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-# Create the data
-data = {
-    'The': [0.2, 0.3, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0],
-    'cat': [0.3, 0.2, 0.4, 0.1, 0.0, 0.0, 0.5, 0.2, 0.3],
-    'sat': [0.1, 0.2, 0.2, 0.1, 0.0, 0.1, 0.1, 0.0, 0.0],
-    'on': [0.1, 0.1, 0.1, 0.2, 0.2, 0.2, 0.0, 0.0, 0.0],
-    'the': [0.1, 0.0, 0.0, 0.2, 0.2, 0.4, 0.0, 0.0, 0.0],
-    'mat': [0.1, 0.0, 0.1, 0.2, 0.4, 0.2, 0.0, 0.0, 0.0],
-    'It': [0.0, 0.1, 0.0, 0.0, 0.0, 0.0, 0.2, 0.4, 0.3],
-    'was': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.2, 0.2],
-    'tired': [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.2, 0.2]
-}
-
-# Create DataFrame with proper index
-df = pd.DataFrame(data,
-                 index=['The', 'cat', 'sat', 'on', 'the', 'mat', 'It', 'was', 'tired'])
-
-# Set up the matplotlib figure
-fig = plt.figure(figsize=(5, 5))
-
-
-# Create heatmap with seaborn
-sns.heatmap(df,
-            annot=True,  # Show numbers in cells
-            fmt='.1f',   # Format numbers to 1 decimal place
-            cmap='cividis',  # Yellow-Orange-Red color scheme
-            square=True,    # Make cells square
-            cbar_kws={'label': 'Probability'},
-            vmin=0,         # Minimum value for color scaling
-            vmax=0.5)       # Maximum value for color scaling
-
-# Customize the plot
-plt.title('Word Transition Probabilities', pad=20, size=16)
-plt.xlabel('Next Word', size=12)
-plt.ylabel('Current Word', size=12)
-
-# Rotate x-axis labels for better readability
-plt.xticks(rotation=0, ha='right')
-plt.yticks(rotation=0)
-
-# Adjust layout to prevent label cutoff
-plt.tight_layout()
-
-# Show the plot
-plt.show()
-glue("cdf_fig", fig, display=False)
-
-# Display the DataFrame with styling (for numerical comparison)
-#df.style.background_gradient(cmap='YlOrRd', vmin=0, vmax=0.5)\
-#    .format('{:.1f}')\
-#    .set_caption('Word Transition Probabilities Table')
-```
-
-
-- **Attention matrix**: The vector product $QK^T$ is a matrix of size $n \times n$, where $n$ is the number of words in the sentence. This matrix is called *"attention matrix." Attention matrix shows how much attention each word pays to each other word. For example, given the sentence "The cat sat on the mat. It was tired.", the attention matrix (after applying the softmax function) is:
-
-
-   ```{glue} cdf_fig
-   ```
-
-  A large value in the matrix means that transformer pays more attention to the word in the column as a relevant context to the row word. In this example, "It" and "tired" have high attention to "cat" (0.5, 0.3), meaning that "It" and "tired" are highly related to "cat".
-
-
-- **Softmax function**: The softmax function is then applied to each row of the matrix, resulting in a matrix of size $n \times n$ where each element is the probability of the word being the next word in the sentence. The denominator $\sqrt{d_k}$ is a scaling factor that prevents the dot product from becoming too large, which can cause the softmax function to saturate and produce very small gradients.
-
-  ```{note}
-  The softmax function has a peculiar property: it is very sensitive to the scale of the input. If the input is too large, the softmax function will saturate and produce very small gradients. This is why we scale the dot product by $\sqrt{d_k}$.
-
-  ```{figure} https://www.researchgate.net/publication/348703101/figure/fig5/AS:983057658040324@1611390618742/Graphic-representation-of-the-softmax-activation-function.ppm
-  :alt: Softmax activation function
-  :width: 50%
-  :align: center
-
-  Graphic representation of the softmax activation function.
-  ```
-
-- **Contextualized vector**: The final step in the attention mechanism involves the value vector $V$. After normalizing the attention matrix using softmax, we multiply it with $V$ to produce the output. This multiplication essentially computes a weighted average of the value vectors, where the weights come from the attention scores, i.e., $\text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)$. The result is the *contextualized vector* of the word in the row, where a word vector ($V$) is contextualized by other word vectors through the attention scores. Mathematically, for each word $i$, its contextualized vector is:
-
-  $$c_i = \sum_{j=1}^n \alpha_{ij}v_j$$
-
-  where $\alpha_{ij}$ is the $(i,j)$-th element of the attention matrix after softmax and $v_j$ is the $j$-th row of $V$. It is the weighted average since:
-
-  $$\sum_{j=1}^n \alpha_{ij} = 1$$
-
-  for all $i$, with larger weights being assigned to words that are more relevant to the word in the row.
-
-
-
-### Multi-Head Attention: Multiple Perspectives
-Why do we need multiple attention heads? Consider how you understand language. When reading a sentence, you simultaneously process multiple aspects: grammar, context, emotion, etc. Multi-head attention allows the model to do something similar. Each head can focus on different aspects of the relationships between words.
-
-For example, in the sentence "The old man walked his dog", one attention head might focus on subject-verb relationships ("man-walked"), while another might capture possessive relationships ("man-dog").
-
-### Position Matters: Encoding Sequential Information
-One challenge with processing all words simultaneously is that word order gets lost. In the sentences "Dog bites man" and "Man bites dog", the words are identical, but the meaning is completely different! This is where positional encoding comes in.
-
-Instead of learning word positions from scratch, Transformers use a clever mathematical formula using sine and cosine functions. These functions create unique patterns for each position, allowing the model to understand word order without sacrificing parallel processing.
-
-### The Feed-Forward Networks: Individual Word Processing
-After words have gathered information from their neighbors through attention, each word goes through its own feed-forward neural network. This is like giving each word a chance to "digest" all the information it has collected. The network is intentionally made wider in the middle (the `d_ff` parameter is typically 4 times larger than `d_model`) to allow for more complex processing.
-
-### Layer Normalization: Keeping Things Stable
-Training deep neural networks is like trying to balance a very tall tower – it can become unstable easily. Layer normalization helps stabilize this process by ensuring that the values flowing through the network don't become too large or too small. It's like having a thermostat that keeps the temperature (values) within a comfortable range.
-
-### Putting It All Together
-The beauty of Transformers lies in how these components work together:
-1. Words are first embedded and position-encoded
-2. Self-attention allows words to gather relevant information from each other
-3. Multiple attention heads capture different types of relationships
-4. Feed-forward networks process this gathered information
-5. Layer normalization keeps everything stable
-6. Residual connections ensure that no important information is lost
-
-This architecture has proven so successful that it's now the foundation for models like BERT, GPT, and many others that have revolutionized natural language processing.
-
-## From Sequential to Parallel Processing
-
-Consider this challenge: How can we process a sequence without processing it... sequentially? Our previous models (RNNs, LSTMs) processed tokens one by one, maintaining a hidden state. But this sequential nature had two major drawbacks:
-
-1. Limited parallelization: We had to wait for each step to complete before processing the next token
-2. Difficulty capturing long-range dependencies: Even with LSTM's gating mechanisms, information could still get diluted over long sequences
-
-```{note}
-The Transformer architecture, introduced in the "Attention is All You Need" paper (Vaswani et al., 2017), was revolutionary because it showed that we can process sequences entirely through attention mechanisms, without any recurrence or convolution.
-```
-
-Let's build our intuition about how this works.
-
-## Visual Overview
-
-Before we dive into the implementation, let's visualize the key components:
-
-```{figure} https://builtin.com/sites/www.builtin.com/files/styles/ckeditor_optimize/public/inline-images/Transformer-neural-network-11.png
-:name: transformer-architecture
-:alt: Transformer Architecture
+```{figure} ../figs/transformer-attention.jpg
+:name: transformer-attention
+:alt: Attention Mechanism
+:width: 80%
 :align: center
 
-The Transformer architecture showing encoder and decoder components
+The attention mechanism in transformers.
 ```
 
-## Self-Attention: The Key Innovation
-
-Imagine you're reading a sentence and trying to understand the meaning of each word. Instead of processing words strictly in order, you look at all words simultaneously and figure out how they relate to each other. This is essentially what self-attention does!
-
-### Mathematical Framework
-
-For each position in the sequence, we compute three vectors:
-- Query ($\mathbf{q}$): What information we're looking for
-- Key ($\mathbf{k}$): What information this position offers
-- Value ($\mathbf{v}$): The actual content at this position
-
-These are computed using learned weight matrices:
-
-$$\mathbf{q} = \mathbf{x}W^Q$$
-$$\mathbf{k} = \mathbf{x}W^K$$
-$$\mathbf{v} = \mathbf{x}W^V$$
-
-The attention scores are then computed as:
-
-$$\text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}\left(\frac{\mathbf{Q}\mathbf{K}^T}{\sqrt{d_k}}\right)\mathbf{V}$$
-
-Let's implement this in Python:
-
-```{code-cell} ipython3
-import numpy as np
-import torch
-import torch.nn as nn
-
-class SelfAttention(nn.Module):
-    def __init__(self, d_model):
-        super().__init__()
-        # d_model is the dimension of our input/output vectors
-        self.d_model = d_model
-
-        # These linear layers transform our input into Q, K, V vectors
-        # Input shape: (d_model) -> Output shape: (d_model)
-        self.q_linear = nn.Linear(d_model, d_model)
-        self.k_linear = nn.Linear(d_model, d_model)
-        self.v_linear = nn.Linear(d_model, d_model)
-
-    def forward(self, x):
-        # x shape: (batch_size, seq_len, d_model)
-        batch_size, seq_len, d_model = x.size()
-
-        # Step 1: Create Q, K, V vectors
-        q = self.q_linear(x)  # Shape: (batch_size, seq_len, d_model)
-        k = self.k_linear(x)  # Shape: (batch_size, seq_len, d_model)
-        v = self.v_linear(x)  # Shape: (batch_size, seq_len, d_model)
-
-        # Step 2: Calculate attention scores
-        # matmul(Q, K^T) -> Shape: (batch_size, seq_len, seq_len)
-        scores = torch.matmul(q, k.transpose(-2, -1))
-
-        # Scale the scores to prevent softmax saturation
-        scores = scores / np.sqrt(d_model)
-
-        # Step 3: Apply softmax to get attention weights
-        attention = torch.softmax(scores, dim=-1)
-
-        # Step 4: Multiply attention weights with values
-        # Shape: (batch_size, seq_len, d_model)
-        output = torch.matmul(attention, v)
-        return output
-```
-
-```{tip}
-When implementing self-attention, watch out for the scaling factor $\sqrt{d_k}$. Without it, the dot products can grow large in magnitude, pushing the softmax into regions with small gradients.
-```
-
-## Multi-Head Attention: Parallel Feature Learning
-
-One key insight of Transformers is that a single attention mechanism might be too constraining. Why not let the model attend to different aspects of the sequence simultaneously?
-
-This leads to Multi-Head Attention, where we run several attention mechanisms in parallel:
-
-$$\text{MultiHead}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{Concat}(\text{head}_1, ..., \text{head}_h)W^O$$
-
-where each head is:
-
-$$\text{head}_i = \text{Attention}(\mathbf{Q}W^Q_i, \mathbf{K}W^K_i, \mathbf{V}W^V_i)$$
-
-Let's implement this:
-
-```{code-cell} ipython3
-class MultiHeadAttention(nn.Module):
-    def __init__(self, d_model, num_heads):
-        super().__init__()
-        # Ensure d_model is divisible by num_heads
-        assert d_model % num_heads == 0, "d_model must be divisible by num_heads"
-
-        self.d_model = d_model
-        self.num_heads = num_heads
-        # Split d_model into num_heads pieces
-        self.d_k = d_model // num_heads
-
-        # Linear layers for Q, K, V, and output projections
-        self.q_linear = nn.Linear(d_model, d_model)
-        self.k_linear = nn.Linear(d_model, d_model)
-        self.v_linear = nn.Linear(d_model, d_model)
-        self.out_linear = nn.Linear(d_model, d_model)
-
-    def forward(self, x):
-        batch_size, seq_len, _ = x.size()
-
-        # Step 1: Project input into Q, K, V vectors and split into heads
-        # Original shape: (batch_size, seq_len, d_model)
-        # After view: (batch_size, seq_len, num_heads, d_k)
-        q = self.q_linear(x).view(batch_size, seq_len, self.num_heads, self.d_k)
-        k = self.k_linear(x).view(batch_size, seq_len, self.num_heads, self.d_k)
-        v = self.v_linear(x).view(batch_size, seq_len, self.num_heads, self.d_k)
-
-        # Step 2: Transpose for attention computation
-        # New shape: (batch_size, num_heads, seq_len, d_k)
-        q = q.transpose(1, 2)
-        k = k.transpose(1, 2)
-        v = v.transpose(1, 2)
-
-        # Step 3: Compute attention scores and apply attention
-        scores = torch.matmul(q, k.transpose(-2, -1)) / np.sqrt(self.d_k)
-        attention = torch.softmax(scores, dim=-1)
-        output = torch.matmul(attention, v)
-
-        # Step 4: Reshape and project back
-        # Transpose back to (batch_size, seq_len, num_heads, d_k)
-        output = output.transpose(1, 2)
-        # Combine heads: (batch_size, seq_len, d_model)
-        output = output.contiguous().view(batch_size, seq_len, self.d_model)
-        return self.out_linear(output)
-```
-
-## Position-Aware Processing
-
-One challenge with pure attention-based architectures is that they have no built-in sense of position - they're permutation invariant! The solution? Add position information directly to the input embeddings.
-
-The original Transformer uses sinusoidal position encodings:
-
-$$PE_{(pos,2i)} = \sin(pos/10000^{2i/d_{model}})$$
-$$PE_{(pos,2i+1)} = \cos(pos/10000^{2i/d_{model}})$$
-
-```{code-cell} ipython3
-def positional_encoding(max_seq_len, d_model):
-    pe = torch.zeros(max_seq_len, d_model)
-    position = torch.arange(0, max_seq_len, dtype=torch.float).unsqueeze(1)
-    div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-np.log(10000.0) / d_model))
-
-    pe[:, 0::2] = torch.sin(position * div_term)
-    pe[:, 1::2] = torch.cos(position * div_term)
-    return pe
-```
+To compute the attention between words, the attention head creates three types of vectors---**query, key, and value**---for each word. Each of these vectors are created by a neural network (w/ single linear layer) that takes the input word as input, and outputs another vector.
 
 ```{note}
-The choice of sinusoidal functions is clever because it allows the model to easily attend to relative positions through linear combinations of these position encodings.
+Think of this like a library system: The Query is what you're looking for, the Keys are like book titles, and the Values are the actual content of the books. When you search (Q) for a specific topic, you match it against book titles (K) to find the relevant content (V).
 ```
 
-## Feed-Forward Networks and Layer Normalization
+The query and key vectors are used to compute the attention score, which represents how much attention the model pays to each key word for the query word, with a larger score indicating a stronger attention. For example, in the sentence "The cat sat on the mat because it was tired", a good model should pay more attention to "cat" than "mat" for the word "it". The atttention score computed by the dot product of the query and key vectors.  The score is then normalized by the softmax function, with rescaling by $\sqrt{d_k}$ to prevent the score from becoming too large. More formally, the attention score is computed as:
 
-Between attention layers, Transformers use simple feed-forward networks with a special structure:
+$$
+\text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right),
+$$
 
-$$FFN(x) = \max(0, xW_1 + b_1)W_2 + b_2$$
+where $Q \in \mathbb{R}^{n \times d_k}$ is the query matrix containing $n$ query vectors of dimension $d_k$, $K \in \mathbb{R}^{n \times d_k}$ is the key matrix containing $n$ key vectors of dimension $d_k$, and $V \in \mathbb{R}^{n \times d_v}$ is the value matrix containing $n$ value vectors of dimension $d_v$.
 
-This is implemented as two linear transformations with a ReLU activation in between:
+The normalized attention score is used as a weight for the weghted sum of the value vectors, which results in *the contextualized vector of the query word*. Putting all the pieces together, the attention mechanism is computed as:
 
-```{code-cell} ipython3
-class FeedForward(nn.Module):
-    def __init__(self, d_model, d_ff):
-        super().__init__()
-        self.linear1 = nn.Linear(d_model, d_ff)
-        self.linear2 = nn.Linear(d_ff, d_model)
-        self.relu = nn.ReLU()
+$$
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V,
+$$
 
-    def forward(self, x):
-        return self.linear2(self.relu(self.linear1(x)))
+where $V \in \mathbb{R}^{n \times d_v}$ is the value matrix containing $n$ value vectors of dimension $d_v$. In the original paper on transformers {cite:p}`vaswani2017attention`, the dimension of the query, key, and value vectors are all set to be the same, i.e., $d_k = d_v = d_q = d / h$, where $h$ is the number of attention heads and $d$ is the dimension of the input vector, though this is not a strict requirement.
+
+```{note}
+The output of the attention mechanism is the *contextualized vector*, meaning that the vector for a word can vary depending on other words input to the attention module. This is ideal for language modeling, since the meaning of a word can vary depending on the context, e.g., "bank" can mean "river bank" or "financial institution" depending on the words surrounding it.
 ```
 
-To help training, Transformers use Layer Normalization before each sub-layer:
+### Multi-Head Attention
 
-```{code-cell} ipython3
-class TransformerBlock(nn.Module):
-    def __init__(self, d_model, num_heads, d_ff):
-        super().__init__()
-        self.attention = MultiHeadAttention(d_model, num_heads)
-        self.norm1 = nn.LayerNorm(d_model)
-        self.ff = FeedForward(d_model, d_ff)
-        self.norm2 = nn.LayerNorm(d_model)
+Multi-head attention consists of multiple attention heads to enable a model to pay attentions to multiple aspects of the input sequence. Each attention head can have different parameters and thus produces different "contextualized vectors." These different vector are then concatenated and fed into a feed-forward network to produce the final output.
 
-    def forward(self, x):
-        # Attention with residual connection and layer norm
-        x = x + self.attention(self.norm1(x))
-        # Feed-forward with residual connection and layer norm
-        x = x + self.ff(self.norm2(x))
-        return x
+```{figure} ../figs/transformer-multihead-attention.jpg
+:name: transformer-attention
+:alt: Multi-Head Attention
+:width: 50%
+:align: center
+
+Multi-head attention mechanism.
 ```
 
-## Reflection Questions
+## Layer Normalization
 
-1. How does the parallel nature of Transformers affect their computational efficiency compared to RNNs?
-2. Why might multiple attention heads be better than a single, larger attention mechanism?
-3. How do the residual connections and layer normalization help with training deep Transformer networks?
-4. What are the limitations of the Transformer architecture? When might traditional RNNs still be preferable?
+```{figure} https://miro.medium.com/v2/resize:fit:1400/0*Agdt1zYwfUxXMJGJ
+:name: transformer-layer-normalization
+:alt: Layer Normalization
+:width: 80%
+:align: center
 
-```{tip}
-When implementing Transformers, pay special attention to:
-- Proper scaling in attention computation
-- Correct reshaping for multi-head attention
-- Adding positional encodings before the first layer
-- Using residual connections around each sub-layer
+Layer normalization works by normalizing each individual sample across its features. For each sample, it calculates the mean and standard deviation across all feature dimensions, then uses these statistics to normalize that sample's values.
 ```
 
-## Exercises
+*Layer normalization* is a technique used to stabilize the training of deep neural networks. It mitigates the problem of too large or too small input values, which can cause the network to become unstable. This normalization shifts and scales the input values to prevent this issue. More specifically, the layer normalization is computed as:
 
-1. **Basic Implementation Exercise**
-   Implement a simplified version of self-attention that works with this input:
-   ```python
-   # Your code should handle:
-   batch_size = 2
-   seq_length = 4
-   d_model = 8
-   x = torch.randn(batch_size, seq_length, d_model)
-   ```
+$$
+\text{LayerNorm}(x) = \gamma \frac{x - \mu}{\sigma} + \beta,
+$$
 
-2. **Visualization Exercise**
-   Write code to visualize attention weights using a heatmap:
-   ```python
-   import seaborn as sns
-   import matplotlib.pyplot as plt
+where $\mu$ and $\sigma$ are the mean and standard deviation of the input, $\gamma$ is the scaling factor, and $\beta$ is the shifting factor. The variables $\gamma$ and $\beta$ are learnable parameters that are initialized to 1 and 0, respectively, and are updated during training.
 
-   def plot_attention(attention_weights, words):
-       # Your code here
-       pass
-   ```
+
+## Wiring it all together
+
+### Structure of a Transformer Block
+
+Now, we have all the components to build a transformer block. Let's wire them together.
+
+```{figure} ../figs/transformer-wired-components.jpg
+:name: transformer-block
+:alt: Transformer Block
+:width: 50%
+:align: center
+
+Input flows through multi-head attention, layer normalization, feed-forward networks, and another normalization step.
+```
+
+Let us ignore the residual connection for now. The input is first passed through multi-head attention, followed by layer normalization. Then, the output of the normalization is passed through feed-forward networks and another layer normalization step.
+
+### Residual Connection
+
+```{figure} https://i.sstatic.net/UcJSa.png
+:name: residual-connection
+:alt: Residual Connection
+:width: 30%
+:align: center
+
+Residual connection.
+```
+
+Now, let us consider the *residual connection*.
+A residual connection, also known as a *skip connection*, is a technique used to stabilize the training of deep neural networks. More specifically, let us denote by $f$ the neural network that we want to train, which is the multi-head attention or feed-forward networks in the transformer block. The residual connection is defined as:
+
+$$
+\underbrace{x_{\text{out}}}_{\text{output}} = \underbrace{x_{\text{in}}}_{\text{input}} + \underbrace{f(x_{\text{in}})}_{\text{component}}.
+$$
+
+Note that rather than learning the complete mapping from input to output, the network $f$ learns to model the residual (difference) between them. This is particularly advantageous when the desired transformation approximates an identity mapping, as the network can simply learn to output values near zero.
+
+Residual connections help prevent the vanishing gradient problem.
+Deep learning models like LLMs consist of many layers, which are trained to minimize the loss function ${\cal L}_{\text{loss}}$ with respect to the parameters $\theta$.
+To this end, the gradient of the loss function is computed using the chain rule as
+
+$$
+\frac{\partial {\cal L}_{\text{loss}}}{\partial \theta} = \frac{\partial {\cal L}_{\text{loss}}}{\partial f_L} \cdot \frac{\partial f_L}{\partial f_{L-1}} \cdot \frac{\partial f_{L-1}}{\partial f_{L-2}} \cdot ... \cdot \frac{\partial f_{l+1}}{\partial f_l} \cdot \frac{\partial f_l}{\partial \theta}
+$$
+
+where $f_i$ is the output of the $i$-th layer. The gradient vanishing problem occurs when the individual terms $\frac{\partial f_{i+1}}{\partial f_i}$ are less than 1. As a result, the gradient becomes smaller and smaller as the gradient flows backward through earlier layers.
+By adding the residual connection, the gradient for the individual term becomes:
+
+$$
+\frac{\partial x_{i+1}}{\partial x_i} = 1 + \frac{\partial f_i(x_i)}{\partial x_i}
+$$
+
+Notice the "+1" term, which is the direct path from the input to the output. The chain rule is thus modified as:
+
+$$\left(1 + \frac{\partial f_{L-1}}{\partial x_{L-1}}\right)\left(1 + \frac{\partial f_{L-2}}{\partial x_{L-2}}\right)\left(1 + \frac{\partial f_{L-3}}{\partial x_{L-3}}\right)...$$
+
+When we expand this, we can group terms by their order (how many $\partial f_i$ terms are multiplied together):
+We can write this more concisely using $O_n$ to represent terms of nth order:
+
+$$1 + O_1 + O_2 + O_3 + ...$$
+
+where:
+- $O_1 = \frac{\partial f_{L-1}}{\partial x_{L-1}} + \frac{\partial f_{L-2}}{\partial x_{L-2}} + \frac{\partial f_{L-3}}{\partial x_{L-3}} + ...$
+- $O_2 = \frac{\partial f_{L-1}}{\partial x_{L-1}}\frac{\partial f_{L-2}}{\partial x_{L-2}} + \frac{\partial f_{L-2}}{\partial x_{L-2}}\frac{\partial f_{L-3}}{\partial x_{L-3}} + \frac{\partial f_{L-1}}{\partial x_{L-1}}\frac{\partial f_{L-3}}{\partial x_{L-3}} + ...$
+- $O_3 = \frac{\partial f_{L-1}}{\partial x_{L-1}}\frac{\partial f_{L-2}}{\partial x_{L-2}}\frac{\partial f_{L-3}}{\partial x_{L-3}} + ...$
+
+Without the residual connection, we only have the $O_L$ terms for the network with $L$ layers, which is subject to the gradient vanishing problem. Whereas with the residual connection, we have the lower-order terms like $O_1, O_2, O_3, ...$ for the network with $L$ layers, which is less susceptible to the gradient vanishing problem.
+
+```{admonition} Residual Connection
+:class: tip
+
+Residual connections are a architectural innovation that allows neural networks to be much deeper without degrading performance. It was proposed by He et al. {cite:p}`he2015deep` for image processing from Microsoft Research.
+```
+
+
+```{admonition} Residual connection mitigates gradient explosion
+:class: tip
+
+Residual connections also help prevent gradient explosion, even though this may not be obvious from the chain rule perspective. As shown in {cite:p}`philipp2017exploding`, the residual connection provides an alternative path for gradients to flow through. By distributing gradients between the residual path and the learning component path, the gradient is less likely to explode.
+```
+
+## Other miscellaneous components
+
+### Position embedding
+
+Position embedding is also an interesting component that is used to encode the position of the tokens in the sequence.
+A key limitation of the attention mechanism is that it is *permutation invariant*.
+This means that the order of the input tokens does not matter, e.g., "The cat sat on the mat" and "The mat sat on the cat" are the same.
+To better capture the position information, transformers add to the input token embedding *a position embedding*.
+
+To understand how this works, let us approach from a naive approach.
+Suppose that we have a sequence of $T$ token embeddings, denoted by $x_1, x_2, ..., x_T$, each of which is a $d$-dimensional vector.
+A simple way to encode the position information is to add a position index to each token embedding, i.e.,
+
+$$
+x_t := x_t + \beta t,
+$$
+
+where $t = 1, 2, ..., T$ is the position index of the token in the sequence, and $\beta$ is the step size. This appears to be simple but has a critical problem.
+
+1. **Unbounded**: The position index can be arbitrarily large. When the models see a sequence longer than those in training data, it may suffer since the model will be exposed to a new position index that the model has never seen before.
+2. **Discrete**: The position index is discrete, which means that the model cannot capture the position information in a smooth manner.
+
+Because this naive approach has the problems, let us consider another approach. Let us represent the position index using a binary vector of length $d$. For example, in case of $d=4$, we have the following binary vectors:
+
+$$
+\begin{align*}
+  0: \ \ \ \ \color{orange}{\texttt{0}} \ \ \color{green}{\texttt{0}} \ \ \color{blue}{\texttt{0}} \ \ \color{red}{\texttt{0}} & &
+  8: \ \ \ \ \color{orange}{\texttt{1}} \ \ \color{green}{\texttt{0}} \ \ \color{blue}{\texttt{0}} \ \ \color{red}{\texttt{0}} \\
+  1: \ \ \ \ \color{orange}{\texttt{0}} \ \ \color{green}{\texttt{0}} \ \ \color{blue}{\texttt{0}} \ \ \color{red}{\texttt{1}} & &
+  9: \ \ \ \ \color{orange}{\texttt{1}} \ \ \color{green}{\texttt{0}} \ \ \color{blue}{\texttt{0}} \ \ \color{red}{\texttt{1}} \\
+  2: \ \ \ \ \color{orange}{\texttt{0}} \ \ \color{green}{\texttt{0}} \ \ \color{blue}{\texttt{1}} \ \ \color{red}{\texttt{0}} & &
+  10: \ \ \ \ \color{orange}{\texttt{1}} \ \ \color{green}{\texttt{0}} \ \ \color{blue}{\texttt{1}} \ \ \color{red}{\texttt{0}} \\
+  3: \ \ \ \ \color{orange}{\texttt{0}} \ \ \color{green}{\texttt{0}} \ \ \color{blue}{\texttt{1}} \ \ \color{red}{\texttt{1}} & &
+  11: \ \ \ \ \color{orange}{\texttt{1}} \ \ \color{green}{\texttt{0}} \ \ \color{blue}{\texttt{1}} \ \ \color{red}{\texttt{1}} \\
+  4: \ \ \ \ \color{orange}{\texttt{0}} \ \ \color{green}{\texttt{1}} \ \ \color{blue}{\texttt{0}} \ \ \color{red}{\texttt{0}} & &
+  12: \ \ \ \ \color{orange}{\texttt{1}} \ \ \color{green}{\texttt{1}} \ \ \color{blue}{\texttt{0}} \ \ \color{red}{\texttt{0}} \\
+  5: \ \ \ \ \color{orange}{\texttt{0}} \ \ \color{green}{\texttt{1}} \ \ \color{blue}{\texttt{0}} \ \ \color{red}{\texttt{1}} & &
+  13: \ \ \ \ \color{orange}{\texttt{1}} \ \ \color{green}{\texttt{1}} \ \ \color{blue}{\texttt{0}} \ \ \color{red}{\texttt{1}} \\
+  6: \ \ \ \ \color{orange}{\texttt{0}} \ \ \color{green}{\texttt{1}} \ \ \color{blue}{\texttt{1}} \ \ \color{red}{\texttt{0}} & &
+  14: \ \ \ \ \color{orange}{\texttt{1}} \ \ \color{green}{\texttt{1}} \ \ \color{blue}{\texttt{1}} \ \ \color{red}{\texttt{0}} \\
+  7: \ \ \ \ \color{orange}{\texttt{0}} \ \ \color{green}{\texttt{1}} \ \ \color{blue}{\texttt{1}} \ \ \color{red}{\texttt{1}} & &
+  15: \ \ \ \ \color{orange}{\texttt{1}} \ \ \color{green}{\texttt{1}} \ \ \color{blue}{\texttt{1}} \ \ \color{red}{\texttt{1}} \\
+\end{align*}
+$$
+
+Then, one may use the binary vector as the position embedding as follows:
+
+$$
+x_{t,i} := x_{t,i} + \text{Pos}(t, i),
+$$
+
+where $\text{Pos}(t, i)$ is the position embedding vector of the position index $t$ and the dimension index $i$.
+This representation is good in the sense that it is unbounded. Yet, it is still discrete.
+
+An elegant position embedding, which is used in transformers, is the *sinusoidal position embedding* {footcite:p}`vaswani2017attention`. It appears to be complicated but stay with me for a moment.
+
+$$
+\text{Pos}(t, i) =
+\begin{cases}
+\sin\left(\dfrac{t}{10000^{2i/d}}\right), & \text{if } i \text{ is even} \\
+\cos\left(\dfrac{t}{10000^{2i/d}}\right), & \text{if } i \text{ is odd}
+\end{cases},
+$$
+
+where $i$ is the dimension index of the position embedding vector. This position embedding is added to the input token embedding as:
+
+$$
+x_{t,i} := x_{t,i} + \text{Pos}(t, i),
+$$
+
+It appears to be complicated but it can be seen as a continuous version of the binary position embedding above. To see this, let us plot the position embedding for the first 100 positions.
+
+```{figure} https://kazemnejad.com/img/transformer_architecture_positional_encoding/positional_encoding.png
+:name: transformer-position-embedding
+:alt: Transformer Position Embedding
+:width: 80%
+:align: center
+
+The position embedding. The image is taken from https://kazemnejad.com/blog/transformer_architecture_positional_encoding/
+```
+
+We note that, just like the binary position embedding, the sinusoidal position embedding also exhibits the alternating pattern (vertically) with frequency increasing as the dimension index increases (horizontal axis). Additionally, the sinusoidal position embedding is continuous, which means that the model can capture the position information in a smooth manner.
+
+Another key property of the sinusoidal position embedding is that the dot similarity between the two position embedding vectors represent the distance between the two positions, regardless of the position index.
+
+```{figure} https://kazemnejad.com/img/transformer_architecture_positional_encoding/time-steps_dot_product.png
+
+:name: transformer-position-embedding-similarity
+:alt: Transformer Position Embedding Similarity
+:width: 80%
+:align: center
+
+The dot similarity between the two position embedding vectors represent the distance between the two positions, regardless of the position index. The image is taken from https://kazemnejad.com/blog/transformer_architecture_positional_encoding/
+```
+
+
+```{admonition} Why additive position embedding?
+:class: tip
+
+The sinusoidal position embedding is additive, which alter the token embedding. Alternatively, one may concatenate, instead of adding, the position embedding to the token embedding, i.e., $x_{t,i} := [x_{t,i}; \text{Pos}(t, i)]$. This makes it easier for a model to distinguish the position information from the token information. So why not use the concatenation?
+
+One reason is that the concatenation requires a larger embedding dimension, which increases the number of parameters in the model.
+Instead, adding the position embedding creates an interesting effect in the attention mechanism.
+Interested readers can check out [this Reddit post](https://www.reddit.com/r/MachineLearning/comments/cttefo/comment/exs7d08/?utm_source=reddit&utm_medium=web2x&context=3).
+
+```
+
+```{footbibliography}
+:style: unsrt
+:filter: docname in docnames
+```
