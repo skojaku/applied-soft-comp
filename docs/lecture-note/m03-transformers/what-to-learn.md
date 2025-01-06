@@ -2,10 +2,7 @@
 
 ## What to learn in this module
 
-In this module, we will learn about language models - neural networks that can understand and generate human language. We will learn:
-- Recurrent Neural Networks (RNNs) for processing sequential text data
-- Long-Short Term Memory (LSTM) networks for capturing long-range dependencies
-- The Attention mechanism for focusing on relevant parts of text
+In this module, we will learn about transformers - a modern architecture that revolutionized NLP. We will learn:
 - Transformers architecture that revolutionized NLP
 - BERT and its bidirectional understanding of context
 - SentenceTransformers for generating sentence embeddings
