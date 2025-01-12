@@ -371,7 +371,7 @@ The position embedding. The image is taken from https://kazemnejad.com/blog/tran
 
 We note that, just like the binary position embedding, the sinusoidal position embedding also exhibits the alternating pattern (vertically) with frequency increasing as the dimension index increases (horizontal axis). Additionally, the sinusoidal position embedding is continuous, which means that the model can capture the position information in a smooth manner.
 
-Another key property of the sinusoidal position embedding is that the dot similarity between the two position embedding vectors represent the distance between the two positions, regardless of the position index.
+Another key property of the sinusoidal position embedding is that the dot similarity between the two position embedding vectors represent the similarity between the two positions, regardless of the position index.
 
 ```{figure} https://kazemnejad.com/img/transformer_architecture_positional_encoding/time-steps_dot_product.png
 
@@ -394,9 +394,19 @@ Instead, adding the position embedding creates an interesting effect in the atte
 Interested readers can check out [this Reddit post](https://www.reddit.com/r/MachineLearning/comments/cttefo/comment/exs7d08/?utm_source=reddit&utm_medium=web2x&context=3).
 ```
 
-### Masked Multi-Head Attention
+```{admonition} Absolute vs Relative Position Embedding
+:class: tip
 
-When training a transformer model for generation
+Absolute position embedding is the one we discussed above, where each position is represented by a unique vector.
+On the other hand, relative position embedding represents the position difference between two positions, rather than the absolute position {footcite}`shaw2018self`.
+The relative position embedding can be implemented by adding a learnable scalar to the unnormalized attention scores before softmax operation {footcite}`raffel2020exploring`, i.e.,
+
+$$
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T + B}{\sqrt{d_k}}\right)V
+$$
+
+where $B$ is a learnable offset matrix that is added to the unnormalized attention scores. The matrix $B$ is a function of the position difference between the query and key, i.e., $B = f(i-j)$, where $i$ and $j$ are the position indices of the query and key, respectively. Such a formulation is useful when the model needs to capture the relative position between two tokens.
+```
 
 
 ```{footbibliography}

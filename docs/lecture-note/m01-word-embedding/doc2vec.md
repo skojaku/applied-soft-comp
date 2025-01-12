@@ -14,6 +14,7 @@ kernelspec:
 
 ## Doc2Vec Model
 
+
 Doc2Vec {footcite}`le2014distributed` extends word2vec by learning document vectors alongside word vectors. For a document $d$ with words $w_1, w_2, ..., w_n$, it learns:
 - Document vector $v_d \in \mathbb{R}^m$
 - Word vectors $v_w \in \mathbb{R}^m$

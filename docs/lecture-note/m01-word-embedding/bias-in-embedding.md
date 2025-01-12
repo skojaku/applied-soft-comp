@@ -10,7 +10,8 @@ kernelspec:
   name: python3
 ---
 
-## Bias in Word Embeddings
+
+# Bias in Word Embeddings
 
 Word embeddings can capture and reinforce societal biases from their training data through the geometric relationships between word vectors. These relationships often reflect stereotypes about gender, race, age and other social factors. We'll examine how semantic axes help analyze gender bias in job-related terms, showing both the benefits and risks of word embeddings capturing these real-world associations {footcite}`bolukbasi2016debiasing`.
 
