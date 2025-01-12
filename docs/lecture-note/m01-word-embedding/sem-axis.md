@@ -14,6 +14,7 @@ kernelspec:
 
 ## Motivation and Background
 
+
 SemAxis is a framework for analyzing word semantics in vector spaces by defining semantic axes between pairs of antonymous words {footcite}`an2018semaxis`. For example, we can create a "soft-hard" axis and measure how other words align with this dimension. This allows us to capture how word meanings shift across different domains - the word "soft" may align differently with this axis when used in product reviews versus sports commentary. By leveraging word embeddings and semantic axes, SemAxis provides a systematic way to characterize these domain-specific semantic variations.
 
 ## Core Concept: Semantic Axes

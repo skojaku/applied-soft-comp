@@ -27,23 +27,31 @@ For those unfamiliar with programming in Python, there are several online tutori
 
 - Assignemnts will be distributed, collected and graded through GitHub Classroom, an educational infrastructure for coding assignments. The instructor will distribute the links to the assignment to the students, and students will submit their answers through GitHub Classroom. Here is how to submit your assignment: (https://youtu.be/YEp942EbggQ)
 
+## Building computing environment
 
-## Trouble shooting
+This course involves coding in Python and we will need to install some packages that are not pre-installed on Google Colab or your local machine.
 
-### Cannot plot a graph with igraph on Google Colab
 
-Google Colab has many packages pre-installed. However, they do not include some pacages for network analysis like `igraph` and `graph-tool`.
+### Local machine
 
-**Installing igraph**
-Create a cell on top of the notebook and run the following code to install the igraph.
+A recommended way to install the packages is to use anaconda or miniconda. Follow the instructions here: https://github.com/conda-forge/miniforge to set up.
+
+Then, you can install the packages by running the following command:
+
 ```
-!sudo apt install libcairo2-dev pkg-config python3-dev
-!pip install pycairo cairocffi
-!pip install igraph
+mamba create -n applsoftcomp -c bioconda -c nvidia -c pytorch -c pyg python=3.11 torchvision torchaudio snakemake graph-tool scikit-learn numpy numba scipy pandas polars networkx seaborn matplotlib gensim ipykernel tqdm black faiss pyg python-igraph transformers pytorch-lightning jupytext jupyter-book nltk bokeh -y
 ```
 
-**Installing graph-tool**
-Create a cell on top of the notebook and run the following code to install the graph-tool.
+### Using Google Colab
+
+Google Colab is probably an easier way to set up the enviroment, though it may take some time to install the packages everytime you start a new session.
+
+```
+!pip install networkx gensim transformers pytorch-lightning tqdm torch_geometric nltk bokeh faiss-cpu
+```
+
+And install graph-tool as follows:
+
 ```
 !wget https://downloads.skewed.de/skewed-keyring/skewed-keyring_1.0_all_$(lsb_release -s -c).deb
 !dpkg -i skewed-keyring_1.0_all_$(lsb_release -s -c).deb
@@ -56,4 +64,44 @@ Create a cell on top of the notebook and run the following code to install the g
 !apt install libcairo2-dev pkg-config python3-dev
 !pip install --force-reinstall pycairo
 !pip install zstandar
-````
+```
+
+Finally, install igraph as follows:
+```
+!sudo apt install libcairo2-dev pkg-config python3-dev
+!pip install pycairo cairocffi
+!pip install igraph
+```
+
+## Trouble shooting
+
+### Imcompatibility issue between gensim and scipy
+
+gensim may not be compatible with the latest version of scipy. If you encounter an error, you can try to install the older version of scipy.
+
+```
+mamba install scipy=1.12.0
+```
+
+If this does not work, you can fix the issue by manually editting the gensim code (just one line). If you are using mac or linux, it is a piece of cake.
+
+```
+sed -i 's/from scipy.linalg import get_blas_funcs, triu/from scipy.linalg import get_blas_funcs\nfrom scipy.sparse import triu/' ~/miniforge3/envs/applsoftcomp/lib/python3.11/site-packages/gensim/matutils.py
+```
+
+Otherwise, you can instead follow the following instructions to amend the package.
+
+1. Open the matutils.py file ~/miniforge3/envs/applsoftcomp/lib/python3.11/site-packages/gensim/matutils.py (you can use any text editor):
+
+2. Locate this line:
+```python
+from scipy.linalg import get_blas_funcs, triu
+```
+
+3. Replace it with these two lines:
+```python
+from scipy.linalg import get_blas_funcs
+from scipy.sparse import triu
+```
+
+4. Save the file and exit
