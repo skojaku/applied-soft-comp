@@ -364,6 +364,13 @@ Let us test the model on the test dataset.
 
 We see that LeNet-1 achieves a very high accuracy on the test dataset, despite the fact that it is a very simple model.
 
+
+## 🔥Exercise🔥
+
+- Try training the model by yourself using [Notebook](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/lenet.ipynb)
+- Hand draw a digit and see if the model can predict it correctly.
+- If it does not work, think about why it does not work and how you can improve the model.
+
 ```{footbibliography}
 :style: unsrt
 :filter: docname in docnames
