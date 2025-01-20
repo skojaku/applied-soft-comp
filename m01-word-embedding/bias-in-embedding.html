@@ -1,0 +1,932 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Bias in Word Embeddings &#8212; Applied Soft Computing</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'm01-word-embedding/bias-in-embedding';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Doc2Vec: From Words to Documents" href="doc2vec.html" />
+    <link rel="prev" title="Understanding SemAxis: Semantic Axes in Word Vector Spaces" href="sem-axis.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../home.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.jpg" class="logo__image only-light" alt="Applied Soft Computing - Home"/>
+    <script>document.write(`<img src="../_static/logo.jpg" class="logo__image only-dark" alt="Applied Soft Computing - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../home.html">
+                    Welcome to SSIE 541/441 Applied Soft Computing
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Intro</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../intro/why-applied-soft-computing.html">Why applied soft computing?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/setup.html">Set up</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/deliverables.html">Deliverables</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Word and Document Embeddings</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="what-to-learn.html">Module 1: Word Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tf-idf.html">Teaching computers how to understand words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="word2vec.html">word2vec: a small model with a big idea</a></li>
+<li class="toctree-l1"><a class="reference internal" href="word2vec_plus.html">GloVe and FastText: Building on Word2Vec’s Foundation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sem-axis.html">Understanding SemAxis: Semantic Axes in Word Vector Spaces</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Bias in Word Embeddings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="doc2vec.html">Doc2Vec: From Words to Documents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="summary.html">Summary</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Recurrent Neural Networks</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/what-to-learn.html">Module 2: Language Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/reccurrent-neural-net.html">Recurrent Neural Network (RNN)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/lstm.html">Long Short-Term Memory (LSTM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/elmo.html">Embedding from Language Models (ELMo)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/seq2seq.html">Sequence-to-Sequence Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/summary.html">Summary</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Transformers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/what-to-learn.html">Module 3: Transformers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/transformers.html">Transformers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/bert.html">Bidirectional Encoder Representations from Transformers (BERT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/sentence-bert.html">Sentence-BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/gpt.html">Generative Pre-trained Transformer (GPT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/t5.html">Text-to-Text Transfer Transformer (T5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/summary.html">Summary</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Images</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/what-to-learn.html">Module 3: Image Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/pen-and-paper.html">Pen and paper exercises</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/image-processing.html">Preliminaries: Image Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/cnn.html">From Traditional Image Processing to Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/lenet.html">LeNet and LeNet-5: Pioneering CNN Architectures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/alexnet.html">AlexNet: A Breakthrough in Deep Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/vgg.html">VGGNet - A Deep Convolutional Neural Network for Image Recognition</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Graphs</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/what-to-learn.html">Module 4: Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/pen-and-paper.html">Pen and paper exercises</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/spectral-embedding.html">Spectral Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/graph-embedding-w-word2vec.html">Graph embedding with word2vec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/spectral-vs-neural-embedding.html">Spectral vs Neural Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/from-image-to-graph.html">From Image to Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/graph-convolutional-network.html">Graph Convolutional Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/popular-gnn.html">Popular Graph Neural Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/appendix.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/software.html">Software for Network Embedding</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/skojaku/applied-soft-comp/gh-pages?urlpath=tree/docs/lecture-note/m01-word-embedding/bias-in-embedding.md" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="../_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="initThebeSBT()"
+  class="btn btn-sm btn-launch-thebe dropdown-item"
+  title="Launch Thebe"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-play"></i>
+  </span>
+<span class="btn__text-container">Live Code</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/skojaku/applied-soft-comp" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/skojaku/applied-soft-comp/issues/new?title=Issue%20on%20page%20%2Fm01-word-embedding/bias-in-embedding.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/m01-word-embedding/bias-in-embedding.ipynb" target="_blank"
+   class="btn btn-sm btn-download-notebook-button dropdown-item"
+   title="Download notebook file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="../_sources/m01-word-embedding/bias-in-embedding.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Bias in Word Embeddings</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stereotype-analogies">Stereotype Analogies</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#indirect-bias-analysis">Indirect Bias Analysis</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="bias-in-word-embeddings">
+<h1>Bias in Word Embeddings<a class="headerlink" href="#bias-in-word-embeddings" title="Link to this heading">#</a></h1>
+<p>Word embeddings can capture and reinforce societal biases from their training data through the geometric relationships between word vectors. These relationships often reflect stereotypes about gender, race, age and other social factors. We’ll examine how semantic axes help analyze gender bias in job-related terms, showing both the benefits and risks of word embeddings capturing these real-world associations <a class="footnote-reference brackets" href="#footcite-bolukbasi2016debiasing" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.</p>
+<p>SemAxis is a powerful tool to analyze gender bias in word embeddings by measuring word alignments along semantic axes <a class="footnote-reference brackets" href="#footcite-kwak2021frameaxis" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>. Using antonym pairs like “she-he” as poles, it quantifies gender associations in words on a scale from -1 to 1, where positive values indicate feminine associations and negative values indicate masculine as ones.</p>
+<p>Let’s start with a simple example of analyzing gender bias in occupations.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gensim.downloader</span><span class="w"> </span><span class="kn">import</span> <span class="n">load</span>
+
+<span class="c1"># Load word vectors</span>
+<span class="n">vectors</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s1">&#39;word2vec-google-news-300&#39;</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_bias</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">microframe</span><span class="p">):</span>
+    <span class="n">word_vector</span> <span class="o">=</span> <span class="n">vectors</span><span class="p">[</span><span class="n">word</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">word_vector</span><span class="p">,</span> <span class="n">microframe</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">word_vector</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">microframe</span><span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">analyze</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">pos_word</span><span class="p">,</span> <span class="n">neg_word</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">word</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">vectors</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="n">microframe</span> <span class="o">=</span> <span class="n">vectors</span><span class="p">[</span><span class="n">pos_word</span><span class="p">]</span> <span class="o">-</span> <span class="n">vectors</span><span class="p">[</span><span class="n">neg_word</span><span class="p">]</span>
+    <span class="n">bias</span> <span class="o">=</span> <span class="n">compute_bias</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">microframe</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">bias</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We will use the following occupations:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Occupations from the paper</span>
+<span class="n">she_occupations</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;homemaker&quot;</span><span class="p">,</span> <span class="s2">&quot;nurse&quot;</span><span class="p">,</span> <span class="s2">&quot;receptionist&quot;</span><span class="p">,</span> <span class="s2">&quot;librarian&quot;</span><span class="p">,</span> <span class="s2">&quot;socialite&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;hairdresser&quot;</span><span class="p">,</span> <span class="s2">&quot;nanny&quot;</span><span class="p">,</span> <span class="s2">&quot;bookkeeper&quot;</span><span class="p">,</span> <span class="s2">&quot;stylist&quot;</span><span class="p">,</span> <span class="s2">&quot;housekeeper&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">he_occupations</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;maestro&quot;</span><span class="p">,</span> <span class="s2">&quot;skipper&quot;</span><span class="p">,</span> <span class="s2">&quot;protege&quot;</span><span class="p">,</span> <span class="s2">&quot;philosopher&quot;</span><span class="p">,</span> <span class="s2">&quot;captain&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;architect&quot;</span><span class="p">,</span> <span class="s2">&quot;financier&quot;</span><span class="p">,</span> <span class="s2">&quot;warrior&quot;</span><span class="p">,</span> <span class="s2">&quot;broadcaster&quot;</span><span class="p">,</span> <span class="s2">&quot;magician&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;boss&quot;</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We measure the gender bias in these occupations by measuring how they align with the “she-he” axis.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Analyze gender bias in occupations</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Gender Bias in Occupations (she-he axis):&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">She-associated occupations:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">occupation</span> <span class="ow">in</span> <span class="n">she_occupations</span><span class="p">:</span>
+    <span class="n">bias</span> <span class="o">=</span> <span class="n">analyze</span><span class="p">(</span><span class="n">occupation</span><span class="p">,</span> <span class="s2">&quot;she&quot;</span><span class="p">,</span> <span class="s2">&quot;he&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">occupation</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">bias</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">He-associated occupations:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">occupation</span> <span class="ow">in</span> <span class="n">he_occupations</span><span class="p">:</span>
+    <span class="n">bias</span> <span class="o">=</span> <span class="n">analyze</span><span class="p">(</span><span class="n">occupation</span><span class="p">,</span> <span class="s2">&quot;she&quot;</span><span class="p">,</span> <span class="s2">&quot;he&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">occupation</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">bias</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Gender Bias in Occupations (she-he axis):
+
+She-associated occupations:
+homemaker: 0.360
+nurse: 0.333
+receptionist: 0.329
+librarian: 0.300
+socialite: 0.310
+hairdresser: 0.307
+nanny: 0.287
+bookkeeper: 0.264
+stylist: 0.252
+housekeeper: 0.260
+
+He-associated occupations:
+maestro: -0.203
+skipper: -0.177
+protege: -0.148
+philosopher: -0.155
+captain: -0.130
+architect: -0.151
+financier: -0.145
+warrior: -0.120
+broadcaster: -0.124
+magician: -0.110
+boss: -0.090
+</pre></div>
+</div>
+</div>
+</div>
+<section id="stereotype-analogies">
+<h2>Stereotype Analogies<a class="headerlink" href="#stereotype-analogies" title="Link to this heading">#</a></h2>
+<p>Since word embeddings capture semantic relationships learned from large text corpora, they inevitably encode societal biases and stereotypes present in that training data. We can leverage this property to identify pairs of words that exhibit stereotypical gender associations. By measuring how different words align with the gender axis (she-he), we can find pairs where one word shows a strong feminine bias while its counterpart shows a masculine bias, revealing ingrained stereotypes in language use.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Stereotype analogies from the paper</span>
+<span class="n">stereotype_pairs</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s2">&quot;sewing&quot;</span><span class="p">,</span> <span class="s2">&quot;carpentry&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;nurse&quot;</span><span class="p">,</span> <span class="s2">&quot;surgeon&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;softball&quot;</span><span class="p">,</span> <span class="s2">&quot;baseball&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;cosmetics&quot;</span><span class="p">,</span> <span class="s2">&quot;pharmaceuticals&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;vocalist&quot;</span><span class="p">,</span> <span class="s2">&quot;guitarist&quot;</span><span class="p">)</span>
+<span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Analyzing Gender Stereotype Pairs:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">word1</span><span class="p">,</span> <span class="n">word2</span> <span class="ow">in</span> <span class="n">stereotype_pairs</span><span class="p">:</span>
+    <span class="n">bias1</span> <span class="o">=</span> <span class="n">analyze</span><span class="p">(</span><span class="n">word1</span><span class="p">,</span> <span class="s2">&quot;she&quot;</span><span class="p">,</span> <span class="s2">&quot;he&quot;</span><span class="p">)</span>
+    <span class="n">bias2</span> <span class="o">=</span> <span class="n">analyze</span><span class="p">(</span><span class="n">word2</span><span class="p">,</span> <span class="s2">&quot;she&quot;</span><span class="p">,</span> <span class="s2">&quot;he&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">word1</span><span class="si">}</span><span class="s2"> vs </span><span class="si">{</span><span class="n">word2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">word1</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">bias1</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">word2</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">bias2</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Analyzing Gender Stereotype Pairs:
+
+sewing vs carpentry
+sewing: 0.302
+carpentry: -0.028
+
+nurse vs surgeon
+nurse: 0.333
+surgeon: -0.048
+
+softball vs baseball
+softball: 0.260
+baseball: -0.066
+
+cosmetics vs pharmaceuticals
+cosmetics: 0.331
+pharmaceuticals: -0.011
+
+vocalist vs guitarist
+vocalist: 0.140
+guitarist: -0.041
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="indirect-bias-analysis">
+<h2>Indirect Bias Analysis<a class="headerlink" href="#indirect-bias-analysis" title="Link to this heading">#</a></h2>
+<p>Indirect bias occurs when seemingly neutral words or concepts become associated with gender through their relationships with other words. For example, while “softball” and “football” are not inherently gendered terms, they may show gender associations in word embeddings due to how they’re used in language and society.</p>
+<p>We can detect indirect bias by:</p>
+<ol class="arabic simple">
+<li><p>Identifying word pairs that form a semantic axis (e.g., softball-football)</p></li>
+<li><p>Measuring how other words align with this axis</p></li>
+<li><p>Examining if alignment with this axis correlates with gender bias</p></li>
+</ol>
+<p>This reveals how gender stereotypes can be encoded indirectly through word associations, even when the words themselves don’t explicitly reference gender.</p>
+<p>Let’s see how this works in practice. We first measure the gender bias of the following words:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Words associated with softball-football axis</span>
+<span class="n">softball_associations</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;pitcher&quot;</span><span class="p">,</span> <span class="s2">&quot;bookkeeper&quot;</span><span class="p">,</span> <span class="s2">&quot;receptionist&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nurse&quot;</span><span class="p">,</span> <span class="s2">&quot;waitress&quot;</span>
+<span class="p">]</span>
+
+<span class="n">football_associations</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;footballer&quot;</span><span class="p">,</span> <span class="s2">&quot;businessman&quot;</span><span class="p">,</span> <span class="s2">&quot;pundit&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;maestro&quot;</span><span class="p">,</span> <span class="s2">&quot;cleric&quot;</span>
+<span class="p">]</span>
+
+<span class="c1"># Analyze bias along both gender and sports axes</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="c1"># Calculate biases for all words</span>
+<span class="n">gender_biases</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">sports_biases</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">words</span> <span class="o">=</span> <span class="n">softball_associations</span> <span class="o">+</span> <span class="n">football_associations</span>
+
+<span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">:</span>
+    <span class="n">gender_bias</span> <span class="o">=</span> <span class="n">analyze</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="s2">&quot;she&quot;</span><span class="p">,</span> <span class="s2">&quot;he&quot;</span><span class="p">)</span>
+    <span class="n">sports_bias</span> <span class="o">=</span> <span class="n">analyze</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="s2">&quot;softball&quot;</span><span class="p">,</span> <span class="s2">&quot;football&quot;</span><span class="p">)</span>
+    <span class="n">gender_biases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gender_bias</span><span class="p">)</span>
+    <span class="n">sports_biases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sports_bias</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s plot the results:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create scatter plot</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">gender_biases</span><span class="p">,</span> <span class="n">sports_biases</span><span class="p">)</span>
+
+<span class="c1"># Add labels for each point</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">word</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">words</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="p">(</span><span class="n">gender_biases</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sports_biases</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Gender Bias (she-he)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sports Bias (softball-football)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Indirect Bias Analysis: Gender vs Sports&#39;</span><span class="p">)</span>
+
+<span class="c1"># Add grid for better readability</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Print numerical results</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Indirect Bias Analysis (Numerical Results):&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">word</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">words</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">word</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Gender bias: </span><span class="si">{</span><span class="n">gender_biases</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sports bias: </span><span class="si">{</span><span class="n">sports_biases</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/c1bfb91f253fa754bd802d6b74ee198695a2a3147648b40d79ba4ebd695038fb.png" src="../_images/c1bfb91f253fa754bd802d6b74ee198695a2a3147648b40d79ba4ebd695038fb.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Indirect Bias Analysis (Numerical Results):
+
+pitcher:
+Gender bias: 0.075
+Sports bias: 0.270
+
+bookkeeper:
+Gender bias: 0.264
+Sports bias: 0.195
+
+receptionist:
+Gender bias: 0.329
+Sports bias: 0.159
+
+nurse:
+Gender bias: 0.333
+Sports bias: 0.079
+
+waitress:
+Gender bias: 0.342
+Sports bias: 0.163
+
+footballer:
+Gender bias: -0.049
+Sports bias: -0.275
+
+businessman:
+Gender bias: -0.166
+Sports bias: -0.174
+
+pundit:
+Gender bias: -0.097
+Sports bias: -0.170
+
+maestro:
+Gender bias: -0.203
+Sports bias: -0.175
+
+cleric:
+Gender bias: -0.016
+Sports bias: -0.147
+</pre></div>
+</div>
+</div>
+</div>
+<section id="exercise">
+<h3>Exercise<a class="headerlink" href="#exercise" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Stereotype Analysis</strong></p>
+<ul class="simple">
+<li><p>Question: Which analogies reveal societal stereotypes?</p></li>
+<li><p>Task: Create new analogy pairs and validate them against human judgments</p></li>
+<li><p>Analysis: Compare stereotypical vs. definitional gender associations</p></li>
+</ul>
+</li>
+<li><p><strong>Indirect Bias Discovery</strong></p>
+<ul class="simple">
+<li><p>Question: How do seemingly neutral word pairs encode gender bias?</p></li>
+<li><p>Task: Find new word pairs like softball-football that show indirect bias</p></li>
+<li><p>Analysis: Measure correlation between direct and indirect bias</p></li>
+</ul>
+</li>
+</ol>
+<div class="docutils container" id="id3">
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="footcite-bolukbasi2016debiasing" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Tolga Bolukbasi, Kai-Wei Chang, James Zou, Venkatesh Saligrama, and Adam Kalai. Man is to computer programmer as woman is to homemaker? debiasing word embeddings. In <em>Proceedings of the 30th International Conference on Neural Information Processing Systems</em>, NIPS’16, 4356–4364. Red Hook, NY, USA, 2016. Curran Associates Inc.</p>
+</aside>
+<aside class="footnote brackets" id="footcite-kwak2021frameaxis" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<p>Haewoon Kwak, Jisun An, Elise Jing, and Yong-Yeol Ahn. Frameaxis: characterizing microframe bias and intensity with word embedding. <em>PeerJ Computer Science</em>, 7:e644, July 2021. URL: <a class="reference external" href="https://doi.org/10.7717/peerj-cs.644">https://doi.org/10.7717/peerj-cs.644</a>, <a class="reference external" href="https://doi.org/10.7717/peerj-cs.644">doi:10.7717/peerj-cs.644</a>.</p>
+</aside>
+</aside>
+</div>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "skojaku/applied-soft-comp",
+            ref: "gh-pages",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./m01-word-embedding"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="sem-axis.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Understanding SemAxis: Semantic Axes in Word Vector Spaces</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="doc2vec.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Doc2Vec: From Words to Documents</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stereotype-analogies">Stereotype Analogies</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#indirect-bias-analysis">Indirect Bias Analysis</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Sadamori Kojaku
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,789 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>From Traditional Image Processing to Learning &#8212; Applied Soft Computing</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'm04-image-processing/cnn';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="LeNet and LeNet-5: Pioneering CNN Architectures" href="lenet.html" />
+    <link rel="prev" title="Preliminaries: Image Processing" href="image-processing.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../home.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.jpg" class="logo__image only-light" alt="Applied Soft Computing - Home"/>
+    <script>document.write(`<img src="../_static/logo.jpg" class="logo__image only-dark" alt="Applied Soft Computing - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../home.html">
+                    Welcome to SSIE 541/441 Applied Soft Computing
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Intro</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../intro/why-applied-soft-computing.html">Why applied soft computing?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/setup.html">Set up</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/deliverables.html">Deliverables</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Word and Document Embeddings</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/what-to-learn.html">Module 1: Word Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/tf-idf.html">Teaching computers how to understand words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/word2vec.html">word2vec: a small model with a big idea</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/word2vec_plus.html">GloVe and FastText: Building on Word2Vec’s Foundation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/sem-axis.html">Understanding SemAxis: Semantic Axes in Word Vector Spaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/bias-in-embedding.html">Bias in Word Embeddings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/doc2vec.html">Doc2Vec: From Words to Documents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/summary.html">Summary</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Recurrent Neural Networks</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/what-to-learn.html">Module 2: Language Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/reccurrent-neural-net.html">Recurrent Neural Network (RNN)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/lstm.html">Long Short-Term Memory (LSTM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/elmo.html">Embedding from Language Models (ELMo)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/seq2seq.html">Sequence-to-Sequence Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/summary.html">Summary</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Transformers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/what-to-learn.html">Module 3: Transformers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/transformers.html">Transformers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/bert.html">Bidirectional Encoder Representations from Transformers (BERT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/sentence-bert.html">Sentence-BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/gpt.html">Generative Pre-trained Transformer (GPT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/t5.html">Text-to-Text Transfer Transformer (T5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/summary.html">Summary</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Images</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="what-to-learn.html">Module 3: Image Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pen-and-paper.html">Pen and paper exercises</a></li>
+<li class="toctree-l1"><a class="reference internal" href="image-processing.html">Preliminaries: Image Processing</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">From Traditional Image Processing to Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lenet.html">LeNet and LeNet-5: Pioneering CNN Architectures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alexnet.html">AlexNet: A Breakthrough in Deep Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vgg.html">VGGNet - A Deep Convolutional Neural Network for Image Recognition</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Graphs</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/what-to-learn.html">Module 4: Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/pen-and-paper.html">Pen and paper exercises</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/spectral-embedding.html">Spectral Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/graph-embedding-w-word2vec.html">Graph embedding with word2vec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/spectral-vs-neural-embedding.html">Spectral vs Neural Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/from-image-to-graph.html">From Image to Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/graph-convolutional-network.html">Graph Convolutional Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/popular-gnn.html">Popular Graph Neural Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/appendix.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/software.html">Software for Network Embedding</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/skojaku/applied-soft-comp/gh-pages?urlpath=tree/docs/lecture-note/m04-image-processing/cnn.md" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="../_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="initThebeSBT()"
+  class="btn btn-sm btn-launch-thebe dropdown-item"
+  title="Launch Thebe"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-play"></i>
+  </span>
+<span class="btn__text-container">Live Code</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/skojaku/applied-soft-comp" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/skojaku/applied-soft-comp/issues/new?title=Issue%20on%20page%20%2Fm04-image-processing/cnn.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/m04-image-processing/cnn.ipynb" target="_blank"
+   class="btn btn-sm btn-download-notebook-button dropdown-item"
+   title="Download notebook file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="../_sources/m04-image-processing/cnn.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>From Traditional Image Processing to Learning</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#building-block-of-cnns">Building block of CNNs</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#convolutional-layer">Convolutional Layer</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stride-and-padding">Stride and Padding</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pooling-layer">Pooling Layer</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="from-traditional-image-processing-to-learning">
+<h1>From Traditional Image Processing to Learning<a class="headerlink" href="#from-traditional-image-processing-to-learning" title="Link to this heading">#</a></h1>
+<p>Image is a 2D matrix that can be extremely large. For example, a 1024x1024 image has 1,048,576 pixels.
+Processing such a high-dimensional data with neural networks requires a large number of parameters, the prohibitive computational cost, and an enormous dataset for training.</p>
+<p>Convolutional Neural Networks (CNNs) were developed to address this key limitation of fully connected networks by leveraging convolution operation that leverages the local connectivity. Namely, instead of processing the entire image, CNN only processes a small region of the image at a time, and progressively integrates the information from the local regions to form a global representation. Here, we will first introduce the building blocks of CNNs, and then discuss how CNNs are built upon these blocks.</p>
+<section id="building-block-of-cnns">
+<h2>Building block of CNNs<a class="headerlink" href="#building-block-of-cnns" title="Link to this heading">#</a></h2>
+<section id="convolutional-layer">
+<h3>Convolutional Layer<a class="headerlink" href="#convolutional-layer" title="Link to this heading">#</a></h3>
+<p>At the heart of Convolutional Neural Networks (CNNs) lies a remarkably elegant operation called <em>convolution</em>. Imagine sliding a small window, called <em>a kernel or filter</em>, across an image. At each position, we perform a simple multiplication and addition operation between the kernel values and the overlapping image pixels. This fundamental operation allows CNNs to automatically learn and detect important visual features.</p>
+<figure class="align-default" id="convolution">
+<a class="reference internal image-reference" href="https://anhreynolds.com/img/cnn.png"><img alt="https://anhreynolds.com/img/cnn.png" src="https://anhreynolds.com/img/cnn.png" style="width: 100%;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 50 </span><span class="caption-text">Convolution operation. The kernel slides across the input image and performs the multiplication and addition operation at each position. The result is a feature map that represents the detected features.
+Image taken from <a class="reference external" href="https://anhreynolds.com/blogs/cnn.html">https://anhreynolds.com/blogs/cnn.html</a></span><a class="headerlink" href="#convolution" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>Let’s understand this mathematically. For a single-channel input (like a grayscale image), the 2D convolution operation can be expressed as:</p>
+<div class="math notranslate nohighlight">
+\[
+(I * K)_{i,j} = \sum_{m=0}^{L-1}\sum_{n=0}^{L-1} I_{i+m,j+n} \cdot K_{m,n}
+\]</div>
+<p>where <span class="math notranslate nohighlight">\(I\)</span> represents the input image, <span class="math notranslate nohighlight">\(K\)</span> is the kernel, and <span class="math notranslate nohighlight">\(*\)</span> denotes the convolution operation.
+The indices <span class="math notranslate nohighlight">\(i,j\)</span> represent the position in the output feature map, while <span class="math notranslate nohighlight">\(m,n\)</span> traverse the kernel dimensions of size <span class="math notranslate nohighlight">\(L\)</span>.</p>
+<p>What makes CNNs powerful is that these kernels are learnable parameters. During training, each kernel evolves to detect specific visual patterns. Some kernels might become edge detectors, highlighting vertical or horizontal edges, while others might respond to textures or more complex patterns. This hierarchical feature learning is what makes CNNs so effective at visual recognition tasks.</p>
+<p>Real-world images typically have multiple channels (like RGB). The convolution operation naturally extends to handle this by using 3D kernels. For an input with <span class="math notranslate nohighlight">\(C\)</span> channels, the operation becomes:</p>
+<div class="math notranslate nohighlight">
+\[
+(I * K)_{i,j} = \sum_{c=1}^{C}\sum_{m=0}^{L-1}\sum_{n=0}^{L-1} I_{c,i+m,j+n} \cdot K_{c,m,n}
+\]</div>
+<p>where <span class="math notranslate nohighlight">\(I\)</span> is a 3D matrix with the last dimension of size <span class="math notranslate nohighlight">\(C\)</span>, and <span class="math notranslate nohighlight">\(K\)</span> is a 3D kernel with the last dimension of size <span class="math notranslate nohighlight">\(C\)</span> as well. <span class="math notranslate nohighlight">\(C\)</span> is the number of channels in the input image.</p>
+<figure class="align-default" id="id1">
+<a class="reference internal image-reference" href="https://d2l.ai/_images/conv-multi-in.svg"><img alt="https://d2l.ai/_images/conv-multi-in.svg" src="https://d2l.ai/_images/conv-multi-in.svg" style="width: 100%;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 51 </span><span class="caption-text">Convolution operation for multi-channel input. Each channel is processed separately, and the results are summed up to produce the final output.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>One of the key features of CNNs is <em>translation equivariance</em>. This means that when an input image is shifted, the output feature map shifts by the same amount. For example, if we move an object in an image one pixel to the right, its detected features in the output will also move one pixel to the right. This property allows CNNs to detect features consistently regardless of their position in the image.</p>
+<figure class="align-default" id="translation-invariance">
+<a class="reference internal image-reference" href="https://miro.medium.com/v2/resize:fit:1400/1*NoAQ4ZgofpkK6esl4sMHkA.png"><img alt="https://miro.medium.com/v2/resize:fit:1400/1*NoAQ4ZgofpkK6esl4sMHkA.png" src="https://miro.medium.com/v2/resize:fit:1400/1*NoAQ4ZgofpkK6esl4sMHkA.png" style="width: 100%;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 52 </span><span class="caption-text">Translation invariance. The same kernel can detect the same feature regardless of its position in the input.</span><a class="headerlink" href="#translation-invariance" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>Another key feature of convolutional layers is <em>parameter sharing</em>. Unlike dense neural networks where each parameter is used only once, a kernel’s weights are reused as it slides across the input. For example, a 3×3 kernel applied to a 224×224 RGB image (i.e., 3 channels) uses just 27 parameters (3×3×3) instead of the millions required by a fully connected layer. This weight-sharing scheme not only drastically reduces the model’s parameter count but also preserves spatial relationships in the data.</p>
+<p><em>Receptive Field</em> is the region of input pixels that influence each output pixel. This field grows larger in deeper layers through the combination of convolution and pooling, allowing CNNs to detect increasingly complex, hierarchical, and abstract features. For example, the first layer might detect edges, while deeper layers might recognize complex patterns like faces or objects.</p>
+<figure class="align-center" id="receptive-field">
+<a class="reference internal image-reference" href="https://www.researchgate.net/publication/316950618/figure/fig4/AS:11431281212123378&#64;1702542797323/The-receptive-field-of-each-convolution-layer-with-a-3-3-kernel-The-green-area-marks.tif"><img alt="https://www.researchgate.net/publication/316950618/figure/fig4/AS:11431281212123378&#64;1702542797323/The-receptive-field-of-each-convolution-layer-with-a-3-3-kernel-The-green-area-marks.tif" src="https://www.researchgate.net/publication/316950618/figure/fig4/AS:11431281212123378&#64;1702542797323/The-receptive-field-of-each-convolution-layer-with-a-3-3-kernel-The-green-area-marks.tif" style="width: 50%;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 53 </span><span class="caption-text">Receptive field of each convolution layer with a 3x3 kernel. The green area marks the receptive field of each layer. The image is taken from <a class="reference external" href="https://www.mdpi.com/2072-4292/9/5/480">https://www.mdpi.com/2072-4292/9/5/480</a></span><a class="headerlink" href="#receptive-field" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="stride-and-padding">
+<h3>Stride and Padding<a class="headerlink" href="#stride-and-padding" title="Link to this heading">#</a></h3>
+<p>In convolutional networks, stride and padding are crucial hyperparameters that control how we process spatial information. Stride (<span class="math notranslate nohighlight">\(S\)</span>) determines how many pixels we skip when sliding our kernel across the input. With stride-1, we move the kernel one pixel at a time, creating dense feature maps. When we increase the stride to 2 or more, we take larger steps, effectively downsampling the input.
+For a one-dimensional example, consider an input signal <span class="math notranslate nohighlight">\([a,b,c,d,e,f]\)</span> and a kernel <span class="math notranslate nohighlight">\([1,2]\)</span>. With stride-1, we compute:
+$<span class="math notranslate nohighlight">\(
+\begin{aligned}
+&amp;[1a + 2b, \
+&amp;\phantom{[}1b + 2c, \
+&amp;\phantom{[}1c + 2d, \
+&amp;\phantom{[}1d + 2e, \
+&amp;\phantom{[}1e + 2f]
+\end{aligned}
+\)</span>$</p>
+<p>However, with stride-2, we skip every other position:
+$<span class="math notranslate nohighlight">\(
+[1a + 2b, 1c + 2d, 1e + 2f]
+\)</span>$
+This striding mechanism serves two purposes: it reduces computational complexity and increases the receptive field (the region of input pixels that influence each output pixel).</p>
+<figure class="align-center" id="stride">
+<a class="reference internal image-reference" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJTOGcDwPXtlNnev9ayPj92FIysGddxe__Fw&amp;s"><img alt="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJTOGcDwPXtlNnev9ayPj92FIysGddxe__Fw&amp;s" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJTOGcDwPXtlNnev9ayPj92FIysGddxe__Fw&amp;s" style="width: 50%;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 54 </span><span class="caption-text">Stride-1 and stride-2. The image is taken from <a class="reference external" href="https://svitla.com/blog/math-at-the-heart-of-cnn/">https://svitla.com/blog/math-at-the-heart-of-cnn/</a></span><a class="headerlink" href="#stride" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>Padding addresses a different challenge: information loss at the borders. Without padding (“valid” padding), the output dimensions shrink after each convolution because the kernel can’t fully overlap with border pixels.
+While various padding schemes are proposed, zero padding has been widely used because it is simple and effective.</p>
+<figure class="align-center" id="padding">
+<a class="reference internal image-reference" href="https://svitla.com/uploads/ckeditor/2024/Math%20at%20the%20heart%20of%20CNN/image_930660943761713546482755.gif"><img alt="https://svitla.com/uploads/ckeditor/2024/Math%20at%20the%20heart%20of%20CNN/image_930660943761713546482755.gif" src="https://svitla.com/uploads/ckeditor/2024/Math%20at%20the%20heart%20of%20CNN/image_930660943761713546482755.gif" style="width: 50%;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 55 </span><span class="caption-text">Padding. The image is taken from <a class="reference external" href="https://svitla.com/blog/math-at-the-heart-of-cnn/">https://svitla.com/blog/math-at-the-heart-of-cnn/</a></span><a class="headerlink" href="#padding" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>Mathematically, for a square input of size <span class="math notranslate nohighlight">\(W\)</span> with kernel size <span class="math notranslate nohighlight">\(K\)</span>, stride <span class="math notranslate nohighlight">\(S\)</span>, and padding <span class="math notranslate nohighlight">\(P\)</span>, the output dimension <span class="math notranslate nohighlight">\(O\)</span> is given by:
+$<span class="math notranslate nohighlight">\(
+O = \left\lfloor\frac{W - K + 2P}{S}\right\rfloor + 1
+\)</span>$
+Let’s break this formula down:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(W - K\)</span> represents how far the kernel can move</p></li>
+<li><p><span class="math notranslate nohighlight">\(2P\)</span> accounts for padding on both sides</p></li>
+<li><p>Division by <span class="math notranslate nohighlight">\(S\)</span> reflects the stride’s effect</p></li>
+<li><p>The floor function <span class="math notranslate nohighlight">\(\lfloor \cdot \rfloor\)</span> ensures integer output</p></li>
+<li><p>Adding 1 accounts for the initial position</p></li>
+</ul>
+<p>For example, with an input size of 224×224, a 3×3 kernel, stride-2, and padding-1:
+$<span class="math notranslate nohighlight">\(
+O = \left\lfloor\frac{224 - 3 + 2(1)}{2}\right\rfloor + 1 = 112
+\)</span>$</p>
+<p>The interplay between stride and padding allows network designers to control information flow and computational efficiency. Larger strides create more compact representations but might miss fine details, while appropriate padding ensures no spatial information is unnecessarily discarded.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Try out <a class="reference external" href="https://poloclub.github.io/cnn-explainer/?norec=true">CNN Explainer</a> to learn how convolution, padding, and stride affect the output.</p>
+</div>
+</section>
+<section id="pooling-layer">
+<h3>Pooling Layer<a class="headerlink" href="#pooling-layer" title="Link to this heading">#</a></h3>
+<p>Pooling layers serve as the dimensionality reduction modules in CNNs, summarizing spatial regions into single values while preserving essential features.
+Max-pooling, for example, is a widely used pooling operation that selects the highest activation value within a local region. For a feature map <span class="math notranslate nohighlight">\(F\)</span> (i.e., intermediate representation of a convolutional layer), max pooling over a 3×3 window can be expressed as:</p>
+<div class="math notranslate nohighlight">
+\[
+P_{i,j} = \max_{m=0,1}\max_{n=0,1} F_{3i+m,3j+n}
+\]</div>
+<p>Max-pooling offers several key benefits. First, it creates a form of local translation invariance - small shifts in feature positions are absorbed by the pooling window. For instance, if an edge moves slightly within a 2×2 pooling region, the max-pooled output remains unchanged. Second, by reducing spatial dimensions, pooling significantly decreases computational complexity in subsequent layers.</p>
+<p>Similarly, average pooling computes:</p>
+<div class="math notranslate nohighlight">
+\[
+P_{i,j} = \frac{1}{9}\sum_{m=0}^2\sum_{n=0}^2 F_{3i+m,3j+n}
+\]</div>
+<p>The output dimensions after a pooling operation follow a similar formula to strided convolutions, but without padding considerations:</p>
+<div class="math notranslate nohighlight">
+\[
+O = \left\lfloor\frac{W - K}{S}\right\rfloor + 1
+\]</div>
+<p>where <span class="math notranslate nohighlight">\(W\)</span> is the input size, <span class="math notranslate nohighlight">\(K\)</span> is the pooling window size (typically 2 or 3), and <span class="math notranslate nohighlight">\(S\)</span> is the stride (usually equal to <span class="math notranslate nohighlight">\(K\)</span>).</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Modern CNN architectures often debate the necessity of pooling layers <a class="footnote-reference brackets" href="#footcite-springenberg2015striving" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>. Some networks replace them with strided convolutions, arguing that learnable downsampling might be more effective. The key difference lies in parameterization - pooling has no learnable parameters, while strided convolutions learn how to downsample. Consider these approaches:</p>
+<div class="math notranslate nohighlight">
+\[
+\text{Max Pooling: } y = \max(x_1, x_2, x_3, x_4)
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+\text{Strided Conv: } y = w_1x_1 + w_2x_2 + w_3x_3 + w_4x_4
+\]</div>
+<p>Despite this trend, pooling layers remain valuable in many applications. They offer built-in invariance to small translations and rotations, reduce overfitting through their parameter-free nature, and provide consistent dimension reduction.</p>
+</div>
+<div class="docutils container" id="id3">
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="footcite-springenberg2015striving" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">1</a><span class="fn-bracket">]</span></span>
+<p>Jost Tobias Springenberg, Alexey Dosovitskiy, Thomas Brox, and Martin A. Riedmiller. Striving for simplicity: the all convolutional net. In Yoshua Bengio and Yann LeCun, editors, <em>3rd International Conference on Learning Representations, ICLR 2015, San Diego, CA, USA, May 7-9, 2015, Workshop Track Proceedings</em>. 2015. URL: <a class="reference external" href="http://arxiv.org/abs/1412.6806">http://arxiv.org/abs/1412.6806</a>.</p>
+</aside>
+</aside>
+</div>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "skojaku/applied-soft-comp",
+            ref: "gh-pages",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./m04-image-processing"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="image-processing.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Preliminaries: Image Processing</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="lenet.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">LeNet and LeNet-5: Pioneering CNN Architectures</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#building-block-of-cnns">Building block of CNNs</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#convolutional-layer">Convolutional Layer</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stride-and-padding">Stride and Padding</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pooling-layer">Pooling Layer</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Sadamori Kojaku
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,937 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>word2vec: a small model with a big idea &#8212; Applied Soft Computing</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'm01-word-embedding/word2vec';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GloVe and FastText: Building on Word2Vec’s Foundation" href="word2vec_plus.html" />
+    <link rel="prev" title="Teaching computers how to understand words" href="tf-idf.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../home.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.jpg" class="logo__image only-light" alt="Applied Soft Computing - Home"/>
+    <script>document.write(`<img src="../_static/logo.jpg" class="logo__image only-dark" alt="Applied Soft Computing - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../home.html">
+                    Welcome to SSIE 541/441 Applied Soft Computing
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Intro</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../intro/why-applied-soft-computing.html">Why applied soft computing?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/setup.html">Set up</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/deliverables.html">Deliverables</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Word and Document Embeddings</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="what-to-learn.html">Module 1: Word Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tf-idf.html">Teaching computers how to understand words</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">word2vec: a small model with a big idea</a></li>
+<li class="toctree-l1"><a class="reference internal" href="word2vec_plus.html">GloVe and FastText: Building on Word2Vec’s Foundation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sem-axis.html">Understanding SemAxis: Semantic Axes in Word Vector Spaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bias-in-embedding.html">Bias in Word Embeddings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="doc2vec.html">Doc2Vec: From Words to Documents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="summary.html">Summary</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Recurrent Neural Networks</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/what-to-learn.html">Module 2: Language Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/reccurrent-neural-net.html">Recurrent Neural Network (RNN)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/lstm.html">Long Short-Term Memory (LSTM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/elmo.html">Embedding from Language Models (ELMo)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/seq2seq.html">Sequence-to-Sequence Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/summary.html">Summary</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Transformers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/what-to-learn.html">Module 3: Transformers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/transformers.html">Transformers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/bert.html">Bidirectional Encoder Representations from Transformers (BERT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/sentence-bert.html">Sentence-BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/gpt.html">Generative Pre-trained Transformer (GPT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/t5.html">Text-to-Text Transfer Transformer (T5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/summary.html">Summary</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Images</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/what-to-learn.html">Module 3: Image Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/pen-and-paper.html">Pen and paper exercises</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/image-processing.html">Preliminaries: Image Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/cnn.html">From Traditional Image Processing to Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/lenet.html">LeNet and LeNet-5: Pioneering CNN Architectures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/alexnet.html">AlexNet: A Breakthrough in Deep Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/vgg.html">VGGNet - A Deep Convolutional Neural Network for Image Recognition</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Graphs</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/what-to-learn.html">Module 4: Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/pen-and-paper.html">Pen and paper exercises</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/spectral-embedding.html">Spectral Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/graph-embedding-w-word2vec.html">Graph embedding with word2vec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/spectral-vs-neural-embedding.html">Spectral vs Neural Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/from-image-to-graph.html">From Image to Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/graph-convolutional-network.html">Graph Convolutional Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/popular-gnn.html">Popular Graph Neural Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/appendix.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/software.html">Software for Network Embedding</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/skojaku/applied-soft-comp/gh-pages?urlpath=tree/docs/lecture-note/m01-word-embedding/word2vec.md" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="../_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="initThebeSBT()"
+  class="btn btn-sm btn-launch-thebe dropdown-item"
+  title="Launch Thebe"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-play"></i>
+  </span>
+<span class="btn__text-container">Live Code</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/skojaku/applied-soft-comp" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/skojaku/applied-soft-comp/issues/new?title=Issue%20on%20page%20%2Fm01-word-embedding/word2vec.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/m01-word-embedding/word2vec.ipynb" target="_blank"
+   class="btn btn-sm btn-download-notebook-button dropdown-item"
+   title="Download notebook file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="../_sources/m01-word-embedding/word2vec.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>word2vec: a small model with a big idea</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-documents-to-windows">From Documents to Windows</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-from-co-occurrence">Learning from Co-occurrence</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#neural-network-representation">Neural network representation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skip-gram-model">Skip-gram Model</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cbow-model">CBOW Model</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-matrix-factorization-connection">The Matrix Factorization Connection</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-softmax-challenge">The Softmax Challenge</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hierarchical-softmax-a-clever-solution">Hierarchical Softmax: A Clever Solution</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#impact-and-legacy">Impact and Legacy</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hands-on-with-word2vec">Hands-on with word2vec</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">🔥🔥 Exercise 🔥🔥</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="word2vec-a-small-model-with-a-big-idea">
+<h1>word2vec: a small model with a big idea<a class="headerlink" href="#word2vec-a-small-model-with-a-big-idea" title="Link to this heading">#</a></h1>
+<section id="from-documents-to-windows">
+<h2>From Documents to Windows<a class="headerlink" href="#from-documents-to-windows" title="Link to this heading">#</a></h2>
+<p>While TF-IDF gave us our first glimpse into distributed word representations, it had a fundamental limitation: it only considered document-level context. But language has rich structure at much finer scales. Word2Vec, introduced by Mikolov et al. in 2013 <a class="footnote-reference brackets" href="#footcite-mikolov2013distributed" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>, revolutionized word embeddings by focusing on local context windows.</p>
+<p>Instead of looking at entire documents, Word2Vec looks at small windows of text, typically 5-10 words wide. For example, in the sentence “The cat chases mice in the garden”, with a window size of 2, the context for “chases” would be [“The”, “cat”, “mice”, “in”].</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This shift from document-level to window-level context was revolutionary. It allowed the model to capture more nuanced relationships between words, as words that appear in similar immediate contexts often have similar grammatical roles or semantic meanings.</p>
+</div>
+</section>
+<section id="learning-from-co-occurrence">
+<h2>Learning from Co-occurrence<a class="headerlink" href="#learning-from-co-occurrence" title="Link to this heading">#</a></h2>
+<p>Like TF-IDF, Word2Vec is fundamentally about learning from patterns of word co-occurrence. However, instead of creating a large sparse matrix of word-document counts, Word2Vec learns dense vector representations directly through a prediction task.</p>
+<p>There are two main variants:</p>
+<ul class="simple">
+<li><p><strong>CBOW (Continuous Bag of Words)</strong> works like that fill-in-the-blank test. For example:
+<code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">_____</span> <span class="pre">chases</span> <span class="pre">mice</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">garden</span></code>
+This is similar to how we learn language - by understanding which words make sense in a given context. CBOW takes the surrounding context words and uses them to predict the center word that would make sense in that context.</p></li>
+<li><p><strong>Skip-gram</strong> is a much more challenging task. It tries to predict the surrounding context words given a center word. For example: <code class="docutils literal notranslate"><span class="pre">_____</span> <span class="pre">cat</span> <span class="pre">_____</span> <span class="pre">_____</span> <span class="pre">_____</span> <span class="pre">_____</span> </code>. Note that the order of the context words does not matter, i.e., Skip-gram predicts the set of context words, so “{garden, in, the, mice, chases, The}” is equally correct as “{cat, in, the, mice, chases, The}”.</p></li>
+</ul>
+</section>
+<section id="neural-network-representation">
+<h2>Neural network representation<a class="headerlink" href="#neural-network-representation" title="Link to this heading">#</a></h2>
+<p>word2vec can be represented as a neural network with a single hidden layer as follows.</p>
+<ul class="simple">
+<li><p><strong>Input layer</strong>: The input layer consists of <span class="math notranslate nohighlight">\(N\)</span> neurons, where <span class="math notranslate nohighlight">\(N\)</span> is the size of the vocabulary (i.e., the number of unique words in the corpus). Each neuron corresponds to a unique word in the vocabulary. When a word is inputted, its corresponding neuron is activated and the other neurons are inhibited. Thus, the input layer is essentially a lookup mechanism that transforms the input word into a corresponding one-hot vector.</p></li>
+<li><p><strong>Output layer</strong>: The output layer also consists of <span class="math notranslate nohighlight">\(N\)</span> neurons, each corresponding to a unique word in the vocabulary. Unlike the input layer, multiple neurons can be activated for a single input. The strength of the activation of each neuron (with a normalization by the softmax function) represents the probability of the corresponding word being the input word’s context.</p></li>
+<li><p><strong>Hidden layer</strong>: The hidden layer is much smaller than the input and output layers. Multiple neurons in the hidden layer can be activated for a single input, and this activation pattern represents the word’s <em>embedding</em>.</p></li>
+</ul>
+<p><img alt="" src="../_images/word2vec.jpg" /></p>
+<section id="skip-gram-model">
+<h3>Skip-gram Model<a class="headerlink" href="#skip-gram-model" title="Link to this heading">#</a></h3>
+<p>In the Skip-gram model, given a word, we try to predict the probability of seeing each possible context word. Specifically, for a center word <span class="math notranslate nohighlight">\(w_c\)</span> and a context word <span class="math notranslate nohighlight">\(w_o\)</span>, we want:</p>
+<p><span class="math notranslate nohighlight">\(P(w_o|w_c) = \dfrac{\exp(v_{w_o}^T v_{w_c})}{\sum_{w \in V} \exp(v_w^T v_{w_c})}\)</span></p>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(v_{w_c}\)</span> is the vector representation of the center word</p></li>
+<li><p><span class="math notranslate nohighlight">\(v_{w_o}\)</span> is the vector representation of the output word</p></li>
+<li><p><span class="math notranslate nohighlight">\(V\)</span> is the vocabulary</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Notice the softmax function in the equation. This transforms the raw dot product scores into proper probabilities that sum to 1. However, this normalization over the entire vocabulary becomes computationally expensive for large vocabularies.</p>
+</div>
+</section>
+<section id="cbow-model">
+<h3>CBOW Model<a class="headerlink" href="#cbow-model" title="Link to this heading">#</a></h3>
+<p>CBOW works in the opposite direction, predicting the center word from the context. For context words <span class="math notranslate nohighlight">\(w_{1}, ..., w_{C}\)</span>, we have:</p>
+<div class="math notranslate nohighlight">
+\[
+P(w_c|w_1,...,w_C) = \dfrac{\exp(v_{w_c}^T \bar{v})}{\sum_{w \in V} \exp(v_w^T \bar{v})},
+\]</div>
+<p>where <span class="math notranslate nohighlight">\(\bar{v} = \dfrac{1}{C}\sum_{i=1}^C v_{w_i}\)</span> is the average of the context word vectors.</p>
+</section>
+</section>
+<section id="the-matrix-factorization-connection">
+<h2>The Matrix Factorization Connection<a class="headerlink" href="#the-matrix-factorization-connection" title="Link to this heading">#</a></h2>
+<p>word2vec can be represented as a neural network with a single hidden layer as follows. So it appears to be different from the word embedding we constructed using tf-idf matrix factorization. However, word2vec implicitly factorizes a matrix <a class="footnote-reference brackets" href="#footcite-levy2014neural" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> as follows.</p>
+<div class="math notranslate nohighlight">
+\[
+M = (M_{ij}), \quad M_{ij} = \log \dfrac{P(w_i,  w_j)}{P(w_j)P(w_j)}
+\]</div>
+<p>where <span class="math notranslate nohighlight">\(M\)</span> is the matrix that word2vec implicitly factorizes. <span class="math notranslate nohighlight">\(M_{ij}\)</span> is called the <em>pointwise mutual information</em> between words <span class="math notranslate nohighlight">\(w_i\)</span> and <span class="math notranslate nohighlight">\(w_j\)</span>. <span class="math notranslate nohighlight">\(M_{ij}\)</span> is the smallest when <span class="math notranslate nohighlight">\(w_i\)</span> and <span class="math notranslate nohighlight">\(w_j\)</span> appear independently, and the largest when <span class="math notranslate nohighlight">\(w_i\)</span> and <span class="math notranslate nohighlight">\(w_j\)</span> always appear together. Likewise tf-idf, it normalizes the mere co-occurrence counts (<span class="math notranslate nohighlight">\(P(w_i, w_j)\)</span>) by the probabilities of the words (<span class="math notranslate nohighlight">\(P(w_i)\)</span> and <span class="math notranslate nohighlight">\(P(w_j)\)</span>), creating a similar effect as tf-idf.</p>
+<p>Word embeddings learned by word2vec are essentially constructed by factorizing the pointwise mutual information matrix, and the similarity between words approximately preserves the PMI values.</p>
+<div class="math notranslate nohighlight">
+\[
+v_{w_i} ^\top v_{w_j} \approx M_{ij}
+\]</div>
+<p>This means that words that frequently co-appear in the same context tend to be similar to each other (a high PMI value), and vice versa.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>This connection to matrix factorization helps explain why Word2Vec works: it’s finding a low-dimensional representation that captures the essential patterns in word co-occurrence statistics, just like how PCA finds low-dimensional representations that capture variance in data.</p>
+</div>
+</section>
+<section id="the-softmax-challenge">
+<h2>The Softmax Challenge<a class="headerlink" href="#the-softmax-challenge" title="Link to this heading">#</a></h2>
+<p>The above approximation is only valid when the embedding dimension is sufficiently large. Adding softmax transforms the problem from simple matrix factorization into a Boltzmann machine. While this gives us proper probabilities, it introduces a major computational challenge: computing the normalization constant requires summing over the entire vocabulary.
+For a vocabulary of 100,000 words, this means computing 100,000 exponentials for every prediction!</p>
+<section id="hierarchical-softmax-a-clever-solution">
+<h3>Hierarchical Softmax: A Clever Solution<a class="headerlink" href="#hierarchical-softmax-a-clever-solution" title="Link to this heading">#</a></h3>
+<p>To make training feasible, Word2Vec uses hierarchical softmax. Instead of computing probabilities over the entire vocabulary at once, it:</p>
+<ol class="arabic simple">
+<li><p>Arranges words in a binary tree (usually a Huffman tree)</p></li>
+<li><p>Transforms the prediction problem into a sequence of binary decisions</p></li>
+<li><p>Reduces computation from O(|V|) to O(log|V|)</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is similar to how you might play “20 questions” to guess a word. Each question splits the possible answers in half, making the process much more efficient than checking each possibility one by one.</p>
+</div>
+</section>
+</section>
+<section id="impact-and-legacy">
+<h2>Impact and Legacy<a class="headerlink" href="#impact-and-legacy" title="Link to this heading">#</a></h2>
+<p>Word2Vec demonstrated that meaningful word representations could be learned from local context alone, without requiring expensive annotation or linguistic expertise. Its success inspired many subsequent developments in NLP, including:</p>
+<ul class="simple">
+<li><p>GloVe: Combining the benefits of matrix factorization and local context</p></li>
+<li><p>FastText: Adding subword information to handle out-of-vocabulary words</p></li>
+<li><p>Contextual embeddings like BERT: Learning dynamic representations that change based on context</p></li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The principles behind Word2Vec - learning from context and using clever approximations to handle scale - continue to influence modern NLP architectures. Even large language models like GPT can be seen as sophisticated extensions of these basic ideas.</p>
+</div>
+</section>
+<section id="hands-on-with-word2vec">
+<h2>Hands-on with word2vec<a class="headerlink" href="#hands-on-with-word2vec" title="Link to this heading">#</a></h2>
+<p>With word2vec, words are represented as dense vectors, enabling us to explore their relationships using simple linear algebra. This is in contrast to traditional natural language processing (NLP) methods, such as bag-of-words and topic modeling, which represent words as discrete units or high-dimensional vectors.</p>
+<p><img alt="" src="https://miro.medium.com/v2/resize:fit:678/1*5F4TXdFYwqi-BWTToQPIfg.jpeg" /></p>
+<p>To showcase the effectiveness of word2vec, let’s walk through an example using the <code class="docutils literal notranslate"><span class="pre">gensim</span></code> library.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">gensim</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gensim.downloader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gensim.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Word2Vec</span>
+
+<span class="c1"># Load pre-trained word2vec model from Google News</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">gensim</span><span class="o">.</span><span class="n">downloader</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;word2vec-google-news-300&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Our first example is to find the words most similar to <em>king</em>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example usage</span>
+<span class="n">word</span> <span class="o">=</span> <span class="s2">&quot;king&quot;</span>
+<span class="n">similar_words</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">most_similar</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Words most similar to &#39;</span><span class="si">{</span><span class="n">word</span><span class="si">}</span><span class="s2">&#39;:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">similar_word</span><span class="p">,</span> <span class="n">similarity</span> <span class="ow">in</span> <span class="n">similar_words</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">similar_word</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">similarity</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Words most similar to &#39;king&#39;:
+kings: 0.7138
+queen: 0.6511
+monarch: 0.6413
+crown_prince: 0.6204
+prince: 0.6160
+sultan: 0.5865
+ruler: 0.5798
+princes: 0.5647
+Prince_Paras: 0.5433
+throne: 0.5422
+</pre></div>
+</div>
+</div>
+</div>
+<p>A cool (yet controversial) application of word embeddings is analogy solving. Let us consider the following puzzle:</p>
+<blockquote>
+<div><p><em>man</em> is to <em>woman</em> as <em>king</em> is to ___ ?</p>
+</div></blockquote>
+<p>We can use word embeddings to solve this puzzle.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># We solve the puzzle by</span>
+<span class="c1">#</span>
+<span class="c1">#  vec(king) - vec(man) + vec(woman)</span>
+<span class="c1">#</span>
+<span class="c1"># To solve this, we use the model.most_similar function, with positive words being &quot;king&quot; and &quot;woman&quot; (additive), and negative words being &quot;man&quot; (subtractive).</span>
+<span class="c1">#</span>
+<span class="n">model</span><span class="o">.</span><span class="n">most_similar</span><span class="p">(</span><span class="n">positive</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;woman&#39;</span><span class="p">,</span> <span class="s2">&quot;king&quot;</span><span class="p">],</span> <span class="n">negative</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;man&#39;</span><span class="p">],</span> <span class="n">topn</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[(&#39;queen&#39;, 0.7118192911148071),
+ (&#39;monarch&#39;, 0.6189674735069275),
+ (&#39;princess&#39;, 0.5902431011199951),
+ (&#39;crown_prince&#39;, 0.5499460697174072),
+ (&#39;prince&#39;, 0.5377321243286133)]
+</pre></div>
+</div>
+</div>
+</div>
+<p>The last example is to visualize the word embeddings.</p>
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.decomposition</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCA</span>
+
+<span class="n">countries</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Germany&#39;</span><span class="p">,</span> <span class="s1">&#39;France&#39;</span><span class="p">,</span> <span class="s1">&#39;Italy&#39;</span><span class="p">,</span> <span class="s1">&#39;Spain&#39;</span><span class="p">,</span> <span class="s1">&#39;Portugal&#39;</span><span class="p">,</span> <span class="s1">&#39;Greece&#39;</span><span class="p">]</span>
+<span class="n">capital_words</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Berlin&#39;</span><span class="p">,</span> <span class="s1">&#39;Paris&#39;</span><span class="p">,</span> <span class="s1">&#39;Rome&#39;</span><span class="p">,</span> <span class="s1">&#39;Madrid&#39;</span><span class="p">,</span> <span class="s1">&#39;Lisbon&#39;</span><span class="p">,</span> <span class="s1">&#39;Athens&#39;</span><span class="p">]</span>
+
+<span class="c1"># Get the word embeddings for the countries and capitals</span>
+<span class="n">country_embeddings</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">model</span><span class="p">[</span><span class="n">country</span><span class="p">]</span> <span class="k">for</span> <span class="n">country</span> <span class="ow">in</span> <span class="n">countries</span><span class="p">])</span>
+<span class="n">capital_embeddings</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">model</span><span class="p">[</span><span class="n">capital</span><span class="p">]</span> <span class="k">for</span> <span class="n">capital</span> <span class="ow">in</span> <span class="n">capital_words</span><span class="p">])</span>
+
+<span class="c1"># Compute the PCA</span>
+<span class="n">pca</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">embeddings</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">country_embeddings</span><span class="p">,</span> <span class="n">capital_embeddings</span><span class="p">])</span>
+<span class="n">embeddings_pca</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+
+<span class="c1"># Create a DataFrame for seaborn</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">embeddings_pca</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;PC1&#39;</span><span class="p">,</span> <span class="s1">&#39;PC2&#39;</span><span class="p">])</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;Label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">countries</span> <span class="o">+</span> <span class="n">capital_words</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Country&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">countries</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;Capital&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">capital_words</span><span class="p">)</span>
+
+<span class="c1"># Plot the data</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="c1"># Create a scatter plot with seaborn</span>
+<span class="n">scatter_plot</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;PC1&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;PC2&#39;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;deep&#39;</span><span class="p">,</span> <span class="n">markers</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">])</span>
+
+<span class="c1"># Annotate the points</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;PC1&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;PC2&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.08</span><span class="p">,</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Label&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span>
+             <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">))</span>
+
+<span class="c1"># Draw arrows between countries and capitals</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">countries</span><span class="p">)):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">arrow</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;PC1&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;PC2&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;PC1&#39;</span><span class="p">][</span><span class="n">i</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">countries</span><span class="p">)]</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;PC1&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;PC2&#39;</span><span class="p">][</span><span class="n">i</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">countries</span><span class="p">)]</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;PC2&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+              <span class="n">color</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">head_width</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">head_length</span><span class="o">=</span><span class="mf">0.03</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="n">title_fontsize</span><span class="o">=</span><span class="s1">&#39;13&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;11&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;PCA of Country and Capital Word Embeddings&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Principal Component 1&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Principal Component 2&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<img alt="../_images/89933d889915b433d0ecde688fe7750fdb1b16fbbca3a312d6b6e98548cb68ed.png" src="../_images/89933d889915b433d0ecde688fe7750fdb1b16fbbca3a312d6b6e98548cb68ed.png" />
+</div>
+</div>
+<p>We can see that word2vec places the words representing countries close to each other and so do the words representing their capitals. The country-capital relationship is also roughly preserved, e.g., <em>Germany</em>-<em>Berlin</em> vector is roughly parallel to <em>France</em>-<em>Paris</em> vector.</p>
+</section>
+<section id="exercise">
+<h2>🔥🔥 Exercise 🔥🔥<a class="headerlink" href="#exercise" title="Link to this heading">#</a></h2>
+<ol class="arabic">
+<li><p>Using the word2vec model, find the 5 most similar words to “computer” and “science”. What do you observe about the semantic relationships between these words?</p></li>
+<li><p>Perform the following word analogy tasks using word2vec and explain your findings:</p>
+<ul class="simple">
+<li><p>man : woman :: king : ?</p></li>
+<li><p>Paris : France :: Tokyo : ?</p></li>
+<li><p>car : cars :: child : ?</p></li>
+</ul>
+</li>
+<li><p>Create a visualization similar to the country-capital example above but using:</p>
+<ul class="simple">
+<li><p>Different professions and their typical workplaces (e.g., doctor-hospital, teacher-school)</p></li>
+<li><p>Different languages and their countries (e.g., Spanish-Spain, French-France)</p></li>
+</ul>
+<p>Compare the patterns you observe with the country-capital relationships.</p>
+</li>
+<li><p>Advanced: Investigate the concept of “gender bias” in word embeddings:</p>
+<ul class="simple">
+<li><p>Find the vector difference between pairs like “he-she”, “man-woman”, “king-queen”</p></li>
+<li><p>Project profession words (e.g., “doctor”, “nurse”, “engineer”, “teacher”) onto these gender directions</p></li>
+<li><p>What does this tell us about potential biases in the training data?</p></li>
+</ul>
+</li>
+</ol>
+<div class="docutils container" id="id3">
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="footcite-mikolov2013distributed" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Tomas Mikolov, Ilya Sutskever, Kai Chen, Greg S Corrado, and Jeff Dean. Distributed representations of words and phrases and their compositionality. <em>Advances in neural information processing systems</em>, 2013.</p>
+</aside>
+<aside class="footnote brackets" id="footcite-levy2014neural" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<p>Omer Levy and Yoav Goldberg. Neural word embedding as implicit matrix factorization. In Z. Ghahramani, M. Welling, C. Cortes, N. Lawrence, and K.Q. Weinberger, editors, <em>Advances in Neural Information Processing Systems</em>, volume 27. Curran Associates, Inc., 2014. URL: <a class="reference external" href="https://proceedings.neurips.cc/paper_files/paper/2014/file/feab05aa91085b7a8012516bc3533958-Paper.pdf">https://proceedings.neurips.cc/paper_files/paper/2014/file/feab05aa91085b7a8012516bc3533958-Paper.pdf</a>.</p>
+</aside>
+</aside>
+</div>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "skojaku/applied-soft-comp",
+            ref: "gh-pages",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./m01-word-embedding"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="tf-idf.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Teaching computers how to understand words</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="word2vec_plus.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">GloVe and FastText: Building on Word2Vec’s Foundation</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-documents-to-windows">From Documents to Windows</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-from-co-occurrence">Learning from Co-occurrence</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#neural-network-representation">Neural network representation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skip-gram-model">Skip-gram Model</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cbow-model">CBOW Model</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-matrix-factorization-connection">The Matrix Factorization Connection</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-softmax-challenge">The Softmax Challenge</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hierarchical-softmax-a-clever-solution">Hierarchical Softmax: A Clever Solution</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#impact-and-legacy">Impact and Legacy</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hands-on-with-word2vec">Hands-on with word2vec</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">🔥🔥 Exercise 🔥🔥</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Sadamori Kojaku
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

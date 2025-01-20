@@ -1,0 +1,753 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>InceptionNet: Image Recognition CNN by Google (GoogLeNet) &#8212; Applied Soft Computing</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'm04-image-processing/inception';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../home.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.jpg" class="logo__image only-light" alt="Applied Soft Computing - Home"/>
+    <script>document.write(`<img src="../_static/logo.jpg" class="logo__image only-dark" alt="Applied Soft Computing - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../home.html">
+                    Welcome to SSIE 541/441 Applied Soft Computing
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Intro</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../intro/why-applied-soft-computing.html">Why applied soft computing?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/setup.html">Set up</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/deliverables.html">Deliverables</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Word and Document Embeddings</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/what-to-learn.html">Module 1: Word Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/tf-idf.html">Teaching computers how to understand words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/word2vec.html">word2vec: a small model with a big idea</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/word2vec_plus.html">GloVe and FastText: Building on Word2Vec’s Foundation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/sem-axis.html">Understanding SemAxis: Semantic Axes in Word Vector Spaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/bias-in-embedding.html">Bias in Word Embeddings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/doc2vec.html">Doc2Vec: From Words to Documents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/summary.html">Summary</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Recurrent Neural Networks</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/what-to-learn.html">Module 2: Language Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/reccurrent-neural-net.html">Recurrent Neural Network (RNN)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/lstm.html">Long Short-Term Memory (LSTM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/elmo.html">Embedding from Language Models (ELMo)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/seq2seq.html">Sequence-to-Sequence Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/summary.html">Summary</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Transformers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/what-to-learn.html">Module 3: Transformers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/transformers.html">Transformers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/bert.html">Bidirectional Encoder Representations from Transformers (BERT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/sentence-bert.html">Sentence-BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/gpt.html">Generative Pre-trained Transformer (GPT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/t5.html">Text-to-Text Transfer Transformer (T5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/summary.html">Summary</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Images</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="what-to-learn.html">Module 3: Image Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pen-and-paper.html">Pen and paper exercises</a></li>
+<li class="toctree-l1"><a class="reference internal" href="image-processing.html">Preliminaries: Image Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cnn.html">From Traditional Image Processing to Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lenet.html">LeNet and LeNet-5: Pioneering CNN Architectures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alexnet.html">AlexNet: A Breakthrough in Deep Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vgg.html">VGGNet - A Deep Convolutional Neural Network for Image Recognition</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Graphs</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/what-to-learn.html">Module 4: Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/pen-and-paper.html">Pen and paper exercises</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/spectral-embedding.html">Spectral Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/graph-embedding-w-word2vec.html">Graph embedding with word2vec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/spectral-vs-neural-embedding.html">Spectral vs Neural Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/from-image-to-graph.html">From Image to Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/graph-convolutional-network.html">Graph Convolutional Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/popular-gnn.html">Popular Graph Neural Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/appendix.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/software.html">Software for Network Embedding</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/skojaku/applied-soft-comp" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/skojaku/applied-soft-comp/issues/new?title=Issue%20on%20page%20%2Fm04-image-processing/inception.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/m04-image-processing/inception.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>InceptionNet: Image Recognition CNN by Google (GoogLeNet)</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-of-contents">Table of Contents</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-inceptionnet-overview">1. What is InceptionNet [Overview]</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#article-structure">1.1 Article Structure</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#core-ideas-and-key-points-of-each-version">1.2 Core Ideas and Key Points of Each Version</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#origin-of-inceptionnets-name">1.3 Origin of InceptionNet’s Name</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-googlenet">2. v1 (GoogLeNet)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inception-module">2.1 Inception Module</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#multiple-size-path-parallelization">2.1.1 Multiple Size Path Parallelization</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#dimension-reduction-for-lightweight-design">2.1.2 Dimension Reduction for Lightweight Design</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#global-average-pooling">2.2 Global Average Pooling</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#auxiliary-classifiers-stabilizing-backpropagation-to-early-layers">2.3 Auxiliary Classifiers: Stabilizing Backpropagation to Early Layers</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v2-introduction-of-batch-normalization">3. v2: Introduction of Batch Normalization</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v3-improvement-of-inception-blocks">4. v3: Improvement of Inception Blocks</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-reduction-through-factorization">4.1 Parameter Reduction through Factorization</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#effective-spatial-size-reduction">4.2 Effective Spatial Size Reduction</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#label-smoothing">4.3 Label Smoothing</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inception-v4-and-inception-resnet">5. Inception-v4 and Inception-ResNet</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="inceptionnet-image-recognition-cnn-by-google-googlenet">
+<h1>InceptionNet: Image Recognition CNN by Google (GoogLeNet)<a class="headerlink" href="#inceptionnet-image-recognition-cnn-by-google-googlenet" title="Link to this heading">#</a></h1>
+<p>Posted September 20, 2021 by Masaki Hayashi</p>
+<section id="table-of-contents">
+<h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>What is InceptionNet [Overview]
+1.1 Article Structure
+1.2 Core Ideas and Key Points of Each Version
+1.3 Origin of InceptionNet’s Name</p></li>
+<li><p>v1 (GoogLeNet)
+2.1 Inception Module
+2.1.1 Multiple Size Path Parallelization
+2.1.2 Dimension Reduction for Lightweight Design
+2.2 Global Average Pooling
+2.3 Auxiliary Classifiers: Stabilizing Backpropagation to Early Layers</p></li>
+<li><p>v2: Introduction of Batch Normalization</p></li>
+<li><p>v3: Improvement of Inception Blocks
+4.1 Parameter Reduction through Factorization
+4.2 Effective Spatial Size Reduction
+4.3 Label Smoothing</p></li>
+<li><p>Inception-v4 and Inception-ResNet</p></li>
+<li><p>Summary</p></li>
+</ol>
+</section>
+<section id="what-is-inceptionnet-overview">
+<h2>1. What is InceptionNet [Overview]<a class="headerlink" href="#what-is-inceptionnet-overview" title="Link to this heading">#</a></h2>
+<p>InceptionNet (Inception Network, also known as GoogLeNet) is a CNN (Convolutional Neural Network) architecture devised by Google’s research team [Szegedy et al., 2015]. After InceptionNet v1, improved versions v2, v3, and v4 were successively released.</p>
+<p>This article will introduce Inception v1 through v4 in order of their appearance, focusing on the important points of each version.</p>
+<p><em>Note (Important): This site consistently uses the unique term “InceptionNet.” When searching for “Inception” alone, search results are dominated by the movie Inception (see Section 1.2), making it difficult to find this article directly. When searching for this article directly from Google or other search engines, please include “InceptionNet” in your query (when referring to specific versions, we use the standard notation like “Inception v3” without “Net”).</em></p>
+<section id="article-structure">
+<h3>1.1 Article Structure<a class="headerlink" href="#article-structure" title="Link to this heading">#</a></h3>
+<p>The following sections will introduce each version in order:</p>
+<ol class="arabic simple">
+<li><p>Section 1: Key points of each version (1.2) and origin of the name (1.3)</p></li>
+<li><p>Section 2: Inception v1 (GoogLeNet) [CVPR2015]: Initial version</p></li>
+<li><p>Section 3: Inception v2 (BN-Inception) [ICML2015]: Introduction of batch normalization</p></li>
+<li><p>Section 4: Inception v3 [CVPR2016]: Improvement of Inception blocks</p></li>
+<li><p>Section 5: Inception v4 and Inception-ResNet v1, v2 [AAAI 2017]: Improvements with residual connections</p></li>
+<li><p>Section 6: Summary</p></li>
+</ol>
+</section>
+<section id="core-ideas-and-key-points-of-each-version">
+<h3>1.2 Core Ideas and Key Points of Each Version<a class="headerlink" href="#core-ideas-and-key-points-of-each-version" title="Link to this heading">#</a></h3>
+<p>The central idea of InceptionNet (Inception v1 = GoogLeNet, Section 2) lies in “approximating and replacing each convolution layer with computationally efficient Inception blocks.”</p>
+<p>The Inception block (Section 2.1) is a block that uses “dimension reduction in the channel direction using 1x1 convolution layers” and “parallelization with multiple convolution sizes in 4 paths (=widening).” This allowed the use of blocks that were both expressive and computationally efficient as basic building units.</p>
+<p>Inception v1 succeeded in significantly reducing computational costs through parameter reduction compared to previous CNN backbones like AlexNet, while improving expressiveness by making the network deeper (winning first place in ILSVRC 2014). While Inception v2 was proposed in the batch normalization paper with the addition of batch normalization, it had no other contributions (new proposals).</p>
+<p>Next, Inception v3 [Szegedy et al., 2016b] evolved into a more efficient and accurate InceptionNet with the proposal of new Inception blocks that had better balance between width and depth (Section 4). Label smoothing was also an important contribution from the Inception v3 research.</p>
+<p>Finally, the Inception v4 research [Szegedy et al., 2017] completed the final form of Inception-ResNet (v1, v2), which reached a 96-layer configuration through ResNet-style additions with residual connections (Section 5). As it combined the efficiency of Inception modules with the advantages of residual connections in optimizing large-scale models, Inception-ResNet was widely used afterward, particularly in scenarios “where model size was necessary,” such as video recognition.</p>
+<p><em>Note: The use of multiple layers as a repeating unit is called a “block” in networks like ResNet and DenseNet. While Inception v1 and v3 papers call it an “Inception module,” we will consistently refer to it as an “Inception block” here. The Google team called it “Inception module” in papers from Inception v1 through Inception v3, but in the Inception v4 paper, they unified the terminology with ResNet-style “block” and began calling it “Inception block.”</em></p>
+</section>
+<section id="origin-of-inceptionnets-name">
+<h3>1.3 Origin of InceptionNet’s Name<a class="headerlink" href="#origin-of-inceptionnets-name" title="Link to this heading">#</a></h3>
+<p>The network name “Inception” comes from the hit SF action movie Inception of that time (a favorite of the site administrator).</p>
+<p>The movie title “Inception” means “beginning,” named after the idiomatic phrase “inception of an idea.” In English, “inception of an idea” refers to something that starts small but later develops into a bigger idea. In the movie Inception, the protagonists are a special operations group that secretly enters their target’s lucid dreams, going into “deeper layers” of dreams. They attempt to “plant ideas” by acting in the dreams without being detected, going down to deep layers of subconscious. Hence, the movie was titled “Inception (of an idea).”</p>
+<p>The movie Inception was a massive hit worldwide at the time, and the line “We need to go deeper” spoken by the protagonist (DiCaprio) to the wealthy target became popular as an image macro and internet slang in English-speaking regions. The authors of InceptionNet [Szegedy et al., 2015] named their network and paper after this movie’s story of descending through multiple dream layers.</p>
+<p>At the time, top researchers studying new CNN structures were competing to “improve image recognition accuracy by making CNNs deeper.” They drew a parallel between the movie Inception’s “dream within a dream (going deeper through multiple layers)” hierarchical meta-structure and their “meta-network structure = Inception module” utilizing the Network-in-Network [Lin et al., 2014] concept. Therefore, their paper was similarly titled “Going deeper with convolutions.”</p>
+<p>While this lengthy explanation shows how young researchers sometimes give (occasionally immature) names to their methods during the third AI boom, younger researchers should avoid imitating this as it tends to become embarrassing in retrospect.</p>
+</section>
+</section>
+<section id="v1-googlenet">
+<h2>2. v1 (GoogLeNet)<a class="headerlink" href="#v1-googlenet" title="Link to this heading">#</a></h2>
+<p>InceptionNet v1’s network structure is “an architecture using Inception blocks instead of convolution layers” in an AlexNet-style serial CNN:</p>
+<ul class="simple">
+<li><p>conv1: Convolution layer - [7 x 7] kernel, stride=2</p></li>
+<li><p>pool1: Max pooling - [3 x 3] kernel, stride=2</p></li>
+<li><p>conv2: Convolution layer - [3 x 3] kernel, stride=2</p></li>
+<li><p>pool2: Max pooling - [3 x 3] kernel, stride=2</p></li>
+<li><p>3a: Inception block</p></li>
+<li><p>3b: Inception block</p></li>
+<li><p>pool3: Max pooling - [3 x 3] kernel, stride=2</p></li>
+<li><p>4a: Inception block</p></li>
+<li><p>4b: Inception block</p></li>
+<li><p>4c: Inception block</p></li>
+<li><p>4d: Inception block</p></li>
+<li><p>4e: Inception block</p></li>
+<li><p>pool4: Max pooling - [3 x 3] kernel, stride=2</p></li>
+<li><p>5a: Inception block</p></li>
+<li><p>5b: Inception block &gt; Output size: [7 × 7] x 1024</p></li>
+<li><p>pool5: Global average pooling - [7 x 7] kernel, stride=1 &gt; Output size: [1 × 1] x 1024</p></li>
+<li><p>linear6: Fully connected layer: 1024 x 1000</p></li>
+<li><p>softmax: 1000-class probability distribution</p></li>
+</ul>
+<section id="inception-module">
+<h3>2.1 Inception Module<a class="headerlink" href="#inception-module" title="Link to this heading">#</a></h3>
+<p>The Inception block is the basic building unit that makes up InceptionNet. Within the Inception block, it performs (1) diverse size path parallelization (Figure 1-a, Section 2.1.1) and (2) dimension reduction for each path to achieve lightweight design (Figure 1-b, Section 2.1.2). This provides high expressiveness while maintaining a small parameter count.</p>
+<section id="multiple-size-path-parallelization">
+<h4>2.1.1 Multiple Size Path Parallelization<a class="headerlink" href="#multiple-size-path-parallelization" title="Link to this heading">#</a></h4>
+<p>The novelty of the Inception block lies in (1) branching the block into parallel paths of different depths to aim for improved expressiveness per block (Figure 1-a). It combines feature maps in the channel direction after parallel implementation of 4 paths: [[1 x 1], [3 x 3], [5 x 5] convolution layers + max pooling layer] (Figure 1-a).</p>
+<p>This “multiple size path parallelization (=widening)” allows each Inception module to express the synthesis of features from various convolution sizes.</p>
+</section>
+<section id="dimension-reduction-for-lightweight-design">
+<h4>2.1.2 Dimension Reduction for Lightweight Design<a class="headerlink" href="#dimension-reduction-for-lightweight-design" title="Link to this heading">#</a></h4>
+<p>However, with the 4-parallel path configuration of the Inception block (Figure 1-a), the parameter count becomes too large when connecting multiple blocks, making it difficult to train a deep network (with the learning techniques of that time).</p>
+<p>Therefore, they introduced the 1x1 convolution proposed in NiN (Network-in-Network) [Lin et al., 2014] at the beginning of each of the three paths to perform feature dimension reduction (in the channel direction) at each spatial position, performing convolution layers after reducing channel numbers (Figure 1-b). This form of block was used in Inception v1.</p>
+<p>This achieved computational efficiency for the Inception module. Inception v1 achieved comparable accuracy with significantly fewer parameters than the contemporary VGGNet.</p>
+<p><em>Note: In ILSVRC2014, Inception v1 took first place with an error rate of 6.6%, while VGGNet took second place with an error rate of 7.3%.</em></p>
+</section>
+</section>
+<section id="global-average-pooling">
+<h3>2.2 Global Average Pooling<a class="headerlink" href="#global-average-pooling" title="Link to this heading">#</a></h3>
+<p>The “global average pooling” proposed in Network-in-Network (NIN) [Lin et al., 2014] as a replacement for fully connected layers in the final head was also used in Inception v1.</p>
+<p>This greatly reduced the CNN’s parameter count as the “layer-to-layer weight parameters” used in the fully connected layers of the classifier head became unnecessary when replaced with global average pooling.</p>
+</section>
+<section id="auxiliary-classifiers-stabilizing-backpropagation-to-early-layers">
+<h3>2.3 Auxiliary Classifiers: Stabilizing Backpropagation to Early Layers<a class="headerlink" href="#auxiliary-classifiers-stabilizing-backpropagation-to-early-layers" title="Link to this heading">#</a></h3>
+<p>When introducing a total of 22 convolution layers in depth, there was a problem with gradients not propagating well to early layers during backpropagation. Therefore, InceptionNet v1 proposed using auxiliary classifiers as learning support for stable training.</p>
+<p>It adds classifier branches (composed of fully connected layers similar to AlexNet’s final layers) as heads twice in the middle layers of Inception. Then, it takes additional cross-entropy loss at the end output of the added auxiliary classifier heads and adds it to the total loss.</p>
+<p>This allowed easier backpropagation of loss to intermediate parts, enabling larger gradients to be added to backpropagation around the middle area. Thanks to this, InceptionNet could avoid gradient vanishing and propagate gradients to early layers even with its deep large-scale structure, enabling stable learning convergence (auxiliary classifier branches are used only for training, not for testing).</p>
+<p>This idea of adding auxiliary classifiers to intermediate layers and output layers to stabilize deep network learning was later applied in ACGAN (Auxiliary Classifier GAN) [Odena et al., 2017] and others, becoming a popular approach in the realm of deep generative models for image generation and image-to-image translation.</p>
+</section>
+</section>
+<section id="v2-introduction-of-batch-normalization">
+<h2>3. v2: Introduction of Batch Normalization<a class="headerlink" href="#v2-introduction-of-batch-normalization" title="Link to this heading">#</a></h2>
+<p>The batch normalization paper [Ioffe and Szegedy, 2015] was published by the same Google authors as InceptionNet.</p>
+<p>Inception v2, which introduced batch normalization to Inception, was experimented with in the batch normalization paper, and this is called version 2 of InceptionNet. In later research, it is often called BN-Inception.</p>
+</section>
+<section id="v3-improvement-of-inception-blocks">
+<h2>4. v3: Improvement of Inception Blocks<a class="headerlink" href="#v3-improvement-of-inception-blocks" title="Link to this heading">#</a></h2>
+<p>[Szegedy et al., 2016] proposed Inception v3 as an improved version reconsidering Inception v1.</p>
+<p>In Inception v3, both image recognition performance and model efficiency were improved by introducing “new Inception blocks utilizing factorization (Section 4.1)” and “efficient spatial size reduction blocks (Section 4.2).” This evolved it into a “network structure with better balance between width and depth” compared to Inception v1.</p>
+<p>The network configuration of InceptionNet v3 (excluding auxiliary classifier branches) is as follows:</p>
+<ul class="simple">
+<li><p>Early convolution + pooling layers</p></li>
+<li><p>Inception block A (Figure 2-a)</p></li>
+<li><p>Spatial size reduction block (Figure 4-b)</p></li>
+<li><p>Inception block B (Figure 2-b)</p></li>
+<li><p>Spatial size reduction block (Figure 4-b)</p></li>
+<li><p>Inception block C (Figure 3)</p></li>
+<li><p>Classifier head layers</p></li>
+</ul>
+<p>Additionally, it makes error backpropagation easier in deep networks by branching the auxiliary classifier branch from the second spatial size reduction block.</p>
+<p>Furthermore, label smoothing (Section 4.3) was proposed as a regularization term for the loss function, which would later be widely used in deep models.</p>
+<section id="parameter-reduction-through-factorization">
+<h3>4.1 Parameter Reduction through Factorization<a class="headerlink" href="#parameter-reduction-through-factorization" title="Link to this heading">#</a></h3>
+<p>Inception v3 uses module A, module B (Figure 2), and module C (Figure 3) in sequence, taking as input the feature map [35 x 35 x 288] first convolved with six 3x3 convolution layers + 3x3 pooling layer.</p>
+<p>All three modules utilize “factorization of convolution layers.” This achieved both (1) parameter reduction and (2) performance improvement for InceptionNet v3 as a whole.</p>
+<p>First, “module A (Figure 2-a)” was proposed, which factorizes the [5 x 5] convolution path used in Inception v1’s Inception block (Figure 1) into two layers of [3 x 3] convolutions for parameter reduction (same concept as VGGNet). Channel-direction dimension reduction is performed with [1 x 1] convolution layers before each convolution, which is the same technique as Inception v1 (Figure 1-b).</p>
+<p>Also, “module B (Figure 2-b)” using asymmetric factorization was proposed. It reduces computational cost by factorizing the original [n x n] convolution into two layers of [n x 1] and [1 x n] with equivalent receptive fields.</p>
+<p>“Module C (Figure 3)” was also proposed, which promotes high-dimensional features by branching paths at the module’s end. High-dimensionalization promotes more disentangled (convolution) features in each path (principle 2 in the paper section 2). This also improves convergence and speeds up learning.</p>
+</section>
+<section id="effective-spatial-size-reduction">
+<h3>4.2 Effective Spatial Size Reduction<a class="headerlink" href="#effective-spatial-size-reduction" title="Link to this heading">#</a></h3>
+<p>Inception v3 proposed using a new “spatial size reduction block (Figure 4-b blue frame)” to perform spatial size reduction efficiently.</p>
+<p>While Inception v1 uses 1x1 convolutions within blocks to reduce feature dimensions in the channel direction at each spatial position, there were still issues with spatial size reduction, with two areas for improvement:</p>
+<p>Type 1 (Figure 4-a left):
+When pooling before the Inception block
+The middle feature map becomes a bottleneck, hindering improvement in expressiveness.</p>
+<p>Type 2 (Figure 4-a right):
+When placing the Inception block first
+Computational cost triples.</p>
+<p>Therefore, Inception v3 proposed and used an “improved spatial size reduction block” (Figure 4-b blue frame). Using this improved version allows increasing filter numbers while reducing spatial size. This enabled spatial size reduction while maintaining low computational cost and avoiding bottleneck representations.</p>
+</section>
+<section id="label-smoothing">
+<h3>4.3 Label Smoothing<a class="headerlink" href="#label-smoothing" title="Link to this heading">#</a></h3>
+<p>The 2015-2016 research of Inception v3 (and ResNet) was motivated by the desire to increase layers and make networks deeper than the contemporary state-of-the-art CNN backbone VGGNet (16/19 layers). However, increasing layers further increased the number of model parameters, raising the risk of CNN overfitting.</p>
+<p>As a countermeasure, Inception v3 proposed label smoothing as a regularization method for the softmax loss function (Figure 5). Label smoothing achieves regularization by creating smoothed pseudo-labels that add a small noise distribution to all classes in the distribution created by Softmax from the correct label, and training with these pseudo-labels.</p>
+</section>
+</section>
+<section id="inception-v4-and-inception-resnet">
+<h2>5. Inception-v4 and Inception-ResNet<a class="headerlink" href="#inception-v4-and-inception-resnet" title="Link to this heading">#</a></h2>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "skojaku/applied-soft-comp",
+            ref: "gh-pages",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./m04-image-processing"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-of-contents">Table of Contents</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-inceptionnet-overview">1. What is InceptionNet [Overview]</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#article-structure">1.1 Article Structure</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#core-ideas-and-key-points-of-each-version">1.2 Core Ideas and Key Points of Each Version</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#origin-of-inceptionnets-name">1.3 Origin of InceptionNet’s Name</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-googlenet">2. v1 (GoogLeNet)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inception-module">2.1 Inception Module</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#multiple-size-path-parallelization">2.1.1 Multiple Size Path Parallelization</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#dimension-reduction-for-lightweight-design">2.1.2 Dimension Reduction for Lightweight Design</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#global-average-pooling">2.2 Global Average Pooling</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#auxiliary-classifiers-stabilizing-backpropagation-to-early-layers">2.3 Auxiliary Classifiers: Stabilizing Backpropagation to Early Layers</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v2-introduction-of-batch-normalization">3. v2: Introduction of Batch Normalization</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v3-improvement-of-inception-blocks">4. v3: Improvement of Inception Blocks</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-reduction-through-factorization">4.1 Parameter Reduction through Factorization</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#effective-spatial-size-reduction">4.2 Effective Spatial Size Reduction</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#label-smoothing">4.3 Label Smoothing</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inception-v4-and-inception-resnet">5. Inception-v4 and Inception-ResNet</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Sadamori Kojaku
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

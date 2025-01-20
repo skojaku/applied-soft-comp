@@ -1,0 +1,1220 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Preliminaries: Image Processing &#8212; Applied Soft Computing</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'm05-graph/image-processing';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../home.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.jpg" class="logo__image only-light" alt="Applied Soft Computing - Home"/>
+    <img src="../_static/logo.jpg" class="logo__image only-dark pst-js-only" alt="Applied Soft Computing - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../home.html">
+                    Welcome to SSIE 541/441 Applied Soft Computing
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Intro</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../intro/why-applied-soft-computing.html">Why applied soft computing?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/setup.html">Set up</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/deliverables.html">Deliverables</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Word and Document Embeddings</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/what-to-learn.html">Module 1: Word Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/tf-idf.html">Teaching computers how to understand words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/word2vec.html">word2vec: a small model with a big idea</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/word2vec_plus.html">GloVe and FastText: Building on Word2Vec’s Foundation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/sem-axis.html">Understanding SemAxis: Semantic Axes in Word Vector Spaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/bias-in-embedding.html">Bias in Word Embeddings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/doc2vec.html">Doc2Vec: From Words to Documents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/summary.html">Summary</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Recurrent Neural Networks</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/what-to-learn.html">Module 2: Language Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/reccurrent-neural-net.html">Recurrent Neural Network (RNN)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/lstm.html">Long Short-Term Memory (LSTM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/elmo.html">Embedding from Language Models (ELMo)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/seq2seq.html">Sequence-to-Sequence Models</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Transformers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/what-to-learn.html">Module 3: Transformers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/transformers.html">Transformers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/bert.html">Bidirectional Encoder Representations from Transformers (BERT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/sentence-bert.html">Sentence-BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/gpt.html">Generative Pre-trained Transformer (GPT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/t5.html">Text-to-Text Transfer Transformer (T5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/instruction-fine-tuning.html">Instruction Fine-Tuning</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Images</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/what-to-learn.html">Module 3: Image Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/pen-and-paper.html">Pen and paper exercises</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/image-processing.html">Preliminaries: Image Processing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Graphs</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="what-to-learn.html">Module 4: Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pen-and-paper.html">Pen and paper exercises</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spectral-embedding.html">Spectral Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graph-embedding-w-word2vec.html">Graph embedding with word2vec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spectral-vs-neural-embedding.html">Spectral vs Neural Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="from-image-to-graph.html">From Image to Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graph-convolutional-network.html">Graph Convolutional Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="popular-gnn.html">Popular Graph Neural Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="software.html">Software for Network Embedding</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/skojaku/applied-soft-comp/gh-pages?urlpath=tree/docs/lecture-note/m05-graph/image-processing.md" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="../_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="initThebeSBT()"
+  class="btn btn-sm btn-launch-thebe dropdown-item"
+  title="Launch Thebe"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-play"></i>
+  </span>
+<span class="btn__text-container">Live Code</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/skojaku/applied-soft-comp" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/skojaku/applied-soft-comp/issues/new?title=Issue%20on%20page%20%2Fm05-graph/image-processing.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/m05-graph/image-processing.ipynb" target="_blank"
+   class="btn btn-sm btn-download-notebook-button dropdown-item"
+   title="Download notebook file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="../_sources/m05-graph/image-processing.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Preliminaries: Image Processing</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#edge-detection-problem-in-image-processing">Edge Detection Problem in Image Processing</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-example">An example</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#convolution">Convolution</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fourier-transform">Fourier Transform</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-example-for-the-fourier-transform">An example for the Fourier transform</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fourier-transform-of-images">Fourier Transform of Images</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-example-of-fourier-transform">An example of Fourier transform</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-key-lesson-from-image-processing">A key lesson from image processing</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="preliminaries-image-processing">
+<h1>Preliminaries: Image Processing<a class="headerlink" href="#preliminaries-image-processing" title="Link to this heading">#</a></h1>
+<p>Graph Neural Networks are a type of neural network for graph data. node2vec and deepwalk stem from the idea of language modeling.
+In this module, we will focus on another branch of graph neural networks that stem from image processing.</p>
+<section id="edge-detection-problem-in-image-processing">
+<h2>Edge Detection Problem in Image Processing<a class="headerlink" href="#edge-detection-problem-in-image-processing" title="Link to this heading">#</a></h2>
+<p>Edge detection is a classical problem in image processing. The goal is to identify the boundaries of objects in an image.</p>
+<p><img alt="" src="https://media.geeksforgeeks.org/wp-content/uploads/20240616211411/Screenshot-(85).webp" /></p>
+<p>To approach the problem, let us first remind that an image is a matrix of pixels. Each pixel has RGB values, each of which represents the intensity of red, green, and blue color. To simplify the problem, we focus on grayscale images, in which each pixel has only one value representing the brightness. In this case, an image can be represented as a 2D matrix, where each element in the matrix represents the brightness of a pixel.</p>
+<p><img alt="" src="https://ai.stanford.edu/~syyeung/cvweb/Pictures1/imagematrix.png" /></p>
+<section id="an-example">
+<h3>An example<a class="headerlink" href="#an-example" title="Link to this heading">#</a></h3>
+<p>Human eyes are very sensitive to brightness changes. An edge in an image appears when there is a <em>significant brightness change between adjacent pixels</em>. To be more concrete, let’s consider a small example consisting of 6x6 pixels, with a vertical line from the top to the bottom, where the brightness is higher than the neighboring pixels. This is an edge we want to detect.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+X = \begin{bmatrix}
+10 &amp; 10 &amp; 80 &amp; 10 &amp; 10 &amp; 10 \\
+10 &amp; 10 &amp; 80 &amp; 10 &amp; 10 &amp; 10 \\
+10 &amp; 10 &amp; 80 &amp; 10 &amp; 10 &amp; 10 \\
+10 &amp; 10 &amp; 80 &amp; 10 &amp; 10 &amp; 10 \\
+10 &amp; 10 &amp; 80 &amp; 10 &amp; 10 &amp; 10 \\
+10 &amp; 10 &amp; 80 &amp; 10 &amp; 10 &amp; 10
+\end{bmatrix}
+\end{split}\]</div>
+<p>Let’s zoom on the pixel at (3, 3) and its surrounding pixels.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+Z = \begin{bmatrix}
+10 &amp; 80 &amp; 10 \\
+\textcolor{blue}{10} &amp; \textcolor{red}{80} &amp; \textcolor{purple}{10} \\
+10 &amp; 80 &amp; 10
+\end{bmatrix}
+\end{split}\]</div>
+<p>where the central pixel is highlighted in red. Since we are interested in the edge which is a sudden change in brightness along the horizontal direction, we take a derivative at the central pixel by</p>
+<div class="math notranslate nohighlight">
+\[
+\nabla Z_{22} = \textcolor{blue}{Z_{2,1}} - \textcolor{purple}{Z_{2,3}}
+\]</div>
+<p>Following the same process, we can compute the derivative at all pixels, which gives us the (horizontal) derivative of the image.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{bmatrix}
+- &amp; -70 &amp; 0 &amp; 70 &amp; 0 &amp; - \\
+- &amp; -70 &amp; 0 &amp; 70 &amp; 0 &amp; - \\
+- &amp; -70 &amp; 0 &amp; 70 &amp; 0 &amp; - \\
+- &amp; -70 &amp; 0 &amp; 70 &amp; 0 &amp; - \\
+- &amp; -70 &amp; 0 &amp; 70 &amp; 0 &amp; -
+\end{bmatrix}
+\end{split}\]</div>
+<p>The symbol <code class="docutils literal notranslate"><span class="pre">-</span></code> indicates that the derivative is not defined because one of the neighboring pixels is out of the image boundary.
+We observe that the derivative is high at the edge and low elsewhere. This is a simple but effective way to detect edges in an image.</p>
+<p>We can consider a derivative operator along the vertical direction that computes the difference between the vertical neighboring pixels.</p>
+<div class="math notranslate nohighlight">
+\[
+\nabla Z_{22} = Z_{1,2} - Z_{3,2}
+\]</div>
+<p>And, when applied to the entire image, the result is</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{bmatrix}
+- &amp; - &amp; - &amp; - &amp; -  &amp; - \\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+- &amp; - &amp; - &amp; - &amp; - &amp; -
+\end{bmatrix}
+\end{split}\]</div>
+<p>The all entries are zero, meaning that there is no edge in the vertical direction.</p>
+<p>We can combine the horizontal and vertical derivatives to get the gradient of the image. For example,</p>
+<div class="math notranslate nohighlight">
+\[
+\nabla Z_{22} = Z_{12} - Z_{32} + Z_{21} - Z_{23}
+\]</div>
+<p>When applied to the entire image, the result is the same as the horizontal derivative.</p>
+</section>
+<section id="convolution">
+<h3>Convolution<a class="headerlink" href="#convolution" title="Link to this heading">#</a></h3>
+<p>We observe that there is a repeated pattern in the derivative computation: we are taking addition and subtraction of neighbiring pixels. This motivates us to generalize the operation to a more general form.</p>
+<div class="math notranslate nohighlight">
+\[
+\nabla Z_{22} = \sum_{i=-1}^1 \sum_{j=-1}^1 K_{h-(i+1),w-(j+1)} Z_{2+i, 2+j}
+\]</div>
+<p>where <span class="math notranslate nohighlight">\(K\)</span> is a <span class="math notranslate nohighlight">\(3 \times 3\)</span> matrix, and <span class="math notranslate nohighlight">\(w=h=3\)</span> represent the width and height of the kernel.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+K = \begin{bmatrix}
+K_{11} &amp; K_{12} &amp; K_{13} \\
+K_{21} &amp; K_{22} &amp; K_{23} \\
+K_{31} &amp; K_{32} &amp; K_{33}
+\end{bmatrix}
+\end{split}\]</div>
+<p>The matrix <span class="math notranslate nohighlight">\(K\)</span> is called a <strong>kernel</strong>, and applying it to the image is called <strong>convolution</strong>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The index of the kernel is conventionally reversed. Namely, we reorder the entries of the kernel such that</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{bmatrix}
+K_{33} &amp; K_{32} &amp; K_{31} \\
+K_{23} &amp; K_{22} &amp; K_{21} \\
+K_{13} &amp; K_{12} &amp; K_{11}
+\end{bmatrix}
+\end{split}\]</div>
+<p>Then, take the element-wise product with <span class="math notranslate nohighlight">\(Z\)</span></p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{bmatrix}
+Z_{11} K_{33} &amp; Z_{12} K_{32} &amp; Z_{13} K_{31} \\
+Z_{21} K_{23} &amp; Z_{22} K_{22} &amp; Z_{23} K_{21} \\
+Z_{31} K_{13} &amp; Z_{32} K_{12} &amp; Z_{33} K_{11}
+\end{bmatrix}
+\end{split}\]</div>
+<p>and sum up all the elements to get the new pixel value <span class="math notranslate nohighlight">\(\nabla Z_{22}\)</span>.
+Why do we reverse the kernel? This is to match with the mathematical definition of convolution, which will be introduced later.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>In the previous example, we used a <span class="math notranslate nohighlight">\(3 \times 3\)</span> kernels called the Prewitt operator, which in terms of <span class="math notranslate nohighlight">\(K\)</span> is</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+K_h = \begin{bmatrix}
+-1 &amp; 0 &amp; 1 \\
+-1 &amp; 0 &amp; 1 \\
+-1 &amp; 0 &amp; 1
+\end{bmatrix}
+\quad \text{or} \quad
+K_v = \begin{bmatrix}
+-1 &amp; -1 &amp; -1 \\
+0 &amp; 0 &amp; 0 \\
+1 &amp; 1 &amp; 1
+\end{bmatrix}
+\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(K_h\)</span> is the horizontal Prewitt operator and <span class="math notranslate nohighlight">\(K_v\)</span> is the vertical Prewitt operator.</p>
+</div>
+<p>A kernel represents a local pattern we want to detect. The new pixel value after the convolution is maximized when the pattern is most similar to the kernel in terms of the inner product. This can be confirmed by:</p>
+<div class="math notranslate nohighlight">
+\[
+\nabla Z_{22} = \sum_{i=-1}^1 \sum_{j=-1}^1 K_{h-(i+1),w-(j+1)} Z_{2+i, 2+j} = \langle \hat K, Z \rangle
+\]</div>
+<p>where <span class="math notranslate nohighlight">\(\langle \cdot, \cdot \rangle\)</span> is the inner product, and <span class="math notranslate nohighlight">\(\hat K\)</span> is the order-reversed kernel.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Check out this awesome interactive demo to see how different kernels work: <a class="reference external" href="https://setosa.io/ev/image-kernels/">Demo</a></p>
+</div>
+</section>
+</section>
+<section id="fourier-transform">
+<h2>Fourier Transform<a class="headerlink" href="#fourier-transform" title="Link to this heading">#</a></h2>
+<p><img alt="" src="https://miro.medium.com/v2/resize:fit:1400/1*D6iRfzDkz-sEzyjYoVZ73w.gif" /></p>
+<p>Convolution computes the new pixel values by sliding a kernel over an image. How is the resulting image related to the original image?</p>
+<p>To answer this question, let us consider a row of an image and convolve it with a kernel <span class="math notranslate nohighlight">\(K\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{aligned}
+X &amp;= \begin{bmatrix}
+X_1 &amp; X_2 &amp; X_3 &amp; X_4 &amp; X_5 &amp; X_6
+\end{bmatrix} \\
+K &amp;= \begin{bmatrix}
+K_1 &amp; K_2 &amp; K_3
+\end{bmatrix}
+\end{aligned}
+\end{split}\]</div>
+<p>The convolution of <span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(K\)</span> is</p>
+<div class="math notranslate nohighlight">
+\[
+X * K = \begin{bmatrix}
+X_1 K_3 + X_2 K_2 + X_3 K_1 &amp; X_2 K_3 + X_3 K_2 + X_4 K_1 &amp; X_3 K_3 + X_4 K_2 + X_5 K_1 &amp; X_4 K_3 + X_5 K_2 + X_6 K_1
+\end{bmatrix}
+\]</div>
+<p>…which is complicated, right? 😅 So let’s make it simple by using a useful theorem called <strong>the convolution theorem</strong>.</p>
+<p>The convolution theorem gives us a simpler way to think about convolution. Instead of doing the complex sliding window operation in the original domain (like pixel values), we can:</p>
+<ol class="arabic simple">
+<li><p>Transform both signals to the frequency domain using Fourier transform</p></li>
+<li><p>Multiply them together (much simpler!)</p></li>
+<li><p>Transform back to get the same result</p></li>
+</ol>
+<p>Mathematically, the above steps can be written as:</p>
+<ol class="arabic simple">
+<li><p><span class="math notranslate nohighlight">\(\mathcal{F}(X), \mathcal{F}(K)\)</span> - Transform both signals to frequency domain (Fourier transform)</p></li>
+<li><p><span class="math notranslate nohighlight">\(\mathcal{F}(X) \cdot \mathcal{F}(K)\)</span> - Multiply the transformed signals</p></li>
+<li><p><span class="math notranslate nohighlight">\(\mathcal{F}^{-1}(\mathcal{F}(X) \cdot \mathcal{F}(K))\)</span> - Transform back to get <span class="math notranslate nohighlight">\(X * K\)</span></p></li>
+</ol>
+<p>where <span class="math notranslate nohighlight">\(\mathcal{F}^{-1}\)</span> is the inverse Fourier transform that brings us back to the original domain. This is much easier than computing the convolution directly!</p>
+<p>For a discrete signal <span class="math notranslate nohighlight">\(x[n]\)</span> with <span class="math notranslate nohighlight">\(N\)</span> points, the Fourier transform <span class="math notranslate nohighlight">\(\mathcal{F}\)</span> is defined as:</p>
+<div class="math notranslate nohighlight">
+\[
+\mathcal{F}(x)[k] = \sum_{n=0}^{N-1} x[n] \cdot e^{-2\pi i \frac{nk}{N}}
+\]</div>
+<p>where <span class="math notranslate nohighlight">\(i\)</span> is the imaginary unit. Or equivalently,</p>
+<div class="math notranslate nohighlight">
+\[
+\mathcal{F}(x)[k] = \sum_{n=0}^{N-1} x[n] \cdot \left[ \cos\left(2\pi \frac{nk}{N}\right) - i \sin\left(2\pi \frac{nk}{N}\right) \right]
+\]</div>
+<p>using Euler’s formula <span class="math notranslate nohighlight">\(e^{ix} = \cos(x) + i\sin(x)\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Complex number can be thought of as a way to represent a 2D vector using a single value (which is a computer science perspective; mathematically, it is a bit more subtle). For example, <span class="math notranslate nohighlight">\(e^{i\pi/2} = \cos(\pi/2) + i\sin(\pi/2)\)</span> represents the 2D vector <span class="math notranslate nohighlight">\((\cos(\pi/2), \sin(\pi/2))\)</span>. In the context of Fourier transform, we interpret <span class="math notranslate nohighlight">\(e^{-2\pi i \frac{nk}{N}}\)</span> as two <em>base waves</em>, i.e., sine and cosine, with phase <span class="math notranslate nohighlight">\(\frac{2\pi k}{N}\)</span>.</p>
+<p><img alt="" src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Euler%27s_formula.svg/360px-Euler%27s_formula.svg.png" /></p>
+</div>
+<p>In simple terms, <span class="math notranslate nohighlight">\(\mathcal{F}\)</span> takes a signal (like our row of pixel values) and breaks it down into sine and cosine waves of different frequencies. Each frequency component <span class="math notranslate nohighlight">\(k\)</span> tells us “how much” of that frequency exists in our original signal.
+Don’t worry too much about the complex math. The key idea is that <span class="math notranslate nohighlight">\(\mathcal{F}\)</span> represents a signal as a sum of multiple waves with different frequencies, so we can understand the signal in terms of its frequencies rather than its original values.</p>
+<p><img alt="" src="https://devincody.github.io/Blog/post/an_intuitive_interpretation_of_the_fourier_transform/img/FFT-Time-Frequency-View_hu24c1c8fe894ecd0dad24174b2bed08c9_99850_800x0_resize_lanczos_2.png" /></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>3Blue1Brown makes a beautiful video explaining Fourier transform: <a class="reference external" href="https://www.youtube.com/watch?v=spUNpyF58BY">Video</a>. Here is a great interactive demo on Fourier transform by Jez Swanson: <a class="reference external" href="https://www.jezzamon.com/fourier/">Demo</a>.</p>
+</div>
+<section id="an-example-for-the-fourier-transform">
+<h3>An example for the Fourier transform<a class="headerlink" href="#an-example-for-the-fourier-transform" title="Link to this heading">#</a></h3>
+<p>Now, let’s perform the convolution using the Fourier transform using an example.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<span class="n">K</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let us first perform the convolution directly.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Pad X with zeros on both sides to handle boundary</span>
+<span class="n">n_conv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">K</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># Now we get full length output</span>
+<span class="n">XKconv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_conv</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_conv</span><span class="p">):</span>
+    <span class="n">XKconv</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">:(</span><span class="n">i</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">K</span><span class="p">))]</span> <span class="o">*</span> <span class="n">K</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># Reverse the kernel and take element-wise product and sum up</span>
+<span class="n">XKconv</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([-70.,   0.,  70.,   0.])
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let us now perform the convolution using the Fourier transform. We compute the Fourier transform of <span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(K\)</span>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 1: Transform X and K to frequency domain</span>
+<span class="n">FX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="c1"># Pad K with zeros to match the length of X before FFT</span>
+<span class="n">K_padded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">K</span><span class="p">)),</span> <span class="s1">&#39;constant&#39;</span><span class="p">)</span> <span class="c1"># [-1  0  1  0  0  0]</span>
+<span class="n">FK</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">K_padded</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;FX:&quot;</span><span class="p">,</span> <span class="n">FX</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FX: [130.+0.00000000e+00j -35.-6.06217783e+01j -35.+6.06217783e+01j
+  70.+7.10542736e-15j -35.-6.06217783e+01j -35.+6.06217783e+01j]
+</pre></div>
+</div>
+</div>
+</div>
+<ul class="simple">
+<li><p>We add zeros to <span class="math notranslate nohighlight">\(K\)</span> to make it the same length as <span class="math notranslate nohighlight">\(X\)</span> before applying the Fourier transform. This is necessary because the convolution theorem requires the signals to have the same length.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FX</span></code> is the Fourier transform of <span class="math notranslate nohighlight">\(X\)</span>, which is a complex number. Each entry <span class="math notranslate nohighlight">\(FX[k]\)</span> represents the weight of the cosine wave in its real part and the weight of the sine wave in its imaginary part, with phase <span class="math notranslate nohighlight">\(2\pi k / N\)</span>. Similarly for <code class="docutils literal notranslate"><span class="pre">FK</span></code>.</p></li>
+</ul>
+<p>Next, we multiply the transformed signals.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">FXKconv</span> <span class="o">=</span> <span class="n">FX</span> <span class="o">*</span> <span class="n">FK</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>This is the convolution in the frequency domain. Finally, we transform back to get the convolution.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">XKconv_ft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">FXKconv</span><span class="p">))</span>
+<span class="n">XKconv_ft</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([ 2.84957243e-15,  3.05036092e-15, -7.00000000e+01,  1.88737914e-15,
+        7.00000000e+01, -1.05195948e-15])
+</pre></div>
+</div>
+</div>
+</div>
+<ul>
+<li><p>We take the real part. The imaginary part is due to numerical artifacts that do not matter in practice.</p></li>
+<li><p>The Fourier transform convolution produces a longer output than direct convolution because it includes partial overlaps between K and X at the boundaries. Since we only want the full overlaps, we need to truncate the first two elements of <code class="docutils literal notranslate"><span class="pre">XKconv_ft</span></code> (as K has length 3) to match the length of the direct convolution result.</p></li>
+<li><p>For example, let’s look at what happens at the beginning of the convolution:</p>
+<ul class="simple">
+<li><p>At position -2: Only the last element of K overlaps with X: <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">10]</span> <span class="pre">*</span> <span class="pre">[-1,</span> <span class="pre">0,</span> <span class="pre">1]</span> <span class="pre">=</span> <span class="pre">10</span></code></p></li>
+<li><p>At position -1: Two elements of K overlap with X: <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">10,</span> <span class="pre">10]</span> <span class="pre">*</span> <span class="pre">[-1,</span> <span class="pre">0,</span> <span class="pre">1]</span> <span class="pre">=</span> <span class="pre">10</span></code></p></li>
+<li><p>At position 0: Full overlap begins: <code class="docutils literal notranslate"><span class="pre">[10,</span> <span class="pre">10,</span> <span class="pre">80]</span> <span class="pre">*</span> <span class="pre">[-1,</span> <span class="pre">0,</span> <span class="pre">1]</span> <span class="pre">=</span> <span class="pre">70</span></code></p></li>
+</ul>
+<p>The Fourier transform method gives us all these positions (-2, -1, 0, …), but we only want the full overlaps starting from position 0, which is why we truncate the first two elements.</p>
+</li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">XKconv_ft</span> <span class="o">=</span> <span class="n">XKconv_ft</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+<span class="n">XKconv_ft</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([-7.00000000e+01,  1.88737914e-15,  7.00000000e+01, -1.05195948e-15])
+</pre></div>
+</div>
+</div>
+</div>
+<p>This gives us the same result as the direct convolution up to numerical errors.</p>
+</section>
+</section>
+<section id="fourier-transform-of-images">
+<h2>Fourier Transform of Images<a class="headerlink" href="#fourier-transform-of-images" title="Link to this heading">#</a></h2>
+<p>Let’s extend the above example to an image which is a 2D matrix.
+The idea is the same: we take the Fourier transform of each row and column of the image, and then multiply them together to get the convolution in the frequency domain.
+More specifically, for an image <span class="math notranslate nohighlight">\(X\)</span> with size <span class="math notranslate nohighlight">\(H \times W\)</span>, the Fourier transform of <span class="math notranslate nohighlight">\(X\)</span> is</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{aligned}
+\mathcal{F}(X)[h, w] &amp;= \sum_{k=0}^{H-1} \sum_{\ell=0}^{W-1} X[k, \ell] \cdot e^{-2\pi i \frac{hk}{H}} \cdot e^{-2\pi i \frac{w\ell}{W}} \\
+&amp;= \sum_{k=0}^{H-1} \sum_{\ell=0}^{W-1} X[k, \ell] e^{-2\pi i \left(\frac{hk}{H} + \frac{w\ell}{W}\right)}
+\end{aligned}
+\end{split}\]</div>
+<p>Comparing with the 1D case, we see that the 2D Fourier transform is <em>functionally</em> the same as the 1D Fourier transform, except that we now have two indices <span class="math notranslate nohighlight">\(h\)</span> and <span class="math notranslate nohighlight">\(w\)</span> to represent the frequency in both dimensions.
+The basis waves are 2D waves as shown below.</p>
+<p><strong>Cosine waves</strong></p>
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="k">def</span> <span class="nf">basis_function</span><span class="p">(</span><span class="n">img_size</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">  img_size : square size of image f(x,y)</span>
+<span class="sd">  u,v : spatial space indice</span>
+<span class="sd">  &#39;&#39;&#39;</span>
+  <span class="n">N</span> <span class="o">=</span> <span class="n">img_size</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+  <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+  <span class="n">x_</span><span class="p">,</span> <span class="n">y_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+  <span class="n">bf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">u</span><span class="o">*</span><span class="n">x_</span><span class="o">/</span><span class="n">N</span><span class="o">+</span><span class="n">v</span><span class="o">*</span><span class="n">y_</span><span class="o">/</span><span class="n">N</span><span class="p">))</span>
+  <span class="k">if</span> <span class="n">u</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">bf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">bf</span><span class="p">)</span>
+  <span class="n">real</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">bf</span><span class="p">)</span> <span class="c1"># The cosine part</span>
+  <span class="n">imag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">bf</span><span class="p">)</span> <span class="c1"># The sine part</span>
+  <span class="k">return</span> <span class="n">real</span><span class="p">,</span> <span class="n">imag</span>
+
+<span class="n">size</span> <span class="o">=</span> <span class="mi">16</span>
+<span class="n">bf_arr_real</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">size</span><span class="o">*</span><span class="n">size</span><span class="p">,</span><span class="n">size</span><span class="p">,</span><span class="n">size</span><span class="p">))</span>
+<span class="n">bf_arr_imag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">size</span><span class="o">*</span><span class="n">size</span><span class="p">,</span><span class="n">size</span><span class="p">,</span><span class="n">size</span><span class="p">))</span>
+<span class="n">ind</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+    <span class="n">re</span><span class="p">,</span><span class="n">imag</span> <span class="o">=</span> <span class="n">basis_function</span><span class="p">(</span><span class="n">img_size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">row</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="n">col</span><span class="p">)</span>
+    <span class="n">bf_arr_real</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span>
+    <span class="n">bf_arr_imag</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">imag</span>
+    <span class="n">ind</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="c1"># real part</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">axs</span> <span class="o">=</span> <span class="n">axs</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">img</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">bf_arr_real</span><span class="p">,</span> <span class="n">axs</span><span class="p">):</span>
+  <span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+  <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<img alt="../_images/96835558c8a144e3c18e56e6a6a78a5b24d0c9220f3d3ea820b261587ac74bf5.png" src="../_images/96835558c8a144e3c18e56e6a6a78a5b24d0c9220f3d3ea820b261587ac74bf5.png" />
+</div>
+</div>
+<p><strong>Sine waves</strong></p>
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># imaginary part</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">axs</span> <span class="o">=</span> <span class="n">axs</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">img</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">bf_arr_imag</span><span class="p">,</span> <span class="n">axs</span><span class="p">):</span>
+  <span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+  <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<img alt="../_images/116b770235d49736544c5b03de3816670d1996b7ad5e7321cadb190989e2612a.png" src="../_images/116b770235d49736544c5b03de3816670d1996b7ad5e7321cadb190989e2612a.png" />
+</div>
+</div>
+<p>The Fourier transform of an image is a decomposition of an image into the sum of these basis waves.</p>
+<section id="an-example-of-fourier-transform">
+<h3>An example of Fourier transform<a class="headerlink" href="#an-example-of-fourier-transform" title="Link to this heading">#</a></h3>
+<p>Let us apply the Fourier transform to an image.</p>
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="c1"># Read image from URL</span>
+<span class="k">def</span> <span class="nf">read_jpeg_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
+    <span class="c1"># Convert to RGB mode if needed (in case it&#39;s RGBA)</span>
+    <span class="k">if</span> <span class="n">img</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s1">&#39;RGB&#39;</span><span class="p">:</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">img</span>
+
+<span class="k">def</span> <span class="nf">image_to_numpy</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">to_gray_scale</span><span class="p">(</span><span class="n">img_np</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">img_np</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># URL of the image</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://www.binghamton.edu/news/images/uploads/features/20180815_peacequad02_jwc.jpg&quot;</span>
+
+<span class="n">img</span> <span class="o">=</span> <span class="n">read_jpeg_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+<span class="n">img_np</span> <span class="o">=</span> <span class="n">image_to_numpy</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+<span class="n">img_gray</span> <span class="o">=</span> <span class="n">to_gray_scale</span><span class="p">(</span><span class="n">img_np</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img_gray</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.image.AxesImage at 0x15a35c910&gt;
+</pre></div>
+</div>
+<img alt="../_images/6f03a50fadf3039c955c046ab1e3455c61151ea01b143efe0399bf0ce159bad7.png" src="../_images/6f03a50fadf3039c955c046ab1e3455c61151ea01b143efe0399bf0ce159bad7.png" />
+</div>
+</div>
+<p>Take the Fourier transform of the image.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ft_img_gray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft2</span><span class="p">(</span><span class="n">img_gray</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>This decomposes the image into a sum of basis waves. Let’s see the weights of the basis waves.</p>
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib</span>
+
+<span class="n">weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ft_img_gray</span><span class="p">)</span>
+
+<span class="c1"># real part</span>
+<span class="n">fig1</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+<span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">weight</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">(),</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+<span class="n">cbar</span> <span class="o">=</span> <span class="n">fig1</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">ax1</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">)</span>
+<span class="n">cbar</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s1">&#39;Fourier transform magnitude&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<img alt="../_images/b9a1adc91e53cda9cbe41890a103fea7a33a3131f49997a241b51461c8a4d72b.png" src="../_images/b9a1adc91e53cda9cbe41890a103fea7a33a3131f49997a241b51461c8a4d72b.png" />
+</div>
+</div>
+<p>The corresponding basis waves look like this:</p>
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">size</span> <span class="o">=</span> <span class="mi">16</span>
+<span class="n">bf_arr_real</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">size</span><span class="o">*</span><span class="n">size</span><span class="p">,</span><span class="n">size</span><span class="p">,</span><span class="n">size</span><span class="p">))</span>
+<span class="n">bf_arr_imag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">size</span><span class="o">*</span><span class="n">size</span><span class="p">,</span><span class="n">size</span><span class="p">,</span><span class="n">size</span><span class="p">))</span>
+<span class="n">ind</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">size</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="n">size</span><span class="o">//</span><span class="mi">2</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">size</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="n">size</span><span class="o">//</span><span class="mi">2</span><span class="p">):</span>
+    <span class="n">re</span><span class="p">,</span><span class="n">imag</span> <span class="o">=</span> <span class="n">basis_function</span><span class="p">(</span><span class="n">img_size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">row</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="n">col</span><span class="p">)</span>
+    <span class="n">bf_arr_real</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span>
+    <span class="n">bf_arr_imag</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">imag</span>
+    <span class="n">ind</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="c1"># real part</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">axs</span> <span class="o">=</span> <span class="n">axs</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">img</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">bf_arr_real</span><span class="p">,</span> <span class="n">axs</span><span class="p">):</span>
+  <span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+  <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;Real Part of Basis Functions&#39;</span><span class="p">)</span>
+
+
+<span class="c1"># imaginary part</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">axs</span> <span class="o">=</span> <span class="n">axs</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">img</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">bf_arr_imag</span><span class="p">,</span> <span class="n">axs</span><span class="p">):</span>
+  <span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+  <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;Imaginary Part of Basis Functions&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0.5, 0.98, &#39;Imaginary Part of Basis Functions&#39;)
+</pre></div>
+</div>
+<img alt="../_images/11a5fd3d8bad4d94b7f80cf436f6c65bf5515ff120a3a7e9bf67c17055b2cda0.png" src="../_images/11a5fd3d8bad4d94b7f80cf436f6c65bf5515ff120a3a7e9bf67c17055b2cda0.png" />
+<img alt="../_images/1b4813a8c793912f19dfc5925bd5b45e92fabdbedd1717b98b35d7415e7f2a50.png" src="../_images/1b4813a8c793912f19dfc5925bd5b45e92fabdbedd1717b98b35d7415e7f2a50.png" />
+</div>
+</div>
+<p>Now, let’s see the convolution of the image with a Prewitt operator.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">K</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span> <span class="c1"># Prewitt operator</span>
+
+<span class="n">K_padd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">img_gray</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">img_gray</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+<span class="n">K_padd</span><span class="p">[:</span><span class="n">K</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:</span><span class="n">K</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">K</span>
+
+<span class="c1"># convolution</span>
+<span class="n">FK</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft2</span><span class="p">(</span><span class="n">K_padd</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The Fourier transform of the Prewitt operator looks like this:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">FK</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+<span class="n">cbar</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/cd0c557e2ea4786dcb0fb5b845acadea906a3164e9a3ba0036c1b1eb5bfeee12.png" src="../_images/cd0c557e2ea4786dcb0fb5b845acadea906a3164e9a3ba0036c1b1eb5bfeee12.png" />
+</div>
+</div>
+<p>We can think of the frequency domain of the kernel as a <strong>filter</strong> that suppresses some frequencies and allows others to pass through. In the example of the Prewitt operator, the kernel <code class="docutils literal notranslate"><span class="pre">FK</span></code> has a low value around the center of the image. The product <span class="math notranslate nohighlight">\(FX \cdot FK\)</span> then suppresses the low-frequency components of the image, and we are left with the high-frequency components that correspond to the horizontal edges. We can think of this as a high-pass filter that only allows high-frequency components to pass through.</p>
+<p>Let’s see the convolution result.</p>
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">FX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft2</span><span class="p">(</span><span class="n">img_gray</span><span class="p">)</span>
+<span class="n">conv_img_gray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft2</span><span class="p">(</span><span class="n">FX</span> <span class="o">*</span> <span class="n">FK</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">conv_img_gray</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.image.AxesImage at 0x15e4c13d0&gt;
+</pre></div>
+</div>
+<img alt="../_images/71b205c6a33f60942d6e23d1c5cfed7ee86fe0ccedd1c6238f035db107dfce96.png" src="../_images/71b205c6a33f60942d6e23d1c5cfed7ee86fe0ccedd1c6238f035db107dfce96.png" />
+</div>
+</div>
+<p>We observe that the horizontal edges are highlighted.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A widespread application of the 2D Fourier transform is JPEG format. Here’s how it works:</p>
+<p>(1) It first breaks the image into small 8x8 squares.
+(2) It converts each square into frequencies using the Discrete Cosine Transform. The sine part is discarded for compression.
+(3) It keeps the important low frequencies that our eyes can see well.
+(4) It throws away most of the high frequencies that our eyes don’t notice much.</p>
+<p>These steps make the file much smaller while still looking good to us.</p>
+</div>
+</section>
+</section>
+<section id="a-key-lesson-from-image-processing">
+<h2>A key lesson from image processing<a class="headerlink" href="#a-key-lesson-from-image-processing" title="Link to this heading">#</a></h2>
+<p>We have seen an equivalence between convolution in the pixel (spatial) domain and multiplication in the frequency domain.
+Using the Fourier transform, an image is decomposed into a sum of basis waves.
+The <em>kernel</em> can be thought of as <em>a filter</em> that suppresses some basis waves and allows others to pass through.</p>
+<p>This idea is the key to understand graph convolutional networks we will see in the next page.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "skojaku/applied-soft-comp",
+            ref: "gh-pages",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./m05-graph"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#edge-detection-problem-in-image-processing">Edge Detection Problem in Image Processing</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-example">An example</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#convolution">Convolution</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fourier-transform">Fourier Transform</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-example-for-the-fourier-transform">An example for the Fourier transform</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fourier-transform-of-images">Fourier Transform of Images</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-example-of-fourier-transform">An example of Fourier transform</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-key-lesson-from-image-processing">A key lesson from image processing</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Sadamori Kojaku
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,115 @@
+Traceback (most recent call last):
+  File "/Users/skojaku-admin/miniforge3/envs/advnetsci/lib/python3.11/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+  File "/Users/skojaku-admin/miniforge3/envs/advnetsci/lib/python3.11/site-packages/nbclient/client.py", line 1305, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/skojaku-admin/miniforge3/envs/advnetsci/lib/python3.11/site-packages/jupyter_core/utils/__init__.py", line 165, in wrapped
+    return loop.run_until_complete(inner)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/skojaku-admin/miniforge3/envs/advnetsci/lib/python3.11/asyncio/base_events.py", line 650, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/Users/skojaku-admin/miniforge3/envs/advnetsci/lib/python3.11/contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "/Users/skojaku-admin/miniforge3/envs/advnetsci/lib/python3.11/site-packages/nbclient/client.py", line 650, in async_setup_kernel
+    yield
+  File "/Users/skojaku-admin/miniforge3/envs/advnetsci/lib/python3.11/site-packages/nbclient/client.py", line 705, in async_execute
+    await self.async_execute_cell(
+  File "/Users/skojaku-admin/miniforge3/envs/advnetsci/lib/python3.11/site-packages/nbclient/client.py", line 1058, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/Users/skojaku-admin/miniforge3/envs/advnetsci/lib/python3.11/site-packages/nbclient/client.py", line 914, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+from asctools.rnn_trainer import RNNTrainer
+from torch import nn
+vocab_size = 28 # 26 characters + 2 parentheses
+
+lstm = LSTM(input_size=vocab_size, hidden_size=32, output_size=2)
+lstm.train()
+trainer = RNNTrainer(lstm)
+losses = trainer.train(
+    input_tensors=sequences_one_hot, # This is the input sequence.
+    targets=y_valid, # This is the target sequence.
+    criterion=nn.CrossEntropyLoss(), # This is the loss function.
+    max_epochs=300, # This is the maximum number of epochs.
+    learning_rate=0.01, # This is the learning rate.
+    clip_grad_norm=1.0, # This is to prevent the gradient from exploding or vanishing.
+)
+------------------
+
+----- stderr -----
+/Users/skojaku-admin/miniforge3/envs/advnetsci/lib/python3.11/site-packages/torch/optim/lr_scheduler.py:28: UserWarning: The verbose parameter is deprecated. Please use get_last_lr() to access the learning rate.
+  warnings.warn("The verbose parameter is deprecated. Please use get_last_lr() "
+----- stderr -----
+Training:   0%|                                                                                                                         | 0/300 [00:00<?, ?it/s]
+----- stderr -----
+
+----- stderr -----
+Epoch 1 - Loss: 0.0000:   0%|                                                                                                            | 0/32 [00:00<?, ?it/s]
+----- stderr -----
+[A
+----- stderr -----
+
+----- stderr -----
+
+----- stderr -----
+[A
+----- stderr -----
+Training:   0%|                                                                                                                         | 0/300 [00:00<?, ?it/s]
+----- stderr -----
+
+------------------
+
+[0;31m---------------------------------------------------------------------------[0m
+[0;31mTypeError[0m                                 Traceback (most recent call last)
+Cell [0;32mIn[5], line 8[0m
+[1;32m      6[0m lstm[38;5;241m.[39mtrain()
+[1;32m      7[0m trainer [38;5;241m=[39m RNNTrainer(lstm)
+[0;32m----> 8[0m losses [38;5;241m=[39m trainer[38;5;241m.[39mtrain(
+[1;32m      9[0m     input_tensors[38;5;241m=[39msequences_one_hot, [38;5;66;03m# This is the input sequence.[39;00m
+[1;32m     10[0m     targets[38;5;241m=[39my_valid, [38;5;66;03m# This is the target sequence.[39;00m
+[1;32m     11[0m     criterion[38;5;241m=[39mnn[38;5;241m.[39mCrossEntropyLoss(), [38;5;66;03m# This is the loss function.[39;00m
+[1;32m     12[0m     max_epochs[38;5;241m=[39m[38;5;241m300[39m, [38;5;66;03m# This is the maximum number of epochs.[39;00m
+[1;32m     13[0m     learning_rate[38;5;241m=[39m[38;5;241m0.01[39m, [38;5;66;03m# This is the learning rate.[39;00m
+[1;32m     14[0m     clip_grad_norm[38;5;241m=[39m[38;5;241m1.0[39m, [38;5;66;03m# This is to prevent the gradient from exploding or vanishing.[39;00m
+[1;32m     15[0m )
+
+File [0;32m~/Documents/projects/applied-soft-comp/libs/asctools/asctools/rnn_trainer.py:120[0m, in [0;36mRNNTrainer.train[0;34m(self, input_tensors, targets, criterion, optimizer, max_epochs, learning_rate, batch_size, teacher_forcing_ratio, patience, min_delta, hidden_init_func, clip_grad_norm, lr_scheduler, lr_patience, lr_factor, show_progress)[0m
+[1;32m    117[0m hidden [38;5;241m=[39m hidden_init_func() [38;5;28;01mif[39;00m hidden_init_func [38;5;28;01melse[39;00m [38;5;28;01mNone[39;00m
+[1;32m    118[0m optimizer[38;5;241m.[39mzero_grad()
+[0;32m--> 120[0m sequence_loss [38;5;241m=[39m [38;5;28mself[39m[38;5;241m.[39m_train_batch(
+[1;32m    121[0m     input_batch,
+[1;32m    122[0m     target_batch,
+[1;32m    123[0m     hidden,
+[1;32m    124[0m     criterion,
+[1;32m    125[0m     teacher_forcing_ratio
+[1;32m    126[0m )
+[1;32m    128[0m sequence_loss[38;5;241m.[39mbackward()
+[1;32m    129[0m [38;5;28;01mif[39;00m clip_grad_norm [38;5;129;01mis[39;00m [38;5;129;01mnot[39;00m [38;5;28;01mNone[39;00m:
+
+File [0;32m~/Documents/projects/applied-soft-comp/libs/asctools/asctools/rnn_trainer.py:190[0m, in [0;36mRNNTrainer._train_batch[0;34m(self, input_tensor, target_tensor, hidden, criterion, teacher_forcing_ratio)[0m
+[1;32m    187[0m hidden [38;5;241m=[39m [38;5;28mself[39m[38;5;241m.[39m_get_hidden_state(batch_size, hidden)
+[1;32m    189[0m [38;5;66;03m# Process the entire input sequence[39;00m
+[0;32m--> 190[0m encoder_outputs, hidden [38;5;241m=[39m [38;5;28mself[39m[38;5;241m.[39mmodel(input_tensor, hidden, mode[38;5;241m=[39m[38;5;124m'[39m[38;5;124mencode[39m[38;5;124m'[39m)
+[1;32m    192[0m [38;5;66;03m# For classification tasks (target is 1D)[39;00m
+[1;32m    193[0m [38;5;28;01mif[39;00m target_tensor[38;5;241m.[39mdim() [38;5;241m==[39m [38;5;241m1[39m:
+
+File [0;32m~/miniforge3/envs/advnetsci/lib/python3.11/site-packages/torch/nn/modules/module.py:1511[0m, in [0;36mModule._wrapped_call_impl[0;34m(self, *args, **kwargs)[0m
+[1;32m   1509[0m     [38;5;28;01mreturn[39;00m [38;5;28mself[39m[38;5;241m.[39m_compiled_call_impl([38;5;241m*[39margs, [38;5;241m*[39m[38;5;241m*[39mkwargs)  [38;5;66;03m# type: ignore[misc][39;00m
+[1;32m   1510[0m [38;5;28;01melse[39;00m:
+[0;32m-> 1511[0m     [38;5;28;01mreturn[39;00m [38;5;28mself[39m[38;5;241m.[39m_call_impl([38;5;241m*[39margs, [38;5;241m*[39m[38;5;241m*[39mkwargs)
+
+File [0;32m~/miniforge3/envs/advnetsci/lib/python3.11/site-packages/torch/nn/modules/module.py:1520[0m, in [0;36mModule._call_impl[0;34m(self, *args, **kwargs)[0m
+[1;32m   1515[0m [38;5;66;03m# If we don't have any hooks, we want to skip the rest of the logic in[39;00m
+[1;32m   1516[0m [38;5;66;03m# this function, and just call forward.[39;00m
+[1;32m   1517[0m [38;5;28;01mif[39;00m [38;5;129;01mnot[39;00m ([38;5;28mself[39m[38;5;241m.[39m_backward_hooks [38;5;129;01mor[39;00m [38;5;28mself[39m[38;5;241m.[39m_backward_pre_hooks [38;5;129;01mor[39;00m [38;5;28mself[39m[38;5;241m.[39m_forward_hooks [38;5;129;01mor[39;00m [38;5;28mself[39m[38;5;241m.[39m_forward_pre_hooks
+[1;32m   1518[0m         [38;5;129;01mor[39;00m _global_backward_pre_hooks [38;5;129;01mor[39;00m _global_backward_hooks
+[1;32m   1519[0m         [38;5;129;01mor[39;00m _global_forward_hooks [38;5;129;01mor[39;00m _global_forward_pre_hooks):
+[0;32m-> 1520[0m     [38;5;28;01mreturn[39;00m forward_call([38;5;241m*[39margs, [38;5;241m*[39m[38;5;241m*[39mkwargs)
+[1;32m   1522[0m [38;5;28;01mtry[39;00m:
+[1;32m   1523[0m     result [38;5;241m=[39m [38;5;28;01mNone[39;00m
+
+[0;31mTypeError[0m: LSTM.forward() got an unexpected keyword argument 'mode'
+
