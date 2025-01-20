@@ -6,8 +6,7 @@ This course is designed to help you *feel* the concepts and tools of applied sof
 
 | Module | Pen and Paper Exercise | Jupyter Notebook |
 |--------|------------------------|------------------|
-| M01    | [Word Embedding](./m01-word-embedding/pen-and-paper/pen-and-paper.pdf) | [Word Embedding](ttps://github.com/skojaku/adv-net-sci/tree/main/notebooks/word-embedding.ipynb) |
-
+| M01    | [Word Embedding](./m01-word-embedding/pen-and-paper/pen-and-paper.pdf) | [Word Embedding](ttps://github.com/skojaku/adv-net-sci/tree/main/notebooks/word-embedding.ipynb) [SemAxis](ttps://github.com/skojaku/adv-net-sci/tree/main/notebooks/semaxis.ipynb) [Doc2Vec](ttps://github.com/skojaku/adv-net-sci/tree/main/notebooks/doc2vec.ipynb) |
 
 
 ```{tableofcontents}
