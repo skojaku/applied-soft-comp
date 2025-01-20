@@ -94,7 +94,7 @@
     \item New external force (input)
 \end{enumerate}
 
-For each scenario below, shade the boxes to show the ball's momentum (darker = faster).
+For each scenario below, shade the boxes to show the ball's momentum (darker = faster). For simplicity, assume the relationship between momentum and time is linear, e.g., if the ball is moving at 1 m/s at $t_1$ and the external force is 1 m/s$^2$, it will be moving at 2 m/s at $t_2$.
 
 \begin{center}
 \begin{tikzpicture}
@@ -110,36 +110,38 @@ For each scenario below, shade the boxes to show the ball's momentum (darker = f
 \end{tikzpicture}
 \end{center}
 
-\think{Why doesn't the ball speed up forever with constant force? How does this relate to activation functions in RNNs?}
-
-\step Now let's understand how friction (weight on previous state) affects motion. A high weight (w = 0.9) means low friction, while a low weight (w = 0.1) means high friction.
+\step Now let's understand how friction (weight on previous state) affects motion. A high weight ($w = 0.9$) means low friction, while a low weight ($w = 0.1$) means high friction. The friction is applied to the previous momentum by multiplying it, e.g., $h_{\text{new}} = w \times h_{\text{old}}$.
 
 Shade these boxes showing momentum for different friction levels, with force [2, 2, 0, 0]:
 
 \begin{center}
 \begin{tikzpicture}
-    \node[text width=12cm] at (4,3) {Momentum with different friction levels:};
     \begin{scope}[yshift=0cm]
         \draw (0,0) grid[step=1] (4,1);
-        \draw (0,1.5) grid[step=1] (4,2.5);
-        \node at (-1.5,2) {Low friction};
-        \node at (-1.5,0.5) {High friction};
+        % Time steps
+        \foreach \x/\t in {0.5/$t_1$, 1.5/$t_2$, 2.5/$t_3$, 3.5/$t_4$} {
+            \node[rotate=0] at (\x,-0.3) {\t};
+        }
+        \node at (-2,0.5) {Momentum};
     \end{scope}
 \end{tikzpicture}
 \end{center}
 
 \think{How does friction (weight) affect how long the ball "remembers" previous pushes?}
 \step Let's turn this physical intuition into an RNN. The new hidden state is:
-$h_{\text{new}} = \tanh(w \times h_{\text{old}} + w_x \times \text{force})$
+
+$$h_{\text{new}} = \tanh(w \times h_{\text{old}} + w_x \times \text{force})$$
 
 where:
-- $h_{\text{old}}$ is previous momentum
-- $\text{force}$ is input
-- $w$ relates to friction (how much previous momentum is preserved)
-- $w_x$ relates to how effectively force changes momentum
-- tanh keeps momentum from growing infinitely
+\begin{enumerate}
+    \item $h_{\text{old}}$ is previous momentum
+    \item $\text{force}$ is input
+    \item $w$ relates to friction (how much previous momentum is preserved)
+    \item $w_x$ relates to how effectively force changes momentum
+    \item tanh keeps momentum from growing infinitely
+\end{enumerate}
 
-For these force sequences, shade the predicted momentum:
+For these force sequences, shade the predicted momentum, with $w = 1.0$ and $w_x = 1$:
 
 \begin{center}
 \begin{tabular}{ccc}
@@ -166,52 +168,51 @@ For these force sequences, shade the predicted momentum:
 
 \think{How does each force sequence affect momentum differently? Which sequence would be hardest for the network to "learn"?}
 
-\step Design your own RNN weights! If you wanted to:
-1. Remember past inputs longer
-2. Respond more quickly to new forces
-3. Have a maximum speed limit
-
-Shade these weight matrices to achieve each goal:
+\step Design your own RNN weights! If you wanted to: (Design 1) Remember past inputs longer, (Design 2) Respond more quickly to new forces, (Design 3) Have a maximum speed limit. Shade these weight matrices to achieve each goal:
 
 \begin{center}
 \begin{tikzpicture}
-    \node[text width=12cm] at (4,4) {Weight designs for different behaviors:};
     \begin{scope}[yshift=0cm]
-        \draw (0,0) grid[step=1.5] (3,1);
-        \draw (0,1.5) grid[step=1.5] (3,2.5);
-        \draw (0,3) grid[step=1.5] (3,4);
-        \node at (-1,3.5) {Design 1};
-        \node at (-1,2) {Design 2};
-        \node at (-1,0.5) {Design 3};
-        \node at (0.75,-0.5) {$w$};
-        \node at (2.25,-0.5) {$w_x$};
+        \draw (0,0) grid[step=1] (2,1);
+        \draw (4,0) grid[step=1] (6,1);
+        \draw (8,0) grid[step=1] (10,1);
+        \node at (1,1.5) {Design 1};
+        \node at (5,1.5) {Design 2};
+        \node at (9,1.5) {Design 3};
+        \node at (0.5,-0.5) {$w$};
+        \node at (1.5,-0.5) {$w_x$};
+        \node at (4.5,-0.5) {$w$};
+        \node at (5.5,-0.5) {$w_x$};
+        \node at (8.5,-0.5) {$w$};
+        \node at (9.5,-0.5) {$w_x$};
     \end{scope}
 \end{tikzpicture}
 \end{center}
 
-\think{How do your weight choices reflect the physics of the rolling ball?}
-
-\step Finally, predict what would happen with these "physically impossible" weights:
-1. $w > 1$ (momentum grows from previous state)
-2. No activation function
-3. Negative weights
+\step Predict what would happen with these "physically impossible" weights:
+\begin{enumerate}
+    \item $w > 1$ (momentum grows from previous state)
+    \item No activation function
+    \item Negative weights
+\end{enumerate}
 
 Shade the momentum evolution for input sequence [1, 1, 1, 1]:
 
 \begin{center}
 \begin{tikzpicture}
-    \node[text width=12cm] at (4,4) {Momentum with "impossible" physics:};
     \begin{scope}[yshift=0cm]
         \draw (0,0) grid[step=1] (4,1);
-        \draw (0,1.5) grid[step=1] (4,2.5);
-        \draw (0,3) grid[step=1] (4,4);
-        \node at (-1.5,3.5) {$w = 1.2$};
-        \node at (-1.5,2) {No tanh};
+        \draw (0,2) grid[step=1] (4,3);
+        \draw (0,4) grid[step=1] (4,5);
+        \node at (-1.5,4.5) {$w = 1.2$};
+        \node at (-1.5,2.5) {No tanh};
         \node at (-1.5,0.5) {$w = -0.5$};
     \end{scope}
 \end{tikzpicture}
 \end{center}
 
 \think{Why are these scenarios "impossible" physically but possible in an RNN? What problems might they cause or solve?}
+
+
 
 \end{document}
