@@ -383,7 +383,22 @@ with torch.no_grad():
 
 ```
 
-We see that the model did NOT work well. This is a very common situation, where some tuning of the model architecture or hyperparameters is needed for the model to work well.
+We see that the validation loss increased as the training progressed. This implies overfitting, i.e. the model is too expressive and memorizes the training data but lacks the understanding of underlying patterns and thereby generalizes poorly to unseen data. This is a common problem in deep learning.
+
+```{admonition} Regularization
+:class: tip
+
+Regularization is a technique to prevent a model from overfitting. A traditional way to regularize a model is to add a penalty term to the loss function, e.g., $L = L_{\text{data}} + \lambda L_{\text{reg}}$, where $L_{\text{data}}$ is the data loss and $L_{\text{reg}}$ is the regularization loss.
+Another popular regularization technique is dropout {footcite}`srivastava2014dropout`, which randomly drops out some neurons during training to prevent the model from relying too heavily on specific features.
+
+
+```{figure} https://s3-ap-south-1.amazonaws.com/av-blog-media/wp-content/uploads/2018/04/1IrdJ5PghD9YoOyVAQ73MJw.gif
+:alt: Dropout
+:width: 50%
+:align: center
+
+Dropout.
+```
 
 ## 🔥 Exercise 🔥
 
@@ -391,8 +406,9 @@ Let's fix the model by doing the following:
 
 1. Try increasing the number of hidden units in the LSTM model.
 2. Bring back to the original number of hidden units, and try increasing the number of layers in the LSTM model.
-3. Try increasing the learning rate.
-4. Play with other hyperparameters, e.g., the number of epochs, batch size, etc.
+3. Add dropout to the model by using `torch.nn.Dropout` on the output of the LSTM layer.
+4. Try increasing the learning rate.
+5. Play with other hyperparameters, e.g., the number of epochs, batch size, etc.
 5. Change the model to `nn.RNN` instead of `nn.LSTM`. You should replace `(h_n, c_n)` with `hidden` in the training and evaluation since `nn.RNN` does not have a cell state.
 
 You should be able to see the model to correctly predict the wrapped character.

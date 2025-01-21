@@ -92,9 +92,13 @@ This is a visualization of how sequence-to-sequence models with attention mechan
 
 ## Hands on
 
+Training a seq2seq model with attention mechanism is a challenging but fun exercise through which you will learn so many things like how to adjust tensor shapes, teacher forcing, and how to put together different components of PyTorch (Linear, GRU, LSTM, Embedding, etc.). This is a very rewarding experience, and I highly recommend implementing it yourself if you want to develop practical ML engineering skills.
+
 Interested students can try the following hands on edxercise:
 
-[NLP From Scratch: Translation with a Sequence to Sequence Network and Attention — PyTorch Tutorials 2.5.0+cu124 documentation](https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html)
+- [seq2seq.ipynb](https://github.com/applied-soft-comp/applied-soft-comp/blob/main/notebooks/seq2seq.ipynb). This is a hands-on exercise to implement a seq2seq model with attention mechanism for deciphering a simple cipher.
+
+- [NLP From Scratch: Translation with a Sequence to Sequence Network and Attention — PyTorch Tutorials 2.5.0+cu124 documentation](https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html). This is a PyTorch tutorial to implement a seq2seq model with attention mechanism for machine translation.
 
 
 ```{footbibliography}
