@@ -72,24 +72,16 @@ Sadamori Kojaku
 
 ---
 
-# The Challenge 🤔
-
-- Traditional computing requires **explicit rules**
-- Consider face recognition:
-  - How do you measure eye spacing?
-  - What defines nose shape?
-  - Which features matter most?
-
----
-
 # How is it possible?
 
+![bg left:50% width:100%](https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Casio_calculator_JS-20WK_in_201901_002.jpg/800px-Casio_calculator_JS-20WK_in_201901_002.jpg)
+
+
 ---
 
-# Classsical Paradigm (60s-80s)
+# 60s-80s: Expert System
 
-- Expert System
-  - Explicit rules
+- Explicit rules
 - Examples:
   - MYCIN (1976) for medical diagnosis
 - Issues:
@@ -101,20 +93,22 @@ Sadamori Kojaku
 
 ---
 
-# Classsical Paradigm (90s-2000s)
+# 90s-2000s: Statistical Learning
 
-- Statistical Learning
-  - Allow some randomness in real-world data
-  - Examples:
-    - Support Vector Machine
-    - Random Forest
+- Allow some randomness in real-world data
+- Examples:
+  - Support Vector Machine
+  - Random Forest
 - Issues:
   - Need a lot of data
-  - Need a lot of rules for complex tasks
+  - No cross-domain generalization
+
+
+![bg right:50% width:100%](https://devopedia.org/images/article/214/5570.1567702039.jpg)
 
 ---
 
-# Deep Learning (2010s-2020s) 🧠
+# 2010s-2020s: Deep Learning 🧠
 
 - Learn patterns from examples
 - Adapt to new situations
@@ -122,6 +116,32 @@ Sadamori Kojaku
 - Handle complexity naturally
 
 ![bg right:55% width:100%](https://miro.medium.com/v2/resize:fit:1000/1*63sGPbvLLpvlD16hG1bvmA.gif)
+
+---
+
+# Neural networks are not new
+
+- Warren McCulloch and Walter Pitts to develop the concept of the McCulloch-Pitts (MCP) neuron in 1943.
+- Frank Rosenblatt later introduced the perceptron learning rule for the MCP.
+
+![bg right:50% width:100%](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSts1CoScaQu-e98I2ax8bGXW91eYIUP7WTKrucjTtu2Q&s)
+
+---
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/cNxadbrN_aI?si=dji-pXYux8ibuVYM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+---
+
+## Neural networks were virtually dead until 2012
+
+- Computing limitations - computers were too slow to train meaningful neural networks
+- Data scarcity - Neural networks require massive datasets that weren't available
+- Vanishing gradient - Prevented training deep architectures effectively
+- Better alternatives (e.g., SVMs) outperformed neural networks with less overhead
+- AlexNet (2012) represents a breakthrough in deep learning
+
+![](https://miro.medium.com/v2/resize:fit:1200/1*cuPn8fTAnDEtkKTHp10-Tw.png)
+
 
 
 ---
@@ -211,13 +231,7 @@ Sadamori Kojaku
 
 ---
 
-# What motivates you to take this course (if you want to)?
-
-[![Drive: The surprising truth about what motivates us](https://img.youtube.com/vi/u6XAPnuFjJc/0.jpg)](https://www.youtube.com/watch?v=u6XAPnuFjJc "Drive: The surprising truth about what motivates us")
-https://www.youtube.com/watch?v=u6XAPnuFjJc
-
-~8:23
-
+# About this course
 
 ---
 
@@ -290,6 +304,7 @@ https://www.youtube.com/watch?v=u6XAPnuFjJc
   - ☁️ Use on cloud (Google Colab, Kaggle) or locally
   - 📦 Install packages from `environment.yml` for local use
   - See [The course GitHub repo](https://github.com/skojaku/applied-soft-comp/) for details
+- Slides: [The course GitHub repo](https://github.com/skojaku/applied-soft-comp/slides)
 
 ---
 
@@ -309,6 +324,13 @@ https://www.youtube.com/watch?v=u6XAPnuFjJc
 
 ---
 
+# Teaching computers how to understand words
+
+---
+
+
+---
+
 # The Challenge: Teaching Computers Language 🧮
 
 - Computers only understand numbers
@@ -317,6 +339,23 @@ https://www.youtube.com/watch?v=u6XAPnuFjJc
   - Each word gets a unique binary vector
   - Example: cat → [1,0,0], dog → [0,1,0]
 - Problem: No semantic meaning captured
+
+![bg right:40% width:100%](https://s-ai-f.github.io/Natural-Language-Processing/images/one-hot.png)
+
+---
+
+# Distributional Hypothesis
+
+Words that appear in similar contexts have similar meanings
+
+
+![bg right:50% width:100%](https://miro.medium.com/v2/resize:fit:1400/0*nSSuJe2-MaPKSmaB)
+
+---
+
+
+# How can we build such a distributional representation?
+[Pen and Paper exercise](https://skojaku.github.io/applied-soft-comp/_downloads/7bc97d4364d978c1c47c7dfcd0576fe4/pen-and-paper.pdf)
 
 ---
 
@@ -349,7 +388,6 @@ https://www.youtube.com/watch?v=u6XAPnuFjJc
             ~Words appearing in similar contexts have similar meanings~
 
 ![Distribution Example](https://i0.wp.com/neptune.ai/wp-content/uploads/2022/10/Word-embeddings-model.png?ssl=1)
-
 
 ---
 
@@ -425,6 +463,7 @@ $$
 
 ![](https://storage.googleapis.com/coderzcolumn/static/tutorials/artificial_intelligence/word_embeddings.jpg)
 
+
 ---
 
 # FastText: Handling Subwords 🔄
@@ -436,6 +475,13 @@ $$
 
 
 ![bg right:50% width:700px](https://kavita-ganesan.com/wp-content/uploads/fastText-vs.-Word2Vec.png)
+
+
+---
+
+## Let's build the first word embedding using TF-IDF and word2vec
+
+[Jupyter notebook](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/word-embedding.ipynb)
 
 
 ---
@@ -457,6 +503,12 @@ Gender bias example:
 - he : programmer :: she : homemaker
 
 ![bg right:50% width:500px](https://lena-voita.github.io/resources/lectures/word_emb/papers/gender_bias-min.png)
+
+---
+
+# Let's build SemAxis
+
+[Jupyter notebook](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/semaxis.ipynb)
 
 ---
 
@@ -493,6 +545,13 @@ P(w_i|d) = \frac{\exp(u_{w_i}^T v_d)}{\sum_{w \in V} \exp(u_w^T v_d)}
 $$
 
 Where $v_d$ is the document vector.
+
+
+---
+
+# Let's build Doc2Vec
+
+[Jupyter notebook](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/doc2vec.ipynb)
 
 ---
 
