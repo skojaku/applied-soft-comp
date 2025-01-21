@@ -348,11 +348,34 @@ Sadamori Kojaku
 
 Words that appear in similar contexts have similar meanings
 
-
 ![bg right:50% width:100%](https://miro.medium.com/v2/resize:fit:1400/0*nSSuJe2-MaPKSmaB)
 
 ---
 
+# A trivia
+- Ancient Buddhist concept of Apoha (5th-6th century CE):
+  - We understand concepts by what they are not
+  - Example: A "cow" is defined by everything that is not a cow
+- Parallels with modern distributional semantics:
+  - Both define meaning through relationships between concepts
+  - Words understood by their contrasts with other words
+
+
+![bg right:40% width:100%](https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhQbWHl7Npbub7nDC9GvfUneConFZbjoHkPHuMPh3PXpGakxdDrv_0JmWt7Fpg63lo_XhhqZqFzOs6YUsVEbPyHBMVexnaqPLWzDQJ-CXAjFCoe7PzNrKlm474QDo14LiqOjrfr1zMt6As/s1600/cnononcow.jpg)
+
+---
+
+# Another trivia
+
+My grandma called me in many different ways
+- Sadamori
+- My son
+- My nephew
+- My niece
+- My cousin
+- Her dog
+
+---
 
 # How can we build such a distributional representation?
 [Pen and Paper exercise](https://skojaku.github.io/applied-soft-comp/_downloads/7bc97d4364d978c1c47c7dfcd0576fe4/pen-and-paper.pdf)
