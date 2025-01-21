@@ -1,6 +1,6 @@
 # SSIE 541 Applied Soft Computing 
 
-- [Lecture note](skojaku.github.io/applied-soft-comp)
+- [Lecture note](https://skojaku.github.io/applied-soft-comp)
 - [Syllabus](docs/syllabus/syllabus.pdf)
 - [Slide](docs/slide)
 - [Exercise](notebooks)
