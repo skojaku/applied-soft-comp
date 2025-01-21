@@ -6,8 +6,8 @@ This course is designed to help you *feel* the concepts and tools of applied sof
 
 | Module | Pen and Paper Exercise | Jupyter Notebook |
 |--------|------------------------|------------------|
-| M01    | [Word Embedding](./m01-word-embedding/pen-and-paper/pen-and-paper.pdf) | - [Word Embedding](ttps://github.com/skojaku/adv-net-sci/tree/main/notebooks/word-embedding.ipynb)<br>- [SemAxis](ttps://github.com/skojaku/adv-net-sci/tree/main/notebooks/semaxis.ipynb)<br>- [Doc2Vec](ttps://github.com/skojaku/adv-net-sci/tree/main/notebooks/doc2vec.ipynb) |
-
+| M01    | [Word Embedding](./m01-word-embedding/pen-and-paper/pen-and-paper.pdf) | - [Word Embedding](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/word-embedding.ipynb)<br>- [SemAxis](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/semaxis.ipynb)<br>- [Doc2Vec](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/doc2vec.ipynb) |
+| M02    | [Recurrent Neural Network](./m02-recurrent-neural-network/pen-and-paper/pen-and-paper.pdf) | - [PyTorch](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/pytorch.ipynb) |
 
 ```{tableofcontents}
 ```
