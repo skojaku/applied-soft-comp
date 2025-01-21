@@ -1,0 +1,218 @@
+\documentclass[a4paper,14pt]{extarticle}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+\setlength{\emergencystretch}{2em}  % Allows some flexibility in line breaking
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{fontspec}
+\usepackage{hyperref}
+
+% Required packages
+\usepackage{thmtools}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{mdframed}
+
+% Define colors
+\definecolor{contextcolor}{RGB}{240,248,255}  % Light blue
+\definecolor{setupcolor}{RGB}{245,245,245}    % Light gray
+\definecolor{thinkcolor}{RGB}{230,245,230}    % Light green
+
+% Define counter for exercises
+\newcounter{exercisecount}
+
+% Define custom commands
+\newcommand{\exercise}[1][]{%
+    \stepcounter{exercisecount}%
+    \phantomsection % Add anchor for hyperref
+    \addcontentsline{toc}{section}{Exercise \theexercisecount: #1} % Add to table of contents
+    \section*{\large\textbf{Exercise \theexercisecount:} #1}\par\medskip}
+
+% Define custom commands
+\newcounter{stepcount}[exercisecount]
+\newcommand{\step}{\stepcounter{stepcount}\paragraph{Step \theexercisecount.\thestepcount}}
+\newcommand{\think}[1]{
+    \begin{mdframed}[backgroundcolor=thinkcolor,linewidth=0.5pt]
+    \textit{Think:} #1
+    \end{mdframed}}
+
+% Document settings
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em}
+
+\usetikzlibrary{calc,decorations,patterns,arrows,decorations.pathmorphing,positioning}
+\definecolor{pltblue}{HTML}{1F77B4}
+\tikzset{every picture/.style={/utils/exec={\fontspec{Pretty Neat}}}}
+\setmainfont{Pretty Neat}
+
+\usepackage{wasysym}  % Provides \Square symbol
+
+\makeatletter
+\pgfset{
+  /pgf/decoration/randomness/.initial=2,
+  /pgf/decoration/wavelength/.initial=100
+}
+\pgfdeclaredecoration{sketch}{init}{
+  \state{init}[width=0pt,next state=draw,persistent precomputation={
+    \pgfmathsetmacro\pgf@lib@dec@sketch@t0
+  }]{}
+  \state{draw}[width=\pgfdecorationsegmentlength,
+  auto corner on length=\pgfdecorationsegmentlength,
+  persistent precomputation={
+    \pgfmathsetmacro\pgf@lib@dec@sketch@t{mod(\pgf@lib@dec@sketch@t+pow(\pgfkeysvalueof{/pgf/decoration/randomness},rand),\pgfkeysvalueof{/pgf/decoration/wavelength})}
+  }]{
+    \pgfmathparse{sin(2*\pgf@lib@dec@sketch@t*pi/\pgfkeysvalueof{/pgf/decoration/wavelength} r)}
+    \pgfpathlineto{\pgfqpoint{\pgfdecorationsegmentlength}{\pgfmathresult\pgfdecorationsegmentamplitude}}
+  }
+  \state{final}{}
+}
+\tikzset{xkcd/.style={decorate,decoration={sketch,segment length=0.5pt,amplitude=0.5pt}}}
+\makeatother
+
+\usepackage{etoolbox}
+\AtBeginEnvironment{tabular}{\fontspec{Pretty Neat}}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+\usepackage{fancyhdr}
+\usepackage{adjustbox}
+\usepackage{titling}
+\usepackage{multicol}
+\usepackage{enumitem}
+
+\title{Random Walk Characteristics Worksheet}
+\author{Network Science Course}
+\date{}
+
+\begin{document}
+
+\exercise[Building RNNs: From Rolling Balls to Hidden States]
+
+\step Imagine a ball rolling on a surface with some friction. The ball's momentum (hidden state) changes based on:
+\begin{enumerate}
+    \item Previous momentum (how fast it was already rolling)
+    \item New external force (input)
+\end{enumerate}
+
+For each scenario below, shade the boxes to show the ball's momentum (darker = faster). For simplicity, assume the relationship between momentum and time is linear, e.g., if the ball is moving at 1 m/s at $t_1$ and the external force is 1 m/s$^2$, it will be moving at 2 m/s at $t_2$.
+
+\begin{center}
+\begin{tikzpicture}
+    \node[text width=12cm] at (4,2) {Constant push force [1, 1, 1, 1]:};
+    \begin{scope}[yshift=0cm]
+        \draw (0,0) grid[step=1] (4,1);
+        % Time steps
+        \foreach \x/\t in {0.5/$t_1$, 1.5/$t_2$, 2.5/$t_3$, 3.5/$t_4$} {
+            \node[rotate=0] at (\x,-0.3) {\t};
+        }
+        \node at (-2,0.5) {Momentum};
+    \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\step Now let's understand how friction (weight on previous state) affects motion. A high weight ($w = 0.9$) means low friction, while a low weight ($w = 0.1$) means high friction. The friction is applied to the previous momentum by multiplying it, e.g., $h_{\text{new}} = w \times h_{\text{old}}$.
+
+Shade these boxes showing momentum for different friction levels, with force [2, 2, 0, 0]:
+
+\begin{center}
+\begin{tikzpicture}
+    \begin{scope}[yshift=0cm]
+        \draw (0,0) grid[step=1] (4,1);
+        % Time steps
+        \foreach \x/\t in {0.5/$t_1$, 1.5/$t_2$, 2.5/$t_3$, 3.5/$t_4$} {
+            \node[rotate=0] at (\x,-0.3) {\t};
+        }
+        \node at (-2,0.5) {Momentum};
+    \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\think{How does friction (weight) affect how long the ball "remembers" previous pushes?}
+\step Let's turn this physical intuition into an RNN. The new hidden state is:
+
+$$h_{\text{new}} = \tanh(w \times h_{\text{old}} + w_x \times \text{force})$$
+
+where:
+\begin{enumerate}
+    \item $h_{\text{old}}$ is previous momentum
+    \item $\text{force}$ is input
+    \item $w$ relates to friction (how much previous momentum is preserved)
+    \item $w_x$ relates to how effectively force changes momentum
+    \item tanh keeps momentum from growing infinitely
+\end{enumerate}
+
+For these force sequences, shade the predicted momentum, with $w = 1.0$ and $w_x = 1$:
+
+\begin{center}
+\begin{tabular}{ccc}
+    [3,0,0,0] & [1,1,1,1] & [0,3,0,0] \\
+    \begin{tabular}{|c|c|c|c|}
+    \hline
+    $\square$ & $\square$ & $\square$ & $\square$ \\
+    \hline
+    \end{tabular}
+    &
+    \begin{tabular}{|c|c|c|c|}
+    \hline
+    $\square$ & $\square$ & $\square$ & $\square$ \\
+    \hline
+    \end{tabular}
+    &
+    \begin{tabular}{|c|c|c|c|}
+    \hline
+    $\square$ & $\square$ & $\square$ & $\square$ \\
+    \hline
+    \end{tabular}
+\end{tabular}
+\end{center}
+
+\think{How does each force sequence affect momentum differently? Which sequence would be hardest for the network to "learn"?}
+
+\step Design your own RNN weights! If you wanted to: (Design 1) Remember past inputs longer, (Design 2) Respond more quickly to new forces, (Design 3) Have a maximum speed limit. Shade these weight matrices to achieve each goal:
+
+\begin{center}
+\begin{tikzpicture}
+    \begin{scope}[yshift=0cm]
+        \draw (0,0) grid[step=1] (2,1);
+        \draw (4,0) grid[step=1] (6,1);
+        \draw (8,0) grid[step=1] (10,1);
+        \node at (1,1.5) {Design 1};
+        \node at (5,1.5) {Design 2};
+        \node at (9,1.5) {Design 3};
+        \node at (0.5,-0.5) {$w$};
+        \node at (1.5,-0.5) {$w_x$};
+        \node at (4.5,-0.5) {$w$};
+        \node at (5.5,-0.5) {$w_x$};
+        \node at (8.5,-0.5) {$w$};
+        \node at (9.5,-0.5) {$w_x$};
+    \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\step Predict what would happen with these "physically impossible" weights:
+\begin{enumerate}
+    \item $w > 1$ (momentum grows from previous state)
+    \item No activation function
+    \item Negative weights
+\end{enumerate}
+
+Shade the momentum evolution for input sequence [1, 1, 1, 1]:
+
+\begin{center}
+\begin{tikzpicture}
+    \begin{scope}[yshift=0cm]
+        \draw (0,0) grid[step=1] (4,1);
+        \draw (0,2) grid[step=1] (4,3);
+        \draw (0,4) grid[step=1] (4,5);
+        \node at (-1.5,4.5) {$w = 1.2$};
+        \node at (-1.5,2.5) {No tanh};
+        \node at (-1.5,0.5) {$w = -0.5$};
+    \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\think{Why are these scenarios "impossible" physically but possible in an RNN? What problems might they cause or solve?}
+
+
+
+\end{document}
