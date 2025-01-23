@@ -416,24 +416,27 @@ My grandma called me in many different ways
 
 ## Word2Vec: Neural Word Embeddings 🧠
 
-Two approaches: CBOW (Continuous Bag of Words) and Skip-gram
-1. CBOW: Predict center word from context
-2. Skip-gram: Predict context from center word
+1. Consit of one hidden layer without non-linear activation
+2. Output layer is a softmax layer
+3. Two models: Skip-gram and CBOW depending on the input and output
 
-![bg right:60% width:800px](https://kavita-ganesan.com/wp-content/uploads/skipgram-vs-cbow-continuous-bag-of-words-word2vec-word-representation.png)
+![bg right:50% width:600px](../../lecture-note/figs/word2vec.jpg)
 
 ---
 
 # Model (Skip-gram)
 
 $$
-P(w_o|w_c) = \frac{\exp(v_{w_o}^T v_{w_c})}{\sum_{w \in V} \exp(v_w^T v_{w_c})}
+\begin{aligned}
+&P(\textcolor{blue}{\text{context word $j$}}\;|\; \textcolor{red}{\text{center word $i$}}) \\
+&= \frac{1}{Z} \exp( \textcolor{blue}{v^T _j} \textcolor{red}{u_i}) \\
+\end{aligned}
 $$
 
-Where:
-- $v_{w_c}$ is center word vector
-- $v_{w_o}$ is output word vector
-- $V$ is vocabulary
+Each word has **two vectors**, $\textcolor{blue}{v}$ and $\textcolor{red}{u}$:
+- In-vector: $\textcolor{red}{u_i}$ represents word $i$ as a center word
+- Out-vector: $\textcolor{blue}{v_j}$ represents word $j$ as a context word
+- $Z$ is normalization constant
 
 ![bg right:50% width:600px](../../lecture-note/figs/word2vec.jpg)
 
@@ -448,6 +451,8 @@ P(w_c|w_1,...,w_C) = \dfrac{\exp(v_{w_c}^T \bar{v})}{\sum_{w \in V} \exp(v_w^T \
 $$
 
 where $\bar{v} = \dfrac{1}{C}\sum_{i=1}^C v_{w_i}$ is the average of the context word vectors.
+
+![bg right:50% width:600px](https://production-media.paperswithcode.com/methods/Screen_Shot_2020-05-26_at_2.04.47_PM.png)
 
 ---
 
@@ -485,19 +490,6 @@ M_{ij} = \log \frac{P(w_i, w_j)}{P(w_i)P(w_j)}
 $$
 
 ![](https://storage.googleapis.com/coderzcolumn/static/tutorials/artificial_intelligence/word_embeddings.jpg)
-
-
----
-
-# FastText: Handling Subwords 🔄
-
-- Use subword information
-- Example: "where" → "<wh", "whe", "her", "ere", "re>"
-- Handles out-of-vocabulary words
-- Better for morphologically rich languages
-
-
-![bg right:50% width:700px](https://kavita-ganesan.com/wp-content/uploads/fastText-vs.-Word2Vec.png)
 
 
 ---
