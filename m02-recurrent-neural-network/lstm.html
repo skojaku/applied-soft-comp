@@ -35,6 +35,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -60,10 +61,15 @@
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'm02-recurrent-neural-network/lstm';</script>
+    <script src="../_static/js/custom.js"></script>
+    <script src="../_static/react-components/react-components.umd.js?v=a3fc6171"></script>
+    <script src="../_static/react-components/react-components.es.js?v=9a43f5e7"></script>
+    <script src="../_static/react-components.umd.js?v=a3fc6171"></script>
+    <script src="../_static/react-components.es.js?v=9a43f5e7"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Embedding from Language Models (ELMo)" href="elmo.html" />
-    <link rel="prev" title="Recurrent Neural Network (RNN)" href="reccurrent-neural-net.html" />
+    <link rel="prev" title="Memory Passing Game" href="memory-passing-game.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -190,6 +196,7 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Word and Document Embeddings</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/what-to-learn.html">Module 1: Word Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/pen-and-paper.html">Pen and Paper Exercise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/tf-idf.html">Teaching computers how to understand words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/word2vec.html">word2vec: a small model with a big idea</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/word2vec_plus.html">GloVe and FastText: Building on Word2Vec’s Foundation</a></li>
@@ -201,7 +208,10 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Recurrent Neural Networks</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="what-to-learn.html">Module 2: Language Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pen-and-paper.html">Pen and Paper Exercise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rnn-interactive.html">Interactive RNN Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reccurrent-neural-net.html">Recurrent Neural Network (RNN)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="memory-passing-game.html">Memory Passing Game</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Long Short-Term Memory (LSTM)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="elmo.html">Embedding from Language Models (ELMo)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="seq2seq.html">Sequence-to-Sequence Models</a></li>
@@ -669,9 +679,9 @@ Think of this cell as a conveyor belt that runs straight through the network, al
 </div>
 </details>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Sequence: SQIBZDWPGXYMORJAEKNVTFUC&lt;H&gt;L, Target: H
-Sequence: MZPSYQFLXIN&lt;W&gt;AVCHTJOKDUBEGR, Target: W
-Sequence: P&lt;M&gt;ROZGJHIWCUENKFBDLQSVYATX, Target: M
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Sequence: KQONMEUDWILGS&lt;P&gt;JVRCHFZXBTAY, Target: P
+Sequence: TLJXWUMAQFOZVBSYRIGDHCKNP&lt;E&gt;, Target: E
+Sequence: XQKTJODPZS&lt;B&gt;VIUAWFCMLRHGNYE, Target: B
 </pre></div>
 </div>
 </div>
@@ -910,7 +920,7 @@ We use ADAM <a class="footnote-reference brackets" href="#footcite-kingma2014ada
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/3b67c49fcb27d3acf5589c6992d3e14ffafdb0e12886ea7ef3129355f6a0cd3a.png" src="../_images/3b67c49fcb27d3acf5589c6992d3e14ffafdb0e12886ea7ef3129355f6a0cd3a.png" />
+<img alt="../_images/a65b3ec48956828a7132ed80457ee93ec8be850217f2a6a8bce26904bbe7da59.png" src="../_images/a65b3ec48956828a7132ed80457ee93ec8be850217f2a6a8bce26904bbe7da59.png" />
 </div>
 </div>
 <p>The loss did not decrease nicely. This is a sign of the struggle of the LSTM model to learn the data. If you see this, you might need to decrease the learning rate, increase the number of epochs untile the loss becomes stable, or re-design the model architecture.</p>
@@ -935,12 +945,12 @@ We use ADAM <a class="footnote-reference brackets" href="#footcite-kingma2014ada
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Sequence: JNCTPHOBRMZKAXGWELDFUQSVY&lt;I&gt;, Target: I, Predicted: H
-Sequence: &lt;E&gt;VBUSIZJXYNDRAWMPLOGTCFKQH, Target: E, Predicted: T
-Sequence: ZPOEIUVDLYFNCSAWXJT&lt;Q&gt;BMRHGK, Target: Q, Predicted: Q
-Sequence: CUOTIEZNDBRXMWKLPQHJGYVA&lt;S&gt;F, Target: S, Predicted: S
-Sequence: FWUBPRJYMZNAOQCLVDXGKHE&lt;S&gt;IT, Target: S, Predicted: S
-Accuracy: 1.0
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Sequence: RNKQTZADMPSFCHUYGEOWIXLBJ&lt;V&gt;, Target: V, Predicted: Z
+Sequence: EFIYNH&lt;V&gt;BWQKOCRAXZUTLSGPJMD, Target: V, Predicted: S
+Sequence: FWENOJMABXUYTQSCRI&lt;P&gt;HGKZVDL, Target: P, Predicted: T
+Sequence: &lt;C&gt;KTVUXDWRNLOBSYGHEQFZAPMIJ, Target: C, Predicted: U
+Sequence: ZFNVBKR&lt;M&gt;SEJADHYTCLQWOUPIXG, Target: M, Predicted: K
+Accuracy: 0.0
 </pre></div>
 </div>
 </div>
@@ -1024,12 +1034,12 @@ Another popular regularization technique is dropout <a class="footnote-reference
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="reccurrent-neural-net.html"
+       href="memory-passing-game.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Recurrent Neural Network (RNN)</p>
+        <p class="prev-next-title">Memory Passing Game</p>
       </div>
     </a>
     <a class="right-next"
