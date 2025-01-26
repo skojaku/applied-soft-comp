@@ -4,8 +4,8 @@ This interactive visualization demonstrates the behavior of a simple Recurrent N
 
 <div class="rnn-visualization-container"></div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
+<script type="text/javascript">
+window.addEventListener('load', function() {
     if (window.ReactComponents && window.ReactComponents.RNNVisualization) {
         const containers = document.querySelectorAll('.rnn-visualization-container');
         containers.forEach(container => {
@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 container
             );
         });
+    } else {
+        console.error('React components not loaded properly');
     }
 });
 </script>
