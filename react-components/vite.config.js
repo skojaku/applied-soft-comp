@@ -5,22 +5,26 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   define: {
-    'process.env': {}
+    'process.env': {
+      NODE_ENV: '"production"'
+    }
   },
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/components/index.js'),
       name: 'ReactComponents',
-      formats: ['iife'],
-      fileName: (format) => `react-components.${format}.js`,
+      formats: ['umd'],
+      fileName: () => `react-components.umd.js`,
     },
     rollupOptions: {
-      external: ['react', 'react-dom'],
+      external: ['react', 'react-dom', 'recharts'],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
+          'recharts': 'Recharts'
         },
+        inlineDynamicImports: true
       },
     },
   },

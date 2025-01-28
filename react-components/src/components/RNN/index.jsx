@@ -1,55 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import * as Slider from '@radix-ui/react-slider';
-import * as Switch from '@radix-ui/react-switch';
 
-const RNNVisualization = () => {
+const RNNVisualization = ({ Slider, Switch }) => {
   const [weight, setWeight] = useState(0.5);
   const [input, setInput] = useState(1.0);
+  const [initialState, setInitialState] = useState(1.0);
   const [useTanh, setUseTanh] = useState(false);
   const [timeSeriesData, setTimeSeriesData] = useState([]);
 
-  const HIDDEN_COLOR = "#E6425E";
+  const HIDDEN_COLOR = "#6B4CE6";
   const INPUT_COLOR = "#1D84B5";
+  const OUTPUT_COLOR = "#E6425E";
 
   useEffect(() => {
     let data = [];
-    let state = 1;
+    let state = initialState;
 
     for (let t = 0; t < 50; t++) {
-      data.push({
-        time: t,
-        value: state,
-        input: input
-      });
-      state = useTanh ?
+      const currentState = useTanh ?
         Math.tanh(weight * state + input) :
         weight * state + input;
+
+      data.push({
+        time: t,
+        input: input,
+        output: currentState
+      });
+      state = currentState;
     }
 
     setTimeSeriesData(data);
-  }, [weight, input, useTanh]);
+  }, [weight, input, initialState, useTanh]);
 
   const SchematicSVG = () => (
-    <svg viewBox="0 0 200 120" className="w-full h-32">
+    <svg viewBox="0 0 200 120" style={{ width: '100%', height: '120px' }}>
       <rect x="70" y="30" width="60" height="40" fill="white" stroke={HIDDEN_COLOR} strokeWidth="2"/>
-      <text x="100" y="50" textAnchor="middle" dominantBaseline="middle" className="text-sm">
+      <text x="100" y="50" textAnchor="middle" dominantBaseline="middle" style={{ fontSize: '12px' }}>
         {useTanh ? "tanh(h)" : "h"}
       </text>
 
       <path
-        d="M100 30 C100 10, 100 10, 100 10 L100 10 C100 10, 100 30, 100 30"
+        d="M100 30 C100 0, 150 0, 150 30 L150 70 C150 100, 100 100, 100 70"
         fill="none"
         stroke={HIDDEN_COLOR}
-        strokeWidth="2"
+        strokeWidth={Math.max(Math.abs(weight) * 6, 0.5)}
       />
 
-      <line x1="40" y1="50" x2="70" y2="50" stroke={INPUT_COLOR} strokeWidth="2" markerEnd="url(#arrowhead)"/>
-      <text x="30" y="50" textAnchor="middle" className="text-xs">u</text>
+      <line x1="40" y1="50" x2="70" y2="50" stroke={INPUT_COLOR} strokeWidth="2" markerEnd="url(#arrowhead-input)"/>
+      <text x="30" y="50" textAnchor="middle" style={{ fontSize: '12px' }}>u</text>
+
+      <line x1="130" y1="50" x2="160" y2="50" stroke={OUTPUT_COLOR} strokeWidth="2" markerEnd="url(#arrowhead-output)"/>
+      <text x="170" y="50" textAnchor="middle" style={{ fontSize: '12px' }}>y</text>
 
       <defs>
         <marker
-          id="arrowhead"
+          id="arrowhead-input"
           markerWidth="10"
           markerHeight="7"
           refX="9"
@@ -58,70 +63,68 @@ const RNNVisualization = () => {
         >
           <polygon points="0 0, 10 3.5, 0 7" fill={INPUT_COLOR}/>
         </marker>
+        <marker
+          id="arrowhead-output"
+          markerWidth="10"
+          markerHeight="7"
+          refX="9"
+          refY="3.5"
+          orient="auto"
+        >
+          <polygon points="0 0, 10 3.5, 0 7" fill={OUTPUT_COLOR}/>
+        </marker>
       </defs>
 
-      <text x="100" y="15" textAnchor="middle" className="text-xs">w = {weight.toFixed(2)}</text>
+      <text x="100" y="15" textAnchor="middle" style={{ fontSize: '12px' }}>w = {weight.toFixed(2)}</text>
     </svg>
   );
 
   return (
-    <div className="p-6 space-y-6 bg-white rounded-lg shadow-md">
-      <div className="prose max-w-none mb-4">
-        <h2 className="text-xl font-bold mb-2">Simple RNN</h2>
-        <p>Equation: {useTanh ? 'h(t) = tanh(w * h(t-1) + u)' : 'h(t) = w * h(t-1) + u'}</p>
-        <p>System behavior: |w| &lt; 1 stable, |w| &gt; 1 unstable {useTanh && ', tanh bounds output to [-1,1]'}</p>
+    <div style={{ padding: '20px' }}>
+      <div style={{ marginBottom: '20px' }}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: '500', marginBottom: '0.5rem' }}>Initial State h(0): {initialState.toFixed(2)}</h3>
+        <Slider.Root
+          value={[initialState]}
+          onValueChange={([value]) => setInitialState(value)}
+          min={-2}
+          max={2}
+          step={0.1}
+        />
       </div>
 
-      <div className="space-y-4">
-        <div>
-          <h3 className="text-lg font-medium mb-2">Recurrent Weight: {weight.toFixed(2)}</h3>
-          <Slider.Root
-            value={[weight]}
-            onValueChange={([value]) => setWeight(value)}
-            min={-1.5}
-            max={1.5}
-            step={0.01}
-            className="slider-root"
-          >
-            <Slider.Track className="slider-track">
-              <Slider.Range className="slider-range" />
-            </Slider.Track>
-            <Slider.Thumb className="slider-thumb" />
-          </Slider.Root>
-        </div>
+      <div style={{ marginBottom: '20px' }}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: '500', marginBottom: '0.5rem' }}>Recurrent Weight: {weight.toFixed(2)}</h3>
+        <Slider.Root
+          value={[weight]}
+          onValueChange={([value]) => setWeight(value)}
+          min={-2}
+          max={2}
+          step={0.1}
+        />
+      </div>
 
-        <div>
-          <h3 className="text-lg font-medium mb-2">Input Signal: {input.toFixed(2)}</h3>
-          <Slider.Root
-            value={[input]}
-            onValueChange={([value]) => setInput(value)}
-            min={-2}
-            max={2}
-            step={0.1}
-            className="slider-root"
-          >
-            <Slider.Track className="slider-track">
-              <Slider.Range className="slider-range" />
-            </Slider.Track>
-            <Slider.Thumb className="slider-thumb" />
-          </Slider.Root>
-        </div>
+      <div style={{ marginBottom: '20px' }}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: '500', marginBottom: '0.5rem' }}>Input Signal: {input.toFixed(2)}</h3>
+        <Slider.Root
+          value={[input]}
+          onValueChange={([value]) => setInput(value)}
+          min={-2}
+          max={2}
+          step={0.1}
+        />
+      </div>
 
-        <div className="flex items-center space-x-2">
-          <Switch.Root
-            checked={useTanh}
-            onCheckedChange={setUseTanh}
-            className="switch-root"
-          >
-            <Switch.Thumb className="switch-thumb" />
-          </Switch.Root>
-          <label className="text-lg font-medium">Use tanh non-linearity</label>
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+        <Switch.Root
+          checked={useTanh}
+          onCheckedChange={setUseTanh}
+        />
+        <label style={{ fontSize: '1.25rem', fontWeight: '500' }}>Use tanh non-linearity</label>
       </div>
 
       <SchematicSVG />
 
-      <div className="mt-6 h-64">
+      <div style={{ marginTop: '20px' }}>
         <LineChart
           width={600}
           height={200}
@@ -132,8 +135,8 @@ const RNNVisualization = () => {
           <XAxis dataKey="time" />
           <YAxis />
           <Tooltip />
-          <Line type="monotone" dataKey="value" stroke={HIDDEN_COLOR} dot={false} name="Hidden State" strokeWidth={2}/>
           <Line type="monotone" dataKey="input" stroke={INPUT_COLOR} dot={false} name="Input" strokeWidth={2}/>
+          <Line type="monotone" dataKey="output" stroke={OUTPUT_COLOR} dot={false} name="Output" strokeWidth={2}/>
         </LineChart>
       </div>
     </div>
