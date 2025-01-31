@@ -60,6 +60,12 @@ name: convolution
 Convolution operation for multi-channel input. Each channel is processed separately, and the results are summed up to produce the final output.
 ```
 
+```{tip}
+Interactive visualization of convolution neural networks
+- [An Interactive Node-Link Visualization of Convolutional Neural Networks](https://adamharley.com/nn_vis/cnn/2d.html)
+- [CNN Explainer](https://poloclub.github.io/cnn-explainer/?norec=true)
+```
+
 One of the key features of CNNs is *translation equivariance*. This means that when an input image is shifted, the output feature map shifts by the same amount. For example, if we move an object in an image one pixel to the right, its detected features in the output will also move one pixel to the right. This property allows CNNs to detect features consistently regardless of their position in the image.
 
 ```{figure} https://miro.medium.com/v2/resize:fit:1400/1*NoAQ4ZgofpkK6esl4sMHkA.png
@@ -112,6 +118,10 @@ align: center
 Stride-1 and stride-2. The image is taken from https://svitla.com/blog/math-at-the-heart-of-cnn/
 ```
 
+```{tip}
+Interactive visualization of stride
+- [Convolution Visualizer](https://ezyang.github.io/convolution-visualizer/)
+```
 
 Padding addresses a different challenge: information loss at the borders. Without padding ("valid" padding), the output dimensions shrink after each convolution because the kernel can't fully overlap with border pixels.
 While various padding schemes are proposed, zero padding has been widely used because it is simple and effective.
