@@ -575,17 +575,8 @@ Where $v_d$ is the document vector.
 1. One-hot encoding → No semantics
 2. TF-IDF → Document-level patterns
 3. Word2Vec → Local context patterns
-4. GloVe → Global patterns
-5. FastText → Subword information
-6. Doc2Vec → Document embeddings
+4. Doc2Vec → Document embeddings
 
 ---
 
-# Applications and Future Directions 💡
-
-- Machine Translation
-- Document Classification
-- Information Retrieval
-- Sentiment Analysis
-- Question Answering
-- Text Generation
+# Assignment on GitHub:

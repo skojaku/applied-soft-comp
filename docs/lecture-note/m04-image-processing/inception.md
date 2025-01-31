@@ -1,172 +1,240 @@
-# InceptionNet: Image Recognition CNN by Google (GoogLeNet)
-Posted September 20, 2021 by Masaki Hayashi
+---
+jupytext:
+  formats: md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
 
-## Table of Contents
-1. What is InceptionNet [Overview]
-   1.1 Article Structure
-   1.2 Core Ideas and Key Points of Each Version
-   1.3 Origin of InceptionNet's Name
-2. v1 (GoogLeNet)
-   2.1 Inception Module
-      2.1.1 Multiple Size Path Parallelization
-      2.1.2 Dimension Reduction for Lightweight Design
-   2.2 Global Average Pooling
-   2.3 Auxiliary Classifiers: Stabilizing Backpropagation to Early Layers
-3. v2: Introduction of Batch Normalization
-4. v3: Improvement of Inception Blocks
-   4.1 Parameter Reduction through Factorization
-   4.2 Effective Spatial Size Reduction
-   4.3 Label Smoothing
-5. Inception-v4 and Inception-ResNet
-6. Summary
+# GoogleNet and the Inception Module
 
-## 1. What is InceptionNet [Overview]
-InceptionNet (Inception Network, also known as GoogLeNet) is a CNN (Convolutional Neural Network) architecture devised by Google's research team [Szegedy et al., 2015]. After InceptionNet v1, improved versions v2, v3, and v4 were successively released.
+Imagine you’re looking at a painting in an art gallery. You might step close to examine the tiny brushstrokes or stand far away to observe the overall composition. **How can a neural network do something similar with images?** The **Inception module** proposed by Szegedy et al. in "Going Deeper with Convolutions" tackles this by letting different convolutional filters (big and small) work together in parallel—capturing both fine details and large-scale context at once.
 
-This article will introduce Inception v1 through v4 in order of their appearance, focusing on the important points of each version.
 
-*Note (Important): This site consistently uses the unique term "InceptionNet." When searching for "Inception" alone, search results are dominated by the movie Inception (see Section 1.2), making it difficult to find this article directly. When searching for this article directly from Google or other search engines, please include "InceptionNet" in your query (when referring to specific versions, we use the standard notation like "Inception v3" without "Net").*
+## Conceptual Foundation
 
-### 1.1 Article Structure
-The following sections will introduce each version in order:
+### Multi-Scale Feature Extraction
+In a traditional CNN layer, you pick **one** filter size (like $3 \times 3$). But an Inception module uses **multiple** filter sizes (like $1 \times 1$, $3 \times 3$, and $5 \times 5$) all at once. Each filter “looks” at the same input but focuses on different scales—much like zooming in and out of a scene.
 
-1. Section 1: Key points of each version (1.2) and origin of the name (1.3)
-2. Section 2: Inception v1 (GoogLeNet) [CVPR2015]: Initial version
-3. Section 3: Inception v2 (BN-Inception) [ICML2015]: Introduction of batch normalization
-4. Section 4: Inception v3 [CVPR2016]: Improvement of Inception blocks
-5. Section 5: Inception v4 and Inception-ResNet v1, v2 [AAAI 2017]: Improvements with residual connections
-6. Section 6: Summary
+![](https://miro.medium.com/v2/resize:fit:1400/1*DKjGRDd_lJeUfVlY50ojOA.png)
 
-### 1.2 Core Ideas and Key Points of Each Version
-The central idea of InceptionNet (Inception v1 = GoogLeNet, Section 2) lies in "approximating and replacing each convolution layer with computationally efficient Inception blocks."
+### Sparse Connectivity by 1x1 Convolutions
 
-The Inception block (Section 2.1) is a block that uses "dimension reduction in the channel direction using 1x1 convolution layers" and "parallelization with multiple convolution sizes in 4 paths (=widening)." This allowed the use of blocks that were both expressive and computationally efficient as basic building units.
+From a theoretical perspective, not every pixel in a feature map needs to connect to every pixel in the next layer (i.e., connectivity is often sparse). However, sparse operations can be slow on current hardware. Inception approximates this “sparse” idea by using *1x1 convolutions*.
 
-Inception v1 succeeded in significantly reducing computational costs through parameter reduction compared to previous CNN backbones like AlexNet, while improving expressiveness by making the network deeper (winning first place in ILSVRC 2014). While Inception v2 was proposed in the batch normalization paper with the addition of batch normalization, it had no other contributions (new proposals).
+The 1x1 convolutions appear unnatural at first glance but they are actually a very elegant solution to “sparcify” the convolutional filters. The core idea is that pixel values at different spatial locations are often less correlated than the values across different channels. Thus, **1x1 convolutions** focus on compressing or expanding information across channels, reducing the effective parameter count for the subsequent larger filters.
 
-Next, Inception v3 [Szegedy et al., 2016b] evolved into a more efficient and accurate InceptionNet with the proposal of new Inception blocks that had better balance between width and depth (Section 4). Label smoothing was also an important contribution from the Inception v3 research.
+For example, for a $3 \times 3$ convolution filter, the 1x1 convolution reduces the number of parameters from $3 \times 3 \times C_{\text{in}} \times C_{\text{out}}$ to $1 \times 1 \times C_{\text{in}}$ (1x1 convolution) plus $3 \times 3 \times C_{\text{out}}$ (3x3 convolution). This is $C_{\text{in}} + 9C_{\text{out}}$ versus $9C_{\text{in}} \times C_{\text{out}}$, yielding a substantial parameter reduction when $C_{\text{out}}$ or $C_{\text{in}}$ is large.
 
-Finally, the Inception v4 research [Szegedy et al., 2017] completed the final form of Inception-ResNet (v1, v2), which reached a 96-layer configuration through ResNet-style additions with residual connections (Section 5). As it combined the efficiency of Inception modules with the advantages of residual connections in optimizing large-scale models, Inception-ResNet was widely used afterward, particularly in scenarios "where model size was necessary," such as video recognition.
+```{note}
+**Connection to Sparse Representations**
+Early theoretical work suggested that a sparse network with many filter sizes could approximate a wide variety of feature types. However, directly implementing a sparse network can be very memory-intensive. The Inception module cleverly approximates a sparse structure by mixing 1x1, 3x3, and 5x5 convolutions in an efficient manner{footcite}`paperswithcode-inception`.
+```
 
-*Note: The use of multiple layers as a repeating unit is called a "block" in networks like ResNet and DenseNet. While Inception v1 and v3 papers call it an "Inception module," we will consistently refer to it as an "Inception block" here. The Google team called it "Inception module" in papers from Inception v1 through Inception v3, but in the Inception v4 paper, they unified the terminology with ResNet-style "block" and began calling it "Inception block."*
+### Filter Concatenation
 
-### 1.3 Origin of InceptionNet's Name
-The network name "Inception" comes from the hit SF action movie Inception of that time (a favorite of the site administrator).
+After each branch applies its own sequence of convolutions (or pooling), the results are **merged** by concatenating them along the channel dimension. Think of it as stacking the feature maps from each branch side by side. This “merge” step is powerful because:
 
-The movie title "Inception" means "beginning," named after the idiomatic phrase "inception of an idea." In English, "inception of an idea" refers to something that starts small but later develops into a bigger idea. In the movie Inception, the protagonists are a special operations group that secretly enters their target's lucid dreams, going into "deeper layers" of dreams. They attempt to "plant ideas" by acting in the dreams without being detected, going down to deep layers of subconscious. Hence, the movie was titled "Inception (of an idea)."
+- It combines multi-scale features into a single tensor.
+- Each branch contributes a unique perspective (e.g., the $1\times1$ branch might capture fine details, while the $5\times5$ branch looks at broader context).
+- The network can learn how to best blend and leverage these feature maps for the next stage of processing.
 
-The movie Inception was a massive hit worldwide at the time, and the line "We need to go deeper" spoken by the protagonist (DiCaprio) to the wealthy target became popular as an image macro and internet slang in English-speaking regions. The authors of InceptionNet [Szegedy et al., 2015] named their network and paper after this movie's story of descending through multiple dream layers.
+As a result, the **final** output of an Inception module is a multi-channel representation that integrates information from multiple scales and pooling operations.
 
-At the time, top researchers studying new CNN structures were competing to "improve image recognition accuracy by making CNNs deeper." They drew a parallel between the movie Inception's "dream within a dream (going deeper through multiple layers)" hierarchical meta-structure and their "meta-network structure = Inception module" utilizing the Network-in-Network [Lin et al., 2014] concept. Therefore, their paper was similarly titled "Going deeper with convolutions."
+### Parallel Pooling
 
-While this lengthy explanation shows how young researchers sometimes give (occasionally immature) names to their methods during the third AI boom, younger researchers should avoid imitating this as it tends to become embarrassing in retrospect.
+GoogleNet is a stack of the Inception modules explained above, followed by a module that transform the feature maps of the last Inception module into a single vector that is used for classification. This last module is also one of the key feature of GoogleNet that sets it apart from the previous architectures.
 
-## 2. v1 (GoogLeNet)
-InceptionNet v1's network structure is "an architecture using Inception blocks instead of convolution layers" in an AlexNet-style serial CNN:
+GoogleNet uses **max pooling** for each channel of the feature maps.
+For example, if the feature maps has 10 channel, the max pooling will reduce it to 10-dimensional vector, regardless of the spatial dimension of the feature maps, by taking the maximum value across the spatial dimension.
 
-- conv1: Convolution layer - [7 x 7] kernel, stride=2
-- pool1: Max pooling - [3 x 3] kernel, stride=2
-- conv2: Convolution layer - [3 x 3] kernel, stride=2
-- pool2: Max pooling - [3 x 3] kernel, stride=2
-- 3a: Inception block
-- 3b: Inception block
-- pool3: Max pooling - [3 x 3] kernel, stride=2
-- 4a: Inception block
-- 4b: Inception block
-- 4c: Inception block
-- 4d: Inception block
-- 4e: Inception block
-- pool4: Max pooling - [3 x 3] kernel, stride=2
-- 5a: Inception block
-- 5b: Inception block > Output size: [7 × 7] x 1024
-- pool5: Global average pooling - [7 x 7] kernel, stride=1 > Output size: [1 × 1] x 1024
-- linear6: Fully connected layer: 1024 x 1000
-- softmax: 1000-class probability distribution
+This design choice was motivated, in part, by observations like in VGG16 (which uses the full-connected layers to this transformation), where 123 million of its 138 million parameters come from fully-connected layers alone. Reducing or eliminating these layers via pooling can dramatically cut down on model size and overfitting risk{footcite}`lin2013network`.
 
-### 2.1 Inception Module
-The Inception block is the basic building unit that makes up InceptionNet. Within the Inception block, it performs (1) diverse size path parallelization (Figure 1-a, Section 2.1.1) and (2) dimension reduction for each path to achieve lightweight design (Figure 1-b, Section 2.1.2). This provides high expressiveness while maintaining a small parameter count.
+### Auxiliary Classifiers
 
-#### 2.1.1 Multiple Size Path Parallelization
-The novelty of the Inception block lies in (1) branching the block into parallel paths of different depths to aim for improved expressiveness per block (Figure 1-a). It combines feature maps in the channel direction after parallel implementation of 4 paths: [[1 x 1], [3 x 3], [5 x 5] convolution layers + max pooling layer] (Figure 1-a).
+As GoogleNet grew deeper, the authors noticed that early layers sometimes struggled with vanishing gradients. To combat this, **auxiliary classifiers** were placed at intermediate layers. The authors take the output from the classifier attached to these intermediate layers, and add its loss to the overall loss. When backpropagating, the gradient from the auxiliary classifier is also added to the gradient of the earlier layers, which guides the earlier layers to learn more discriminative features.
 
-This "multiple size path parallelization (=widening)" allows each Inception module to express the synthesis of features from various convolution sizes.
+```{figure} https://production-media.paperswithcode.com/methods/GoogleNet-structure-and-auxiliary-classifier-units_CM5xsxk.png
+:name: inception-auxiliary-classifier
+:align: center
 
-#### 2.1.2 Dimension Reduction for Lightweight Design
-However, with the 4-parallel path configuration of the Inception block (Figure 1-a), the parameter count becomes too large when connecting multiple blocks, making it difficult to train a deep network (with the learning techniques of that time).
+An illustration of the GoogleNet architecture, including the auxiliary classifier units.
+```
 
-Therefore, they introduced the 1x1 convolution proposed in NiN (Network-in-Network) [Lin et al., 2014] at the beginning of each of the three paths to perform feature dimension reduction (in the channel direction) at each spatial position, performing convolution layers after reducing channel numbers (Figure 1-b). This form of block was used in Inception v1.
+## Mathematical Framework (Light Overview)
 
-This achieved computational efficiency for the Inception module. Inception v1 achieved comparable accuracy with significantly fewer parameters than the contemporary VGGNet.
+Let’s denote the input to an Inception module as a 3D tensor $ X $ with shape $(H \times W \times C)$, where $H$ and $W$ are the spatial dimensions and $C$ is the channel depth.
 
-*Note: In ILSVRC2014, Inception v1 took first place with an error rate of 6.6%, while VGGNet took second place with an error rate of 7.3%.*
+1. **1x1 path**:
 
-### 2.2 Global Average Pooling
-The "global average pooling" proposed in Network-in-Network (NIN) [Lin et al., 2014] as a replacement for fully connected layers in the final head was also used in Inception v1.
+   $$
+   Y_{1\times1} = \text{Conv}_{1\times1}(X)
+   $$
 
-This greatly reduced the CNN's parameter count as the "layer-to-layer weight parameters" used in the fully connected layers of the classifier head became unnecessary when replaced with global average pooling.
+2. **1x1 -> 3x3 path**:
 
-### 2.3 Auxiliary Classifiers: Stabilizing Backpropagation to Early Layers
-When introducing a total of 22 convolution layers in depth, there was a problem with gradients not propagating well to early layers during backpropagation. Therefore, InceptionNet v1 proposed using auxiliary classifiers as learning support for stable training.
+   $$
+   X_{\text{reduced}} = \text{Conv}_{1\times1}(X),
+   \quad
+   Y_{3\times3} = \text{Conv}_{3\times3}(X_{\text{reduced}})
+   $$
 
-It adds classifier branches (composed of fully connected layers similar to AlexNet's final layers) as heads twice in the middle layers of Inception. Then, it takes additional cross-entropy loss at the end output of the added auxiliary classifier heads and adds it to the total loss.
+3. **1x1 -> 5x5 path**:
 
-This allowed easier backpropagation of loss to intermediate parts, enabling larger gradients to be added to backpropagation around the middle area. Thanks to this, InceptionNet could avoid gradient vanishing and propagate gradients to early layers even with its deep large-scale structure, enabling stable learning convergence (auxiliary classifier branches are used only for training, not for testing).
+   $$
+   X_{\text{reduced}}' = \text{Conv}_{1\times1}(X),
+   \quad
+   Y_{5\times5} = \text{Conv}_{5\times5}(X_{\text{reduced}}')
+   $$
 
-This idea of adding auxiliary classifiers to intermediate layers and output layers to stabilize deep network learning was later applied in ACGAN (Auxiliary Classifier GAN) [Odena et al., 2017] and others, becoming a popular approach in the realm of deep generative models for image generation and image-to-image translation.
+4. **Pooling path**:
 
-## 3. v2: Introduction of Batch Normalization
-The batch normalization paper [Ioffe and Szegedy, 2015] was published by the same Google authors as InceptionNet.
+   $$
+   Y_{\text{pool}} = \text{Pool}(X)
+   \quad\text{(often followed by Conv}_{1\times1})
+   $$
 
-Inception v2, which introduced batch normalization to Inception, was experimented with in the batch normalization paper, and this is called version 2 of InceptionNet. In later research, it is often called BN-Inception.
+After computing these branches, the final output of the Inception module is:
 
-## 4. v3: Improvement of Inception Blocks
-[Szegedy et al., 2016] proposed Inception v3 as an improved version reconsidering Inception v1.
+$$
+Y_{\text{inception}} = \text{Concat}\big(Y_{1\times1}, \,Y_{3\times3}, \,Y_{5\times5}, \,Y_{\text{pool}}\big).
+$$
 
-In Inception v3, both image recognition performance and model efficiency were improved by introducing "new Inception blocks utilizing factorization (Section 4.1)" and "efficient spatial size reduction blocks (Section 4.2)." This evolved it into a "network structure with better balance between width and depth" compared to Inception v1.
+## Recent Advancements and Improvements
 
-The network configuration of InceptionNet v3 (excluding auxiliary classifier branches) is as follows:
+1. **Inception v2 & v3**
+   - Introduced **Batch Normalization**, reducing internal covariate shift.
+   - Factorized larger filters (e.g., 5x5 → two 3x3) to cut cost.
+   These improvements increased accuracy and efficiency{footcite}`visoai`.
 
-- Early convolution + pooling layers
-- Inception block A (Figure 2-a)
-- Spatial size reduction block (Figure 4-b)
-- Inception block B (Figure 2-b)
-- Spatial size reduction block (Figure 4-b)
-- Inception block C (Figure 3)
-- Classifier head layers
+2. **Inception v4 & Inception-ResNet**
+   - Integrated **residual connections**, further improving training stability and depth{footcite}`cvpr2016`.
 
-Additionally, it makes error backpropagation easier in deep networks by branching the auxiliary classifier branch from the second spatial size reduction block.
+3. **Xception**
+   - Proposed **depthwise separable convolutions**, pushing the Inception idea further by decoupling spatial and channel-wise processing, leading to better efficiency{footcite}`visoai`.
 
-Furthermore, label smoothing (Section 4.3) was proposed as a regularization term for the loss function, which would later be widely used in deep models.
+4. **Simplified Inception with Hadamard Attention**
+   - Targeted at **medical image classification**.
+   - Uses attention mechanisms to focus on crucial parts of the image, enhancing accuracy without exploding parameter size{footcite}`srp-hadamard`.
 
-### 4.1 Parameter Reduction through Factorization
-Inception v3 uses module A, module B (Figure 2), and module C (Figure 3) in sequence, taking as input the feature map [35 x 35 x 288] first convolved with six 3x3 convolution layers + 3x3 pooling layer.
+## Implementation Example
 
-All three modules utilize "factorization of convolution layers." This achieved both (1) parameter reduction and (2) performance improvement for InceptionNet v3 as a whole.
+Below is a simplified PyTorch-like example of how we can define a single Inception module. This code demonstrates the parallel branches and concatenation of outputs. While not an exact reproduction of GoogleNet, it captures the core idea.
 
-First, "module A (Figure 2-a)" was proposed, which factorizes the [5 x 5] convolution path used in Inception v1's Inception block (Figure 1) into two layers of [3 x 3] convolutions for parameter reduction (same concept as VGGNet). Channel-direction dimension reduction is performed with [1 x 1] convolution layers before each convolution, which is the same technique as Inception v1 (Figure 1-b).
+```{code-cell} ipython3
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
-Also, "module B (Figure 2-b)" using asymmetric factorization was proposed. It reduces computational cost by factorizing the original [n x n] convolution into two layers of [n x 1] and [1 x n] with equivalent receptive fields.
+class InceptionModule(nn.Module):
+    def __init__(self, in_channels, out_1x1, red_3x3, out_3x3, red_5x5, out_5x5, pool_proj):
+        super(InceptionModule, self).__init__()
 
-"Module C (Figure 3)" was also proposed, which promotes high-dimensional features by branching paths at the module's end. High-dimensionalization promotes more disentangled (convolution) features in each path (principle 2 in the paper section 2). This also improves convergence and speeds up learning.
+        # Branch 1: 1x1 Conv
+        self.branch1 = nn.Conv2d(in_channels, out_1x1, kernel_size=1)
 
-### 4.2 Effective Spatial Size Reduction
-Inception v3 proposed using a new "spatial size reduction block (Figure 4-b blue frame)" to perform spatial size reduction efficiently.
+        # Branch 2: 1x1 Conv -> 3x3 Conv
+        self.branch2_reduce = nn.Conv2d(in_channels, red_3x3, kernel_size=1)
+        self.branch2 = nn.Conv2d(red_3x3, out_3x3, kernel_size=3, padding=1)
 
-While Inception v1 uses 1x1 convolutions within blocks to reduce feature dimensions in the channel direction at each spatial position, there were still issues with spatial size reduction, with two areas for improvement:
+        # Branch 3: 1x1 Conv -> 5x5 Conv
+        self.branch3_reduce = nn.Conv2d(in_channels, red_5x5, kernel_size=1)
+        self.branch3 = nn.Conv2d(red_5x5, out_5x5, kernel_size=5, padding=2)
 
-Type 1 (Figure 4-a left):
-When pooling before the Inception block
-The middle feature map becomes a bottleneck, hindering improvement in expressiveness.
+        # Branch 4: Max Pool -> 1x1 Conv
+        self.branch4_pool = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
+        self.branch4 = nn.Conv2d(in_channels, pool_proj, kernel_size=1)
 
-Type 2 (Figure 4-a right):
-When placing the Inception block first
-Computational cost triples.
+    def forward(self, x):
+        branch1_out = F.relu(self.branch1(x))
 
-Therefore, Inception v3 proposed and used an "improved spatial size reduction block" (Figure 4-b blue frame). Using this improved version allows increasing filter numbers while reducing spatial size. This enabled spatial size reduction while maintaining low computational cost and avoiding bottleneck representations.
+        branch2_out = F.relu(self.branch2(F.relu(self.branch2_reduce(x))))
 
-### 4.3 Label Smoothing
-The 2015-2016 research of Inception v3 (and ResNet) was motivated by the desire to increase layers and make networks deeper than the contemporary state-of-the-art CNN backbone VGGNet (16/19 layers). However, increasing layers further increased the number of model parameters, raising the risk of CNN overfitting.
+        branch3_out = F.relu(self.branch3(F.relu(self.branch3_reduce(x))))
 
-As a countermeasure, Inception v3 proposed label smoothing as a regularization method for the softmax loss function (Figure 5). Label smoothing achieves regularization by creating smoothed pseudo-labels that add a small noise distribution to all classes in the distribution created by Softmax from the correct label, and training with these pseudo-labels.
+        branch4_out = F.relu(self.branch4(self.branch4_pool(x)))
 
-## 5. Inception-v4 and Inception-ResNet
+        # Concatenate along channel dimension
+        return torch.cat([branch1_out, branch2_out, branch3_out, branch4_out], dim=1)
+
+# Example usage:
+if __name__ == "__main__":
+    inception = InceptionModule(64, 16, 16, 24, 16, 24, 16)
+    dummy_input = torch.randn(1, 64, 56, 56)  # (batch_size, channels, height, width)
+    output = inception(dummy_input)
+    print("Output shape from Inception module:", output.shape)
+```
+
+## Coding Exercise: Using Pre-trained GoogLeNet in PyTorch
+
+Below is a simple exercise that uses the pre-trained GoogLeNet model available in `torchvision`. You can try this out in a local Jupyter notebook or a cloud environment like Google Colab.
+
+```{code-cell} ipython3
+:tags: [remove-cell]
+
+# If needed, install torchvision (in Colab or local environment)
+# !pip install torch torchvision
+```
+
+```{code-cell} ipython3
+import torch
+import torchvision
+import torchvision.transforms as T
+from PIL import Image
+import requests
+from io import BytesIO
+
+# 1. Load the pre-trained GoogLeNet model
+googlenet = torchvision.models.googlenet(pretrained=True)
+googlenet.eval()  # set the model to inference mode
+
+# 2. Load an example image from the web (replace with any image URL you want)
+url = "https://raw.githubusercontent.com/pytorch/hub/master/imagenet_samples/imagenet_class_index.json"
+response = requests.get("https://images.unsplash.com/photo-1595433562696-1e052b4d841d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60")
+img = Image.open(BytesIO(response.content))
+
+# 3. Define transformations: resize, center crop, convert to tensor, normalize
+transform = T.Compose([
+    T.Resize(256),
+    T.CenterCrop(224),
+    T.ToTensor(),
+    T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+
+input_tensor = transform(img).unsqueeze(0)  # add batch dimension
+
+# 4. Run a forward pass
+with torch.no_grad():
+    output = googlenet(input_tensor)
+
+# 5. Load ImageNet labels for interpreting the output
+# In a standard environment, you can download labels like below or store them locally
+labels_url = "https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt"
+labels_response = requests.get(labels_url)
+categories = labels_response.text.strip().split("\n")
+
+# 6. Get the predicted class
+_, predicted_idx = torch.max(output, 1)
+predicted_category = categories[predicted_idx]
+print("Predicted category:", predicted_category)
+```
+
+### Exercise Suggestions
+
+1. **Try Different Images**
+   Download or use different image URLs to see how well GoogLeNet classifies them.
+2. **Visualize Feature Maps**
+   Try to hook into intermediate layers of GoogLeNet (e.g., after an early Inception module) and visualize the feature maps to see what features are being extracted.
+3. **Compare with Other Models**
+   Load other models (e.g., ResNet, VGG) from `torchvision.models` and compare their predictions and performance on the same images.
+4. **Fine-Tuning**
+   Replace GoogLeNet’s final classification layer and fine-tune on a custom dataset of your choice. Observe how quickly the network adapts.
+
+
+```{footbibliography}
+:style: unsrt
+```
