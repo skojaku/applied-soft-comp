@@ -12,28 +12,20 @@ kernelspec:
 
 # AlexNet: A Breakthrough in Deep Learning
 
-How can we train a computer to recognize 1000 different types of objects across more than a million images, and what makes this problem so challenging?
+## The ImageNet Challenge and the Deep Learning Revolution
 
-## Conceptual Foundation: The ImageNet Challenge
-
-Before diving into AlexNet, let's explore **why** large-scale image classification posed such a formidable problem for machine learning:
-
-1. **Massive Dataset**: The ImageNet Large Scale Visual Recognition Challenge (ILSVRC) dataset contains over 1.2 million training images labeled across 1000 categories.
-2. **Computational Demands**: Traditional approaches struggled both with the sheer volume of data and with the complexity of designing handcrafted features.
-3. **Error Plateaus**: Prior to 2012, the best error rates hovered around 25%, suggesting that existing methods had nearly peaked using conventional feature-engineering techniques.
+The ImageNet Large Scale Visual Recognition Challenge (ILSVRC) represented one of the most ambitious and challenging tasks in computer vision: classifying images across 1000 different categories. Before 2012, the best performing systems struggled with error rates above 25%, relying primarily on hand-crafted features and traditional machine learning approaches. The sheer scale of the dataset—--with over 1.2 million training images—--posed significant computational challenges that many believed would make deep learning approaches impractical.
 
 ```{figure} https://media.springernature.com/lw685/springer-static/image/art%3A10.1007%2Fs11263-015-0816-y/MediaObjects/11263_2015_816_Fig2_HTML.gif
-:width: 100%
-:align: center
-
-The ImageNet Large Scale Visual Recognition Challenge (ILSVRC).
+The ImageNet Large Scale Visual Recognition Challenge (ILSVRC)
 ```
 
 ```{tip}
-Prior to AlexNet, most computer vision systems relied on hand-engineered features such as SIFT (Scale-Invariant Feature Transform) or HOG (Histogram of Oriented Gradients). These were labor-intensive to design and often failed to generalize well to diverse images.
+Prior to AlexNet, the dominant approaches in computer vision relied heavily on hand-engineered features like SIFT (Scale-Invariant Feature Transform) and HOG (Histogram of Oriented Gradients). These methods required significant domain expertise and often failed to generalize well across different types of images.
 ```
 
-In 2012, a team led by **Alex Krizhevsky**, **Ilya Sutskever**, and **Geoffrey Hinton** demonstrated a deep **Convolutional Neural Network (CNN)** that shattered expectations. Their submission, known as **AlexNet**, reduced the top-5 error rate to **16.4%**—a remarkable improvement of **over 10 percentage points** compared to the next-best approach {footcite}`krizhevsky2012alexnet`.
+In 2012, Alex Krizhevsky, Ilya Sutskever, and Geoffrey Hinton submitted a deep convolutional neural network that achieved a top-5 error rate of 16.4%---an unprecedented improvement of over 10 percentage points compared to the second-best entry {footcite}`krizhevsky2012alexnet`.
+This represents a paradigm shift in computer vision and machine learning towards deep learning.
 
 ```{figure} https://viso.ai/wp-content/uploads/2024/02/imagenet-winners-by-year.jpg
 :width: 100%
@@ -42,43 +34,57 @@ In 2012, a team led by **Alex Krizhevsky**, **Ilya Sutskever**, and **Geoffrey H
 Top 5 error rates of the ImageNet Large Scale Visual Recognition Challenge (ILSVRC) from 2010 to 2017. AlexNet reduced the error rate by over 10 percentage points compared to the best performing method based on human-crafted features in 2011.
 ```
 
-This breakthrough ignited the **deep learning revolution** in computer vision. Researchers quickly realized the potential of stacking many layers of neural networks—provided they could overcome critical hurdles in training and regularization.
 
-## Key Innovations in AlexNet
+## Key Innovations of AlexNet
+
+The idea of using multiple layers of neurons has been around for a long time. However, deep neural networks have cricial issues in training. AlexNet introduced several crucial innovations to address this challenge, which have since become standard practices in deep learning:
 
 ### ReLU Activation Function
-
-**The Challenge**:
-Deep neural networks often suffer from the **vanishing gradient problem**, making early layers in the network extremely hard to train. Common activation functions like the sigmoid:
-
-$$
-\sigma(x) = \frac{1}{1 + e^{-x}}
-$$
-
-suffer from saturation, where the gradient becomes almost zero if the input $x$ is large (positive or negative).
-
-**The AlexNet Solution**:
-Introduce the **Rectified Linear Unit (ReLU)** {footcite}`nair2010rectified`:
-
-$$
-\text{ReLU}(x) = \max(0, x)
-$$
 
 ```{figure} https://miro.medium.com/v2/resize:fit:474/1*HGctgaVdv9rEHIVvLYONdQ.jpeg
 :width: 100%
 :align: center
 
-Sigmoid vs. ReLU activation functions. Sigmoid can cause gradients to vanish for $x$ far from zero, whereas ReLU maintains a constant gradient (1) for $x>0$.
+Sigmoid and ReLU activation functions. Sigmoid is prone to the vanishing gradient problem due to the plateau for input $x$ far from zero. ReLU, on the other hand, does not suffer from this problem as long as $x>0$. The image is taken from https://medium.com/@jarajan123/a-comparative-analysis-relu-vs-sigmoid-activation-functions-fa1dbe481d80
 ```
 
-- **Benefits**:
-  - Avoids vanishing gradients for positive $x$.
-  - **Computationally efficient**: Only a simple check if $x>0$.
-- **Drawback**:
-  - Neurons can "die" (always output zero) if $x$ stays negative. Variants like **Leaky ReLU** or **Parametric ReLU (PReLU)** introduce a small slope for $x \leq 0$ to mitigate this.
+Traditional neural networks with multiple layers often suffer from *the vanishing gradient problem*. It is a phenomenon where the gradient of parameters in early layers approaches zero, hindering the training process. This is attributed to the activation functions, the most common one being the sigmoid function.
+
+The sigmoid function is defined as:
+
+$$
+f(x) = \frac{1}{1 + e^{-x}}
+$$
+
+The sigmoid function has a gradient of:
+
+$$
+f'(x) = f(x) (1 - f(x))
+$$
+
+Input $x$ is random and effectively distributed around zero when the neural network is initialized. The gradient is thus large. However, as the neural network learns the data, the input signal $x$ tends to be far from zero, making the gradient of the sigmoid function approach zero.
+
+The Rectified Linear Unit (ReLU) was proposed in the previous year of AlexNet by one of the authors of AlexNet, Hinton {footcite}`nair2010rectified`.
+
+The Rectified Linear Unit (ReLU) is defined by a simple operation:
+
+$$
+f(x) = \max(0, x)
+$$
+
+The gradient of the ReLU function is:
+
+$$
+f'(x) = \begin{cases}
+0 & \text{if } x \leq 0 \\
+1 & \text{if } x > 0
+\end{cases}
+$$
+
+The ReLU function solves the vanishing gradient problem since its gradient is always either 0 or 1 when the input is positive. Additionally, ReLU is computationally efficient because it only needs to check if the input is greater than zero, making it faster than more complex activation functions like sigmoid.
 
 ```{note}
-Leaky ReLU/PReLU are typically defined as:
+ReLU suffers from so-called "dying neurons" problem, where neurons can get stuck in the dead state (i.e., $x \leq 0$) and never activate, since the gradient is zero. This issue leads to various activation functions that add a small positive value for $x \leq 0$ to the ReLU function. For example, Leaky ReLU and Parametric ReLU (PReLU) are two such activation functions defined as:
 
 $$
 f(x) = \begin{cases}
@@ -88,141 +94,112 @@ x & \text{if } x > 0 \\
 $$
 
 where $\alpha$ is a small positive constant.
+
+```{figure} https://media.licdn.com/dms/image/v2/D4D12AQH2F3GJ9wen_Q/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1688885174323?e=2147483647&v=beta&t=dY_S6xeNsRCIvpIrjrPFzq8qgHPgmP4e_HLaA15ufPM
+:width: 100%
+:align: center
+
+Comparison of various activation functions. The image is taken from https://www.linkedin.com/pulse/activation-functions-heba-al-haddad
 ```
 
 ### Dropout Regularization
 
-Deep networks with millions of parameters can easily **overfit** to the training data, harming their ability to generalize.
+Another key limitation of deep neural networks is overfitting. Overfitting occurs when the neural network learns the training data too well, resulting in poor generalization to unseen data. It is thus crucial to prevent overfitting by "regularizing" the neural network.
 
-The AlexNet solution is to use **Dropout** {footcite}`srivastava2014dropout`, a technique that randomly disables (or "drops out") neurons with probability $p$ during training.
+A traditional way to prevent overfitting is to use L2 regularization, which adds a penalty term to the loss function to prevent the weights from becoming too large. While this method is effective, an easier alternative is *dropout* {footcite}`srivastava2014dropout`.
 
 ```{figure} https://s3-ap-south-1.amazonaws.com/av-blog-media/wp-content/uploads/2018/04/1IrdJ5PghD9YoOyVAQ73MJw.gif
 :width: 100%
 :align: center
 
-Dropout in action.
+Dropout in action. The image is taken from https://primo.ai/index.php?title=Dropout
 ```
 
-1. **Training**: Each neuron is "dropped" with probability $p$, forcing the network to not rely on any single neuron’s output.
-2. **Inference**: All neurons are used, but their outputs are scaled by $(1-p)$ to maintain expected values.
+Dropout is a regularization technique that randomly drops out neurons during training to prevent overfitting. It works in two modes:
+
+1. During training, each neuron has a probability $p$ (typically 0.5) of being temporarily "dropped out" of the network. Specifically, for a given input $x$, the output $y$ of the neuron is given by
+  $$
+  y = r \cdot x, \quad \text{where } r \sim \text{Bernoulli}(p)
+  $$
+2. During inference, all neurons are used without dropping out. However, because all neurons can attend to the same input in the subsequent layers, their outputs might be changed. To compensate for this, the outputs of the neurons are scaled by the "keep probability" $1-p$ to maintain the distribution of the outputs.
+  $$
+  y = (1-p) x
+  $$
+
+This technique effectively forces the network to learn redundant representations, as it cannot rely on any single neuron being present. During inference, all neurons are used, but their outputs are scaled by the dropout probability to maintain consistent expected values.
 
 ```{note}
-An alternative known as *inverse dropout* scales weights by $1/(1-p)$ during training, removing the need for scaling during inference. This is how many popular deep learning frameworks (e.g., TensorFlow) implement dropout.
+An alternative way to implement dropout is so-called *inverse dropout*, where, instead of scaling the input $x$, scale the weights of the neurons by $1/(1-p)$ **during training**. During inference, no scaling is applied to both the input and the weights. This is what is used in TensorFlow.
 ```
 
----
 
-### 3. Local Response Normalization (LRN)
+### Local Response Normalization (LRN)
 
-In CNNs, neighboring feature maps can become disproportionately large, leading to unstable or less discriminative representations.
+Similar to how our eyes adjust to see details in both bright and dark areas of an image (like being able to see both the details of a person standing in the shadows and the bright sky behind them), Local Response Normalization (LRN) helps neural networks balance and normalize feature responses across channels. LRN is a normalization technique for CNNs originally proposed in AlexNet {footcite}`krizhevsky2012alexnet` that normalizes feature map responses across adjacent channels to enhance local contrast.
 
-In the AlexNet, this is rectified by **Local Response Normalization (LRN)** {footcite}`alexnet-lrn`, which normalizes activity across adjacent channels:
+The LRN operation for a given activity $a^i_{x,y}$ at position $(x,y)$ in the $i$-th channel of the feature map was defined as:
 
 $$
-b^i_{x,y} = \frac{a^i_{x,y}}{\Bigl(k + \alpha \sum_{j=\max(0,i-\frac{n}{2})}^{\min(N-1,i+\frac{n}{2})} (a^j_{x,y})^2\Bigr)^\beta}
+b^i_{x,y} = a^i_{x,y} / \left(k + \alpha \sum_{j=\max(0,i-n/2)}^{\min(N-1,i+n/2)} (a^j_{x,y})^2\right)^\beta
 $$
 
-Here, \(a^i_{x,y}\) is the activation at channel \(i\), and \(k, \alpha, \beta, n\) are constants. LRN encourages local competition among adjacent channels, akin to certain neural mechanisms in biological systems.
+where the constants $k$, $n$, $\alpha$, and $\beta$ were determined through validation. Note that this is the channel-wise normalization. See the original paper for more details.
 
-```{note}
-LRN is less commonly used in modern architectures (like VGG, ResNet, etc.) which often rely on batch normalization or other normalization techniques. Still, LRN was a key component in AlexNet’s success at the time.
-```
+LRN normalizes each neuron's response based on the activity of its neighboring neurons across the channels. It may improve CNN generalization by making features locally contrast-invariant and potentially stabilizing training. However, LRN has limitations, one of which is that it can only be applied to multi-channel visual features and might potentially reduce discriminative power by altering the overall representation.
+A remedy for this is Local Contrast Normalization (LCN) {footcite}`ortiz2020local`, which normalizes within a local window of a single channel.
 
----
+## Architecture and Implementation
 
-## The AlexNet Architecture
-
-Now that we've seen how AlexNet addressed vanishing gradients, overfitting, and feature-map normalization, let's look at the **overall blueprint**:
+AlexNet's architecture consisted of five convolutional layers followed by three fully connected layers.
 
 ```{figure} ../figs/alexnet-architecture.jpg
 :width: 50%
 :align: center
 
-A high-level view of the AlexNet architecture.
+Detailed architecture diagram showing the parallel GPU implementation
 ```
 
-**Detailed Layer-by-Layer Overview**:
+The network was split across two GPUs due to memory constraints of the hardware available at the time:
 
-1. **Input**: 3-channel color image, 224×224 pixels
-2. **Conv1**: [11×11, stride=4, padding=2] → ReLU → LRN → Overlapping Max Pool ([3×3], stride=2)
-3. **Conv2**: [5×5, stride=1, padding=2] → ReLU → LRN → Overlapping Max Pool ([3×3], stride=2)
-4. **Conv3**: [3×3, stride=1, padding=1] → ReLU
-5. **Conv4**: [3×3, stride=1, padding=1] → ReLU
-6. **Conv5**: [3×3, stride=1, padding=1] → ReLU → Overlapping Max Pool ([3×3], stride=2)
-7. **FC6**: Flatten → 9216 → 4096 → ReLU → Dropout
-8. **FC7**: 4096 → 4096 → ReLU → Dropout
-9. **FC8**: 4096 → 1000 → Softmax Output
+* **Input image**: [224 x 224] normalized, 3-channel color image (with color whitening, section 3.2.1)
+* **Conv1**: Convolutional layer - [11 x 11] kernel x 96 channels, stride = 4, padding = 2
+* **Activation function**: ReLU + Local Response Normalization (section 3.2.2)
+* **P1**: Pooling layer - Overlapping max pooling, [3 x 3] kernel, stride = 2
+* **Conv2**: Convolutional layer - [5 x 5] kernel x 256 channels, stride = 1, padding = 2
+* **Activation function**: ReLU + Local Response Normalization (section 3.2.2)
+* **P2**: Pooling layer - Overlapping max pooling, [3 x 3] kernel, stride = 2
+* **Conv3**: Convolutional layer - [3 x 3] kernel x 384 channels, stride = 1, padding = 1
+* **Conv4**: Convolutional layer - [3 x 3] kernel x 384 channels, stride = 1, padding = 1
+* **Conv5**: Convolutional layer - [3 x 3] kernel x 256 channels, stride = 1, padding = 1
+* **P3**: Pooling layer - Overlapping max pooling, [3 x 3] kernel, stride = 2
+* (During training only: **Dropout**)
+* **FC6**: Fully connected layer - 9216 (= 256 x 6 x 6) → 4096
+* **Activation function**: ReLU
+* (During training only: **Dropout**)
+* **FC7**: Fully connected layer - 4096 → 4096
+* **Activation function**: ReLU
+* **FC8**: Fully connected layer - 4096 → 1000
+* **Output**: 1000-dimensional vector probability distribution (output probability for each dimension) using softmax function
+
+It appears to be complicated. However, the architecture follows a clear pattern common to many convolutional neural networks.
+1. It starts with convolutional layers that extract features from the input image, followed by pooling layers that reduce spatial dimensions while preserving important information.
+2. The network begins with larger kernels (11x11, 5x5) to capture broad features and transitions to smaller ones (3x3) for more detailed features.
+3. The three consecutive 3x3 convolutions (Conv3, Conv4, Conv5) effectively create a larger receptive field while using fewer parameters than a single large kernel.
+4. The network then flattens the spatial features and passes them through fully connected layers, progressively reducing dimensions from 9216 to 4096 and finally to 1000 classes.
+5. The use of ReLU activation functions helps prevent vanishing gradients, while Local Response Normalization and Dropout serve as regularization techniques to prevent overfitting.
+
+AlexNet consists of two paths that are parallelly executed on two GPUs. This is to reduce the memory footprint of the network, since at that time, the memory of a single GPU was insufficient for the network (i.e., 3GB of memory for a single GPU).
+
+- The first Convolutional layer (Conv1) produces a feature map of 96 channels, which are split into two halves, where 48 channels for each GPU. The pooling and normalization are applied to each half.
+- The second Convolutional layer (Conv2) independently processes the feature maps of the two GPUs, producing two 128-channel feature maps.
+- In the third Convolutional layer (Conv3), the feature maps of the two GPUs interact with each other, producing two 192-channel feature maps, each of which lives on a different GPU.
+- The fourth and fifth Convolutional layer (Conv4 and Conv5) independently processes the feature maps of the two GPUs.
 
 ```{tip}
-**Parallel GPU Computation**
-AlexNet was trained on two GPUs with 3GB of memory each, splitting feature maps between them to handle the large parameter count. This approach showcased the necessity and practicality of GPU computing for large-scale deep learning.
+The use of GPUs for training neural networks was not new, but AlexNet demonstrated their practical necessity for training large-scale networks on real-world datasets. This helped establish GPU computing as a cornerstone of modern deep learning.
 ```
 
----
+## Implementation
 
-## Implementation Example
-
-Below is a minimal snippet illustrating how one might instantiate an AlexNet-like model using PyTorch’s built-in module. For a step-by-step tutorial, check out
-[Writing AlexNet from Scratch in PyTorch | DigitalOcean](https://www.digitalocean.com/community/tutorials/alexnet-pytorch).
-
-```{code-cell} ipython3
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
-class SimpleAlexNet(nn.Module):
-    def __init__(self, num_classes=1000):
-        super(SimpleAlexNet, self).__init__()
-        self.features = nn.Sequential(
-            nn.Conv2d(3, 96, kernel_size=11, stride=4, padding=2),
-            nn.ReLU(inplace=True),
-            # LRN is omitted in modern PyTorch models, replaced by batch norm or left out
-            nn.MaxPool2d(kernel_size=3, stride=2),
-
-            nn.Conv2d(96, 256, kernel_size=5, padding=2),
-            nn.ReLU(inplace=True),
-            # Another LRN placeholder if needed
-            nn.MaxPool2d(kernel_size=3, stride=2),
-
-            nn.Conv2d(256, 384, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-
-            nn.Conv2d(384, 384, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-
-            nn.Conv2d(384, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
-        )
-
-        self.classifier = nn.Sequential(
-            nn.Dropout(),
-            nn.Linear(256 * 6 * 6, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(4096, 4096),
-            nn.ReLU(inplace=True),
-            nn.Linear(4096, num_classes),
-        )
-
-    def forward(self, x):
-        x = self.features(x)
-        x = torch.flatten(x, 1)
-        x = self.classifier(x)
-        return x
-
-# Instantiate the model
-model = SimpleAlexNet(num_classes=1000)
-print(model)
-```
-
-In practice, PyTorch provides a pre-trained version of AlexNet via `torchvision.models.alexnet`. You can load it with:
-
-```{code-cell} ipython3
-import torchvision.models as models
-alexnet = models.alexnet(pretrained=True)
-```
-
-```{footbibliography}
-:style: unsrt
-```
+Interested in implementing AlexNet? You can find the implementation in
+[Writing AlexNet from Scratch in PyTorch | DigitalOcean](https://www.digitalocean.com/community/tutorials/alexnet-pytorch)

@@ -12,60 +12,34 @@ kernelspec:
 
 # LeNet and LeNet-5: Pioneering CNN Architectures
 
-How can a neural network learn to recognize complex visual patterns—like handwritten digits—without relying on hand-crafted features?
+LeNet {footcite}`lecun1989backpropagation` was one of the pioneering CNNs that revolutionized computer vision. At a time when machine learning relied heavily on hand-engineered features, LeNet demonstrated that neural networks could automatically learn to recognize visual patterns. Its most successful implementation, LeNet-5 (1998), achieved impressive accuracy in reading handwritten digits, finding practical application in processing postal codes and bank checks across the United States.
 
-In the late 1980s and early 1990s, hand-engineered feature extraction dominated machine learning approaches to computer vision. This process was laborious and often inflexible. **LeNet** {footcite}`lecun1989backpropagation` offered a radical alternative by showing that a network could learn these features directly from raw pixel data.
-
-The most influential incarnation, **LeNet-5** {footcite}`lecun1998gradient`, demonstrated impressive performance on handwritten digit recognition, finding real-world application in automated check reading and postal code processing. Although modern networks have grown significantly in depth and complexity, the core ideas from LeNet remain fundamental to today’s convolutional neural networks (CNNs).
-
-```{note}
-LeNet popularized the key innovations of convolution, pooling, and end-to-end learning—approaches that form the foundation for modern deep learning in computer vision.
-```
-
-## Learning Objectives
-- Understand the historical context and motivation behind the LeNet family of architectures.
-- Explore the architectural components (convolution, pooling, and sparse connectivity) that enabled effective pattern learning.
-- Implement a simplified version of LeNet-1 in PyTorch to gain hands-on experience.
-- Reflect on how LeNet’s innovations paved the way for more advanced CNNs.
-
-## Conceptual Foundation
-
-Before LeNet, engineers painstakingly crafted feature extractors for each vision task: edges, corners, specific shapes, etc. This approach was time-consuming, difficult to generalize, and prone to missing subtle features crucial for classification.
-
-LeNet challenged this paradigm by **automating feature extraction**. It did this through layers that systematically learn local patterns (via convolution) and gradually build more global representations (via subsampling/pooling). This hierarchical approach mimics aspects of human visual perception, where lower-level patterns combine into higher-level objects.
-
-```{note}
-**Historical Context**:
-Yann LeCun’s work on applying backpropagation to convolutional architectures in the 1980s was met with skepticism. But the success of LeNet on real-world tasks (e.g., check reading at banks) helped spark wider interest in neural network approaches to image recognition.
-```
 
 ## Architecture
 
-LeNet actually refers to several iterative designs. In what follows, we examine two key versions: **LeNet-1** (the earliest demonstration) and **LeNet-5** (the widely known and more powerful network).
+There are multiple versions of LeNet. We will focus on the seminal version of LeNet {footcite}`lecun1989backpropagation` and the most successful version of LeNet, LeNet-5 {footcite}`lecun1998gradient`.
 
-### LeNet-1
+## LeNet-1
+
+LeNet-1 is the first version of LeNet. It represents a proof-of-concept of the idea that CNNs can be used for handwritten digit recognition.
 
 ```{figure} https://miro.medium.com/v2/resize:fit:1400/format:webp/1*ge5OLutAT9_3fxt_sKTBGA.png
 ---
-width: 100%
+width: 50%
 name: lenet
 ---
 LeNet-1 architecture.
 ```
 
-1. **Convolution (C1)**: Takes a $28\times28$ (originally $32\times32$ in some demos) grayscale image and applies 4 filters of size $5\times5$. This step captures basic patterns like edges and corners.
+- The network begins with a convolutional layer that applies 4 feature maps using 5×5 kernels.
 
-2. **Pooling (S2)**: Applies average pooling (subsampling) with a $2\times2$ window, reducing the spatial dimensions from $24\times24$ to $12\times12$. This coarse-grains the features, allowing the network to focus on more abstract patterns.
+- Following C1, an average pooling layer (S2) performs subsampling using 2×2 windows, reducing the spatial dimensions.
 
-3. **Second Convolution (C3)**: Produces more feature maps (12 feature maps). By stacking multiple convolutions, the network builds increasingly complex features.
+- The network then applies a second convolution-pooling pair (C3 and S4), this time using 12 feature maps of size 8x8 and 4x4, respectively.
 
-4. **Second Pooling (S4)**: Another average pooling layer further reduces spatial dimensions to $4\times4$.
+- Finally, the network flattens the processed features and passes them through fully connected layers, combining all the extracted features to make the final digit prediction.
 
-5. **Fully Connected Layers**: The network flattens these features and passes them through a fully connected layer to produce a 10-class output (digits 0–9).
-
-```{note}
-This hierarchical processing—convolution followed by subsampling—mimics the structure of the visual cortex, where neurons respond to progressively more complex stimuli in each stage.
-```
+LeNet mirrors how human vision works, i.e., it processes images in layers, starting with basic features and building up to complex patterns. This approach laid the groundwork for modern computer vision systems.
 
 ### LeNet-5
 
@@ -77,46 +51,43 @@ name: lenet-5
 LeNet-5 architecture.
 ```
 
-LeNet-5 builds on LeNet-1 but **scales up the number of learnable parameters** and introduces a few architectural refinements:
+LeNet-5 is essentially a larger version of LeNet-1 with more parameters and some architectural improvements.
 
-1. **Input Normalization**: Inputs (grayscale images) are normalized to a range of roughly $[-0.1, 1.175]$. This centering speeds up training and stabilizes the gradients.
+1. **Input normalization**: The input is a 32×32 grayscale image. While LeNet-1 takes the raw pixel values, LeNet-5 normalizes the pixel values to fall within [-0.1, 1.175], where the white (background) corresponds to a value of -0.1 and the black (foreground) corresponds to a value of 1.175. This makes the mean input roughly 0 and the variance roughly 1, which accelerates learning.
 
-2. **Convolution + Subsampling Pairs**: Similar to LeNet-1, but with more feature maps and a **mean pooling** mechanism. Each pooling step is followed by a **non-linear activation** (often the sigmoid, though other activations can be used).
+2. **Convolutional + Subsampling + Activation**: LeNet-5 uses two pairs of convolutional and pooling (subsampling) layers. In LeNet-5, the pooling layer is a mean pooling layer that computes the mean value of each 2x2 patch. The subsampled feature maps are then passed through a sigmoid activation function to introduce non-linearity.
 
-3. **Sparse Connectivity (C3)**: Not every feature map in the previous layer connects to every feature map in the next layer. This selective approach reduces parameters and encourages **diverse features** rather than overly correlated ones.
+4. **Sparse connectivity**: In LeNet-5, there is a special convolutional layer (C3) that generates 16 feature maps, each of which is based on a combination of different S2 feature maps. The combination is determined by the connection table as shown below.
+    ```{figure} https://miro.medium.com/v2/resize:fit:894/1*eAwGLH0U4ndCyqInDBhiyg.png
+    ---
+    width: 50%
+    name: lenet-5-sparse-connectivity
+    align: center
+    ---
+    Sparse connectivity in LeNet-5.
+    ```
+    The main reason for this sparse connectivity is to diversify the feature maps generated by C3. Namely, if we generate all feature maps from all S2 feature maps, the output feature maps will be highly correlated since they are generated from the same set of S2 feature maps. By constraining the connectivity, C3 forces the network to learn more diverse features. Another added value is the parameter reduction.
 
-4. **Transition to 1D**: Instead of simply flattening, LeNet-5 includes a convolutional layer (C5) that bridges 2D feature maps to a fully connected layer, preserving more spatial structure.
+5. **From 2D feature maps to 1D feature vector**: Convolution and pooling layers generate 2D feature maps. The last step is to transform it into a 1D feature vector. A naive approch is to flatten the feature maps. However, this is not efficient since it discards the spatial information. Instead, LeNet-5 uses a convolutional layer (C5) followed by a fully connected layer and Radial Basis Function (RBF) layer to transform the 2D feature maps into a 1D feature vector. Interested readers can refer to the original paper for more details {footcite}`lecun1998gradient`.
 
-5. **Final RBF Layer** (in the original paper): An additional radial-basis-function layer was sometimes used to enhance feature representation. Modern implementations often simplify this to a linear or fully connected layer.
 
-```{note}
-**Parameter Efficiency**: One reason LeNet-5 performed well on the limited hardware of the 1990s is its careful use of sparse connections to reduce the number of parameters.
-```
+## Hands-on
 
-## Implementation
+Let us implement LeNet-1 using PyTorch. We note that this is not a faithful implementation of LeNet-1. We will use some modern techniques such as the Adam optimizer to speed up the training process.
 
-In this section, we will implement a simplified **LeNet-1** in PyTorch. While LeNet-1 was traditionally trained with batch gradient descent and certain custom optimizations, our example will use **modern tooling**—such as **PyTorch Lightning** and the **Adam** optimizer—to streamline the training process.
-
-### Dataset: MNIST
-
-We will train our model on the MNIST dataset, a classic benchmark of $28\times28$ handwritten digits. MNIST is split into 60,000 training and 10,000 test images.
+We will use the MNIST dataset for this example. This dataset is a collection of handwritten digits, with goal of classifying the digit into one of the 10 classes.
 
 ```{figure} https://production-media.paperswithcode.com/datasets/MNIST-0000000001-2e09631a_09liOmx.jpg
 ---
 width: 100%
 name: mnist
 ---
-MNIST dataset (digits 0–9 in handwritten form).
+MNIST dataset.
 ```
 
-```{tip}
-**Why MNIST?**
-- Small image size (28x28) → Perfect for simple convolutional nets.
-- 10 distinct classes → Easy to measure classification accuracy.
-- Widely used → Many existing examples to compare against.
-```
+### Prepare the dataset
 
-### Data Preparation with PyTorch Lightning
+To start, let us first prepare the dataset. We will use pytorch-lightning to create a dataloader for the MNIST dataset.
 
 ```{code-cell} ipython3
 import torch
@@ -138,17 +109,17 @@ class MNISTDataModule(pl.LightningDataModule):
 
         # Define transforms
         self.transform = transforms.Compose([
-            transforms.ToTensor(),           # Convert PIL image to torch.Tensor
-            transforms.Normalize((0,), (1,)) # Normalize to mean=0, std=1
+            transforms.ToTensor(), # convert to tensor
+            transforms.Normalize((0,), (1,)) # normalize the data such that the mean is 0 and the standard deviation is 1
         ])
 
     def prepare_data(self):
-        """Download data if needed."""
+        """Download data if needed"""
         datasets.MNIST(self.data_dir, train=True, download=True)
         datasets.MNIST(self.data_dir, train=False, download=True)
 
     def setup(self, stage=None):
-        """Setup train, val, and test datasets."""
+        """Setup train, val, and test datasets"""
         if stage == 'fit' or stage is None:
             mnist_full = datasets.MNIST(self.data_dir, train=True, transform=self.transform)
             self.mnist_train, self.mnist_val = random_split(
@@ -168,19 +139,79 @@ class MNISTDataModule(pl.LightningDataModule):
         return DataLoader(self.mnist_test, batch_size=self.batch_size, num_workers=1)
 ```
 
-```{note}
-**PyTorch Lightning DataModule**:
-- Ensures consistent data splits for training, validation, and testing.
-- Handles shuffling, batching, and transformation pipelines.
-- Makes code cleaner and easier to maintain.
+
+#### About PyTorch Lightning DataModule
+
+Let us break down the MNIST DataModule code. The MNISTDataModule class is a PyTorch Lightning implementation for handling the MNIST dataset. It inherits from `pl.LightningDataModule`, which provides a structured way to organize dataset-related code.
+
+The initialization of the DataModule sets up basic configurations and transforms:
+
+```python
+def __init__(self, data_dir: str = './data', batch_size: int = 32):
+    super().__init__()
+    self.data_dir = data_dir
+    self.batch_size = batch_size
+    self.transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0,), (1,))
+    ])
 ```
 
-### Model Definition
+The transformation pipeline consists of two steps. First, `transforms.ToTensor()` converts the PIL images to PyTorch tensors and scales the pixel values from [0, 255] to [0, 1]. Then, `transforms.Normalize((0,), (1,))` standardizes the data to have a mean of 0 and standard deviation of 1. This normalization is crucial for stable training and faster convergence of neural networks.
+
+The `prepare_data()` method handles dataset downloading:
+
+```python
+def prepare_data(self):
+    datasets.MNIST(self.data_dir, train=True, download=True)
+    datasets.MNIST(self.data_dir, train=False, download=True)
+```
+
+This method ensures the MNIST dataset is downloaded if it's not already present. It's called automatically by PyTorch Lightning and runs only on the first GPU in distributed settings.
+
+The `setup()` method prepares the train, validation, and test splits:
+
+```python
+def setup(self, stage=None):
+    if stage == 'fit' or stage is None:
+        mnist_full = datasets.MNIST(self.data_dir, train=True, transform=self.transform)
+        self.mnist_train, self.mnist_val = random_split(
+            mnist_full, [55000, 5000], generator=torch.Generator().manual_seed(42)
+        )
+    if stage == 'test' or stage is None:
+        self.mnist_test = datasets.MNIST(self.data_dir, train=False, transform=self.transform)
+```
+
+This method splits the training data into training and validation sets (55,000 and 5,000 samples respectively). The `random_split` uses a fixed seed (42) for reproducibility. The test set remains separate and uses the official MNIST test split.
+
+Finally, the DataModule provides three dataloader methods:
+
+```python
+def train_dataloader(self):
+    return DataLoader(self.mnist_train, batch_size=self.batch_size, shuffle=True, num_workers=1)
+
+def val_dataloader(self):
+    return DataLoader(self.mnist_val, batch_size=self.batch_size, num_workers=1)
+
+def test_dataloader(self):
+    return DataLoader(self.mnist_test, batch_size=self.batch_size, num_workers=1)
+```
+
+These methods create DataLoader instances for each dataset split. The training dataloader shuffles the data to prevent the model from learning the order of samples. All loaders use a single worker (`num_workers=1`) for data loading, though this can be increased for better performance on more powerful systems.
+
+For more detailed information about PyTorch Lightning DataModules and the MNIST dataset, you can refer to:
+- [PyTorch Lightning DataModule Documentation](https://lightning.ai/docs/pytorch/stable/data/datamodule.html)
+- [torchvision.datasets.MNIST Documentation](https://pytorch.org/vision/stable/datasets.html#mnist)
+- [PyTorch DataLoader Documentation](https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader)
+
+
+### Define the model
 
 ```{code-cell} ipython3
 class LeNet1(pl.LightningModule):
     """
     PyTorch Lightning implementation of LeNet-1
+    Includes training, validation, and test functionality
     """
 
     def __init__(self, learning_rate=1e-3):
@@ -192,7 +223,7 @@ class LeNet1(pl.LightningModule):
         self.val_accuracy = Accuracy(task="multiclass", num_classes=10)
         self.test_accuracy = Accuracy(task="multiclass", num_classes=10)
 
-        # First convolutional layer (Input: 1x28x28 -> Output: 4x24x24)
+        # First convolutional layer (1x28x28 -> 4x24x24)
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=4, kernel_size=5, stride=1)
 
         # Average pooling layer (4x24x24 -> 4x12x12)
@@ -207,12 +238,12 @@ class LeNet1(pl.LightningModule):
         # Initialize weights
         self._init_weights()
 
-        # Track losses over time (for visualization)
+        # Initialize validation losses
         self.val_losses = []
         self.train_losses = []
 
     def _init_weights(self):
-        """Initialize weights with Xavier initialization."""
+        """Initialize weights using Xavier initialization"""
         for m in self.modules():
             if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
                 nn.init.xavier_uniform_(m.weight)
@@ -221,12 +252,16 @@ class LeNet1(pl.LightningModule):
     def forward(self, x):
         # First conv block
         x = self.conv1(x)
-        x = torch.tanh(x)  # Using tanh for nonlinearity
+        x = torch.tanh(
+            x
+        )  # while the original paper does not mention the activation function, we use tanh here
         x = self.pool(x)
 
         # Second conv block
         x = self.conv2(x)
-        x = torch.tanh(x)
+        x = torch.tanh(
+            x
+        )  # while the original paper does not mention the activation function, we use tanh here
         x = self.pool(x)
 
         # Flatten and fully connected
@@ -235,77 +270,75 @@ class LeNet1(pl.LightningModule):
         return x
 
     def configure_optimizers(self):
-        """Define optimizer and LR scheduler."""
+        """Define optimizers and LR schedulers"""
         optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer, mode="min", factor=0.1, patience=10, verbose=True
         )
         return {
             "optimizer": optimizer,
-            "lr_scheduler": {"scheduler": scheduler, "monitor": "val_loss"}
+            "lr_scheduler": {"scheduler": scheduler, "monitor": "val_loss"},
         }
 
     def training_step(self, batch, batch_idx):
-        """Train on a single batch."""
+        """Training step"""
         x, y = batch
         logits = self(x)
         loss = F.cross_entropy(logits, y)
 
+        # Log metrics
         acc = self.train_accuracy(logits, y)
         self.log("train_loss", loss, prog_bar=True)
         self.log("train_acc", acc, prog_bar=True)
 
         self.train_losses.append({"loss": loss.item(), "acc": acc.item()})
+
         return loss
 
     def validation_step(self, batch, batch_idx):
-        """Validate on a single batch."""
+        """Validation step"""
         x, y = batch
         logits = self(x)
         loss = F.cross_entropy(logits, y)
 
+        # Log metrics
         acc = self.val_accuracy(logits, y)
         self.log("val_loss", loss, prog_bar=True)
         self.log("val_acc", acc, prog_bar=True)
-
         self.val_losses.append({"loss": loss.item(), "acc": acc.item()})
 
     def test_step(self, batch, batch_idx):
-        """Test on a single batch."""
+        """Test step"""
         x, y = batch
         logits = self(x)
         loss = F.cross_entropy(logits, y)
 
+        # Log metrics
         acc = self.test_accuracy(logits, y)
         self.log("test_loss", loss, prog_bar=True)
         self.log("test_acc", acc, prog_bar=True)
 ```
 
-### Training the Model
+### Train the model
 
 ```{code-cell} ipython3
-# Initialize model and data
-model = LeNet1(learning_rate=1e-3)
-data_module = MNISTDataModule(batch_size=256)
+    # Initialize model and data
+    model = LeNet1(learning_rate=1e-3)
+    data_module = MNISTDataModule(batch_size=256)
 
-# Initialize trainer
-trainer = pl.Trainer(
-    max_epochs=2,
-    accelerator="auto",  # Use GPU if available
-    devices=1,
-)
+    # Initialize trainer
+    trainer = pl.Trainer(
+        max_epochs=2,
+        accelerator="auto",  # Uses GPU if available
+        devices=1,
+    )
 
-# Train
-trainer.fit(model, data_module)
+    # Train and test
+    trainer.fit(model, data_module)
 ```
 
-```{tip}
-**Check GPU usage**:
-- If you have a GPU available, `accelerator="auto"` automatically leverages it.
-- Otherwise, it trains on CPU, which is slower but will still work for a small model like LeNet-1.
-```
+Let us check if the validation loss is decreasing.
 
-### Monitoring Validation Loss
 
 ```{code-cell} ipython3
 import seaborn as sns
@@ -316,50 +349,29 @@ df_val = pd.DataFrame(model.val_losses)
 df_val["Iteration"] = df_val.index
 
 fig, ax = plt.subplots(figsize=(10, 6))
-sns.lineplot(x="Iteration", y="loss", data=df_val, label="Validation Loss", ax=ax)
-ax.set_title("Validation Loss Over Time")
+ax = sns.lineplot(x="Iteration", y="loss", data=df_val, label="val")
+ax.set_title("Validation Loss")
 ax.set_xlabel("Iteration")
 ax.set_ylabel("Loss")
 plt.show()
 ```
 
-### Testing
+Let us test the model on the test dataset.
 
 ```{code-cell} ipython3
-trainer.test(model, data_module)
+    trainer.test(model, data_module)
 ```
 
-Observe the final test loss and test accuracy. Even this simple LeNet-1 inspired model often achieves high accuracy on MNIST—demonstrating how effective early CNN architectures can be.
-
-## Reflection and Exercises
-
-1. **Experiment**:
-   - Vary the learning rate and batch size to see how training dynamics change.
-   - Replace `tanh` activation with `ReLU` or `Sigmoid` and compare performance.
-
-2. **Visual Inspection**:
-   - Hand-draw a digit (e.g., using a graphics tool) and see whether the model correctly classifies it. If it fails, hypothesize why (differences in stroke thickness, image alignment, etc.).
-
-3. **Architectural Tweaks**:
-   - Try adding an additional convolutional layer or using different pooling strategies (like max pooling) to see if you can improve accuracy.
+We see that LeNet-1 achieves a very high accuracy on the test dataset, despite the fact that it is a very simple model.
 
 
-```{note}
-**Real-world Application**:
-LeNet’s core ideas are still used in modern banking systems to read checks automatically. Its principle of learning features from raw data underpins almost all modern deep-learning-based image classification systems.
-```
+## 🔥Exercise🔥
 
-## Further Reading
-
-- [**Writing LeNet5 from Scratch in PyTorch (DigitalOcean)**](https://www.digitalocean.com/community/tutorials/writing-lenet5-from-scratch-in-python)
-- [**PyTorch LeNet Implementation Video**](https://m.youtube.com/watch?v=fcOW-Zyb5Bo&pp=ygUGI2xlbmV0)
-- [**Original LeCun Paper**](http://yann.lecun.com/exdb/publis/pdf/lecun-01a.pdf)
+- Try training the model by yourself using [Notebook](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/lenet.ipynb)
+- Hand draw a digit and see if the model can predict it correctly.
+- If it does not work, think about why it does not work and how you can improve the model.
 
 ```{footbibliography}
 :style: unsrt
 :filter: docname in docnames
 ```
-
-## Summary
-
-In summary, **LeNet** {footcite}`lecun1989backpropagation` and **LeNet-5** {footcite}`lecun1998gradient` formed the basis for convolutional networks that learn directly from data. By incorporating convolution, subsampling, sparse connectivity, and end-to-end training, LeNet demonstrated how networks can autonomously discover robust representations—laying the groundwork for today’s deep learning revolution.
