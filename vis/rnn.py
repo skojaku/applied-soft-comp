@@ -10,11 +10,12 @@ def _(np):
     def rnn_step(h, w, u, use_nonlin=False):
         position = h[0]
         velocity = h[1]
-        
+
+        dt = 0.01
         mass = 1
         damping = w[1]
         spring_k = w[0]
-        dt = 0.05
+
         acceleration = u - damping * velocity - spring_k * position
         new_velocity = velocity + acceleration * dt
         new_position = position + velocity * dt
@@ -27,7 +28,7 @@ def _(np):
     return (rnn_step,)
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _():
     import marimo as mo
     import numpy as np
@@ -88,7 +89,7 @@ def _():
     )
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(
     generate_time_series,
     initial_state_slider,
@@ -113,7 +114,7 @@ def _(
     return (fig,)
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(np, rnn_step):
     # Cell for generating time series data
     def generate_time_series(w, u, h0, use_nonlin, steps=5000):
@@ -130,7 +131,7 @@ def _(np, rnn_step):
     return (generate_time_series,)
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(go, np):
     def visualize_rnn(
         weight_slider,
@@ -193,7 +194,7 @@ def _(go, np):
     return (visualize_rnn,)
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _():
     return
 

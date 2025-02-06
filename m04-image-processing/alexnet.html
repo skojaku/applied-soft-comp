@@ -232,6 +232,7 @@
 <li class="toctree-l1"><a class="reference internal" href="lenet.html">LeNet and LeNet-5: Pioneering CNN Architectures</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">AlexNet: A Breakthrough in Deep Learning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vgg.html">VGGNet - A Deep Convolutional Neural Network for Image Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inception.html">GoogleNet and the Inception Module</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Graphs</span></p>
 <ul class="nav bd-sidenav">
@@ -506,15 +507,15 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-imagenet-challenge-and-the-deep-learning-revolution">The ImageNet Challenge and the Deep Learning Revolution</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-innovations-of-alexnet">Key Innovations of AlexNet</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conceptual-foundation-the-imagenet-challenge">Conceptual Foundation: The ImageNet Challenge</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-innovations-in-alexnet">Key Innovations in AlexNet</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#relu-activation-function">ReLU Activation Function</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dropout-regularization">Dropout Regularization</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#local-response-normalization-lrn">Local Response Normalization (LRN)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#local-response-normalization-lrn">3. Local Response Normalization (LRN)</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#architecture-and-implementation">Architecture and Implementation</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation">Implementation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-alexnet-architecture">The AlexNet Architecture</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation-example">Implementation Example</a></li>
 </ul>
             </nav>
         </div>
@@ -528,69 +529,73 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="alexnet-a-breakthrough-in-deep-learning">
 <h1>AlexNet: A Breakthrough in Deep Learning<a class="headerlink" href="#alexnet-a-breakthrough-in-deep-learning" title="Link to this heading">#</a></h1>
-<section id="the-imagenet-challenge-and-the-deep-learning-revolution">
-<h2>The ImageNet Challenge and the Deep Learning Revolution<a class="headerlink" href="#the-imagenet-challenge-and-the-deep-learning-revolution" title="Link to this heading">#</a></h2>
-<p>The ImageNet Large Scale Visual Recognition Challenge (ILSVRC) represented one of the most ambitious and challenging tasks in computer vision: classifying images across 1000 different categories. Before 2012, the best performing systems struggled with error rates above 25%, relying primarily on hand-crafted features and traditional machine learning approaches. The sheer scale of the dataset—–with over 1.2 million training images—–posed significant computational challenges that many believed would make deep learning approaches impractical.</p>
-<figure class="align-default" id="id5">
-<img alt="https://media.springernature.com/lw685/springer-static/image/art%3A10.1007%2Fs11263-015-0816-y/MediaObjects/11263_2015_816_Fig2_HTML.gif" src="https://media.springernature.com/lw685/springer-static/image/art%3A10.1007%2Fs11263-015-0816-y/MediaObjects/11263_2015_816_Fig2_HTML.gif" />
+<p>How can we train a computer to recognize 1000 different types of objects across more than a million images, and what makes this problem so challenging?</p>
+<section id="conceptual-foundation-the-imagenet-challenge">
+<h2>Conceptual Foundation: The ImageNet Challenge<a class="headerlink" href="#conceptual-foundation-the-imagenet-challenge" title="Link to this heading">#</a></h2>
+<p>Before diving into AlexNet, let’s explore <strong>why</strong> large-scale image classification posed such a formidable problem for machine learning:</p>
+<ol class="arabic simple">
+<li><p><strong>Massive Dataset</strong>: The ImageNet Large Scale Visual Recognition Challenge (ILSVRC) dataset contains over 1.2 million training images labeled across 1000 categories.</p></li>
+<li><p><strong>Computational Demands</strong>: Traditional approaches struggled both with the sheer volume of data and with the complexity of designing handcrafted features.</p></li>
+<li><p><strong>Error Plateaus</strong>: Prior to 2012, the best error rates hovered around 25%, suggesting that existing methods had nearly peaked using conventional feature-engineering techniques.</p></li>
+</ol>
+<figure class="align-center" id="id5">
+<a class="reference internal image-reference" href="https://media.springernature.com/lw685/springer-static/image/art%3A10.1007%2Fs11263-015-0816-y/MediaObjects/11263_2015_816_Fig2_HTML.gif"><img alt="https://media.springernature.com/lw685/springer-static/image/art%3A10.1007%2Fs11263-015-0816-y/MediaObjects/11263_2015_816_Fig2_HTML.gif" src="https://media.springernature.com/lw685/springer-static/image/art%3A10.1007%2Fs11263-015-0816-y/MediaObjects/11263_2015_816_Fig2_HTML.gif" style="width: 100%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 60 </span><span class="caption-text">The ImageNet Large Scale Visual Recognition Challenge (ILSVRC)</span><a class="headerlink" href="#id5" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 59 </span><span class="caption-text">The ImageNet Large Scale Visual Recognition Challenge (ILSVRC).</span><a class="headerlink" href="#id5" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>Prior to AlexNet, the dominant approaches in computer vision relied heavily on hand-engineered features like SIFT (Scale-Invariant Feature Transform) and HOG (Histogram of Oriented Gradients). These methods required significant domain expertise and often failed to generalize well across different types of images.</p>
+<p>Prior to AlexNet, most computer vision systems relied on hand-engineered features such as SIFT (Scale-Invariant Feature Transform) or HOG (Histogram of Oriented Gradients). These were labor-intensive to design and often failed to generalize well to diverse images.</p>
 </div>
-<p>In 2012, Alex Krizhevsky, Ilya Sutskever, and Geoffrey Hinton submitted a deep convolutional neural network that achieved a top-5 error rate of 16.4%—an unprecedented improvement of over 10 percentage points compared to the second-best entry <a class="footnote-reference brackets" href="#footcite-krizhevsky2012alexnet" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.
-This represents a paradigm shift in computer vision and machine learning towards deep learning.</p>
+<p>In 2012, a team led by <strong>Alex Krizhevsky</strong>, <strong>Ilya Sutskever</strong>, and <strong>Geoffrey Hinton</strong> demonstrated a deep <strong>Convolutional Neural Network (CNN)</strong> that shattered expectations. Their submission, known as <strong>AlexNet</strong>, reduced the top-5 error rate to <strong>16.4%</strong>—a remarkable improvement of <strong>over 10 percentage points</strong> compared to the next-best approach <a class="footnote-reference brackets" href="#footcite-krizhevsky2012alexnet" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.</p>
 <figure class="align-center" id="id6">
 <a class="reference internal image-reference" href="https://viso.ai/wp-content/uploads/2024/02/imagenet-winners-by-year.jpg"><img alt="https://viso.ai/wp-content/uploads/2024/02/imagenet-winners-by-year.jpg" src="https://viso.ai/wp-content/uploads/2024/02/imagenet-winners-by-year.jpg" style="width: 100%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 61 </span><span class="caption-text">Top 5 error rates of the ImageNet Large Scale Visual Recognition Challenge (ILSVRC) from 2010 to 2017. AlexNet reduced the error rate by over 10 percentage points compared to the best performing method based on human-crafted features in 2011.</span><a class="headerlink" href="#id6" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 60 </span><span class="caption-text">Top 5 error rates of the ImageNet Large Scale Visual Recognition Challenge (ILSVRC) from 2010 to 2017. AlexNet reduced the error rate by over 10 percentage points compared to the best performing method based on human-crafted features in 2011.</span><a class="headerlink" href="#id6" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
+<p>This breakthrough ignited the <strong>deep learning revolution</strong> in computer vision. Researchers quickly realized the potential of stacking many layers of neural networks—provided they could overcome critical hurdles in training and regularization.</p>
 </section>
-<section id="key-innovations-of-alexnet">
-<h2>Key Innovations of AlexNet<a class="headerlink" href="#key-innovations-of-alexnet" title="Link to this heading">#</a></h2>
-<p>The idea of using multiple layers of neurons has been around for a long time. However, deep neural networks have cricial issues in training. AlexNet introduced several crucial innovations to address this challenge, which have since become standard practices in deep learning:</p>
+<section id="key-innovations-in-alexnet">
+<h2>Key Innovations in AlexNet<a class="headerlink" href="#key-innovations-in-alexnet" title="Link to this heading">#</a></h2>
 <section id="relu-activation-function">
 <h3>ReLU Activation Function<a class="headerlink" href="#relu-activation-function" title="Link to this heading">#</a></h3>
+<p><strong>The Challenge</strong>:
+Deep neural networks often suffer from the <strong>vanishing gradient problem</strong>, making early layers in the network extremely hard to train. Common activation functions like the sigmoid:</p>
+<div class="math notranslate nohighlight">
+\[
+\sigma(x) = \frac{1}{1 + e^{-x}}
+\]</div>
+<p>suffer from saturation, where the gradient becomes almost zero if the input <span class="math notranslate nohighlight">\(x\)</span> is large (positive or negative).</p>
+<p><strong>The AlexNet Solution</strong>:
+Introduce the <strong>Rectified Linear Unit (ReLU)</strong> <a class="footnote-reference brackets" href="#footcite-nair2010rectified" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>:</p>
+<div class="math notranslate nohighlight">
+\[
+\text{ReLU}(x) = \max(0, x)
+\]</div>
 <figure class="align-center" id="id7">
 <a class="reference internal image-reference" href="https://miro.medium.com/v2/resize:fit:474/1*HGctgaVdv9rEHIVvLYONdQ.jpeg"><img alt="https://miro.medium.com/v2/resize:fit:474/1*HGctgaVdv9rEHIVvLYONdQ.jpeg" src="https://miro.medium.com/v2/resize:fit:474/1*HGctgaVdv9rEHIVvLYONdQ.jpeg" style="width: 100%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 62 </span><span class="caption-text">Sigmoid and ReLU activation functions. Sigmoid is prone to the vanishing gradient problem due to the plateau for input <span class="math notranslate nohighlight">\(x\)</span> far from zero. ReLU, on the other hand, does not suffer from this problem as long as <span class="math notranslate nohighlight">\(x&gt;0\)</span>. The image is taken from <a class="reference external" href="https://medium.com/&#64;jarajan123/a-comparative-analysis-relu-vs-sigmoid-activation-functions-fa1dbe481d80">https://medium.com/&#64;jarajan123/a-comparative-analysis-relu-vs-sigmoid-activation-functions-fa1dbe481d80</a></span><a class="headerlink" href="#id7" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 61 </span><span class="caption-text">Sigmoid vs. ReLU activation functions. Sigmoid can cause gradients to vanish for <span class="math notranslate nohighlight">\(x\)</span> far from zero, whereas ReLU maintains a constant gradient (1) for <span class="math notranslate nohighlight">\(x&gt;0\)</span>.</span><a class="headerlink" href="#id7" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<p>Traditional neural networks with multiple layers often suffer from <em>the vanishing gradient problem</em>. It is a phenomenon where the gradient of parameters in early layers approaches zero, hindering the training process. This is attributed to the activation functions, the most common one being the sigmoid function.</p>
-<p>The sigmoid function is defined as:</p>
-<div class="math notranslate nohighlight">
-\[
-f(x) = \frac{1}{1 + e^{-x}}
-\]</div>
-<p>The sigmoid function has a gradient of:</p>
-<div class="math notranslate nohighlight">
-\[
-f'(x) = f(x) (1 - f(x))
-\]</div>
-<p>Input <span class="math notranslate nohighlight">\(x\)</span> is random and effectively distributed around zero when the neural network is initialized. The gradient is thus large. However, as the neural network learns the data, the input signal <span class="math notranslate nohighlight">\(x\)</span> tends to be far from zero, making the gradient of the sigmoid function approach zero.</p>
-<p>The Rectified Linear Unit (ReLU) was proposed in the previous year of AlexNet by one of the authors of AlexNet, Hinton <a class="footnote-reference brackets" href="#footcite-nair2010rectified" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>.</p>
-<p>The Rectified Linear Unit (ReLU) is defined by a simple operation:</p>
-<div class="math notranslate nohighlight">
-\[
-f(x) = \max(0, x)
-\]</div>
-<p>The gradient of the ReLU function is:</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}
-f'(x) = \begin{cases}
-0 &amp; \text{if } x \leq 0 \\
-1 &amp; \text{if } x &gt; 0
-\end{cases}
-\end{split}\]</div>
-<p>The ReLU function solves the vanishing gradient problem since its gradient is always either 0 or 1 when the input is positive. Additionally, ReLU is computationally efficient because it only needs to check if the input is greater than zero, making it faster than more complex activation functions like sigmoid.</p>
+<ul class="simple">
+<li><p><strong>Benefits</strong>:</p>
+<ul>
+<li><p>Avoids vanishing gradients for positive <span class="math notranslate nohighlight">\(x\)</span>.</p></li>
+<li><p><strong>Computationally efficient</strong>: Only a simple check if <span class="math notranslate nohighlight">\(x&gt;0\)</span>.</p></li>
+</ul>
+</li>
+<li><p><strong>Drawback</strong>:</p>
+<ul>
+<li><p>Neurons can “die” (always output zero) if <span class="math notranslate nohighlight">\(x\)</span> stays negative. Variants like <strong>Leaky ReLU</strong> or <strong>Parametric ReLU (PReLU)</strong> introduce a small slope for <span class="math notranslate nohighlight">\(x \leq 0\)</span> to mitigate this.</p></li>
+</ul>
+</li>
+</ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>ReLU suffers from so-called “dying neurons” problem, where neurons can get stuck in the dead state (i.e., <span class="math notranslate nohighlight">\(x \leq 0\)</span>) and never activate, since the gradient is zero. This issue leads to various activation functions that add a small positive value for <span class="math notranslate nohighlight">\(x \leq 0\)</span> to the ReLU function. For example, Leaky ReLU and Parametric ReLU (PReLU) are two such activation functions defined as:</p>
+<p>Leaky ReLU/PReLU are typically defined as:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 f(x) = \begin{cases}
@@ -599,109 +604,193 @@ x &amp; \text{if } x &gt; 0 \\
 \end{cases}
 \end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\alpha\)</span> is a small positive constant.</p>
-<figure class="align-center" id="id8">
-<a class="reference internal image-reference" href="https://media.licdn.com/dms/image/v2/D4D12AQH2F3GJ9wen_Q/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1688885174323?e=2147483647&amp;v=beta&amp;t=dY_S6xeNsRCIvpIrjrPFzq8qgHPgmP4e_HLaA15ufPM"><img alt="https://media.licdn.com/dms/image/v2/D4D12AQH2F3GJ9wen_Q/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1688885174323?e=2147483647&amp;v=beta&amp;t=dY_S6xeNsRCIvpIrjrPFzq8qgHPgmP4e_HLaA15ufPM" src="https://media.licdn.com/dms/image/v2/D4D12AQH2F3GJ9wen_Q/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1688885174323?e=2147483647&amp;v=beta&amp;t=dY_S6xeNsRCIvpIrjrPFzq8qgHPgmP4e_HLaA15ufPM" style="width: 100%;" /></a>
-<figcaption>
-<p><span class="caption-number">Fig. 63 </span><span class="caption-text">Comparison of various activation functions. The image is taken from <a class="reference external" href="https://www.linkedin.com/pulse/activation-functions-heba-al-haddad">https://www.linkedin.com/pulse/activation-functions-heba-al-haddad</a></span><a class="headerlink" href="#id8" title="Link to this image">#</a></p>
-</figcaption>
-</figure>
 </div>
 </section>
 <section id="dropout-regularization">
 <h3>Dropout Regularization<a class="headerlink" href="#dropout-regularization" title="Link to this heading">#</a></h3>
-<p>Another key limitation of deep neural networks is overfitting. Overfitting occurs when the neural network learns the training data too well, resulting in poor generalization to unseen data. It is thus crucial to prevent overfitting by “regularizing” the neural network.</p>
-<p>A traditional way to prevent overfitting is to use L2 regularization, which adds a penalty term to the loss function to prevent the weights from becoming too large. While this method is effective, an easier alternative is <em>dropout</em> <a class="footnote-reference brackets" href="#footcite-srivastava2014dropout" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>.</p>
-<figure class="align-center" id="id9">
+<p>Deep networks with millions of parameters can easily <strong>overfit</strong> to the training data, harming their ability to generalize.</p>
+<p>The AlexNet solution is to use <strong>Dropout</strong> <a class="footnote-reference brackets" href="#footcite-srivastava2014dropout" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>, a technique that randomly disables (or “drops out”) neurons with probability <span class="math notranslate nohighlight">\(p\)</span> during training.</p>
+<figure class="align-center" id="id8">
 <a class="reference internal image-reference" href="https://s3-ap-south-1.amazonaws.com/av-blog-media/wp-content/uploads/2018/04/1IrdJ5PghD9YoOyVAQ73MJw.gif"><img alt="https://s3-ap-south-1.amazonaws.com/av-blog-media/wp-content/uploads/2018/04/1IrdJ5PghD9YoOyVAQ73MJw.gif" src="https://s3-ap-south-1.amazonaws.com/av-blog-media/wp-content/uploads/2018/04/1IrdJ5PghD9YoOyVAQ73MJw.gif" style="width: 100%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 64 </span><span class="caption-text">Dropout in action. The image is taken from <a class="reference external" href="https://primo.ai/index.php?title=Dropout">https://primo.ai/index.php?title=Dropout</a></span><a class="headerlink" href="#id9" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 62 </span><span class="caption-text">Dropout in action.</span><a class="headerlink" href="#id8" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<p>Dropout is a regularization technique that randomly drops out neurons during training to prevent overfitting. It works in two modes:</p>
 <ol class="arabic simple">
-<li><p>During training, each neuron has a probability <span class="math notranslate nohighlight">\(p\)</span> (typically 0.5) of being temporarily “dropped out” of the network. Specifically, for a given input <span class="math notranslate nohighlight">\(x\)</span>, the output <span class="math notranslate nohighlight">\(y\)</span> of the neuron is given by
-$<span class="math notranslate nohighlight">\(
-y = r \cdot x, \quad \text{where } r \sim \text{Bernoulli}(p)
-\)</span>$</p></li>
-<li><p>During inference, all neurons are used without dropping out. However, because all neurons can attend to the same input in the subsequent layers, their outputs might be changed. To compensate for this, the outputs of the neurons are scaled by the “keep probability” <span class="math notranslate nohighlight">\(1-p\)</span> to maintain the distribution of the outputs.
-$<span class="math notranslate nohighlight">\(
-y = (1-p) x
-\)</span>$</p></li>
+<li><p><strong>Training</strong>: Each neuron is “dropped” with probability <span class="math notranslate nohighlight">\(p\)</span>, forcing the network to not rely on any single neuron’s output.</p></li>
+<li><p><strong>Inference</strong>: All neurons are used, but their outputs are scaled by <span class="math notranslate nohighlight">\((1-p)\)</span> to maintain expected values.</p></li>
 </ol>
-<p>This technique effectively forces the network to learn redundant representations, as it cannot rely on any single neuron being present. During inference, all neurons are used, but their outputs are scaled by the dropout probability to maintain consistent expected values.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>An alternative way to implement dropout is so-called <em>inverse dropout</em>, where, instead of scaling the input <span class="math notranslate nohighlight">\(x\)</span>, scale the weights of the neurons by <span class="math notranslate nohighlight">\(1/(1-p)\)</span> <strong>during training</strong>. During inference, no scaling is applied to both the input and the weights. This is what is used in TensorFlow.</p>
+<p>An alternative known as <em>inverse dropout</em> scales weights by <span class="math notranslate nohighlight">\(1/(1-p)\)</span> during training, removing the need for scaling during inference. This is how many popular deep learning frameworks (e.g., TensorFlow) implement dropout.</p>
 </div>
 </section>
+<hr class="docutils" />
 <section id="local-response-normalization-lrn">
-<h3>Local Response Normalization (LRN)<a class="headerlink" href="#local-response-normalization-lrn" title="Link to this heading">#</a></h3>
-<p>Similar to how our eyes adjust to see details in both bright and dark areas of an image (like being able to see both the details of a person standing in the shadows and the bright sky behind them), Local Response Normalization (LRN) helps neural networks balance and normalize feature responses across channels. LRN is a normalization technique for CNNs originally proposed in AlexNet <a class="footnote-reference brackets" href="#footcite-krizhevsky2012alexnet" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> that normalizes feature map responses across adjacent channels to enhance local contrast.</p>
-<p>The LRN operation for a given activity <span class="math notranslate nohighlight">\(a^i_{x,y}\)</span> at position <span class="math notranslate nohighlight">\((x,y)\)</span> in the <span class="math notranslate nohighlight">\(i\)</span>-th channel of the feature map was defined as:</p>
+<h3>3. Local Response Normalization (LRN)<a class="headerlink" href="#local-response-normalization-lrn" title="Link to this heading">#</a></h3>
+<p>In CNNs, neighboring feature maps can become disproportionately large, leading to unstable or less discriminative representations.</p>
+<p>In the AlexNet, this is rectified by <strong>Local Response Normalization (LRN)</strong> , which normalizes activity across adjacent channels:</p>
 <div class="math notranslate nohighlight">
 \[
-b^i_{x,y} = a^i_{x,y} / \left(k + \alpha \sum_{j=\max(0,i-n/2)}^{\min(N-1,i+n/2)} (a^j_{x,y})^2\right)^\beta
+b^i_{x,y} = \frac{a^i_{x,y}}{\Bigl(k + \alpha \sum_{j=\max(0,i-\frac{n}{2})}^{\min(N-1,i+\frac{n}{2})} (a^j_{x,y})^2\Bigr)^\beta}
 \]</div>
-<p>where the constants <span class="math notranslate nohighlight">\(k\)</span>, <span class="math notranslate nohighlight">\(n\)</span>, <span class="math notranslate nohighlight">\(\alpha\)</span>, and <span class="math notranslate nohighlight">\(\beta\)</span> were determined through validation. Note that this is the channel-wise normalization. See the original paper for more details.</p>
-<p>LRN normalizes each neuron’s response based on the activity of its neighboring neurons across the channels. It may improve CNN generalization by making features locally contrast-invariant and potentially stabilizing training. However, LRN has limitations, one of which is that it can only be applied to multi-channel visual features and might potentially reduce discriminative power by altering the overall representation.
-A remedy for this is Local Contrast Normalization (LCN) , which normalizes within a local window of a single channel.</p>
-</section>
-</section>
-<section id="architecture-and-implementation">
-<h2>Architecture and Implementation<a class="headerlink" href="#architecture-and-implementation" title="Link to this heading">#</a></h2>
-<p>AlexNet’s architecture consisted of five convolutional layers followed by three fully connected layers.</p>
-<figure class="align-center" id="id10">
-<a class="reference internal image-reference" href="../_images/alexnet-architecture.jpg"><img alt="../_images/alexnet-architecture.jpg" src="../_images/alexnet-architecture.jpg" style="width: 50%;" /></a>
-<figcaption>
-<p><span class="caption-number">Fig. 65 </span><span class="caption-text">Detailed architecture diagram showing the parallel GPU implementation</span><a class="headerlink" href="#id10" title="Link to this image">#</a></p>
-</figcaption>
-</figure>
-<p>The network was split across two GPUs due to memory constraints of the hardware available at the time:</p>
-<ul class="simple">
-<li><p><strong>Input image</strong>: [224 x 224] normalized, 3-channel color image (with color whitening, section 3.2.1)</p></li>
-<li><p><strong>Conv1</strong>: Convolutional layer - [11 x 11] kernel x 96 channels, stride = 4, padding = 2</p></li>
-<li><p><strong>Activation function</strong>: ReLU + Local Response Normalization (section 3.2.2)</p></li>
-<li><p><strong>P1</strong>: Pooling layer - Overlapping max pooling, [3 x 3] kernel, stride = 2</p></li>
-<li><p><strong>Conv2</strong>: Convolutional layer - [5 x 5] kernel x 256 channels, stride = 1, padding = 2</p></li>
-<li><p><strong>Activation function</strong>: ReLU + Local Response Normalization (section 3.2.2)</p></li>
-<li><p><strong>P2</strong>: Pooling layer - Overlapping max pooling, [3 x 3] kernel, stride = 2</p></li>
-<li><p><strong>Conv3</strong>: Convolutional layer - [3 x 3] kernel x 384 channels, stride = 1, padding = 1</p></li>
-<li><p><strong>Conv4</strong>: Convolutional layer - [3 x 3] kernel x 384 channels, stride = 1, padding = 1</p></li>
-<li><p><strong>Conv5</strong>: Convolutional layer - [3 x 3] kernel x 256 channels, stride = 1, padding = 1</p></li>
-<li><p><strong>P3</strong>: Pooling layer - Overlapping max pooling, [3 x 3] kernel, stride = 2</p></li>
-<li><p>(During training only: <strong>Dropout</strong>)</p></li>
-<li><p><strong>FC6</strong>: Fully connected layer - 9216 (= 256 x 6 x 6) → 4096</p></li>
-<li><p><strong>Activation function</strong>: ReLU</p></li>
-<li><p>(During training only: <strong>Dropout</strong>)</p></li>
-<li><p><strong>FC7</strong>: Fully connected layer - 4096 → 4096</p></li>
-<li><p><strong>Activation function</strong>: ReLU</p></li>
-<li><p><strong>FC8</strong>: Fully connected layer - 4096 → 1000</p></li>
-<li><p><strong>Output</strong>: 1000-dimensional vector probability distribution (output probability for each dimension) using softmax function</p></li>
-</ul>
-<p>It appears to be complicated. However, the architecture follows a clear pattern common to many convolutional neural networks.</p>
-<ol class="arabic simple">
-<li><p>It starts with convolutional layers that extract features from the input image, followed by pooling layers that reduce spatial dimensions while preserving important information.</p></li>
-<li><p>The network begins with larger kernels (11x11, 5x5) to capture broad features and transitions to smaller ones (3x3) for more detailed features.</p></li>
-<li><p>The three consecutive 3x3 convolutions (Conv3, Conv4, Conv5) effectively create a larger receptive field while using fewer parameters than a single large kernel.</p></li>
-<li><p>The network then flattens the spatial features and passes them through fully connected layers, progressively reducing dimensions from 9216 to 4096 and finally to 1000 classes.</p></li>
-<li><p>The use of ReLU activation functions helps prevent vanishing gradients, while Local Response Normalization and Dropout serve as regularization techniques to prevent overfitting.</p></li>
-</ol>
-<p>AlexNet consists of two paths that are parallelly executed on two GPUs. This is to reduce the memory footprint of the network, since at that time, the memory of a single GPU was insufficient for the network (i.e., 3GB of memory for a single GPU).</p>
-<ul class="simple">
-<li><p>The first Convolutional layer (Conv1) produces a feature map of 96 channels, which are split into two halves, where 48 channels for each GPU. The pooling and normalization are applied to each half.</p></li>
-<li><p>The second Convolutional layer (Conv2) independently processes the feature maps of the two GPUs, producing two 128-channel feature maps.</p></li>
-<li><p>In the third Convolutional layer (Conv3), the feature maps of the two GPUs interact with each other, producing two 192-channel feature maps, each of which lives on a different GPU.</p></li>
-<li><p>The fourth and fifth Convolutional layer (Conv4 and Conv5) independently processes the feature maps of the two GPUs.</p></li>
-</ul>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>The use of GPUs for training neural networks was not new, but AlexNet demonstrated their practical necessity for training large-scale networks on real-world datasets. This helped establish GPU computing as a cornerstone of modern deep learning.</p>
+<p>Here, (a^i_{x,y}) is the activation at channel (i), and (k, \alpha, \beta, n) are constants. LRN encourages local competition among adjacent channels, akin to certain neural mechanisms in biological systems.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>LRN is less commonly used in modern architectures (like VGG, ResNet, etc.) which often rely on batch normalization or other normalization techniques. Still, LRN was a key component in AlexNet’s success at the time.</p>
 </div>
 </section>
-<section id="implementation">
-<h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">#</a></h2>
-<p>Interested in implementing AlexNet? You can find the implementation in
-<a class="reference external" href="https://www.digitalocean.com/community/tutorials/alexnet-pytorch">Writing AlexNet from Scratch in PyTorch | DigitalOcean</a></p>
+</section>
+<hr class="docutils" />
+<section id="the-alexnet-architecture">
+<h2>The AlexNet Architecture<a class="headerlink" href="#the-alexnet-architecture" title="Link to this heading">#</a></h2>
+<p>Now that we’ve seen how AlexNet addressed vanishing gradients, overfitting, and feature-map normalization, let’s look at the <strong>overall blueprint</strong>:</p>
+<figure class="align-center" id="id9">
+<a class="reference internal image-reference" href="../_images/alexnet-architecture.jpg"><img alt="../_images/alexnet-architecture.jpg" src="../_images/alexnet-architecture.jpg" style="width: 50%;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 63 </span><span class="caption-text">A high-level view of the AlexNet architecture.</span><a class="headerlink" href="#id9" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p><strong>Detailed Layer-by-Layer Overview</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>Input</strong>: 3-channel color image, 224×224 pixels</p></li>
+<li><p><strong>Conv1</strong>: [11×11, stride=4, padding=2] → ReLU → LRN → Overlapping Max Pool ([3×3], stride=2)</p></li>
+<li><p><strong>Conv2</strong>: [5×5, stride=1, padding=2] → ReLU → LRN → Overlapping Max Pool ([3×3], stride=2)</p></li>
+<li><p><strong>Conv3</strong>: [3×3, stride=1, padding=1] → ReLU</p></li>
+<li><p><strong>Conv4</strong>: [3×3, stride=1, padding=1] → ReLU</p></li>
+<li><p><strong>Conv5</strong>: [3×3, stride=1, padding=1] → ReLU → Overlapping Max Pool ([3×3], stride=2)</p></li>
+<li><p><strong>FC6</strong>: Flatten → 9216 → 4096 → ReLU → Dropout</p></li>
+<li><p><strong>FC7</strong>: 4096 → 4096 → ReLU → Dropout</p></li>
+<li><p><strong>FC8</strong>: 4096 → 1000 → Softmax Output</p></li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><strong>Parallel GPU Computation</strong>
+AlexNet was trained on two GPUs with 3GB of memory each, splitting feature maps between them to handle the large parameter count. This approach showcased the necessity and practicality of GPU computing for large-scale deep learning.</p>
+</div>
+</section>
+<hr class="docutils" />
+<section id="implementation-example">
+<h2>Implementation Example<a class="headerlink" href="#implementation-example" title="Link to this heading">#</a></h2>
+<p>Below is a minimal snippet illustrating how one might instantiate an AlexNet-like model using PyTorch’s built-in module. For a step-by-step tutorial, check out
+<a class="reference external" href="https://www.digitalocean.com/community/tutorials/alexnet-pytorch">Writing AlexNet from Scratch in PyTorch | DigitalOcean</a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SimpleAlexNet</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SimpleAlexNet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">96</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="c1"># LRN is omitted in modern PyTorch models, replaced by batch norm or left out</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">MaxPool2d</span><span class="p">(</span><span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+
+            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">96</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="c1"># Another LRN placeholder if needed</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">MaxPool2d</span><span class="p">(</span><span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+
+            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">384</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+
+            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">384</span><span class="p">,</span> <span class="mi">384</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+
+            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">384</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">MaxPool2d</span><span class="p">(</span><span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">256</span> <span class="o">*</span> <span class="mi">6</span> <span class="o">*</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">4096</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">4096</span><span class="p">,</span> <span class="mi">4096</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">4096</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span>
+
+<span class="c1"># Instantiate the model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">SimpleAlexNet</span><span class="p">(</span><span class="n">num_classes</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>SimpleAlexNet(
+  (features): Sequential(
+    (0): Conv2d(3, 96, kernel_size=(11, 11), stride=(4, 4), padding=(2, 2))
+    (1): ReLU(inplace=True)
+    (2): MaxPool2d(kernel_size=3, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (3): Conv2d(96, 256, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (4): ReLU(inplace=True)
+    (5): MaxPool2d(kernel_size=3, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (6): Conv2d(256, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (7): ReLU(inplace=True)
+    (8): Conv2d(384, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (9): ReLU(inplace=True)
+    (10): Conv2d(384, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (11): ReLU(inplace=True)
+    (12): MaxPool2d(kernel_size=3, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (classifier): Sequential(
+    (0): Dropout(p=0.5, inplace=False)
+    (1): Linear(in_features=9216, out_features=4096, bias=True)
+    (2): ReLU(inplace=True)
+    (3): Dropout(p=0.5, inplace=False)
+    (4): Linear(in_features=4096, out_features=4096, bias=True)
+    (5): ReLU(inplace=True)
+    (6): Linear(in_features=4096, out_features=1000, bias=True)
+  )
+)
+</pre></div>
+</div>
+</div>
+</div>
+<p>In practice, PyTorch provides a pre-trained version of AlexNet via <code class="docutils literal notranslate"><span class="pre">torchvision.models.alexnet</span></code>. You can load it with:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torchvision.models</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">models</span>
+<span class="n">alexnet</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">alexnet</span><span class="p">(</span><span class="n">pretrained</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/skojaku-admin/miniforge3/envs/advnetsci/lib/python3.11/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter &#39;pretrained&#39; is deprecated since 0.13 and may be removed in the future, please use &#39;weights&#39; instead.
+  warnings.warn(
+/Users/skojaku-admin/miniforge3/envs/advnetsci/lib/python3.11/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for &#39;weights&#39; are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=AlexNet_Weights.IMAGENET1K_V1`. You can also use `weights=AlexNet_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="docutils container" id="id4">
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="footcite-krizhevsky2012alexnet" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Alex Krizhevsky, Ilya Sutskever, and Geoffrey E Hinton. Imagenet classification with deep convolutional neural networks. In F. Pereira, C.J. Burges, L. Bottou, and K.Q. Weinberger, editors, <em>Advances in Neural Information Processing Systems</em>, volume 25. Curran Associates, Inc., 2012. URL: <a class="reference external" href="https://proceedings.neurips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf">https://proceedings.neurips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf</a>.</p>
+</aside>
+<aside class="footnote brackets" id="footcite-nair2010rectified" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<p>Vinod Nair and Geoffrey E. Hinton. Rectified linear units improve restricted boltzmann machines. In <em>Proceedings of the 27th International Conference on International Conference on Machine Learning</em>, ICML’10, 807–814. Madison, WI, USA, 2010. Omnipress.</p>
+</aside>
+<aside class="footnote brackets" id="footcite-srivastava2014dropout" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
+<p>Nitish Srivastava, Geoffrey Hinton, Alex Krizhevsky, Ilya Sutskever, and Ruslan Salakhutdinov. Dropout: a simple way to prevent neural networks from overfitting. <em>The journal of machine learning research</em>, 15(1):1929–1958, 2014.</p>
+</aside>
+</aside>
+</div>
 </section>
 </section>
 
@@ -769,15 +858,15 @@ A remedy for this is Local Contrast Normalization (LCN) , which normalizes withi
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-imagenet-challenge-and-the-deep-learning-revolution">The ImageNet Challenge and the Deep Learning Revolution</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-innovations-of-alexnet">Key Innovations of AlexNet</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conceptual-foundation-the-imagenet-challenge">Conceptual Foundation: The ImageNet Challenge</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-innovations-in-alexnet">Key Innovations in AlexNet</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#relu-activation-function">ReLU Activation Function</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dropout-regularization">Dropout Regularization</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#local-response-normalization-lrn">Local Response Normalization (LRN)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#local-response-normalization-lrn">3. Local Response Normalization (LRN)</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#architecture-and-implementation">Architecture and Implementation</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation">Implementation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-alexnet-architecture">The AlexNet Architecture</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation-example">Implementation Example</a></li>
 </ul>
   </nav></div>
 
