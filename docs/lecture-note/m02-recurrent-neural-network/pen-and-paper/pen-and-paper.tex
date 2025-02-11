@@ -88,20 +88,18 @@
 
 \exercise[Building RNNs: From Rolling Balls to Hidden States]
 
-\step Imagine a ball rolling on a surface with some friction. The ball's momentum (hidden state) changes based on:
+\step Imagine a ball rolling on a surface with air resistance (drag). The ball's momentum (hidden state) changes based on:
 \begin{enumerate}
     \item Previous momentum (how fast it was already rolling)
     \item New external force (input)
 \end{enumerate}
 
-For each scenario below, shade the boxes to show the ball's momentum (darker = faster). For simplicity, assume the relationship between momentum and time is linear, e.g., if the ball is moving at 1 m/s at $t_1$ and the external force is 1 m/s$^2$, it will be moving at 2 m/s at $t_2$.
+For force sequence [1, 1, 1, 1], shade boxes to show momentum (white = 0 m/s, light gray = 1 m/s, medium gray = 2 m/s, dark gray = 3 m/s, black = 4+ m/s):
 
 \begin{center}
 \begin{tikzpicture}
-    \node[text width=12cm] at (4,2) {Constant push force [1, 1, 1, 1]:};
     \begin{scope}[yshift=0cm]
         \draw (0,0) grid[step=1] (4,1);
-        % Time steps
         \foreach \x/\t in {0.5/$t_1$, 1.5/$t_2$, 2.5/$t_3$, 3.5/$t_4$} {
             \node[rotate=0] at (\x,-0.3) {\t};
         }
@@ -110,38 +108,49 @@ For each scenario below, shade the boxes to show the ball's momentum (darker = f
 \end{tikzpicture}
 \end{center}
 
-\step Now let's understand how friction (weight on previous state) affects motion. A high weight ($w = 0.9$) means low friction, while a low weight ($w = 0.1$) means high friction. The friction is applied to the previous momentum by multiplying it, e.g., $h_{\text{new}} = w \times h_{\text{old}}$.
+\step In both physics and RNNs, we need a way to control how much past information is retained. In physics, this is air resistance (drag), which reduces velocity proportionally to speed. In RNNs, we use a weight ($w$) that serves the same purpose - it determines what fraction of the previous momentum is kept. A high weight ($w = 0.9$) means 90\% of momentum is retained (low drag), while a low weight ($w = 0.1$) means only 10\% is retained (high drag).
 
-Shade these boxes showing momentum for different friction levels, with force [2, 2, 0, 0]:
+For force sequence [2, 2, 0, 0], shade three sets of boxes for:
+\begin{enumerate}[label=(\alph*)]
+    \item High retention ($w = 0.9$)
+    \item Medium retention ($w = 0.5$)
+    \item Low retention ($w = 0.1$)
+\end{enumerate}
 
 \begin{center}
 \begin{tikzpicture}
+    \begin{scope}[yshift=4cm]
+        \draw (0,0) grid[step=1] (4,1);
+        \node at (-2,0.5) {$w = 0.9$};
+    \end{scope}
+    \begin{scope}[yshift=2cm]
+        \draw (0,0) grid[step=1] (4,1);
+        \node at (-2,0.5) {$w = 0.5$};
+    \end{scope}
     \begin{scope}[yshift=0cm]
         \draw (0,0) grid[step=1] (4,1);
-        % Time steps
-        \foreach \x/\t in {0.5/$t_1$, 1.5/$t_2$, 2.5/$t_3$, 3.5/$t_4$} {
-            \node[rotate=0] at (\x,-0.3) {\t};
-        }
-        \node at (-2,0.5) {Momentum};
+        \node at (-2,0.5) {$w = 0.1$};
     \end{scope}
 \end{tikzpicture}
 \end{center}
 
-\think{How does friction (weight) affect how long the ball "remembers" previous pushes?}
-\step Let's turn this physical intuition into an RNN. The new hidden state is:
+\think{How does $w$ affect the network's memory of past inputs?}
 
-$$h_{\text{new}} = \tanh(w \times h_{\text{old}} + w_x \times \text{force})$$
+\step Just as real objects can't have infinite speed due to air resistance, RNNs need a way to prevent unbounded growth of the hidden state. We introduce the $\tanh$ activation function as our "speed limit." Let's see how our physical model becomes an RNN:
+
+Physical model: $\text{new momentum} = w \times \text{old momentum} + w_x \times \text{force}$
+RNN model: $h_{\text{new}} = \tanh(w \times h_{\text{old}} + w_x \times \text{force})$
 
 where:
 \begin{enumerate}
     \item $h_{\text{old}}$ is previous momentum
     \item $\text{force}$ is input
-    \item $w$ relates to friction (how much previous momentum is preserved)
-    \item $w_x$ relates to how effectively force changes momentum
-    \item tanh keeps momentum from growing infinitely
+    \item $w$ controls memory retention (like inverse drag coefficient)
+    \item $w_x$ controls force sensitivity
+    \item $\tanh$ keeps values between -1 and 1 (our speed limit)
 \end{enumerate}
 
-For these force sequences, shade the predicted momentum, with $w = 1.0$ and $w_x = 1$:
+For these force sequences, shade the predicted momentum (white = -1, light gray = -0.5, medium gray = 0, dark gray = 0.5, black = 1), with $w = 1.0$ and $w_x = 1$:
 
 \begin{center}
 \begin{tabular}{ccc}
@@ -168,7 +177,7 @@ For these force sequences, shade the predicted momentum, with $w = 1.0$ and $w_x
 
 \think{How does each force sequence affect momentum differently? Which sequence would be hardest for the network to "learn"?}
 
-\step Design your own RNN weights! If you wanted to: (Design 1) Remember past inputs longer, (Design 2) Respond more quickly to new forces, (Design 3) Have a maximum speed limit. Shade these weight matrices to achieve each goal:
+\step Design your own RNN weights! If you wanted to: (Design 1) Remember past inputs longer, (Design 2) Respond more quickly to new forces, (Design 3) Have a maximum speed limit. Shade these weight matrices (white = 0, black = 1) to achieve each goal:
 
 \begin{center}
 \begin{tikzpicture}
@@ -196,7 +205,7 @@ For these force sequences, shade the predicted momentum, with $w = 1.0$ and $w_x
     \item Negative weights
 \end{enumerate}
 
-Shade the momentum evolution for input sequence [1, 1, 1, 1]:
+Shade the momentum evolution for input sequence [1, 1, 1, 1] (use white = minimum value, black = maximum value in each case):
 
 \begin{center}
 \begin{tikzpicture}
@@ -212,7 +221,5 @@ Shade the momentum evolution for input sequence [1, 1, 1, 1]:
 \end{center}
 
 \think{Why are these scenarios "impossible" physically but possible in an RNN? What problems might they cause or solve?}
-
-
 
 \end{document}
