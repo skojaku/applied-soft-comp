@@ -22,16 +22,16 @@ def _(mo):
             </defs>
             <!-- Background -->
             <rect width="700" height="300" fill="#fff"/>
-        
+
             <!-- Left side: Physical System -->
             <g transform="translate(80,80)">
                 <!-- Wall -->
                 <rect x="0" y="90" width="20" height="100" fill="#666"/>
-            
+
                 <!-- Spring (connected to mass) -->
                 <path d="M20,130 C30,130 30,120 40,120 S50,130 60,130 S70,120 80,120 S90,130 100,130 S110,120 120,120 S130,130 140,130" 
                       stroke="#666" fill="none" stroke-width="2"/>
-            
+
                 <!-- Shortened and raised damper -->
                 <path d="M20,155 L50,155" stroke="#666" stroke-width="2"/>
                 <!-- Damper piston -->
@@ -40,16 +40,16 @@ def _(mo):
                 <path d="M75,148 L110,148 L110,162 L75,162" stroke="#666" fill="none" stroke-width="2"/>
                 <!-- Straight connection to mass -->
                 <line x1="110" y1="155" x2="140" y2="155" stroke="#666" stroke-width="2"/>
-            
+
                 <!-- Mass (increased size) -->
                 <rect x="140" y="110" width="70" height="70" fill="#4664c5" stroke="none"/>
                 <text x="175" y="150" text-anchor="middle" fill="white" font-family="Arial" font-size="16">m</text>
-            
+
                 <!-- Force arrow (attached to mass) -->
                 <line x1="210" y1="140" x2="240" y2="140" stroke="#d64242" 
                       marker-end="url(#arrowhead)" stroke-width="2"/>
                 <text x="225" y="125" fill="#d64242" font-family="Arial">F</text>
-            
+
                 <!-- Label -->
                 <text x="80" y="50" text-anchor="middle" font-family="Arial" 
                       font-size="20">Physical System</text>
@@ -61,27 +61,27 @@ def _(mo):
                       fill="#4664c5" stroke="none"/>
                 <text x="160" y="130" text-anchor="middle" fill="white" font-family="Arial">Hidden State</text>
                 <text x="160" y="150" text-anchor="middle" fill="white" font-family="Arial" font-size="12">h₁(t), h₂(t)</text>
-            
+
                 <!-- Input (bottom to top) -->
                 <rect x="130" y="200" width="60" height="30" rx="5" 
                       fill="#8b8b8b" stroke="none"/>
                 <text x="160" y="220" text-anchor="middle" fill="white" font-family="Arial">u(t)</text>
-            
+
                 <!-- Output (bottom to top) -->
                 <rect x="130" y="30" width="60" height="30" rx="5" 
                       fill="#e85757" stroke="none"/>
                 <text x="160" y="50" text-anchor="middle" fill="white" font-family="Arial">y(t)</text>
-            
+
                 <!-- Connections -->
                 <line x1="160" y1="200" x2="160" y2="160" stroke="#333" 
                       marker-end="url(#arrowhead)" fill="none"/>
                 <line x1="160" y1="100" x2="160" y2="60" stroke="#333" 
                       marker-end="url(#arrowhead)" fill="none"/>
-            
+
                 <!-- Modified self-loop direction -->
                 <path d="M100,130 C50,130 50,100 100,100" 
                       stroke="#333" marker-end="url(#arrowhead)" fill="none"/>
-            
+
                 <!-- Label -->
                 <text x="160" y="0" text-anchor="middle" font-family="Arial" 
                       font-size="20">RNN Structure</text>
@@ -177,7 +177,7 @@ def _():
 
         # --------------
         # #TODO: Design the parameters to create sinusoidal wave
-        W = [[0, 0, 0], [0, 0, 0]]  #
+        W = [[-c * dt + 1, -k * dt, dt * u], [dt,1.0,0]] #
         # ---------------
 
         x = np.concatenate([h, [u]])
@@ -190,7 +190,7 @@ def _():
     def g_recurrent(h):
         # --------------
         # #TODO: Design the parameters to create sinusoidal wave
-        R = [[0, 0]]  #
+        R = [[0, 1]]  #
         # ---------------
         y = np.array(R) @ h
 

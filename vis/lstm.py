@@ -215,14 +215,14 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ## **Implementation Task 👨‍💻**  
+        ## **Implementation Task 👨‍💻**
 
-        LSTM maintains two key internal variables:  
+        LSTM maintains two key internal variables:
 
-        - **`cell_state`**: A vector storing two of three memory notes you can keep.  
-        - **`hidden_state`**: A vector of length **three**, consisting of:  
+        - **`cell_state`**: A vector storing two of three memory notes you can keep.
+        - **`hidden_state`**: A vector of length **three**, consisting of:
           - `hidden_state[0]`, `hidden_state[1]`: The **last two numbers** seen.
-          - `hidden_state[2]`: A note you can keep. 
+          - `hidden_state[2]`: A note you can keep.
 
 
 
@@ -232,40 +232,40 @@ def _(mo):
             <defs>
                 <rect id="square" width="25" height="25" rx="2"/>
             </defs>
-        
+
             <!-- Cell State -->
             <g transform="translate(25, 25)">
                 <!-- Squares -->
                 <use href="#square" fill="#ff6b6b" stroke="#cc5555" stroke-width="1.5"/>
                 <use href="#square" x="30" fill="#ff6b6b" stroke="#cc5555" stroke-width="1.5"/>
-            
+
                 <!-- Label -->
                 <text x="-8" y="12" text-anchor="end" font-family="Arial" font-size="10">Cell state</text>
-            
+
                 <!-- User controlled annotation -->
                 <text x="27" y="-6" text-anchor="middle" font-family="Arial" font-size="8" fill="#666">User controlled</text>
             </g>
-        
+
             <!-- Hidden State -->
             <g transform="translate(25, 75)">
                 <!-- Squares -->
                 <use href="#square" fill="#a8c7f0"/>
                 <use href="#square" x="30" fill="#a8c7f0"/>
                 <use href="#square" x="60" fill="#4a90e3" stroke="#3a72b5" stroke-width="1.5"/>
-            
+
                 <!-- Labels -->
                 <text x="-8" y="12" text-anchor="end" font-family="Arial" font-size="10">Hidden state</text>
-            
+
                 <!-- Last two numbers annotation -->
                 <text x="27" y="-6" text-anchor="middle" font-family="Arial" font-size="8" fill="#666">Last two numbers</text>
-            
+
                 <!-- User controlled annotation -->
                 <text x="72" y="35" text-anchor="middle" font-family="Arial" font-size="8" fill="#666">User controlled</text>
             </g>
         </svg>
         </div>
 
-        **Example**: After processing the sequence `[5, 8, 12, 15]`:  
+        **Example**: After processing the sequence `[5, 8, 12, 15]`:
 
         ```python
         # Managed by your implementation
@@ -274,7 +274,7 @@ def _(mo):
         # Automatically updated
         hidden_state = [15, 12, # Last two numbers
                         3 # Managed by your implementation
-                       ]     
+                       ]
         ```
         """
     )
@@ -285,7 +285,7 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ### **Task**  
+        ### **Task**
 
         First, select the level (e.g., 'Easy', 'Medium') of questions for which your LSTM will answer.
         """
@@ -303,15 +303,15 @@ def _(radiogroup):
 def _(mo):
     mo.md(
         r"""
-        You will implement the following three functions:  
+        You will implement the following three functions:
 
-        - **`forget_gate`**: Decide what to keep in your long-term memory.  
-        - **`input_gate`**: Choose what new information to store.  
-        - **`output_gate`**: Answer questions using your stored info.  
+        - **`forget_gate`**: Decide what to keep in your long-term memory.
+        - **`input_gate`**: Choose what new information to store.
+        - **`output_gate`**: Answer questions using your stored info.
 
-        Your LSTM should generate answers and store them in the `output` array inside `output_gate`.  
+        Your LSTM should generate answers and store them in the `output` array inside `output_gate`.
 
-        - `output[i]` should contain the answer to the **\(i\)th** question.  
+        - `output[i]` should contain the answer to the **\(i\)th** question.
         - For example, `output[0]` contains the first answer, `output[1]` contains the next, and so on.
 
         <div>
@@ -319,7 +319,7 @@ def _(mo):
             <!-- Definitions -->
             <defs>
                 <rect id="cell" width="25" height="25" rx="2"/>
-                <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" 
+                <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
                         markerWidth="6" markerHeight="6" orient="auto">
                     <path d="M 0 0 L 10 5 L 0 10 z" fill="#666"/>
                 </marker>
@@ -538,50 +538,6 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(game, longShortTermMemory, np, radiogroup):
-    num_tests = 100
-    hidden_state_size = 3
-    game.set_level(radiogroup.value)
-    cell_state_size = 2
-
-
-    def run_lstm(sequence, hidden_state_size, cell_state_size):
-        """
-        Run LSTM over a sequence of inputs.
-
-        Args:
-            sequence: Input sequence to process
-            hidden_state_size: Size of hidden state array [min_value, padding]
-            cell_state_size: Size of cell state array [sum, product, min]
-
-        Returns:
-            output: Final [sum, product, min] outputs after processing sequence
-        """
-        hidden_state = np.zeros(
-            hidden_state_size
-        )  # Initialize [min_value, padding]
-        cell_state = np.zeros(cell_state_size)  # Initialize [sum, product, min]
-
-        for s in sequence:
-            hidden_state, cell_state, output = longShortTermMemory(
-                s, hidden_state, cell_state
-            )
-        return output
-
-
-    # Run tests and compute accuracy
-    n_questions = len(game.questions)
-    n_correct = np.zeros(n_questions, dtype=float)
-    for i in range(num_tests):
-        game.reset()
-        output = run_lstm(game.sequence, hidden_state_size, cell_state_size)
-        answers = np.array([q["func"]() for q in game.questions])
-
-        output = np.array(output)[: len(answers)]
-        # Compute the accuracy for each run
-        n_correct += np.isclose(answers, output, atol=1e-1)
-
-    n_correct /= num_tests
-    final_score = np.min(n_correct)
     return (
         answers,
         cell_state_size,
