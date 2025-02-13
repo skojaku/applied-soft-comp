@@ -220,7 +220,7 @@ def _(mo):
         LSTM maintains two key internal variables:
 
         - **`cell_state`**: A vector storing two of three memory notes you can keep.
-        - **`hidden_state`**: A vector of length **three**, consisting of:
+        - **`hidden_state`**: A vector of length **two**, consisting of:
           - `hidden_state[0]`, `hidden_state[1]`: The **last two numbers** seen.
           - `hidden_state[2]`: A note you can keep.
 
@@ -537,19 +537,8 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(game, longShortTermMemory, np, radiogroup):
-    return (
-        answers,
-        cell_state_size,
-        final_score,
-        hidden_state_size,
-        i,
-        n_correct,
-        n_questions,
-        num_tests,
-        output,
-        run_lstm,
-    )
+def _():
+    return
 
 
 @app.cell(hide_code=True)
