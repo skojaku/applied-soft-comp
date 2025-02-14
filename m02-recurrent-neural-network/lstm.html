@@ -65,7 +65,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Embedding from Language Models (ELMo)" href="elmo.html" />
-    <link rel="prev" title="Memory Passing Game" href="memory-passing-game.html" />
+    <link rel="prev" title="Recurrent Neural Network (RNN)" href="reccurrent-neural-net.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -204,10 +204,8 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Recurrent Neural Networks</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="what-to-learn.html">Module 2: Language Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pen-and-paper.html">Pen and Paper Exercise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rnn-interactive.html">🧠 Learn RNNs Through Physics!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reccurrent-neural-net.html">Recurrent Neural Network (RNN)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="memory-passing-game.html">Memory Passing Game</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Long Short-Term Memory (LSTM)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="elmo.html">Embedding from Language Models (ELMo)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="seq2seq.html">Sequence-to-Sequence Models</a></li>
@@ -600,6 +598,10 @@ Think of this cell as a conveyor belt that runs straight through the network, al
 <p>Finally, the hidden state is produced by:</p>
 <div class="math notranslate nohighlight">
 \[ h_t = o_t \odot \tanh(C_t) \]</div>
+<div class="tip admonition">
+<p class="admonition-title">Memory Challenge Game 👾</p>
+<p>Let us learn how LSTM works by playing <a class="reference internal" href="memory-challenge.html"><span class="std std-doc">a memory challenge game 🎮</span></a>. Given a sequence of numbers and possible questions, your job is to manage a limited memory to compress the sequence into three numbers 🧮.</p>
+</div>
 </section>
 </section>
 <section id="hands-on">
@@ -675,9 +677,9 @@ Think of this cell as a conveyor belt that runs straight through the network, al
 </div>
 </details>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Sequence: FISURLZQTNYKBVPG&lt;J&gt;WXEDHOMAC, Target: J
-Sequence: YXPFVJIWGKROCDTQAZSBU&lt;N&gt;MHEL, Target: N
-Sequence: BLIZHOPEKJAMGQY&lt;U&gt;FWVTXSDNCR, Target: U
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Sequence: NLP&lt;W&gt;QGCFOIUYEJRZAMTVSKXBDH, Target: W
+Sequence: IWNYKSDGRVXMAZ&lt;F&gt;CQULHBJOEPT, Target: F
+Sequence: YAPSTXJ&lt;F&gt;IEOLKDVZQRHNCGWUMB, Target: F
 </pre></div>
 </div>
 </div>
@@ -916,7 +918,7 @@ We use ADAM <a class="footnote-reference brackets" href="#footcite-kingma2014ada
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/685724dd5a2b8da1bc6df5333ffa374666091b21595d3c2fcbd1795a57f4fb9b.png" src="../_images/685724dd5a2b8da1bc6df5333ffa374666091b21595d3c2fcbd1795a57f4fb9b.png" />
+<img alt="../_images/23ea8458ad6bf6a241a7b444424121e9b3f68db2a69e876924b9b25b09ff8f34.png" src="../_images/23ea8458ad6bf6a241a7b444424121e9b3f68db2a69e876924b9b25b09ff8f34.png" />
 </div>
 </div>
 <p>The loss did not decrease nicely. This is a sign of the struggle of the LSTM model to learn the data. If you see this, you might need to decrease the learning rate, increase the number of epochs untile the loss becomes stable, or re-design the model architecture.</p>
@@ -941,11 +943,11 @@ We use ADAM <a class="footnote-reference brackets" href="#footcite-kingma2014ada
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Sequence: CIHZMLTVWGOJKNFYUD&lt;A&gt;SBRXPQE, Target: A, Predicted: M
-Sequence: FWGJEL&lt;I&gt;PNHDORXYKABCZUMVQTS, Target: I, Predicted: O
-Sequence: DXWLOSQVNZKFIAJ&lt;B&gt;PCTHMGERYU, Target: B, Predicted: J
-Sequence: ZSJVOIUBEG&lt;Y&gt;XDPHFWMALKNCQTR, Target: Y, Predicted: E
-Sequence: MRUBJDSXQKZYCVPTHEA&lt;L&gt;GOIFNW, Target: L, Predicted: M
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Sequence: TBMNYZEKIRFSJP&lt;O&gt;XLHADUVCQWG, Target: O, Predicted: B
+Sequence: TLEHYQAUCGOJ&lt;X&gt;WFNMPKBISZVDR, Target: X, Predicted: L
+Sequence: MPXVHBEUYRWCKSNIOG&lt;A&gt;QZFTDJL, Target: A, Predicted: E
+Sequence: SOFMH&lt;I&gt;GNYKXDREAUTLWVJBZPCQ, Target: I, Predicted: R
+Sequence: UANF&lt;H&gt;QBYKZMDRLTOVGJXPEIWCS, Target: H, Predicted: E
 Accuracy: 0.0
 </pre></div>
 </div>
@@ -1030,12 +1032,12 @@ Another popular regularization technique is dropout <a class="footnote-reference
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="memory-passing-game.html"
+       href="reccurrent-neural-net.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Memory Passing Game</p>
+        <p class="prev-next-title">Recurrent Neural Network (RNN)</p>
       </div>
     </a>
     <a class="right-next"

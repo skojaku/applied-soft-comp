@@ -440,6 +440,23 @@ def _(mo):
     return
 
 
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        > To showcase how this works, the following starter code implements an LSTM for the questions at the entry-level 🧑‍🏫. 
+        > In this code, I used the memory as follows:
+        > 
+        > 1. First cell state is used to answer the first question, i.e., the sum of all numbers
+        > 2. Second cell state is used to answer the last question, i.e., the number of evens followed by the final odd
+        > 3. I used the one hidden memory to answer the second question, i.e., the sum of evens 
+
+        You can remove and comment out the start code you want.
+        """
+    )
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.accordion(
@@ -467,8 +484,8 @@ def _(np):
         """
         # 🔥 MODIFY: Set forgetting factors 🔥
         forgetting_factor = [
-            1.0,  #
-            1.0,  #
+            1.0,  # no forgetting takes place since we want to compute the sum of all numbers.
+            0.0 if input %2 != 0 else 1.0,  # we need to forget the count when input is odd
         ]
 
         return np.array(forgetting_factor)
@@ -483,8 +500,8 @@ def _(np):
         """
         # 🔥 MODIFY: Set values to add 🔥
         addition_cell_state = [
-            input,  #
-            input,  #
+            input,  # We add the input since we are interested in the sum of all numbers
+            0.0 if input %2 !=0 else 1.0,  # We want to add 1 when the input is even
         ]
 
         return np.array(addition_cell_state)
@@ -498,22 +515,14 @@ def _(np):
             hidden_state: Previous outputs array [min_value, padding]
             cell_state: Current cell state values
         """
-        # 🔥 MODIFY: Set outputs 🔥
-        a = np.sort(
-            np.concatenate(
-                [
-                    np.array([input]),
-                    hidden_state[:2],
-                    np.array([-hidden_state[2]]),
-                    cell_state,
-                ]
-            )
-        )[-4]
-        output = [a, 0, 0]
-        # print(hidden_state, cell_state, input, a)
+
 
         # 🔥 MODIFY: Set your hidden state 🔥
-        your_hidden_state = 0
+        your_hidden_state = hidden_state[2]
+        your_hidden_state+= input if input %2 == 0 else 0.0 # Here we use the hidden state as a counter, where we add the input to the counter if the input is even, since we are interested in the sum of evens. 
+
+        # 🔥 MODIFY: Set outputs 🔥
+        output = [cell_state[0], your_hidden_state, cell_state[1]]
 
         hidden_state = [
             hidden_state[1],  # Leave this as is
@@ -537,8 +546,65 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _():
-    return
+def _(game, longShortTermMemory, np, radiogroup):
+    num_tests = 100
+    hidden_state_size = 3
+    cell_state_size = 2
+
+
+    game.set_level(radiogroup.value)
+
+    def run_lstm(sequence, hidden_state_size, cell_state_size):
+        """
+        Run LSTM over a sequence of inputs.
+
+        Args:
+            sequence: Input sequence to process
+            hidden_state_size: Size of hidden state array [min_value, padding]
+            cell_state_size: Size of cell state array [sum, product, min]
+
+        Returns:
+            output: Final [sum, product, min] outputs after processing sequence
+        """
+        hidden_state = np.zeros(
+            hidden_state_size
+        )  # Initialize [min_value, padding]
+        cell_state = np.zeros(cell_state_size)  # Initialize [sum, product, min]
+
+        for s in sequence:
+            hidden_state, cell_state, output = longShortTermMemory(
+                s, hidden_state, cell_state
+            )
+        return output
+
+
+    # Run tests and compute accuracy
+    n_questions = len(game.questions)
+    n_correct = np.zeros(n_questions, dtype=float)
+    for i in range(num_tests):
+        game.reset()
+        output = run_lstm(game.sequence, hidden_state_size, cell_state_size)
+        answers = np.array([q["func"]() for q in game.questions])
+
+        output = np.array(output)[: len(answers)]
+        # Compute the accuracy for each run
+        n_correct += np.isclose(answers, output, atol=1e-1)
+
+    n_correct /= num_tests
+    final_score = np.min(n_correct)
+
+    return (
+        answers,
+        cell_state_size,
+        final_score,
+        hidden_state_size,
+        i,
+        n_correct,
+        n_questions,
+        num_tests,
+        output,
+        run_lstm,
+    )
 
 
 @app.cell(hide_code=True)
@@ -953,12 +1019,14 @@ def _(np, selq):
 
         def get_len_last_odd_in_row(self):
             cnt = 0
+            odd_count = 0
             for i in range(len(self.sequence)):
                 if self.sequence[i] % 2 == 0:
+                    odd_count = cnt
                     cnt = 0
                 else:
                     cnt += 1
-            return cnt
+            return odd_count
 
         def get_last_four_pos_number(self):
             return selq.sequence[-4]
