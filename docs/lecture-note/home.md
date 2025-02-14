@@ -7,7 +7,7 @@ This course is designed to help you *feel* the concepts and tools of applied sof
 | Module | Exercise | Jupyter Notebook |
 |--------|------------------------|------------------|
 | M01    | [Word Embedding](./m01-word-embedding/pen-and-paper/pen-and-paper.pdf) | - [Word Embedding](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/word-embedding.ipynb)<br>- [SemAxis](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/semaxis.ipynb)<br>- [Doc2Vec](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/doc2vec.ipynb) |
-| M02    | - [Simple RNN](https://marimo.app/l/1zzsto) - [LSTM](https://marimo.app/?slug=988jqi) | - [PyTorch](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/pytorch.ipynb) |
+| M02    | - [Simple RNN](./m02-recurrent-neural-network/rnn-mapping-challenge) - [LSTM](./m02-recurrent-neural-network/memory-challenge) | - [PyTorch](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/pytorch.ipynb) |
 
 ```{tableofcontents}
 ```
