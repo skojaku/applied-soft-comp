@@ -104,6 +104,14 @@ Finally, the hidden state is produced by:
 
 $$ h_t = o_t \odot \tanh(C_t) $$
 
+
+```{admonition} Memory Challenge Game 👾
+:class: tip
+
+Let us learn how LSTM works by playing [a memory challenge game 🎮](memory-challenge.md). Given a sequence of numbers and possible questions, your job is to manage a limited memory to compress the sequence into three numbers 🧮.
+```
+
+
 ## Hands on
 
 We will train an LSTM model to identify a wrapped character in a sequence. The task is to predict which character is enclosed in `<>` tags within a sequence of randomly ordered uppercase letters. For example,

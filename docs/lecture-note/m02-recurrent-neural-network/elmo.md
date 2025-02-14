@@ -53,4 +53,3 @@ Given a sequence of words, the forward LSTM processes the words from the first t
 
 ELMo architecture
 ```
-
