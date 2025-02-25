@@ -62,6 +62,13 @@ The forward pass of an RNN processes sequential data through a series of transfo
 These steps produce an output vector $o_t \in \mathbb{R}^m$ that represents the network's prediction or response at the current time step. The hidden state $h_t$ serves as the network's memory, carrying forward relevant information from previous time steps to influence future predictions.
 
 
+```{admonition} Interactive Example
+:class: tip
+
+Let us see how the RNN works by [creating a Physics simulator with RNN 🚀🔮](rnn-mapping-challenge.md).
+```
+
+
 ## Optimization
 
 
@@ -127,6 +134,7 @@ Conversely, if these derivatives are greater than 1, the gradients can explode, 
 Gradient clipping prevents the vanishing and exploding gradient problem in RNNs by constraining how much the model parameters can change in a single update. Think of it as a "speed limit" - without clipping, parameter updates can become too large due to exploding gradients during backpropagation, causing the model to overshoot optimal values. By clipping gradients to a maximum norm (1.0 in this case), we keep updates within a reasonable range and maintain stable training.
 
 ![](https://spotintelligence.com/wp-content/uploads/2023/12/gradient-clipping-example.jpg)
+
 
 ## Hands-on Example
 
