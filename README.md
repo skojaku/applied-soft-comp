@@ -4,6 +4,7 @@
 - [Syllabus](docs/syllabus/syllabus.pdf)
 - [Slide](docs/slide)
 - [Exercise](notebooks)
+- [Exercise Answer](https://github.com/skojaku/applied-soft-comp/tree/answer/notebooks)
 
 # Set up the environment
 
