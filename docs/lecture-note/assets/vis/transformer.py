@@ -1,0 +1,2095 @@
+import marimo
+
+__generated_with = "0.11.9"
+app = marimo.App(width="medium", layout_file="layouts/transformer.slides.json")
+
+
+@app.cell
+def _(mo):
+    mo.hstack(
+        [
+            mo.md(
+                """
+                - Many large language models (LLMs) are built based on a stack of transformer blocks.
+                - Each transformer block takes a sequence of token vectors as input and outputs a sequence of token vectors (sequence-to-sequence!).
+                - What is the trasnformer block?
+                """
+            ),
+            mo.md(
+                r"""
+                ![](https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-overview.jpg?raw=true)
+        """
+            ),
+        ],
+        align="center",
+        widths=[2, 1],
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.hstack(
+        [
+            mo.md(
+                """
+                - A transformer block consists of three components, i.e., multi-head attention, layer normalization, and feed-forward networks.
+                - The key component is the **attention** module. """
+            ),
+            mo.md(
+                r"""
+                ![](https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-component.jpg?raw=true)
+        """
+            ),
+        ],
+        align="center",
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.hstack(
+        [
+            mo.md(
+                """
+                - An **attention module**:
+                    - **Input**: A sequence of $N$ tokens
+                    - **Output**: A transformed sequence of $N$ tokens
+
+                - Each output token is *contextualized* by other tokens within the sequence
+                - This allows the transformers to capture polysemies.
+
+                - Let's look at each component one by one.
+
+                """
+            ),
+            mo.md(
+                r"""
+                ![](https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-attention.jpg?raw=true)
+        """
+            ),
+        ],
+        align="center",
+        widths=[1, 1],
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.hstack(
+        [
+            mo.md(
+                """
+                - There are multiple types of **attention**, the most basic form being **self-attention**:
+                - An attention module creates three types of vectors-*query, key, and value*—for each word.
+                - Each of these vectors are created by **a linear layer**.
+                """
+            ),
+            mo.Html(
+                r"""
+                <div style="width: 100%; height: 300px; overflow: hidden; position: relative;">
+                  <img src="https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-attention.jpg?raw=true"
+                       style="position: absolute; width: 200%; max-width: none; right: -100%; top: -29%;">
+                </div>
+                """
+            ),
+        ],
+        align="center",
+        widths=[0.45, 0.55],
+    )
+    return
+
+
+@app.cell
+def _(
+    emb2df,
+    embeddings,
+    layout_controls,
+    mo,
+    rotation,
+    scatter_plot,
+    words,
+    x_intercept,
+    x_scale,
+    y_intercept,
+    y_scale,
+):
+    _original_df, _transformed_df, W, b = emb2df(
+        words, embeddings, x_scale.value, y_scale.value, rotation.value, x_intercept.value, y_intercept.value
+    )
+
+    _chart = scatter_plot(
+        _transformed_df,
+        _original_df,
+        title="Linear Transformation",
+        width=250,
+        height=250,
+        size=100,
+    )
+
+    # Create the visualization using current slider values
+    # Create the UI controls
+    mo.vstack(
+        [
+            mo.md("## Linear Transformation"),
+            mo.hstack(
+                [
+                    _chart,
+                    mo.vstack(
+                        [
+                            mo.md("""
+                            Linear transformation:
+
+                            $$
+                            \\underbrace{\\begin{bmatrix}
+                                x_{\\text{out}} & y_{\\text{out}}
+                            \\end{bmatrix}}_{\\text{output}}
+                            =
+                            \\underbrace{\\begin{bmatrix}
+                                x_{\\text{in}} & y_{\\text{in}}
+                            \\end{bmatrix}}_{\\text{input}}
+                            \\underbrace{\\begin{bmatrix}
+                                w_{11} & w_{12} \\\\
+                                w_{21} & w_{22} \\\\
+                            \\end{bmatrix}}_{\\text{W}}+
+                            \\underbrace{\\begin{bmatrix}
+                                b_{1} \\\\
+                                b_{2} \\\\
+                            \\end{bmatrix}}_{\\text{b}}
+                            $$
+                            """),
+                            mo.md(
+                                """
+                            $$
+                            \\text{W} = \\begin{bmatrix}
+                                %.2f & %.2f \\\\
+                                %.2f & %.2f \\\\
+                            \\end{bmatrix} +
+                            \\begin{bmatrix}
+                                %.2f \\\\
+                                %.2f \\\\
+                            \\end{bmatrix}
+                            $$
+                            """
+                                % (W[0, 0], W[0, 1], W[1, 0], W[1, 1], b[0], b[1])
+                            ),
+                            layout_controls(x_scale, y_scale, rotation, x_intercept, y_intercept),
+                            mo.hstack(
+                                [
+                                    mo.md("""
+                                          - $S_x$: X-axis scale
+                                          - $S_y$: Y-axis scale
+                                          - $\\theta$: Rotation
+                                          """),
+                                    mo.md("""
+                                          - $b_x$: X-axis intercept
+                                          - $b_y$: Y-axis intercept
+                                          """),
+                                ],
+                            ),
+                        ],
+                        align="center",
+                    ),
+                ]
+            ),
+        ]
+    )
+    return W, b
+
+
+@app.cell
+def _(create_transformation_controls):
+    x_scale, y_scale, rotation, x_intercept, y_intercept = create_transformation_controls()
+    return rotation, x_intercept, x_scale, y_intercept, y_scale
+
+
+@app.cell
+def _(mo):
+    mo.hstack(
+        [
+            mo.md(
+                """
+                - The query and key vectors are used to compute **the attention score**, i.e., how much each query word attends to key word, with a larger score indicating a stronger attendance.
+                """
+            ),
+            mo.Html(
+                r"""
+                <div style="width: 100%; height: 300px; overflow: hidden; position: relative;">
+                  <img src="https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-attention.jpg?raw=true"
+                       style="position: absolute; width: 200%; max-width: none; right: -90%; top: -29%;">
+                </div>
+                """
+            ),
+        ],
+        align="center",
+        widths=[0.45, 0.55],
+    )
+    return
+
+
+@app.cell
+def _(
+    emb2df,
+    embeddings,
+    heatmap,
+    key_rotation,
+    key_x_intercept,
+    key_x_scale,
+    key_y_intercept,
+    key_y_scale,
+    layout_controls,
+    mo,
+    np,
+    query_rotation,
+    query_x_intercept,
+    query_x_scale,
+    query_y_intercept,
+    query_y_scale,
+    scatter_plot,
+    vertical_line,
+    words,
+):
+    _transformed_df_key, _original_df_key, _W_key, _b_key = emb2df(
+        words, embeddings, key_x_scale.value, key_y_scale.value, key_rotation.value, key_x_intercept.value, key_y_intercept.value
+    )
+    _transformed_df_query, _original_df_query, _W_query, _b_query = emb2df(
+        words,
+        embeddings,
+        query_x_scale.value,
+        query_y_scale.value,
+        query_rotation.value,
+        query_x_intercept.value,
+        query_y_intercept.value,
+    )
+
+    _chart_key = scatter_plot(
+        _original_df_key,
+        _transformed_df_key,
+        title="Key",
+        width=170,
+        height=170,
+        size=100,
+    )
+    _chart_query = scatter_plot(
+        _original_df_query,
+        _transformed_df_query,
+        title="Query",
+        width=170,
+        height=170,
+        size=100,
+    )
+
+    _key_vecs = embeddings @ _W_key + _b_key
+    _query_vecs = embeddings @ _W_query + _b_query
+    _qk_matrix = _query_vecs @ _key_vecs.T
+
+
+    _qk_matrix_normalized = np.exp(_qk_matrix / np.sqrt(_query_vecs.shape[1]))
+    _qk_matrix_normalized = _qk_matrix_normalized / _qk_matrix_normalized.sum(
+        axis=1, keepdims=True
+    )
+
+    _chart_qk_matrix = heatmap(
+        _qk_matrix,
+        tick_labels=words,
+        title="QK matrix",
+        width=300,
+        height=300,
+    )
+
+    _chart_qk_matrix_normalized = heatmap(
+        _qk_matrix_normalized,
+        tick_labels=words,
+        title="QK matrix",
+        width=300,
+        height=300,
+        vmin=0,
+    )
+
+    # Create the visualization using current slider values
+    # Create the UI controls
+    mo.hstack(
+        [
+            mo.vstack(
+                [
+                    mo.md(
+                        """
+
+                        ## AttentionScore
+
+                        The attention score is computed as follows:
+
+                        $$
+                        \\text{QK matrix} = Q K^\\top, \\quad
+                        Q = \\begin{bmatrix}
+                        q_1 \\\\
+                        q_2 \\\\
+                        \\vdots \\\\
+                        q_N
+                        \\end{bmatrix},\quad
+                        K = \\begin{bmatrix}
+                        k_1 \\\\
+                        k_2 \\\\
+                        \\vdots \\\\
+                        k_N
+                        \\end{bmatrix}
+                        $$
+
+                        $Q$ and $K$ are the matrices of query and key vectors, respectively.
+
+                            """
+                    ),
+                    mo.hstack(
+                        [
+                            mo.vstack(
+                                [
+                                    layout_controls(query_x_scale, query_y_scale, query_rotation, query_x_intercept, query_y_intercept),
+                                    _chart_query,
+                                ],
+                                justify="center",
+                                align="start",
+                            ),
+                            vertical_line(),
+                            mo.vstack(
+                                [
+                                    layout_controls(key_x_scale, key_y_scale, key_rotation, key_x_intercept, key_y_intercept),
+                                    _chart_key,
+                                ],
+                                justify="center",
+                                align="start",
+                            ),
+                        ]
+                    ),
+                ]
+            ),
+            mo.vstack(
+                [
+                    mo.md(
+                        """
+                        The resulting matrix has $(i,j)$-th entry $(QK^\\top)_{ij}$ which is the attention score between the $i$-th query and the $j$-th key.
+                        """
+                    ),
+                    _chart_qk_matrix,
+                ]
+            ),
+        ],
+        align="center",
+    )
+    return
+
+
+@app.cell
+def _(create_transformation_controls):
+    query_x_scale, query_y_scale, query_rotation, query_x_intercept, query_y_intercept = create_transformation_controls()
+    key_x_scale, key_y_scale, key_rotation, key_x_intercept, key_y_intercept = create_transformation_controls()
+    return (
+        key_rotation,
+        key_x_intercept,
+        key_x_scale,
+        key_y_intercept,
+        key_y_scale,
+        query_rotation,
+        query_x_intercept,
+        query_x_scale,
+        query_y_intercept,
+        query_y_scale,
+    )
+
+
+@app.cell
+def _(
+    emb2df,
+    embeddings,
+    heatmap,
+    key_rotation,
+    key_x_intercept,
+    key_x_scale,
+    key_y_intercept,
+    key_y_scale,
+    mo,
+    np,
+    query_rotation,
+    query_x_intercept,
+    query_x_scale,
+    query_y_intercept,
+    query_y_scale,
+    scatter_plot,
+    words,
+):
+    _transformed_df_key, _original_df_key, _W_key, _b_key = emb2df(
+        words,
+        embeddings,
+        key_x_scale.value,
+        key_y_scale.value,
+        key_rotation.value,
+        key_x_intercept.value,
+        key_y_intercept.value,
+    )
+    _transformed_df_query, _original_df_query, _W_query, _b_query = emb2df(
+        words,
+        embeddings,
+        query_x_scale.value,
+        query_y_scale.value,
+        query_rotation.value,
+        query_x_intercept.value,
+        query_y_intercept.value,
+    )
+
+    _chart_key = scatter_plot(
+        _original_df_key,
+        _transformed_df_key,
+        title="Key",
+        width=170,
+        height=170,
+        size=100,
+    )
+    _chart_query = scatter_plot(
+        _original_df_query,
+        _transformed_df_query,
+        title="Query",
+        width=170,
+        height=170,
+        size=100,
+    )
+
+    _key_vecs = embeddings @ _W_key + _b_key
+    _query_vecs = embeddings @ _W_query + _b_query
+    _qk_matrix = _query_vecs @ _key_vecs.T
+
+    _qk_matrix_normalized = np.exp(_qk_matrix / np.sqrt(_query_vecs.shape[1]))
+    _qk_matrix_normalized = _qk_matrix_normalized / _qk_matrix_normalized.sum(
+        axis=1, keepdims=True
+    )
+
+    _chart_qk_matrix = heatmap(
+        _qk_matrix,
+        tick_labels=words,
+        title="QK matrix",
+        width=300,
+        height=300,
+    )
+
+    _chart_qk_matrix_normalized = heatmap(
+        _qk_matrix_normalized,
+        tick_labels=words,
+        title="QK matrix",
+        width=300,
+        height=300,
+        vmin=0,
+    )
+
+
+    mo.hstack(
+        [
+            mo.md(
+                """
+
+               ##Normalizing Attention Score
+
+               The attention score ranges between $-\\infty$ and $\\infty$, which is normalized into [0,1] by the softmax function **for each row**.
+
+               $$
+               \\text{Attention score} = \\text{softmax}\\left(\\frac{\\text{QK matrix}}{\\sqrt{d}}\\right)
+               $$
+
+               where $d$ is the dimension of the vectors.
+
+               **The normalization ensures each row sums to 1.**
+                """
+            ),
+            mo.ui.tabs(
+                {
+                    "QK matrix": _chart_qk_matrix,
+                    "QK matrix (softmaxed)": _chart_qk_matrix_normalized,
+                }
+            ),
+        ],
+    )
+
+    return
+
+
+@app.cell
+def _(
+    emb2df,
+    embeddings,
+    heatmap,
+    key_rotation_qkv,
+    key_x_intercept_qkv,
+    key_x_scale_qkv,
+    key_y_intercept_qkv,
+    key_y_scale_qkv,
+    layout_controls,
+    mo,
+    np,
+    pd,
+    query_rotation_qkv,
+    query_x_intercept_qkv,
+    query_x_scale_qkv,
+    query_y_intercept_qkv,
+    query_y_scale_qkv,
+    scatter_plot,
+    value_rotation_qkv,
+    value_x_intercept_qkv,
+    value_x_scale_qkv,
+    value_y_intercept_qkv,
+    value_y_scale_qkv,
+    words,
+):
+    _transformed_df_key, _original_df_key, _W_key, _b_key = emb2df(
+        words,
+        embeddings,
+        key_x_scale_qkv.value,
+        key_y_scale_qkv.value,
+        key_rotation_qkv.value,
+        key_x_intercept_qkv.value,
+        key_y_intercept_qkv.value,
+    )
+    _transformed_df_query, _original_df_query, _W_query, _b_query = emb2df(
+        words,
+        embeddings,
+        query_x_scale_qkv.value,
+        query_y_scale_qkv.value,
+        query_rotation_qkv.value,
+        query_x_intercept_qkv.value,
+        query_y_intercept_qkv.value,
+    )
+    _transformed_df_value, _original_df_value, _W_value, _b_value = emb2df(
+        words,
+        embeddings,
+        value_x_scale_qkv.value,
+        value_y_scale_qkv.value,
+        value_rotation_qkv.value,
+        value_x_intercept_qkv.value,
+        value_y_intercept_qkv.value,
+    )
+
+    _width = 200
+    _height = 200
+    _chart_key = scatter_plot(
+        _original_df_key,
+        _transformed_df_key,
+        title="Key",
+        width=_width,
+        height=_height,
+        size=100,
+    )
+    _chart_query = scatter_plot(
+        _original_df_query,
+        _transformed_df_query,
+        title="Query",
+        width=_width,
+        height=_height,
+        size=100,
+    )
+    _chart_value = scatter_plot(
+        _original_df_value,
+        _transformed_df_value,
+        title="Value",
+        width=_width,
+        height=_height,
+        size=100,
+    )
+
+    _key_vecs = embeddings @ _W_key + _b_key
+    _query_vecs = embeddings @ _W_query + _b_query
+    _value_vecs = embeddings @ _W_value + _b_value
+    _qk_matrix = _query_vecs @ _key_vecs.T
+
+    _qk_matrix_normalized = np.exp(_qk_matrix / np.sqrt(_query_vecs.shape[1]))
+    _qk_matrix_normalized = _qk_matrix_normalized / _qk_matrix_normalized.sum(
+        axis=1, keepdims=True
+    )
+
+    _chart_qk_matrix_normalized = heatmap(
+        _qk_matrix_normalized,
+        tick_labels=words,
+        title="QK matrix (Softmaxed)",
+        width=200,
+        height=200,
+        vmin=0,
+    )
+
+
+    _output_vecs = _qk_matrix_normalized @ _value_vecs
+
+    _transformed_df_output = pd.DataFrame(
+        {"word": words, "x": _output_vecs[:, 0], "y": _output_vecs[:, 1]}
+    )
+    _original_df_output = pd.DataFrame(
+        {"word": words, "x": embeddings[:, 0], "y": embeddings[:, 1]}
+    )
+    _chart_output = scatter_plot(
+        _transformed_df_output,
+        _original_df_output,
+        title="V",
+        width=300,
+        height=300,
+        size=100,
+    )
+    _description = mo.md(
+        """
+        ## Attention with QKV
+
+        The output of the attention is computed as follows:
+
+        $$
+        \\text{Output} = \\text{softmax}\\left(\\frac{\\text{QK matrix}}{\\sqrt{d}}\\right) V
+        $$
+
+        where $V$ is the value vectors. This creates a weighted average of the value vector. For example, for the word "bank",
+
+        $$
+        \\text{v}^{\\text{out}}_{\\text{bank}} = {%.2f} v_{\\text{bank}} + {%.2f} v_{\\text{loan}} + {%.2f} v_{\\text{money}} + {%.2f} v_{\\text{river}} + {%.2f} v_{\\text{shore}}
+        $$
+
+        """
+        % (
+            _qk_matrix_normalized[0, 0],
+            _qk_matrix_normalized[0, 1],
+            _qk_matrix_normalized[0, 2],
+            _qk_matrix_normalized[0, 3],
+            _qk_matrix_normalized[0, 4],
+        )
+    )
+
+    _query_plot = mo.vstack(
+        [
+            layout_controls(
+                query_x_scale_qkv,
+                query_y_scale_qkv,
+                query_rotation_qkv,
+                query_x_intercept_qkv,
+                query_y_intercept_qkv,
+            ),
+            _chart_query,
+        ],
+        align="start",
+    )
+
+    key_plot = mo.vstack(
+        [
+            layout_controls(
+                key_x_scale_qkv,
+                key_y_scale_qkv,
+                key_rotation_qkv,
+                key_x_intercept_qkv,
+                key_y_intercept_qkv,
+            ),
+            _chart_key,
+        ],
+        align="start",
+    )
+
+    mo.hstack(
+        [
+            mo.vstack([_description, mo.hstack([_query_plot, key_plot])]),
+            mo.vstack(
+                [
+                    _chart_qk_matrix_normalized,
+                    _chart_output,
+                ]
+            ),
+        ],
+        widths=[0.3, 0.6],
+    )
+    return (key_plot,)
+
+
+@app.cell
+def _(mo):
+    _fig = mo.md(
+        """
+        ![](https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-multihead-attention.jpg?raw=true)
+        """
+    )
+
+    _text = mo.md(
+        """# Multi-Head Attention
+        - Multi-head attention uses multiple attention heads to process input sequences in parallel.
+        - Each head learns different contextualization of the input sequence.
+            - e.g., one head learns how to contextualize for word 'bank' and another learns how to contextualize for word 'apple'.
+        - The outputs from all heads are combined to create the final representation.
+        """
+    )
+
+    mo.hstack(
+        [
+            _text,
+            _fig,
+        ],
+        widths=[0.6, 0.4],
+    )
+    return
+
+
+@app.cell
+def _(create_transformation_controls):
+    # Cell 1: Define the UI elements for all heads
+    num_heads = 2
+
+
+    # Head 1 UI elements
+    head1_key_x_scale, head1_key_y_scale, head1_key_rotation, head1_key_x_intercept, head1_key_y_intercept = create_transformation_controls()
+    head1_query_x_scale, head1_query_y_scale, head1_query_rotation, head1_query_x_intercept, head1_query_y_intercept = create_transformation_controls()
+    head1_value_x_scale, head1_value_y_scale, head1_value_rotation, head1_value_x_intercept, head1_value_y_intercept = create_transformation_controls()
+
+    # Head 2 UI elements
+    head2_key_x_scale, head2_key_y_scale, head2_key_rotation, head2_key_x_intercept, head2_key_y_intercept = create_transformation_controls()
+    head2_query_x_scale, head2_query_y_scale, head2_query_rotation, head2_query_x_intercept, head2_query_y_intercept = create_transformation_controls()
+    head2_value_x_scale, head2_value_y_scale, head2_value_rotation, head2_value_x_intercept, head2_value_y_intercept = create_transformation_controls()
+    return (
+        head1_key_rotation,
+        head1_key_x_intercept,
+        head1_key_x_scale,
+        head1_key_y_intercept,
+        head1_key_y_scale,
+        head1_query_rotation,
+        head1_query_x_intercept,
+        head1_query_x_scale,
+        head1_query_y_intercept,
+        head1_query_y_scale,
+        head1_value_rotation,
+        head1_value_x_intercept,
+        head1_value_x_scale,
+        head1_value_y_intercept,
+        head1_value_y_scale,
+        head2_key_rotation,
+        head2_key_x_intercept,
+        head2_key_x_scale,
+        head2_key_y_intercept,
+        head2_key_y_scale,
+        head2_query_rotation,
+        head2_query_x_intercept,
+        head2_query_x_scale,
+        head2_query_y_intercept,
+        head2_query_y_scale,
+        head2_value_rotation,
+        head2_value_x_intercept,
+        head2_value_x_scale,
+        head2_value_y_intercept,
+        head2_value_y_scale,
+        num_heads,
+    )
+
+
+@app.cell
+def _(
+    emb2df,
+    embeddings,
+    head1_key_rotation,
+    head1_key_x_intercept,
+    head1_key_x_scale,
+    head1_key_y_intercept,
+    head1_key_y_scale,
+    head1_query_rotation,
+    head1_query_x_intercept,
+    head1_query_x_scale,
+    head1_query_y_intercept,
+    head1_query_y_scale,
+    head1_value_rotation,
+    head1_value_x_intercept,
+    head1_value_x_scale,
+    head1_value_y_intercept,
+    head1_value_y_scale,
+    head2_key_rotation,
+    head2_key_x_intercept,
+    head2_key_x_scale,
+    head2_key_y_intercept,
+    head2_key_y_scale,
+    head2_query_rotation,
+    head2_query_x_intercept,
+    head2_query_x_scale,
+    head2_query_y_intercept,
+    head2_query_y_scale,
+    head2_value_rotation,
+    head2_value_x_intercept,
+    head2_value_x_scale,
+    head2_value_y_intercept,
+    head2_value_y_scale,
+    heatmap,
+    layout_controls,
+    mo,
+    np,
+    pd,
+    scatter_plot,
+    words,
+):
+    def process_head(
+        head_id,
+        words,
+        embeddings,
+        query_x_scale,
+        query_y_scale,
+        query_rotation,
+        query_x_intercept,
+        query_y_intercept,
+        key_x_scale,
+        key_y_scale,
+        key_rotation,
+        key_x_intercept,
+        key_y_intercept,
+        value_x_scale,
+        value_y_scale,
+        value_rotation,
+        value_x_intercept,
+        value_y_intercept,
+        _width=200,
+        _height=200,
+    ):
+        """Process QKV transformations and visualizations for a single head"""
+        head_data = {}
+
+        # Create transformed dataframes for key, query, value
+        component_params = {
+            "key": (
+                key_x_scale,
+                key_y_scale,
+                key_rotation,
+                key_x_intercept,
+                key_y_intercept,
+            ),
+            "query": (
+                query_x_scale,
+                query_y_scale,
+                query_rotation,
+                query_x_intercept,
+                query_y_intercept,
+            ),
+            "value": (
+                value_x_scale,
+                value_y_scale,
+                value_rotation,
+                value_x_intercept,
+                value_y_intercept,
+            ),
+        }
+
+        for component, (
+            x_scale,
+            y_scale,
+            rotation,
+            x_intercept,
+            y_intercept,
+        ) in component_params.items():
+            _transformed_df, _original_df, _W, _b = emb2df(
+                words,
+                embeddings,
+                x_scale.value,
+                y_scale.value,
+                rotation.value,
+                x_intercept.value,
+                y_intercept.value,
+            )
+
+            # Store results
+            head_data[f"transformed_df_{component}"] = _transformed_df
+            head_data[f"original_df_{component}"] = _original_df
+            head_data[f"W_{component}"] = _W
+            head_data[f"b_{component}"] = _b
+
+            # Create scatter plot
+            head_data[f"chart_{component}"] = scatter_plot(
+                _original_df,
+                _transformed_df,
+                title=component.capitalize(),
+                width=_width,
+                height=_height,
+                size=100,
+                vmax=None,
+            )
+
+        # Compute attention mechanism
+        _query_vecs = embeddings @ head_data["W_query"] + head_data["b_query"]
+        _key_vecs = embeddings @ head_data["W_key"] + head_data["b_key"]
+        _value_vecs = embeddings @ head_data["W_value"] + head_data["b_value"]
+
+        _qk_matrix = _query_vecs @ _key_vecs.T
+        _qk_matrix_normalized = np.exp(_qk_matrix / np.sqrt(_query_vecs.shape[1]))
+        _qk_matrix_normalized = _qk_matrix_normalized / _qk_matrix_normalized.sum(
+            axis=1, keepdims=True
+        )
+
+        head_data["qk_matrix_normalized"] = _qk_matrix_normalized
+        head_data["chart_qk_matrix"] = heatmap(
+            _qk_matrix_normalized,
+            tick_labels=words,
+            title="QK matrix (Softmaxed)",
+            width=200,
+            height=200,
+            vmin=0,
+            show_labels=False,
+        )
+
+        # Compute output vectors
+        _output_vecs = _qk_matrix_normalized @ _value_vecs
+        _transformed_df_output = pd.DataFrame(
+            {"word": words, "x": _output_vecs[:, 0], "y": _output_vecs[:, 1]}
+        )
+        _original_df_output = pd.DataFrame(
+            {"word": words, "x": embeddings[:, 0], "y": embeddings[:, 1]}
+        )
+
+        head_data["output_vecs"] = _output_vecs
+        head_data["chart_output"] = scatter_plot(
+            _transformed_df_output,
+            _original_df_output,
+            title="V",
+            width=300,
+            height=300,
+            size=100,
+            vmax=None,
+        )
+
+        return head_data
+
+
+    def create_head_layout(
+        head_id,
+        head_data,
+        query_x_scale,
+        query_y_scale,
+        query_rotation,
+        query_x_intercept,
+        query_y_intercept,
+        key_x_scale,
+        key_y_scale,
+        key_rotation,
+        key_x_intercept,
+        key_y_intercept,
+        value_x_scale,
+        value_y_scale,
+        value_rotation,
+        value_x_intercept,
+        value_y_intercept,
+        description,
+    ):
+        """Create the layout for a single head's visualization"""
+        controller = mo.vstack(
+            [
+                layout_controls(
+                    query_x_scale,
+                    query_y_scale,
+                    query_rotation,
+                    query_x_intercept,
+                    query_y_intercept,
+                ),
+                head_data["chart_query"],
+            ],
+            align="start",
+        )
+        row_1 = mo.vstack([description, controller], align = "center")
+        row_2 = mo.vstack([head_data["chart_output"], head_data["chart_qk_matrix"]], align = "center")
+        return mo.hstack([row_1, row_2], align="center")
+
+
+    def visualize_multihead_attention(words, embeddings, num_heads=2):
+        """Create a complete multihead attention visualization with tabs for each head"""
+        # Process all heads
+        _all_head_data = {}
+        _head_layouts = {}
+
+        description_head_1 = mo.md(
+            """
+    ### 🏦 Financial "Bank" Attention
+
+    Adjust the query vectors to help the model understand "bank" in a financial context. Try to make the attention focus on finance-related words like "money", "account", and "loan".
+
+    Note: Only query vectors can be modified. Key and value vectors are fixed.
+    """
+        )
+        description_head_2 = mo.md(
+            """
+    ### 🌊 River "Bank" Attention
+
+    Adjust the query vectors to help the model understand "bank" in a geographical context. Make the attention focus on nature-related words like "river", "water", and "shore".
+
+    Note: Only query vectors can be modified. Key and value vectors are fixed.
+    """
+        )
+        # Head 1
+        _all_head_data[1] = process_head(
+            1,
+            words,
+            embeddings,
+            head1_query_x_scale,
+            head1_query_y_scale,
+            head1_query_rotation,
+            head1_query_x_intercept,
+            head1_query_y_intercept,
+            head1_key_x_scale,
+            head1_key_y_scale,
+            head1_key_rotation,
+            head1_key_x_intercept,
+            head1_key_y_intercept,
+            head1_value_x_scale,
+            head1_value_y_scale,
+            head1_value_rotation,
+            head1_value_x_intercept,
+            head1_value_y_intercept,
+        )
+
+        _head_layouts["Head 1"] = create_head_layout(
+            1,
+            _all_head_data[1],
+            head1_query_x_scale,
+            head1_query_y_scale,
+            head1_query_rotation,
+            head1_query_x_intercept,
+            head1_query_y_intercept,
+            head1_key_x_scale,
+            head1_key_y_scale,
+            head1_key_rotation,
+            head1_key_x_intercept,
+            head1_key_y_intercept,
+            head1_value_x_scale,
+            head1_value_y_scale,
+            head1_value_rotation,
+            head1_value_x_intercept,
+            head1_value_y_intercept,
+            description_head_1,
+        )
+
+        # Head 2
+        _all_head_data[2] = process_head(
+            2,
+            words,
+            embeddings,
+            head2_query_x_scale,
+            head2_query_y_scale,
+            head2_query_rotation,
+            head2_query_x_intercept,
+            head2_query_y_intercept,
+            head2_key_x_scale,
+            head2_key_y_scale,
+            head2_key_rotation,
+            head2_key_x_intercept,
+            head2_key_y_intercept,
+            head2_value_x_scale,
+            head2_value_y_scale,
+            head2_value_rotation,
+            head2_value_x_intercept,
+            head2_value_y_intercept,
+        )
+
+        _head_layouts["Head 2"] = create_head_layout(
+            2,
+            _all_head_data[2],
+            head2_query_x_scale,
+            head2_query_y_scale,
+            head2_query_rotation,
+            head2_query_x_intercept,
+            head2_query_y_intercept,
+            head2_key_x_scale,
+            head2_key_y_scale,
+            head2_key_rotation,
+            head2_key_x_intercept,
+            head2_key_y_intercept,
+            head2_value_x_scale,
+            head2_value_y_scale,
+            head2_value_rotation,
+            head2_value_x_intercept,
+            head2_value_y_intercept,
+            description_head_2,
+        )
+
+        instruction = mo.md("""# Exercise: Multi-Head Attention
+
+        - Create two attention heads to help the model understand "bank" 🏦 in a financial context or river context 🏞️.
+        - Click the tabs to switch between the two heads.
+        """)
+
+        # Create tabs
+        return mo.vstack([instruction, mo.ui.tabs(_head_layouts)], align="center")
+
+
+    ## Define a set of words with two polysemous words
+    # _words = [
+    #    "bank",    # polysemous: financial institution or river side
+    #    "apple",   # polysemous: fruit or technology company
+    #    "money",
+    #    "loan",
+    #    "river",
+    #    "shore",
+    #    "fruit",
+    #    "orange",
+    #    "computer",
+    #    "phone"
+    # ]
+    #
+    ## Create simple 2D embeddings where polysemous words are positioned between their different meaning clusters
+    # np.random.seed(42)  # For reproducibility
+    #
+    ## Base embeddings - deliberately positioned to show polysemy
+    # _embeddings = np.array([
+    #    [-0.0, -0.3],   # bank (between financial and river clusters)
+    #    [-0.1, 0.6],    # apple (better positioned between fruit and tech clusters)
+    #    [-0.8, -0.3],   # money
+    #    [-0.7, -0.6],   # loan
+    #    [0.7, -0.5],    # river
+    #    [0.6, -0.7],    # shore
+    #    [0.6, 0.6],     # fruit
+    #    [0.8, 0.4],     # orange
+    #    [-0.5, 0.7],    # computer
+    #    [-0.7, 0.5]     # phone
+    # ]) * 2
+
+    # Use the UI elements created in the previous cell
+    multihead_viz = visualize_multihead_attention(words, embeddings)
+    multihead_viz  # Display the visualization
+    return (
+        create_head_layout,
+        multihead_viz,
+        process_head,
+        visualize_multihead_attention,
+    )
+
+
+@app.cell
+def _(mo):
+    _fig = mo.md(
+        """
+        ![](https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-encoder-decoder.jpg?raw=true)
+        """
+    )
+    _text= mo.md(
+        """
+        # Encoder and Decoder Transformers
+
+        - Many LLM adopts an encoder-decoder architecture.
+        - Two types of transformers: **encoder** and **decoder**.
+        - Each transformer has a different structure.
+        """
+    )
+    mo.hstack(
+        [
+            _text,
+            _fig,
+        ],
+        widths=[0.5, 0.5], align= "center"
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    _fig = mo.md(
+        """
+        ![](https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-encoder.jpg?raw=true)
+        """
+    )
+    _text= mo.md(
+        """
+        # Encoder Transformer
+
+        - Encode the input sequence.
+        - Multi-head attention.
+        - Two **Layer normalizations** and **Residual connections**.
+        - Feed-forward network.
+        """
+    )
+    mo.hstack(
+        [
+            _text,
+            _fig,
+        ],
+        widths=[0.5, 0.5], align="center"
+    )
+    return
+
+
+@app.cell
+def _(
+    alt,
+    emb2df,
+    embeddings,
+    mo,
+    np,
+    pd,
+    rotation,
+    words,
+    x_intercept,
+    x_scale,
+    y_intercept,
+    y_scale,
+):
+    _fig = mo.md(
+        """
+        ![](https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-component.jpg?raw=true)
+        """
+    )
+
+
+    def create_chart(
+        df,
+        vmax,
+        color_before,
+        color_after,
+        width=200,
+        height=200,
+        label_before="before",
+        label_after="after",
+    ):
+        """Create a chart comparing before and after states with consistent styling"""
+        # Create a legend data frame
+        legend_df = pd.DataFrame(
+            [
+                {"state": label_before, "x": -vmax, "y": vmax},
+                {"state": label_after, "x": -vmax, "y": vmax},
+            ]
+        )
+
+        # Create legend chart
+        legend = (
+            alt.Chart(legend_df)
+            .mark_circle(size=100)
+            .encode(
+                x=alt.X("x", scale=alt.Scale(domain=[-vmax, vmax])),
+                y=alt.Y("y", scale=alt.Scale(domain=[-vmax, vmax])),
+                color=alt.Color(
+                    "state:N",
+                    scale=alt.Scale(
+                        domain=[label_before, label_after],
+                        range=[color_before, color_after],
+                    ),
+                ),
+                opacity=alt.value(0),  # Make legend points invisible but keep legend
+            )
+            .properties(width=width, height=height, title="Data after layer 1")
+        )
+
+        base = (
+            alt.Chart(df)
+            .mark_circle(size=100)
+            .encode(
+                x=alt.X("x_changed", scale=alt.Scale(domain=[-vmax, vmax])),
+                y=alt.Y("y_changed", scale=alt.Scale(domain=[-vmax, vmax])),
+                color=alt.value(color_after),
+                tooltip=["word_id"],
+            )
+        )
+
+        base2 = (
+            alt.Chart(df)
+            .mark_circle(size=100)
+            .encode(
+                x=alt.X("x_without_change", scale=alt.Scale(domain=[-vmax, vmax])),
+                y=alt.Y("y_without_change", scale=alt.Scale(domain=[-vmax, vmax])),
+                color=alt.value(color_before),
+                tooltip=["word_id"],
+            )
+        )
+        lines = (
+            alt.Chart(df)
+            .mark_rule()
+            .encode(
+                x=alt.X("x_changed", scale=alt.Scale(domain=[-vmax, vmax])),
+                y=alt.Y("y_changed", scale=alt.Scale(domain=[-vmax, vmax])),
+                x2="x_without_change",
+                y2="y_without_change",
+                detail="word_id",
+                color=alt.value(color_before),
+            )
+        )
+        return lines + base + base2 + legend
+
+
+    np.random.seed(42)
+    _layer_params = [
+        {
+            "x_scale": x_scale.value,
+            "y_scale": y_scale.value,
+            "rotation": rotation.value,
+            "x_intercept": x_intercept.value,
+            "y_intercept": y_intercept.value,
+        },
+        {
+            "x_scale": np.random.rand() * 3,
+            "y_scale": np.random.rand() * 3,
+            "rotation": np.random.rand() * 360,
+            "x_intercept": np.random.rand(),
+            "y_intercept": np.random.rand(),
+        },
+    ]
+
+    # Neural network without changed parameters
+    _df_0_without_change, _df_1_without_change, _W_1_without_change, _b_1_without_change = (
+        emb2df(words, embeddings, 1, 1, 0, 0, 0)
+    )
+    _, _df_2_without_change, _W_2_without_change, _b_2_without_change = emb2df(
+        words, embeddings, **_layer_params[1]
+    )
+
+    _df_0_without_change["layer_id"] = 0
+    _df_1_without_change["layer_id"] = 1
+    _df_2_without_change["layer_id"] = 2
+    _df_without_change = pd.concat(
+        [_df_0_without_change, _df_1_without_change, _df_2_without_change]
+    )
+
+    # Neural network with changed parameters
+    _df_0, _df_1, _W, _b = emb2df(words, embeddings, **_layer_params[0])
+    _emb = embeddings @ _W + _b
+    _, _df_2, _W_2, _b_2 = emb2df(words, _emb, **_layer_params[1])
+
+    _df_0["layer_id"] = 0
+    _df_1["layer_id"] = 1
+    _df_2["layer_id"] = 2
+    _df = pd.concat([_df_0, _df_1, _df_2])
+
+    vmax = np.max(np.abs(_df["x"]))
+    vmax = np.max([vmax, np.max(np.abs(_df["y"]))])
+
+    # Rename columns before concatenating to avoid duplicates
+    _df_changed = _df.rename(
+        columns={"x": "x_changed", "y": "y_changed", "word": "word_id", "layer_id": "layer"}
+    )
+    _df_unchanged = _df_without_change.rename(
+        columns={
+            "x": "x_without_change",
+            "y": "y_without_change",
+            "word": "word_id",
+            "layer_id": "layer",
+        }
+    )
+    _df_combined = pd.merge(_df_changed, _df_unchanged, on=["word_id", "layer"])
+
+    # Filter data for layer 1
+    _df_layer1 = _df_combined[_df_combined["layer"] == 1]
+
+    # Create chart for first layer only
+    _chart_layer1 = create_chart(_df_layer1, vmax, "#FFB6C1", "#FF0000")
+
+    # Create chart showing only layer 2
+    _df_layer2 = _df_combined[_df_combined["layer"] == 2]
+
+    # Create legend data frame for layer 2
+    _legend_df2 = pd.DataFrame(
+        [
+            {"state": "before", "x": -vmax, "y": vmax},
+            {"state": "after", "x": -vmax, "y": vmax},
+        ]
+    )
+
+    _legend2 = (
+        alt.Chart(_legend_df2)
+        .mark_circle(size=100)
+        .encode(
+            x=alt.X("x", scale=alt.Scale(domain=[-vmax, vmax])),
+            y=alt.Y("y", scale=alt.Scale(domain=[-vmax, vmax])),
+            color=alt.Color(
+                "state:N",
+                scale=alt.Scale(domain=["before", "after"], range=["#ADD8E6", "#0000FF"]),
+            ),
+            opacity=alt.value(0),
+        )
+        .properties(
+            title="Data after layer 2",
+            width=200,
+            height=200,
+        )
+    )
+
+    _chart_layer2 = (
+        (
+            alt.Chart(_df_layer2)
+            .mark_circle(size=100)
+            .encode(
+                x=alt.X("x_changed", scale=alt.Scale(domain=[-vmax, vmax])),
+                y=alt.Y("y_changed", scale=alt.Scale(domain=[-vmax, vmax])),
+                color=alt.value("#0000FF"),
+                tooltip=["word_id"],
+            )
+        )
+        + (
+            alt.Chart(_df_layer2)
+            .mark_circle(size=100)
+            .encode(
+                x=alt.X("x_without_change", scale=alt.Scale(domain=[-vmax, vmax])),
+                y=alt.Y("y_without_change", scale=alt.Scale(domain=[-vmax, vmax])),
+                color=alt.value("#ADD8E6"),
+                tooltip=["word_id"],
+            )
+        )
+        + (
+            alt.Chart(_df_layer2)
+            .mark_rule()
+            .encode(
+                x=alt.X("x_changed", scale=alt.Scale(domain=[-vmax, vmax])),
+                y=alt.Y("y_changed", scale=alt.Scale(domain=[-vmax, vmax])),
+                x2="x_without_change",
+                y2="y_without_change",
+                detail="word_id",
+                color=alt.value("#ADD8E6"),
+            )
+        )
+        + _legend2
+    ).properties(
+        width=300,
+        height=300,
+    )
+
+    _text = mo.md(
+        """# Layer Normalization (1)
+        - Addresses the issue of **internal covariate shift**.
+
+        - Internal covariate shift occurs when updates in earlier layers change the distribution of activations, forcing later layers to readjust continuously.
+        """
+    )
+
+    _neural_net = mo.md(
+        """
+         ![](https://github.com/user-attachments/assets/9c5d2919-e27d-4ebe-b989-e5000db8ceb0)
+        """
+    )
+    print(_neural_net.text)
+    _chart_layer1 = mo.hstack(
+        [_chart_layer1, mo.vstack([x_scale, y_scale, rotation, x_intercept, y_intercept])]
+    )
+    mo.hstack(
+        [mo.vstack([_text, _neural_net, _chart_layer1]), _chart_layer2],
+        widths=[1.0, 1.0],
+    )
+    return create_chart, vmax
+
+
+@app.cell
+def _(create_transformation_controls):
+    x_scale_second, y_scale_second, rotation_second, x_intercept_second, y_intercept_second = create_transformation_controls()
+    return (
+        rotation_second,
+        x_intercept_second,
+        x_scale_second,
+        y_intercept_second,
+        y_scale_second,
+    )
+
+
+@app.cell
+def _(
+    beta_slider,
+    emb2df,
+    embeddings,
+    gamma_slider,
+    mo,
+    np,
+    pd,
+    rotation,
+    scatter_plot,
+    words,
+    x_intercept,
+    x_scale,
+    y_intercept,
+    y_scale,
+):
+    _original_df, _transformed_df, _W, _b = emb2df(
+        words,
+        embeddings,
+        x_scale.value,
+        y_scale.value,
+        rotation.value,
+        x_intercept.value,
+        y_intercept.value,
+    )
+
+    _emb = embeddings @ _W + _b
+    _mu = np.mean(_emb, axis=1).reshape(-1, 1)
+    _sigma2 = np.var(_emb, axis=1).reshape(-1, 1)
+
+    _emb_norm = (
+        gamma_slider.value
+        * (_emb - _mu @ np.ones((1, _emb.shape[1])))
+        / np.sqrt(_sigma2 @ np.ones((1, _emb.shape[1])) + 1e-1)
+        + beta_slider.value
+    )
+
+    # Create dataframes
+    _normalized_df = pd.DataFrame(
+        {"word": words, "x": _emb_norm[:, 0], "y": _emb_norm[:, 1]}
+    )
+    _fig_scatter_plot = scatter_plot(
+        _transformed_df,
+        _original_df,
+        title="Input embeddings",
+        width=200,
+        height=200,
+    )
+
+    _fig_scatter_plot_normalized = scatter_plot(
+        _normalized_df,
+        _transformed_df,
+        title="Layer normalization",
+        width=200,
+        height=200,
+    )
+
+    _text = mo.md(
+        """# Layer normalization (2)
+        - A common technique to normalize the data $x$ from previous layers before feeding into the next layer.
+
+            $$
+            \\text{LN}(x) = \\textcolor{red}{\\gamma} \\cdot \\frac{x - \\textcolor{blue}{\\mu}}{\\sqrt{\\textcolor{blue}{\\sigma^2} + \\epsilon}} + \\textcolor{red}{\\beta}
+            $$
+
+            where:
+
+            - $\\textcolor{blue}{\\mu}$, $\\textcolor{blue}{\\sigma^2}$: mean and variance of $x$
+            - $\\textcolor{red}{\\gamma}, \\textcolor{red}{\\beta}$: learnable parameters
+            - $\\epsilon$: small constant for numerical stability
+
+         - Example:
+
+            $$
+            \\begin{aligned}
+            \\mu_{\\text{bank}} &= \\frac{v_{x,\\text{bank}} + v_{y,\\text{bank}}}{2} ={%.2f}, \\\\ \\sigma^2_{\\text{bank}} &= \\frac{1}{2} \\sum_{z \\in \\{x,y\\}} (v_{z,\\text{bank}} - \\mu_{\\text{bank}})^2  ={%.2f}
+            \\end{aligned}
+            $$
+
+            $$
+            \\begin{aligned}
+            \\text{LN}(v_{\\text{bank}}) &= {%.2f} \\cdot \\frac{[{%.2f}, {%.2f}] - {%.2f}}{\\sqrt{{%.2f} + 1e-1}} + {%.2f} \\\\
+            &= [{%.2f}, {%.2f}]
+            \\end{aligned}
+            $$
+
+        """ % (_mu[0], _sigma2[0], gamma_slider.value, _emb[0,0], _emb[0,1], _mu[0], _sigma2[0], beta_slider.value, _emb_norm[0,0], _emb_norm[0,1])
+
+    )
+
+    mo.hstack(
+        [
+            _text,
+            mo.vstack(
+                [
+                    mo.hstack(
+                        [
+                            _fig_scatter_plot,
+                            mo.vstack(
+                                [x_scale, y_scale, rotation, x_intercept, y_intercept]
+                            ),
+                        ],
+                        align="start",
+                    ),
+                    mo.hstack(
+                        [
+                            _fig_scatter_plot_normalized,
+                            mo.vstack([gamma_slider, beta_slider]),
+                        ],
+                        align="start",
+                    ),
+                ],
+                align="start",
+            ),
+        ],
+        widths=[0.6, 0.4],
+    )
+    return
+
+
+@app.cell
+def _(
+    create_chart,
+    emb2df,
+    embeddings,
+    layout_controls,
+    mo,
+    pd,
+    rotation,
+    words,
+    x_intercept,
+    x_scale,
+    y_intercept,
+    y_scale,
+):
+    _text = mo.md(
+        """# Residual connection
+
+        ![](https://upload.wikimedia.org/wikipedia/commons/b/ba/ResBlock.png)
+
+        A common technique to stabilize the training of deep neural networks.
+
+    $$
+    \\text{RC}(x) = x + \\textcolor{red}{F(x)}
+    $$
+
+    - $\\textcolor{red}{F(x)}$ is a function (e.g., a neural network) that learns "residual" information.
+    - Useful when the input data has a complex distribution.
+    - Stabilizes the training of deep neural networks (We will touch this in the next module).
+
+    """
+    )
+
+    _fig_residual = mo.md(
+        """![](https://upload.wikimedia.org/wikipedia/commons/b/ba/ResBlock.png)"""
+    )
+
+    # Get transformed and original embeddings
+    _original_df, _transformed_df, _W, _b = emb2df(
+        words, embeddings, x_scale.value, y_scale.value, rotation.value, x_intercept.value, y_intercept.value
+    )
+
+    # Create DataFrame for visualization
+    _vis_df = pd.DataFrame({
+        'word_id': _transformed_df['word'],
+        'x_without_change': _original_df['x'],
+        'y_without_change': _original_df['y'],
+        'x_changed': _transformed_df['x'] + _original_df['x'],
+        'y_changed': _transformed_df['y'] + _original_df['y']
+    })
+
+    # Create visualization
+    _residual_plot = create_chart(
+        _vis_df,
+        vmax=4,
+        color_before="#FFB6C1",
+        color_after="#FF0000",
+        width=300,
+        height=300,
+        label_before='x',
+        label_after='RC(x)'
+    )
+
+    mo.hstack(
+        [
+            _text,
+            mo.vstack([_residual_plot, layout_controls(x_scale, y_scale, rotation, x_intercept, y_intercept)])
+        ],
+        widths=[0.7, 0.3]
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    _fig = mo.md(
+        """
+        ![](https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-encoder.jpg?raw=true)
+        """
+    )
+    _text= mo.md(
+        """
+        # Encoder Transformer (Revisit)
+
+        - Encode the input sequence.
+        - Multi-head attention.
+        - Two **Layer normalizations** and **Residual connections**.
+        - Feed-forward network.
+        """
+    )
+    mo.hstack(
+        [
+            _text,
+            _fig,
+        ],
+        widths=[0.5, 0.5], align="center"
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    _fig = mo.md(
+        """
+        ![](https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-decoder.jpg?raw=true)
+        """
+    )
+    _text= mo.md(
+        """
+        # Decoder Transformer
+
+        - Decode the output sequence.
+        - **Masked** multi-head attention.
+        - **Cross-attention** with the encoder.
+        """
+    )
+    mo.hstack(
+        [
+            _text,
+            _fig,
+        ],
+        widths=[0.5, 0.5], align="center"
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    _text = mo.md(
+        """# Masked Attention
+
+        Consider translating "I love you" → "Je t'aime". Training can be:
+
+        - **Sequential:** Each token is generated step by step.
+
+            - Step 1: Input → "I love you". Output → "Je"
+            - Step 2: Input → "I love you Je". Output → "t'aime"
+
+        - **Parallel (Masked Attention):** The decoder predicts all tokens at once, masking future ones.
+            - Input → "I love you [$\\color{red}{\\text{mask}}$] [$\\color{red}{\\text{mask}}$]". Output → "Je [$\\color{red}{\\text{mask}}$] [$\\color{red}{\\text{mask}}$]"
+            - Input → "I love you Je [$\\color{red}{\\text{mask}}$]". Output → "t'aime [$\\color{red}{\\text{mask}}$]"
+
+        where **[$\\color{red}{\\text{mask}}$]** indicates a masked token that does not attend to any other tokens.
+        Masked attention prevents a token from attending to future tokens by modifying attention scores.
+        """
+    )
+
+
+
+
+    _figs = mo.md(
+        """
+        ![](https://substackcdn.com/image/fetch/f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fe1317a05-3542-4158-94bf-085109a5793a_1220x702.png)
+        """
+    )
+
+    mo.hstack(
+        [
+            _text,
+            _figs,
+        ],
+        widths=[0.5, 0.5], align="center"
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    _text = mo.md("""
+    # Cross-attention
+
+    - This module blends the information from the encoder and the decoder.
+    - The key and value vectors are formed with the encoder's output, and the query vector is from the decoder.
+          """)
+
+    _fig = mo.md(
+        """
+        ![](https://skojaku.github.io/applied-soft-comp/_images/transformer-cross-attention.jpg)
+        """
+    )
+
+    mo.hstack(
+        [
+            _text,
+            _fig,
+        ],
+        widths=[0.5, 0.5], align="center"
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    _text = mo.md("""
+    # Overview of the Transformer
+
+    #### **Attention modules:**
+
+    - Contextualize the token embeddings
+
+      - Self-attention, Cross-attention, Masked attention
+
+    #### **Residual connections:**
+
+    - Stabilize the training of deep neural networks.
+
+    #### **Layer normalization:**
+
+    - Normalize the token embeddings.
+
+    #### **Feed-forward network:**
+
+    - A fully connected neural network.
+
+    ## What is the **Positional encoding 🤔?**
+    """)
+
+
+    _fig = mo.md(
+        """
+        ![](https://d2l.ai/_images/transformer.svg)
+        """
+    )
+
+    mo.hstack(
+        [
+            _text,
+            _fig,
+        ],
+        widths=[0.5, 0.5], align="center"
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    beta_slider = mo.ui.slider(-1, 1, 0.1, value=0.5, label="$\\beta$", full_width=False)
+    gamma_slider = mo.ui.slider(0, 2, 0.1, value=1.0, label="$\\gamma$", full_width=False)
+    return beta_slider, gamma_slider
+
+
+@app.cell
+def _(create_transformation_controls):
+    query_x_scale_qkv, query_y_scale_qkv, query_rotation_qkv, query_x_intercept_qkv, query_y_intercept_qkv = create_transformation_controls()
+    key_x_scale_qkv, key_y_scale_qkv, key_rotation_qkv, key_x_intercept_qkv, key_y_intercept_qkv = create_transformation_controls()
+    value_x_scale_qkv, value_y_scale_qkv, value_rotation_qkv, value_x_intercept_qkv, value_y_intercept_qkv = create_transformation_controls()
+    return (
+        key_rotation_qkv,
+        key_x_intercept_qkv,
+        key_x_scale_qkv,
+        key_y_intercept_qkv,
+        key_y_scale_qkv,
+        query_rotation_qkv,
+        query_x_intercept_qkv,
+        query_x_scale_qkv,
+        query_y_intercept_qkv,
+        query_y_scale_qkv,
+        value_rotation_qkv,
+        value_x_intercept_qkv,
+        value_x_scale_qkv,
+        value_y_intercept_qkv,
+        value_y_scale_qkv,
+    )
+
+
+@app.cell
+def _():
+    import marimo as mo
+    import numpy as np
+    import pandas as pd
+    import altair as alt
+    return alt, mo, np, pd
+
+
+@app.cell
+def _(alt, mo, np, pd):
+    def scatter_plot(
+        df,
+        df_original,
+        color="#ff7f0e",
+        width=300,
+        height=300,
+        size=100,
+        title=None,
+        vmax = 2,
+    ):
+        """Generates an Altair scatter plot with word labels."""
+        if vmax is None:
+            vmax = np.maximum(np.max(np.abs(df['x'])), np.max(np.abs(df['y'])))
+
+        base_original = (
+            alt.Chart(df_original)
+            .mark_circle(size=size, color="#dadada", opacity=0.8)
+            .encode(
+                x=alt.X("x", scale=alt.Scale(domain=[-vmax, vmax])),
+                y=alt.Y("y", scale=alt.Scale(domain=[-vmax, vmax])),
+                tooltip=["word"],
+            )
+        )
+        base = (
+            alt.Chart(df)
+            .mark_circle(size=size, color=color)
+            .encode(
+                x=alt.X("x", scale=alt.Scale(domain=[-vmax, vmax])),
+                y=alt.Y("y", scale=alt.Scale(domain=[-vmax, vmax])),
+                tooltip=["word"],
+            )
+        )
+
+
+        # Add vectors from origin to points with arrow heads
+        vectors = (
+            alt.Chart(df)
+            .mark_line(
+                color=color,
+                opacity=0.5,
+            )
+            .encode(
+                x=alt.X("x0:Q", scale=alt.Scale(domain=[-vmax, vmax])),
+                x2=alt.X2("x:Q"),
+                y=alt.Y("y0:Q", scale=alt.Scale(domain=[-vmax, vmax])),
+                y2=alt.Y2("y:Q"),
+                angle=alt.value(0)
+            )
+            .transform_calculate(
+                x0="0",  # Start at origin x=0
+                y0="0"  # Start at origin y=0
+            )
+        )
+
+        base = base_original + base + vectors
+
+        text = (
+            alt.Chart(df)
+            .mark_text(align="left", dx=10, dy=-5, fontSize=14)
+            .encode(x="x", y="y", text="word")
+        )
+
+        return (base + text).properties(width=width, height=height, title=title)
+
+
+    def create_transformation_controls():
+        """Creates the transformation control sliders."""
+        x_scale = mo.ui.slider(0.1, 2.5, 0.1, value=1.0, label="$S_{\\text{x}}$", full_width=False)
+        y_scale = mo.ui.slider(0.1, 2.5, 0.1, value=1.0, label="$S_{\\text{y}}$", full_width=False)
+        rotation = mo.ui.slider(-180, 180, 1, value=0, label="$\\theta$", full_width=False)
+        x_intercept = mo.ui.slider(-1, 1, 0.1, value=0, label="$b_{\\text{x}}$", full_width=False)
+        y_intercept = mo.ui.slider(-1, 1, 0.1, value=0, label="$b_{\\text{y}}$", full_width=False)
+        return x_scale, y_scale, rotation, x_intercept, y_intercept
+
+    def layout_controls(x_scale, y_scale, rotation, x_intercept, y_intercept):
+        return mo.hstack([
+            mo.vstack([x_scale, y_scale, rotation]),
+            mo.vstack([x_intercept, y_intercept]),
+        ], align="start", widths=[0.3, 0.7], gap=0)
+
+
+    def vertical_line():
+        return mo.Html("<div style='width: 2px; height: 100%; background-color: #ccc; margin: 0 10px;'></div>")
+
+
+    def emb2df(words, embeddings, x_scale, y_scale, rotation, x_intercept, y_intercept):
+        """Creates visualization with the current transformation values."""
+        # Apply scaling
+        scale_matrix = np.array([[x_scale, 0], [0, y_scale]])
+
+        b = np.array([x_intercept, y_intercept])
+
+        # Apply rotation
+        theta = np.radians(rotation)
+        rotation_matrix = np.array(
+            [[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]]
+        )
+
+        # Compute transformed embeddings
+        W = scale_matrix @ rotation_matrix
+        transformed = embeddings @ W + b
+
+        # Create dataframes
+        original_df = pd.DataFrame(
+            {"word": words, "x": embeddings[:, 0], "y": embeddings[:, 1]}
+        )
+        transformed_df = pd.DataFrame(
+            {"word": words, "x": transformed[:, 0], "y": transformed[:, 1]}
+        )
+        return original_df, transformed_df, W, b
+    return (
+        create_transformation_controls,
+        emb2df,
+        layout_controls,
+        scatter_plot,
+        vertical_line,
+    )
+
+
+@app.cell
+def _(alt, pd):
+    def heatmap(matrix, tick_labels=None, title=None, width=300, height=300, vmin=None, vmax=None, show_labels=True):
+        # Convert matrix to DataFrame with explicit x, y, value columns
+        data = []
+        for i, row in enumerate(matrix):
+            for j, value in enumerate(row):
+                data.append(
+                    {
+                        "x": tick_labels[j] if tick_labels else j,
+                        "y": tick_labels[i] if tick_labels else i,
+                        "value": value,
+                    }
+                )
+
+        df = pd.DataFrame(data)
+
+        # Calculate domain based on actual data
+        min_val = df["value"].min() if vmin is None else vmin
+        max_val = df["value"].max() if vmax is None else vmax
+
+        # Set symmetric domain for better color contrast
+        domain = [min_val, max_val]
+
+        base = alt.Chart(df).mark_rect(strokeWidth=1, stroke="white").encode(
+            x=alt.X(
+                "x:N",  # Changed to nominal type for text labels
+                title="",
+                axis=alt.Axis(
+                    labelAngle=45
+                ),  # Angled labels for better readability
+                sort=None,
+            ),
+            y=alt.Y(
+                "y:N",  # Changed to nominal type for text labels
+                title="",
+                sort=None,  # Prevents automatic sorting
+            ),
+            color=alt.Color(
+                "value",
+                scale=alt.Scale(domain=domain, scheme="inferno", clamp=True),
+                legend=alt.Legend(title="Value", orient="right"),
+            )
+        )
+
+        if show_labels:  # Add parameter to control label visibility
+            text_layer = alt.Chart(df).mark_text(baseline="middle", align="center").encode(
+                x="x:N",
+                y="y:N",
+                text=alt.Text("value:Q", format=".2f"),
+                color=alt.condition(
+                    alt.datum.value < (domain[1] + domain[0])/2,
+                    alt.value("white"),
+                    alt.value("black")
+                )
+            )
+            return (base + text_layer).properties(width=width, height=height, title=title)
+
+        return base.properties(width=width, height=height, title=title)
+    return (heatmap,)
+
+
+@app.cell
+def _():
+    # Create the UI controls for each transformation
+    #key_x, key_y, key_r, key_x_intercept, key_y_intercept = create_transformation_controls()
+    #query_x, query_y, query_r, query_x_intercept, query_y_intercept = create_transformation_controls()
+    #value_x, value_y, value_r, value_x_intercept, value_y_intercept = create_transformation_controls()
+    return
+
+
+@app.cell
+def _(np):
+    ## Define a set of words with two polysemous words
+    words = [
+        "bank",    # polysemous: financial institution or river side
+    #    "apple",   # polysemous: fruit or technology company
+        "money",
+        "loan",
+        "river",
+        "shore",
+    #    "fruit",
+    #    "orange",
+    #    "computer",
+    #    "phone"
+    ]
+
+    # Base embeddings - deliberately positioned to show polysemy
+    embeddings = np.array([
+        [-0.0, -0.3],   # bank (between financial and river clusters)
+    #    [-0.1, 0.6],    # apple (better positioned between fruit and tech clusters)
+        [-0.8, -0.3],   # money
+        [-0.7, -0.6],   # loan
+        [0.7, -0.5],    # river
+        [0.6, -0.7],    # shore
+    #    [0.6, 0.6],     # fruit
+    #    [0.8, 0.4],     # orange
+    #    [-0.5, 0.7],    # computer
+    #    [-0.7, 0.5]     # phone
+    ]) * 2
+    return embeddings, words
+
+
+@app.cell
+def _():
+    return
+
+
+if __name__ == "__main__":
+    app.run()
