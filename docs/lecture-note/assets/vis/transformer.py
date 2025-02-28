@@ -1895,9 +1895,17 @@ def _(mo):
     )
     return
 
+@app.cell
+def _(mo):
+    # Create a slider for controlling the number of positions in the outer product matrix
+    seq_len = 30
+    position_slider = mo.ui.slider(2, seq_len, 1, value=5, label="Position Progress", full_width=False)
+    d_model_slider = mo.ui.slider(2, 100, 1, value=2, label="Dimension of the embedding", full_width=False)
+    return position_slider, d_model_slider
 
 @app.cell
-def _(alt, mo, np, pd):
+def _(alt, mo, np, pd, seq_len, position_slider, d_model_slider):
+
     # Create a function to generate positional encodings
     def get_positional_encoding(seq_len, d_model):
         # Initialize the positional encoding matrix
@@ -1912,8 +1920,7 @@ def _(alt, mo, np, pd):
         return pos_enc
 
     # Parameters for visualization
-    seq_len = 20  # Number of positions to show
-    d_model = 2   # Using 2D for visualization
+    d_model = d_model_slider.value  # Using 2D for visualization
 
     # Generate positional encodings
     pos_enc = get_positional_encoding(seq_len, d_model)
@@ -1921,121 +1928,192 @@ def _(alt, mo, np, pd):
     # Create a dataframe for visualization with a frame column for animation
     df = pd.DataFrame()
     for frame in range(seq_len):
-        temp_df = pd.DataFrame({
-            'position': range(frame + 1),
-            'x': pos_enc[:frame + 1, 0],
-            'y': pos_enc[:frame + 1, 1],
-            'frame': frame
-        })
+        temp_df = pd.DataFrame(
+            {
+                "position": range(frame + 1),
+                "x": pos_enc[: frame + 1, 0],
+                "y": pos_enc[: frame + 1, 1],
+                "frame": frame,
+            }
+        )
         df = pd.concat([df, temp_df])
+        if frame == position_slider.value:
+            break
+
+    print(df)
 
     # Create animated scatter plot
-    scatter = alt.Chart(df).mark_circle(size=100).encode(
-        x=alt.X('x', scale=alt.Scale(domain=[-1.1, 1.1])),
-        y=alt.Y('y', scale=alt.Scale(domain=[-1.1, 1.1])),
-        color=alt.Color('position:O', scale=alt.Scale(scheme='reds')),
-        tooltip=['position', 'x', 'y']
-    ).properties(
-        width=300,
-        height=300,
-        title='Positional Encoding in 2D'
+    scatter = (
+        alt.Chart(df)
+        .mark_circle(size=100)
+        .encode(
+            x=alt.X("x", scale=alt.Scale(domain=[-1.1, 1.1])),
+            y=alt.Y("y", scale=alt.Scale(domain=[-1.1, 1.1])),
+            color=alt.Color("position:O", scale=alt.Scale(scheme="reds")),
+            tooltip=["position", "x", "y"],
+        )
+        .properties(width=300, height=300, title="Positional Encoding in 2D")
     )
 
     # Create animated line connecting points in sequence
-    line = alt.Chart(df).mark_line().encode(
-        x='x',
-        y='y',
-        order='position',
-        color=alt.value('gray'),
-        opacity=alt.value(0.3),
-        strokeWidth=alt.value(0.5)
+    line = (
+        alt.Chart(df)
+        .mark_line()
+        .encode(
+            x="x",
+            y="y",
+            order="position",
+            color=alt.value("gray"),
+            opacity=alt.value(0.3),
+            strokeWidth=alt.value(0.5),
+        )
     )
 
     # Add animation by frame
-    animation = (scatter + line).add_params(
-        alt.selection_point(
-            fields=['frame'],
-            bind=alt.binding_range(
-                min=0,
-                max=seq_len-1,
-                step=1,
-                name='Position Progress:'
-            ),
-            name='animation'
-        )
-    ).transform_filter(
-        'datum.frame <= animation.frame'
-    )
+    animation = scatter + line
+    #    .add_params(
+    #        alt.selection_point(
+    #            fields=['frame'],
+    #            bind=alt.binding_range(
+    #                min=0,
+    #                max=seq_len-1,
+    #                step=1,
+    #                name='Position Progress:'
+    #            ),
+    #            name='animation'
+    #        )
+    #    ).transform_filter(
+    #        'datum.frame <= animation.frame'
+    #    )
 
     # Create a static version showing the full pattern for reference
-    static_df = pd.DataFrame({
-        'position': range(seq_len),
-        'x': pos_enc[:, 0],
-        'y': pos_enc[:, 1]
-    })
-
-    static_scatter = alt.Chart(static_df).mark_circle(size=60, opacity=1.0).encode(
-        x=alt.X('x', scale=alt.Scale(domain=[-1.1, 1.1])),
-        y=alt.Y('y', scale=alt.Scale(domain=[-1.1, 1.1])),
-        color=alt.Color('position:O', scale=alt.Scale(scheme='viridis')),
-        tooltip=['position', 'x', 'y']
+    static_df = pd.DataFrame(
+        {"position": range(seq_len), "x": pos_enc[:, 0], "y": pos_enc[:, 1]}
     )
 
-    static_line = alt.Chart(static_df).mark_line(opacity=0.3).encode(
-        x='x',
-        y='y',
-        order='position',
-        color=alt.value('gray')
+    static_scatter = (
+        alt.Chart(static_df)
+        .mark_circle(size=60, opacity=1.0)
+        .encode(
+            x=alt.X("x", scale=alt.Scale(domain=[-1.1, 1.1])),
+            y=alt.Y("y", scale=alt.Scale(domain=[-1.1, 1.1])),
+            color=alt.Color("position:O", scale=alt.Scale(scheme="viridis")),
+            tooltip=["position", "x", "y"],
+        )
+    )
+
+    static_line = (
+        alt.Chart(static_df)
+        .mark_line(opacity=0.3)
+        .encode(x="x", y="y", order="position", color=alt.value("gray"))
     )
 
     # Combine animated and static versions
-    chart = animation #+ static_line
+    chart = animation  # + static_line
+
+    # Function to update the outer product matrix based on slider value
+    def update_outer_product(num_positions):
+        # Select positions based on slider value
+        positions_subset = list(range(num_positions))
+        subset_enc = pos_enc[positions_subset]
+
+        # Calculate outer products between position vectors
+        outer_products = []
+        for i in range(len(positions_subset)):
+            for j in range(len(positions_subset)):
+                # Calculate dot product similarity
+                similarity = np.dot(subset_enc[i], subset_enc[j])
+                outer_products.append(
+                    {
+                        "pos_i": positions_subset[i],
+                        "pos_j": positions_subset[j],
+                        "similarity": similarity,
+                    }
+                )
+
+        outer_df = pd.DataFrame(outer_products)
+
+        # Create heatmap of outer products
+        heatmap = (
+            alt.Chart(outer_df)
+            .mark_rect()
+            .encode(
+                x=alt.X("pos_i:O", title="Position i"),
+                y=alt.Y("pos_j:O", title="Position j"),
+                color=alt.Color("similarity:Q", scale=alt.Scale(scheme="viridis")),
+                tooltip=["pos_i", "pos_j", "similarity"],
+            )
+            .properties(
+                width=250,
+                height=250,
+                title=f"Similarity between Position Embeddings (n={num_positions})",
+            )
+        )
+
+        return heatmap
 
     # Explanation text
-    text = mo.md("""
-    # Positional Encoding
+    text = mo.md(
+        """
+    # 🔢 Positional Encoding
 
-    - Transformers have **no inherent notion of token order** since self-attention treats input as a set.
+    - 🧩 Transformers don't know token order by default (self-attention sees tokens as a set)
 
-    - Positional encoding adds position information to each token embedding.
+    - ➕ We add position info to each token embedding:
+      $$\\text{Embedding} = \\text{Token Embedding} + \\text{Positional Encoding}$$
 
-    - Uses sine and cosine functions of different frequencies:
-
+    - 📐 Using sine/cosine functions:
       $$PE_{(pos, 2i)} = \sin(pos/10000^{2i/d_{model}})$$
-
       $$PE_{(pos, 2i+1)} = \cos(pos/10000^{2i/d_{model}})$$
 
-    - This creates a unique pattern for each position that the model can learn to interpret.
+    - This makes nearby positions stay close together.
 
-    - The 2D visualization shows how positions form a spiral pattern, with nearby positions being close in the encoding space.
+    - This lets the model use both content AND position when paying attention
 
-    - This encoding allows the model to attend to tokens based on both content and position.
+    - ▶️ **Try the slider to watch positions being added!**
 
-    - **Use the slider to see how positions are added sequentially!**
-    """)
+    - 🔍 The heatmap shows similarity between positions
+
+    - 🎛️ Adjust positions in the matrix with the slider below
+    """
+    )
 
     # Display the visualization and explanation side by side
     mo.hstack(
-        [text, chart],
+        [
+            text,
+            mo.vstack(
+                [
+                    chart,
+                    position_slider,
+                    d_model_slider,
+                    update_outer_product(position_slider.value),
+                ]
+            ),
+        ],
         widths=[0.6, 0.4],
-        align="center"
+        align="center",
     )
+
+    # Make the heatmap update when the slider changes
+    # position_slider.on_change(lambda _: mo.output.replace(update_outer_product(position_slider.value)))
+
     return (
         animation,
         chart,
         d_model,
         df,
-        frame,
         get_positional_encoding,
         line,
         pos_enc,
+        position_slider,
         scatter,
         seq_len,
         static_df,
         static_line,
         static_scatter,
-        temp_df,
         text,
+        update_outer_product,
     )
 
 
