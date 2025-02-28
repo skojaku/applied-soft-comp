@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.11.9"
-app = marimo.App(width="medium", layout_file="layouts/transformer.slides.json")
+app = marimo.App(width="medium")
 
 
 @app.cell
@@ -17,12 +17,12 @@ def _(mo):
             ),
             mo.md(
                 r"""
-                ![](https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-overview.jpg?raw=true)
+                 <img src="https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-overview.jpg?raw=true" width="250px">
         """
             ),
         ],
         align="center",
-        widths=[2, 1],
+        widths=[1, 1],
     )
     return
 
@@ -38,7 +38,7 @@ def _(mo):
             ),
             mo.md(
                 r"""
-                ![](https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-component.jpg?raw=true)
+                <img src="https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-component.jpg?raw=true" width="1000px">
         """
             ),
         ],
@@ -82,17 +82,18 @@ def _(mo):
         [
             mo.md(
                 """
-                - There are multiple types of **attention**, the most basic form being **self-attention**:
-                - An attention module creates three types of vectors-*query, key, and value*—for each word.
-                - Each of these vectors are created by **a linear layer**.
+                - An attention module creates three types of vectors for each word:
+
+                    - *Query vector* ,
+                    - *Key vector*,
+                    - *Value vector*
+
+                - Each of these vectors are created by **a linear layer** ➡️.
                 """
             ),
             mo.Html(
                 r"""
-                <div style="width: 100%; height: 300px; overflow: hidden; position: relative;">
-                  <img src="https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-attention.jpg?raw=true"
-                       style="position: absolute; width: 200%; max-width: none; right: -100%; top: -29%;">
-                </div>
+                <img width="250" alt="Screenshot 2025-02-28 at 3 31 35 PM" src="https://github.com/user-attachments/assets/5f14c983-ced9-41b8-bab9-36e125ac708d" />
                 """
             ),
         ],
@@ -103,21 +104,34 @@ def _(mo):
 
 
 @app.cell
+def _(create_transformation_controls):
+    # Create new controllers for this visualization
+    linear_x_scale, linear_y_scale, linear_rotation, linear_x_intercept, linear_y_intercept = create_transformation_controls()
+    return (
+        linear_rotation,
+        linear_x_intercept,
+        linear_x_scale,
+        linear_y_intercept,
+        linear_y_scale,
+    )
+
+
+@app.cell
 def _(
     emb2df,
     embeddings,
     layout_controls,
+    linear_rotation,
+    linear_x_intercept,
+    linear_x_scale,
+    linear_y_intercept,
+    linear_y_scale,
     mo,
-    rotation,
     scatter_plot,
     words,
-    x_intercept,
-    x_scale,
-    y_intercept,
-    y_scale,
 ):
     _original_df, _transformed_df, W, b = emb2df(
-        words, embeddings, x_scale.value, y_scale.value, rotation.value, x_intercept.value, y_intercept.value
+        words, embeddings, linear_x_scale.value, linear_y_scale.value, linear_rotation.value, linear_x_intercept.value, linear_y_intercept.value
     )
 
     _chart = scatter_plot(
@@ -175,7 +189,7 @@ def _(
                             """
                                 % (W[0, 0], W[0, 1], W[1, 0], W[1, 1], b[0], b[1])
                             ),
-                            layout_controls(x_scale, y_scale, rotation, x_intercept, y_intercept),
+                            layout_controls(linear_x_scale, linear_y_scale, linear_rotation, linear_x_intercept, linear_y_intercept),
                             mo.hstack(
                                 [
                                     mo.md("""
@@ -190,19 +204,12 @@ def _(
                                 ],
                             ),
                         ],
-                        align="center",
                     ),
-                ]
+                ], justify = "center", align="center",
             ),
         ]
     )
     return W, b
-
-
-@app.cell
-def _(create_transformation_controls):
-    x_scale, y_scale, rotation, x_intercept, y_intercept = create_transformation_controls()
-    return rotation, x_intercept, x_scale, y_intercept, y_scale
 
 
 @app.cell
@@ -216,52 +223,69 @@ def _(mo):
             ),
             mo.Html(
                 r"""
-                <div style="width: 100%; height: 300px; overflow: hidden; position: relative;">
-                  <img src="https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-attention.jpg?raw=true"
-                       style="position: absolute; width: 200%; max-width: none; right: -90%; top: -29%;">
-                </div>
+                <img width="350" alt="Screenshot 2025-02-28 at 3 34 40 PM" src="https://github.com/user-attachments/assets/d33313c7-f11f-47eb-8a77-6fd78967bb47" />
                 """
             ),
         ],
         align="center",
+        justify="center",
         widths=[0.45, 0.55],
     )
     return
 
 
 @app.cell
+def _(create_transformation_controls):
+    # Create new controllers for query and key
+    attention_query_x_scale, attention_query_y_scale, attention_query_rotation, attention_query_x_intercept, attention_query_y_intercept = create_transformation_controls()
+    attention_key_x_scale, attention_key_y_scale, attention_key_rotation, attention_key_x_intercept, attention_key_y_intercept = create_transformation_controls()
+    return (
+        attention_key_rotation,
+        attention_key_x_intercept,
+        attention_key_x_scale,
+        attention_key_y_intercept,
+        attention_key_y_scale,
+        attention_query_rotation,
+        attention_query_x_intercept,
+        attention_query_x_scale,
+        attention_query_y_intercept,
+        attention_query_y_scale,
+    )
+
+
+@app.cell
 def _(
+    attention_key_rotation,
+    attention_key_x_intercept,
+    attention_key_x_scale,
+    attention_key_y_intercept,
+    attention_key_y_scale,
+    attention_query_rotation,
+    attention_query_x_intercept,
+    attention_query_x_scale,
+    attention_query_y_intercept,
+    attention_query_y_scale,
     emb2df,
     embeddings,
     heatmap,
-    key_rotation,
-    key_x_intercept,
-    key_x_scale,
-    key_y_intercept,
-    key_y_scale,
     layout_controls,
     mo,
     np,
-    query_rotation,
-    query_x_intercept,
-    query_x_scale,
-    query_y_intercept,
-    query_y_scale,
     scatter_plot,
     vertical_line,
     words,
 ):
     _transformed_df_key, _original_df_key, _W_key, _b_key = emb2df(
-        words, embeddings, key_x_scale.value, key_y_scale.value, key_rotation.value, key_x_intercept.value, key_y_intercept.value
+        words, embeddings, attention_key_x_scale.value, attention_key_y_scale.value, attention_key_rotation.value, attention_key_x_intercept.value, attention_key_y_intercept.value
     )
     _transformed_df_query, _original_df_query, _W_query, _b_query = emb2df(
         words,
         embeddings,
-        query_x_scale.value,
-        query_y_scale.value,
-        query_rotation.value,
-        query_x_intercept.value,
-        query_y_intercept.value,
+        attention_query_x_scale.value,
+        attention_query_y_scale.value,
+        attention_query_rotation.value,
+        attention_query_x_intercept.value,
+        attention_query_y_intercept.value,
     )
 
     _chart_key = scatter_plot(
@@ -317,7 +341,7 @@ def _(
                     mo.md(
                         """
 
-                        ## AttentionScore
+                        ## Attention Score
 
                         The attention score is computed as follows:
 
@@ -345,7 +369,7 @@ def _(
                         [
                             mo.vstack(
                                 [
-                                    layout_controls(query_x_scale, query_y_scale, query_rotation, query_x_intercept, query_y_intercept),
+                                    layout_controls(attention_query_x_scale, attention_query_y_scale, attention_query_rotation, attention_query_x_intercept, attention_query_y_intercept),
                                     _chart_query,
                                 ],
                                 justify="center",
@@ -354,7 +378,7 @@ def _(
                             vertical_line(),
                             mo.vstack(
                                 [
-                                    layout_controls(key_x_scale, key_y_scale, key_rotation, key_x_intercept, key_y_intercept),
+                                    layout_controls(attention_key_x_scale, attention_key_y_scale, attention_key_rotation, attention_key_x_intercept, attention_key_y_intercept),
                                     _chart_key,
                                 ],
                                 justify="center",
@@ -376,25 +400,27 @@ def _(
             ),
         ],
         align="center",
+        justify="center",
     )
     return
 
 
 @app.cell
 def _(create_transformation_controls):
-    query_x_scale, query_y_scale, query_rotation, query_x_intercept, query_y_intercept = create_transformation_controls()
-    key_x_scale, key_y_scale, key_rotation, key_x_intercept, key_y_intercept = create_transformation_controls()
+    # Create new controllers for softmax visualization
+    softmax_query_x_scale, softmax_query_y_scale, softmax_query_rotation, softmax_query_x_intercept, softmax_query_y_intercept = create_transformation_controls()
+    softmax_key_x_scale, softmax_key_y_scale, softmax_key_rotation, softmax_key_x_intercept, softmax_key_y_intercept = create_transformation_controls()
     return (
-        key_rotation,
-        key_x_intercept,
-        key_x_scale,
-        key_y_intercept,
-        key_y_scale,
-        query_rotation,
-        query_x_intercept,
-        query_x_scale,
-        query_y_intercept,
-        query_y_scale,
+        softmax_key_rotation,
+        softmax_key_x_intercept,
+        softmax_key_x_scale,
+        softmax_key_y_intercept,
+        softmax_key_y_scale,
+        softmax_query_rotation,
+        softmax_query_x_intercept,
+        softmax_query_x_scale,
+        softmax_query_y_intercept,
+        softmax_query_y_scale,
     )
 
 
@@ -403,38 +429,38 @@ def _(
     emb2df,
     embeddings,
     heatmap,
-    key_rotation,
-    key_x_intercept,
-    key_x_scale,
-    key_y_intercept,
-    key_y_scale,
     mo,
     np,
-    query_rotation,
-    query_x_intercept,
-    query_x_scale,
-    query_y_intercept,
-    query_y_scale,
     scatter_plot,
+    softmax_key_rotation,
+    softmax_key_x_intercept,
+    softmax_key_x_scale,
+    softmax_key_y_intercept,
+    softmax_key_y_scale,
+    softmax_query_rotation,
+    softmax_query_x_intercept,
+    softmax_query_x_scale,
+    softmax_query_y_intercept,
+    softmax_query_y_scale,
     words,
 ):
     _transformed_df_key, _original_df_key, _W_key, _b_key = emb2df(
         words,
         embeddings,
-        key_x_scale.value,
-        key_y_scale.value,
-        key_rotation.value,
-        key_x_intercept.value,
-        key_y_intercept.value,
+        softmax_key_x_scale.value,
+        softmax_key_y_scale.value,
+        softmax_key_rotation.value,
+        softmax_key_x_intercept.value,
+        softmax_key_y_intercept.value,
     )
     _transformed_df_query, _original_df_query, _W_query, _b_query = emb2df(
         words,
         embeddings,
-        query_x_scale.value,
-        query_y_scale.value,
-        query_rotation.value,
-        query_x_intercept.value,
-        query_y_intercept.value,
+        softmax_query_x_scale.value,
+        softmax_query_y_scale.value,
+        softmax_query_rotation.value,
+        softmax_query_x_intercept.value,
+        softmax_query_y_intercept.value,
     )
 
     _chart_key = scatter_plot(
@@ -507,8 +533,32 @@ def _(
             ),
         ],
     )
-
     return
+
+
+@app.cell
+def _(create_transformation_controls):
+    # Create new controllers for QKV visualization
+    qkv_query_x_scale, qkv_query_y_scale, qkv_query_rotation, qkv_query_x_intercept, qkv_query_y_intercept = create_transformation_controls()
+    qkv_key_x_scale, qkv_key_y_scale, qkv_key_rotation, qkv_key_x_intercept, qkv_key_y_intercept = create_transformation_controls()
+    qkv_value_x_scale, qkv_value_y_scale, qkv_value_rotation, qkv_value_x_intercept, qkv_value_y_intercept = create_transformation_controls()
+    return (
+        qkv_key_rotation,
+        qkv_key_x_intercept,
+        qkv_key_x_scale,
+        qkv_key_y_intercept,
+        qkv_key_y_scale,
+        qkv_query_rotation,
+        qkv_query_x_intercept,
+        qkv_query_x_scale,
+        qkv_query_y_intercept,
+        qkv_query_y_scale,
+        qkv_value_rotation,
+        qkv_value_x_intercept,
+        qkv_value_x_scale,
+        qkv_value_y_intercept,
+        qkv_value_y_scale,
+    )
 
 
 @app.cell
@@ -516,54 +566,54 @@ def _(
     emb2df,
     embeddings,
     heatmap,
-    key_rotation_qkv,
-    key_x_intercept_qkv,
-    key_x_scale_qkv,
-    key_y_intercept_qkv,
-    key_y_scale_qkv,
     layout_controls,
     mo,
     np,
     pd,
-    query_rotation_qkv,
-    query_x_intercept_qkv,
-    query_x_scale_qkv,
-    query_y_intercept_qkv,
-    query_y_scale_qkv,
+    qkv_key_rotation,
+    qkv_key_x_intercept,
+    qkv_key_x_scale,
+    qkv_key_y_intercept,
+    qkv_key_y_scale,
+    qkv_query_rotation,
+    qkv_query_x_intercept,
+    qkv_query_x_scale,
+    qkv_query_y_intercept,
+    qkv_query_y_scale,
+    qkv_value_rotation,
+    qkv_value_x_intercept,
+    qkv_value_x_scale,
+    qkv_value_y_intercept,
+    qkv_value_y_scale,
     scatter_plot,
-    value_rotation_qkv,
-    value_x_intercept_qkv,
-    value_x_scale_qkv,
-    value_y_intercept_qkv,
-    value_y_scale_qkv,
     words,
 ):
     _transformed_df_key, _original_df_key, _W_key, _b_key = emb2df(
         words,
         embeddings,
-        key_x_scale_qkv.value,
-        key_y_scale_qkv.value,
-        key_rotation_qkv.value,
-        key_x_intercept_qkv.value,
-        key_y_intercept_qkv.value,
+        qkv_key_x_scale.value,
+        qkv_key_y_scale.value,
+        qkv_key_rotation.value,
+        qkv_key_x_intercept.value,
+        qkv_key_y_intercept.value,
     )
     _transformed_df_query, _original_df_query, _W_query, _b_query = emb2df(
         words,
         embeddings,
-        query_x_scale_qkv.value,
-        query_y_scale_qkv.value,
-        query_rotation_qkv.value,
-        query_x_intercept_qkv.value,
-        query_y_intercept_qkv.value,
+        qkv_query_x_scale.value,
+        qkv_query_y_scale.value,
+        qkv_query_rotation.value,
+        qkv_query_x_intercept.value,
+        qkv_query_y_intercept.value,
     )
     _transformed_df_value, _original_df_value, _W_value, _b_value = emb2df(
         words,
         embeddings,
-        value_x_scale_qkv.value,
-        value_y_scale_qkv.value,
-        value_rotation_qkv.value,
-        value_x_intercept_qkv.value,
-        value_y_intercept_qkv.value,
+        qkv_value_x_scale.value,
+        qkv_value_y_scale.value,
+        qkv_value_rotation.value,
+        qkv_value_x_intercept.value,
+        qkv_value_y_intercept.value,
     )
 
     _width = 200
@@ -658,11 +708,11 @@ def _(
     _query_plot = mo.vstack(
         [
             layout_controls(
-                query_x_scale_qkv,
-                query_y_scale_qkv,
-                query_rotation_qkv,
-                query_x_intercept_qkv,
-                query_y_intercept_qkv,
+                qkv_query_x_scale,
+                qkv_query_y_scale,
+                qkv_query_rotation,
+                qkv_query_x_intercept,
+                qkv_query_y_intercept,
             ),
             _chart_query,
         ],
@@ -672,11 +722,11 @@ def _(
     key_plot = mo.vstack(
         [
             layout_controls(
-                key_x_scale_qkv,
-                key_y_scale_qkv,
-                key_rotation_qkv,
-                key_x_intercept_qkv,
-                key_y_intercept_qkv,
+                qkv_key_x_scale,
+                qkv_key_y_scale,
+                qkv_key_rotation,
+                qkv_key_x_intercept,
+                qkv_key_y_intercept,
             ),
             _chart_key,
         ],
@@ -727,10 +777,7 @@ def _(mo):
 
 @app.cell
 def _(create_transformation_controls):
-    # Cell 1: Define the UI elements for all heads
-    num_heads = 2
-
-
+    # Create new controllers for each head
     # Head 1 UI elements
     head1_key_x_scale, head1_key_y_scale, head1_key_rotation, head1_key_x_intercept, head1_key_y_intercept = create_transformation_controls()
     head1_query_x_scale, head1_query_y_scale, head1_query_rotation, head1_query_x_intercept, head1_query_y_intercept = create_transformation_controls()
@@ -740,6 +787,8 @@ def _(create_transformation_controls):
     head2_key_x_scale, head2_key_y_scale, head2_key_rotation, head2_key_x_intercept, head2_key_y_intercept = create_transformation_controls()
     head2_query_x_scale, head2_query_y_scale, head2_query_rotation, head2_query_x_intercept, head2_query_y_intercept = create_transformation_controls()
     head2_value_x_scale, head2_value_y_scale, head2_value_rotation, head2_value_x_intercept, head2_value_y_intercept = create_transformation_controls()
+
+    num_heads = 2
     return (
         head1_key_rotation,
         head1_key_x_intercept,
@@ -1151,7 +1200,7 @@ def _(
 def _(mo):
     _fig = mo.md(
         """
-        ![](https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-encoder-decoder.jpg?raw=true)
+        <img width="60%" alt="Screenshot 2025-02-28 at 3 34 40 PM" src="https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-encoder-decoder.jpg?raw=true" />
         """
     )
     _text= mo.md(
@@ -1168,7 +1217,7 @@ def _(mo):
             _text,
             _fig,
         ],
-        widths=[0.5, 0.5], align= "center"
+        widths=[0.5, 0.5], align= "center", justify="center"
     )
     return
 
@@ -1195,9 +1244,21 @@ def _(mo):
             _text,
             _fig,
         ],
-        widths=[0.5, 0.5], align="center"
+        widths=[0.5, 0.5], align="center", justify="center"
     )
     return
+
+
+@app.cell
+def _(create_transformation_controls):
+    x_scale_first, y_scale_first, rotation_first, x_intercept_first, y_intercept_first = create_transformation_controls()
+    return (
+        rotation_first,
+        x_intercept_first,
+        x_scale_first,
+        y_intercept_first,
+        y_scale_first,
+    )
 
 
 @app.cell
@@ -1208,12 +1269,12 @@ def _(
     mo,
     np,
     pd,
-    rotation,
+    rotation_first,
     words,
-    x_intercept,
-    x_scale,
-    y_intercept,
-    y_scale,
+    x_intercept_first,
+    x_scale_first,
+    y_intercept_first,
+    y_scale_first,
 ):
     _fig = mo.md(
         """
@@ -1299,11 +1360,11 @@ def _(
     np.random.seed(42)
     _layer_params = [
         {
-            "x_scale": x_scale.value,
-            "y_scale": y_scale.value,
-            "rotation": rotation.value,
-            "x_intercept": x_intercept.value,
-            "y_intercept": y_intercept.value,
+            "x_scale": x_scale_first.value,
+            "y_scale": y_scale_first.value,
+            "rotation": rotation_first.value,
+            "x_intercept": x_intercept_first.value,
+            "y_intercept": y_intercept_first.value,
         },
         {
             "x_scale": np.random.rand() * 3,
@@ -1446,7 +1507,7 @@ def _(
     )
     print(_neural_net.text)
     _chart_layer1 = mo.hstack(
-        [_chart_layer1, mo.vstack([x_scale, y_scale, rotation, x_intercept, y_intercept])]
+        [_chart_layer1, mo.vstack([x_scale_first, y_scale_first, rotation_first, x_intercept_first, y_intercept_first])]
     )
     mo.hstack(
         [mo.vstack([_text, _neural_net, _chart_layer1]), _chart_layer2],
@@ -1476,22 +1537,22 @@ def _(
     mo,
     np,
     pd,
-    rotation,
+    rotation_second,
     scatter_plot,
     words,
-    x_intercept,
-    x_scale,
-    y_intercept,
-    y_scale,
+    x_intercept_second,
+    x_scale_second,
+    y_intercept_second,
+    y_scale_second,
 ):
     _original_df, _transformed_df, _W, _b = emb2df(
         words,
         embeddings,
-        x_scale.value,
-        y_scale.value,
-        rotation.value,
-        x_intercept.value,
-        y_intercept.value,
+        x_scale_second.value,
+        y_scale_second.value,
+        rotation_second.value,
+        x_intercept_second.value,
+        y_intercept_second.value,
     )
 
     _emb = embeddings @ _W + _b
@@ -1567,7 +1628,7 @@ def _(
                         [
                             _fig_scatter_plot,
                             mo.vstack(
-                                [x_scale, y_scale, rotation, x_intercept, y_intercept]
+                                [x_scale_second, y_scale_second, rotation_second, x_intercept_second, y_intercept_second]
                             ),
                         ],
                         align="start",
@@ -1589,6 +1650,19 @@ def _(
 
 
 @app.cell
+def _(create_transformation_controls):
+    # Create new controllers specifically for residual connection visualization
+    residual_x_scale, residual_y_scale, residual_rotation, residual_x_intercept, residual_y_intercept = create_transformation_controls()
+    return (
+        residual_rotation,
+        residual_x_intercept,
+        residual_x_scale,
+        residual_y_intercept,
+        residual_y_scale,
+    )
+
+
+@app.cell
 def _(
     create_chart,
     emb2df,
@@ -1596,12 +1670,12 @@ def _(
     layout_controls,
     mo,
     pd,
-    rotation,
+    residual_rotation,
+    residual_x_intercept,
+    residual_x_scale,
+    residual_y_intercept,
+    residual_y_scale,
     words,
-    x_intercept,
-    x_scale,
-    y_intercept,
-    y_scale,
 ):
     _text = mo.md(
         """# Residual connection
@@ -1627,7 +1701,7 @@ def _(
 
     # Get transformed and original embeddings
     _original_df, _transformed_df, _W, _b = emb2df(
-        words, embeddings, x_scale.value, y_scale.value, rotation.value, x_intercept.value, y_intercept.value
+        words, embeddings, residual_x_scale.value, residual_y_scale.value, residual_rotation.value, residual_x_intercept.value, residual_y_intercept.value
     )
 
     # Create DataFrame for visualization
@@ -1654,7 +1728,7 @@ def _(
     mo.hstack(
         [
             _text,
-            mo.vstack([_residual_plot, layout_controls(x_scale, y_scale, rotation, x_intercept, y_intercept)])
+            mo.vstack([_residual_plot, layout_controls(residual_x_scale, residual_y_scale, residual_rotation, residual_x_intercept, residual_y_intercept)])
         ],
         widths=[0.7, 0.3]
     )
@@ -1823,6 +1897,149 @@ def _(mo):
 
 
 @app.cell
+def _(alt, mo, np, pd):
+    # Create a function to generate positional encodings
+    def get_positional_encoding(seq_len, d_model):
+        # Initialize the positional encoding matrix
+        pos_enc = np.zeros((seq_len, d_model))
+        # Calculate positional encodings
+        for pos in range(seq_len):
+            for i in range(0, d_model, 2):
+                pos_enc[pos, i] = np.sin(pos / (10000 ** (i / d_model)))
+                if i + 1 < d_model:
+                    pos_enc[pos, i + 1] = np.cos(pos / (10000 ** (i / d_model)))
+
+        return pos_enc
+
+    # Parameters for visualization
+    seq_len = 20  # Number of positions to show
+    d_model = 2   # Using 2D for visualization
+
+    # Generate positional encodings
+    pos_enc = get_positional_encoding(seq_len, d_model)
+
+    # Create a dataframe for visualization with a frame column for animation
+    df = pd.DataFrame()
+    for frame in range(seq_len):
+        temp_df = pd.DataFrame({
+            'position': range(frame + 1),
+            'x': pos_enc[:frame + 1, 0],
+            'y': pos_enc[:frame + 1, 1],
+            'frame': frame
+        })
+        df = pd.concat([df, temp_df])
+
+    # Create animated scatter plot
+    scatter = alt.Chart(df).mark_circle(size=100).encode(
+        x=alt.X('x', scale=alt.Scale(domain=[-1.1, 1.1])),
+        y=alt.Y('y', scale=alt.Scale(domain=[-1.1, 1.1])),
+        color=alt.Color('position:O', scale=alt.Scale(scheme='reds')),
+        tooltip=['position', 'x', 'y']
+    ).properties(
+        width=300,
+        height=300,
+        title='Positional Encoding in 2D'
+    )
+
+    # Create animated line connecting points in sequence
+    line = alt.Chart(df).mark_line().encode(
+        x='x',
+        y='y',
+        order='position',
+        color=alt.value('gray'),
+        opacity=alt.value(0.3),
+        strokeWidth=alt.value(0.5)
+    )
+
+    # Add animation by frame
+    animation = (scatter + line).add_params(
+        alt.selection_point(
+            fields=['frame'],
+            bind=alt.binding_range(
+                min=0,
+                max=seq_len-1,
+                step=1,
+                name='Position Progress:'
+            ),
+            name='animation'
+        )
+    ).transform_filter(
+        'datum.frame <= animation.frame'
+    )
+
+    # Create a static version showing the full pattern for reference
+    static_df = pd.DataFrame({
+        'position': range(seq_len),
+        'x': pos_enc[:, 0],
+        'y': pos_enc[:, 1]
+    })
+
+    static_scatter = alt.Chart(static_df).mark_circle(size=60, opacity=1.0).encode(
+        x=alt.X('x', scale=alt.Scale(domain=[-1.1, 1.1])),
+        y=alt.Y('y', scale=alt.Scale(domain=[-1.1, 1.1])),
+        color=alt.Color('position:O', scale=alt.Scale(scheme='viridis')),
+        tooltip=['position', 'x', 'y']
+    )
+
+    static_line = alt.Chart(static_df).mark_line(opacity=0.3).encode(
+        x='x',
+        y='y',
+        order='position',
+        color=alt.value('gray')
+    )
+
+    # Combine animated and static versions
+    chart = animation #+ static_line
+
+    # Explanation text
+    text = mo.md("""
+    # Positional Encoding
+
+    - Transformers have **no inherent notion of token order** since self-attention treats input as a set.
+
+    - Positional encoding adds position information to each token embedding.
+
+    - Uses sine and cosine functions of different frequencies:
+
+      $$PE_{(pos, 2i)} = \sin(pos/10000^{2i/d_{model}})$$
+
+      $$PE_{(pos, 2i+1)} = \cos(pos/10000^{2i/d_{model}})$$
+
+    - This creates a unique pattern for each position that the model can learn to interpret.
+
+    - The 2D visualization shows how positions form a spiral pattern, with nearby positions being close in the encoding space.
+
+    - This encoding allows the model to attend to tokens based on both content and position.
+
+    - **Use the slider to see how positions are added sequentially!**
+    """)
+
+    # Display the visualization and explanation side by side
+    mo.hstack(
+        [text, chart],
+        widths=[0.6, 0.4],
+        align="center"
+    )
+    return (
+        animation,
+        chart,
+        d_model,
+        df,
+        frame,
+        get_positional_encoding,
+        line,
+        pos_enc,
+        scatter,
+        seq_len,
+        static_df,
+        static_line,
+        static_scatter,
+        temp_df,
+        text,
+    )
+
+
+@app.cell
 def _(mo):
     beta_slider = mo.ui.slider(-1, 1, 0.1, value=0.5, label="$\\beta$", full_width=False)
     gamma_slider = mo.ui.slider(0, 2, 0.1, value=1.0, label="$\\gamma$", full_width=False)
@@ -1923,7 +2140,8 @@ def _(alt, mo, np, pd):
         text = (
             alt.Chart(df)
             .mark_text(align="left", dx=10, dy=-5, fontSize=14)
-            .encode(x="x", y="y", text="word")
+            .encode(
+                x="x", y="y", text="word")
         )
 
         return (base + text).properties(width=width, height=height, title=title)
@@ -2084,11 +2302,6 @@ def _(np):
     #    [-0.7, 0.5]     # phone
     ]) * 2
     return embeddings, words
-
-
-@app.cell
-def _():
-    return
 
 
 if __name__ == "__main__":
