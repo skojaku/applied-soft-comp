@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>InceptionNet: Image Recognition CNN by Google (GoogLeNet) &#8212; Applied Soft Computing</title>
+    <title>GoogleNet and the Inception Module &#8212; Applied Soft Computing</title>
   
   
   
@@ -58,10 +58,14 @@
     <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'm04-image-processing/inception';</script>
     <script src="../_static/js/custom.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ResNet (Residual Neural Networks)" href="resnet.html" />
+    <link rel="prev" title="VGGNet - A Deep Convolutional Neural Network for Image Recognition" href="vgg.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -123,8 +127,6 @@
     <div class="bd-container__inner bd-page-width">
       
       
-      
-        
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -202,10 +204,8 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Recurrent Neural Networks</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/what-to-learn.html">Module 2: Language Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/pen-and-paper.html">Pen and Paper Exercise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/rnn-interactive.html">🧠 Learn RNNs Through Physics!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/reccurrent-neural-net.html">Recurrent Neural Network (RNN)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/memory-passing-game.html">Memory Passing Game</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/lstm.html">Long Short-Term Memory (LSTM)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/elmo.html">Embedding from Language Models (ELMo)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/seq2seq.html">Sequence-to-Sequence Models</a></li>
@@ -222,7 +222,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../m03-transformers/summary.html">Summary</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Images</span></p>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="what-to-learn.html">Module 3: Image Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pen-and-paper.html">Pen and paper exercises</a></li>
 <li class="toctree-l1"><a class="reference internal" href="image-processing.html">Preliminaries: Image Processing</a></li>
@@ -230,6 +230,8 @@
 <li class="toctree-l1"><a class="reference internal" href="lenet.html">LeNet and LeNet-5: Pioneering CNN Architectures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alexnet.html">AlexNet: A Breakthrough in Deep Learning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vgg.html">VGGNet - A Deep Convolutional Neural Network for Image Recognition</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">GoogleNet and the Inception Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resnet.html">ResNet (Residual Neural Networks)</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Graphs</span></p>
 <ul class="nav bd-sidenav">
@@ -289,6 +291,55 @@
 
 
 
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/skojaku/applied-soft-comp/gh-pages?urlpath=tree/docs/lecture-note/m04-image-processing/inception.md" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="../_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="initThebeSBT()"
+  class="btn btn-sm btn-launch-thebe dropdown-item"
+  title="Launch Thebe"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-play"></i>
+  </span>
+<span class="btn__text-container">Live Code</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
 <div class="dropdown dropdown-source-buttons">
   <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
     <i class="fab fa-github"></i>
@@ -341,6 +392,23 @@
     <i class="fas fa-download"></i>
   </button>
   <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/m04-image-processing/inception.ipynb" target="_blank"
+   class="btn btn-sm btn-download-notebook-button dropdown-item"
+   title="Download notebook file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
       
       
       
@@ -428,7 +496,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>InceptionNet: Image Recognition CNN by Google (GoogLeNet)</h1>
+    <h1>GoogleNet and the Inception Module</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -438,31 +506,21 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-of-contents">Table of Contents</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-inceptionnet-overview">1. What is InceptionNet [Overview]</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#article-structure">1.1 Article Structure</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#core-ideas-and-key-points-of-each-version">1.2 Core Ideas and Key Points of Each Version</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#origin-of-inceptionnets-name">1.3 Origin of InceptionNet’s Name</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conceptual-foundation">Conceptual Foundation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#multi-scale-feature-extraction">Multi-Scale Feature Extraction</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sparse-connectivity-by-1x1-convolutions">Sparse Connectivity by 1x1 Convolutions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#filter-concatenation">Filter Concatenation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-pooling">Parallel Pooling</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#auxiliary-classifiers">Auxiliary Classifiers</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-googlenet">2. v1 (GoogLeNet)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inception-module">2.1 Inception Module</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#multiple-size-path-parallelization">2.1.1 Multiple Size Path Parallelization</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#dimension-reduction-for-lightweight-design">2.1.2 Dimension Reduction for Lightweight Design</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mathematical-framework-light-overview">Mathematical Framework (Light Overview)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#recent-advancements-and-improvements">Recent Advancements and Improvements</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation-example">Implementation Example</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#coding-exercise-using-pre-trained-googlenet-in-pytorch">Coding Exercise: Using Pre-trained GoogLeNet in PyTorch</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-suggestions">Exercise Suggestions</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#global-average-pooling">2.2 Global Average Pooling</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#auxiliary-classifiers-stabilizing-backpropagation-to-early-layers">2.3 Auxiliary Classifiers: Stabilizing Backpropagation to Early Layers</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v2-introduction-of-batch-normalization">3. v2: Introduction of Batch Normalization</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v3-improvement-of-inception-blocks">4. v3: Improvement of Inception Blocks</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-reduction-through-factorization">4.1 Parameter Reduction through Factorization</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#effective-spatial-size-reduction">4.2 Effective Spatial Size Reduction</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#label-smoothing">4.3 Label Smoothing</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inception-v4-and-inception-resnet">5. Inception-v4 and Inception-ResNet</a></li>
 </ul>
             </nav>
         </div>
@@ -474,167 +532,283 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="inceptionnet-image-recognition-cnn-by-google-googlenet">
-<h1>InceptionNet: Image Recognition CNN by Google (GoogLeNet)<a class="headerlink" href="#inceptionnet-image-recognition-cnn-by-google-googlenet" title="Link to this heading">#</a></h1>
-<p>Posted September 20, 2021 by Masaki Hayashi</p>
-<section id="table-of-contents">
-<h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading">#</a></h2>
+  <section class="tex2jax_ignore mathjax_ignore" id="googlenet-and-the-inception-module">
+<h1>GoogleNet and the Inception Module<a class="headerlink" href="#googlenet-and-the-inception-module" title="Link to this heading">#</a></h1>
+<p>Imagine you’re looking at a painting in an art gallery. You might step close to examine the tiny brushstrokes or stand far away to observe the overall composition. <strong>How can a neural network do something similar with images?</strong> The <strong>Inception module</strong> proposed by Szegedy et al. in “Going Deeper with Convolutions” tackles this by letting different convolutional filters (big and small) work together in parallel—capturing both fine details and large-scale context at once.</p>
+<section id="conceptual-foundation">
+<h2>Conceptual Foundation<a class="headerlink" href="#conceptual-foundation" title="Link to this heading">#</a></h2>
+<section id="multi-scale-feature-extraction">
+<h3>Multi-Scale Feature Extraction<a class="headerlink" href="#multi-scale-feature-extraction" title="Link to this heading">#</a></h3>
+<p>In a traditional CNN layer, you pick <strong>one</strong> filter size (like <span class="math notranslate nohighlight">\(3 \times 3\)</span>). But an Inception module uses <strong>multiple</strong> filter sizes (like <span class="math notranslate nohighlight">\(1 \times 1\)</span>, <span class="math notranslate nohighlight">\(3 \times 3\)</span>, and <span class="math notranslate nohighlight">\(5 \times 5\)</span>) all at once. Each filter “looks” at the same input but focuses on different scales—much like zooming in and out of a scene.</p>
+<p><img alt="" src="https://miro.medium.com/v2/resize:fit:1400/1*DKjGRDd_lJeUfVlY50ojOA.png" /></p>
+</section>
+<section id="sparse-connectivity-by-1x1-convolutions">
+<h3>Sparse Connectivity by 1x1 Convolutions<a class="headerlink" href="#sparse-connectivity-by-1x1-convolutions" title="Link to this heading">#</a></h3>
+<p>From a theoretical perspective, not every pixel in a feature map needs to connect to every pixel in the next layer (i.e., connectivity is often sparse). However, sparse operations can be slow on current hardware. Inception approximates this “sparse” idea by using <em>1x1 convolutions</em>.</p>
+<p>The 1x1 convolutions appear unnatural at first glance but they are actually a very elegant solution to “sparcify” the convolutional filters. The core idea is that pixel values at different spatial locations are often less correlated than the values across different channels. Thus, <strong>1x1 convolutions</strong> focus on compressing or expanding information across channels, reducing the effective parameter count for the subsequent larger filters.</p>
+<p>For example, for a <span class="math notranslate nohighlight">\(3 \times 3\)</span> convolution filter, the 1x1 convolution reduces the number of parameters from <span class="math notranslate nohighlight">\(3 \times 3 \times C_{\text{in}} \times C_{\text{out}}\)</span> to <span class="math notranslate nohighlight">\(1 \times 1 \times C_{\text{in}}\)</span> (1x1 convolution) plus <span class="math notranslate nohighlight">\(3 \times 3 \times C_{\text{out}}\)</span> (3x3 convolution). This is <span class="math notranslate nohighlight">\(C_{\text{in}} + 9C_{\text{out}}\)</span> versus <span class="math notranslate nohighlight">\(9C_{\text{in}} \times C_{\text{out}}\)</span>, yielding a substantial parameter reduction when <span class="math notranslate nohighlight">\(C_{\text{out}}\)</span> or <span class="math notranslate nohighlight">\(C_{\text{in}}\)</span> is large.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Connection to Sparse Representations</strong>
+Early theoretical work suggested that a sparse network with many filter sizes could approximate a wide variety of feature types. However, directly implementing a sparse network can be very memory-intensive. The Inception module cleverly approximates a sparse structure by mixing 1x1, 3x3, and 5x5 convolutions in an efficient manner.</p>
+</div>
+</section>
+<section id="filter-concatenation">
+<h3>Filter Concatenation<a class="headerlink" href="#filter-concatenation" title="Link to this heading">#</a></h3>
+<p>After each branch applies its own sequence of convolutions (or pooling), the results are <strong>merged</strong> by concatenating them along the channel dimension. Think of it as stacking the feature maps from each branch side by side. This “merge” step is powerful because:</p>
+<ul class="simple">
+<li><p>It combines multi-scale features into a single tensor.</p></li>
+<li><p>Each branch contributes a unique perspective (e.g., the <span class="math notranslate nohighlight">\(1\times1\)</span> branch might capture fine details, while the <span class="math notranslate nohighlight">\(5\times5\)</span> branch looks at broader context).</p></li>
+<li><p>The network can learn how to best blend and leverage these feature maps for the next stage of processing.</p></li>
+</ul>
+<p>As a result, the <strong>final</strong> output of an Inception module is a multi-channel representation that integrates information from multiple scales and pooling operations.</p>
+</section>
+<section id="parallel-pooling">
+<h3>Parallel Pooling<a class="headerlink" href="#parallel-pooling" title="Link to this heading">#</a></h3>
+<p>GoogleNet is a stack of the Inception modules explained above, followed by a module that transform the feature maps of the last Inception module into a single vector that is used for classification. This last module is also one of the key feature of GoogleNet that sets it apart from the previous architectures.</p>
+<p>GoogleNet uses <strong>max pooling</strong> for each channel of the feature maps.
+For example, if the feature maps has 10 channel, the max pooling will reduce it to 10-dimensional vector, regardless of the spatial dimension of the feature maps, by taking the maximum value across the spatial dimension.</p>
+<p>This design choice was motivated, in part, by observations like in VGG16 (which uses the full-connected layers to this transformation), where 123 million of its 138 million parameters come from fully-connected layers alone. Reducing or eliminating these layers via pooling can dramatically cut down on model size and overfitting risk<a class="footnote-reference brackets" href="#footcite-lin2013network" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.</p>
+</section>
+<section id="auxiliary-classifiers">
+<h3>Auxiliary Classifiers<a class="headerlink" href="#auxiliary-classifiers" title="Link to this heading">#</a></h3>
+<p>As GoogleNet grew deeper, the authors noticed that early layers sometimes struggled with vanishing gradients. To combat this, <strong>auxiliary classifiers</strong> were placed at intermediate layers. The authors take the output from the classifier attached to these intermediate layers, and add its loss to the overall loss. When backpropagating, the gradient from the auxiliary classifier is also added to the gradient of the earlier layers, which guides the earlier layers to learn more discriminative features.</p>
+<figure class="align-center" id="inception-auxiliary-classifier">
+<img alt="https://production-media.paperswithcode.com/methods/GoogleNet-structure-and-auxiliary-classifier-units_CM5xsxk.png" src="https://production-media.paperswithcode.com/methods/GoogleNet-structure-and-auxiliary-classifier-units_CM5xsxk.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 67 </span><span class="caption-text">An illustration of the GoogleNet architecture, including the auxiliary classifier units.</span><a class="headerlink" href="#inception-auxiliary-classifier" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+<section id="mathematical-framework-light-overview">
+<h2>Mathematical Framework (Light Overview)<a class="headerlink" href="#mathematical-framework-light-overview" title="Link to this heading">#</a></h2>
+<p>Let’s denote the input to an Inception module as a 3D tensor <span class="math notranslate nohighlight">\( X \)</span> with shape <span class="math notranslate nohighlight">\((H \times W \times C)\)</span>, where <span class="math notranslate nohighlight">\(H\)</span> and <span class="math notranslate nohighlight">\(W\)</span> are the spatial dimensions and <span class="math notranslate nohighlight">\(C\)</span> is the channel depth.</p>
+<ol class="arabic">
+<li><p><strong>1x1 path</strong>:</p>
+<div class="math notranslate nohighlight">
+\[
+   Y_{1\times1} = \text{Conv}_{1\times1}(X)
+   \]</div>
+</li>
+<li><p><strong>1x1 -&gt; 3x3 path</strong>:</p>
+<div class="math notranslate nohighlight">
+\[
+   X_{\text{reduced}} = \text{Conv}_{1\times1}(X),
+   \quad
+   Y_{3\times3} = \text{Conv}_{3\times3}(X_{\text{reduced}})
+   \]</div>
+</li>
+<li><p><strong>1x1 -&gt; 5x5 path</strong>:</p>
+<div class="math notranslate nohighlight">
+\[
+   X_{\text{reduced}}' = \text{Conv}_{1\times1}(X),
+   \quad
+   Y_{5\times5} = \text{Conv}_{5\times5}(X_{\text{reduced}}')
+   \]</div>
+</li>
+<li><p><strong>Pooling path</strong>:</p>
+<div class="math notranslate nohighlight">
+\[
+   Y_{\text{pool}} = \text{Pool}(X)
+   \quad\text{(often followed by Conv}_{1\times1})
+   \]</div>
+</li>
+</ol>
+<p>After computing these branches, the final output of the Inception module is:</p>
+<div class="math notranslate nohighlight">
+\[
+Y_{\text{inception}} = \text{Concat}\big(Y_{1\times1}, \,Y_{3\times3}, \,Y_{5\times5}, \,Y_{\text{pool}}\big).
+\]</div>
+</section>
+<section id="recent-advancements-and-improvements">
+<h2>Recent Advancements and Improvements<a class="headerlink" href="#recent-advancements-and-improvements" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
-<li><p>What is InceptionNet [Overview]
-1.1 Article Structure
-1.2 Core Ideas and Key Points of Each Version
-1.3 Origin of InceptionNet’s Name</p></li>
-<li><p>v1 (GoogLeNet)
-2.1 Inception Module
-2.1.1 Multiple Size Path Parallelization
-2.1.2 Dimension Reduction for Lightweight Design
-2.2 Global Average Pooling
-2.3 Auxiliary Classifiers: Stabilizing Backpropagation to Early Layers</p></li>
-<li><p>v2: Introduction of Batch Normalization</p></li>
-<li><p>v3: Improvement of Inception Blocks
-4.1 Parameter Reduction through Factorization
-4.2 Effective Spatial Size Reduction
-4.3 Label Smoothing</p></li>
-<li><p>Inception-v4 and Inception-ResNet</p></li>
-<li><p>Summary</p></li>
+<li><p><strong>Inception v2 &amp; v3</strong></p>
+<ul class="simple">
+<li><p>Introduced <strong>Batch Normalization</strong>, reducing internal covariate shift.</p></li>
+<li><p>Factorized larger filters (e.g., 5x5 → two 3x3) to cut cost.
+These improvements increased accuracy and efficiency.</p></li>
+</ul>
+</li>
+<li><p><strong>Inception v4 &amp; Inception-ResNet</strong></p>
+<ul class="simple">
+<li><p>Integrated <strong>residual connections</strong>, further improving training stability and depth.</p></li>
+</ul>
+</li>
+<li><p><strong>Xception</strong></p>
+<ul class="simple">
+<li><p>Proposed <strong>depthwise separable convolutions</strong>, pushing the Inception idea further by decoupling spatial and channel-wise processing, leading to better efficiency.</p></li>
+</ul>
+</li>
+<li><p><strong>Simplified Inception with Hadamard Attention</strong></p>
+<ul class="simple">
+<li><p>Targeted at <strong>medical image classification</strong>.</p></li>
+<li><p>Uses attention mechanisms to focus on crucial parts of the image, enhancing accuracy without exploding parameter size<a class="footnote-reference brackets" href="#footcite-srp-hadamard" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>.</p></li>
+</ul>
+</li>
 </ol>
 </section>
-<section id="what-is-inceptionnet-overview">
-<h2>1. What is InceptionNet [Overview]<a class="headerlink" href="#what-is-inceptionnet-overview" title="Link to this heading">#</a></h2>
-<p>InceptionNet (Inception Network, also known as GoogLeNet) is a CNN (Convolutional Neural Network) architecture devised by Google’s research team [Szegedy et al., 2015]. After InceptionNet v1, improved versions v2, v3, and v4 were successively released.</p>
-<p>This article will introduce Inception v1 through v4 in order of their appearance, focusing on the important points of each version.</p>
-<p><em>Note (Important): This site consistently uses the unique term “InceptionNet.” When searching for “Inception” alone, search results are dominated by the movie Inception (see Section 1.2), making it difficult to find this article directly. When searching for this article directly from Google or other search engines, please include “InceptionNet” in your query (when referring to specific versions, we use the standard notation like “Inception v3” without “Net”).</em></p>
-<section id="article-structure">
-<h3>1.1 Article Structure<a class="headerlink" href="#article-structure" title="Link to this heading">#</a></h3>
-<p>The following sections will introduce each version in order:</p>
+<section id="implementation-example">
+<h2>Implementation Example<a class="headerlink" href="#implementation-example" title="Link to this heading">#</a></h2>
+<p>Below is a simplified PyTorch-like example of how we can define a single Inception module. This code demonstrates the parallel branches and concatenation of outputs. While not an exact reproduction of GoogleNet, it captures the core idea.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">InceptionModule</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">out_1x1</span><span class="p">,</span> <span class="n">red_3x3</span><span class="p">,</span> <span class="n">out_3x3</span><span class="p">,</span> <span class="n">red_5x5</span><span class="p">,</span> <span class="n">out_5x5</span><span class="p">,</span> <span class="n">pool_proj</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">InceptionModule</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="c1"># Branch 1: 1x1 Conv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">branch1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_channels</span><span class="p">,</span> <span class="n">out_1x1</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Branch 2: 1x1 Conv -&gt; 3x3 Conv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">branch2_reduce</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_channels</span><span class="p">,</span> <span class="n">red_3x3</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">branch2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">red_3x3</span><span class="p">,</span> <span class="n">out_3x3</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Branch 3: 1x1 Conv -&gt; 5x5 Conv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">branch3_reduce</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_channels</span><span class="p">,</span> <span class="n">red_5x5</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">branch3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">red_5x5</span><span class="p">,</span> <span class="n">out_5x5</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Branch 4: Max Pool -&gt; 1x1 Conv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">branch4_pool</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MaxPool2d</span><span class="p">(</span><span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">branch4</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_channels</span><span class="p">,</span> <span class="n">pool_proj</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">branch1_out</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">branch1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+        <span class="n">branch2_out</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">branch2</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">branch2_reduce</span><span class="p">(</span><span class="n">x</span><span class="p">))))</span>
+
+        <span class="n">branch3_out</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">branch3</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">branch3_reduce</span><span class="p">(</span><span class="n">x</span><span class="p">))))</span>
+
+        <span class="n">branch4_out</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">branch4</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">branch4_pool</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+
+        <span class="c1"># Concatenate along channel dimension</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">branch1_out</span><span class="p">,</span> <span class="n">branch2_out</span><span class="p">,</span> <span class="n">branch3_out</span><span class="p">,</span> <span class="n">branch4_out</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Example usage:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">inception</span> <span class="o">=</span> <span class="n">InceptionModule</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+    <span class="n">dummy_input</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">56</span><span class="p">,</span> <span class="mi">56</span><span class="p">)</span>  <span class="c1"># (batch_size, channels, height, width)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">inception</span><span class="p">(</span><span class="n">dummy_input</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Output shape from Inception module:&quot;</span><span class="p">,</span> <span class="n">output</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Output shape from Inception module: torch.Size([1, 80, 56, 56])
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="coding-exercise-using-pre-trained-googlenet-in-pytorch">
+<h2>Coding Exercise: Using Pre-trained GoogLeNet in PyTorch<a class="headerlink" href="#coding-exercise-using-pre-trained-googlenet-in-pytorch" title="Link to this heading">#</a></h2>
+<p>Below is a simple exercise that uses the pre-trained GoogLeNet model available in <code class="docutils literal notranslate"><span class="pre">torchvision</span></code>. You can try this out in a local Jupyter notebook or a cloud environment like Google Colab.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torchvision</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torchvision.transforms</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">T</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">BytesIO</span>
+
+<span class="c1"># 1. Load the pre-trained GoogLeNet model</span>
+<span class="n">googlenet</span> <span class="o">=</span> <span class="n">torchvision</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">googlenet</span><span class="p">(</span><span class="n">pretrained</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">googlenet</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>  <span class="c1"># set the model to inference mode</span>
+
+<span class="c1"># 2. Load an example image from the web (replace with any image URL you want)</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/pytorch/hub/master/imagenet_samples/imagenet_class_index.json&quot;</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://images.unsplash.com/photo-1595433562696-1e052b4d841d?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=500&amp;q=60&quot;</span><span class="p">)</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
+
+<span class="c1"># 3. Define transformations: resize, center crop, convert to tensor, normalize</span>
+<span class="n">transform</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span>
+    <span class="n">T</span><span class="o">.</span><span class="n">Resize</span><span class="p">(</span><span class="mi">256</span><span class="p">),</span>
+    <span class="n">T</span><span class="o">.</span><span class="n">CenterCrop</span><span class="p">(</span><span class="mi">224</span><span class="p">),</span>
+    <span class="n">T</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
+    <span class="n">T</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="p">[</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">],</span> <span class="n">std</span><span class="o">=</span><span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">])</span>
+<span class="p">])</span>
+
+<span class="n">input_tensor</span> <span class="o">=</span> <span class="n">transform</span><span class="p">(</span><span class="n">img</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># add batch dimension</span>
+
+<span class="c1"># 4. Run a forward pass</span>
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">googlenet</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">)</span>
+
+<span class="c1"># 5. Load ImageNet labels for interpreting the output</span>
+<span class="c1"># In a standard environment, you can download labels like below or store them locally</span>
+<span class="n">labels_url</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt&quot;</span>
+<span class="n">labels_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">labels_url</span><span class="p">)</span>
+<span class="n">categories</span> <span class="o">=</span> <span class="n">labels_response</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># 6. Get the predicted class</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">predicted_idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">predicted_category</span> <span class="o">=</span> <span class="n">categories</span><span class="p">[</span><span class="n">predicted_idx</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Predicted category:&quot;</span><span class="p">,</span> <span class="n">predicted_category</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/skojaku-admin/miniforge3/envs/advnetsci/lib/python3.11/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter &#39;pretrained&#39; is deprecated since 0.13 and may be removed in the future, please use &#39;weights&#39; instead.
+  warnings.warn(
+/Users/skojaku-admin/miniforge3/envs/advnetsci/lib/python3.11/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for &#39;weights&#39; are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=GoogLeNet_Weights.IMAGENET1K_V1`. You can also use `weights=GoogLeNet_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+</pre></div>
+</div>
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">UnidentifiedImageError</span><span class="g g-Whitespace">                    </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">15</span>
+<span class="g g-Whitespace">     </span><span class="mi">13</span> <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/pytorch/hub/master/imagenet_samples/imagenet_class_index.json&quot;</span>
+<span class="g g-Whitespace">     </span><span class="mi">14</span> <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://images.unsplash.com/photo-1595433562696-1e052b4d841d?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=500&amp;q=60&quot;</span><span class="p">)</span>
+<span class="ne">---&gt; </span><span class="mi">15</span> <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
+<span class="g g-Whitespace">     </span><span class="mi">17</span> <span class="c1"># 3. Define transformations: resize, center crop, convert to tensor, normalize</span>
+<span class="g g-Whitespace">     </span><span class="mi">18</span> <span class="n">transform</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span>
+<span class="g g-Whitespace">     </span><span class="mi">19</span>     <span class="n">T</span><span class="o">.</span><span class="n">Resize</span><span class="p">(</span><span class="mi">256</span><span class="p">),</span>
+<span class="g g-Whitespace">     </span><span class="mi">20</span>     <span class="n">T</span><span class="o">.</span><span class="n">CenterCrop</span><span class="p">(</span><span class="mi">224</span><span class="p">),</span>
+<span class="g g-Whitespace">     </span><span class="mi">21</span>     <span class="n">T</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
+<span class="g g-Whitespace">     </span><span class="mi">22</span>     <span class="n">T</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="p">[</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">],</span> <span class="n">std</span><span class="o">=</span><span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">])</span>
+<span class="g g-Whitespace">     </span><span class="mi">23</span> <span class="p">])</span>
+
+<span class="nn">File ~/miniforge3/envs/advnetsci/lib/python3.11/site-packages/PIL/Image.py:3536,</span> in <span class="ni">open</span><span class="nt">(fp, mode, formats)</span>
+<span class="g g-Whitespace">   </span><span class="mi">3534</span>     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">3535</span> <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;cannot identify image file </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filename</span> <span class="k">if</span> <span class="n">filename</span> <span class="k">else</span> <span class="n">fp</span><span class="p">)</span>
+<span class="ne">-&gt; </span><span class="mi">3536</span> <span class="k">raise</span> <span class="n">UnidentifiedImageError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+<span class="ne">UnidentifiedImageError</span>: cannot identify image file &lt;_io.BytesIO object at 0x1449ae980&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<section id="exercise-suggestions">
+<h3>Exercise Suggestions<a class="headerlink" href="#exercise-suggestions" title="Link to this heading">#</a></h3>
 <ol class="arabic simple">
-<li><p>Section 1: Key points of each version (1.2) and origin of the name (1.3)</p></li>
-<li><p>Section 2: Inception v1 (GoogLeNet) [CVPR2015]: Initial version</p></li>
-<li><p>Section 3: Inception v2 (BN-Inception) [ICML2015]: Introduction of batch normalization</p></li>
-<li><p>Section 4: Inception v3 [CVPR2016]: Improvement of Inception blocks</p></li>
-<li><p>Section 5: Inception v4 and Inception-ResNet v1, v2 [AAAI 2017]: Improvements with residual connections</p></li>
-<li><p>Section 6: Summary</p></li>
+<li><p><strong>Try Different Images</strong>
+Download or use different image URLs to see how well GoogLeNet classifies them.</p></li>
+<li><p><strong>Visualize Feature Maps</strong>
+Try to hook into intermediate layers of GoogLeNet (e.g., after an early Inception module) and visualize the feature maps to see what features are being extracted.</p></li>
+<li><p><strong>Compare with Other Models</strong>
+Load other models (e.g., ResNet, VGG) from <code class="docutils literal notranslate"><span class="pre">torchvision.models</span></code> and compare their predictions and performance on the same images.</p></li>
+<li><p><strong>Fine-Tuning</strong>
+Replace GoogLeNet’s final classification layer and fine-tune on a custom dataset of your choice. Observe how quickly the network adapts.</p></li>
 </ol>
+<div class="docutils container" id="id3">
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="footcite-lin2013network" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Min Lin, Qiang Chen, and Shuicheng Yan. Network in network. <em>CoRR</em>, 2013. URL: <a class="reference external" href="https://api.semanticscholar.org/CorpusID:16636683">https://api.semanticscholar.org/CorpusID:16636683</a>.</p>
+</aside>
+<aside class="footnote brackets" id="footcite-srp-hadamard" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<p>Multiple Authors. Simplified inception module based hadamard attention mechanism for medical image classification. <em>Scientific Research Publishing</em>, 2023. Accessed January 29, 2025. URL: <a class="reference external" href="https://www.scirp.org/journal/paperinformation?paperid=125546">https://www.scirp.org/journal/paperinformation?paperid=125546</a>.</p>
+</aside>
+</aside>
+</div>
 </section>
-<section id="core-ideas-and-key-points-of-each-version">
-<h3>1.2 Core Ideas and Key Points of Each Version<a class="headerlink" href="#core-ideas-and-key-points-of-each-version" title="Link to this heading">#</a></h3>
-<p>The central idea of InceptionNet (Inception v1 = GoogLeNet, Section 2) lies in “approximating and replacing each convolution layer with computationally efficient Inception blocks.”</p>
-<p>The Inception block (Section 2.1) is a block that uses “dimension reduction in the channel direction using 1x1 convolution layers” and “parallelization with multiple convolution sizes in 4 paths (=widening).” This allowed the use of blocks that were both expressive and computationally efficient as basic building units.</p>
-<p>Inception v1 succeeded in significantly reducing computational costs through parameter reduction compared to previous CNN backbones like AlexNet, while improving expressiveness by making the network deeper (winning first place in ILSVRC 2014). While Inception v2 was proposed in the batch normalization paper with the addition of batch normalization, it had no other contributions (new proposals).</p>
-<p>Next, Inception v3 [Szegedy et al., 2016b] evolved into a more efficient and accurate InceptionNet with the proposal of new Inception blocks that had better balance between width and depth (Section 4). Label smoothing was also an important contribution from the Inception v3 research.</p>
-<p>Finally, the Inception v4 research [Szegedy et al., 2017] completed the final form of Inception-ResNet (v1, v2), which reached a 96-layer configuration through ResNet-style additions with residual connections (Section 5). As it combined the efficiency of Inception modules with the advantages of residual connections in optimizing large-scale models, Inception-ResNet was widely used afterward, particularly in scenarios “where model size was necessary,” such as video recognition.</p>
-<p><em>Note: The use of multiple layers as a repeating unit is called a “block” in networks like ResNet and DenseNet. While Inception v1 and v3 papers call it an “Inception module,” we will consistently refer to it as an “Inception block” here. The Google team called it “Inception module” in papers from Inception v1 through Inception v3, but in the Inception v4 paper, they unified the terminology with ResNet-style “block” and began calling it “Inception block.”</em></p>
-</section>
-<section id="origin-of-inceptionnets-name">
-<h3>1.3 Origin of InceptionNet’s Name<a class="headerlink" href="#origin-of-inceptionnets-name" title="Link to this heading">#</a></h3>
-<p>The network name “Inception” comes from the hit SF action movie Inception of that time (a favorite of the site administrator).</p>
-<p>The movie title “Inception” means “beginning,” named after the idiomatic phrase “inception of an idea.” In English, “inception of an idea” refers to something that starts small but later develops into a bigger idea. In the movie Inception, the protagonists are a special operations group that secretly enters their target’s lucid dreams, going into “deeper layers” of dreams. They attempt to “plant ideas” by acting in the dreams without being detected, going down to deep layers of subconscious. Hence, the movie was titled “Inception (of an idea).”</p>
-<p>The movie Inception was a massive hit worldwide at the time, and the line “We need to go deeper” spoken by the protagonist (DiCaprio) to the wealthy target became popular as an image macro and internet slang in English-speaking regions. The authors of InceptionNet [Szegedy et al., 2015] named their network and paper after this movie’s story of descending through multiple dream layers.</p>
-<p>At the time, top researchers studying new CNN structures were competing to “improve image recognition accuracy by making CNNs deeper.” They drew a parallel between the movie Inception’s “dream within a dream (going deeper through multiple layers)” hierarchical meta-structure and their “meta-network structure = Inception module” utilizing the Network-in-Network [Lin et al., 2014] concept. Therefore, their paper was similarly titled “Going deeper with convolutions.”</p>
-<p>While this lengthy explanation shows how young researchers sometimes give (occasionally immature) names to their methods during the third AI boom, younger researchers should avoid imitating this as it tends to become embarrassing in retrospect.</p>
-</section>
-</section>
-<section id="v1-googlenet">
-<h2>2. v1 (GoogLeNet)<a class="headerlink" href="#v1-googlenet" title="Link to this heading">#</a></h2>
-<p>InceptionNet v1’s network structure is “an architecture using Inception blocks instead of convolution layers” in an AlexNet-style serial CNN:</p>
-<ul class="simple">
-<li><p>conv1: Convolution layer - [7 x 7] kernel, stride=2</p></li>
-<li><p>pool1: Max pooling - [3 x 3] kernel, stride=2</p></li>
-<li><p>conv2: Convolution layer - [3 x 3] kernel, stride=2</p></li>
-<li><p>pool2: Max pooling - [3 x 3] kernel, stride=2</p></li>
-<li><p>3a: Inception block</p></li>
-<li><p>3b: Inception block</p></li>
-<li><p>pool3: Max pooling - [3 x 3] kernel, stride=2</p></li>
-<li><p>4a: Inception block</p></li>
-<li><p>4b: Inception block</p></li>
-<li><p>4c: Inception block</p></li>
-<li><p>4d: Inception block</p></li>
-<li><p>4e: Inception block</p></li>
-<li><p>pool4: Max pooling - [3 x 3] kernel, stride=2</p></li>
-<li><p>5a: Inception block</p></li>
-<li><p>5b: Inception block &gt; Output size: [7 × 7] x 1024</p></li>
-<li><p>pool5: Global average pooling - [7 x 7] kernel, stride=1 &gt; Output size: [1 × 1] x 1024</p></li>
-<li><p>linear6: Fully connected layer: 1024 x 1000</p></li>
-<li><p>softmax: 1000-class probability distribution</p></li>
-</ul>
-<section id="inception-module">
-<h3>2.1 Inception Module<a class="headerlink" href="#inception-module" title="Link to this heading">#</a></h3>
-<p>The Inception block is the basic building unit that makes up InceptionNet. Within the Inception block, it performs (1) diverse size path parallelization (Figure 1-a, Section 2.1.1) and (2) dimension reduction for each path to achieve lightweight design (Figure 1-b, Section 2.1.2). This provides high expressiveness while maintaining a small parameter count.</p>
-<section id="multiple-size-path-parallelization">
-<h4>2.1.1 Multiple Size Path Parallelization<a class="headerlink" href="#multiple-size-path-parallelization" title="Link to this heading">#</a></h4>
-<p>The novelty of the Inception block lies in (1) branching the block into parallel paths of different depths to aim for improved expressiveness per block (Figure 1-a). It combines feature maps in the channel direction after parallel implementation of 4 paths: [[1 x 1], [3 x 3], [5 x 5] convolution layers + max pooling layer] (Figure 1-a).</p>
-<p>This “multiple size path parallelization (=widening)” allows each Inception module to express the synthesis of features from various convolution sizes.</p>
-</section>
-<section id="dimension-reduction-for-lightweight-design">
-<h4>2.1.2 Dimension Reduction for Lightweight Design<a class="headerlink" href="#dimension-reduction-for-lightweight-design" title="Link to this heading">#</a></h4>
-<p>However, with the 4-parallel path configuration of the Inception block (Figure 1-a), the parameter count becomes too large when connecting multiple blocks, making it difficult to train a deep network (with the learning techniques of that time).</p>
-<p>Therefore, they introduced the 1x1 convolution proposed in NiN (Network-in-Network) [Lin et al., 2014] at the beginning of each of the three paths to perform feature dimension reduction (in the channel direction) at each spatial position, performing convolution layers after reducing channel numbers (Figure 1-b). This form of block was used in Inception v1.</p>
-<p>This achieved computational efficiency for the Inception module. Inception v1 achieved comparable accuracy with significantly fewer parameters than the contemporary VGGNet.</p>
-<p><em>Note: In ILSVRC2014, Inception v1 took first place with an error rate of 6.6%, while VGGNet took second place with an error rate of 7.3%.</em></p>
-</section>
-</section>
-<section id="global-average-pooling">
-<h3>2.2 Global Average Pooling<a class="headerlink" href="#global-average-pooling" title="Link to this heading">#</a></h3>
-<p>The “global average pooling” proposed in Network-in-Network (NIN) [Lin et al., 2014] as a replacement for fully connected layers in the final head was also used in Inception v1.</p>
-<p>This greatly reduced the CNN’s parameter count as the “layer-to-layer weight parameters” used in the fully connected layers of the classifier head became unnecessary when replaced with global average pooling.</p>
-</section>
-<section id="auxiliary-classifiers-stabilizing-backpropagation-to-early-layers">
-<h3>2.3 Auxiliary Classifiers: Stabilizing Backpropagation to Early Layers<a class="headerlink" href="#auxiliary-classifiers-stabilizing-backpropagation-to-early-layers" title="Link to this heading">#</a></h3>
-<p>When introducing a total of 22 convolution layers in depth, there was a problem with gradients not propagating well to early layers during backpropagation. Therefore, InceptionNet v1 proposed using auxiliary classifiers as learning support for stable training.</p>
-<p>It adds classifier branches (composed of fully connected layers similar to AlexNet’s final layers) as heads twice in the middle layers of Inception. Then, it takes additional cross-entropy loss at the end output of the added auxiliary classifier heads and adds it to the total loss.</p>
-<p>This allowed easier backpropagation of loss to intermediate parts, enabling larger gradients to be added to backpropagation around the middle area. Thanks to this, InceptionNet could avoid gradient vanishing and propagate gradients to early layers even with its deep large-scale structure, enabling stable learning convergence (auxiliary classifier branches are used only for training, not for testing).</p>
-<p>This idea of adding auxiliary classifiers to intermediate layers and output layers to stabilize deep network learning was later applied in ACGAN (Auxiliary Classifier GAN) [Odena et al., 2017] and others, becoming a popular approach in the realm of deep generative models for image generation and image-to-image translation.</p>
-</section>
-</section>
-<section id="v2-introduction-of-batch-normalization">
-<h2>3. v2: Introduction of Batch Normalization<a class="headerlink" href="#v2-introduction-of-batch-normalization" title="Link to this heading">#</a></h2>
-<p>The batch normalization paper [Ioffe and Szegedy, 2015] was published by the same Google authors as InceptionNet.</p>
-<p>Inception v2, which introduced batch normalization to Inception, was experimented with in the batch normalization paper, and this is called version 2 of InceptionNet. In later research, it is often called BN-Inception.</p>
-</section>
-<section id="v3-improvement-of-inception-blocks">
-<h2>4. v3: Improvement of Inception Blocks<a class="headerlink" href="#v3-improvement-of-inception-blocks" title="Link to this heading">#</a></h2>
-<p>[Szegedy et al., 2016] proposed Inception v3 as an improved version reconsidering Inception v1.</p>
-<p>In Inception v3, both image recognition performance and model efficiency were improved by introducing “new Inception blocks utilizing factorization (Section 4.1)” and “efficient spatial size reduction blocks (Section 4.2).” This evolved it into a “network structure with better balance between width and depth” compared to Inception v1.</p>
-<p>The network configuration of InceptionNet v3 (excluding auxiliary classifier branches) is as follows:</p>
-<ul class="simple">
-<li><p>Early convolution + pooling layers</p></li>
-<li><p>Inception block A (Figure 2-a)</p></li>
-<li><p>Spatial size reduction block (Figure 4-b)</p></li>
-<li><p>Inception block B (Figure 2-b)</p></li>
-<li><p>Spatial size reduction block (Figure 4-b)</p></li>
-<li><p>Inception block C (Figure 3)</p></li>
-<li><p>Classifier head layers</p></li>
-</ul>
-<p>Additionally, it makes error backpropagation easier in deep networks by branching the auxiliary classifier branch from the second spatial size reduction block.</p>
-<p>Furthermore, label smoothing (Section 4.3) was proposed as a regularization term for the loss function, which would later be widely used in deep models.</p>
-<section id="parameter-reduction-through-factorization">
-<h3>4.1 Parameter Reduction through Factorization<a class="headerlink" href="#parameter-reduction-through-factorization" title="Link to this heading">#</a></h3>
-<p>Inception v3 uses module A, module B (Figure 2), and module C (Figure 3) in sequence, taking as input the feature map [35 x 35 x 288] first convolved with six 3x3 convolution layers + 3x3 pooling layer.</p>
-<p>All three modules utilize “factorization of convolution layers.” This achieved both (1) parameter reduction and (2) performance improvement for InceptionNet v3 as a whole.</p>
-<p>First, “module A (Figure 2-a)” was proposed, which factorizes the [5 x 5] convolution path used in Inception v1’s Inception block (Figure 1) into two layers of [3 x 3] convolutions for parameter reduction (same concept as VGGNet). Channel-direction dimension reduction is performed with [1 x 1] convolution layers before each convolution, which is the same technique as Inception v1 (Figure 1-b).</p>
-<p>Also, “module B (Figure 2-b)” using asymmetric factorization was proposed. It reduces computational cost by factorizing the original [n x n] convolution into two layers of [n x 1] and [1 x n] with equivalent receptive fields.</p>
-<p>“Module C (Figure 3)” was also proposed, which promotes high-dimensional features by branching paths at the module’s end. High-dimensionalization promotes more disentangled (convolution) features in each path (principle 2 in the paper section 2). This also improves convergence and speeds up learning.</p>
-</section>
-<section id="effective-spatial-size-reduction">
-<h3>4.2 Effective Spatial Size Reduction<a class="headerlink" href="#effective-spatial-size-reduction" title="Link to this heading">#</a></h3>
-<p>Inception v3 proposed using a new “spatial size reduction block (Figure 4-b blue frame)” to perform spatial size reduction efficiently.</p>
-<p>While Inception v1 uses 1x1 convolutions within blocks to reduce feature dimensions in the channel direction at each spatial position, there were still issues with spatial size reduction, with two areas for improvement:</p>
-<p>Type 1 (Figure 4-a left):
-When pooling before the Inception block
-The middle feature map becomes a bottleneck, hindering improvement in expressiveness.</p>
-<p>Type 2 (Figure 4-a right):
-When placing the Inception block first
-Computational cost triples.</p>
-<p>Therefore, Inception v3 proposed and used an “improved spatial size reduction block” (Figure 4-b blue frame). Using this improved version allows increasing filter numbers while reducing spatial size. This enabled spatial size reduction while maintaining low computational cost and avoiding bottleneck representations.</p>
-</section>
-<section id="label-smoothing">
-<h3>4.3 Label Smoothing<a class="headerlink" href="#label-smoothing" title="Link to this heading">#</a></h3>
-<p>The 2015-2016 research of Inception v3 (and ResNet) was motivated by the desire to increase layers and make networks deeper than the contemporary state-of-the-art CNN backbone VGGNet (16/19 layers). However, increasing layers further increased the number of model parameters, raising the risk of CNN overfitting.</p>
-<p>As a countermeasure, Inception v3 proposed label smoothing as a regularization method for the softmax loss function (Figure 5). Label smoothing achieves regularization by creating smoothed pseudo-labels that add a small noise distribution to all classes in the distribution created by Softmax from the correct label, and training with these pseudo-labels.</p>
-</section>
-</section>
-<section id="inception-v4-and-inception-resnet">
-<h2>5. Inception-v4 and Inception-ResNet<a class="headerlink" href="#inception-v4-and-inception-resnet" title="Link to this heading">#</a></h2>
 </section>
 </section>
 
@@ -668,6 +842,24 @@ Computational cost triples.</p>
                 <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
+    <a class="left-prev"
+       href="vgg.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">VGGNet - A Deep Convolutional Neural Network for Image Recognition</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="resnet.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">ResNet (Residual Neural Networks)</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
 </div>
                 </footer>
               
@@ -684,31 +876,21 @@ Computational cost triples.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-of-contents">Table of Contents</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-inceptionnet-overview">1. What is InceptionNet [Overview]</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#article-structure">1.1 Article Structure</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#core-ideas-and-key-points-of-each-version">1.2 Core Ideas and Key Points of Each Version</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#origin-of-inceptionnets-name">1.3 Origin of InceptionNet’s Name</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conceptual-foundation">Conceptual Foundation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#multi-scale-feature-extraction">Multi-Scale Feature Extraction</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sparse-connectivity-by-1x1-convolutions">Sparse Connectivity by 1x1 Convolutions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#filter-concatenation">Filter Concatenation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-pooling">Parallel Pooling</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#auxiliary-classifiers">Auxiliary Classifiers</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-googlenet">2. v1 (GoogLeNet)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inception-module">2.1 Inception Module</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#multiple-size-path-parallelization">2.1.1 Multiple Size Path Parallelization</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#dimension-reduction-for-lightweight-design">2.1.2 Dimension Reduction for Lightweight Design</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mathematical-framework-light-overview">Mathematical Framework (Light Overview)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#recent-advancements-and-improvements">Recent Advancements and Improvements</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation-example">Implementation Example</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#coding-exercise-using-pre-trained-googlenet-in-pytorch">Coding Exercise: Using Pre-trained GoogLeNet in PyTorch</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-suggestions">Exercise Suggestions</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#global-average-pooling">2.2 Global Average Pooling</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#auxiliary-classifiers-stabilizing-backpropagation-to-early-layers">2.3 Auxiliary Classifiers: Stabilizing Backpropagation to Early Layers</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v2-introduction-of-batch-normalization">3. v2: Introduction of Batch Normalization</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v3-improvement-of-inception-blocks">4. v3: Improvement of Inception Blocks</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-reduction-through-factorization">4.1 Parameter Reduction through Factorization</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#effective-spatial-size-reduction">4.2 Effective Spatial Size Reduction</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#label-smoothing">4.3 Label Smoothing</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inception-v4-and-inception-resnet">5. Inception-v4 and Inception-ResNet</a></li>
 </ul>
   </nav></div>
 
