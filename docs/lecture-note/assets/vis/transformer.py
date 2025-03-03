@@ -6,6 +6,26 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _(mo):
+    _fig = mo.md("![](https://github.com/user-attachments/assets/7f986426-a71f-444e-8e41-714a7cbe5add)")
+
+    _text = mo.md("""
+          # Transformers Inside Out
+
+          <center>*An Interactive Guide to Attention, Residual Connections, and Positional Encoding*</center>
+          <center>[@SadamoriKojaku](https://skojaku.github.io/)</center>
+          """)
+    mo.hstack([_text, _fig], align="center", widths=[0.5, 0.5], justify="center")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 6)
+    return
+
+
+@app.cell
+def _(mo):
     mo.hstack(
         [
             mo.md(
@@ -29,6 +49,12 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    mo.md("<br>" * 7)
+    return
+
+
+@app.cell
+def _(mo):
     mo.hstack(
         [
             mo.md(
@@ -44,6 +70,12 @@ def _(mo):
         ],
         align="center",
     )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 7)
     return
 
 
@@ -78,6 +110,12 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    mo.md("<br>" * 7)
+    return
+
+
+@app.cell
+def _(mo):
     mo.hstack(
         [
             mo.md(
@@ -100,6 +138,12 @@ def _(mo):
         align="center",
         widths=[0.45, 0.55],
     )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 7)
     return
 
 
@@ -214,11 +258,17 @@ def _(
 
 @app.cell
 def _(mo):
+    mo.md("<br>" * 7)
+    return
+
+
+@app.cell
+def _(mo):
     mo.hstack(
         [
             mo.md(
                 """
-                - The query and key vectors are used to compute **the attention score**, i.e., how much each query word attends to key word, with a larger score indicating a stronger attendance.
+                The query and key vectors are used to compute **the attention score**, i.e., how much each query word attends to key word, with a larger score indicating a stronger attendance.
                 """
             ),
             mo.Html(
@@ -231,6 +281,12 @@ def _(mo):
         justify="center",
         widths=[0.45, 0.55],
     )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 7)
     return
 
 
@@ -406,6 +462,12 @@ def _(
 
 
 @app.cell
+def _(mo):
+    mo.md("<br>" * 7)
+    return
+
+
+@app.cell
 def _(create_transformation_controls):
     # Create new controllers for softmax visualization
     softmax_query_x_scale, softmax_query_y_scale, softmax_query_rotation, softmax_query_x_intercept, softmax_query_y_intercept = create_transformation_controls()
@@ -533,6 +595,37 @@ def _(
             ),
         ],
     )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 7)
+    return
+
+
+@app.cell
+def _(mo):
+    _question = mo.callout(mo.md("""**Question:** Why do we need the scaling factor $\\sqrt{d_k}$ in the attention score computation?
+
+    $$
+    \\text{Attention score} = \\text{softmax}\\left(\\frac{\\text{QK matrix}}{\\sqrt{d}}\\right)
+    $$
+
+    where $d$ is the dimension of the vectors.
+                                 """))
+
+    _answer = mo.accordion(
+        {"Answer": """The scaling factor $\\sqrt{d_k}$, where $d_k$ is the dimensionality of the key vectors, is used to prevent the dot product of the query and key vectors from growing too large as $d_k$ increases. Without this scaling, larger values of $d_k$ could result in very large dot products, leading to extremely small gradients after applying the softmax function, which can slow down or hinder the training process. By scaling the dot product by $\\sqrt{d_k}$, the model maintains more stable gradients, leading to improved training stability and performance. :contentReference[oaicite:0]{index=0}"""
+         }
+    )
+    mo.vstack([_question, _answer])
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 7)
     return
 
 
@@ -750,6 +843,12 @@ def _(
 
 @app.cell
 def _(mo):
+    mo.md("<br>" * 7)
+    return
+
+
+@app.cell
+def _(mo):
     _fig = mo.md(
         """
         ![](https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-multihead-attention.jpg?raw=true)
@@ -772,6 +871,12 @@ def _(mo):
         ],
         widths=[0.6, 0.4],
     )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 7)
     return
 
 
@@ -1198,6 +1303,30 @@ def _(
 
 @app.cell
 def _(mo):
+    mo.md("<br>" * 7)
+    return
+
+
+@app.cell
+def _(mo):
+    _question = mo.callout(mo.md("""**Question:** Can we directly interpret attention weights to conclude that one word refers to another? For instance, if the word "this" has a high attention weight with the word "cat" in a sentence, does it imply that "this" refers to "cat"?"""))
+
+    _answer = mo.accordion(
+        {"Answer": """Not necessarily. While high attention weights between words like "this" and "cat" might suggest a relationship, attention weights are influenced by various factors and do not always indicate direct referential connections. Relying solely on attention weights for interpretability can be misleading, as they may not accurately reflect linguistic relationships. For a more in-depth analysis, refer to the study ["Is Attention Interpretable?" by Serrano and Smith (2019)](https://aclanthology.org/P19-1282/) """
+         }
+    )
+    mo.vstack([_question, _answer])
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 7)
+    return
+
+
+@app.cell
+def _(mo):
     _fig = mo.md(
         """
         <img width="60%" alt="Screenshot 2025-02-28 at 3 34 40 PM" src="https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-encoder-decoder.jpg?raw=true" />
@@ -1219,6 +1348,12 @@ def _(mo):
         ],
         widths=[0.5, 0.5], align= "center", justify="center"
     )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 7)
     return
 
 
@@ -1246,6 +1381,12 @@ def _(mo):
         ],
         widths=[0.5, 0.5], align="center", justify="center"
     )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 7)
     return
 
 
@@ -1517,6 +1658,12 @@ def _(
 
 
 @app.cell
+def _(mo):
+    mo.md("<br>" * 7)
+    return
+
+
+@app.cell
 def _(create_transformation_controls):
     x_scale_second, y_scale_second, rotation_second, x_intercept_second, y_intercept_second = create_transformation_controls()
     return (
@@ -1650,6 +1797,41 @@ def _(
 
 
 @app.cell
+def _(mo):
+    mo.md("<br>" * 7)
+    return
+
+
+@app.cell
+def _(mo):
+    _question = mo.callout(mo.md(
+        """
+        **Question:** Why is layer normalization preferred over standard normalization techniques, such as whitening (decorrelating inputs using the inverse covariance matrix) or scaling features to unit variance, in transformer architectures? Additionally, what potential issue arises from normalizing data by its norm?
+        """
+    ))
+
+    _answer = mo.accordion(
+        {
+            "Answer": """
+            Layer normalization is favored in transformer architectures because it normalizes across the features within a single data sample, making it *independent of batch size and sequence length*. This is particularly beneficial for models dealing with varying sequence lengths, as it ensures consistent normalization across different layers.
+
+            In contrast, whitening involves computing the inverse covariance matrix to decorrelate input features, which is computationally intensive and can be impractical for large-scale models.
+
+            Simply scaling features by its norm can destabilize gradients. Specifically, dividing data by its norm can lead to exploding or vanishing gradients during backpropagation, hindering effective training. See [python - Why is Normalization causing my network to have exploding gradients in training? - Stack Overflow](https://stackoverflow.com/questions/68122785/why-is-normalization-causing-my-network-to-have-exploding-gradients-in-training).
+            """
+        }
+    )
+    mo.vstack([_question, _answer])
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 7)
+    return
+
+
+@app.cell
 def _(create_transformation_controls):
     # Create new controllers specifically for residual connection visualization
     residual_x_scale, residual_y_scale, residual_rotation, residual_x_intercept, residual_y_intercept = create_transformation_controls()
@@ -1737,6 +1919,45 @@ def _(
 
 @app.cell
 def _(mo):
+    mo.md("<br>" * 7)
+    return
+
+
+@app.cell
+def _(mo):
+    _question = mo.callout(mo.md(
+        """
+        **Question:** Why is it beneficial to use residual connections (where we compute \( g(x) = f(x) + x \)) instead of having a neural network layer directly learn the complete transformation? For example, focusing on a linear transformation, why learn \( W \) in \( Wx + x \) rather than directly learning \( W_g \) in \( W_g x \) where \( W_g = W + I \)?
+        """
+    ))
+
+    _answer = mo.accordion(
+        {
+            "Answer": """
+            Residual connections provide significant benefits by adding the input x to the output f(x). **Easier optimization** is achieved because the network only needs to learn small adjustments to identity rather than complete transformations, which is particularly valuable when the optimal function is close to identity.
+
+            Residual connections also **prevent degradation** in deep networks by allowing each layer to focus on learning incremental improvements instead of having to learn the entire transformation from scratch.
+
+            Perhaps most importantly, they enable **better gradient flow** by creating shortcuts for gradients during backpropagation, which substantially reduces vanishing gradient problems and makes training much deeper networks possible.
+
+
+            See [He et al. (2016)](https://arxiv.org/abs/1512.03385) for more details.
+
+            """
+        }
+    )
+    mo.vstack([_question, _answer])
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 7)
+    return
+
+
+@app.cell
+def _(mo):
     _fig = mo.md(
         """
         ![](https://github.com/skojaku/applied-soft-comp/blob/master/docs/lecture-note/figs/transformer-encoder.jpg?raw=true)
@@ -1759,6 +1980,12 @@ def _(mo):
         ],
         widths=[0.5, 0.5], align="center"
     )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 7)
     return
 
 
@@ -1830,6 +2057,12 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    mo.md("<br>" * 7)
+    return
+
+
+@app.cell
+def _(mo):
     _text = mo.md("""
     # Cross-attention
 
@@ -1850,6 +2083,12 @@ def _(mo):
         ],
         widths=[0.5, 0.5], align="center"
     )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 7)
     return
 
 
@@ -1895,17 +2134,24 @@ def _(mo):
     )
     return
 
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 7)
+    return
+
+
 @app.cell
 def _(mo):
     # Create a slider for controlling the number of positions in the outer product matrix
     seq_len = 30
     position_slider = mo.ui.slider(2, seq_len, 1, value=5, label="Position Progress", full_width=False)
     d_model_slider = mo.ui.slider(2, 100, 1, value=2, label="Dimension of the embedding", full_width=False)
-    return position_slider, d_model_slider
+    return d_model_slider, position_slider, seq_len
+
 
 @app.cell
-def _(alt, mo, np, pd, seq_len, position_slider, d_model_slider):
-
+def _(alt, d_model_slider, mo, np, pd, position_slider, seq_len):
     # Create a function to generate positional encodings
     def get_positional_encoding(seq_len, d_model):
         # Initialize the positional encoding matrix
@@ -2097,24 +2343,29 @@ def _(alt, mo, np, pd, seq_len, position_slider, d_model_slider):
 
     # Make the heatmap update when the slider changes
     # position_slider.on_change(lambda _: mo.output.replace(update_outer_product(position_slider.value)))
-
     return (
         animation,
         chart,
         d_model,
         df,
+        frame,
         get_positional_encoding,
         line,
         pos_enc,
-        position_slider,
         scatter,
-        seq_len,
         static_df,
         static_line,
         static_scatter,
+        temp_df,
         text,
         update_outer_product,
     )
+
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 7)
+    return
 
 
 @app.cell
@@ -2380,6 +2631,69 @@ def _(np):
     #    [-0.7, 0.5]     # phone
     ]) * 2
     return embeddings, words
+
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 7)
+    return
+
+
+@app.cell
+def _(mo):
+    _question = mo.callout(mo.md(
+        """
+        **Question:** In transformer architectures, why don't we simply add positional indices like "1", "2", "3", etc., directly to the word embeddings to encode positional information?
+        """
+    ))
+
+    _answer = mo.accordion(
+        {
+            "Answer": """
+            Directly adding positional indices to word embeddings is problematic for three key reasons:
+
+            **Magnitude Disparity:** In long sequences, large position values can overwhelm the semantic content of word embeddings, causing the model to focus too much on position rather than meaning.
+
+            **Poor Relative Positioning:** Simple indices don't effectively capture the relationships between positions in a sequence, whereas sinusoidal encodings help the model understand relative distances between tokens.
+
+            **Inconsistent Normalization:** Attempting to normalize position indices creates inconsistencies across sequences of different lengths, making it difficult for the model to generalize.
+
+            Instead, transformers use sophisticated encoding methods like sinusoidal functions that maintain consistency and better support the model's pattern recognition capabilities.
+
+            For more details and intuitive visualizations, see [You could have designed state of the art positional encoding](https://huggingface.co/blog/designing-positional-encoding)
+
+            <video controls>
+              <source src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/you-could-have-designed-SOTA-positional-encoding/IntegerEncoding.mp4" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+            """
+        }
+    )
+    mo.vstack([_question, _answer])
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("<br>" * 7)
+    return
+
+
+@app.cell
+def _(mo):
+    _text = mo.md("""
+          # Further Readings
+
+            - [Attention is All You Need](https://arxiv.org/abs/1706.03762)
+            -  [3Blue1Brown - Visualizing Attention, a Transformer's Heart | Chapter 6, Deep Learning](https://www.3blue1brown.com/lessons/attention)
+            - [Transformer Explainer: LLM Transformer Model Visually Explained](https://poloclub.github.io/transformer-explainer/)
+            - [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html)
+            - [Dodrio](https://poloclub.github.io/dodrio/)
+            - [You could have designed state of the art positional encoding](https://huggingface.co/blog/designing-positional-encoding)
+
+          """)
+    _text
+    return
 
 
 if __name__ == "__main__":
