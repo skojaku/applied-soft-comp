@@ -1,7 +1,7 @@
 import marimo
 
-__generated_with = "0.11.9"
-app = marimo.App(width="medium")
+__generated_with = "0.11.14-dev6"
+app = marimo.App()
 
 
 @app.cell
@@ -1427,6 +1427,7 @@ def _(
     def create_chart(
         df,
         vmax,
+        vmin,
         color_before,
         color_after,
         width=200,
@@ -1438,8 +1439,8 @@ def _(
         # Create a legend data frame
         legend_df = pd.DataFrame(
             [
-                {"state": label_before, "x": -vmax, "y": vmax},
-                {"state": label_after, "x": -vmax, "y": vmax},
+                {"state": label_before, "x": vmin, "y": vmax},
+                {"state": label_after, "x": vmin, "y": vmax},
             ]
         )
 
@@ -1448,8 +1449,8 @@ def _(
             alt.Chart(legend_df)
             .mark_circle(size=100)
             .encode(
-                x=alt.X("x", scale=alt.Scale(domain=[-vmax, vmax])),
-                y=alt.Y("y", scale=alt.Scale(domain=[-vmax, vmax])),
+                x=alt.X("x", scale=alt.Scale(domain=[vmin, vmax])),
+                y=alt.Y("y", scale=alt.Scale(domain=[vmin, vmax])),
                 color=alt.Color(
                     "state:N",
                     scale=alt.Scale(
@@ -1466,8 +1467,8 @@ def _(
             alt.Chart(df)
             .mark_circle(size=100)
             .encode(
-                x=alt.X("x_changed", scale=alt.Scale(domain=[-vmax, vmax])),
-                y=alt.Y("y_changed", scale=alt.Scale(domain=[-vmax, vmax])),
+                x=alt.X("x_changed", scale=alt.Scale(domain=[vmin, vmax])),
+                y=alt.Y("y_changed", scale=alt.Scale(domain=[vmin, vmax])),
                 color=alt.value(color_after),
                 tooltip=["word_id"],
             )
@@ -1477,8 +1478,8 @@ def _(
             alt.Chart(df)
             .mark_circle(size=100)
             .encode(
-                x=alt.X("x_without_change", scale=alt.Scale(domain=[-vmax, vmax])),
-                y=alt.Y("y_without_change", scale=alt.Scale(domain=[-vmax, vmax])),
+                x=alt.X("x_without_change", scale=alt.Scale(domain=[vmin, vmax])),
+                y=alt.Y("y_without_change", scale=alt.Scale(domain=[vmin, vmax])),
                 color=alt.value(color_before),
                 tooltip=["word_id"],
             )
@@ -1487,8 +1488,8 @@ def _(
             alt.Chart(df)
             .mark_rule()
             .encode(
-                x=alt.X("x_changed", scale=alt.Scale(domain=[-vmax, vmax])),
-                y=alt.Y("y_changed", scale=alt.Scale(domain=[-vmax, vmax])),
+                x=alt.X("x_changed", scale=alt.Scale(domain=[vmin, vmax])),
+                y=alt.Y("y_changed", scale=alt.Scale(domain=[vmin, vmax])),
                 x2="x_without_change",
                 y2="y_without_change",
                 detail="word_id",
@@ -1541,8 +1542,26 @@ def _(
     _df_2["layer_id"] = 2
     _df = pd.concat([_df_0, _df_1, _df_2])
 
-    vmax = np.max(np.abs(_df["x"]))
-    vmax = np.max([vmax, np.max(np.abs(_df["y"]))])
+    vmax_0 = np.max(_df_0["x"])
+    vmax_0 = np.max([vmax_0, np.max(_df_0["y"])])
+    vmin_0 = np.min(_df_0["x"])
+    vmin_0 = np.min([vmin_0, np.min(_df_0["y"])])
+
+    vmax_1 = np.max(_df_1["x"])
+    vmax_1 = np.max([vmax_1, np.max(_df_1["y"])])
+    vmin_1 = np.min(_df_1["x"])
+    vmin_1 = np.min([vmin_1, np.min(_df_1["y"])])
+
+    vmax_2 = np.max(_df_2["x"])
+    vmax_2 = np.max([vmax_2, np.max(_df_2["y"])])
+    vmin_2 = np.min(_df_2["x"])
+    vmin_2 = np.min([vmin_2, np.min(_df_2["y"])])
+
+    vmax_2 = np.maximum(vmax_2, vmax_1)
+    vmin_2 = np.minimum(vmin_2, vmin_1)
+
+    vmax_1 = np.maximum(vmax_0, vmax_1)
+    vmin_1 = np.minimum(vmin_0, vmin_1)
 
     # Rename columns before concatenating to avoid duplicates
     _df_changed = _df.rename(
@@ -1562,7 +1581,7 @@ def _(
     _df_layer1 = _df_combined[_df_combined["layer"] == 1]
 
     # Create chart for first layer only
-    _chart_layer1 = create_chart(_df_layer1, vmax, "#FFB6C1", "#FF0000")
+    _chart_layer1 = create_chart(_df_layer1, vmax_1, vmin_1, "#FFB6C1", "#FF0000")
 
     # Create chart showing only layer 2
     _df_layer2 = _df_combined[_df_combined["layer"] == 2]
@@ -1570,17 +1589,18 @@ def _(
     # Create legend data frame for layer 2
     _legend_df2 = pd.DataFrame(
         [
-            {"state": "before", "x": -vmax, "y": vmax},
-            {"state": "after", "x": -vmax, "y": vmax},
+            {"state": "before", "x": vmin_2, "y": vmax_2},
+            {"state": "after", "x": vmin_2, "y": vmax_2},
         ]
     )
+
 
     _legend2 = (
         alt.Chart(_legend_df2)
         .mark_circle(size=100)
         .encode(
-            x=alt.X("x", scale=alt.Scale(domain=[-vmax, vmax])),
-            y=alt.Y("y", scale=alt.Scale(domain=[-vmax, vmax])),
+            x=alt.X("x", scale=alt.Scale(domain=[vmin_2, vmax_2])),
+            y=alt.Y("y", scale=alt.Scale(domain=[vmin_2, vmax_2])),
             color=alt.Color(
                 "state:N",
                 scale=alt.Scale(domain=["before", "after"], range=["#ADD8E6", "#0000FF"]),
@@ -1599,8 +1619,8 @@ def _(
             alt.Chart(_df_layer2)
             .mark_circle(size=100)
             .encode(
-                x=alt.X("x_changed", scale=alt.Scale(domain=[-vmax, vmax])),
-                y=alt.Y("y_changed", scale=alt.Scale(domain=[-vmax, vmax])),
+                x=alt.X("x_changed", scale=alt.Scale(domain=[vmin_2, vmax_2])),
+                y=alt.Y("y_changed", scale=alt.Scale(domain=[vmin_2, vmax_2])),
                 color=alt.value("#0000FF"),
                 tooltip=["word_id"],
             )
@@ -1609,8 +1629,8 @@ def _(
             alt.Chart(_df_layer2)
             .mark_circle(size=100)
             .encode(
-                x=alt.X("x_without_change", scale=alt.Scale(domain=[-vmax, vmax])),
-                y=alt.Y("y_without_change", scale=alt.Scale(domain=[-vmax, vmax])),
+                x=alt.X("x_without_change", scale=alt.Scale(domain=[vmin_2, vmax_2])),
+                y=alt.Y("y_without_change", scale=alt.Scale(domain=[vmin_2, vmax_2])),
                 color=alt.value("#ADD8E6"),
                 tooltip=["word_id"],
             )
@@ -1619,8 +1639,8 @@ def _(
             alt.Chart(_df_layer2)
             .mark_rule()
             .encode(
-                x=alt.X("x_changed", scale=alt.Scale(domain=[-vmax, vmax])),
-                y=alt.Y("y_changed", scale=alt.Scale(domain=[-vmax, vmax])),
+                x=alt.X("x_changed", scale=alt.Scale(domain=[vmin_2, vmax_2])),
+                y=alt.Y("y_changed", scale=alt.Scale(domain=[vmin_2, vmax_2])),
                 x2="x_without_change",
                 y2="y_without_change",
                 detail="word_id",
@@ -1654,7 +1674,7 @@ def _(
         [mo.vstack([_text, _neural_net, _chart_layer1]), _chart_layer2],
         widths=[1.0, 1.0],
     )
-    return create_chart, vmax
+    return create_chart, vmax_0, vmax_1, vmax_2, vmin_0, vmin_1, vmin_2
 
 
 @app.cell
