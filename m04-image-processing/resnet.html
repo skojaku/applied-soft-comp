@@ -28,13 +28,13 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -53,7 +53,7 @@
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
@@ -573,11 +573,11 @@ $<span class="math notranslate nohighlight">\(
 <p>In PyTorch, you can implement a basic residual block as follows:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
 
-<span class="k">class</span><span class="w"> </span><span class="nc">BasicBlock</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">BasicBlock</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bn1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="n">out_channels</span><span class="p">)</span>
@@ -586,7 +586,7 @@ $<span class="math notranslate nohighlight">\(
         <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">out_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bn2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="n">out_channels</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">identity</span> <span class="o">=</span> <span class="n">x</span>
 
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -604,7 +604,8 @@ $<span class="math notranslate nohighlight">\(
 </div>
 </div>
 <figure class="align-center" id="resnet-block">
-<a class="reference internal image-reference" href="https://www.researchgate.net/publication/364330795/figure/fig7/AS:11431281176036099&#64;1689999593116/Basic-residual-block-of-ResNet.png"><img alt="https://www.researchgate.net/publication/364330795/figure/fig7/AS:11431281176036099&#64;1689999593116/Basic-residual-block-of-ResNet.png" src="https://www.researchgate.net/publication/364330795/figure/fig7/AS:11431281176036099&#64;1689999593116/Basic-residual-block-of-ResNet.png" style="width: 50%;" /></a>
+<a class="reference internal image-reference" href="https://www.researchgate.net/publication/364330795/figure/fig7/AS:11431281176036099&#64;1689999593116/Basic-residual-block-of-ResNet.png"><img alt="https://www.researchgate.net/publication/364330795/figure/fig7/AS:11431281176036099&#64;1689999593116/Basic-residual-block-of-ResNet.png" src="https://www.researchgate.net/publication/364330795/figure/fig7/AS:11431281176036099&#64;1689999593116/Basic-residual-block-of-ResNet.png" style="width: 50%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 68 </span><span class="caption-text">A basic 2-layer residual block (left) vs. a plain block without skip (right). The skip connection allows the input <span class="math notranslate nohighlight">\(\mathbf{x}\)</span> to directly add to the block’s output.</span><a class="headerlink" href="#resnet-block" title="Link to this image">#</a></p>
 </figcaption>
@@ -621,7 +622,8 @@ Instead of learning a full mapping <span class="math notranslate nohighlight">\(
 <li><p><strong>Ensemble-Like Behavior</strong>
 When you chain <span class="math notranslate nohighlight">\(N\)</span> residual blocks, you effectively create numerous paths for gradient flow—some skip many layers, some pass through multiple convolutions. This variety of gradient routes can speed convergence and reduce the risk of vanishing gradients <a class="footnote-reference brackets" href="#footcite-veit2016residual" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>.</p>
 <figure class="align-center" id="resnet-gradient-flow">
-<a class="reference internal image-reference" href="https://arxiv.org/html/2405.01725v1/x28.png"><img alt="https://arxiv.org/html/2405.01725v1/x28.png" src="https://arxiv.org/html/2405.01725v1/x28.png" style="width: 100%;" /></a>
+<a class="reference internal image-reference" href="https://arxiv.org/html/2405.01725v1/x28.png"><img alt="https://arxiv.org/html/2405.01725v1/x28.png" src="https://arxiv.org/html/2405.01725v1/x28.png" style="width: 100%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 69 </span><span class="caption-text">The gradient flow in ResNet with skip connections.</span><a class="headerlink" href="#resnet-gradient-flow" title="Link to this image">#</a></p>
 </figcaption>
@@ -635,7 +637,8 @@ ResNet-50, -101, and -152 can be trained without suffering the performance drop 
 <h3>Bottleneck Blocks for Deep ResNet<a class="headerlink" href="#bottleneck-blocks-for-deep-resnet" title="Link to this heading">#</a></h3>
 <p>ResNet has some variants depending on the depth. For deep ResNet, the <strong>bottleneck</strong> design is used to maintain computational efficiency.</p>
 <figure class="align-center" id="resnet-bottleneck-block">
-<a class="reference internal image-reference" href="https://i.sstatic.net/kbiIG.png"><img alt="https://i.sstatic.net/kbiIG.png" src="https://i.sstatic.net/kbiIG.png" style="width: 80%;" /></a>
+<a class="reference internal image-reference" href="https://i.sstatic.net/kbiIG.png"><img alt="https://i.sstatic.net/kbiIG.png" src="https://i.sstatic.net/kbiIG.png" style="width: 80%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 70 </span><span class="caption-text">A bottleneck block of ResNet.</span><a class="headerlink" href="#resnet-bottleneck-block" title="Link to this image">#</a></p>
 </figcaption>
@@ -663,7 +666,8 @@ ResNet-50, -101, and -152 can be trained without suffering the performance drop 
 </ol>
 <p>By increasing <strong>cardinality</strong> (the number of parallel conv groups) instead of just adding more channels or layers, ResNeXt achieves better accuracy with moderate complexity. This approach also draws on the idea of Inception’s multi-branch parallel conv, but unifies them into a single grouped-convolution block.</p>
 <figure class="align-center" id="resnext-block">
-<a class="reference internal image-reference" href="https://production-media.paperswithcode.com/methods/Screen_Shot_2020-06-06_at_4.32.52_PM.png"><img alt="https://production-media.paperswithcode.com/methods/Screen_Shot_2020-06-06_at_4.32.52_PM.png" src="https://production-media.paperswithcode.com/methods/Screen_Shot_2020-06-06_at_4.32.52_PM.png" style="width: 50%;" /></a>
+<a class="reference internal image-reference" href="https://production-media.paperswithcode.com/methods/Screen_Shot_2020-06-06_at_4.32.52_PM.png"><img alt="https://production-media.paperswithcode.com/methods/Screen_Shot_2020-06-06_at_4.32.52_PM.png" src="https://production-media.paperswithcode.com/methods/Screen_Shot_2020-06-06_at_4.32.52_PM.png" style="width: 50%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 71 </span><span class="caption-text">A basic block of ResNeXt, showing multiple grouped-conv “paths” that are aggregated.</span><a class="headerlink" href="#resnext-block" title="Link to this image">#</a></p>
 </figcaption>

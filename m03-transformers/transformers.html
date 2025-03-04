@@ -28,13 +28,13 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -53,7 +53,7 @@
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
@@ -548,7 +548,8 @@ document.write(`
 <p>Many large language models (LLMs) including GPT-3, GPT-4, and Claude are built based on a stack of <em>transformer</em> blocks <a class="footnote-reference brackets" href="#footcite-vaswani2017attention" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.
 Each transformer block takes a sequence of token vectors as input and outputs a sequence of token vectors (sequence-to-sequence!).</p>
 <figure class="align-center" id="transformer-overview">
-<a class="reference internal image-reference" href="../_images/transformer-overview.jpg"><img alt="Transformer Overview" src="../_images/transformer-overview.jpg" style="width: 50%;" /></a>
+<a class="reference internal image-reference" href="../_images/transformer-overview.jpg"><img alt="Transformer Overview" src="../_images/transformer-overview.jpg" style="width: 50%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 18 </span><span class="caption-text">The basic architecture of the transformer-based LLMs.</span><a class="headerlink" href="#transformer-overview" title="Link to this image">#</a></p>
 </figcaption>
@@ -556,14 +557,16 @@ Each transformer block takes a sequence of token vectors as input and outputs a 
 <p>These transformer blocks can be further divided into encoder and decoder components.
 The encoder is used for encoding the input sequence, while the decoder is used for generating the output sequence. Like seq2se models with attention, the decoder can also see the encoder outputs for invidiual tokens, along with the previous output tokens. The output of the decoder is then passed through a linear layer to produce the probability distribution over the next token.</p>
 <figure class="align-center" id="transformer-encoder-decoder">
-<a class="reference internal image-reference" href="../_images/transformer-encoder-decoder.jpg"><img alt="Transformer Encoder-Decoder" src="../_images/transformer-encoder-decoder.jpg" style="width: 80%;" /></a>
+<a class="reference internal image-reference" href="../_images/transformer-encoder-decoder.jpg"><img alt="Transformer Encoder-Decoder" src="../_images/transformer-encoder-decoder.jpg" style="width: 80%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 19 </span><span class="caption-text">The basic architecture of the transformer encoder-decoder. The encoder is used for encoding the input sequence, while the decoder is used for generating the output sequence. The encoder takes the input sequence as input and outputs a sequence of token vectors, which are then passed to the decoder. The decoder takes the encoder outputs, along with the previous output tokens, and outputs the probability distribution over the next token.</span><a class="headerlink" href="#transformer-encoder-decoder" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <p>Inside the encoder and decoder transformer blocks are essentially three components, i.e., <em>multi-head attention</em>, <em>layer normalization</em>, and <em>feed-forward networks</em>. We will learn individual components in the following sections.</p>
 <figure class="align-center" id="transformer-wired-components">
-<a class="reference internal image-reference" href="../_images/transformer-component.jpg"><img alt="Transformer Wired Components" src="../_images/transformer-component.jpg" style="width: 80%;" /></a>
+<a class="reference internal image-reference" href="../_images/transformer-component.jpg"><img alt="Transformer Wired Components" src="../_images/transformer-component.jpg" style="width: 80%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 20 </span><span class="caption-text">The encoder-decoder architecture of the transformer.</span><a class="headerlink" href="#transformer-wired-components" title="Link to this image">#</a></p>
 </figcaption>
@@ -576,7 +579,8 @@ The encoder is used for encoding the input sequence, while the decoder is used f
 <h3>Self-Attention<a class="headerlink" href="#self-attention" title="Link to this heading">#</a></h3>
 <p>In transformers, the attention is called <em>self-attention</em>, since the attention is paid within the same sentence, unlike the sequence-to-sequence models that pays attention from one sentence to another. At its core, self-attention is about relationships. When you read the sentence “The cat sat on the mat because it was tired”, how do you know what “it” refers to? You naturally look back at the previous words and determine that “it” refers to “the cat”. Self-attention works similarly, but does this for every word in relation to every other word, simultaneously.</p>
 <figure class="align-center" id="transformer-attention">
-<a class="reference internal image-reference" href="../_images/transformer-attention.jpg"><img alt="Attention Mechanism" src="../_images/transformer-attention.jpg" style="width: 80%;" /></a>
+<a class="reference internal image-reference" href="../_images/transformer-attention.jpg"><img alt="Attention Mechanism" src="../_images/transformer-attention.jpg" style="width: 80%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 21 </span><span class="caption-text">The attention mechanism in transformers.</span><a class="headerlink" href="#transformer-attention" title="Link to this image">#</a></p>
 </figcaption>
@@ -607,7 +611,8 @@ The encoder is used for encoding the input sequence, while the decoder is used f
 <h3>Multi-Head Attention<a class="headerlink" href="#multi-head-attention" title="Link to this heading">#</a></h3>
 <p>Multi-head attention consists of multiple attention heads to enable a model to pay attentions to multiple aspects of the input sequence. Each attention head can have different parameters and thus produces different “contextualized vectors.” These different vector are then concatenated and fed into a feed-forward network to produce the final output.</p>
 <figure class="align-center" id="transformer-multihead-attention">
-<a class="reference internal image-reference" href="../_images/transformer-multihead-attention.jpg"><img alt="Multi-Head Attention" src="../_images/transformer-multihead-attention.jpg" style="width: 50%;" /></a>
+<a class="reference internal image-reference" href="../_images/transformer-multihead-attention.jpg"><img alt="Multi-Head Attention" src="../_images/transformer-multihead-attention.jpg" style="width: 50%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 22 </span><span class="caption-text">Multi-head attention mechanism.</span><a class="headerlink" href="#transformer-multihead-attention" title="Link to this image">#</a></p>
 </figcaption>
@@ -617,7 +622,8 @@ The encoder is used for encoding the input sequence, while the decoder is used f
 <section id="layer-normalization">
 <h2>Layer Normalization<a class="headerlink" href="#layer-normalization" title="Link to this heading">#</a></h2>
 <figure class="align-center" id="transformer-layer-normalization">
-<a class="reference internal image-reference" href="https://miro.medium.com/v2/resize:fit:1400/0*Agdt1zYwfUxXMJGJ"><img alt="Layer Normalization" src="https://miro.medium.com/v2/resize:fit:1400/0*Agdt1zYwfUxXMJGJ" style="width: 80%;" /></a>
+<a class="reference internal image-reference" href="https://miro.medium.com/v2/resize:fit:1400/0*Agdt1zYwfUxXMJGJ"><img alt="Layer Normalization" src="https://miro.medium.com/v2/resize:fit:1400/0*Agdt1zYwfUxXMJGJ" style="width: 80%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 23 </span><span class="caption-text">Layer normalization works by normalizing each individual sample across its features. For each sample, it calculates the mean and standard deviation across all feature dimensions, then uses these statistics to normalize that sample’s values.</span><a class="headerlink" href="#transformer-layer-normalization" title="Link to this image">#</a></p>
 </figcaption>
@@ -635,7 +641,8 @@ The encoder is used for encoding the input sequence, while the decoder is used f
 <h3>Encoder Transformer Block<a class="headerlink" href="#encoder-transformer-block" title="Link to this heading">#</a></h3>
 <p>Now, we have all the components to build a transformer block. Let’s wire them together.</p>
 <figure class="align-center" id="transformer-block">
-<a class="reference internal image-reference" href="../_images/transformer-encoder.jpg"><img alt="Transformer Block" src="../_images/transformer-encoder.jpg" style="width: 50%;" /></a>
+<a class="reference internal image-reference" href="../_images/transformer-encoder.jpg"><img alt="Transformer Block" src="../_images/transformer-encoder.jpg" style="width: 50%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 24 </span><span class="caption-text">Input flows through multi-head attention, layer normalization, feed-forward networks, and another normalization step.</span><a class="headerlink" href="#transformer-block" title="Link to this image">#</a></p>
 </figcaption>
@@ -644,7 +651,8 @@ The encoder is used for encoding the input sequence, while the decoder is used f
 <section id="residual-connection">
 <h4>Residual Connection<a class="headerlink" href="#residual-connection" title="Link to this heading">#</a></h4>
 <figure class="align-center" id="id3">
-<a class="reference internal image-reference" href="https://i.sstatic.net/UcJSa.png"><img alt="Residual Connection" src="https://i.sstatic.net/UcJSa.png" style="width: 30%;" /></a>
+<a class="reference internal image-reference" href="https://i.sstatic.net/UcJSa.png"><img alt="Residual Connection" src="https://i.sstatic.net/UcJSa.png" style="width: 30%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 25 </span><span class="caption-text">Residual connection.</span><a class="headerlink" href="#id3" title="Link to this image">#</a></p>
 </figcaption>
@@ -698,7 +706,8 @@ We can write this more concisely using <span class="math notranslate nohighlight
 <h2>Decoder Transformer Block<a class="headerlink" href="#decoder-transformer-block" title="Link to this heading">#</a></h2>
 <p>The decoder transformer block is similar to the encoder transformer block, but it also includes the <em>masked multi-head attention</em> and <em>cross-attention</em> components.</p>
 <figure class="align-center" id="transformer-decoder">
-<a class="reference internal image-reference" href="../_images/transformer-decoder.jpg"><img alt="Transformer Decoder" src="../_images/transformer-decoder.jpg" style="width: 50%;" /></a>
+<a class="reference internal image-reference" href="../_images/transformer-decoder.jpg"><img alt="Transformer Decoder" src="../_images/transformer-decoder.jpg" style="width: 50%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 26 </span><span class="caption-text">The decoder transformer block.</span><a class="headerlink" href="#transformer-decoder" title="Link to this image">#</a></p>
 </figcaption>
@@ -733,7 +742,8 @@ We can write this more concisely using <span class="math notranslate nohighlight
 \]</div>
 <p>where <span class="math notranslate nohighlight">\(M\)</span> is a matrix with <span class="math notranslate nohighlight">\(-\infty\)</span> for positions corresponding to future tokens. The result is the attention scores, where the tokens attend only to the previous tokens.</p>
 <figure class="align-center" id="transformer-masked-attention">
-<a class="reference internal image-reference" href="https://substackcdn.com/image/fetch/f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fe1317a05-3542-4158-94bf-085109a5793a_1220x702.png"><img alt="Masked Attention" src="https://substackcdn.com/image/fetch/f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fe1317a05-3542-4158-94bf-085109a5793a_1220x702.png" style="width: 80%;" /></a>
+<a class="reference internal image-reference" href="https://substackcdn.com/image/fetch/f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fe1317a05-3542-4158-94bf-085109a5793a_1220x702.png"><img alt="Masked Attention" src="https://substackcdn.com/image/fetch/f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fe1317a05-3542-4158-94bf-085109a5793a_1220x702.png" style="width: 80%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 27 </span><span class="caption-text">The masked attention mechanism.</span><a class="headerlink" href="#transformer-masked-attention" title="Link to this image">#</a></p>
 </figcaption>
@@ -751,7 +761,8 @@ We can write this more concisely using <span class="math notranslate nohighlight
 \]</div>
 <p>where Q comes from the decoder and K,V come from the encoder. This effectively bridges the encoding and decoding processes.</p>
 <figure class="align-center" id="transformer-cross-attention">
-<a class="reference internal image-reference" href="../_images/transformer-cross-attention.jpg"><img alt="Cross-Attention" src="../_images/transformer-cross-attention.jpg" style="width: 60%;" /></a>
+<a class="reference internal image-reference" href="../_images/transformer-cross-attention.jpg"><img alt="Cross-Attention" src="../_images/transformer-cross-attention.jpg" style="width: 60%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 28 </span><span class="caption-text">The cross-attention mechanism.</span><a class="headerlink" href="#transformer-cross-attention" title="Link to this image">#</a></p>
 </figcaption>
@@ -823,7 +834,8 @@ x_{t,i} := x_{t,i} + \text{Pos}(t, i),
 \]</div>
 <p>It appears to be complicated but it can be seen as a continuous version of the binary position embedding above. To see this, let us plot the position embedding for the first 100 positions.</p>
 <figure class="align-center" id="transformer-position-embedding">
-<a class="reference internal image-reference" href="https://kazemnejad.com/img/transformer_architecture_positional_encoding/positional_encoding.png"><img alt="Transformer Position Embedding" src="https://kazemnejad.com/img/transformer_architecture_positional_encoding/positional_encoding.png" style="width: 80%;" /></a>
+<a class="reference internal image-reference" href="https://kazemnejad.com/img/transformer_architecture_positional_encoding/positional_encoding.png"><img alt="Transformer Position Embedding" src="https://kazemnejad.com/img/transformer_architecture_positional_encoding/positional_encoding.png" style="width: 80%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 29 </span><span class="caption-text">The position embedding. The image is taken from <a class="reference external" href="https://kazemnejad.com/blog/transformer_architecture_positional_encoding/">https://kazemnejad.com/blog/transformer_architecture_positional_encoding/</a></span><a class="headerlink" href="#transformer-position-embedding" title="Link to this image">#</a></p>
 </figcaption>

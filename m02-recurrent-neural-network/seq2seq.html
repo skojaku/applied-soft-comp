@@ -28,13 +28,13 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -53,7 +53,7 @@
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
@@ -533,7 +533,8 @@ document.write(`
 </ul>
 <p>The encoder and decoder are connected through a context vector, which is a fixed-size vector that captures the meaning and nuances of the input sequence. The context vector is used to initialize the decoder state, and the decoder uses it to generate the output sequence. The encoder and decoder are recurrent neural networks that can be implemented using LSTM or similar RNN modles.</p>
 <figure class="align-default" id="id5">
-<a class="reference internal image-reference" href="../_images/seq2seq.jpg"><img alt="seq2seq model architecture" src="../_images/seq2seq.jpg" style="width: 100%;" /></a>
+<a class="reference internal image-reference" href="../_images/seq2seq.jpg"><img alt="seq2seq model architecture" src="../_images/seq2seq.jpg" style="width: 100%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 14 </span><span class="caption-text">seq2seq model architecture. The last hidden state of the encoder is used to initialize the decoder state. <code class="docutils literal notranslate"><span class="pre">[SOS]</span></code> is the start-of-sequence token that indicates the beginning of the output sequence.</span><a class="headerlink" href="#id5" title="Link to this image">#</a></p>
 </figcaption>
@@ -545,7 +546,8 @@ document.write(`
 <p>One of the key limitation of the seq2seq model is that the context vector has a fixed size, which creates an information bottleneck, especially for long sequences where important details can be lost during compression.</p>
 <p>In attention mechanism, we pass, instead of the last hidden state of the encoder, all the hidden states of the encoder to the decoder. This resolves the information bottleneck problem.</p>
 <figure class="align-default" id="id6">
-<a class="reference internal image-reference" href="../_images/seq2seq-attention.jpg"><img alt="seq2seq model architecture" src="../_images/seq2seq-attention.jpg" style="width: 100%;" /></a>
+<a class="reference internal image-reference" href="../_images/seq2seq-attention.jpg"><img alt="seq2seq model architecture" src="../_images/seq2seq-attention.jpg" style="width: 100%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 15 </span><span class="caption-text">seq2seq model architecture with attention mechanism. All the hidden states of the encoder are passed to the decoder.</span><a class="headerlink" href="#id6" title="Link to this image">#</a></p>
 </figcaption>
@@ -558,7 +560,8 @@ e_{tj} = f(s_{t-1}, h_j)
 \]</div>
 <p>where <span class="math notranslate nohighlight">\(f\)</span> is a scoring function, often implemented as a neural network, that computes the relevance between the decoder hidden state <span class="math notranslate nohighlight">\(s_{t-1}\)</span> and the encoder hidden state <span class="math notranslate nohighlight">\(h_j\)</span>. For example, the following figure represents a neural network consisting of one hidden layer with a tanh activation.</p>
 <figure class="align-default" id="id7">
-<a class="reference internal image-reference" href="../_images/seq2seq-attention-weight.jpg"><img alt="seq2seq model architecture" src="../_images/seq2seq-attention-weight.jpg" style="width: 100%;" /></a>
+<a class="reference internal image-reference" href="../_images/seq2seq-attention-weight.jpg"><img alt="seq2seq model architecture" src="../_images/seq2seq-attention-weight.jpg" style="width: 100%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 16 </span><span class="caption-text">The neural network that computes the relevance between the decoder hidden state <span class="math notranslate nohighlight">\(s_{t-1}\)</span> and the encoder hidden state <span class="math notranslate nohighlight">\(h_j\)</span>.</span><a class="headerlink" href="#id7" title="Link to this image">#</a></p>
 </figcaption>
@@ -574,7 +577,8 @@ e_{tj} = f(s_{t-1}, h_j)
 c_t = \sum_{j=1}^n \alpha_{tj}h_j
 \]</div>
 <figure class="align-default" id="id8">
-<a class="reference internal image-reference" href="../_images/seq2seq-attention-weighted-average.jpg"><img alt="seq2seq model architecture" src="../_images/seq2seq-attention-weighted-average.jpg" style="width: 750%;" /></a>
+<a class="reference internal image-reference" href="../_images/seq2seq-attention-weighted-average.jpg"><img alt="seq2seq model architecture" src="../_images/seq2seq-attention-weighted-average.jpg" style="width: 750%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 17 </span><span class="caption-text">How the new context vector <span class="math notranslate nohighlight">\(c_t\)</span> is computed as a weighted sum of the encoder hidden states <span class="math notranslate nohighlight">\(h_j\)</span> using the attention weights <span class="math notranslate nohighlight">\(\alpha_{tj}\)</span>.</span><a class="headerlink" href="#id8" title="Link to this image">#</a></p>
 </figcaption>

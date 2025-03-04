@@ -187,31 +187,37 @@ Let us learn how to generate text with GPT-2. We will use the `transformers` lib
 
 ```{code-cell} ipython
 import torch
+import gc
 from transformers import AutoModelForCausalLM, AutoTokenizer
+import transformers
 
-torch_device = "cpu" # "cpu" or "cuda" or "mps"
+# Force CPU usage and clear memory
+torch.cuda.empty_cache() if torch.cuda.is_available() else None
+gc.collect()
 
-if torch.cuda.is_available():
-    torch_device = "cuda"
-elif torch.backends.mps.is_available():
-    torch_device = "mps"
+# Force CPU usage for this example
+if torch.backends.mps.is_available():
+    torch_device = "mps"  # MPS (Apple Silicon)
+elif torch.cuda.is_available():
+    torch_device = "cuda" #  CUDA (GPU)
+else:
+    torch_device = "cpu" # (CPU)
 
+# Initialize tokenizer and set pad token
 tokenizer = AutoTokenizer.from_pretrained("gpt2")
+tokenizer.pad_token = tokenizer.eos_token
 
+# Initialize model and set pad token id
 model = AutoModelForCausalLM.from_pretrained("gpt2").to(torch_device)
+model.config.pad_token_id = model.config.eos_token_id
 
-# add the EOS token as PAD token to avoid warnings
-model.generation_config.pad_token_id = tokenizer.pad_token_id
-```
-
-Let's generate text using the greedy search.
-
-```{code-cell} ipython
 # We encode the input text into tokens.
-model_inputs = tokenizer('I enjoy walking with my cute dog', return_tensors='pt').to(torch_device)
+model_inputs = tokenizer('I enjoy walking with ', return_tensors='pt').to(torch_device)
 
 # generate 40 new tokens
-greedy_output = model.generate(**model_inputs, max_new_tokens=40)
+greedy_output = model.generate(**model_inputs,
+                             max_new_tokens=20,
+                             pad_token_id=tokenizer.eos_token_id)
 
 print("Output:\n" + 100 * '-')
 print(tokenizer.decode(greedy_output[0], skip_special_tokens=True))

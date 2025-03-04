@@ -28,13 +28,13 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -53,7 +53,7 @@
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
@@ -230,6 +230,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/lenet.html">LeNet and LeNet-5: Pioneering CNN Architectures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/alexnet.html">AlexNet: A Breakthrough in Deep Learning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/vgg.html">VGGNet - A Deep Convolutional Neural Network for Image Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/inception.html">GoogleNet and the Inception Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/resnet.html">ResNet (Residual Neural Networks)</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Graphs</span></p>
 <ul class="current nav bd-sidenav">
@@ -618,7 +620,7 @@ $<span class="math notranslate nohighlight">\(h_{\text{high}}(\lambda) = \frac{\
 </ol>
 <div class="cell tag_remove-input docutils container">
 <div class="cell_output docutils container">
-<img alt="../_images/4f8ad2e95bb844b5887d5d55053435d248c98042abf4727d6784dc191e07bf7f.png" src="../_images/4f8ad2e95bb844b5887d5d55053435d248c98042abf4727d6784dc191e07bf7f.png" />
+<img alt="../_images/bab48c820139b984a9b09b482bfb2dcc7192e67337a65f2e34844cff7a4a388d.png" src="../_images/bab48c820139b984a9b09b482bfb2dcc7192e67337a65f2e34844cff7a4a388d.png" />
 </div>
 </div>
 </section>
@@ -626,6 +628,18 @@ $<span class="math notranslate nohighlight">\(h_{\text{high}}(\lambda) = \frac{\
 <h3>Example<a class="headerlink" href="#example" title="Link to this heading">#</a></h3>
 <p>Let us showcase the idea of spectral filtering with a simple example with the karate club network.</p>
 <div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ModuleNotFoundError</span><span class="g g-Whitespace">                       </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">import</span> <span class="nn">igraph</span> <span class="k">as</span> <span class="nn">ig</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
+
+<span class="ne">ModuleNotFoundError</span>: No module named &#39;igraph&#39;
+</pre></div>
+</div>
+</div>
 </div>
 <p>We will first compute the laplacian matrix and its eigendecomposition.</p>
 <div class="cell docutils container">
@@ -655,12 +669,6 @@ $<span class="math notranslate nohighlight">\(h_{\text{high}}(\lambda) = \frac{\
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Size of low-pass filter:&quot;</span><span class="p">,</span> <span class="n">L_low</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Size of high-pass filter:&quot;</span><span class="p">,</span> <span class="n">L_high</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Size of low-pass filter: (34, 34)
-Size of high-pass filter: (34, 34)
 </pre></div>
 </div>
 </div>
@@ -722,9 +730,6 @@ Size of high-pass filter: (34, 34)
 </div>
 </div>
 </details>
-<div class="cell_output docutils container">
-<img alt="../_images/8a2a32b5f995a05252e59b7cf383aec7d8a02877d0812ef03988097433857086.png" src="../_images/8a2a32b5f995a05252e59b7cf383aec7d8a02877d0812ef03988097433857086.png" />
-</div>
 </div>
 <p>We observe that the low-pass filter results in smoother <span class="math notranslate nohighlight">\({\bf x}\)</span> between connected nodes (i.e., neighboring nodes have similar <span class="math notranslate nohighlight">\({\bf x}\)</span>).
 The original <span class="math notranslate nohighlight">\({\bf x}\)</span> and <span class="math notranslate nohighlight">\({\bf x}'_{\text{low}}\)</span> are very similar because random variables are high-frequency components. In contrast, when we apply the high-pass filter, <span class="math notranslate nohighlight">\({\bf x}'_{\text{high}}\)</span> is similar to <span class="math notranslate nohighlight">\({\bf x}\)</span> because the high-frequency components are not filtered.</p>
@@ -765,9 +770,6 @@ The original <span class="math notranslate nohighlight">\({\bf x}\)</span> and <
 </div>
 </div>
 </details>
-<div class="cell_output docutils container">
-<img alt="../_images/890b05c4dc1b5105df9b05be8233cd7e6d1d5f5092e8ee4c9b6c798dffba07b4.png" src="../_images/890b05c4dc1b5105df9b05be8233cd7e6d1d5f5092e8ee4c9b6c798dffba07b4.png" />
-</div>
 </div>
 <p>The high-pass filter increases the contrast of the eigenvector centrality, emphasizing the differences between nodes. On the other hand, the low-pass filter smooths out the eigenvector centrality.</p>
 </section>

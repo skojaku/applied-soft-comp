@@ -1,0 +1,78 @@
+Traceback (most recent call last):
+  File "/Users/skojaku-admin/miniforge3/envs/applsoftcomp/lib/python3.10/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+  File "/Users/skojaku-admin/miniforge3/envs/applsoftcomp/lib/python3.10/site-packages/nbclient/client.py", line 1305, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+  File "/Users/skojaku-admin/miniforge3/envs/applsoftcomp/lib/python3.10/site-packages/jupyter_core/utils/__init__.py", line 165, in wrapped
+    return loop.run_until_complete(inner)
+  File "/Users/skojaku-admin/miniforge3/envs/applsoftcomp/lib/python3.10/asyncio/base_events.py", line 649, in run_until_complete
+    return future.result()
+  File "/Users/skojaku-admin/miniforge3/envs/applsoftcomp/lib/python3.10/site-packages/nbclient/client.py", line 705, in async_execute
+    await self.async_execute_cell(
+  File "/Users/skojaku-admin/miniforge3/envs/applsoftcomp/lib/python3.10/site-packages/nbclient/client.py", line 1058, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/Users/skojaku-admin/miniforge3/envs/applsoftcomp/lib/python3.10/site-packages/nbclient/client.py", line 914, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import pytorch_lightning as pl
+from torch.utils.data import DataLoader, random_split
+from torchvision import datasets, transforms
+from torchmetrics import Accuracy
+
+class MNISTDataModule(pl.LightningDataModule):
+    """
+    PyTorch Lightning data module for MNIST dataset
+    """
+    def __init__(self, data_dir: str = './data', batch_size: int = 32):
+        super().__init__()
+        self.data_dir = data_dir
+        self.batch_size = batch_size
+
+        # Define transforms
+        self.transform = transforms.Compose([
+            transforms.ToTensor(),           # Convert PIL image to torch.Tensor
+            transforms.Normalize((0,), (1,)) # Normalize to mean=0, std=1
+        ])
+
+    def prepare_data(self):
+        """Download data if needed."""
+        datasets.MNIST(self.data_dir, train=True, download=True)
+        datasets.MNIST(self.data_dir, train=False, download=True)
+
+    def setup(self, stage=None):
+        """Setup train, val, and test datasets."""
+        if stage == 'fit' or stage is None:
+            mnist_full = datasets.MNIST(self.data_dir, train=True, transform=self.transform)
+            self.mnist_train, self.mnist_val = random_split(
+                mnist_full, [55000, 5000], generator=torch.Generator().manual_seed(42)
+            )
+
+        if stage == 'test' or stage is None:
+            self.mnist_test = datasets.MNIST(self.data_dir, train=False, transform=self.transform)
+
+    def train_dataloader(self):
+        return DataLoader(self.mnist_train, batch_size=self.batch_size, shuffle=True, num_workers=1)
+
+    def val_dataloader(self):
+        return DataLoader(self.mnist_val, batch_size=self.batch_size, num_workers=1)
+
+    def test_dataloader(self):
+        return DataLoader(self.mnist_test, batch_size=self.batch_size, num_workers=1)
+------------------
+
+
+[0;31m---------------------------------------------------------------------------[0m
+[0;31mModuleNotFoundError[0m                       Traceback (most recent call last)
+Cell [0;32mIn[1], line 4[0m
+[1;32m      2[0m [38;5;28;01mimport[39;00m [38;5;21;01mtorch[39;00m[38;5;21;01m.[39;00m[38;5;21;01mnn[39;00m [38;5;28;01mas[39;00m [38;5;21;01mnn[39;00m
+[1;32m      3[0m [38;5;28;01mimport[39;00m [38;5;21;01mtorch[39;00m[38;5;21;01m.[39;00m[38;5;21;01mnn[39;00m[38;5;21;01m.[39;00m[38;5;21;01mfunctional[39;00m [38;5;28;01mas[39;00m [38;5;21;01mF[39;00m
+[0;32m----> 4[0m [38;5;28;01mimport[39;00m [38;5;21;01mpytorch_lightning[39;00m [38;5;28;01mas[39;00m [38;5;21;01mpl[39;00m
+[1;32m      5[0m [38;5;28;01mfrom[39;00m [38;5;21;01mtorch[39;00m[38;5;21;01m.[39;00m[38;5;21;01mutils[39;00m[38;5;21;01m.[39;00m[38;5;21;01mdata[39;00m [38;5;28;01mimport[39;00m DataLoader, random_split
+[1;32m      6[0m [38;5;28;01mfrom[39;00m [38;5;21;01mtorchvision[39;00m [38;5;28;01mimport[39;00m datasets, transforms
+
+[0;31mModuleNotFoundError[0m: No module named 'pytorch_lightning'
+

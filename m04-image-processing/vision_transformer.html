@@ -28,13 +28,13 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -53,7 +53,7 @@
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
@@ -230,6 +230,8 @@
 <li class="toctree-l1"><a class="reference internal" href="lenet.html">LeNet and LeNet-5: Pioneering CNN Architectures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alexnet.html">AlexNet: A Breakthrough in Deep Learning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vgg.html">VGGNet - A Deep Convolutional Neural Network for Image Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inception.html">GoogleNet and the Inception Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resnet.html">ResNet (Residual Neural Networks)</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Graphs</span></p>
 <ul class="nav bd-sidenav">
@@ -487,7 +489,8 @@ document.write(`
 <p>CNNs have been the cornerstone of computer vision for years, particularly good at capturing local patterns through convolutional filters. However, they can struggle to efficiently capture <strong>global context</strong> and <strong>long-range dependencies</strong>. In scenarios where relationships between objects spread across an entire image become crucial (e.g., understanding crowd scenes or satellite imagery), this limitation can be significant.</p>
 <p>Meanwhile, the <strong>Transformer architecture</strong> (from the paper “Attention Is All You Need”) revolutionized NLP by modeling long-range dependencies in sequential data. This success inspired researchers to ask: <em>Could the same self-attention mechanism help models ‘see’ the entire image at once, instead of focusing on small, local regions?</em></p>
 <figure class="align-center" id="fig-cnn-vit">
-<a class="reference internal image-reference" href="https://www.researchgate.net/publication/361733806/figure/fig3/AS%3A1173979050057729%401656909825527/Operation-of-CNN-and-ViT.ppm"><img alt="https://www.researchgate.net/publication/361733806/figure/fig3/AS%3A1173979050057729%401656909825527/Operation-of-CNN-and-ViT.ppm" src="https://www.researchgate.net/publication/361733806/figure/fig3/AS%3A1173979050057729%401656909825527/Operation-of-CNN-and-ViT.ppm" style="width: 500px;" /></a>
+<a class="reference internal image-reference" href="https://www.researchgate.net/publication/361733806/figure/fig3/AS%3A1173979050057729%401656909825527/Operation-of-CNN-and-ViT.ppm"><img alt="https://www.researchgate.net/publication/361733806/figure/fig3/AS%3A1173979050057729%401656909825527/Operation-of-CNN-and-ViT.ppm" src="https://www.researchgate.net/publication/361733806/figure/fig3/AS%3A1173979050057729%401656909825527/Operation-of-CNN-and-ViT.ppm" style="width: 500px;" />
+</a>
 <figcaption>
 <p><span class="caption-text">Comparison of the receptive field of CNNs and Vision Transformers. CNN has a local receptive field constrained by the convolutional filters, while ViT has a global receptive field, allowing it to capture long-range dependencies between different parts of the image.</span><a class="headerlink" href="#fig-cnn-vit" title="Link to this image">#</a></p>
 </figcaption>
@@ -508,7 +511,8 @@ document.write(`
 <p><em>How do we adapt an NLP-centric Transformer to handle 2D image data?</em></p>
 <p>In <strong>Vision Transformers</strong>, an image is first split into a grid of small, equally sized patches—commonly <span class="math notranslate nohighlight">\(16 \times 16\)</span> pixels each. Each patch is <strong>flattened</strong> and fed into a linear layer that creates a higher-dimensional embedding. You can think of each patch embedding as analogous to a “word embedding” in NLP.</p>
 <figure class="align-center" id="fig-vit-patch">
-<a class="reference internal image-reference" href="https://www.pinecone.io/_next/image/?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fvr8gru94%2Fproduction%2F7a096efc8f3cc40849ee17a546dc0e685da2dc73-4237x1515.png&amp;w=3840&amp;q=75"><img alt="https://www.pinecone.io/_next/image/?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fvr8gru94%2Fproduction%2F7a096efc8f3cc40849ee17a546dc0e685da2dc73-4237x1515.png&amp;w=3840&amp;q=75" src="https://www.pinecone.io/_next/image/?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fvr8gru94%2Fproduction%2F7a096efc8f3cc40849ee17a546dc0e685da2dc73-4237x1515.png&amp;w=3840&amp;q=75" style="width: 500px;" /></a>
+<a class="reference internal image-reference" href="https://www.pinecone.io/_next/image/?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fvr8gru94%2Fproduction%2F7a096efc8f3cc40849ee17a546dc0e685da2dc73-4237x1515.png&amp;w=3840&amp;q=75"><img alt="https://www.pinecone.io/_next/image/?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fvr8gru94%2Fproduction%2F7a096efc8f3cc40849ee17a546dc0e685da2dc73-4237x1515.png&amp;w=3840&amp;q=75" src="https://www.pinecone.io/_next/image/?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fvr8gru94%2Fproduction%2F7a096efc8f3cc40849ee17a546dc0e685da2dc73-4237x1515.png&amp;w=3840&amp;q=75" style="width: 500px;" />
+</a>
 <figcaption>
 <p><span class="caption-text">The process of splitting an image into patches and feeding them into a Vision Transformer. Image taken from <a class="reference external" href="https://www.pinecone.io/learn/series/image-search/vision-transformers/">Pinecone</a>.</span><a class="headerlink" href="#fig-vit-patch" title="Link to this image">#</a></p>
 </figcaption>

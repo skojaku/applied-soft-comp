@@ -28,13 +28,13 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -53,7 +53,7 @@
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
@@ -533,10 +533,11 @@ document.write(`
 <section id="architecture">
 <h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading">#</a></h2>
 <p>VGGNet employs a systematic stack of convolutional layers using exclusively 3×3 filters with stride 1 and padding 1, interspersed with 2×2 max pooling layers with stride 2. This uniformity makes the architecture conceptually simple.</p>
-<figure class="align-center" id="id1">
-<a class="reference internal image-reference" href="../_images/vgg-architecture.jpg"><img alt="../_images/vgg-architecture.jpg" src="../_images/vgg-architecture.jpg" style="width: 40%;" /></a>
+<figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="../_images/vgg-architecture.jpg"><img alt="../_images/vgg-architecture.jpg" src="../_images/vgg-architecture.jpg" style="width: 40%;" />
+</a>
 <figcaption>
-<p><span class="caption-number">Fig. 64 </span><span class="caption-text">A schematic representation of VGG16 architecture showing the progression of spatial dimensions and feature channels through the network. The input is a 224×224×3 image, and the output is a 1000-dimensional vector for ImageNet classification. The image is taken from <a class="reference external" href="https://www.researchgate.net/profile/Max-Ferguson">https://www.researchgate.net/profile/Max-Ferguson</a>.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 64 </span><span class="caption-text">A schematic representation of VGG16 architecture showing the progression of spatial dimensions and feature channels through the network. The input is a 224×224×3 image, and the output is a 1000-dimensional vector for ImageNet classification. The image is taken from <a class="reference external" href="https://www.researchgate.net/profile/Max-Ferguson">https://www.researchgate.net/profile/Max-Ferguson</a>.</span><a class="headerlink" href="#id3" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <p>VGG has multiple variants, and the most popular one is VGG16, which has 16 layers. The full architecture of VGG16 is as follows:</p>
@@ -577,7 +578,7 @@ document.write(`
 \[
 \text{spatial dimensions} = \{224 \rightarrow 112 \rightarrow 56 \rightarrow 28 \rightarrow 14 \rightarrow 7\}
 \]</div>
-<p>Despite its apparent simplicity, VGG16 contains approximately 140 million parameters, with the majority concentrated in the first fully connected layer (approximately 102 million parameters). This large parameter count highlights an interesting trade-off in the architecture: while the convolutional layers follow a clean and efficient design, the fully connected layers remain computationally intensive. This issue is later resolved by global average pooling proposed by .</p>
+<p>Despite its apparent simplicity, VGG16 contains approximately 140 million parameters, with the majority concentrated in the first fully connected layer (approximately 102 million parameters). This large parameter count highlights an interesting trade-off in the architecture: while the convolutional layers follow a clean and efficient design, the fully connected layers remain computationally intensive. This issue is later resolved by global average pooling proposed by <a class="footnote-reference brackets" href="#footcite-lin2013network" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.</p>
 </section>
 <section id="key-design-principles">
 <h2>Key Design Principles<a class="headerlink" href="#key-design-principles" title="Link to this heading">#</a></h2>
@@ -596,10 +597,11 @@ The second layer then generates a new feature map by applying the same 3×3 conv
 <p>Which one has fewer parameters? The answer is the second case. In fact,
 a single 5×5 convolution layer has <span class="math notranslate nohighlight">\(5 \times 5 =25\)</span> parameters, while two stacked 3×3 convolution layers have <span class="math notranslate nohighlight">\(2 \times (3 \times 3) = 18\)</span> parameters.</p>
 <p>This 28% reduction in parameters comes with an additional benefit: the inclusion of an extra ReLU non-linearity between the convolutions, allowing the network to be deeper.</p>
-<figure class="align-center" id="id2">
-<a class="reference internal image-reference" href="https://miro.medium.com/v2/resize:fit:1200/1*k97NVvlMkRXau-uItlq5Gw.png"><img alt="https://miro.medium.com/v2/resize:fit:1200/1*k97NVvlMkRXau-uItlq5Gw.png" src="https://miro.medium.com/v2/resize:fit:1200/1*k97NVvlMkRXau-uItlq5Gw.png" style="width: 70%;" /></a>
+<figure class="align-center" id="id4">
+<a class="reference internal image-reference" href="https://miro.medium.com/v2/resize:fit:1200/1*k97NVvlMkRXau-uItlq5Gw.png"><img alt="https://miro.medium.com/v2/resize:fit:1200/1*k97NVvlMkRXau-uItlq5Gw.png" src="https://miro.medium.com/v2/resize:fit:1200/1*k97NVvlMkRXau-uItlq5Gw.png" style="width: 70%;" />
+</a>
 <figcaption>
-<p><span class="caption-number">Fig. 65 </span><span class="caption-text">A schematic representation of the receptive field of two stacked 3x3 convolution layers. The receptive field of the first layer is 3x3, and the receptive field of the second layer is 5x5. The image is taken from <a class="reference external" href="https://medium.com/&#64;rekalantar/receptive-fields-in-deep-convolutional-networks-43871d2ef2e9">https://medium.com/&#64;rekalantar/receptive-fields-in-deep-convolutional-networks-43871d2ef2e9</a></span><a class="headerlink" href="#id2" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 65 </span><span class="caption-text">A schematic representation of the receptive field of two stacked 3x3 convolution layers. The receptive field of the first layer is 3x3, and the receptive field of the second layer is 5x5. The image is taken from <a class="reference external" href="https://medium.com/&#64;rekalantar/receptive-fields-in-deep-convolutional-networks-43871d2ef2e9">https://medium.com/&#64;rekalantar/receptive-fields-in-deep-convolutional-networks-43871d2ef2e9</a></span><a class="headerlink" href="#id4" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
@@ -608,12 +610,21 @@ a single 5×5 convolution layer has <span class="math notranslate nohighlight">\
 <h2>VGG-style Data Augmentation<a class="headerlink" href="#vgg-style-data-augmentation" title="Link to this heading">#</a></h2>
 <p>VGGNet proposed multi-scale data augmentation (Figure 3). In AlexNet, data augmentation was performed by randomly cropping 224×224 input images from normalized images where the height was set to 256 pixels (left half of the figure below). In addition to this, VGGNet randomly crops 224×224 input images from images resized to a different scale with height of 384 pixels (right half of the figure below).</p>
 <p>Through this VGGNet-style data augmentation approach of resizing to two scales, VGGNet was able to learn diversity across two scales, leading to improved classification accuracy.</p>
-<figure class="align-center" id="id3">
-<a class="reference internal image-reference" href="https://cvml-expertguide.net/wp-content/uploads/2021/08/e72850b7f9960fbbd9d51f636963baec.png"><img alt="https://cvml-expertguide.net/wp-content/uploads/2021/08/e72850b7f9960fbbd9d51f636963baec.png" src="https://cvml-expertguide.net/wp-content/uploads/2021/08/e72850b7f9960fbbd9d51f636963baec.png" style="width: 100%;" /></a>
+<figure class="align-center" id="id5">
+<a class="reference internal image-reference" href="https://cvml-expertguide.net/wp-content/uploads/2021/08/e72850b7f9960fbbd9d51f636963baec.png"><img alt="https://cvml-expertguide.net/wp-content/uploads/2021/08/e72850b7f9960fbbd9d51f636963baec.png" src="https://cvml-expertguide.net/wp-content/uploads/2021/08/e72850b7f9960fbbd9d51f636963baec.png" style="width: 100%;" />
+</a>
 <figcaption>
-<p><span class="caption-number">Fig. 66 </span><span class="caption-text">Data augmentation for VGGNet. The image is taken from <a class="reference external" href="https://cvml-expertguide.net/">https://cvml-expertguide.net/</a></span><a class="headerlink" href="#id3" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 66 </span><span class="caption-text">Data augmentation for VGGNet. The image is taken from <a class="reference external" href="https://cvml-expertguide.net/">https://cvml-expertguide.net/</a></span><a class="headerlink" href="#id5" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
+<div class="docutils container" id="id2">
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="footcite-lin2013network" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Min Lin, Qiang Chen, and Shuicheng Yan. Network in network. <em>CoRR</em>, 2013. URL: <a class="reference external" href="https://api.semanticscholar.org/CorpusID:16636683">https://api.semanticscholar.org/CorpusID:16636683</a>.</p>
+</aside>
+</aside>
+</div>
 </section>
 </section>
 

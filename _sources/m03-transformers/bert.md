@@ -66,7 +66,7 @@ BERT uses *position* and *segment* embeddings to provide the model with informat
 
 - The segment embeddings are used to distinguish the sentences in the input. For example, for the sentence "The cat sat on the mat. It then went to sleep.", the tokens in the first sentence are added with segment embedding 0, and the tokens in the second sentence are added with segment embedding 1. These segmend embeddings are also learned during the pre-training process.
 
-```{figure} https://i.sstatic.net/thmqC.png
+```{figure} https://lh3.googleusercontent.com/stK9CWIWiSuF_aq75q7_6wUqyqfePKzeLxqVet9IVNqrcyJqqg9hXkhuFXBXXbIjaGY15gSF9Yr7kyjceVXs5HbDMpmkhet49fhbtLsm9-4E4iCYckzGTsYSxOqRaVGNTkkhWykg
 :name: bert_position_segment_embeddings
 :alt: BERT position and segment embeddings
 :width: 80%

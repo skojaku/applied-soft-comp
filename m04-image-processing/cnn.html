@@ -28,13 +28,13 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -53,7 +53,7 @@
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
@@ -534,7 +534,8 @@ Processing such a high-dimensional data with neural networks requires a large nu
 <h3>Convolutional Layer<a class="headerlink" href="#convolutional-layer" title="Link to this heading">#</a></h3>
 <p>At the heart of Convolutional Neural Networks (CNNs) lies a remarkably elegant operation called <em>convolution</em>. Imagine sliding a small window, called <em>a kernel or filter</em>, across an image. At each position, we perform a simple multiplication and addition operation between the kernel values and the overlapping image pixels. This fundamental operation allows CNNs to automatically learn and detect important visual features.</p>
 <figure class="align-default" id="convolution">
-<a class="reference internal image-reference" href="https://anhreynolds.com/img/cnn.png"><img alt="https://anhreynolds.com/img/cnn.png" src="https://anhreynolds.com/img/cnn.png" style="width: 100%;" /></a>
+<a class="reference internal image-reference" href="https://anhreynolds.com/img/cnn.png"><img alt="https://anhreynolds.com/img/cnn.png" src="https://anhreynolds.com/img/cnn.png" style="width: 100%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 50 </span><span class="caption-text">Convolution operation. The kernel slides across the input image and performs the multiplication and addition operation at each position. The result is a feature map that represents the detected features.
 Image taken from <a class="reference external" href="https://anhreynolds.com/blogs/cnn.html">https://anhreynolds.com/blogs/cnn.html</a></span><a class="headerlink" href="#convolution" title="Link to this image">#</a></p>
@@ -555,7 +556,7 @@ The indices <span class="math notranslate nohighlight">\(i,j\)</span> represent 
 \]</div>
 <p>where <span class="math notranslate nohighlight">\(I\)</span> is a 3D matrix with the last dimension of size <span class="math notranslate nohighlight">\(C\)</span>, and <span class="math notranslate nohighlight">\(K\)</span> is a 3D kernel with the last dimension of size <span class="math notranslate nohighlight">\(C\)</span> as well. <span class="math notranslate nohighlight">\(C\)</span> is the number of channels in the input image.</p>
 <figure class="align-default" id="id1">
-<a class="reference internal image-reference" href="https://d2l.ai/_images/conv-multi-in.svg"><img alt="https://d2l.ai/_images/conv-multi-in.svg" src="https://d2l.ai/_images/conv-multi-in.svg" style="width: 100%;" /></a>
+<a class="reference internal image-reference" href="https://d2l.ai/_images/conv-multi-in.svg"><img alt="https://d2l.ai/_images/conv-multi-in.svg" src="https://d2l.ai/_images/conv-multi-in.svg" width="100%" /></a>
 <figcaption>
 <p><span class="caption-number">Fig. 51 </span><span class="caption-text">Convolution operation for multi-channel input. Each channel is processed separately, and the results are summed up to produce the final output.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
 </figcaption>
@@ -570,7 +571,8 @@ The indices <span class="math notranslate nohighlight">\(i,j\)</span> represent 
 </div>
 <p>One of the key features of CNNs is <em>translation equivariance</em>. This means that when an input image is shifted, the output feature map shifts by the same amount. For example, if we move an object in an image one pixel to the right, its detected features in the output will also move one pixel to the right. This property allows CNNs to detect features consistently regardless of their position in the image.</p>
 <figure class="align-default" id="translation-invariance">
-<a class="reference internal image-reference" href="https://miro.medium.com/v2/resize:fit:1400/1*NoAQ4ZgofpkK6esl4sMHkA.png"><img alt="https://miro.medium.com/v2/resize:fit:1400/1*NoAQ4ZgofpkK6esl4sMHkA.png" src="https://miro.medium.com/v2/resize:fit:1400/1*NoAQ4ZgofpkK6esl4sMHkA.png" style="width: 100%;" /></a>
+<a class="reference internal image-reference" href="https://miro.medium.com/v2/resize:fit:1400/1*NoAQ4ZgofpkK6esl4sMHkA.png"><img alt="https://miro.medium.com/v2/resize:fit:1400/1*NoAQ4ZgofpkK6esl4sMHkA.png" src="https://miro.medium.com/v2/resize:fit:1400/1*NoAQ4ZgofpkK6esl4sMHkA.png" style="width: 100%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 52 </span><span class="caption-text">Translation invariance. The same kernel can detect the same feature regardless of its position in the input.</span><a class="headerlink" href="#translation-invariance" title="Link to this image">#</a></p>
 </figcaption>
@@ -578,7 +580,8 @@ The indices <span class="math notranslate nohighlight">\(i,j\)</span> represent 
 <p>Another key feature of convolutional layers is <em>parameter sharing</em>. Unlike dense neural networks where each parameter is used only once, a kernel’s weights are reused as it slides across the input. For example, a 3×3 kernel applied to a 224×224 RGB image (i.e., 3 channels) uses just 27 parameters (3×3×3) instead of the millions required by a fully connected layer. This weight-sharing scheme not only drastically reduces the model’s parameter count but also preserves spatial relationships in the data.</p>
 <p><em>Receptive Field</em> is the region of input pixels that influence each output pixel. This field grows larger in deeper layers through the combination of convolution and pooling, allowing CNNs to detect increasingly complex, hierarchical, and abstract features. For example, the first layer might detect edges, while deeper layers might recognize complex patterns like faces or objects.</p>
 <figure class="align-center" id="receptive-field">
-<a class="reference internal image-reference" href="https://www.researchgate.net/publication/316950618/figure/fig4/AS:11431281212123378&#64;1702542797323/The-receptive-field-of-each-convolution-layer-with-a-3-3-kernel-The-green-area-marks.tif"><img alt="https://www.researchgate.net/publication/316950618/figure/fig4/AS:11431281212123378&#64;1702542797323/The-receptive-field-of-each-convolution-layer-with-a-3-3-kernel-The-green-area-marks.tif" src="https://www.researchgate.net/publication/316950618/figure/fig4/AS:11431281212123378&#64;1702542797323/The-receptive-field-of-each-convolution-layer-with-a-3-3-kernel-The-green-area-marks.tif" style="width: 50%;" /></a>
+<a class="reference internal image-reference" href="https://www.researchgate.net/publication/316950618/figure/fig4/AS:11431281212123378&#64;1702542797323/The-receptive-field-of-each-convolution-layer-with-a-3-3-kernel-The-green-area-marks.tif"><img alt="https://www.researchgate.net/publication/316950618/figure/fig4/AS:11431281212123378&#64;1702542797323/The-receptive-field-of-each-convolution-layer-with-a-3-3-kernel-The-green-area-marks.tif" src="https://www.researchgate.net/publication/316950618/figure/fig4/AS:11431281212123378&#64;1702542797323/The-receptive-field-of-each-convolution-layer-with-a-3-3-kernel-The-green-area-marks.tif" style="width: 50%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 53 </span><span class="caption-text">Receptive field of each convolution layer with a 3x3 kernel. The green area marks the receptive field of each layer. The image is taken from <a class="reference external" href="https://www.mdpi.com/2072-4292/9/5/480">https://www.mdpi.com/2072-4292/9/5/480</a></span><a class="headerlink" href="#receptive-field" title="Link to this image">#</a></p>
 </figcaption>
@@ -603,7 +606,8 @@ $<span class="math notranslate nohighlight">\(
 \)</span>$
 This striding mechanism serves two purposes: it reduces computational complexity and increases the receptive field (the region of input pixels that influence each output pixel).</p>
 <figure class="align-center" id="stride">
-<a class="reference internal image-reference" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJTOGcDwPXtlNnev9ayPj92FIysGddxe__Fw&amp;s"><img alt="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJTOGcDwPXtlNnev9ayPj92FIysGddxe__Fw&amp;s" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJTOGcDwPXtlNnev9ayPj92FIysGddxe__Fw&amp;s" style="width: 50%;" /></a>
+<a class="reference internal image-reference" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJTOGcDwPXtlNnev9ayPj92FIysGddxe__Fw&amp;s"><img alt="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJTOGcDwPXtlNnev9ayPj92FIysGddxe__Fw&amp;s" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJTOGcDwPXtlNnev9ayPj92FIysGddxe__Fw&amp;s" style="width: 50%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 54 </span><span class="caption-text">Stride-1 and stride-2. The image is taken from <a class="reference external" href="https://svitla.com/blog/math-at-the-heart-of-cnn/">https://svitla.com/blog/math-at-the-heart-of-cnn/</a></span><a class="headerlink" href="#stride" title="Link to this image">#</a></p>
 </figcaption>
@@ -618,7 +622,8 @@ This striding mechanism serves two purposes: it reduces computational complexity
 <p>Padding addresses a different challenge: information loss at the borders. Without padding (“valid” padding), the output dimensions shrink after each convolution because the kernel can’t fully overlap with border pixels.
 While various padding schemes are proposed, zero padding has been widely used because it is simple and effective.</p>
 <figure class="align-center" id="padding">
-<a class="reference internal image-reference" href="https://svitla.com/uploads/ckeditor/2024/Math%20at%20the%20heart%20of%20CNN/image_930660943761713546482755.gif"><img alt="https://svitla.com/uploads/ckeditor/2024/Math%20at%20the%20heart%20of%20CNN/image_930660943761713546482755.gif" src="https://svitla.com/uploads/ckeditor/2024/Math%20at%20the%20heart%20of%20CNN/image_930660943761713546482755.gif" style="width: 50%;" /></a>
+<a class="reference internal image-reference" href="https://svitla.com/uploads/ckeditor/2024/Math%20at%20the%20heart%20of%20CNN/image_930660943761713546482755.gif"><img alt="https://svitla.com/uploads/ckeditor/2024/Math%20at%20the%20heart%20of%20CNN/image_930660943761713546482755.gif" src="https://svitla.com/uploads/ckeditor/2024/Math%20at%20the%20heart%20of%20CNN/image_930660943761713546482755.gif" style="width: 50%;" />
+</a>
 <figcaption>
 <p><span class="caption-number">Fig. 55 </span><span class="caption-text">Padding. The image is taken from <a class="reference external" href="https://svitla.com/blog/math-at-the-heart-of-cnn/">https://svitla.com/blog/math-at-the-heart-of-cnn/</a></span><a class="headerlink" href="#padding" title="Link to this image">#</a></p>
 </figcaption>
