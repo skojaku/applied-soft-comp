@@ -13,10 +13,11 @@
 #     "transformers==4.49.0",
 # ]
 # ///
+
 import marimo
 
 __generated_with = "0.11.14"
-app = marimo.App(width="medium")
+app = marimo.App()
 
 
 @app.cell(hide_code=True)
@@ -240,14 +241,10 @@ def _():
     from transformers import AutoTokenizer, AutoModel
 
     # Load the tokenizer and model
-    tokenizer = AutoTokenizer.from_pretrained(
-        "bert-base-uncased"
-    )
+    tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
 
     # Load the model
-    model = AutoModel.from_pretrained(
-        "bert-base-uncased"
-    )
+    model = AutoModel.from_pretrained("bert-base-uncased")
 
     # Set the model to evaluation mode
     model = model.eval()
@@ -393,7 +390,7 @@ def _(last_hidden_state):
     # Get the embedding of the token
     token_embedding = last_hidden_state[0, token_position, :]
 
-    print(token_embedding[:10]) # Truncated for brevity
+    print(token_embedding[:10])  # Truncated for brevity
     return token_embedding, token_position
 
 
@@ -468,7 +465,14 @@ def _(mo):
 @app.cell
 def _(text1, text2, tokenizer):
     # Tokenize the text. We add special tokens to the text.
-    inputs = tokenizer([text1, text2], add_special_tokens=True, padding=True, truncation=True, return_tensors="pt", return_attention_mask = True)
+    inputs = tokenizer(
+        [text1, text2],
+        add_special_tokens=True,
+        padding=True,
+        truncation=True,
+        return_tensors="pt",
+        return_attention_mask=True,
+    )
 
     print(inputs)
     return (inputs,)
@@ -563,7 +567,6 @@ def _(pd):
         combined_table = pd.concat([data_table, label_table], axis=1)
         return combined_table.sample(n_samples)
 
-
     focal_word = "apple"
 
     train_data = load_data(focal_word, is_train=True)
@@ -603,7 +606,7 @@ def _(model, tokenizer, torch, train_data):
 
     # Process data in batches
     for i in range(0, len(train_data), batch_size):
-        batch = train_data.iloc[i:i+batch_size]
+        batch = train_data.iloc[i : i + batch_size]
 
         # Prepare batch data
         batch_sentences = batch["sentence"].tolist()
@@ -616,7 +619,7 @@ def _(model, tokenizer, torch, train_data):
             padding=True,
             truncation=True,
             return_tensors="pt",
-            add_special_tokens=True
+            add_special_tokens=True,
         )
 
         # Get BERT embeddings for the batch
@@ -628,15 +631,16 @@ def _(model, tokenizer, torch, train_data):
                 _outputs_batch.hidden_states[layer_id][i, batch_focal_indices, :]
                 for i, batch_focal_indices in enumerate(batch_focal_indices)
             ]
-            all_embeddings[layer_id]+=focal_token_embeddings
-
+            all_embeddings[layer_id] += focal_token_embeddings
 
         # Stack the embeddings and labels
         all_labels = all_labels + batch_labels
         all_sentences = all_sentences + batch_sentences
 
     for layer_id in all_embeddings.keys():
-        all_embeddings[layer_id] = torch.vstack(all_embeddings[layer_id]).detach().numpy()
+        all_embeddings[layer_id] = (
+            torch.vstack(all_embeddings[layer_id]).detach().numpy()
+        )
     return (
         all_embeddings,
         all_labels,
@@ -671,28 +675,28 @@ def _(
     slider_focal_layer_ids,
 ):
     import altair as alt
+
     # Apply PCA to reduce dimensions to 2D
     pca = PCA(n_components=2, random_state=42)
     xy = pca.fit_transform(all_embeddings[slider_focal_layer_ids.value])
 
     # Create a DataFrame for Altair
-    df_chart = pd.DataFrame({
-        'x': xy[:, 0],
-        'y': xy[:, 1],
-        'label': all_labels,
-        'sentence': all_sentences
-    })
+    df_chart = pd.DataFrame(
+        {"x": xy[:, 0], "y": xy[:, 1], "label": all_labels, "sentence": all_sentences}
+    )
 
-    chart = alt.Chart(df_chart).mark_circle(size=120).encode(
-        x=alt.X('x:Q', title='PCA 1'),
-        y=alt.Y('y:Q', title='PCA 2'),
-        color=alt.Color('label:N', legend=alt.Legend(title="Label")),
-        tooltip=['label', 'sentence']
-    ).properties(
-        width=700,
-        height=500,
-        title='Word Embeddings Visualization'
-    ).interactive()
+    chart = (
+        alt.Chart(df_chart)
+        .mark_circle(size=120)
+        .encode(
+            x=alt.X("x:Q", title="PCA 1"),
+            y=alt.Y("y:Q", title="PCA 2"),
+            color=alt.Color("label:N", legend=alt.Legend(title="Label")),
+            tooltip=["label", "sentence"],
+        )
+        .properties(width=700, height=500, title="Word Embeddings Visualization")
+        .interactive()
+    )
 
     # Display the chart
     chart
@@ -711,7 +715,7 @@ def _(mo):
 
         We set up a MLM task using the following template:
 
-        "When asked about its color, {object} is described as [MASK]."
+        > "Choose a color from red, blue, green, yellow, brown, black, white, purple, orange, pink to describe the color of {object}. Color: [MASK]".
 
         - The {object} is any noun, e.g., "grass", "sky", "banana", "blood", "snow", etc.
         - BERT will predict the masked tokens in the sentence.
@@ -736,7 +740,7 @@ def _(mo):
 def _():
     from transformers import BertForMaskedLM
 
-    model_masked_lm = BertForMaskedLM.from_pretrained('bert-base-uncased')
+    model_masked_lm = BertForMaskedLM.from_pretrained("bert-base-uncased")
     return BertForMaskedLM, model_masked_lm
 
 
@@ -756,7 +760,9 @@ def _(model_masked_lm, tokenizer, torch):
         inputs = tokenizer(text, return_tensors="pt")
 
         # Get position of [MASK] token
-        mask_token_index = torch.where(inputs["input_ids"] == tokenizer.mask_token_id)[1]
+        mask_token_index = torch.where(inputs["input_ids"] == tokenizer.mask_token_id)[
+            1
+        ]
 
         # Forward pass
         with torch.no_grad():
@@ -770,7 +776,9 @@ def _(model_masked_lm, tokenizer, torch):
         top_k_tokens = torch.topk(mask_token_logits, top_k, dim=1).indices[0].tolist()
 
         # Convert token IDs to words
-        top_k_words = [tokenizer.convert_ids_to_tokens(token_id) for token_id in top_k_tokens]
+        top_k_words = [
+            tokenizer.convert_ids_to_tokens(token_id) for token_id in top_k_tokens
+        ]
 
         return top_k_words
     return (predict_masked_word,)
@@ -778,14 +786,15 @@ def _(model_masked_lm, tokenizer, torch):
 
 @app.cell(hide_code=True)
 def _(mo, noun_placeholder, predict_masked_word):
-    template  = "When asked about its color, {object} is described as [MASK]."
-    top_k = 8
+    template = "When asked about its color, {object} is described as [MASK]."
+    template = "Choose a color from red, blue, green, yellow, brown, black, white, purple, orange, pink to describe the color of {object}. Color: [MASK]."
+    top_k = 5
 
     obj = noun_placeholder.value
     predictions = predict_masked_word(template, obj, top_k)
     results = f"**{obj}**: {', '.join(predictions)}"
 
-    mo.vstack([noun_placeholder,results])
+    mo.vstack([noun_placeholder, results])
     return obj, predictions, results, template, top_k
 
 
@@ -801,7 +810,7 @@ def _(mo):
     noun_placeholder = mo.ui.text(
         value="banana",
         label="When asked about its color, {object} is described as [MASK].",
-        full_width = True
+        full_width=True,
     )
     return noun_placeholder, slider_focal_layer_ids
 
