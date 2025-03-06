@@ -1,3 +1,18 @@
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "altair==5.5.0",
+#     "marimo",
+#     "markdown==3.7",
+#     "matplotlib==3.10.1",
+#     "numpy==2.2.3",
+#     "pandas==2.2.3",
+#     "scikit-learn==1.6.1",
+#     "torch==2.6.0",
+#     "tqdm==4.67.1",
+#     "transformers==4.49.0",
+# ]
+# ///
 import marimo
 
 __generated_with = "0.11.14"
@@ -696,7 +711,7 @@ def _(mo):
 
         We set up a MLM task using the following template:
 
-        "The most common color for {object} is [MASK]."
+        "When asked about its color, {object} is described as [MASK]."
 
         - The {object} is any noun, e.g., "grass", "sky", "banana", "blood", "snow", etc.
         - BERT will predict the masked tokens in the sentence.
@@ -763,7 +778,7 @@ def _(model_masked_lm, tokenizer, torch):
 
 @app.cell(hide_code=True)
 def _(mo, noun_placeholder, predict_masked_word):
-    template  = "The most common color for {object} is [MASK]."
+    template  = "When asked about its color, {object} is described as [MASK]."
     top_k = 8
 
     obj = noun_placeholder.value
