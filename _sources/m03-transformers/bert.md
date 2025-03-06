@@ -23,6 +23,20 @@ BERT has become the leading transformer model for natural language processing ta
 
 ```
 
+```{admonition} BERT in interactive mode:
+:class: tip
+
+[Here is a demo notebook for BERT](https://static.marimo.app/static/bert-ux7g)
+
+To run the notebook, download the notebook as a `.py` file and run it with:
+
+```bash
+marimo edit --sandbox bert.py
+```
+
+You will need to install `marimo` and `uv` to run the notebook. But other packages will be installed automatically in uv's virtual environment.
+```
+
 ## Architecture
 
 BERT consists of a stack of encoder transformer layers. Each layer is composed of a self-attention mechanism, a feed-forward neural network, and layer normalization, wired together with residual connections.

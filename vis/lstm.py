@@ -1,7 +1,7 @@
 import marimo
 
-__generated_with = "0.10.17"
-app = marimo.App(width="medium")
+__generated_with = "0.11.14-dev6"
+app = marimo.App()
 
 
 @app.cell(hide_code=True)
@@ -444,12 +444,12 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        > To showcase how this works, the following starter code implements an LSTM for the questions at the entry-level 🧑‍🏫. 
+        > To showcase how this works, the following starter code implements an LSTM for the questions at the entry-level 🧑‍🏫.
         > In this code, I used the memory as follows:
-        > 
+        >
         > 1. First cell state is used to answer the first question, i.e., the sum of all numbers
         > 2. Second cell state is used to answer the last question, i.e., the number of evens followed by the final odd
-        > 3. I used the one hidden memory to answer the second question, i.e., the sum of evens 
+        > 3. I used the one hidden memory to answer the second question, i.e., the sum of evens
 
         You can remove and comment out the start code you want.
         """
@@ -519,7 +519,7 @@ def _(np):
 
         # 🔥 MODIFY: Set your hidden state 🔥
         your_hidden_state = hidden_state[2]
-        your_hidden_state+= input if input %2 == 0 else 0.0 # Here we use the hidden state as a counter, where we add the input to the counter if the input is even, since we are interested in the sum of evens. 
+        your_hidden_state+= input if input %2 == 0 else 0.0 # Here we use the hidden state as a counter, where we add the input to the counter if the input is even, since we are interested in the sum of evens.
 
         # 🔥 MODIFY: Set outputs 🔥
         output = [cell_state[0], your_hidden_state, cell_state[1]]
@@ -592,7 +592,6 @@ def _(game, longShortTermMemory, np, radiogroup):
 
     n_correct /= num_tests
     final_score = np.min(n_correct)
-
     return (
         answers,
         cell_state_size,
@@ -1188,7 +1187,7 @@ def _(mo, np):
         title_color: str = "#333333",
         bullet_color: str = "#555555",
         title_size: str = "24px",
-    ) -> mo.Markdown:
+    ) -> mo.md:
         """
         Creates a styled centered bullet list with title using HTML in Marimo markdown
         Args:
@@ -1200,7 +1199,8 @@ def _(mo, np):
             bullet_color: Color for the bullet points (default: medium gray)
             title_size: Font size for the title (default: 24px)
         Returns:
-            mo.Markdown: Marimo markdown element with styled title and bullet list
+            mo.
+            down: Marimo markdown element with styled title and bullet list
         """
         bullet_points = "\n".join([f"<li>{item}</li>" for item in items])
         possible_values = ", ".join(
@@ -1245,7 +1245,7 @@ def _(mo, np):
         height: str = "1px",
         margin: str = "20px 0",
         width: str = "100%",
-    ) -> mo.Markdown:
+    ) -> mo.md:
         """
         Creates a horizontal line with customizable styling
         Args:
