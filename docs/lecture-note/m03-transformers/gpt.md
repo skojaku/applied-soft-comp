@@ -14,6 +14,23 @@ kernelspec:
 
 The Generative Pre-trained Transformer (GPT) {footcite}`radford2018language` represents a significant evolution in transformer-based language models, focusing on powerful text generation capabilities through a decoder-only architecture. While BERT uses bidirectional attention to understand context, GPT employs unidirectional (causal) attention to generate coherent text by predicting one token at a time.
 
+
+
+
+```{admonition} GPT in interactive mode:
+:class: tip
+
+[Here is a demo notebook for GPT](https://static.marimo.app/static/gpt-ar61)
+
+To run the notebook, download the notebook as a `.py` file and run it with:
+
+```bash
+marimo edit --sandbox gpt-interactive.py
+```
+
+You will need to install `marimo` and `uv` to run the notebook. But other packages will be installed automatically in uv's virtual environment.
+```
+
 ## Architecture
 
 Like in BERT, GPT also uses a transformer architecture. The main difference is that BERT uses an encoder transformer, while GPT uses a decoder transformer with some modifications.
