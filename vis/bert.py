@@ -13,11 +13,10 @@
 #     "transformers==4.49.0",
 # ]
 # ///
-
 import marimo
 
 __generated_with = "0.11.14"
-app = marimo.App(width="medium")
+app = marimo.App()
 
 
 @app.cell(hide_code=True)
@@ -534,15 +533,12 @@ def _():
     import matplotlib.pyplot as plt
     from tqdm import tqdm as tqdm
     from sklearn.decomposition import PCA
-
     return PCA, np, pd, plt, sys, tqdm
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""We will use [CoarseWSD-20](https://github.com/danlou/bert-disambiguation/tree/master/data/CoarseWSD-20). The dataset contains sentences with polysemous words and their sense labels. We will see how to use BERT to disambiguate the word senses. Read the [README](https://github.com/danlou/bert-disambiguation/blob/master/data/CoarseWSD-20/README.txt) for more details."""
-    )
+    mo.md(r"""We will use [CoarseWSD-20](https://github.com/danlou/bert-disambiguation/tree/master/data/CoarseWSD-20). The dataset contains sentences with polysemous words and their sense labels. We will see how to use BERT to disambiguate the word senses. Read the [README](https://github.com/danlou/bert-disambiguation/blob/master/data/CoarseWSD-20/README.txt) for more details.""")
     return
 
 
@@ -718,7 +714,7 @@ def _(mo):
 
         We set up a MLM task using the following template:
 
-        "When asked about its color, {object} is described as [MASK]."
+        > "Choose a color from red, blue, green, yellow, brown, black, white, purple, orange, pink to describe the color of {object}. Color: [MASK]".
 
         - The {object} is any noun, e.g., "grass", "sky", "banana", "blood", "snow", etc.
         - BERT will predict the masked tokens in the sentence.
@@ -784,14 +780,14 @@ def _(model_masked_lm, tokenizer, torch):
         ]
 
         return top_k_words
-
     return (predict_masked_word,)
 
 
 @app.cell(hide_code=True)
 def _(mo, noun_placeholder, predict_masked_word):
     template = "When asked about its color, {object} is described as [MASK]."
-    top_k = 8
+    template = "Choose a color from red, blue, green, yellow, brown, black, white, purple, orange, pink to describe the color of {object}. Color: [MASK]."
+    top_k = 5
 
     obj = noun_placeholder.value
     predictions = predict_masked_word(template, obj, top_k)
@@ -823,7 +819,6 @@ def _():
     import marimo as mo
     import inspect
     import markdown
-
     return inspect, markdown, mo
 
 

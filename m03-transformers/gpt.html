@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
@@ -516,8 +516,6 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#from-deterministic-to-stochastic-sampling">From Deterministic to Stochastic Sampling</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hands-on">Hands-on</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">🔥 Exercise 🔥</a></li>
 </ul>
             </nav>
         </div>
@@ -532,6 +530,15 @@ document.write(`
   <section class="tex2jax_ignore mathjax_ignore" id="generative-pre-trained-transformer-gpt">
 <h1>Generative Pre-trained Transformer (GPT)<a class="headerlink" href="#generative-pre-trained-transformer-gpt" title="Link to this heading">#</a></h1>
 <p>The Generative Pre-trained Transformer (GPT) <a class="footnote-reference brackets" href="#footcite-radford2018language" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> represents a significant evolution in transformer-based language models, focusing on powerful text generation capabilities through a decoder-only architecture. While BERT uses bidirectional attention to understand context, GPT employs unidirectional (causal) attention to generate coherent text by predicting one token at a time.</p>
+<div class="tip admonition">
+<p class="admonition-title">GPT in interactive notebook:</p>
+<p><a class="reference external" href="https://static.marimo.app/static/gpt-ar61">Here is a demo notebook for GPT</a></p>
+<p>To run the notebook, download the notebook as a <code class="docutils literal notranslate"><span class="pre">.py</span></code> file and run it with:</p>
+<blockquote>
+<div><p>marimo edit –sandbox <a class="reference external" href="http://gpt-interactive.py">gpt-interactive.py</a></p>
+</div></blockquote>
+<p>You will need to install <code class="docutils literal notranslate"><span class="pre">marimo</span></code> and <code class="docutils literal notranslate"><span class="pre">uv</span></code> to run the notebook. But other packages will be installed automatically in uv’s virtual environment.</p>
+</div>
 <section id="architecture">
 <h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading">#</a></h2>
 <p>Like in BERT, GPT also uses a transformer architecture. The main difference is that BERT uses an encoder transformer, while GPT uses a decoder transformer with some modifications.</p>
@@ -539,7 +546,7 @@ document.write(`
 <a class="reference internal image-reference" href="https://heidloff.net/assets/img/2023/02/transformers.png"><img alt="GPT architecture" src="https://heidloff.net/assets/img/2023/02/transformers.png" style="width: 80%;" />
 </a>
 <figcaption>
-<p><span class="caption-number">Fig. 34 </span><span class="caption-text">GPT architecture.</span><a class="headerlink" href="#gpt-architecture" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 35 </span><span class="caption-text">GPT architecture.</span><a class="headerlink" href="#gpt-architecture" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <div class="admonition tip">
@@ -556,7 +563,7 @@ document.write(`
 <a class="reference internal image-reference" href="https://substackcdn.com/image/fetch/f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F7536a59a-5326-4a8b-ab12-cebe49acde31_1438x936.png"><img alt="GPT causal attention" src="https://substackcdn.com/image/fetch/f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F7536a59a-5326-4a8b-ab12-cebe49acde31_1438x936.png" style="width: 80%;" />
 </a>
 <figcaption>
-<p><span class="caption-number">Fig. 35 </span><span class="caption-text">Causal attention in GPT.</span><a class="headerlink" href="#gpt-causal-attention" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 36 </span><span class="caption-text">Causal attention in GPT.</span><a class="headerlink" href="#gpt-causal-attention" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <p>Like BERT, GPT uses learned token embeddings to convert input tokens into continuous vector representations. The model also employs learned positional embeddings that are added to the token embeddings to encode position information. A key difference from BERT is that GPT uses a <em>causal attention mechanism</em>, which means each position can only attend to previous positions in the sequence, enabling the model to generate text in a left-to-right fashion by predicting one token at a time.</p>
@@ -599,7 +606,7 @@ Importantly, larger models are more efficient learners - they need proportionall
 <a class="reference internal image-reference" href="https://media.licdn.com/dms/image/v2/D4E22AQFZFRSwwzCSqQ/feedshare-shrink_2048_1536/feedshare-shrink_2048_1536/0/1725003016027?e=2147483647&amp;v=beta&amp;t=oBH1s4V8N0wKCOJQakA_wrwgFrixs56S0s_QafZOvbA"><img alt="GPT inference" src="https://media.licdn.com/dms/image/v2/D4E22AQFZFRSwwzCSqQ/feedshare-shrink_2048_1536/feedshare-shrink_2048_1536/0/1725003016027?e=2147483647&amp;v=beta&amp;t=oBH1s4V8N0wKCOJQakA_wrwgFrixs56S0s_QafZOvbA" style="width: 50%;" />
 </a>
 <figcaption>
-<p><span class="caption-number">Fig. 36 </span><span class="caption-text">GPT predicts the next token repeatedly to generate text.</span><a class="headerlink" href="#gpt-inference" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 37 </span><span class="caption-text">GPT predicts the next token repeatedly to generate text.</span><a class="headerlink" href="#gpt-inference" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <section id="greedy-and-beam-search">
@@ -611,7 +618,7 @@ Sampling a token from the distribution is not as easy as it might seem. This is 
 <a class="reference internal image-reference" href="https://huggingface.co/blog/assets/02_how-to-generate/greedy_search.png"><img alt="GPT greedy search" src="https://huggingface.co/blog/assets/02_how-to-generate/greedy_search.png" style="width: 50%;" />
 </a>
 <figcaption>
-<p><span class="caption-number">Fig. 37 </span><span class="caption-text">GPT greedy search.</span><a class="headerlink" href="#gpt-greedy-search" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 38 </span><span class="caption-text">GPT greedy search.</span><a class="headerlink" href="#gpt-greedy-search" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <p><strong>Beam search</strong> alleviates this problem by taking into account the high-order dependencies between tokens. For example, in generating “The cat ran across the ___”, beam search might preserve a path containing “mat” even if “floor” or “room” have higher individual probabilities at that position. This is because the complete sequence like “mat quickly” could be more probable when considering the token next after “mat”.  “The cat ran across the mat quickly” is a more natural phrase than “The cat ran across the floor quickly” when considering the full flow and common linguistic patterns.</p>
@@ -619,7 +626,7 @@ Sampling a token from the distribution is not as easy as it might seem. This is 
 <a class="reference internal image-reference" href="https://huggingface.co/blog/assets/02_how-to-generate/beam_search.png"><img alt="GPT beam search" src="https://huggingface.co/blog/assets/02_how-to-generate/beam_search.png" style="width: 50%;" />
 </a>
 <figcaption>
-<p><span class="caption-number">Fig. 38 </span><span class="caption-text">GPT beam search.</span><a class="headerlink" href="#gpt-beam-search" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 39 </span><span class="caption-text">GPT beam search.</span><a class="headerlink" href="#gpt-beam-search" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <p>Beam search maintains multiple possible sequences (beams) in parallel, exploring different paths simultaneously. At each step, it expands all current beams, scores the resulting sequences, and keeps only the top-k highest scoring ones. For instance, with a beam width of 3:</p>
@@ -640,7 +647,7 @@ Sampling a token from the distribution is not as easy as it might seem. This is 
 <a class="reference internal image-reference" href="https://storage.googleapis.com/zenn-user-upload/8p2r9urhtn5nztdg6mnia3toibhl"><img alt="GPT top-k top-p" src="https://storage.googleapis.com/zenn-user-upload/8p2r9urhtn5nztdg6mnia3toibhl" style="width: 80%;" />
 </a>
 <figcaption>
-<p><span class="caption-number">Fig. 39 </span><span class="caption-text">Nucleus sampling. The image is taken from <a class="reference external" href="https://zenn.dev/hellorusk/articles/1c0bef15057b1d">this blog</a>.</span><a class="headerlink" href="#gpt-top-k-top-p" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 40 </span><span class="caption-text">Nucleus sampling. The image is taken from <a class="reference external" href="https://zenn.dev/hellorusk/articles/1c0bef15057b1d">this blog</a>.</span><a class="headerlink" href="#gpt-top-k-top-p" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <p><strong>Temperature Control</strong>
@@ -654,268 +661,10 @@ p_i = \frac{\exp(z_i/\tau)}{\sum_j \exp(z_j/\tau)}
 <a class="reference internal image-reference" href="https://cdn.prod.website-files.com/618399cd49d125734c8dec95/6639e35ce91c16b3b9564b2f_mxaIPcROZcBFYta1I0nzWjlGTgs-LxzUOE3p6Kbvf9qPpZzBh5AAZG7ciRtgVquhLTtrM8ToJdNd-ubXvuz8tRfrqBwSozWHCj457pm378buxz2-XrMfWzfSv3b793QP61kLxRKT299WP1gbas_E118.png"><img alt="GPT temperature" src="https://cdn.prod.website-files.com/618399cd49d125734c8dec95/6639e35ce91c16b3b9564b2f_mxaIPcROZcBFYta1I0nzWjlGTgs-LxzUOE3p6Kbvf9qPpZzBh5AAZG7ciRtgVquhLTtrM8ToJdNd-ubXvuz8tRfrqBwSozWHCj457pm378buxz2-XrMfWzfSv3b793QP61kLxRKT299WP1gbas_E118.png" style="width: 80%;" />
 </a>
 <figcaption>
-<p><span class="caption-number">Fig. 40 </span><span class="caption-text">Temperature controls the concentration of the probability distribution. Lower temperature makes the distribution more peaked, while higher temperature makes the distribution more flat.</span><a class="headerlink" href="#gpt-temperature" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 41 </span><span class="caption-text">Temperature controls the concentration of the probability distribution. Lower temperature makes the distribution more peaked, while higher temperature makes the distribution more flat.</span><a class="headerlink" href="#gpt-temperature" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
-</section>
-<section id="hands-on">
-<h2>Hands-on<a class="headerlink" href="#hands-on" title="Link to this heading">#</a></h2>
-<p>Let us learn how to generate text with GPT-2. We will use the <code class="docutils literal notranslate"><span class="pre">transformers</span></code> library to load the model and tokenizer.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">gc</span>
-<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">AutoModelForCausalLM</span><span class="p">,</span> <span class="n">AutoTokenizer</span>
-<span class="kn">import</span> <span class="nn">transformers</span>
-
-<span class="c1"># Force CPU usage and clear memory</span>
-<span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
-<span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
-
-<span class="c1"># Force CPU usage for this example</span>
-<span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">mps</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
-    <span class="n">torch_device</span> <span class="o">=</span> <span class="s2">&quot;mps&quot;</span>  <span class="c1"># MPS (Apple Silicon)</span>
-<span class="k">elif</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
-    <span class="n">torch_device</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span> <span class="c1">#  CUDA (GPU)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">torch_device</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span> <span class="c1"># (CPU)</span>
-
-<span class="c1"># Initialize tokenizer and set pad token</span>
-<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s2">&quot;gpt2&quot;</span><span class="p">)</span>
-<span class="n">tokenizer</span><span class="o">.</span><span class="n">pad_token</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">eos_token</span>
-
-<span class="c1"># Initialize model and set pad token id</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForCausalLM</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s2">&quot;gpt2&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch_device</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pad_token_id</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">eos_token_id</span>
-
-<span class="c1"># We encode the input text into tokens.</span>
-<span class="n">model_inputs</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="s1">&#39;I enjoy walking with &#39;</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s1">&#39;pt&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch_device</span><span class="p">)</span>
-
-<span class="c1"># generate 40 new tokens</span>
-<span class="n">greedy_output</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="o">**</span><span class="n">model_inputs</span><span class="p">,</span>
-                             <span class="n">max_new_tokens</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
-                             <span class="n">pad_token_id</span><span class="o">=</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">eos_token_id</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Output:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="mi">100</span> <span class="o">*</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">greedy_output</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">skip_special_tokens</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/skojaku-admin/miniforge3/envs/applsoftcomp/lib/python3.10/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
-  from .autonotebook import tqdm as notebook_tqdm
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Output:
-----------------------------------------------------------------------------------------------------
-I enjoy walking with ursine, but I&#39;m not sure if I can walk with ursine. I&#39;m not
-</pre></div>
-</div>
-</div>
-</div>
-<p>The greedy search approach often falls into repetitive patterns. This limitation occurs because greedy search always selects the most probable next token, leading to predictable and sometimes monotonous outputs.
-Interested readers can refer to these papers <a class="footnote-reference brackets" href="#footcite-vijayakumar2016diverse" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a> and <a class="footnote-reference brackets" href="#footcite-shao2017generating" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a> for more details.</p>
-<p>Now, let us showcase how to generate text with beam search.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">beam_output</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span>
-    <span class="o">**</span><span class="n">model_inputs</span><span class="p">,</span>
-    <span class="n">max_new_tokens</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
-    <span class="n">num_beams</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="c1"># Number of beams</span>
-    <span class="n">early_stopping</span><span class="o">=</span><span class="kc">True</span> <span class="c1"># Stop when the model generates the EOS token</span>
-<span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Output:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="mi">100</span> <span class="o">*</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">beam_output</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">skip_special_tokens</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Setting `pad_token_id` to `eos_token_id`:None for open-end generation.
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Output:
-----------------------------------------------------------------------------------------------------
-I enjoy walking with iced tea, but I don&#39;t like the taste. I like the taste of tea, but I don&#39;t like the taste of coffee. I like the taste of coffee, but I don&#39;t like
-</pre></div>
-</div>
-</div>
-</div>
-<p>Beam search produces more polished text compared to greedy search by exploring multiple possible sequences simultaneously. However, it still tends to generate repetitive content since it focuses on the most probable paths.</p>
-<p>Beam search generates multiple sequences in parallel, and we can retrieve the top-k sequences with the highest probability as follows:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># set return_num_sequences &gt; 1</span>
-<span class="n">beam_outputs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span>
-    <span class="o">**</span><span class="n">model_inputs</span><span class="p">,</span>
-    <span class="n">max_new_tokens</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
-    <span class="n">num_beams</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="c1"># Number of beams</span>
-    <span class="n">num_return_sequences</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="c1"># Number of output sequences</span>
-    <span class="n">early_stopping</span><span class="o">=</span><span class="kc">True</span> <span class="c1"># Stop when the model generates the EOS token</span>
-<span class="p">)</span>
-
-<span class="c1"># now we have 3 output sequences</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Output:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="mi">100</span> <span class="o">*</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">beam_output</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">beam_outputs</span><span class="p">):</span>
-  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">beam_output</span><span class="p">,</span> <span class="n">skip_special_tokens</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Setting `pad_token_id` to `eos_token_id`:None for open-end generation.
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Output:
-----------------------------------------------------------------------------------------------------
-0: I enjoy walking with iced tea, but I don&#39;t like the taste. I like the taste of tea, but I don&#39;t like the taste of coffee. I like the taste of coffee, but I don&#39;t like
-1: I enjoy walking with iced tea, but I don&#39;t like the taste. I like the taste of tea, but I don&#39;t like the taste of ice cream. I like the taste of ice cream, but I don
-2: I enjoy walking with iced tea, but I don&#39;t like the taste. I like the taste of tea, but I don&#39;t like the taste of tea. I like the taste of tea, but I don&#39;t like
-3: I enjoy walking with iced tea, but I don&#39;t like the taste. I like the taste of tea, but I don&#39;t like the taste of ice cream. I don&#39;t like the taste of ice cream. I
-4: I enjoy walking with iced tea, but I don&#39;t like the taste. I like the taste of tea, but I don&#39;t like the taste of ice cream. I don&#39;t like the taste of ice cream, but
-</pre></div>
-</div>
-</div>
-</div>
-<p>Notice how similar these generated sequences are to each other. This similarity stems from beam search’s fundamental approach: it still favors highly probable sequences, which often share common patterns and phrasings. This behavior reveals a key limitation of probability-based selection strategies.</p>
-<p>These results highlight a crucial insight: the most probable sequences aren’t necessarily the most engaging or human-like. Research has shown that human-written text actually exhibits more variety and unpredictability than the highest-probability sequences generated by language models <a class="footnote-reference brackets" href="#footcite-holtzman2019curious" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>.</p>
-<p>This observation can be interpreted in two ways: either our models aren’t yet sophisticated enough to capture the true distribution of human text <a class="footnote-reference brackets" href="#footcite-welleck2020unlikelihood" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a>, or our generation strategies need to incorporate some randomness to better mimic human writing patterns <a class="footnote-reference brackets" href="#footcite-holtzman2019curious" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>. Let’s explore the second hypothesis by introducing controlled randomness into our generation process.</p>
-<p>In transformers, we set <code class="docutils literal notranslate"><span class="pre">do_sample=True</span></code> to activate sampling. And we set <code class="docutils literal notranslate"><span class="pre">top_k=50</span></code> to perform the top-k sampling, with <span class="math notranslate nohighlight">\(k=50\)</span>.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">set_seed</span>
-<span class="c1"># set seed to reproduce results. Feel free to change the seed though to get different results</span>
-<span class="n">set_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-
-<span class="c1"># activate sampling and deactivate top_k by setting top_k sampling to 0</span>
-<span class="n">sample_output</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span>
-    <span class="o">**</span><span class="n">model_inputs</span><span class="p">,</span>
-    <span class="n">max_new_tokens</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
-    <span class="n">do_sample</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">top_k</span><span class="o">=</span><span class="mi">50</span>
-<span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Output:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="mi">100</span> <span class="o">*</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">sample_output</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">skip_special_tokens</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Setting `pad_token_id` to `eos_token_id`:None for open-end generation.
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Output:
-----------------------------------------------------------------------------------------------------
-I enjoy walking with ike. I use the bike with a lot of energy - 30% of what I spend is consumed by energy and it&#39;s so I&#39;ve done it with no worries about weight or risk of injury.
-</pre></div>
-</div>
-</div>
-</div>
-<p>Now the generated text becomes very different from the greedy search. We can control the “randomness” of the generated text by setting the temperature. For example, by default, the temperature is 1.0. But we can reduce it to make the generated text to have a higher probability.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">set_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-
-<span class="c1"># activate sampling and deactivate top_k by setting top_k sampling to 0</span>
-<span class="n">sample_output</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span>
-    <span class="o">**</span><span class="n">model_inputs</span><span class="p">,</span>
-    <span class="n">max_new_tokens</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
-    <span class="n">do_sample</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">top_k</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-    <span class="n">temperature</span><span class="o">=</span><span class="mf">0.7</span>
-<span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Output:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="mi">100</span> <span class="o">*</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">sample_output</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">skip_special_tokens</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Setting `pad_token_id` to `eos_token_id`:None for open-end generation.
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Output:
-----------------------------------------------------------------------------------------------------
-I enjoy walking with ike. I use the bike with a lot of energy and I feel that it is the best way to go for both the trail and the trail. I like the feeling of being able to walk with
-</pre></div>
-</div>
-</div>
-</div>
-<p>Now, let us try nucleus sampling. We set <code class="docutils literal notranslate"><span class="pre">top_p=0.95</span></code> to perform the nucleus sampling, with <span class="math notranslate nohighlight">\(p=0.95\)</span>.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">set_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-
-<span class="c1"># activate sampling and deactivate top_k by setting top_k sampling to 0</span>
-<span class="n">sample_output</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span>
-    <span class="o">**</span><span class="n">model_inputs</span><span class="p">,</span>
-    <span class="n">max_new_tokens</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
-    <span class="n">do_sample</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">top_p</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
-    <span class="n">top_k</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="c1"># deactivate top_k.</span>
-<span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Output:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="mi">100</span> <span class="o">*</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">sample_output</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">skip_special_tokens</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Setting `pad_token_id` to `eos_token_id`:None for open-end generation.
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Output:
-----------------------------------------------------------------------------------------------------
-I enjoy walking with ike. Great service, great stuff. Shall be worth the 30 GB add on... 13717
-
-Great place to hang out I&#39;ve been here a few times lately and I have a huge dog
-</pre></div>
-</div>
-</div>
-</div>
-<p>It is hard to say which method is better. In practice, both methods often work well. You can combine both methods by setting <code class="docutils literal notranslate"><span class="pre">top_k=50</span></code> and <code class="docutils literal notranslate"><span class="pre">top_p=0.95</span></code>, for instance. This leaves the candidate set of tokens that are more likely than those in the top-k sampling or nucleus sampling. So let’s sample multiple sequences using the nucleus sampling and top-k sampling being toggled.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">set_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-
-<span class="c1"># set top_k = 50 and set top_p = 0.95 and num_return_sequences = 3</span>
-<span class="n">sample_outputs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span>
-    <span class="o">**</span><span class="n">model_inputs</span><span class="p">,</span>
-    <span class="n">max_new_tokens</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
-    <span class="n">do_sample</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">top_k</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-    <span class="n">top_p</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
-    <span class="n">num_return_sequences</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Output:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="mi">100</span> <span class="o">*</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sample_output</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sample_outputs</span><span class="p">):</span>
-  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">sample_output</span><span class="p">,</span> <span class="n">skip_special_tokens</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Setting `pad_token_id` to `eos_token_id`:None for open-end generation.
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Output:
-----------------------------------------------------------------------------------------------------
-0: I enjoy walking with ike. I use the bike with a lot of energy and also feel that it is comfortable.
-
-&quot;It is not so I know how to drive. So I don&#39;t have any problems with
-1: I enjoy walking with _____ and laughing with them. Being an ex-girlfriend or girlfriend in an argument is not uncommon. So being in a relationship isn&#39;t unusual. Being with a man for over 30 minutes is not
-2: I enjoy walking with  that I&#39;ll do my best and go after the people.&quot;
- So what to do?
-            Take some time to think about all these things. It should be very clear that if
-</pre></div>
-</div>
-</div>
-</div>
-</section>
-<section id="exercise">
-<h2>🔥 Exercise 🔥<a class="headerlink" href="#exercise" title="Link to this heading">#</a></h2>
-<p>Write an interesting story using only GPT-2. Write the first prompt and let GPT-2 generate the rest.</p>
-<p>Change the temperature, top-k, top-p, and other parameters to make the story natural and interesting.</p>
 </section>
 </section>
 
@@ -993,8 +742,6 @@ Great place to hang out I&#39;ve been here a few times lately and I have a huge 
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#from-deterministic-to-stochastic-sampling">From Deterministic to Stochastic Sampling</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hands-on">Hands-on</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">🔥 Exercise 🔥</a></li>
 </ul>
   </nav></div>
 
