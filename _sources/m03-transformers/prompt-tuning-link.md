@@ -1,0 +1,6 @@
+<script>
+    window.location.href = "";
+</script>
+<noscript>
+    <meta http-equiv="refresh" content="0;url=">
+</noscript>

@@ -1,0 +1,779 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Appendix: Text-to-Text Transfer Transformer (T5) &#8212; Applied Soft Computing</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'm03-transformers/appendix-t5';</script>
+    <script src="../_static/js/custom.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Module 3: Image Processing" href="../m04-image-processing/what-to-learn.html" />
+    <link rel="prev" title="Summary" href="summary.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../home.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.jpg" class="logo__image only-light" alt="Applied Soft Computing - Home"/>
+    <script>document.write(`<img src="../_static/logo.jpg" class="logo__image only-dark" alt="Applied Soft Computing - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../home.html">
+                    Welcome to SSIE 541/441 Applied Soft Computing
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Intro</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../intro/why-applied-soft-computing.html">Why applied soft computing?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/setup.html">Set up</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/deliverables.html">Deliverables</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Word and Document Embeddings</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/what-to-learn.html">Module 1: Word Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/pen-and-paper.html">Pen and Paper Exercise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/tf-idf.html">Teaching computers how to understand words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/word2vec.html">word2vec: a small model with a big idea</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/word2vec_plus.html">GloVe and FastText: Building on Word2Vec’s Foundation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/sem-axis.html">Understanding SemAxis: Semantic Axes in Word Vector Spaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/bias-in-embedding.html">Bias in Word Embeddings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/doc2vec.html">Doc2Vec: From Words to Documents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m01-word-embedding/summary.html">Summary</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Recurrent Neural Networks</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/what-to-learn.html">Module 2: Language Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/rnn-interactive.html">🧠 Learn RNNs Through Physics!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/reccurrent-neural-net.html">Recurrent Neural Network (RNN)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/lstm.html">Long Short-Term Memory (LSTM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/elmo.html">Embedding from Language Models (ELMo)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/seq2seq.html">Sequence-to-Sequence Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m02-recurrent-neural-network/summary.html">Summary</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Transformers</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="what-to-learn.html">Module 3: Transformers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transformers.html">Transformers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bert.html">Bidirectional Encoder Representations from Transformers (BERT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sentence-bert.html">Sentence-BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpt.html">Generative Pre-trained Transformer (GPT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="from-language-model-to-instruction-following.html">From Language Model to Instruction-Following</a></li>
+<li class="toctree-l1"><a class="reference internal" href="summary.html">Summary</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Appendix: Text-to-Text Transfer Transformer (T5)</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Images</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/what-to-learn.html">Module 3: Image Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/pen-and-paper.html">Pen and paper exercises</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/image-processing.html">Preliminaries: Image Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/cnn.html">From Traditional Image Processing to Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/lenet.html">LeNet and LeNet-5: Pioneering CNN Architectures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/alexnet.html">AlexNet: A Breakthrough in Deep Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/vgg.html">VGGNet - A Deep Convolutional Neural Network for Image Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/inception.html">GoogleNet and the Inception Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/resnet.html">ResNet (Residual Neural Networks)</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Graphs</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/what-to-learn.html">Module 4: Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/pen-and-paper.html">Pen and paper exercises</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/spectral-embedding.html">Spectral Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/graph-embedding-w-word2vec.html">Graph embedding with word2vec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/spectral-vs-neural-embedding.html">Spectral vs Neural Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/from-image-to-graph.html">From Image to Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/graph-convolutional-network.html">Graph Convolutional Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/popular-gnn.html">Popular Graph Neural Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/appendix.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m05-graph/software.html">Software for Network Embedding</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/skojaku/applied-soft-comp" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/skojaku/applied-soft-comp/issues/new?title=Issue%20on%20page%20%2Fm03-transformers/appendix-t5.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/m03-transformers/appendix-t5.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Appendix: Text-to-Text Transfer Transformer (T5)</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-t5">What is T5?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comparison-of-practices">Comparison of practices</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#model-architecture">Model Architecture</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#encoder-decoder">Encoder-Decoder</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#language-model">Language Model</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#prefix-lm">Prefix LM</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pre-training-objectives">Pre-training Objectives</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pre-training-datasets">Pre-training Datasets</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#training-details">Training Details</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fine-tuning">Fine-tuning</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#multi-task-learning">Multi-task Learning</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#model-size">Model Size</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#summary-of-validation-experiments">Summary of validation experiments</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="appendix-text-to-text-transfer-transformer-t5">
+<h1>Appendix: Text-to-Text Transfer Transformer (T5)<a class="headerlink" href="#appendix-text-to-text-transfer-transformer-t5" title="Link to this heading">#</a></h1>
+<p>T5 (Text-to-Text Transfer Transformer) is a transformer-based model introduced by Google in 2020. It represents a milestone in NLP by providing a unified approach to handle diverse tasks like translation, summarization, classification, and question answering. T5 embodies the best practices in transformer architecture design and showcases the state of NLP technology at the time of its release.
+Understanding T5 provides a good starting point into effective transformer model design for NLP applications.
+This note covers only the essennce, and interested readers are encouraged to read the original paper <a class="footnote-reference brackets" href="#footcite-raffel2020exploring" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.</p>
+<section id="what-is-t5">
+<h2>What is T5?<a class="headerlink" href="#what-is-t5" title="Link to this heading">#</a></h2>
+<p>A core idea of T5 is that most NLP tasks can be formulated as converting input text into output text. For example, translation becomes “translate English to German: [text]”, summarization becomes “summarize: [text]”, and classification becomes “classify: [text]”.</p>
+<figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="https://production-media.paperswithcode.com/methods/new_text_to_text.jpg"><img alt="T5's text-to-text format" src="https://production-media.paperswithcode.com/methods/new_text_to_text.jpg" style="width: 500px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 42 </span><span class="caption-text">Many NLP tasks such as translation, summarization, classification, and question answering can be formulated as converting input text into output text.</span><a class="headerlink" href="#id3" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>The rise of transformer models has led to diverse approaches in NLP. Different models such as BERT and GPT were developed with specialized architectures and pre-training objectives. For example, BERT uses bidirectional attention for language understanding tasks, while GPT uses unidirectional attention for text generation.
+However, these models become so diverse that it became challenging to determine which architectural choices and training methods were most effective. T5 addresses this by providing a unified framework that enables direct comparison between different transformer model designs and helps identify the key factors driving their success.</p>
+</section>
+<section id="comparison-of-practices">
+<h2>Comparison of practices<a class="headerlink" href="#comparison-of-practices" title="Link to this heading">#</a></h2>
+<p>The original paper of T5 <a class="footnote-reference brackets" href="#footcite-raffel2020exploring" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> is like a review paper that summarizes the effective practices for transformer models. The authors compared various practices and used the most effective ones to form T5. This note covers only the overview of the practices. Interested readers are encouraged to read the original paper.</p>
+<section id="model-architecture">
+<h3>Model Architecture<a class="headerlink" href="#model-architecture" title="Link to this heading">#</a></h3>
+<p>Three architectures have been widely used for language models:</p>
+<figure class="align-center" id="id4">
+<a class="reference internal image-reference" href="https://miro.medium.com/v2/resize:fit:1400/1*VQxkvg_T0f55crgKEZY8eg.png"><img alt="T5's text-to-text format" src="https://miro.medium.com/v2/resize:fit:1400/1*VQxkvg_T0f55crgKEZY8eg.png" style="width: 500px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 43 </span><span class="caption-text">Three main architectures for language models.</span><a class="headerlink" href="#id4" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<section id="encoder-decoder">
+<h4>Encoder-Decoder<a class="headerlink" href="#encoder-decoder" title="Link to this heading">#</a></h4>
+<p>The encoder-decoder architecture largely follows the design proposed in “Attention is All You Need”. The encoder processes the input sequence using self-attention to create contextual representations, while the decoder generates the output sequence using both self-attention and cross-attention to the encoder’s representations.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>T5 handles positional information differently from the original Transformer. While the original Transformer added absolute position encodings to input embeddings (marking each token’s exact position), T5 uses relative position embeddings. These embeddings represent the relative distance between tokens in the self-attention mechanism, rather than their absolute positions. The relative position information is incorporated as a bias term when computing attention weights, and while each attention head uses different embeddings, they are shared across all layers of the model.</p>
+</div>
+</section>
+<section id="language-model">
+<h4>Language Model<a class="headerlink" href="#language-model" title="Link to this heading">#</a></h4>
+<p>In a Language Model, only the Decoder of the Encoder-Decoder architecture is used. It generates output recursively by sampling words from the output of step <span class="math notranslate nohighlight">\(i\)</span> and using them as input for step <span class="math notranslate nohighlight">\(i+1\)</span>. Models such as GPT fall into this type.</p>
+</section>
+<section id="prefix-lm">
+<h4>Prefix LM<a class="headerlink" href="#prefix-lm" title="Link to this heading">#</a></h4>
+<p>When using a Language Model in a “Text-to-Text” context, one drawback is that it can only predict the next token based on the sequence of tokens from the beginning to the current position, which means it cannot learn bidirectional dependencies such as those learned by BERT. A Prefix LM addresses this by cleverly designing the attention masking: it allows bidirectional visibility for the input text portion (=Prefix) and unidirectional visibility for the output text portion.
+For example, in the case of English-French translation:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align*}
+\text{Input portion:} &amp; \text{ &quot;Translate English to French. English: The cat sat on the mat. French:&quot;} \\
+\text{Output portion:} &amp; \text{ &quot;Le chat était assis sur le tapis&quot;}
+\end{align*}
+\end{split}\]</div>
+<p>The model can see all tokens in the input portion bidirectionally, but can only see previous tokens in the output portion, ensuring proper translation generation.</p>
+<p>The prefix-LM is implemented by attention masking, where the input tokens can attent to all tokens in the input portion bidirectionally, but the output tokens can only attend to previous tokens in the output portion (the right most part of the figure below).</p>
+<figure class="align-center" id="id5">
+<a class="reference internal image-reference" href="https://img-blog.csdnimg.cn/direct/4ff1176d68e84518940e79b05803c5db.png"><img alt="T5's text-to-text format" src="https://img-blog.csdnimg.cn/direct/4ff1176d68e84518940e79b05803c5db.png" style="width: 80%;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 44 </span><span class="caption-text">Attention masking for Prefix LM vs Causal LM. Image from <a class="reference external" href="https://sh-tsang.medium.com/brief-review-unified-language-model-pre-training-for-natural-language-understanding-and-8e133c449377">Brief Review — Unified Language Model Pre-training for Natural Language Understanding and Generation | by Sik-Ho Tsang | Medium</a></span><a class="headerlink" href="#id5" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+<section id="pre-training-objectives">
+<h3>Pre-training Objectives<a class="headerlink" href="#pre-training-objectives" title="Link to this heading">#</a></h3>
+<p>Three methods were considered for pre-training objectives: <em>Prefix language modeling</em>, <em>Masked language modeling</em>, and <em>Deshuffling</em>. For <em>Masked language modeling</em>, several variations were further explored. Table 3 in the paper clearly illustrates how each objective function processes the text.</p>
+<figure class="align-center" id="id6">
+<a class="reference internal image-reference" href="https://stanford-cs324.github.io/winter2022/lectures/images/t5-unsupervised-table.png"><img alt="T5's text-to-text format" src="https://stanford-cs324.github.io/winter2022/lectures/images/t5-unsupervised-table.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 45 </span><span class="caption-text">Table 3 from the original paper.</span><a class="headerlink" href="#id6" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<ul class="simple">
+<li><p><strong>Prefix language modeling</strong>: This is essentially a standard language model where the beginning of the text is given, and the model predicts what follows.</p></li>
+<li><p><strong>BERT-Style</strong>: This is BERT’s pre-training method. It masks 15% of tokens, replacing 90% of these with <code class="docutils literal notranslate"><span class="pre">&quot;&lt;M&gt;&quot;</span></code> and the remaining 10% with random tokens (shown as grey “apple” in the figure), then tries to recover the original text.</p></li>
+<li><p><strong>Deshuffling</strong>: This involves rearranging the token order and having the model restore the original text.</p></li>
+</ul>
+<p>Among these three, “BERT-Style” proved most effective. The following variations build upon “BERT-Style,” aiming to speed up and lighten pre-training:</p>
+<ul class="simple">
+<li><p><strong>i.i.d noise, mask tokens</strong>: This removes the random token replacement (grey “apple”) from BERT-Style.</p></li>
+<li><p><strong>i.i.d noise, replace spans</strong>: This replaces consecutive masked tokens (masked spans) with single special tokens (<code class="docutils literal notranslate"><span class="pre">&quot;&lt;X&gt;&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;&lt;Y&gt;&quot;</span></code>), then predicts what these special tokens represent.</p></li>
+<li><p><strong>i.i.d noise, drop tokens</strong>: This simply removes the masked portions and predicts what was deleted.</p></li>
+<li><p><strong>Random spans</strong>: Since word-level masking rarely creates consecutive masked sections, this approach specifies both the percentage of tokens to mask and the number of masked spans. For example, with 500 tokens, 15% masking rate, and 25 masked spans, the average span length would be 3 (<span class="math notranslate nohighlight">\(500 \times 0.15 / 25 = 3\)</span>).</p></li>
+</ul>
+<p>Experimental results showed that Random spans with a 15% masking rate and average span length of 3 performed best.</p>
+</section>
+<section id="pre-training-datasets">
+<h3>Pre-training Datasets<a class="headerlink" href="#pre-training-datasets" title="Link to this heading">#</a></h3>
+<p>Google created a massive dataset called the Colossal Clean Crawled Corpus (C4). While Common Crawl 12 exists as a petabyte-scale corpus collected by crawling web servers worldwide, with 20TB of data being released monthly (!), Common Crawl still contains non-natural language content, error messages, menus, duplicate text, and source code, even though markup has been removed. C4 was created by applying various cleaning processes to one month of Common Crawl data. The data size is 745GB, which is 46 times larger than the English Wikipedia.</p>
+<p>Table 8 in the paper shows comparison results across six datasets including C4.</p>
+<figure class="align-center" id="id7">
+<a class="reference internal image-reference" href="https://miro.medium.com/v2/resize:fit:1400/0*qezeuqI77yCJjfUb.png"><img alt="Pre-training datasets" src="https://miro.medium.com/v2/resize:fit:1400/0*qezeuqI77yCJjfUb.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 46 </span><span class="caption-text">Table 8 from the original paper.</span><a class="headerlink" href="#id7" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>The compared datasets are as follows (simplified for brevity):</p>
+<ul class="simple">
+<li><p><strong>C4</strong>: A dataset created by applying various cleaning processes to Common Crawl.</p></li>
+<li><p><strong>C4, unfiltered</strong>: C4 with all filtering processes except “English” removed.</p></li>
+<li><p><strong>RealNews-like</strong>: C4 with additional processing to extract only news article content.</p></li>
+<li><p><strong>WebText-like</strong>: Created by applying C4-like cleaning processes to 12 months of Common Crawl and extracting only content that received 3 or more upvotes on Reddit.</p></li>
+<li><p><strong>Wikipedia</strong>: English Wikipedia data from Tensorflow Datasets.</p></li>
+<li><p><strong>Wikipedia+TBC</strong>: Since Wikipedia’s content domain is limited to encyclopedic content, this combines it with Toronto Books Corpus (TBC) data from various ebooks.</p></li>
+</ul>
+<p>While C4 might not seem impressive at first glance, the paper points out:</p>
+<ul class="simple">
+<li><p>Looking at “C4, unfiltered” results shows that <em>data quality significantly impacts results</em>.</p></li>
+<li><p>Results from “Wikipedia+TBC”, “RealNews-like”, and “Wikipedia” indicate that <em>pre-training on datasets matching the downstream task domain improves accuracy</em></p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although there’s a “Size” column in the table, note that this comparison standardizes pre-training learning tokens to <span class="math notranslate nohighlight">\(2^{35}\)</span>. This means pre-training does not complete one full pass through their datasets, while “Wikipedia” goes through multiple passes (since it is smaller than <span class="math notranslate nohighlight">\(2^{35}\)</span> tokens). When taking multiple passes, the accuracy tends to decrease compared to that of one pass with the same amount of data, as illustrated in the figure below.</p>
+</div>
+<figure class="align-center" id="id8">
+<a class="reference internal image-reference" href="https://www.ogis-ri.co.jp/otc/hiroba/technical/similar-document-search/img/pic202002-008.png"><img alt="Pre-training datasets" src="https://www.ogis-ri.co.jp/otc/hiroba/technical/similar-document-search/img/pic202002-008.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 47 </span><span class="caption-text">Results from training with <span class="math notranslate nohighlight">\(2^{35}\)</span> tokens on different-sized datasets. Since the number of training tokens is fixed, as the data volume decreases, the number of passes during training increases. While accuracy decreases as the number of pre-training passes increases, there isn’t much significant decline until around <span class="math notranslate nohighlight">\(2^{29}\)</span> (approximately 540 million) tokens.</span><a class="headerlink" href="#id8" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="training-details">
+<h3>Training Details<a class="headerlink" href="#training-details" title="Link to this heading">#</a></h3>
+<section id="fine-tuning">
+<h4>Fine-tuning<a class="headerlink" href="#fine-tuning" title="Link to this heading">#</a></h4>
+<p>Several fine-tuning methods were compared, with “All parameters” proving to be the best:</p>
+<ul class="simple">
+<li><p><strong>All parameters</strong>: Updates all parameters during fine-tuning.</p></li>
+<li><p><strong>Adapter layers</strong>: Inserts adapter layers (dense-ReLU-dense blocks) at the end of each Transformer block. During fine-tuning, only updates the adapter layer and layer normalization parameters. Multiple dense layer dimensions were compared.</p></li>
+<li><p><strong>Gradual unfreezing</strong>: Initially only updates parameters of the final stack layer during fine-tuning, gradually expanding parameter updates toward the front layers as training progresses, eventually updating all parameters.</p></li>
+</ul>
+</section>
+<section id="multi-task-learning">
+<h4>Multi-task Learning<a class="headerlink" href="#multi-task-learning" title="Link to this heading">#</a></h4>
+<p>Multi-task learning trains multiple tasks simultaneously to enable a single model to solve multiple tasks. Since all tasks in T5 use the “Text-to-Text” format, it becomes a question of how to mix learning data from multiple tasks. The paper compares three strategies, though none performed as well as fine-tuning:</p>
+<ul class="simple">
+<li><p><strong>Examples-proportional mixing</strong>: Samples training data with probability proportional to each task’s dataset size. Sets a limit to control the influence of tasks with extremely large data (i.e., pre-training tasks). Multiple limit parameters were compared.</p></li>
+<li><p><strong>Temperature-scaled mixing</strong>: Mixes tasks by normalizing each task’s sample count raised to 1/T power. Equivalent to “Examples-proportional mixing” when T=1, approaches “Equal mixing” as T increases. Multiple T values were compared.</p></li>
+<li><p><strong>Equal mixing</strong>: Samples training data from each task with equal probability.</p></li>
+</ul>
+<p>They also tried fine-tuning each task after multi-task pre-training, but this too fell short of pre-training + fine-tuning performance.</p>
+</section>
+<section id="model-size">
+<h4>Model Size<a class="headerlink" href="#model-size" title="Link to this heading">#</a></h4>
+<figure class="align-center" id="id9">
+<a class="reference internal image-reference" href="https://miro.medium.com/v2/resize:fit:1400/0*KhbKImG2TLomLHgW.png"><img alt="Model size" src="https://miro.medium.com/v2/resize:fit:1400/0*KhbKImG2TLomLHgW.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 48 </span><span class="caption-text">Table 13 from the original paper.</span><a class="headerlink" href="#id9" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>The paper explores different model configurations that each use approximately 4 times more computational resources than the baseline model. These variations include training the baseline model for 4 times as many steps, using 4 times larger batch sizes, doubling both model size and training steps, quadrupling the model size while keeping training steps constant, and creating ensembles of multiple models.</p>
+<p>For the larger models (2x and 4x size), the researchers used configurations similar to BERT-LARGE, with 16 and 32 transformer layers respectively. When increasing training steps, the model was exposed to more diverse data since the baseline training (using 2³⁵ tokens) only covered a portion of the C4 dataset.</p>
+<p>The results showed that all configurations improved upon the baseline, with increasing model size being particularly effective. Interestingly, quadrupling the model size while keeping the same amount of training data still led to better performance, contrary to the expectation that larger models might need more training data.</p>
+</section>
+</section>
+<section id="summary-of-validation-experiments">
+<h3>Summary of validation experiments<a class="headerlink" href="#summary-of-validation-experiments" title="Link to this heading">#</a></h3>
+<p>Based on these investigations, the paper proceeds to a systematic experiments using a model with 11 billion parameters trained on C4. You can see that T5 isn’t so much about inventing new model architectures or methods, but rather combining Transformer technology with the latest trends, objective functions, and learning optimizations.</p>
+<figure class="align-center" id="id10">
+<a class="reference internal image-reference" href="https://mohitmayank.com/a_lazy_data_science_guide/imgs/t5_unsupervised_exploration.png"><img alt="Design choices" src="https://mohitmayank.com/a_lazy_data_science_guide/imgs/t5_unsupervised_exploration.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 49 </span><span class="caption-text">Design choices for T5.</span><a class="headerlink" href="#id10" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "skojaku/applied-soft-comp",
+            ref: "gh-pages",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./m03-transformers"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="summary.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Summary</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../m04-image-processing/what-to-learn.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Module 3: Image Processing</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-t5">What is T5?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comparison-of-practices">Comparison of practices</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#model-architecture">Model Architecture</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#encoder-decoder">Encoder-Decoder</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#language-model">Language Model</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#prefix-lm">Prefix LM</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pre-training-objectives">Pre-training Objectives</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pre-training-datasets">Pre-training Datasets</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#training-details">Training Details</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fine-tuning">Fine-tuning</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#multi-task-learning">Multi-task Learning</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#model-size">Model Size</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#summary-of-validation-experiments">Summary of validation experiments</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Sadamori Kojaku
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
