@@ -6,12 +6,40 @@ app = marimo.App()
 
 @app.cell(hide_code=True)
 def _(mo):
+    mo.md(r""" """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
     mo.md(
         """
         # Prompt Tuning for Language Models from Basics to Mastery
         <center>Sadamori Kojaku</center>
 
         Getting desired responses from LLMs requires carefully designed prompts. Many prompting techniques have been developed, and here we will learn non-exclusive but basic ingredients of a prompt.
+
+        /// tip | How to run this notebook
+
+        To run the notebook, first download it as a `.py` file, then use the following steps:
+
+        Install **marimo**:
+        ```bash
+        pip install marimo
+        ```
+
+        Install **uv** (a Python package manager that automatically manages dependencies):
+        ```bash
+        pip install uv
+        ```
+
+        Launch the notebook
+        ```bash
+        marimo edit --sandbox <filename>.py
+        ```
+
+        The notebook will open in your web browser. All necessary packages will be installed automatically in a dedicated virtual environment managed by **uv**.
+        ///
         """
     )
     return
@@ -25,26 +53,20 @@ def _(mo):
 
         ![](https://miro.medium.com/v2/resize:fit:1168/0*-9J6J-vqMDaHr174.png)
 
+        We will use [ollama](https://ollama.com/) to run **a small language model** (SLM). Ollama is a lightweight runtime engine for running large language models locally. With ollama, you can chat language models running on your machine.
 
-        We will use [ollama](https://ollama.com/) to run **a small language model** (SLM). Ollama is a lightweight runtime engine for running large language models locally. With ollama, you can chat LLMs running on your machine through many programming languages, including Python.
+        To install ollama, see 👉[Windows](https://www.youtube.com/watch?v=3W-trR0ROUY), [Mac](https://www.metriccoders.com/post/how-to-install-and-run-ollama-on-macos), and [Linux](https://github.com/ollama/ollama/blob/main/docs/linux.md).  We will use `gemma3` which can be downloaded by
 
-        /// note | Why open source small language models?
+        ```bash
+        ollama pull gemma3
+        ```
 
-        Open source small language models help democratize AI by making advanced, language processing widely accessible.
+        If you have a serve with more powerful GPU cards, you can install ollama on the server, and then ssh-tunneling it by:
+        ```bash
+        ssh -N -L 11434:localhost:11434 username@servername
+        ```
 
-        Some non-exclusive lists of open source SLMs are:
-
-        1. **[Gemma (Google DeepMind)](https://ai.google.dev/gemma)** – Lightweight and optimized for efficiency.
-        2. **[DeepSeek R1 (deepseek)](https://github.com/deepseek-ai)** - Open-source model series optimized for reasoning, efficiency, and multilingual support.
-        3. **[Phi series (Microsoft)](https://azure.microsoft.com/en-us/products/phi)** – Compact model designed for reasoning tasks with minimal compute.
-        4. **[Mistral 7B](https://mistral.ai/news/announcing-mistral-7b)** – High-performance dense transformer with strong generalization.
-        5. **[Mixtral 8x7B](https://mistral.ai/news/mixtral-of-experts)** – Mixture-of-experts model, using only a subset of parameters per inference.
-        6. **[TinyLlama 1.1B](https://github.com/jzhang38/TinyLlama)** – Ultra-small LLaMA variant for resource-constrained environments.
-        7. **[StableLM (Stability AI)](https://github.com/Stability-AI/StableLM)** – Open-source models for conversational AI and code generation.
-
-        In this notebook, we will use gemma3 but you are free to choose any SLM you like 😉
-
-        ///
+        (If gemma3 is too slow, you can try 'phi3', which is faster but less accurate.)
         """
     )
     return
@@ -52,11 +74,16 @@ def _(mo):
 
 @app.cell
 def _():
-    # from langchain_ollama import ChatOllama
+    MODEL_NAME = "gemma3"
+    return (MODEL_NAME,)
+
+
+@app.cell
+def _(MODEL_NAME):
     import ollama
 
     # Get a response from the model
-    params_llm = {"model": "gemma3", "options": {"temperature": 0.3}}
+    params_llm = {"model": MODEL_NAME, "options": {"temperature": 0.3}}
 
     _response = ollama.generate(prompt="Hi there!", **params_llm)
 
@@ -160,7 +187,7 @@ def _(ollama, params_llm):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(
-        r"""
+        """
         ### **4. Persona 🏷️**
 
         We sometimes want LLMs to use a specific tone and style, e.g., formal tone for legal assistance, friendly tone for a tech support.
@@ -259,7 +286,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(
-        r"""
+        """
         ### **5. Context 📖**
 
         Sometimes, just giving an instruction isn't enough. **Context** provides additional information that helps the LLM the task better.
@@ -416,6 +443,22 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(
+        """
+        /// tip | Be a Good Boss
+
+        - **Let LLMs admit ignorance**: LLMs closely follow your instructions—even when they shouldn't. They often attempt to answer beyond their actual capabilities, resulting in plausible yet incorrect responses. To prevent this, explicitly tell your model, "If you don't know the answer, just say so," or "If you need more information, please ask."
+
+        - **Encourage critical feedback**: LLMs are trained to be agreeable due to human feedback, which can hinder productive brainstorming or honest critique. To overcome this tendency, explicitly invite critical input: "I want your honest opinion," or "Point out any problems or weaknesses you see in this idea."
+
+        ///
+        """
+    )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(
         r"""
         # In-Context Learning
 
@@ -469,12 +512,10 @@ def _(ollama, params_llm):
     return (prompt_ICL,)
 
 
-app._unparsable_cell(
-    r"""
-    <center><b>Few shot</b></center>
-    """,
-    column=None, disabled=False, hide_code=True, name="_"
-)
+@app.cell(hide_code=True)
+def _(mo):
+    mo.Html("<center><b>Few shot</b></center>")
+    return
 
 
 @app.cell
@@ -554,12 +595,10 @@ def _(mo):
     return
 
 
-app._unparsable_cell(
-    r"""
-    <center><b> Without chain prompting</b></center>
-    """,
-    column=None, disabled=False, hide_code=True, name="_"
-)
+@app.cell(hide_code=True)
+def _(mo):
+    mo.Html("<center><b> Without chain prompting</b></center>")
+    return
 
 
 @app.cell
@@ -789,7 +828,7 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(json_schema, ollama, params_llm):
     _prompt = "Tell me about Iran."
 
@@ -1063,264 +1102,187 @@ def _(ollama, params_llm):
 def _(mo):
     mo.md(
         r"""
-        # Automatic Prompt Optimization
+        # DSPy
+        We have learned how to guide language models to perform tasks by crafting specific prompts. But, we should not forget that what's more crucial is "what to do" rather than "how to do", which is the central idea of DSPy.
 
-        Crafting effective prompts remains challenging; even subtle wording changes can significantly influence language model outputs. Historically, prompt design has relied on manual, trial-and-error adjustments—analogous to early neural network training before backpropagation automated parameter tuning.
+        [DSPy](https://dspy.ai/) is a Python framework that enables developers to define desired outcomes through declarative programming, allowing the framework to handle the underlying mechanics. This method abstracts away the intricacies of prompt engineering, facilitating the creation of modular and self-improving language model pipelines.
 
-        Automatic prompt optimization simplifies the prompt-tuning process. Frameworks such as [DSPy](https://github.com/stanfordnlp/dspy) and [AutoPrompt](https://github.com/Eladlev/AutoPrompt) facilitate this automation. Here, we focus on [TextGrad](https://textgrad.com/), a framework leveraging textual gradients—a natural-language counterpart to numerical gradients used in neural network backpropagation.
+        ## Overview
 
-        ## TextGrad
+        DSPy has three main components: Signature, Module, and Optimizer.
+
+        1. **Signatures**: Declarative specifications that define the input and output behavior of a module.
+
+        2. **Modules**: Reusable building blocks that abstract various prompting techniques, such as chain-of-thought reasoning or retrieval-augmented generation.
+
+        3. **Optimizers (Teleprompters)**: Automated tools that refine prompts and parameters to enhance the performance of LLM pipelines.
+
+        We will walk through each of these components in this example.
+
+        ## Set up DSPy with Ollama
+        """
+    )
+    return
+
+
+@app.cell
+def _(MODEL_NAME):
+    import dspy
+    import pandas as pd
+    import numpy as np
+    from sklearn.model_selection import train_test_split
+    from dspy.teleprompt import COPRO, MIPROv2
+    import litellm
+    litellm.drop_params = True
+
+    lm = dspy.LM(f'ollama_chat/{MODEL_NAME}', api_base='http://localhost:11434', api_key='')
+    dspy.settings.configure(lm=lm)
+    return COPRO, MIPROv2, dspy, litellm, lm, np, pd, train_test_split
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(
+        r"""
+        ## Signature
+        Signature defines the input and output of an LLM model.
+        For example, the following signature defines a model that takes a text as input and outputs a sentiment.
+        """
+    )
+    return
+
+
+@app.cell
+def _(dspy):
+    qa_signature = dspy.Predict("text -> sentiment")
+    _text = qa_signature(text = "I love DSPy!")
+    print(_text)
+    return (qa_signature,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""Under the hood, DSPy uses a prompt template to generate the prompt for the LLM for the given signature. You can inspect the prompt as follows:""")
+    return
+
+
+@app.cell
+def _(lm):
+    print(lm.inspect_history(n=1))
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""You can create a more complex signature by defining subclassing the Signature class.""")
+    return
+
+
+@app.cell
+def _(dspy):
+    class QASignature(dspy.Signature):
+        """Given a question, answer the question for the user. Take into account the context."""
+        question = dspy.InputField(desc="The question")
+        context = dspy.InputField(desc="The context for the question")
+        answer = dspy.OutputField(desc="The answer to the question")
+
+    qa_custom_signature = dspy.Predict(QASignature)
+    _text = qa_custom_signature(question = "What is a famous landmark in Cambridge?", context = "We are traveling in the United States")
+    print(_text)
+    return QASignature, qa_custom_signature
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""Note that the docstring of the signature is used to generate the prompt for the LLM.""")
+    return
+
+
+@app.cell
+def _(lm):
+    print(lm.inspect_history(n=1))
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""Reasoning is also supported in DSPy.""")
+    return
+
+
+@app.cell
+def _(QASignature, dspy):
+    _qa = dspy.ChainOfThought(QASignature)
+    _text = _qa(question = "What is a famous landmark in Cambridge?", context = "We are traveling in the United States")
+    print(_text)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(
+        r"""
+        ## Module
+        A **module** in DSPy is a reusable component defining a specific language-model task through structured inputs (signature), instructions, and output formatting (prefixes).
+        For example, the following module defines a model that can answer questions based on a context.
+        """
+    )
+    return
+
+
+@app.cell
+def _(dspy):
+    class QAModule(dspy.Module):
+        def __init__(self):
+            super().__init__()
+            self.qa = dspy.ChainOfThought("context, question -> answer")
+            self.classifier = dspy.ChainOfThought("context, question, answer -> classification")
+
+        def forward(self, question, context):
+            answer = self.qa(context=context, question=question)
+            classification = self.classifier(context=context, question=question, answer=answer)
+            return classification
+
+    _qa = QAModule()
+    _text = _qa(question = "What is a famous landmark in Cambridge?", context = "We are traveling in the United States")
+    print(_text)
+    return (QAModule,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(
+        r"""
+        ## Optimizer: Prompt Optimization
+        DSPy provides prompt optimization for language models, which automates the process of finding the best prompt for a given task.
+
+        /// warning | The optimization demo in a separate notebook.
+        Since the optimization is computationally intensive, we will showcase it in a separate notebook at [dspy-prompt-optimization.py](https://static.marimo.app/static/dspy-prompt-optimization-52my).
+        ///
+        """
+    )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(
+        r"""
+        /// tip | Framework for programming LLMs
+
+        [TextGrad](https://textgrad.com/) is an alternative to DSPy. A central idea of TextGrad is backpropagation based on "natural language" generated by LLMs. Unlike DSPy, it offers less abstracted APIs, which allows a more fine-grained customization. Additionally, it can do **instance optimization**, an optimization on not the prompt but a solution from LLM. For example, you can provide your write up as few-shot examples and prompt the LLM to rewrite a given text in your writing style. Using TextGrad, we can create an iterative loop of rewriting and self-refletion by an LLM to create a rewriten text in your writing style.
+
         ![](https://anth.us/static/d604518c30b41a6907d7ac24aeec1cee/186a7/TextGrad.png)
-        ![](https://textgrad.readthedocs.io/en/latest/_images/analogy.png)
-
-        The core idea of TextGrad is an analogy with backpropagation:
-
-        1. Prompts targeted for optimization are called `differential`  text variables  (metaphorically, not mathematically).
-
-        2. A network of prompts (e.g., chained prompts) is called a `model`
-
-        3. Textual input data are fed into the model, producing textual outputs (Forward pass).
-
-        4. Outputs are evaluated, generating natural-language feedback (Backward pass).
-
-        4. Explicit textual guidance provided by an LLM, informing prompt adjustments (Gradient).
-
-        ## Results
-
-        ![](https://substackcdn.com/image/fetch/f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F9af6abbb-0a9a-4056-b3a3-da0b9ae344f7_887x1204.png)
-
-        TextGrad has demonstrated to be consistently very effective across various applications. Here are some remarkable results:
-
-        - **Coding:** By refining solutions to complex coding challenges, TextGrad achieved a 20% relative improvement in performance on LeetCode Hard problems, surpassing existing methods.
-
-        - **Problem Solving:** In the Google-Proof Question Answering benchmark, TextGrad enhanced GPT-4o's zero-shot accuracy from 51% to 55% by iteratively refining responses during testing.
-
-        - **Reasoning:** Through prompt optimization, TextGrad elevated GPT-3.5's performance to levels comparable with GPT-4 in several reasoning tasks, highlighting its efficacy in enhancing logical processing.
-
-        - **Chemistry:** The framework successfully designed new small molecules exhibiting desirable drug-like properties and favorable in silico binding affinities, indicating potential in drug discovery.
-
-        - **Medicine:** TextGrad optimized radiation treatment plans for prostate cancer patients, achieving targeted dosages while minimizing side effects, thereby improving patient outcomes.
 
 
-        ## Example with Ollama
+        [Adaflow](https://github.com/SylphAI-Inc/AdalFlow) is a new framework that offers a more cleaner APIs than DSPy (in my personal opinion). It offers a different level of abstractions, offering a fine-grained customization as well as easy-to-use (but abstracted) functions to quickly mock an LLM application.
 
-        To illustrate TextGrad, consider our previous task: generating a sales pitch for Steve. The first step is to create so-called an `engine`, an interface that connects a language model and TextGrad.
+        ![](https://raw.githubusercontent.com/SylphAI-Inc/AdalFlow/main/docs/source/_static/images/adalflow-logo.png)
+
+        ///
         """
     )
     return
-
-
-@app.cell
-def _():
-    from openai import OpenAI
-
-    # Setup
-    client = OpenAI(
-        base_url="http://0.0.0.0:11434/v1",
-        api_key="ollama",
-        timeout=300.0,
-    )
-    return OpenAI, client
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""Let's define our `objective function` in natural language. This defines the task the prompts will be optimized for.""")
-    return
-
-
-@app.cell
-def _():
-    eval_prompt = """Evaluate how convincingly this response reflects Steve Jobs' distinctive style—visionary, persuasive, and succinct—while effectively tailoring his pitch to the context of interviewing at a phone repair shop. Provide a score from 1 (poor) to 5 (excellent) and briefly justify your rating."""
-
-    initial_prompt = "You are Steve Jobs preparing for a job interview at a phone repair shop. Generate a sales pitch for your job interview."
-    return eval_prompt, initial_prompt
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""Let's define the `model`, a network of prompts and LLMs. In this example, we focus on the most simple model, one prompt and one LLM.""")
-    return
-
-
-@app.cell
-def _(client, initial_prompt):
-    from textgrad.engine.local_model_openai_api import (
-        ChatExternalClient,
-    )
-    import textgrad as tg
-
-    class RolePlayLLM:
-        def __init__(
-            self,
-            client,
-            model_name,
-            feedback_model_name,
-            initial_prompt,
-            max_tokens = 1024 
-        ):
-
-            self.engine = ChatExternalClient(
-                client=client, model_string=model_name, max_tokens=max_tokens
-            )
-            self.feedback_engine = ChatExternalClient(
-                client=client, model_string=feedback_model_name, max_tokens = max_tokens
-            )
-            tg.set_backward_engine(
-                self.feedback_engine, override=True
-            )
-            self.user_prompt = tg.Variable(
-                initial_prompt,
-                requires_grad=True,
-                role_description="prompt to guide the LLM for interview pitch",
-            )
-            self.model = tg.BlackboxLLM(
-                engine=self.engine, system_prompt=None
-            )
-
-        def forward(self, **kwargs):
-            return self.model(self.user_prompt)
-
-        def parameters(self):
-            return [self.user_prompt]
-
-
-    model = RolePlayLLM(
-        client,
-        model_name="gemma3:27b",
-        feedback_model_name="gemma3:27b",
-        initial_prompt=initial_prompt,
-    )
-    return ChatExternalClient, RolePlayLLM, model, tg
-
-
-app._unparsable_cell(
-    r"""
-    Then, set the loss function and the optimizer, just like PyTorch 😉!
-    """,
-    column=None, disabled=False, hide_code=True, name="_"
-)
-
-
-@app.cell
-def _(eval_prompt, model, tg):
-    # Loss function
-    loss_fn = tg.TextLoss(eval_prompt)
-
-    # Set optimizer
-    optimizer = tg.TGD(parameters=model.parameters())
-
-    # Optimization loop
-    num_iterations = 3
-
-    prompt_list = []
-    result_list = []
-
-    for i in range(num_iterations):
-        # Forward pass
-        prediction = model.forward()
-
-        loss = loss_fn(prediction)
-
-        result_list.append(prediction.value)
-        prompt_list.append(model.user_prompt.value)
-
-        # Backward pass and optimization step
-        loss.backward()
-        optimizer.step()
-        optimizer.zero_grad()
-
-        # Print the updated prompt
-        print(f"Updated prompt:\n{model.user_prompt.value}\n")
-    return (
-        i,
-        loss,
-        loss_fn,
-        num_iterations,
-        optimizer,
-        prediction,
-        prompt_list,
-        result_list,
-    )
-
-
-@app.cell
-def _(mo, prompt_list, result_list):
-    mo.accordion({"Iteration %d" % i : "<b>Prompt</b>:{prompt}<br><br><b>Result</b>:{result}".format(prompt = prompt_list[i], result = result_list[i]) for i in range(len(prompt_list))})
-    return
-
-
-@app.cell
-def _(mo, prompt_list, result_list):
-    import difflib
-    import re
-
-    def create_simple_markdown_diff(prompt_list, result_list):
-        """
-        Create a simple markdown diff between prompts and display in Marimo accordion.
-        - Added sentences are in bold
-        - Deleted sentences are struck through
-        """
-        accordion_items = {}
-
-        def split_into_sentences(text):
-            """Split text into sentences using regex"""
-            text = re.sub(r'([.!?])\s+', r'\1\n', text)
-            text = re.sub(r'([.!?])"', r'\1"\n', text)
-            return [s.strip() for s in text.split('\n') if s.strip()]
-
-        for i in range(len(prompt_list)):
-            markdown_content = f"### Prompt {i+1}\n\n"
-
-            # For iterations after the first, show the diff
-            if i > 0:
-                prev_sentences = split_into_sentences(prompt_list[i-1])
-                curr_sentences = split_into_sentences(prompt_list[i])
-
-                # Find differences using difflib
-                matcher = difflib.SequenceMatcher(None, prev_sentences, curr_sentences)
-
-                # Process the differences
-                diff_items = []
-                for tag, i1, i2, j1, j2 in matcher.get_opcodes():
-                    if tag == 'equal':
-                        # Unchanged sentences
-                        for sentence in prev_sentences[i1:i2]:
-                            diff_items.append(sentence)
-                    elif tag == 'delete':
-                        # Deleted sentences
-                        for sentence in prev_sentences[i1:i2]:
-                            diff_items.append(f"~~{sentence}~~")
-                    elif tag == 'insert':
-                        # Added sentences
-                        for sentence in curr_sentences[j1:j2]:
-                            diff_items.append(f"**{sentence}**")
-                    elif tag == 'replace':
-                        # Replaced sentences (show as delete + insert)
-                        for sentence in prev_sentences[i1:i2]:
-                            diff_items.append(f"~~{sentence}~~")
-                        for sentence in curr_sentences[j1:j2]:
-                            diff_items.append(f"**{sentence}**")
-
-                # Join the diff items
-                markdown_content += "Changes from previous prompt:\n\n"
-                markdown_content += "\n\n".join(diff_items)
-            else:
-                # First iteration - just show the text
-                markdown_content += prompt_list[i]
-
-            # Add the result
-            markdown_content += f"\n\n### Result {i+1}\n\n"
-            markdown_content += result_list[i]
-
-            # Add to accordion items
-            accordion_items[f"Iteration {i+1}"] = markdown_content
-
-        return mo.accordion(accordion_items)
-
-    # Example usage
-    create_simple_markdown_diff(prompt_list, result_list)
-    return create_simple_markdown_diff, difflib, re
 
 
 @app.cell
