@@ -30,9 +30,7 @@ BERT has become the leading transformer model for natural language processing ta
 
 To run the notebook, download the notebook as a `.py` file and run it with:
 
-```bash
-marimo edit --sandbox bert.py
-```
+> marimo edit --sandbox bert.py
 
 You will need to install `marimo` and `uv` to run the notebook. But other packages will be installed automatically in uv's virtual environment.
 ```
