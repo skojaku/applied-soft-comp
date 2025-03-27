@@ -1,6 +1,7 @@
 """
 This script is used to balance the dataset by downsampling the top queues.
 """
+# %%
 import pandas as pd
 
 # Load the dataset
@@ -34,3 +35,4 @@ queue_counts
 # Save the balanced dataset
 dg_balanced.to_csv("data.csv", index=False)
 # %%
+dg_balanced["queue"].unique()
