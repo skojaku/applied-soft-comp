@@ -540,6 +540,14 @@ def _(ollama, params_llm, prompt_ICL):
     return
 
 
+@app.cell
+def _(ollama, params_llm):
+    _response = ollama.generate(
+        prompt = "France recently moved its capital from Paris to Lyon. What is the capital of France?", **params_llm)
+    _response.response
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     _question = mo.callout(mo.md("""**Question:** When a prompt provides information that contradicts a language model's prior knowledge, how does the model determine which source to rely on, and what factors influence this decision?
