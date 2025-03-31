@@ -953,7 +953,7 @@ def _(mo):
 
 @app.cell
 def _(ollama, params_llm, question_prompt):
-    _prompt = question_prompt + "  Let's think step-by-step."
+    _prompt = question_prompt + "  Let's break down the problem, and answer the question. "
 
     _response = ollama.generate(prompt = _prompt , **params_llm)
     print(_response.response)
@@ -1096,7 +1096,7 @@ def _(ollama, params_llm):
     _question = "Q: A kid has 21 stickers, gives away 20 stickers, and then gets 6 new stickers. How many stickers does the kid have now?"
 
     # Harder question
-    #_question = "Mary drove 120 miles from her home to another city at an average speed of 40 mph and returned home at an average speed of 60 mph. What was her average speed for the entire round trip?"
+    _question = "Mary drove 120 miles from her home to another city at an average speed of 40 mph and returned home at an average speed of 60 mph. What was her average speed for the entire round trip?"
 
     _prompt = _prompt.format(question = _question)
 
@@ -1162,7 +1162,7 @@ def _(mo):
 
 @app.cell
 def _(dspy):
-    qa_signature = dspy.Predict("text -> sentiment")
+    qa_signature = dspy.Predict("text -> informativeness")
     _text = qa_signature(text = "I love DSPy!")
     print(_text)
     return (qa_signature,)
