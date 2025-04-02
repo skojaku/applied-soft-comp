@@ -1,0 +1,135 @@
+[
+    {
+        "question": "Which prompt is *most* likely to elicit unpredictable behavior from a model due to inherent ambiguity, even with a strong model?",
+        "options": {
+            "A": "Summarize this customer review, focusing on sentiment and key features.",
+            "B": "Translate the following sentence to Japanese, prioritizing natural-sounding phrasing.",
+            "C": "Describe the essence of happiness.",
+            "D": "Categorize this movie review as positive, negative, or neutral, providing a confidence score."
+        },
+        "correct_answer": "C",
+        "explanation": "While all prompts have some degree of subjectivity, 'Describe the essence of happiness' is profoundly open-ended.  It lacks concrete criteria for evaluation, leading to highly variable and potentially nonsensical responses.  The model has no objective 'correct' answer, and its response will be heavily influenced by its training data and random seed."
+    },
+    {
+        "question": "You need a model to extract specific data points (e.g., product name, price, rating) from a series of unstructured product descriptions. Which prompt strategy is *most* robust to variations in description format?",
+        "options": {
+            "A": "Provide a natural language instruction: 'Extract the product name, price, and rating from the following text.'",
+            "B": "Use a few-shot example demonstrating the desired output format (e.g., 'Product: [name], Price: [price], Rating: [rating]').",
+            "C": "Employ a JSON schema and use constrained decoding to enforce a structured output.",
+            "D": "Chain-of-thought prompting, asking the model to first identify the relevant information, then format it."
+        },
+        "correct_answer": "C",
+        "explanation": "Constrained decoding, guided by a JSON schema, is the most reliable method.  While few-shot learning (B) is good, it's susceptible to format drift. Natural language (A) is too vague, and CoT (D) adds unnecessary complexity and potential for error.  Constrained decoding *guarantees* a valid JSON output, even if the input is messy."
+    },
+    {
+        "question": "What is the most significant risk of assigning a specific gender or racial identity to an LLM persona when prompting it to make a judgment (e.g., convict or acquit)?",
+        "options": {
+            "A": "The model may generate responses that are too short.",
+            "B": "The model may ignore the demographic information entirely.",
+            "C": "The model may reflect and reinforce societal stereotypes associated with the assigned identity.",
+            "D": "The model will fail to generate any response due to ethical safeguards."
+        },
+        "correct_answer": "C",
+        "explanation": "Demographic persona prompts can trigger implicit biases in the model, leading to stereotype-aligned judgments even without explicit intent."
+    },
+    {
+        "question": "You're building a summarization system. Which contextual element is *most* likely to introduce irrelevant information and *degrade* performance?",
+        "options": {
+            "A": "Indicating the target audience (e.g., 'Summarize this for a high school student').",
+            "B": "Providing the article's publication date.",
+            "C": "Mentioning the user's personal preferences (e.g., 'You enjoy science fiction').",
+            "D": "Specifying the desired summary length (e.g., 'Summarize in three sentences')."
+        },
+        "correct_answer": "C",
+        "explanation": "Personal preferences are almost always irrelevant to the summarization task. They introduce noise and can lead the model to focus on aspects of the article that align with those preferences, rather than providing an objective summary. The other options provide useful constraints or context."
+    },
+    {
+        "question": "You need to explain a complex statistical concept to someone with no prior knowledge. Which prompt is *most* effective?",
+        "options": {
+            "A": "Explain the concept of p-values.",
+            "B": "Describe the statistical significance of p-values.",
+            "C": "Imagine you're explaining p-values to a child. Use analogies and simple language.",
+            "D": "Provide a detailed mathematical derivation of the p-value formula."
+        },
+        "correct_answer": "C",
+        "explanation": "Framing the prompt with a specific persona ('explaining to a child') and requesting analogies forces the model to simplify the explanation and use accessible language. This is far more effective than simply asking for an explanation (A) or delving into technical details (D)."
+    },
+    {
+        "question": "'You're using a few-shot prompt to classify customer feedback as 'Positive', 'Negative', or 'Neutral. Examples: (1) I love this product! → Positive (2) This is amazing! → Positive (3) Works as expected. → Positive (4) It's okay I guess. → Positive (5) Terrible experience. →'  What bias is *most* likely to occur?",
+        "options": {
+            "A": "Confirmation bias – the model will only seek out positive aspects in the new reviews.",
+            "B": "The model will predict 'Positive' for most new reviews, regardless of content.",
+            "C": "The model will be overly influenced by the first few examples.",
+            "D": "No bias."
+        },
+        "correct_answer": "B",
+        "explanation": "Label memorization bias is the most significant risk when the training examples are heavily skewed. The model will learn to predict the majority class ('Positive') even when the input clearly indicates a different sentiment. This is a common problem in few-shot learning."
+    },
+    {
+        "question": "When a prompt states 'As of 2025, Saturn is the farthest planet in our solar system' and then asks 'What is the farthest planet in our solar system?', what factor *most* influences whether the model accepts this false information?",
+        "options": {
+            "A": "The use of 'solar system' sounds scientific, making the model more likely to accept the false information.",
+            "B": "The frequency of the entity ('Saturn' and 'Neptune') in the model's training data.",
+            "C": "The specificity of the contradicting information.",
+            "D": "The temporal marker ('As of 2025') creating a false sense of authority."
+        },
+        "correct_answer": "B",
+        "explanation": "Research by Du et al. (2024) shows that a model is more likely to be persuaded by context when an entity appears less frequently in its training data. While temporal markers (option D) do create a false sense of authority, the entity's frequency in training data is the primary determining factor in whether the model will accept contradictory information about Saturn versus Neptune."
+    },
+    {
+        "question": "Why is a multi-step prompt (e.g., 'First, identify the key arguments. Second, summarize them in a paragraph.') often more effective than a single-step prompt?",
+        "options": {
+            "A": "It reduces the overall token count.",
+            "B": "It breaks down a complex task into more manageable steps.",
+            "C": "It simplifies the vocabulary used in the prompt.",
+            "D": "It eliminates the need for reasoning."
+        },
+        "correct_answer": "B",
+        "explanation": "Breaking down a complex task into smaller steps (chain-of-thought prompting) allows the model to perform intermediate reasoning and build a more coherent and accurate response. This is particularly effective for tasks that require logical inference or synthesis of information."
+    },
+    {
+        "question": "In the prompt 'If a triangle has 4 sides and all angles are 90 degrees, what shape is it?', if the model responds 'It's a trapezoid because triangles with an extra side and right angles form trapezoids', what is the *most* concerning aspect of this response?",
+        "options": {
+            "A": "The response is too short.",
+            "B": "The response uses incorrect formatting.",
+            "C": "The response appears logically valid but is based on a demonstrably false premise.",
+            "D": "The response contradicts the implied persona."
+        },
+        "correct_answer": "C",
+        "explanation": "The most concerning aspect is that the model can generate a logically coherent justification for a false statement. This demonstrates that it's not necessarily *understanding* the information, but rather *pattern-matching* and generating text that *appears* reasonable, even if it's factually incorrect. The premise contains a contradiction (a triangle by definition has 3 sides, not 4), yet the model proceeds with reasoning that sounds plausible but is mathematically nonsensical (the shape would be a square or rectangle, not a trapezoid). This highlights the risk of relying on LLMs for critical reasoning."
+    },
+    {
+        "question": "You want an LLM to output a city’s information in a strictly defined JSON format. Which approach provides the *strongest* guarantee of structural correctness?",
+        "options": {
+            "A": "Zero-shot prompting with a clear instruction: 'Output the information in JSON format.'",
+            "B": "Few-shot examples demonstrating the desired JSON structure.",
+            "C": "Constrained decoding based on a JSON schema, limiting the possible tokens.",
+            "D": "Chain-of-thought reasoning, asking the model to first plan the JSON structure."
+        },
+        "correct_answer": "C",
+        "explanation": "Constrained decoding, guided by a JSON schema, is the most robust method. It *enforces* the desired structure at the token generation level, preventing the model from deviating from the schema. While few-shot learning (B) can help, it's not foolproof. Zero-shot (A) and CoT (D) are even less reliable."
+    },
+    {
+        "question": "What is a key difference between Tree-of-Thought (ToT) and Chain-of-Thought (CoT) prompting?",
+        "options": {
+            "A": "ToT is limited to factual questions, CoT is not.",
+            "B": "ToT decomposes a task into one fixed sequence, CoT explores multiple divergent paths.",
+            "C": "ToT explores multiple reasoning paths in parallel and allows early termination of unpromising paths.",
+            "D": "ToT is only used with structured outputs like JSON."
+        },
+        "correct_answer": "C",
+        "explanation": "ToT explores multiple solutions and prunes unpromising branches, unlike CoT which typically follows a single linear reasoning path."
+    },
+    {
+        "question": "In a Tree-of-Thought prompt, what does early termination of a reasoning path signify?",
+        "options": {
+            "A": "The model hit its token limit.",
+            "B": "The model encountered a syntax error.",
+            "C": "The model recognized that a path is unlikely to yield a good solution.",
+            "D": "The model ran out of examples to consider."
+        },
+        "correct_answer": "C",
+        "explanation": "Tree-of-Thought encourages abandoning weak paths early, allowing better allocation of reasoning capacity to promising options."
+    }
+ ]
+
