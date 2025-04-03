@@ -562,7 +562,7 @@ The +1 represents the bias term. Each output channel has one bias parameter, so 
 
 <div class="admonition question">
 
-**Question**: How many parameters are in a convolutional layer with 64 input channels, 128 output channels, and 3×3 kernels?
+**Question**: How many parameters are in a convolutional layer with 2 input channels, 5 output channels, and 3×3 kernels?
 
 </div>
 
@@ -571,7 +571,7 @@ The +1 represents the bias term. Each output channel has one bias parameter, so 
 <div class="admonition answer">
 
 **Answer**:
-$\text{Parameters} = \underbrace{64}_{\text{input channels}} \times \underbrace{128}_{\text{output channels}} \times \underbrace{3 \times 3}_{\text{kernel size}} + \underbrace{128}_{\text{bias}} = 73,856$
+$\text{Parameters} = \underbrace{2}_{\text{input channels}} \times \underbrace{5}_{\text{output channels}} \times \underbrace{3 \times 3}_{\text{kernel size}} + \underbrace{5}_{\text{bias}} = 95$
 
 For a convolution layer with $C_{in}$ input channels, $C_{out}$ output channels, and $K \times K$ kernel size, the total number of parameters is:
 
@@ -686,7 +686,7 @@ Convolution shrinks images because boundary pixels don't have enough neighbors.
 
 ---
 
-# [👉 Visualization of Convolution in "What is a Convolutional Neural Network?"](https://miro.medium.com/v2/resize:fit:1400/1*X22-wmPcir4y5VoeqDyvWg.gif)
+# [👉 Visualization of Convolution in "What is a Convolutional Neural Network?"](https://poloclub.github.io/cnn-explainer/)
 
 ---
 # Output Size Formula 🧮📏
