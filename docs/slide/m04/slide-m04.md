@@ -790,3 +790,8 @@ The breakthrough? All features are **learned automatically** from raw pixels, no
 ---
 
 # [LeNet in PyTorch](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/lenet.ipynb)
+
+
+---
+
+# 

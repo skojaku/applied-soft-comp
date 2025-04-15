@@ -89,7 +89,7 @@ def convert_json_to_brightspace_csv(json_file: str, output_file: str, course_cod
             question_id=i,
             question_text=item['question'],
             options=item['options'],
-            correct_answer=item['correct_answer'],
+            correct_answer=item['correct_answer'] if "correct_answer" in item else item["answer"],
             course_code=course_code,
             explanation = item["explanation"] if "explanation" in item else ""
         )
