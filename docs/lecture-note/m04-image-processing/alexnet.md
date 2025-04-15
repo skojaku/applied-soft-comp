@@ -14,6 +14,21 @@ kernelspec:
 
 How can we train a computer to recognize 1000 different types of objects across more than a million images, and what makes this problem so challenging?
 
+
+```{admonition} AlexNet in interactive mode:
+:class: tip
+
+[Here is a demo notebook for AlexNet](https://static.marimo.app/static/alexnet-fkeb)
+
+To run the notebook, download the notebook as a `.py` file and run it with:
+
+> marimo edit --sandbox alexnet.py
+
+You will need to install `marimo` and `uv` to run the notebook. But other packages will be installed automatically in uv's virtual environment.
+```
+
+
+
 ## Conceptual Foundation: The ImageNet Challenge
 
 Before diving into AlexNet, let's explore **why** large-scale image classification posed such a formidable problem for machine learning:

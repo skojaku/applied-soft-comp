@@ -1,4 +1,4 @@
-# Module 3: Image Processing
+# Module 4: Image Processing
 
 ## What to learn in this module
 
