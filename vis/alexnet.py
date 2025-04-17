@@ -82,7 +82,9 @@ def _():
 def _():
     import torchvision.models as models
 
-    alexnet = models.alexnet(pretrained=True)
+    #alexnet = models.alexnet(pretrained=True)
+    alexnet = models.vgg16(pretrained=True)
+    #alexnet = models.inception_v3(pretrained=True)
     alexnet.eval()
     print(alexnet.eval())
     return alexnet, models
@@ -104,10 +106,10 @@ def _():
     url = "https://upload.wikimedia.org/wikipedia/commons/2/26/YellowLabradorLooking_new.jpg"
 
     # Real Bearcat
-    # url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnzXi8Bfi2lq22uqFW3zF0bt8Ir7DjmjTJtg&s"
+    url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnzXi8Bfi2lq22uqFW3zF0bt8Ir7DjmjTJtg&s"
 
     # Bearcat
-    # url = "https://blog.suny.edu/wp-content/uploads/2014/03/Binghamton-baxter.jpg"
+    url = "https://blog.suny.edu/wp-content/uploads/2014/03/Binghamton-baxter.jpg"
 
     image = Image.open(BytesIO(requests.get(url).content)).convert("RGB")
     image

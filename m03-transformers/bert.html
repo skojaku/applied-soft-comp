@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
@@ -218,12 +218,15 @@
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Bidirectional Encoder Representations from Transformers (BERT)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sentence-bert.html">Sentence-BERT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gpt.html">Generative Pre-trained Transformer (GPT)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="t5.html">Text-to-Text Transfer Transformer (T5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="from-language-model-to-instruction-following.html">From Language Model to Instruction-Following</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prompt-tuning.html">Prompt Tuning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prompt-tuning-exercise.html">Prompt Tuning Exercise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="summary.html">Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix-t5.html">Appendix: Text-to-Text Transfer Transformer (T5)</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Images</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/what-to-learn.html">Module 3: Image Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/what-to-learn.html">Module 4: Image Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/pen-and-paper.html">Pen and paper exercises</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/image-processing.html">Preliminaries: Image Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/cnn.html">From Traditional Image Processing to Learning</a></li>
@@ -699,8 +702,16 @@ The output of each layer is fed into the next layer, and as we go through the la
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/skojaku-admin/miniforge3/envs/applsoftcomp/lib/python3.10/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
-  from .autonotebook import tqdm as notebook_tqdm
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ModuleNotFoundError</span><span class="g g-Whitespace">                       </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">5</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="kn">import</span> <span class="nn">sys</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="kn">import</span> <span class="nn">torch</span>
+<span class="ne">----&gt; </span><span class="mi">5</span> <span class="kn">import</span> <span class="nn">transformers</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="g g-Whitespace">      </span><span class="mi">7</span> <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="ne">ModuleNotFoundError</span>: No module named &#39;transformers&#39;
 </pre></div>
 </div>
 </div>
@@ -739,94 +750,6 @@ The output of each layer is fed into the next layer, and as we go through the la
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output text_html"><div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>word_pos</th>
-      <th>sentence</th>
-      <th>label</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>2239</th>
-      <td>6</td>
-      <td>the main crops are pear and apple .</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>915</th>
-      <td>42</td>
-      <td>then sony pictures syndicated the series in a ...</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>2250</th>
-      <td>28</td>
-      <td>in 2011 , animax designed and developed beanie...</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>1384</th>
-      <td>9</td>
-      <td>the larvae feed on birch , tilia , and apple .</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>207</th>
-      <td>9</td>
-      <td>'' fruits , sometimes categorized with vegetab...</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>1885</th>
-      <td>7</td>
-      <td>they were traditionally cooked with bits of ap...</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>1653</th>
-      <td>17</td>
-      <td>it is prevalent in the southern united states ...</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>496</th>
-      <td>18</td>
-      <td>nichicon received particular infamy because of...</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>1356</th>
-      <td>17</td>
-      <td>the rather absurd legal precedent in digidyne ...</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>18</td>
-      <td>alcatel ot-908s ot-918s ot-981a ot-990s ot-991...</td>
-      <td>0</td>
-    </tr>
-  </tbody>
-</table>
-</div></div></div>
 </div>
 <p>We will use transformers library developed by Hugging Face to define the BERT model. To use the model, we will need:</p>
 <ul class="simple">
@@ -840,51 +763,6 @@ The output of each layer is fed into the next layer, and as we go through the la
 <span class="n">model</span> <span class="o">=</span> <span class="n">transformers</span><span class="o">.</span><span class="n">AutoModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s2">&quot;bert-base-uncased&quot;</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># set the model to evaluation mode</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="c1"># Print the model architecture</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>BertModel(
-  (embeddings): BertEmbeddings(
-    (word_embeddings): Embedding(30522, 768, padding_idx=0)
-    (position_embeddings): Embedding(512, 768)
-    (token_type_embeddings): Embedding(2, 768)
-    (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
-    (dropout): Dropout(p=0.1, inplace=False)
-  )
-  (encoder): BertEncoder(
-    (layer): ModuleList(
-      (0-11): 12 x BertLayer(
-        (attention): BertAttention(
-          (self): BertSdpaSelfAttention(
-            (query): Linear(in_features=768, out_features=768, bias=True)
-            (key): Linear(in_features=768, out_features=768, bias=True)
-            (value): Linear(in_features=768, out_features=768, bias=True)
-            (dropout): Dropout(p=0.1, inplace=False)
-          )
-          (output): BertSelfOutput(
-            (dense): Linear(in_features=768, out_features=768, bias=True)
-            (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
-            (dropout): Dropout(p=0.1, inplace=False)
-          )
-        )
-        (intermediate): BertIntermediate(
-          (dense): Linear(in_features=768, out_features=3072, bias=True)
-          (intermediate_act_fn): GELUActivation()
-        )
-        (output): BertOutput(
-          (dense): Linear(in_features=3072, out_features=768, bias=True)
-          (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
-          (dropout): Dropout(p=0.1, inplace=False)
-        )
-      )
-    )
-  )
-  (pooler): BertPooler(
-    (dense): Linear(in_features=768, out_features=768, bias=True)
-    (activation): Tanh()
-  )
-)
 </pre></div>
 </div>
 </div>
@@ -947,11 +825,6 @@ The output of each layer is fed into the next layer, and as we go through the la
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;[CLS]&#39;, &#39;bank&#39;, &#39;is&#39;, &#39;located&#39;, &#39;in&#39;, &#39;the&#39;, &#39;city&#39;, &#39;of&#39;, &#39;london&#39;, &#39;[SEP]&#39;]
-</pre></div>
-</div>
-</div>
 </div>
 <p><strong>Token IDs</strong>:</p>
 <div class="cell docutils container">
@@ -960,21 +833,11 @@ The output of each layer is fed into the next layer, and as we go through the la
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>tensor([[ 101, 2924, 2003, 2284, 1999, 1996, 2103, 1997, 2414,  102]])
-</pre></div>
-</div>
-</div>
 </div>
 <p><strong>Segment IDs</strong>:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">segments_tensor</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
 </pre></div>
 </div>
 </div>
@@ -1000,12 +863,6 @@ The output of each layer is fed into the next layer, and as we go through the la
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>how many layers?  13
-Shape?  torch.Size([1, 10, 768])
-</pre></div>
-</div>
-</div>
 </div>
 <p>The hidden states are a list of 13 tensors, where each tensor is of shape (batch_size, sequence_length, hidden_size). The first tensor is the input embeddings, and the subsequent tensors are the hidden states of the BERT layers.</p>
 <p>So, we have 13 choice of hidden states. Deep layers close to the output capture the context of the word from the previous layers.</p>
@@ -1018,11 +875,6 @@ Shape?  torch.Size([1, 10, 768])
 <span class="n">emb</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">stacked_layers</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">emb</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>torch.Size([1, 10, 768])
 </pre></div>
 </div>
 </div>
@@ -1115,356 +967,6 @@ Shape?  torch.Size([1, 10, 768])
 </div>
 </div>
 </details>
-<div class="cell_output docutils container">
-<div class="output text_html">    <style>
-        .bk-notebook-logo {
-            display: block;
-            width: 20px;
-            height: 20px;
-            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNui8sowAAAOkSURBVDiNjZRtaJVlGMd/1/08zzln5zjP1LWcU9N0NkN8m2CYjpgQYQXqSs0I84OLIC0hkEKoPtiH3gmKoiJDU7QpLgoLjLIQCpEsNJ1vqUOdO7ppbuec5+V+rj4ctwzd8IIbbi6u+8f1539dt3A78eXC7QizUF7gyV1fD1Yqg4JWz84yffhm0qkFqBogB9rM8tZdtwVsPUhWhGcFJngGeWrPzHm5oaMmkfEg1usvLFyc8jLRqDOMru7AyC8saQr7GG7f5fvDeH7Ej8CM66nIF+8yngt6HWaKh7k49Soy9nXurCi1o3qUbS3zWfrYeQDTB/Qj6kX6Ybhw4B+bOYoLKCC9H3Nu/leUTZ1JdRWkkn2ldcCamzrcf47KKXdAJllSlxAOkRgyHsGC/zRday5Qld9DyoM4/q/rUoy/CXh3jzOu3bHUVZeU+DEn8FInkPBFlu3+nW3Nw0mk6vCDiWg8CeJaxEwuHS3+z5RgY+YBR6V1Z1nxSOfoaPa4LASWxxdNp+VWTk7+4vzaou8v8PN+xo+KY2xsw6une2frhw05CTYOmQvsEhjhWjn0bmXPjpE1+kplmmkP3suftwTubK9Vq22qKmrBhpY4jvd5afdRA3wGjFAgcnTK2s4hY0/GPNIb0nErGMCRxWOOX64Z8RAC4oCXdklmEvcL8o0BfkNK4lUg9HTl+oPlQxdNo3Mg4Nv175e/1LDGzZen30MEjRUtmXSfiTVu1kK8W4txyV6BMKlbgk3lMwYCiusNy9fVfvvwMxv8Ynl6vxoByANLTWplvuj/nF9m2+PDtt1eiHPBr1oIfhCChQMBw6Aw0UulqTKZdfVvfG7VcfIqLG9bcldL/+pdWTLxLUy8Qq38heUIjh4XlzZxzQm19lLFlr8vdQ97rjZVOLf8nclzckbcD4wxXMidpX30sFd37Fv/GtwwhzhxGVAprjbg0gCAEeIgwCZyTV2Z1REEW8O4py0wsjeloKoMr6iCY6dP92H6Vw/oTyICIthibxjm/DfN9lVz8IqtqKYLUXfoKVMVQVVJOElGjrnnUt9T9wbgp8AyYKaGlqingHZU/uG2NTZSVqwHQTWkx9hxjkpWDaCg6Ckj5qebgBVbT3V3NNXMSiWSDdGV3hrtzla7J+duwPOToIg42ChPQOQjspnSlp1V+Gjdged7+8UN5CRAV7a5EdFNwCjEaBR27b3W890TE7g24NAP/mMDXRWrGoFPQI9ls/MWO2dWFAar/xcOIImbbpA3zgAAAABJRU5ErkJggg==);
-        }
-    </style>
-    <div>
-        <a href="https://bokeh.org" target="_blank" class="bk-notebook-logo"></a>
-        <span id="d2d7d6db-1829-4976-8032-de6f05569a52">Loading BokehJS ...</span>
-    </div>
-</div><script type="application/javascript">'use strict';
-(function(root) {
-  function now() {
-    return new Date();
-  }
-
-  const force = true;
-
-  if (typeof root._bokeh_onload_callbacks === "undefined" || force === true) {
-    root._bokeh_onload_callbacks = [];
-    root._bokeh_is_loading = undefined;
-  }
-
-const JS_MIME_TYPE = 'application/javascript';
-  const HTML_MIME_TYPE = 'text/html';
-  const EXEC_MIME_TYPE = 'application/vnd.bokehjs_exec.v0+json';
-  const CLASS_NAME = 'output_bokeh rendered_html';
-
-  /**
-   * Render data to the DOM node
-   */
-  function render(props, node) {
-    const script = document.createElement("script");
-    node.appendChild(script);
-  }
-
-  /**
-   * Handle when an output is cleared or removed
-   */
-  function handleClearOutput(event, handle) {
-    function drop(id) {
-      const view = Bokeh.index.get_by_id(id)
-      if (view != null) {
-        view.model.document.clear()
-        Bokeh.index.delete(view)
-      }
-    }
-
-    const cell = handle.cell;
-
-    const id = cell.output_area._bokeh_element_id;
-    const server_id = cell.output_area._bokeh_server_id;
-
-    // Clean up Bokeh references
-    if (id != null) {
-      drop(id)
-    }
-
-    if (server_id !== undefined) {
-      // Clean up Bokeh references
-      const cmd_clean = "from bokeh.io.state import curstate; print(curstate().uuid_to_server['" + server_id + "'].get_sessions()[0].document.roots[0]._id)";
-      cell.notebook.kernel.execute(cmd_clean, {
-        iopub: {
-          output: function(msg) {
-            const id = msg.content.text.trim()
-            drop(id)
-          }
-        }
-      });
-      // Destroy server and session
-      const cmd_destroy = "import bokeh.io.notebook as ion; ion.destroy_server('" + server_id + "')";
-      cell.notebook.kernel.execute(cmd_destroy);
-    }
-  }
-
-  /**
-   * Handle when a new output is added
-   */
-  function handleAddOutput(event, handle) {
-    const output_area = handle.output_area;
-    const output = handle.output;
-
-    // limit handleAddOutput to display_data with EXEC_MIME_TYPE content only
-    if ((output.output_type != "display_data") || (!Object.prototype.hasOwnProperty.call(output.data, EXEC_MIME_TYPE))) {
-      return
-    }
-
-    const toinsert = output_area.element.find("." + CLASS_NAME.split(' ')[0]);
-
-    if (output.metadata[EXEC_MIME_TYPE]["id"] !== undefined) {
-      toinsert[toinsert.length - 1].firstChild.textContent = output.data[JS_MIME_TYPE];
-      // store reference to embed id on output_area
-      output_area._bokeh_element_id = output.metadata[EXEC_MIME_TYPE]["id"];
-    }
-    if (output.metadata[EXEC_MIME_TYPE]["server_id"] !== undefined) {
-      const bk_div = document.createElement("div");
-      bk_div.innerHTML = output.data[HTML_MIME_TYPE];
-      const script_attrs = bk_div.children[0].attributes;
-      for (let i = 0; i < script_attrs.length; i++) {
-        toinsert[toinsert.length - 1].firstChild.setAttribute(script_attrs[i].name, script_attrs[i].value);
-        toinsert[toinsert.length - 1].firstChild.textContent = bk_div.children[0].textContent
-      }
-      // store reference to server id on output_area
-      output_area._bokeh_server_id = output.metadata[EXEC_MIME_TYPE]["server_id"];
-    }
-  }
-
-  function register_renderer(events, OutputArea) {
-
-    function append_mime(data, metadata, element) {
-      // create a DOM node to render to
-      const toinsert = this.create_output_subarea(
-        metadata,
-        CLASS_NAME,
-        EXEC_MIME_TYPE
-      );
-      this.keyboard_manager.register_events(toinsert);
-      // Render to node
-      const props = {data: data, metadata: metadata[EXEC_MIME_TYPE]};
-      render(props, toinsert[toinsert.length - 1]);
-      element.append(toinsert);
-      return toinsert
-    }
-
-    /* Handle when an output is cleared or removed */
-    events.on('clear_output.CodeCell', handleClearOutput);
-    events.on('delete.Cell', handleClearOutput);
-
-    /* Handle when a new output is added */
-    events.on('output_added.OutputArea', handleAddOutput);
-
-    /**
-     * Register the mime type and append_mime function with output_area
-     */
-    OutputArea.prototype.register_mime_type(EXEC_MIME_TYPE, append_mime, {
-      /* Is output safe? */
-      safe: true,
-      /* Index of renderer in `output_area.display_order` */
-      index: 0
-    });
-  }
-
-  // register the mime type if in Jupyter Notebook environment and previously unregistered
-  if (root.Jupyter !== undefined) {
-    const events = require('base/js/events');
-    const OutputArea = require('notebook/js/outputarea').OutputArea;
-
-    if (OutputArea.prototype.mime_types().indexOf(EXEC_MIME_TYPE) == -1) {
-      register_renderer(events, OutputArea);
-    }
-  }
-  if (typeof (root._bokeh_timeout) === "undefined" || force === true) {
-    root._bokeh_timeout = Date.now() + 5000;
-    root._bokeh_failed_load = false;
-  }
-
-  const NB_LOAD_WARNING = {'data': {'text/html':
-     "<div style='background-color: #fdd'>\n"+
-     "<p>\n"+
-     "BokehJS does not appear to have successfully loaded. If loading BokehJS from CDN, this \n"+
-     "may be due to a slow or bad network connection. Possible fixes:\n"+
-     "</p>\n"+
-     "<ul>\n"+
-     "<li>re-rerun `output_notebook()` to attempt to load from CDN again, or</li>\n"+
-     "<li>use INLINE resources instead, as so:</li>\n"+
-     "</ul>\n"+
-     "<code>\n"+
-     "from bokeh.resources import INLINE\n"+
-     "output_notebook(resources=INLINE)\n"+
-     "</code>\n"+
-     "</div>"}};
-
-  function display_loaded(error = null) {
-    const el = document.getElementById("d2d7d6db-1829-4976-8032-de6f05569a52");
-    if (el != null) {
-      const html = (() => {
-        if (typeof root.Bokeh === "undefined") {
-          if (error == null) {
-            return "BokehJS is loading ...";
-          } else {
-            return "BokehJS failed to load.";
-          }
-        } else {
-          const prefix = `BokehJS ${root.Bokeh.version}`;
-          if (error == null) {
-            return `${prefix} successfully loaded.`;
-          } else {
-            return `${prefix} <b>encountered errors</b> while loading and may not function as expected.`;
-          }
-        }
-      })();
-      el.innerHTML = html;
-
-      if (error != null) {
-        const wrapper = document.createElement("div");
-        wrapper.style.overflow = "auto";
-        wrapper.style.height = "5em";
-        wrapper.style.resize = "vertical";
-        const content = document.createElement("div");
-        content.style.fontFamily = "monospace";
-        content.style.whiteSpace = "pre-wrap";
-        content.style.backgroundColor = "rgb(255, 221, 221)";
-        content.textContent = error.stack ?? error.toString();
-        wrapper.append(content);
-        el.append(wrapper);
-      }
-    } else if (Date.now() < root._bokeh_timeout) {
-      setTimeout(() => display_loaded(error), 100);
-    }
-  }
-
-  function run_callbacks() {
-    try {
-      root._bokeh_onload_callbacks.forEach(function(callback) {
-        if (callback != null)
-          callback();
-      });
-    } finally {
-      delete root._bokeh_onload_callbacks
-    }
-    console.debug("Bokeh: all callbacks have finished");
-  }
-
-  function load_libs(css_urls, js_urls, callback) {
-    if (css_urls == null) css_urls = [];
-    if (js_urls == null) js_urls = [];
-
-    root._bokeh_onload_callbacks.push(callback);
-    if (root._bokeh_is_loading > 0) {
-      console.debug("Bokeh: BokehJS is being loaded, scheduling callback at", now());
-      return null;
-    }
-    if (js_urls == null || js_urls.length === 0) {
-      run_callbacks();
-      return null;
-    }
-    console.debug("Bokeh: BokehJS not loaded, scheduling load and callback at", now());
-    root._bokeh_is_loading = css_urls.length + js_urls.length;
-
-    function on_load() {
-      root._bokeh_is_loading--;
-      if (root._bokeh_is_loading === 0) {
-        console.debug("Bokeh: all BokehJS libraries/stylesheets loaded");
-        run_callbacks()
-      }
-    }
-
-    function on_error(url) {
-      console.error("failed to load " + url);
-    }
-
-    for (let i = 0; i < css_urls.length; i++) {
-      const url = css_urls[i];
-      const element = document.createElement("link");
-      element.onload = on_load;
-      element.onerror = on_error.bind(null, url);
-      element.rel = "stylesheet";
-      element.type = "text/css";
-      element.href = url;
-      console.debug("Bokeh: injecting link tag for BokehJS stylesheet: ", url);
-      document.body.appendChild(element);
-    }
-
-    for (let i = 0; i < js_urls.length; i++) {
-      const url = js_urls[i];
-      const element = document.createElement('script');
-      element.onload = on_load;
-      element.onerror = on_error.bind(null, url);
-      element.async = false;
-      element.src = url;
-      console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
-      document.head.appendChild(element);
-    }
-  };
-
-  function inject_raw_css(css) {
-    const element = document.createElement("style");
-    element.appendChild(document.createTextNode(css));
-    document.body.appendChild(element);
-  }
-
-  const js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-3.6.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.6.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.6.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.6.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.6.2.min.js"];
-  const css_urls = [];
-
-  const inline_js = [    function(Bokeh) {
-      Bokeh.set_log_level("info");
-    },
-function(Bokeh) {
-    }
-  ];
-
-  function run_inline_js() {
-    if (root.Bokeh !== undefined || force === true) {
-      try {
-            for (let i = 0; i < inline_js.length; i++) {
-      inline_js[i].call(root, root.Bokeh);
-    }
-
-      } catch (error) {display_loaded(error);throw error;
-      }if (force === true) {
-        display_loaded();
-      }} else if (Date.now() < root._bokeh_timeout) {
-      setTimeout(run_inline_js, 100);
-    } else if (!root._bokeh_failed_load) {
-      console.log("Bokeh: BokehJS failed to load within specified timeout.");
-      root._bokeh_failed_load = true;
-    } else if (force !== true) {
-      const cell = $(document.getElementById("d2d7d6db-1829-4976-8032-de6f05569a52")).parents('.cell').data().cell;
-      cell.output_area.append_execute_result(NB_LOAD_WARNING)
-    }
-  }
-
-  if (root._bokeh_is_loading === 0) {
-    console.debug("Bokeh: BokehJS loaded, going straight to plotting");
-    run_inline_js();
-  } else {
-    load_libs(css_urls, js_urls, function() {
-      console.debug("Bokeh: BokehJS plotting callback run at", now());
-      run_inline_js();
-    });
-  }
-}(window));</script><div class="output text_html">
-  <div id="e7c4d1c9-bd05-46dc-9290-9e11be497523" data-root-id="p1004" style="display: contents;"></div>
-</div><script type="application/javascript">(function(root) {
-  function embed_document(root) {
-  const docs_json = {"fa5e1eeb-57e2-43db-8192-3483329f0acf":{"version":"3.6.2","title":"Bokeh Application","roots":[{"type":"object","name":"Figure","id":"p1004","attributes":{"width":700,"height":500,"x_range":{"type":"object","name":"DataRange1d","id":"p1005"},"y_range":{"type":"object","name":"DataRange1d","id":"p1006"},"x_scale":{"type":"object","name":"LinearScale","id":"p1014"},"y_scale":{"type":"object","name":"LinearScale","id":"p1015"},"title":{"type":"object","name":"Title","id":"p1007","attributes":{"text":"Word Embeddings Visualization"}},"renderers":[{"type":"object","name":"GlyphRenderer","id":"p1046","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1001","attributes":{"selected":{"type":"object","name":"Selection","id":"p1002","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1003"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"hVwAwFAHSME3gPs/4TMNQF7bQEBtfw9ArOeDQF3m9D+Ra8c96zJuv1oL6r6t3Oe+vFosQDLjdT936jnB8v8uP5h2ej9aCJtAw69SQMtVF0BcdT/Bd5AVPniRwj9Ap3dADbjFPY8RREAH4ba/t1siQNDr8MCTzoQ/MurkP983E0CZlCE/DEsqvxl1qj8CSStAa3xKQMe6AEAOjLlAszowv4mmQ8GY9JU+sNpjP3BCikB7XDA/ELsuwTrxgD+iHqtA8+wBQI5XCMHHi1DAM+CWP6oZhj7k4Jw+9/OqP3HRFD+UswpA9xZ0QIJP/z3mHQ1AseKNQHE5db6jNKg/jyYIPwinmUATZd4/HYs/QFEaBMHJa2I/XG16vwtwjUCNJwRAt4lpvr/06b9aGwzB+7HePmX+/j+ulOE/m29Vv/Hl1T936HM/XGgHQIAtW0CUbXY9bJ1xvqIsEMFzKSHAA6e8Py98Az4Pxz7BQzKpvvt0Z0D5Trg/Ubg4P5P9HT8K7pTACvzePqSBEL8Yxog/jwMJPw=="},"shape":[100],"dtype":"float32","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"4OCxQMnbH0DgVqDALPyLPeLsEL8oltlAVb4YQO8IPsDf3/W/4wCYvsJNfT+GrT6/TO4yQDJ9o0AHJRVA2hhSwJbLjMBqFYw/RvhGQBnJjL/nbyRAIdbQvqMb4b8ifmxAagV4wGzwtcCq/TnAGwqaQP3UwEADqqbAqM+8v0q5AEEJ+kzAzPgrwLKeJsBkNlxA6NqUQHHUN8AhGjVAmqNHwN9VUEA+oI++ts2RwIO3g0Af+pi/tMxAQHKa4MCbeJlAEfTXvs1jgb8g3ou/4LszwN90HcBd/3u/9u1SwAaQocBICFS/tKfgQPvUHECJwUPAlVa0QGzVVkDTqRs/BEwUvwm6yUCDT8TAZCk7QFT2cr///wRAJ49TwMpgrkAr6HW/KkZdwB/5VMBJkx8/sh/SwPiZwUCq4yXAH1pHwHyWHsCoiRrAHhsoQNyDm0BtIjLAXIYnwGTFHz9ITu6/TAIDwByc6b3AxxBAytk9wC1ORUAcZ2dA65RgwPJVmr93D6Y/K56yv1clmr+9BIvAxiOnQA=="},"shape":[100],"dtype":"float32","order":"little"}],["label",[1,0,0,1,1,1,1,0,0,0,1,1,1,1,0,0,0,1,1,0,0,0,0,1,0,0,0,1,1,1,0,1,0,0,0,1,1,0,1,1,0,1,0,1,1,0,0,1,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,0,1,0,1,0,1,0,1,0,0,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,1,0,0,1,1,1,0,0,0,0,0,1]],["sentence",["the main crops are pear and apple .","then sony pictures syndicated the series in a multi-platform footprint including : youtube , hulu , the playstation network , google tv , the bravia network , animax , axn , at&t , sprint , etc. on october 19 , 2012 , apple releases an exclusive and innovative mobile app edition of urban wolf available on its 172 itunes app stores worldwide for iphone , ipod touch and ipad .","in 2011 , animax designed and developed beanie ballz bounce for ty inc for ipad , iphone , and ipod touch and is free for download in the apple app store .","the larvae feed on birch , tilia , and apple .","'' fruits , sometimes categorized with vegetables , include apple , oranges , banana , berries and lemon .","they were traditionally cooked with bits of apple ( \u00e6ble ) or applesauce inside but these ingredients are very rarely included in modern danish forms of the dish .","it is prevalent in the southern united states and elsewhere , and damages the leaves of infected apple trees .","nichicon received particular infamy because of their use by major computer manufacturers including dell , hewlett-packard , and apple .","the rather absurd legal precedent in digidyne v. data general regarding bundling has never been applied to apple , which might never have been as profitable as it is today had it been forced to license its macintosh operating systems to competitors ( although it did do so temporarily , voluntarily , on a limited scale and for a limited period of time ) .","alcatel ot-908s ot-918s ot-981a ot-990s ot-991 ot-995 one touch fierce one touch scribe x one touch scribe hd-lte apple iphone 5 , model a1428 manufactured after april 12 , 2013 iphone 5c , models a1436 and a1532 iphone 5s , models a1453 and a1533 ipad air , model a1475 ipad mini with retina display , model a1490 asus google nexus 7 padfone 2 google nexus 7 ( 2013 ) fonepad 7 blackberry q5 ( only sqr100-1 ) q10 ( only sqn100-5 ) z10 ( only stl-100-3 ( rfk121lw ) ) bold 9700 bold 9780 bold 9790 bold 9900 curve 9300 curve 9320 curve 9360 curve 9380 pearl 9100 torch 9810 torch 9860 many of the above listed blackberry devices have multiple versions , only one of each being aws compatible .","the iwaki river is the longest river in aomori prefecture , and is the source of irrigation for the large-scale rice and apple production of the prefecture .","the town was first settled around 1763 by jean laframboise , who is also credited with introducing apple growing to the area .","dabinett apples dabinett is a variety of apple , customarily used in somerset for making cider .","michurin also proposed means for overcoming the genetic barrier of incompatibility during the process of hybridization , such as pollination of the young hybrids during their first florescence , preliminary vegetative crossing , use of a '' mediator '' , pollination with the mix of different kinds of pollen etc. the soviets began to cultivate michurin 's hybrids of apple , pear , cherry , rowan and others .","he noted in 2012 that many of the largest companies in silicon valley , including microsoft , apple , and facebook , have also bought large patent portfolios to ` further their strategic game ' .","something venture d follows the stories of the venture capitalists who worked with entrepreneurs to start and build companies like apple , intel , genentech , cisco , atari , tandem , and others .","these features were frowned upon by the then board of directors , who ordered the xerox engineers to share them with apple technicians .","the mcintosh apple was discovered and cultivated in south dundas near williamsburg .","world 's rarest apple was discovered on bardsey island in 2000 .","in 2005 and 2006 , recording artists gwen stefani appeared in advertisements related to a campaign in which codes printed underneath diet pepsi bottle caps could be redeemed for music downloads on the apple itunes music store .","the company has affiliations with more than 3,000 online retailers including amazon , target , staples , best buy and apple .","because userland jailbreaks exploit holes ( vulnerabilities ) in ios ( not the bootrom , iboot , ibss etc. ) they affect users who are both jailbroken and not jailbroken ( potentially compromising the security of users who have not jailbroken ) , apple patched the exploit on versions 4.0 and 3.2.1 .","another prominent proponent of the voucher system was apple co-founder and ceo , steve jobs , who said : some proponents of school vouchers , including the sutherland institute and many supporters of the utah voucher effort , see it as a remedy for the negative cultural impact caused by under-performing public schools , which falls disproportionately on demographic minorities .","ortley ( better known in the southern united states as the white bellflower ) is a variety of apple , medium in size , and light green to yellow in color .","with the advent of apple 's ipod , several companies worked to enable mobile phones and other handheld and portable devices with the ability to access music ( and subsequently video ) over the network in a legal manner .","industry response when surface was first announced , critics noted that the device represented a significant departure for microsoft , as the company had previously relied exclusively on third-party oems to produce devices running windows , and began shifting towards a first-party hardware model with similarities to that of apple .","integrated iris pro graphics was adopted by apple for their late-2013 15-inch macbook pro laptops ( with retina display ) , which for the first time in the history of series did not have discrete graphics , although only for the low-end model .","the larger domain comprises 220 hectares , with terraced garden , english park , and about 1500 varieties of old rose , 800 varieties of pear , and 550 varieties of apple trees .","thus in many sub counties there are successful farmers engaged in the production of grape , apple , pear and peach .","on apple macbook models , it is possible to plug a device in , close the laptop ( putting it into sleep mode ) and have the device continue to charge .","world wide web browser software , such as microsoft 's internet explorer , mozilla firefox , opera , apple 's safari , and google chrome , lets users navigate from one web page to another via hyperlinks embedded in the documents .","the caterpillars feed on orange fruit and other types of citrus fruit , apple and maize .","as for micropayments , they appear to have finally become feasible via apple 's itunes store .","sol republic 's main distribution channels at that time were through apple , radioshack , and best buy .","granddad 's complaint made it to apple .","the ralls genet , sometimes spelled ralls janet or rawls jennet , is a cultivar of apple which originated in virginia in the late 18th century .","in 1995 , the fran\u00e7ois rabelais university in tours created an orchard of pear and apple trees in one part of the park .","apple did n't join this working group , and delayed w3c recommendation of its touch events specification by disclosing patents late in the recommendation process .","beacon is a cultivar of apple created by university of minnesota in 1936 .","hamton j . pig : hungry boy hamton ( a.k.a. '' junction '' ) - similar to konami 's loco-motion , hamton is walking along a blue path towards apple .","the school has during its history educated many professionals in key positions around the world in such companies as honda , toyota , apple , marimekko , nokia and h&m .","pear are the most susceptible , but apple , loquat , crabapple , quince , hawthorn , cotoneaster , pyracantha , raspberry and some other rosaceous plants are also vulnerable .","as with the rest of kala , m.i.a. and co-composer switch relied heavily on logic pro , a digital audio workstation produced by apple , and were able to capture vocals and background sounds outside the traditional studio environment , using a microphone and a macbook pro . consisting of urumee drum percussion , trumpets , tambourine , electronic scratches and synths , the song 's instrumentation also consists of repetitive pumped-up synthesizer and 4/4 beats .","structure of proanthocyanidins distribution in plants proanthocyanidins , including the lesser bioactive / bioavailable polymers ( 4 or more catechines ) represent a group of condensed flavan-3-ols , such as procyanidins , prodelphinidins and propelargonidins , that can be found in many plants , most notably apple , maritime pine bark , cinnamon , aronia fruit , cocoa bean , grape seed , grape skin ( procyanidins and prodelphinidin ) , and red wine of vitis vinifera ( the european wine grape ) .","meanwhile , the office staff begins betting on various things , from counting the jelly beans in pam beesly 's ( jenna fischer ) candy dish to whether creed bratton ( portrayed by the actor of the same name ) will notice that his apple has been replaced with a potato .","it contains branches of luxury firms such as beymen and atelier rebul , vakko , cos , moncler , bulgari , pomellato , louis vuitton , fendi , lanvin , dior , miu miu , burberry , tory burch , michael kors and valentino , and istanbul 's ( and the country 's ) first apple store .","both of these names encompass both the instruction format and the software supporting it ; aat is included on apple operating system , while graphite is available for microsoft windows and linux - based systems .","the stout larva is green with a reddish stripe and feeds on the flower of various rosaceae including apple , blackthorn , cherry , hawthorn , pear and quince .","the permanent sliding calendar was invented by claussen-finks 24 years before apple presented its first iphone in 2008 , where sliding on the screen with the finger appeared in an electronic consumer product for the first time .","examples of de facto standards that were not approved by any standards organizations ( or at least not approved until after they were in widespread de facto use ) include the hayes command set developed by hayes , apple 's truetype font design and the pcl protocol used by hewlett-packard in the computer printer they produced .","the final version took four months of post-production , using off-the-shelf software from electric image , adobe , and apple , and about $ 3,000 in out-of-pocket costs .","over the months of may and june in 2007 , colbert begged apple to give him a free iphone , and finally received one in july .","iphone hacking brocious , under the pseudonym daeken , joined with a group of other hackers to reverse engineer the iphone , granting users the ability to use their phones in ways not intended by apple .","'' personal life he married novelist mona simpson , the biological sister of apple founder steve jobs , in 1993 .","in 1994 , chahil organized a meeting between apple ceo michael spindler and indian prime minister p.v . narasimha rao and finance minister manmohan singh ( later prime minister ) .","mactracker is a freeware application containing a complete database of all apple hardware models and software versions , created and actively developed by ian page .","however , apple has retained inetd for compatibility purposes .","every autumn , the many different kind of apple - sorts that are represented in the almost hundred trees , becomes mature .","for the mountain towns , the crops are summer fruits , mainly apple and pear .","apple used a number of c t controllers in their powerbook line .","fruits such as coconut , mango , fig , pomegranate , apple , peach , melon , banana , guava and papaya are also reportedly grown .","melon dolma along with quince or apple dolma was one of the palace 's specialties ( raw melon stuffed with minced meat , onion , rice , almonds , cooked in an oven ) .","it is made by crushing apple and squeezing out the liquid .","as a location scout in hollywood , he has recently scouted for the hangover part iii , hawaii five-0 , burlesque , the fighter , castle and commercials for brands such as apple , exxonmobil , ford , hyundai , mountain dew , nike , pepsi , verizon and others .","in season , they eat acorn and apple .","the duo subsequently released the vilefault free software program which broke apple 's filevault security .","the peninsula is also a productive fruit region growing apple and tart cherries .","some of the clinical applications that medopad includes are patient clinical notes by voice recognition or typing , scheduling , lab results , image viewer to view x-ray to ct scans , support documents to digitalise all paper documents or to take photos , video conferencing , primary records , realtime vitals , demographics and contact information , apple healthkit integration , realtime data stream , traffic light to sort and prioritise patients , admission , and access to more third party applications integrated into medopad through the clinical app store .",") violet lathyrus tuberosus violet wild cress -- nasturtium officinalis '' biolair '' bitter vetch -- lathyrus tuberosus -- cairmeal bilberries fixed with alum yellow -- buidhe achlasan chaluim cille rhubarb yellow apple - tree , ash and buckthorn poplar and elm bog myrtle , roid ash roots teazle -- dipsacus fullonum -- l\u00f9s-an-fh\u00f9cadair / leadan bracken roots -- raineach mh\u00f2r cow weed tops and flowers of heather , erica , fraoch wild mignonette , reseda luteola , '' lus buidhe m\u00f2r '' , dried , reduced to powder and boiled .","their album , glorious five year plan , was issued on the mgm label and appeared on apple 's itunes store on 10 january .","pear - introduced may 2003 , discontinued february 2008 clementine - introduced february 2004 blueberry - introduced april 2004 pomegranate - introduced march 2005 apple - introduced april 2006 cranberry - introduced november 2006 , discontinued december 2006 , only available at starbucks .","on 13 april 2010 , apple added support for audio out using mini displayport in their macbook pro product line .","they decided to call their company apple and sell their machines for $ 666.66 .","in 2010 the museum began with the collection of source code of important software , beginning with apple 's macpaint 1.3 , written in a combination of assembly and pascal and available as download for the public .","the ccaf has raised objections to class action settlements involving the grand theft auto '' hot coffee '' minigame , honda civic hybrid , apple backdating , a.g. edwards , bluetooth headsets , and the cobell indian trust .","stacks are a feature first found in apple 's operating system , mac os x v10.5 '' leopard '' .","foods foods that are claimed to be negative in calories are mostly low-calorie fruits and vegetables such as celery , grapefruit , lemon , lime , apple , lettuce , broccoli , and cabbage .","he performed at les siestes electroniques in toulouse , france , in the summer of 2006 ( with chicks on speed ) , and performs live periodically at apple stores in japan .","apart from operating systems , mt xinu also produced apple - unix interoperability software , including an appleshare server for unix .","user interface caps lock on an apple wireless keyboard .","size comparison , from top to bottom , between : - a first generation ipod nano - a first generation iphone - a fourth generation ipod classic the apple ipod line has been upgraded many times , and each significant revision is called a '' generation '' .","arboretum trees include apple , white ash , quaking aspen , gray birch , paper birch , yellow birch , american beech , black cherry , dogwood , eastern hemlock , hop-hornbeam , red maple , sugar maple , northern red oak , white oak , and eastern white pine .","the much sought-after winter apple , and especially the glan plum were sent by the wagonload in the months of september and october as far as hamburg .","the company is well known for their service and sale of apple products , including notebooks , desktops , and the ipod music player .","markoff was one of a team of new york times reporters who won the 2013 pulitzer prize for explanatory reporting , for a series of 10 articles on the business practices of apple and other technology companies .","it is available for linux , apple os x , unix and microsoft windows .","as of early 2011 amazon 's kindle reading device is a significant force in the market , along with the apple ipad and the nook from barnes & noble .","the main plot of the south park episode humancentipad was that kyle did not read the terms of service for his last itunes update and therefore had inadvertently agreed to have apple employees experiment upon him .","they are mostly popular with tourists with apple ( elma \u00e7ay\u0131 ) , rose hip ( ku\u015fburnu \u00e7ay\u0131 ) , and linden flower ( \u0131hlamur \u00e7ay\u0131 ) being the most popular flavors .","the board of directors includes representatives from eleven '' promoter '' companies : amd , american megatrends , apple , dell , hp , ibm , insyde software , intel , lenovo , microsoft , and phoenix technologies .","at macworld expo in 2001 , not long after the dot-com bubble burst and amidst industry-wide angst over the future of the pc , apple founder and ceo steve jobs announced a strategy seeing a pc ( specifically , the macintosh ) serving as a '' digital hub '' for future mobile devices ( such as its ipod mp3 player ) .","bunbury to walpole from bunbury , the highway goes through boyanup and on to donnybrook , the heart of wa 's apple country .","its main products include apple , peach and vegetable .","in january , 2012 the focus changed to economic development projects and the organization was rebranded as aythos , inc. projects in 2012 aythos was asked to consult for a grant to develop apple tree and kiwifruit plant farms in villages in helambu .","the images had been demanded in exchange for interviews regarding an alleged leak of apple iphone and ipad user data from an fbi laptop .","intel and microsoft built their first overseas research and development centers in israel , and other high-tech multi-national corporations , such as ibm , google , apple , hp , cisco systems , and motorola , have opened r & d facilities in the country .","thus , matrix capital is not to be confused with ferri 's separate venture capital firm matrix partners , which has made early stage investments in young , private companies over the past 36 years that include apple , sandisk , gilt groupe , and others .","funding key investors include former apple european ceo , pascal cagny , former bbc director-general john birt , co-founder of games workshop and life president of eidos , ian livingstone , and chairman of retail group kingfisher and former chief executive officer of carrefour , daniel bernard .","she is also an internationally recognized digital media artist who began creating digital media with early apple computers , including the colorization of early macintosh educational software .","the fragrance contains scents of apple , grapefruit , white raspberry , water lily , honeysuckle , jasmine , pear , and musk , which minaj commented adds '' a bit of dimension and playfulness to the original scent '' ."]],["color",["#ff7f0e","#1f77b4","#1f77b4","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#1f77b4","#1f77b4","#1f77b4","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#1f77b4","#1f77b4","#1f77b4","#ff7f0e","#ff7f0e","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#ff7f0e","#1f77b4","#1f77b4","#1f77b4","#ff7f0e","#ff7f0e","#ff7f0e","#1f77b4","#ff7f0e","#1f77b4","#1f77b4","#1f77b4","#ff7f0e","#ff7f0e","#1f77b4","#ff7f0e","#ff7f0e","#1f77b4","#ff7f0e","#1f77b4","#ff7f0e","#ff7f0e","#1f77b4","#1f77b4","#ff7f0e","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#ff7f0e","#ff7f0e","#1f77b4","#ff7f0e","#ff7f0e","#ff7f0e","#1f77b4","#ff7f0e","#1f77b4","#ff7f0e","#1f77b4","#ff7f0e","#1f77b4","#ff7f0e","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#ff7f0e","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#ff7f0e","#ff7f0e","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#ff7f0e","#1f77b4","#1f77b4","#ff7f0e","#ff7f0e","#ff7f0e","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#ff7f0e"]]]}}},"view":{"type":"object","name":"CDSView","id":"p1047","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1048"}}},"glyph":{"type":"object","name":"Scatter","id":"p1043","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"size":{"type":"value","value":12},"line_color":{"type":"value","value":"DarkSlateGrey"},"line_width":{"type":"value","value":2},"fill_color":{"type":"field","field":"color"}}},"nonselection_glyph":{"type":"object","name":"Scatter","id":"p1044","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"size":{"type":"value","value":12},"line_color":{"type":"value","value":"DarkSlateGrey"},"line_alpha":{"type":"value","value":0.1},"line_width":{"type":"value","value":2},"fill_color":{"type":"field","field":"color"},"fill_alpha":{"type":"value","value":0.1},"hatch_alpha":{"type":"value","value":0.1}}},"muted_glyph":{"type":"object","name":"Scatter","id":"p1045","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"size":{"type":"value","value":12},"line_color":{"type":"value","value":"DarkSlateGrey"},"line_alpha":{"type":"value","value":0.2},"line_width":{"type":"value","value":2},"fill_color":{"type":"field","field":"color"},"fill_alpha":{"type":"value","value":0.2},"hatch_alpha":{"type":"value","value":0.2}}}}}],"toolbar":{"type":"object","name":"Toolbar","id":"p1013","attributes":{"tools":[{"type":"object","name":"PanTool","id":"p1026"},{"type":"object","name":"WheelZoomTool","id":"p1027","attributes":{"renderers":"auto"}},{"type":"object","name":"BoxZoomTool","id":"p1028","attributes":{"overlay":{"type":"object","name":"BoxAnnotation","id":"p1029","attributes":{"syncable":false,"line_color":"black","line_alpha":1.0,"line_width":2,"line_dash":[4,4],"fill_color":"lightgrey","fill_alpha":0.5,"level":"overlay","visible":false,"left":{"type":"number","value":"nan"},"right":{"type":"number","value":"nan"},"top":{"type":"number","value":"nan"},"bottom":{"type":"number","value":"nan"},"left_units":"canvas","right_units":"canvas","top_units":"canvas","bottom_units":"canvas","handles":{"type":"object","name":"BoxInteractionHandles","id":"p1035","attributes":{"all":{"type":"object","name":"AreaVisuals","id":"p1034","attributes":{"fill_color":"white","hover_fill_color":"lightgray"}}}}}}}},{"type":"object","name":"SaveTool","id":"p1036"},{"type":"object","name":"ResetTool","id":"p1037"},{"type":"object","name":"HelpTool","id":"p1038"},{"type":"object","name":"HoverTool","id":"p1039","attributes":{"renderers":"auto","tooltips":[["Label","@label"],["Sentence","@sentence"]]}}]}},"left":[{"type":"object","name":"LinearAxis","id":"p1021","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1022","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1023"},"axis_label":"PCA 2","major_label_policy":{"type":"object","name":"AllLabels","id":"p1024"}}}],"below":[{"type":"object","name":"LinearAxis","id":"p1016","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1017","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1018"},"axis_label":"PCA 1","major_label_policy":{"type":"object","name":"AllLabels","id":"p1019"}}}],"center":[{"type":"object","name":"Grid","id":"p1020","attributes":{"axis":{"id":"p1016"}}},{"type":"object","name":"Grid","id":"p1025","attributes":{"dimension":1,"axis":{"id":"p1021"}}}]}}]}};
-  const render_items = [{"docid":"fa5e1eeb-57e2-43db-8192-3483329f0acf","roots":{"p1004":"e7c4d1c9-bd05-46dc-9290-9e11be497523"},"root_ids":["p1004"]}];
-  void root.Bokeh.embed.embed_items_notebook(docs_json, render_items);
-  }
-  if (root.Bokeh !== undefined) {
-    embed_document(root);
-  } else {
-    let attempts = 0;
-    const timer = setInterval(function(root) {
-      if (root.Bokeh !== undefined) {
-        clearInterval(timer);
-        embed_document(root);
-      } else {
-        attempts++;
-        if (attempts > 100) {
-          clearInterval(timer);
-          console.log("Bokeh: ERROR: Unable to run BokehJS code because BokehJS library is missing");
-        }
-      }
-    }, 10, root)
-  }
-})(window);</script></div>
 </div>
 </section>
 <section id="exercise">

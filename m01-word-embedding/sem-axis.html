@@ -218,12 +218,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../m03-transformers/bert.html">Bidirectional Encoder Representations from Transformers (BERT)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m03-transformers/sentence-bert.html">Sentence-BERT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m03-transformers/gpt.html">Generative Pre-trained Transformer (GPT)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/t5.html">Text-to-Text Transfer Transformer (T5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/from-language-model-to-instruction-following.html">From Language Model to Instruction-Following</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/prompt-tuning.html">Prompt Tuning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/prompt-tuning-exercise.html">Prompt Tuning Exercise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m03-transformers/summary.html">Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/appendix-t5.html">Appendix: Text-to-Text Transfer Transformer (T5)</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Images</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/what-to-learn.html">Module 3: Image Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/what-to-learn.html">Module 4: Image Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/pen-and-paper.html">Pen and paper exercises</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/image-processing.html">Preliminaries: Image Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/cnn.html">From Traditional Image Processing to Learning</a></li>
@@ -603,58 +606,7 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">3</span>
-<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="ne">----&gt; </span><span class="mi">3</span> <span class="kn">import</span> <span class="nn">gensim.downloader</span> <span class="k">as</span> <span class="nn">api</span>
-<span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="c1"># Download and load pre-trained GloVe embeddings</span>
-<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="n">model</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;glove-wiki-gigaword-100&#39;</span><span class="p">)</span>
-
-<span class="n">File</span> <span class="o">~/</span><span class="n">miniforge3</span><span class="o">/</span><span class="n">envs</span><span class="o">/</span><span class="n">applsoftcomp</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.10</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">gensim</span><span class="o">/</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">11</span>
-<span class="g g-Whitespace">      </span><span class="mi">7</span> <span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;4.3.2&#39;</span>
-<span class="g g-Whitespace">      </span><span class="mi">9</span> <span class="kn">import</span> <span class="nn">logging</span>
-<span class="ne">---&gt; </span><span class="mi">11</span> <span class="kn">from</span> <span class="nn">gensim</span> <span class="kn">import</span> <span class="n">parsing</span><span class="p">,</span> <span class="n">corpora</span><span class="p">,</span> <span class="n">matutils</span><span class="p">,</span> <span class="n">interfaces</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">similarities</span><span class="p">,</span> <span class="n">utils</span>  <span class="c1"># noqa:F401</span>
-<span class="g g-Whitespace">     </span><span class="mi">14</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;gensim&#39;</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">15</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>  <span class="c1"># To ensure reload() doesn&#39;t add another one</span>
-
-<span class="n">File</span> <span class="o">~/</span><span class="n">miniforge3</span><span class="o">/</span><span class="n">envs</span><span class="o">/</span><span class="n">applsoftcomp</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.10</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">gensim</span><span class="o">/</span><span class="n">corpora</span><span class="o">/</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">6</span>
-<span class="g g-Whitespace">      </span><span class="mi">1</span><span class="w"> </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span><span class="sd"> This package contains implementations of various streaming corpus I/O format.</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span><span class="sd"> &quot;&quot;&quot;</span>
-<span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="c1"># bring corpus classes directly into package namespace, to save some typing</span>
-<span class="ne">----&gt; </span><span class="mi">6</span> <span class="kn">from</span> <span class="nn">.indexedcorpus</span> <span class="kn">import</span> <span class="n">IndexedCorpus</span>  <span class="c1"># noqa:F401 must appear before the other classes</span>
-<span class="g g-Whitespace">      </span><span class="mi">8</span> <span class="kn">from</span> <span class="nn">.mmcorpus</span> <span class="kn">import</span> <span class="n">MmCorpus</span>  <span class="c1"># noqa:F401</span>
-<span class="g g-Whitespace">      </span><span class="mi">9</span> <span class="kn">from</span> <span class="nn">.bleicorpus</span> <span class="kn">import</span> <span class="n">BleiCorpus</span>  <span class="c1"># noqa:F401</span>
-
-<span class="n">File</span> <span class="o">~/</span><span class="n">miniforge3</span><span class="o">/</span><span class="n">envs</span><span class="o">/</span><span class="n">applsoftcomp</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.10</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">gensim</span><span class="o">/</span><span class="n">corpora</span><span class="o">/</span><span class="n">indexedcorpus</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">14</span>
-<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="kn">import</span> <span class="nn">logging</span>
-<span class="g g-Whitespace">     </span><span class="mi">12</span> <span class="kn">import</span> <span class="nn">numpy</span>
-<span class="ne">---&gt; </span><span class="mi">14</span> <span class="kn">from</span> <span class="nn">gensim</span> <span class="kn">import</span> <span class="n">interfaces</span><span class="p">,</span> <span class="n">utils</span>
-<span class="g g-Whitespace">     </span><span class="mi">16</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">19</span> <span class="k">class</span> <span class="nc">IndexedCorpus</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">CorpusABC</span><span class="p">):</span>
-
-<span class="n">File</span> <span class="o">~/</span><span class="n">miniforge3</span><span class="o">/</span><span class="n">envs</span><span class="o">/</span><span class="n">applsoftcomp</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.10</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">gensim</span><span class="o">/</span><span class="n">interfaces</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">19</span>
-<span class="g g-Whitespace">      </span><span class="mi">7</span><span class="w"> </span><span class="sd">&quot;&quot;&quot;Basic interfaces used across the whole Gensim package.</span>
-<span class="g g-Whitespace">      </span><span class="mi">8</span><span class="sd"> </span>
-<span class="g g-Whitespace">      </span><span class="mi">9</span><span class="sd"> These interfaces are used for building corpora, model transformation and similarity queries.</span>
-<span class="sd">   (...)</span>
-<span class="g g-Whitespace">     </span><span class="mi">14</span><span class="sd"> </span>
-<span class="g g-Whitespace">     </span><span class="mi">15</span><span class="sd"> &quot;&quot;&quot;</span>
-<span class="g g-Whitespace">     </span><span class="mi">17</span> <span class="kn">import</span> <span class="nn">logging</span>
-<span class="ne">---&gt; </span><span class="mi">19</span> <span class="kn">from</span> <span class="nn">gensim</span> <span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">matutils</span>
-<span class="g g-Whitespace">     </span><span class="mi">22</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">25</span> <span class="k">class</span> <span class="nc">CorpusABC</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">SaveLoad</span><span class="p">):</span>
-
-<span class="n">File</span> <span class="o">~/</span><span class="n">miniforge3</span><span class="o">/</span><span class="n">envs</span><span class="o">/</span><span class="n">applsoftcomp</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.10</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">gensim</span><span class="o">/</span><span class="n">matutils</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">20</span>
-<span class="g g-Whitespace">     </span><span class="mi">18</span> <span class="kn">import</span> <span class="nn">scipy.sparse</span>
-<span class="g g-Whitespace">     </span><span class="mi">19</span> <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">entropy</span>
-<span class="ne">---&gt; </span><span class="mi">20</span> <span class="kn">from</span> <span class="nn">scipy.linalg</span> <span class="kn">import</span> <span class="n">get_blas_funcs</span><span class="p">,</span> <span class="n">triu</span>
-<span class="g g-Whitespace">     </span><span class="mi">21</span> <span class="kn">from</span> <span class="nn">scipy.linalg.lapack</span> <span class="kn">import</span> <span class="n">get_lapack_funcs</span>
-<span class="g g-Whitespace">     </span><span class="mi">22</span> <span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">psi</span>  <span class="c1"># gamma function utils</span>
-
-<span class="ne">ImportError</span>: cannot import name &#39;triu&#39; from &#39;scipy.linalg&#39; (/Users/skojaku-admin/miniforge3/envs/applsoftcomp/lib/python3.10/site-packages/scipy/linalg/__init__.py)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Model contains 400000 words
 </pre></div>
 </div>
 </div>
@@ -709,6 +661,15 @@ document.write(`
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>horrible: -0.231
+terrible: -0.208
+mediocre: -0.001
+amazing: 0.296
+excellent: 0.523
+</pre></div>
+</div>
+</div>
 </div>
 </section>
 <section id="visualizing-word-alignments">
@@ -738,6 +699,9 @@ document.write(`
 <span class="n">plot_semantic_alignment</span><span class="p">(</span><span class="n">test_words</span><span class="p">,</span> <span class="n">sentiment_axis</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/fb7453002d39a2fc2b198cf52b6fb5b51206ef6b4bc65a245d3e5249de451d7a.png" src="../_images/fb7453002d39a2fc2b198cf52b6fb5b51206ef6b4bc65a245d3e5249de451d7a.png" />
 </div>
 </div>
 </section>
@@ -769,6 +733,9 @@ document.write(`
                        <span class="s2">&quot;Robust Sentiment&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/b7ae2d60b8b918dbef40c62ef69b98b7829ed2ef13e1c2fc434ea1277017833b.png" src="../_images/b7ae2d60b8b918dbef40c62ef69b98b7829ed2ef13e1c2fc434ea1277017833b.png" />
 </div>
 </div>
 </section>
@@ -814,6 +781,9 @@ document.write(`
               <span class="s2">&quot;Sentiment (Bad → Good)&quot;</span><span class="p">,</span> <span class="s2">&quot;Strength (Weak → Strong)&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/3075c1d54b3c8a135a027a0d6ae59a2481afd8ec7fff059635a03164b282f713.png" src="../_images/3075c1d54b3c8a135a027a0d6ae59a2481afd8ec7fff059635a03164b282f713.png" />
 </div>
 </div>
 </section>

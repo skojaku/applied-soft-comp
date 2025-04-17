@@ -218,12 +218,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../m03-transformers/bert.html">Bidirectional Encoder Representations from Transformers (BERT)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m03-transformers/sentence-bert.html">Sentence-BERT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m03-transformers/gpt.html">Generative Pre-trained Transformer (GPT)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/t5.html">Text-to-Text Transfer Transformer (T5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/from-language-model-to-instruction-following.html">From Language Model to Instruction-Following</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/prompt-tuning.html">Prompt Tuning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/prompt-tuning-exercise.html">Prompt Tuning Exercise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m03-transformers/summary.html">Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m03-transformers/appendix-t5.html">Appendix: Text-to-Text Transfer Transformer (T5)</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Images</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/what-to-learn.html">Module 3: Image Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/what-to-learn.html">Module 4: Image Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/pen-and-paper.html">Pen and paper exercises</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/image-processing.html">Preliminaries: Image Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/cnn.html">From Traditional Image Processing to Learning</a></li>
@@ -615,108 +618,108 @@ The distributional hypothesis suggests that words that frequently appear in the 
 </div>
 <div class="cell_output docutils container">
 <div class="output text_html"><style type="text/css">
-#T_d428b_row0_col0, #T_d428b_row0_col2, #T_d428b_row0_col4, #T_d428b_row0_col5, #T_d428b_row0_col6, #T_d428b_row0_col8, #T_d428b_row0_col11, #T_d428b_row0_col12, #T_d428b_row1_col0, #T_d428b_row1_col1, #T_d428b_row1_col4, #T_d428b_row1_col6, #T_d428b_row1_col7, #T_d428b_row1_col8, #T_d428b_row1_col10, #T_d428b_row1_col12, #T_d428b_row2_col0, #T_d428b_row2_col1, #T_d428b_row2_col2, #T_d428b_row2_col3, #T_d428b_row2_col5, #T_d428b_row2_col7, #T_d428b_row2_col11, #T_d428b_row2_col12, #T_d428b_row3_col2, #T_d428b_row3_col3, #T_d428b_row3_col4, #T_d428b_row3_col6, #T_d428b_row3_col8, #T_d428b_row3_col10, #T_d428b_row3_col11 {
+#T_b51f0_row0_col0, #T_b51f0_row0_col2, #T_b51f0_row0_col4, #T_b51f0_row0_col5, #T_b51f0_row0_col6, #T_b51f0_row0_col8, #T_b51f0_row0_col11, #T_b51f0_row0_col12, #T_b51f0_row1_col0, #T_b51f0_row1_col1, #T_b51f0_row1_col4, #T_b51f0_row1_col6, #T_b51f0_row1_col7, #T_b51f0_row1_col8, #T_b51f0_row1_col10, #T_b51f0_row1_col12, #T_b51f0_row2_col0, #T_b51f0_row2_col1, #T_b51f0_row2_col2, #T_b51f0_row2_col3, #T_b51f0_row2_col5, #T_b51f0_row2_col7, #T_b51f0_row2_col11, #T_b51f0_row2_col12, #T_b51f0_row3_col2, #T_b51f0_row3_col3, #T_b51f0_row3_col4, #T_b51f0_row3_col6, #T_b51f0_row3_col8, #T_b51f0_row3_col10, #T_b51f0_row3_col11 {
   background-color: #00224e;
   color: #f1f1f1;
 }
-#T_d428b_row0_col1, #T_d428b_row0_col3, #T_d428b_row0_col7, #T_d428b_row0_col9, #T_d428b_row0_col10, #T_d428b_row1_col2, #T_d428b_row1_col3, #T_d428b_row1_col5, #T_d428b_row1_col9, #T_d428b_row1_col11, #T_d428b_row2_col4, #T_d428b_row2_col6, #T_d428b_row2_col8, #T_d428b_row2_col9, #T_d428b_row2_col10, #T_d428b_row2_col13, #T_d428b_row3_col0, #T_d428b_row3_col1, #T_d428b_row3_col5, #T_d428b_row3_col7, #T_d428b_row3_col9, #T_d428b_row3_col12 {
+#T_b51f0_row0_col1, #T_b51f0_row0_col3, #T_b51f0_row0_col7, #T_b51f0_row0_col9, #T_b51f0_row0_col10, #T_b51f0_row1_col2, #T_b51f0_row1_col3, #T_b51f0_row1_col5, #T_b51f0_row1_col9, #T_b51f0_row1_col11, #T_b51f0_row2_col4, #T_b51f0_row2_col6, #T_b51f0_row2_col8, #T_b51f0_row2_col9, #T_b51f0_row2_col10, #T_b51f0_row2_col13, #T_b51f0_row3_col0, #T_b51f0_row3_col1, #T_b51f0_row3_col5, #T_b51f0_row3_col7, #T_b51f0_row3_col9, #T_b51f0_row3_col12 {
   background-color: #7d7c78;
   color: #f1f1f1;
 }
-#T_d428b_row0_col13, #T_d428b_row1_col13, #T_d428b_row3_col13 {
+#T_b51f0_row0_col13, #T_b51f0_row1_col13, #T_b51f0_row3_col13 {
   background-color: #fee838;
   color: #000000;
 }
 </style>
-<table id="T_d428b">
+<table id="T_b51f0">
   <caption>Word-Document Count Matrix</caption>
   <thead>
     <tr>
       <th class="blank level0" >&nbsp;</th>
-      <th id="T_d428b_level0_col0" class="col_heading level0 col0" >and</th>
-      <th id="T_d428b_level0_col1" class="col_heading level0 col1" >cat</th>
-      <th id="T_d428b_level0_col2" class="col_heading level0 col2" >cats</th>
-      <th id="T_d428b_level0_col3" class="col_heading level0 col3" >chases</th>
-      <th id="T_d428b_level0_col4" class="col_heading level0 col4" >cheese</th>
-      <th id="T_d428b_level0_col5" class="col_heading level0 col5" >dog</th>
-      <th id="T_d428b_level0_col6" class="col_heading level0 col6" >eat</th>
-      <th id="T_d428b_level0_col7" class="col_heading level0 col7" >garden</th>
-      <th id="T_d428b_level0_col8" class="col_heading level0 col8" >house</th>
-      <th id="T_d428b_level0_col9" class="col_heading level0 col9" >in</th>
-      <th id="T_d428b_level0_col10" class="col_heading level0 col10" >mice</th>
-      <th id="T_d428b_level0_col11" class="col_heading level0 col11" >park</th>
-      <th id="T_d428b_level0_col12" class="col_heading level0 col12" >play</th>
-      <th id="T_d428b_level0_col13" class="col_heading level0 col13" >the</th>
+      <th id="T_b51f0_level0_col0" class="col_heading level0 col0" >and</th>
+      <th id="T_b51f0_level0_col1" class="col_heading level0 col1" >cat</th>
+      <th id="T_b51f0_level0_col2" class="col_heading level0 col2" >cats</th>
+      <th id="T_b51f0_level0_col3" class="col_heading level0 col3" >chases</th>
+      <th id="T_b51f0_level0_col4" class="col_heading level0 col4" >cheese</th>
+      <th id="T_b51f0_level0_col5" class="col_heading level0 col5" >dog</th>
+      <th id="T_b51f0_level0_col6" class="col_heading level0 col6" >eat</th>
+      <th id="T_b51f0_level0_col7" class="col_heading level0 col7" >garden</th>
+      <th id="T_b51f0_level0_col8" class="col_heading level0 col8" >house</th>
+      <th id="T_b51f0_level0_col9" class="col_heading level0 col9" >in</th>
+      <th id="T_b51f0_level0_col10" class="col_heading level0 col10" >mice</th>
+      <th id="T_b51f0_level0_col11" class="col_heading level0 col11" >park</th>
+      <th id="T_b51f0_level0_col12" class="col_heading level0 col12" >play</th>
+      <th id="T_b51f0_level0_col13" class="col_heading level0 col13" >the</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th id="T_d428b_level0_row0" class="row_heading level0 row0" >0</th>
-      <td id="T_d428b_row0_col0" class="data row0 col0" >0</td>
-      <td id="T_d428b_row0_col1" class="data row0 col1" >1</td>
-      <td id="T_d428b_row0_col2" class="data row0 col2" >0</td>
-      <td id="T_d428b_row0_col3" class="data row0 col3" >1</td>
-      <td id="T_d428b_row0_col4" class="data row0 col4" >0</td>
-      <td id="T_d428b_row0_col5" class="data row0 col5" >0</td>
-      <td id="T_d428b_row0_col6" class="data row0 col6" >0</td>
-      <td id="T_d428b_row0_col7" class="data row0 col7" >1</td>
-      <td id="T_d428b_row0_col8" class="data row0 col8" >0</td>
-      <td id="T_d428b_row0_col9" class="data row0 col9" >1</td>
-      <td id="T_d428b_row0_col10" class="data row0 col10" >1</td>
-      <td id="T_d428b_row0_col11" class="data row0 col11" >0</td>
-      <td id="T_d428b_row0_col12" class="data row0 col12" >0</td>
-      <td id="T_d428b_row0_col13" class="data row0 col13" >2</td>
+      <th id="T_b51f0_level0_row0" class="row_heading level0 row0" >0</th>
+      <td id="T_b51f0_row0_col0" class="data row0 col0" >0</td>
+      <td id="T_b51f0_row0_col1" class="data row0 col1" >1</td>
+      <td id="T_b51f0_row0_col2" class="data row0 col2" >0</td>
+      <td id="T_b51f0_row0_col3" class="data row0 col3" >1</td>
+      <td id="T_b51f0_row0_col4" class="data row0 col4" >0</td>
+      <td id="T_b51f0_row0_col5" class="data row0 col5" >0</td>
+      <td id="T_b51f0_row0_col6" class="data row0 col6" >0</td>
+      <td id="T_b51f0_row0_col7" class="data row0 col7" >1</td>
+      <td id="T_b51f0_row0_col8" class="data row0 col8" >0</td>
+      <td id="T_b51f0_row0_col9" class="data row0 col9" >1</td>
+      <td id="T_b51f0_row0_col10" class="data row0 col10" >1</td>
+      <td id="T_b51f0_row0_col11" class="data row0 col11" >0</td>
+      <td id="T_b51f0_row0_col12" class="data row0 col12" >0</td>
+      <td id="T_b51f0_row0_col13" class="data row0 col13" >2</td>
     </tr>
     <tr>
-      <th id="T_d428b_level0_row1" class="row_heading level0 row1" >1</th>
-      <td id="T_d428b_row1_col0" class="data row1 col0" >0</td>
-      <td id="T_d428b_row1_col1" class="data row1 col1" >0</td>
-      <td id="T_d428b_row1_col2" class="data row1 col2" >1</td>
-      <td id="T_d428b_row1_col3" class="data row1 col3" >1</td>
-      <td id="T_d428b_row1_col4" class="data row1 col4" >0</td>
-      <td id="T_d428b_row1_col5" class="data row1 col5" >1</td>
-      <td id="T_d428b_row1_col6" class="data row1 col6" >0</td>
-      <td id="T_d428b_row1_col7" class="data row1 col7" >0</td>
-      <td id="T_d428b_row1_col8" class="data row1 col8" >0</td>
-      <td id="T_d428b_row1_col9" class="data row1 col9" >1</td>
-      <td id="T_d428b_row1_col10" class="data row1 col10" >0</td>
-      <td id="T_d428b_row1_col11" class="data row1 col11" >1</td>
-      <td id="T_d428b_row1_col12" class="data row1 col12" >0</td>
-      <td id="T_d428b_row1_col13" class="data row1 col13" >2</td>
+      <th id="T_b51f0_level0_row1" class="row_heading level0 row1" >1</th>
+      <td id="T_b51f0_row1_col0" class="data row1 col0" >0</td>
+      <td id="T_b51f0_row1_col1" class="data row1 col1" >0</td>
+      <td id="T_b51f0_row1_col2" class="data row1 col2" >1</td>
+      <td id="T_b51f0_row1_col3" class="data row1 col3" >1</td>
+      <td id="T_b51f0_row1_col4" class="data row1 col4" >0</td>
+      <td id="T_b51f0_row1_col5" class="data row1 col5" >1</td>
+      <td id="T_b51f0_row1_col6" class="data row1 col6" >0</td>
+      <td id="T_b51f0_row1_col7" class="data row1 col7" >0</td>
+      <td id="T_b51f0_row1_col8" class="data row1 col8" >0</td>
+      <td id="T_b51f0_row1_col9" class="data row1 col9" >1</td>
+      <td id="T_b51f0_row1_col10" class="data row1 col10" >0</td>
+      <td id="T_b51f0_row1_col11" class="data row1 col11" >1</td>
+      <td id="T_b51f0_row1_col12" class="data row1 col12" >0</td>
+      <td id="T_b51f0_row1_col13" class="data row1 col13" >2</td>
     </tr>
     <tr>
-      <th id="T_d428b_level0_row2" class="row_heading level0 row2" >2</th>
-      <td id="T_d428b_row2_col0" class="data row2 col0" >0</td>
-      <td id="T_d428b_row2_col1" class="data row2 col1" >0</td>
-      <td id="T_d428b_row2_col2" class="data row2 col2" >0</td>
-      <td id="T_d428b_row2_col3" class="data row2 col3" >0</td>
-      <td id="T_d428b_row2_col4" class="data row2 col4" >1</td>
-      <td id="T_d428b_row2_col5" class="data row2 col5" >0</td>
-      <td id="T_d428b_row2_col6" class="data row2 col6" >1</td>
-      <td id="T_d428b_row2_col7" class="data row2 col7" >0</td>
-      <td id="T_d428b_row2_col8" class="data row2 col8" >1</td>
-      <td id="T_d428b_row2_col9" class="data row2 col9" >1</td>
-      <td id="T_d428b_row2_col10" class="data row2 col10" >1</td>
-      <td id="T_d428b_row2_col11" class="data row2 col11" >0</td>
-      <td id="T_d428b_row2_col12" class="data row2 col12" >0</td>
-      <td id="T_d428b_row2_col13" class="data row2 col13" >1</td>
+      <th id="T_b51f0_level0_row2" class="row_heading level0 row2" >2</th>
+      <td id="T_b51f0_row2_col0" class="data row2 col0" >0</td>
+      <td id="T_b51f0_row2_col1" class="data row2 col1" >0</td>
+      <td id="T_b51f0_row2_col2" class="data row2 col2" >0</td>
+      <td id="T_b51f0_row2_col3" class="data row2 col3" >0</td>
+      <td id="T_b51f0_row2_col4" class="data row2 col4" >1</td>
+      <td id="T_b51f0_row2_col5" class="data row2 col5" >0</td>
+      <td id="T_b51f0_row2_col6" class="data row2 col6" >1</td>
+      <td id="T_b51f0_row2_col7" class="data row2 col7" >0</td>
+      <td id="T_b51f0_row2_col8" class="data row2 col8" >1</td>
+      <td id="T_b51f0_row2_col9" class="data row2 col9" >1</td>
+      <td id="T_b51f0_row2_col10" class="data row2 col10" >1</td>
+      <td id="T_b51f0_row2_col11" class="data row2 col11" >0</td>
+      <td id="T_b51f0_row2_col12" class="data row2 col12" >0</td>
+      <td id="T_b51f0_row2_col13" class="data row2 col13" >1</td>
     </tr>
     <tr>
-      <th id="T_d428b_level0_row3" class="row_heading level0 row3" >3</th>
-      <td id="T_d428b_row3_col0" class="data row3 col0" >1</td>
-      <td id="T_d428b_row3_col1" class="data row3 col1" >1</td>
-      <td id="T_d428b_row3_col2" class="data row3 col2" >0</td>
-      <td id="T_d428b_row3_col3" class="data row3 col3" >0</td>
-      <td id="T_d428b_row3_col4" class="data row3 col4" >0</td>
-      <td id="T_d428b_row3_col5" class="data row3 col5" >1</td>
-      <td id="T_d428b_row3_col6" class="data row3 col6" >0</td>
-      <td id="T_d428b_row3_col7" class="data row3 col7" >1</td>
-      <td id="T_d428b_row3_col8" class="data row3 col8" >0</td>
-      <td id="T_d428b_row3_col9" class="data row3 col9" >1</td>
-      <td id="T_d428b_row3_col10" class="data row3 col10" >0</td>
-      <td id="T_d428b_row3_col11" class="data row3 col11" >0</td>
-      <td id="T_d428b_row3_col12" class="data row3 col12" >1</td>
-      <td id="T_d428b_row3_col13" class="data row3 col13" >2</td>
+      <th id="T_b51f0_level0_row3" class="row_heading level0 row3" >3</th>
+      <td id="T_b51f0_row3_col0" class="data row3 col0" >1</td>
+      <td id="T_b51f0_row3_col1" class="data row3 col1" >1</td>
+      <td id="T_b51f0_row3_col2" class="data row3 col2" >0</td>
+      <td id="T_b51f0_row3_col3" class="data row3 col3" >0</td>
+      <td id="T_b51f0_row3_col4" class="data row3 col4" >0</td>
+      <td id="T_b51f0_row3_col5" class="data row3 col5" >1</td>
+      <td id="T_b51f0_row3_col6" class="data row3 col6" >0</td>
+      <td id="T_b51f0_row3_col7" class="data row3 col7" >1</td>
+      <td id="T_b51f0_row3_col8" class="data row3 col8" >0</td>
+      <td id="T_b51f0_row3_col9" class="data row3 col9" >1</td>
+      <td id="T_b51f0_row3_col10" class="data row3 col10" >0</td>
+      <td id="T_b51f0_row3_col11" class="data row3 col11" >0</td>
+      <td id="T_b51f0_row3_col12" class="data row3 col12" >1</td>
+      <td id="T_b51f0_row3_col13" class="data row3 col13" >2</td>
     </tr>
   </tbody>
 </table>
@@ -740,61 +743,61 @@ The distributional hypothesis suggests that words that frequently appear in the 
 </div>
 <div class="cell_output docutils container">
 <div class="output text_html"><style type="text/css">
-#T_4beb8_row0_col0, #T_4beb8_row0_col2, #T_4beb8_row0_col4, #T_4beb8_row0_col6, #T_4beb8_row0_col8, #T_4beb8_row0_col11, #T_4beb8_row0_col12 {
+#T_0cc0c_row0_col0, #T_0cc0c_row0_col2, #T_0cc0c_row0_col4, #T_0cc0c_row0_col6, #T_0cc0c_row0_col8, #T_0cc0c_row0_col11, #T_0cc0c_row0_col12 {
   background-color: #00224e;
   color: #f1f1f1;
 }
-#T_4beb8_row0_col1, #T_4beb8_row0_col3, #T_4beb8_row0_col5, #T_4beb8_row0_col7, #T_4beb8_row0_col10 {
+#T_0cc0c_row0_col1, #T_0cc0c_row0_col3, #T_0cc0c_row0_col5, #T_0cc0c_row0_col7, #T_0cc0c_row0_col10 {
   background-color: #2a3f6d;
   color: #f1f1f1;
 }
-#T_4beb8_row0_col9 {
+#T_0cc0c_row0_col9 {
   background-color: #7d7c78;
   color: #f1f1f1;
 }
-#T_4beb8_row0_col13 {
+#T_0cc0c_row0_col13 {
   background-color: #fee838;
   color: #000000;
 }
 </style>
-<table id="T_4beb8">
+<table id="T_0cc0c">
   <caption>Total appearances of each word</caption>
   <thead>
     <tr>
       <th class="blank level0" >&nbsp;</th>
-      <th id="T_4beb8_level0_col0" class="col_heading level0 col0" >and</th>
-      <th id="T_4beb8_level0_col1" class="col_heading level0 col1" >cat</th>
-      <th id="T_4beb8_level0_col2" class="col_heading level0 col2" >cats</th>
-      <th id="T_4beb8_level0_col3" class="col_heading level0 col3" >chases</th>
-      <th id="T_4beb8_level0_col4" class="col_heading level0 col4" >cheese</th>
-      <th id="T_4beb8_level0_col5" class="col_heading level0 col5" >dog</th>
-      <th id="T_4beb8_level0_col6" class="col_heading level0 col6" >eat</th>
-      <th id="T_4beb8_level0_col7" class="col_heading level0 col7" >garden</th>
-      <th id="T_4beb8_level0_col8" class="col_heading level0 col8" >house</th>
-      <th id="T_4beb8_level0_col9" class="col_heading level0 col9" >in</th>
-      <th id="T_4beb8_level0_col10" class="col_heading level0 col10" >mice</th>
-      <th id="T_4beb8_level0_col11" class="col_heading level0 col11" >park</th>
-      <th id="T_4beb8_level0_col12" class="col_heading level0 col12" >play</th>
-      <th id="T_4beb8_level0_col13" class="col_heading level0 col13" >the</th>
+      <th id="T_0cc0c_level0_col0" class="col_heading level0 col0" >and</th>
+      <th id="T_0cc0c_level0_col1" class="col_heading level0 col1" >cat</th>
+      <th id="T_0cc0c_level0_col2" class="col_heading level0 col2" >cats</th>
+      <th id="T_0cc0c_level0_col3" class="col_heading level0 col3" >chases</th>
+      <th id="T_0cc0c_level0_col4" class="col_heading level0 col4" >cheese</th>
+      <th id="T_0cc0c_level0_col5" class="col_heading level0 col5" >dog</th>
+      <th id="T_0cc0c_level0_col6" class="col_heading level0 col6" >eat</th>
+      <th id="T_0cc0c_level0_col7" class="col_heading level0 col7" >garden</th>
+      <th id="T_0cc0c_level0_col8" class="col_heading level0 col8" >house</th>
+      <th id="T_0cc0c_level0_col9" class="col_heading level0 col9" >in</th>
+      <th id="T_0cc0c_level0_col10" class="col_heading level0 col10" >mice</th>
+      <th id="T_0cc0c_level0_col11" class="col_heading level0 col11" >park</th>
+      <th id="T_0cc0c_level0_col12" class="col_heading level0 col12" >play</th>
+      <th id="T_0cc0c_level0_col13" class="col_heading level0 col13" >the</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th id="T_4beb8_level0_row0" class="row_heading level0 row0" >count</th>
-      <td id="T_4beb8_row0_col0" class="data row0 col0" >1</td>
-      <td id="T_4beb8_row0_col1" class="data row0 col1" >2</td>
-      <td id="T_4beb8_row0_col2" class="data row0 col2" >1</td>
-      <td id="T_4beb8_row0_col3" class="data row0 col3" >2</td>
-      <td id="T_4beb8_row0_col4" class="data row0 col4" >1</td>
-      <td id="T_4beb8_row0_col5" class="data row0 col5" >2</td>
-      <td id="T_4beb8_row0_col6" class="data row0 col6" >1</td>
-      <td id="T_4beb8_row0_col7" class="data row0 col7" >2</td>
-      <td id="T_4beb8_row0_col8" class="data row0 col8" >1</td>
-      <td id="T_4beb8_row0_col9" class="data row0 col9" >4</td>
-      <td id="T_4beb8_row0_col10" class="data row0 col10" >2</td>
-      <td id="T_4beb8_row0_col11" class="data row0 col11" >1</td>
-      <td id="T_4beb8_row0_col12" class="data row0 col12" >1</td>
-      <td id="T_4beb8_row0_col13" class="data row0 col13" >7</td>
+      <th id="T_0cc0c_level0_row0" class="row_heading level0 row0" >count</th>
+      <td id="T_0cc0c_row0_col0" class="data row0 col0" >1</td>
+      <td id="T_0cc0c_row0_col1" class="data row0 col1" >2</td>
+      <td id="T_0cc0c_row0_col2" class="data row0 col2" >1</td>
+      <td id="T_0cc0c_row0_col3" class="data row0 col3" >2</td>
+      <td id="T_0cc0c_row0_col4" class="data row0 col4" >1</td>
+      <td id="T_0cc0c_row0_col5" class="data row0 col5" >2</td>
+      <td id="T_0cc0c_row0_col6" class="data row0 col6" >1</td>
+      <td id="T_0cc0c_row0_col7" class="data row0 col7" >2</td>
+      <td id="T_0cc0c_row0_col8" class="data row0 col8" >1</td>
+      <td id="T_0cc0c_row0_col9" class="data row0 col9" >4</td>
+      <td id="T_0cc0c_row0_col10" class="data row0 col10" >2</td>
+      <td id="T_0cc0c_row0_col11" class="data row0 col11" >1</td>
+      <td id="T_0cc0c_row0_col12" class="data row0 col12" >1</td>
+      <td id="T_0cc0c_row0_col13" class="data row0 col13" >7</td>
     </tr>
   </tbody>
 </table>
@@ -922,26 +925,26 @@ This process is called <strong>tokenization</strong>.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[0. 0. 1. 0. 0.]
- [0. 0. 0. 1. 0.]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[1. 1. 1. 0. 1.]
  [0. 1. 0. 1. 0.]
- [1. 1. 0. 0. 0.]
- [0. 0. 1. 0. 0.]
  [0. 0. 0. 0. 1.]
- [0. 0. 0. 1. 0.]
- [0. 0. 0. 1. 0.]
- [0. 1. 0. 0. 0.]
+ [0. 0. 0. 0. 1.]
  [0. 0. 1. 0. 0.]
  [0. 0. 0. 1. 0.]
- [1. 1. 1. 0. 1.]
- [0. 0. 0. 0. 1.]
- [0. 0. 0. 0. 1.]
- [1. 0. 0. 0. 0.]
- [0. 0. 0. 0. 1.]
  [1. 0. 1. 0. 0.]
+ [0. 1. 0. 0. 0.]
+ [0. 0. 0. 1. 0.]
+ [0. 0. 0. 0. 1.]
+ [0. 0. 1. 0. 0.]
+ [1. 1. 0. 0. 0.]
+ [1. 1. 0. 1. 0.]
  [1. 1. 1. 0. 0.]
  [0. 0. 0. 1. 0.]
- [1. 1. 0. 1. 0.]]
+ [0. 0. 0. 1. 0.]
+ [0. 0. 1. 0. 0.]
+ [0. 0. 0. 0. 1.]
+ [0. 0. 0. 1. 0.]
+ [1. 0. 0. 0. 0.]]
 </pre></div>
 </div>
 </div>
@@ -1035,26 +1038,26 @@ If we multiple a diagonal matrix from the right, we scale the columns of the mat
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[0.         0.         1.60943791 0.         0.        ]
- [0.         0.         0.         1.60943791 0.        ]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[0.22314355 0.22314355 0.22314355 0.         0.22314355]
  [0.         0.91629073 0.         0.91629073 0.        ]
- [0.91629073 0.91629073 0.         0.         0.        ]
- [0.         0.         1.60943791 0.         0.        ]
  [0.         0.         0.         0.         1.60943791]
- [0.         0.         0.         1.60943791 0.        ]
- [0.         0.         0.         1.60943791 0.        ]
- [0.         1.60943791 0.         0.         0.        ]
+ [0.         0.         0.         0.         1.60943791]
  [0.         0.         1.60943791 0.         0.        ]
  [0.         0.         0.         1.60943791 0.        ]
- [0.22314355 0.22314355 0.22314355 0.         0.22314355]
- [0.         0.         0.         0.         1.60943791]
- [0.         0.         0.         0.         1.60943791]
- [1.60943791 0.         0.         0.         0.        ]
- [0.         0.         0.         0.         1.60943791]
  [0.91629073 0.         0.91629073 0.         0.        ]
+ [0.         1.60943791 0.         0.         0.        ]
+ [0.         0.         0.         1.60943791 0.        ]
+ [0.         0.         0.         0.         1.60943791]
+ [0.         0.         1.60943791 0.         0.        ]
+ [0.91629073 0.91629073 0.         0.         0.        ]
+ [0.51082562 0.51082562 0.         0.51082562 0.        ]
  [0.51082562 0.51082562 0.51082562 0.         0.        ]
  [0.         0.         0.         1.60943791 0.        ]
- [0.51082562 0.51082562 0.         0.51082562 0.        ]]
+ [0.         0.         0.         1.60943791 0.        ]
+ [0.         0.         1.60943791 0.         0.        ]
+ [0.         0.         0.         0.         1.60943791]
+ [0.         0.         0.         1.60943791 0.        ]
+ [1.60943791 0.         0.         0.         0.        ]]
 </pre></div>
 </div>
 </div>
@@ -1110,355 +1113,17 @@ This is possible because tf-idf matrix is often low-rank in practice.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_html">    <style>
-        .bk-notebook-logo {
-            display: block;
-            width: 20px;
-            height: 20px;
-            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNui8sowAAAOkSURBVDiNjZRtaJVlGMd/1/08zzln5zjP1LWcU9N0NkN8m2CYjpgQYQXqSs0I84OLIC0hkEKoPtiH3gmKoiJDU7QpLgoLjLIQCpEsNJ1vqUOdO7ppbuec5+V+rj4ctwzd8IIbbi6u+8f1539dt3A78eXC7QizUF7gyV1fD1Yqg4JWz84yffhm0qkFqBogB9rM8tZdtwVsPUhWhGcFJngGeWrPzHm5oaMmkfEg1usvLFyc8jLRqDOMru7AyC8saQr7GG7f5fvDeH7Ej8CM66nIF+8yngt6HWaKh7k49Soy9nXurCi1o3qUbS3zWfrYeQDTB/Qj6kX6Ybhw4B+bOYoLKCC9H3Nu/leUTZ1JdRWkkn2ldcCamzrcf47KKXdAJllSlxAOkRgyHsGC/zRday5Qld9DyoM4/q/rUoy/CXh3jzOu3bHUVZeU+DEn8FInkPBFlu3+nW3Nw0mk6vCDiWg8CeJaxEwuHS3+z5RgY+YBR6V1Z1nxSOfoaPa4LASWxxdNp+VWTk7+4vzaou8v8PN+xo+KY2xsw6une2frhw05CTYOmQvsEhjhWjn0bmXPjpE1+kplmmkP3suftwTubK9Vq22qKmrBhpY4jvd5afdRA3wGjFAgcnTK2s4hY0/GPNIb0nErGMCRxWOOX64Z8RAC4oCXdklmEvcL8o0BfkNK4lUg9HTl+oPlQxdNo3Mg4Nv175e/1LDGzZen30MEjRUtmXSfiTVu1kK8W4txyV6BMKlbgk3lMwYCiusNy9fVfvvwMxv8Ynl6vxoByANLTWplvuj/nF9m2+PDtt1eiHPBr1oIfhCChQMBw6Aw0UulqTKZdfVvfG7VcfIqLG9bcldL/+pdWTLxLUy8Qq38heUIjh4XlzZxzQm19lLFlr8vdQ97rjZVOLf8nclzckbcD4wxXMidpX30sFd37Fv/GtwwhzhxGVAprjbg0gCAEeIgwCZyTV2Z1REEW8O4py0wsjeloKoMr6iCY6dP92H6Vw/oTyICIthibxjm/DfN9lVz8IqtqKYLUXfoKVMVQVVJOElGjrnnUt9T9wbgp8AyYKaGlqingHZU/uG2NTZSVqwHQTWkx9hxjkpWDaCg6Ckj5qebgBVbT3V3NNXMSiWSDdGV3hrtzla7J+duwPOToIg42ChPQOQjspnSlp1V+Gjdged7+8UN5CRAV7a5EdFNwCjEaBR27b3W890TE7g24NAP/mMDXRWrGoFPQI9ls/MWO2dWFAar/xcOIImbbpA3zgAAAABJRU5ErkJggg==);
-        }
-    </style>
-    <div>
-        <a href="https://bokeh.org" target="_blank" class="bk-notebook-logo"></a>
-        <span id="e522f8c4-71c0-4ec9-9dd3-6be2093ecc8b">Loading BokehJS ...</span>
-    </div>
-</div><script type="application/javascript">'use strict';
-(function(root) {
-  function now() {
-    return new Date();
-  }
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ModuleNotFoundError</span><span class="g g-Whitespace">                       </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">13</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">from</span> <span class="nn">bokeh.plotting</span> <span class="kn">import</span> <span class="n">figure</span><span class="p">,</span> <span class="n">show</span><span class="p">,</span> <span class="n">output_notebook</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">from</span> <span class="nn">bokeh.models</span> <span class="kn">import</span> <span class="n">ColumnDataSource</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="kn">from</span> <span class="nn">bokeh.io</span> <span class="kn">import</span> <span class="n">push_notebook</span>
 
-  const force = true;
-
-  if (typeof root._bokeh_onload_callbacks === "undefined" || force === true) {
-    root._bokeh_onload_callbacks = [];
-    root._bokeh_is_loading = undefined;
-  }
-
-const JS_MIME_TYPE = 'application/javascript';
-  const HTML_MIME_TYPE = 'text/html';
-  const EXEC_MIME_TYPE = 'application/vnd.bokehjs_exec.v0+json';
-  const CLASS_NAME = 'output_bokeh rendered_html';
-
-  /**
-   * Render data to the DOM node
-   */
-  function render(props, node) {
-    const script = document.createElement("script");
-    node.appendChild(script);
-  }
-
-  /**
-   * Handle when an output is cleared or removed
-   */
-  function handleClearOutput(event, handle) {
-    function drop(id) {
-      const view = Bokeh.index.get_by_id(id)
-      if (view != null) {
-        view.model.document.clear()
-        Bokeh.index.delete(view)
-      }
-    }
-
-    const cell = handle.cell;
-
-    const id = cell.output_area._bokeh_element_id;
-    const server_id = cell.output_area._bokeh_server_id;
-
-    // Clean up Bokeh references
-    if (id != null) {
-      drop(id)
-    }
-
-    if (server_id !== undefined) {
-      // Clean up Bokeh references
-      const cmd_clean = "from bokeh.io.state import curstate; print(curstate().uuid_to_server['" + server_id + "'].get_sessions()[0].document.roots[0]._id)";
-      cell.notebook.kernel.execute(cmd_clean, {
-        iopub: {
-          output: function(msg) {
-            const id = msg.content.text.trim()
-            drop(id)
-          }
-        }
-      });
-      // Destroy server and session
-      const cmd_destroy = "import bokeh.io.notebook as ion; ion.destroy_server('" + server_id + "')";
-      cell.notebook.kernel.execute(cmd_destroy);
-    }
-  }
-
-  /**
-   * Handle when a new output is added
-   */
-  function handleAddOutput(event, handle) {
-    const output_area = handle.output_area;
-    const output = handle.output;
-
-    // limit handleAddOutput to display_data with EXEC_MIME_TYPE content only
-    if ((output.output_type != "display_data") || (!Object.prototype.hasOwnProperty.call(output.data, EXEC_MIME_TYPE))) {
-      return
-    }
-
-    const toinsert = output_area.element.find("." + CLASS_NAME.split(' ')[0]);
-
-    if (output.metadata[EXEC_MIME_TYPE]["id"] !== undefined) {
-      toinsert[toinsert.length - 1].firstChild.textContent = output.data[JS_MIME_TYPE];
-      // store reference to embed id on output_area
-      output_area._bokeh_element_id = output.metadata[EXEC_MIME_TYPE]["id"];
-    }
-    if (output.metadata[EXEC_MIME_TYPE]["server_id"] !== undefined) {
-      const bk_div = document.createElement("div");
-      bk_div.innerHTML = output.data[HTML_MIME_TYPE];
-      const script_attrs = bk_div.children[0].attributes;
-      for (let i = 0; i < script_attrs.length; i++) {
-        toinsert[toinsert.length - 1].firstChild.setAttribute(script_attrs[i].name, script_attrs[i].value);
-        toinsert[toinsert.length - 1].firstChild.textContent = bk_div.children[0].textContent
-      }
-      // store reference to server id on output_area
-      output_area._bokeh_server_id = output.metadata[EXEC_MIME_TYPE]["server_id"];
-    }
-  }
-
-  function register_renderer(events, OutputArea) {
-
-    function append_mime(data, metadata, element) {
-      // create a DOM node to render to
-      const toinsert = this.create_output_subarea(
-        metadata,
-        CLASS_NAME,
-        EXEC_MIME_TYPE
-      );
-      this.keyboard_manager.register_events(toinsert);
-      // Render to node
-      const props = {data: data, metadata: metadata[EXEC_MIME_TYPE]};
-      render(props, toinsert[toinsert.length - 1]);
-      element.append(toinsert);
-      return toinsert
-    }
-
-    /* Handle when an output is cleared or removed */
-    events.on('clear_output.CodeCell', handleClearOutput);
-    events.on('delete.Cell', handleClearOutput);
-
-    /* Handle when a new output is added */
-    events.on('output_added.OutputArea', handleAddOutput);
-
-    /**
-     * Register the mime type and append_mime function with output_area
-     */
-    OutputArea.prototype.register_mime_type(EXEC_MIME_TYPE, append_mime, {
-      /* Is output safe? */
-      safe: true,
-      /* Index of renderer in `output_area.display_order` */
-      index: 0
-    });
-  }
-
-  // register the mime type if in Jupyter Notebook environment and previously unregistered
-  if (root.Jupyter !== undefined) {
-    const events = require('base/js/events');
-    const OutputArea = require('notebook/js/outputarea').OutputArea;
-
-    if (OutputArea.prototype.mime_types().indexOf(EXEC_MIME_TYPE) == -1) {
-      register_renderer(events, OutputArea);
-    }
-  }
-  if (typeof (root._bokeh_timeout) === "undefined" || force === true) {
-    root._bokeh_timeout = Date.now() + 5000;
-    root._bokeh_failed_load = false;
-  }
-
-  const NB_LOAD_WARNING = {'data': {'text/html':
-     "<div style='background-color: #fdd'>\n"+
-     "<p>\n"+
-     "BokehJS does not appear to have successfully loaded. If loading BokehJS from CDN, this \n"+
-     "may be due to a slow or bad network connection. Possible fixes:\n"+
-     "</p>\n"+
-     "<ul>\n"+
-     "<li>re-rerun `output_notebook()` to attempt to load from CDN again, or</li>\n"+
-     "<li>use INLINE resources instead, as so:</li>\n"+
-     "</ul>\n"+
-     "<code>\n"+
-     "from bokeh.resources import INLINE\n"+
-     "output_notebook(resources=INLINE)\n"+
-     "</code>\n"+
-     "</div>"}};
-
-  function display_loaded(error = null) {
-    const el = document.getElementById("e522f8c4-71c0-4ec9-9dd3-6be2093ecc8b");
-    if (el != null) {
-      const html = (() => {
-        if (typeof root.Bokeh === "undefined") {
-          if (error == null) {
-            return "BokehJS is loading ...";
-          } else {
-            return "BokehJS failed to load.";
-          }
-        } else {
-          const prefix = `BokehJS ${root.Bokeh.version}`;
-          if (error == null) {
-            return `${prefix} successfully loaded.`;
-          } else {
-            return `${prefix} <b>encountered errors</b> while loading and may not function as expected.`;
-          }
-        }
-      })();
-      el.innerHTML = html;
-
-      if (error != null) {
-        const wrapper = document.createElement("div");
-        wrapper.style.overflow = "auto";
-        wrapper.style.height = "5em";
-        wrapper.style.resize = "vertical";
-        const content = document.createElement("div");
-        content.style.fontFamily = "monospace";
-        content.style.whiteSpace = "pre-wrap";
-        content.style.backgroundColor = "rgb(255, 221, 221)";
-        content.textContent = error.stack ?? error.toString();
-        wrapper.append(content);
-        el.append(wrapper);
-      }
-    } else if (Date.now() < root._bokeh_timeout) {
-      setTimeout(() => display_loaded(error), 100);
-    }
-  }
-
-  function run_callbacks() {
-    try {
-      root._bokeh_onload_callbacks.forEach(function(callback) {
-        if (callback != null)
-          callback();
-      });
-    } finally {
-      delete root._bokeh_onload_callbacks
-    }
-    console.debug("Bokeh: all callbacks have finished");
-  }
-
-  function load_libs(css_urls, js_urls, callback) {
-    if (css_urls == null) css_urls = [];
-    if (js_urls == null) js_urls = [];
-
-    root._bokeh_onload_callbacks.push(callback);
-    if (root._bokeh_is_loading > 0) {
-      console.debug("Bokeh: BokehJS is being loaded, scheduling callback at", now());
-      return null;
-    }
-    if (js_urls == null || js_urls.length === 0) {
-      run_callbacks();
-      return null;
-    }
-    console.debug("Bokeh: BokehJS not loaded, scheduling load and callback at", now());
-    root._bokeh_is_loading = css_urls.length + js_urls.length;
-
-    function on_load() {
-      root._bokeh_is_loading--;
-      if (root._bokeh_is_loading === 0) {
-        console.debug("Bokeh: all BokehJS libraries/stylesheets loaded");
-        run_callbacks()
-      }
-    }
-
-    function on_error(url) {
-      console.error("failed to load " + url);
-    }
-
-    for (let i = 0; i < css_urls.length; i++) {
-      const url = css_urls[i];
-      const element = document.createElement("link");
-      element.onload = on_load;
-      element.onerror = on_error.bind(null, url);
-      element.rel = "stylesheet";
-      element.type = "text/css";
-      element.href = url;
-      console.debug("Bokeh: injecting link tag for BokehJS stylesheet: ", url);
-      document.body.appendChild(element);
-    }
-
-    for (let i = 0; i < js_urls.length; i++) {
-      const url = js_urls[i];
-      const element = document.createElement('script');
-      element.onload = on_load;
-      element.onerror = on_error.bind(null, url);
-      element.async = false;
-      element.src = url;
-      console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
-      document.head.appendChild(element);
-    }
-  };
-
-  function inject_raw_css(css) {
-    const element = document.createElement("style");
-    element.appendChild(document.createTextNode(css));
-    document.body.appendChild(element);
-  }
-
-  const js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-3.6.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.6.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.6.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.6.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.6.2.min.js"];
-  const css_urls = [];
-
-  const inline_js = [    function(Bokeh) {
-      Bokeh.set_log_level("info");
-    },
-function(Bokeh) {
-    }
-  ];
-
-  function run_inline_js() {
-    if (root.Bokeh !== undefined || force === true) {
-      try {
-            for (let i = 0; i < inline_js.length; i++) {
-      inline_js[i].call(root, root.Bokeh);
-    }
-
-      } catch (error) {display_loaded(error);throw error;
-      }if (force === true) {
-        display_loaded();
-      }} else if (Date.now() < root._bokeh_timeout) {
-      setTimeout(run_inline_js, 100);
-    } else if (!root._bokeh_failed_load) {
-      console.log("Bokeh: BokehJS failed to load within specified timeout.");
-      root._bokeh_failed_load = true;
-    } else if (force !== true) {
-      const cell = $(document.getElementById("e522f8c4-71c0-4ec9-9dd3-6be2093ecc8b")).parents('.cell').data().cell;
-      cell.output_area.append_execute_result(NB_LOAD_WARNING)
-    }
-  }
-
-  if (root._bokeh_is_loading === 0) {
-    console.debug("Bokeh: BokehJS loaded, going straight to plotting");
-    run_inline_js();
-  } else {
-    load_libs(css_urls, js_urls, function() {
-      console.debug("Bokeh: BokehJS plotting callback run at", now());
-      run_inline_js();
-    });
-  }
-}(window));</script><div class="output text_html">
-  <div id="d47eac3f-5a51-49f0-8e73-a26df6295b18" data-root-id="p1004" style="display: contents;"></div>
-</div><script type="application/javascript">(function(root) {
-  function embed_document(root) {
-  const docs_json = {"25572a10-a86a-46a7-a54c-29d39b6e8aa0":{"version":"3.6.2","title":"Bokeh Application","roots":[{"type":"object","name":"Figure","id":"p1004","attributes":{"x_range":{"type":"object","name":"DataRange1d","id":"p1005"},"y_range":{"type":"object","name":"DataRange1d","id":"p1006"},"x_scale":{"type":"object","name":"LinearScale","id":"p1014"},"y_scale":{"type":"object","name":"LinearScale","id":"p1015"},"title":{"type":"object","name":"Title","id":"p1007","attributes":{"text":"Node Embeddings from Word2Vec"}},"renderers":[{"type":"object","name":"GlyphRenderer","id":"p1045","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1001","attributes":{"selected":{"type":"object","name":"Selection","id":"p1002","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1003"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"Ru+CFLEN479akJNA6YXzP7JhWzvHfeQ/Ddugiq+VzL9E74IUsQ3jv/a4zv1lS+u/VpCTQOmF8z9WkJNA6YXzP0+oqdmRd8C/RO+CFLEN479WkJNA6YXzP/BcBO4KhNS/9rjO/WVL67/2uM79ZUvrv4YeF2Ee/9K/9rjO/WVL6781pKPMzEzfvyvVGwSwJ9W/VpCTQOmF8z9nH5Nyq3PPPw=="},"shape":[20],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"SJEAliaX8L/vqnasnVjKPxyafWoZhzE/vCgzTYZZ1b9KkQCWJpfwv4Bi7EfeOPI/1Kp2rJ1Yyj/UqnasnVjKP9sV6AGN9su/SpEAliaX8L/UqnasnVjKP2oPgbPwxre/gGLsR9448j+AYuxH3jjyP5GZOFRsW9i/gGLsR9448j/wyO1x4pXpv3XC9iGtsuC/1Kp2rJ1Yyj9p9nLq2U3Avw=="},"shape":[20],"dtype":"float64","order":"little"}],["text_x",{"type":"ndarray","array":{"type":"bytes","data":"cfAh7Glt5L+3s1hOtvryP8Lt1BxMAeM//tLR3XcMyL9EopPWJ6Hjv0gxmOsn2eu/aj7WXTF98z+I1kn/3knzP7a/LPqT27K/GLzl95Uh5L8Oj+gxrGvzPyunWiIl+NO/2g/hlas97b821DFVvU3rv15y9QMLwNS/viuq2xHu6r+/+LpoBznfv2v05pUX5Na/QrrD29Jc8z/Di5qpWtLRPw=="},"shape":[20],"dtype":"float64","order":"little"}],["text_y",{"type":"ndarray","array":{"type":"bytes","data":"RCAvuDtL8L+AfCXZ4brKPzpiXLoAxWU/q2xUxFVd1r+LW2E9JcXwv9TfHCeu5vE/caUdtHRyyj9ogwCyA9HHP/8xMSz9F8y/nhPEoDxt8L8Q2FXrPp/LP9i+qI+FQ7G/QN8xeiz18T/r+k1QMwzyP52clH8E09W/SUKFQIrh8T98/E/81oDovwWqYumGpeC/CFJl3UyTyj8Cq3HcSvi6vw=="},"shape":[20],"dtype":"float64","order":"little"}],["term",["eat","like","dogs","chase","cheese","hunt","need","pets","park","house","and","in","nature","wild","garden","animals","mice","the","care","cats"]]]}}},"view":{"type":"object","name":"CDSView","id":"p1046","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1047"}}},"glyph":{"type":"object","name":"Scatter","id":"p1042","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"size":{"type":"value","value":30},"fill_color":{"type":"value","value":"#1f77b4"}}},"nonselection_glyph":{"type":"object","name":"Scatter","id":"p1043","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"size":{"type":"value","value":30},"line_alpha":{"type":"value","value":0.1},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.1},"hatch_alpha":{"type":"value","value":0.1}}},"muted_glyph":{"type":"object","name":"Scatter","id":"p1044","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"size":{"type":"value","value":30},"line_alpha":{"type":"value","value":0.2},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.2},"hatch_alpha":{"type":"value","value":0.2}}}}},{"type":"object","name":"GlyphRenderer","id":"p1054","attributes":{"data_source":{"id":"p1001"},"view":{"type":"object","name":"CDSView","id":"p1055","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1056"}}},"glyph":{"type":"object","name":"Text","id":"p1051","attributes":{"x":{"type":"field","field":"text_x"},"y":{"type":"field","field":"text_y"},"text":{"type":"field","field":"term"},"text_color":{"type":"value","value":"black"},"text_font_size":{"type":"value","value":"10pt"},"text_align":{"type":"value","value":"center"},"text_baseline":{"type":"value","value":"middle"}}},"nonselection_glyph":{"type":"object","name":"Text","id":"p1052","attributes":{"x":{"type":"field","field":"text_x"},"y":{"type":"field","field":"text_y"},"text":{"type":"field","field":"term"},"text_color":{"type":"value","value":"black"},"text_alpha":{"type":"value","value":0.1},"text_font_size":{"type":"value","value":"10pt"},"text_align":{"type":"value","value":"center"},"text_baseline":{"type":"value","value":"middle"}}},"muted_glyph":{"type":"object","name":"Text","id":"p1053","attributes":{"x":{"type":"field","field":"text_x"},"y":{"type":"field","field":"text_y"},"text":{"type":"field","field":"term"},"text_color":{"type":"value","value":"black"},"text_alpha":{"type":"value","value":0.2},"text_font_size":{"type":"value","value":"10pt"},"text_align":{"type":"value","value":"center"},"text_baseline":{"type":"value","value":"middle"}}}}}],"toolbar":{"type":"object","name":"Toolbar","id":"p1013","attributes":{"tools":[{"type":"object","name":"PanTool","id":"p1026"},{"type":"object","name":"WheelZoomTool","id":"p1027","attributes":{"renderers":"auto"}},{"type":"object","name":"BoxZoomTool","id":"p1028","attributes":{"overlay":{"type":"object","name":"BoxAnnotation","id":"p1029","attributes":{"syncable":false,"line_color":"black","line_alpha":1.0,"line_width":2,"line_dash":[4,4],"fill_color":"lightgrey","fill_alpha":0.5,"level":"overlay","visible":false,"left":{"type":"number","value":"nan"},"right":{"type":"number","value":"nan"},"top":{"type":"number","value":"nan"},"bottom":{"type":"number","value":"nan"},"left_units":"canvas","right_units":"canvas","top_units":"canvas","bottom_units":"canvas","handles":{"type":"object","name":"BoxInteractionHandles","id":"p1035","attributes":{"all":{"type":"object","name":"AreaVisuals","id":"p1034","attributes":{"fill_color":"white","hover_fill_color":"lightgray"}}}}}}}},{"type":"object","name":"SaveTool","id":"p1036"},{"type":"object","name":"ResetTool","id":"p1037"},{"type":"object","name":"HelpTool","id":"p1038"}]}},"left":[{"type":"object","name":"LinearAxis","id":"p1021","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1022","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1023"},"axis_label":"Y","major_label_policy":{"type":"object","name":"AllLabels","id":"p1024"}}}],"below":[{"type":"object","name":"LinearAxis","id":"p1016","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1017","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1018"},"axis_label":"X","major_label_policy":{"type":"object","name":"AllLabels","id":"p1019"}}}],"center":[{"type":"object","name":"Grid","id":"p1020","attributes":{"axis":{"id":"p1016"}}},{"type":"object","name":"Grid","id":"p1025","attributes":{"dimension":1,"axis":{"id":"p1021"}}}]}}]}};
-  const render_items = [{"docid":"25572a10-a86a-46a7-a54c-29d39b6e8aa0","roots":{"p1004":"d47eac3f-5a51-49f0-8e73-a26df6295b18"},"root_ids":["p1004"]}];
-  void root.Bokeh.embed.embed_items_notebook(docs_json, render_items);
-  }
-  if (root.Bokeh !== undefined) {
-    embed_document(root);
-  } else {
-    let attempts = 0;
-    const timer = setInterval(function(root) {
-      if (root.Bokeh !== undefined) {
-        clearInterval(timer);
-        embed_document(root);
-      } else {
-        attempts++;
-        if (attempts > 100) {
-          clearInterval(timer);
-          console.log("Bokeh: ERROR: Unable to run BokehJS code because BokehJS library is missing");
-        }
-      }
-    }, 10, root)
-  }
-})(window);</script></div>
+<span class="ne">ModuleNotFoundError</span>: No module named &#39;bokeh&#39;
+</pre></div>
+</div>
+</div>
 </div>
 <p>The power of TF-IDF lies in its ability to transform the distributional hypothesis into a practical mathematical framework. By representing words through their patterns of usage across documents, TF-IDF creates a distributed representation where semantic relationships emerge naturally from the data.</p>
 <p>However, TF-IDF has its limitations. It only captures word-document relationships, missing out on the rich word-word relationships that occur within documents. This limitation led researchers to develop more sophisticated techniques like word2vec, which we’ll explore in the next section.</p>
