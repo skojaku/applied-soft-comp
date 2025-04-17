@@ -10,7 +10,7 @@ This course is designed to help you *feel* the concepts and tools of applied sof
 | M02    | - [Simple RNN](./m02-recurrent-neural-network/rnn-mapping-challenge) <br> - [LSTM](./m02-recurrent-neural-network/memory-challenge) | - [PyTorch](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/pytorch.ipynb) |
 | M03    | - [Transformers Inside Out](https://marimo.io/p/@sadamori-kojaku/transformers-inside-out?show-code=false) <br> - [BERT](https://static.marimo.app/static/bert-ux7g) | - [Practical Guide to Sentence Transformers](https://github.com/skojaku/Practical-Guide-to-Sentence-Transformers) |
 | M04    | - [Image Processing](./m04-image-processing/pen-and-paper/exercise.pdf) | - [Image Processing](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/image-processing-01.ipynb)<br>- [AlexNet](https://static.marimo.app/static/alexnet-fkeb) |
-| M05    | - [Graph Neural Networks](./noteboooks/graph-neural-net.ipynb) |
+| M05    | - [Graph Neural Networks](https://github.com/skojaku/applied-soft-comp/blob/master/notebooks/graph-neural-net.ipynb) |
 
 
 ```{tableofcontents}
