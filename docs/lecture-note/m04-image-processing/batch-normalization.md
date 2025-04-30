@@ -36,8 +36,8 @@ During inference (when making predictions), we often process samples one by one,
 
 *   Instead, BN layers maintain **running averages** of the mean ($\mu_{pop}$) and variance ($\sigma^2_{pop}$) encountered across *all* mini-batches during training.
     *   These are typically updated using a momentum term:
-        *   $\mu_{pop} = \alpha * \mu_{pop} + (1 - \alpha) \times \mu_B$
-        *   $\sigma_{pop}^2 = \alpha * \sigma_{pop}^2 + (1 - \alpha) \times \sigma_B^2$
+        *   $\mu_{pop} = \alpha \times \mu_{pop} + (1 - \alpha) \times \mu_B$
+        *   $\sigma_{pop}^2 = \alpha \times \sigma_{pop}^2 + (1 - \alpha) \times \sigma_B^2$
         * where $\alpha$ is a momentum parameter.
 *   At inference time, these fixed *population* statistics are used for normalization:
     $ \hat{x} = \frac{x - \mu_{pop}}{\sqrt{\sigma_{pop}^2 + \epsilon}} $

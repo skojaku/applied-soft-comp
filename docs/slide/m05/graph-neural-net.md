@@ -391,44 +391,116 @@ Properties:
 
 ---
 
-# Spectral Graph Convolution 🔄
+<div class="admonition question">
 
-**Key idea:** Let the kernel be a learnable parameter:
+We learned that the total variation of a signal on a graph can be decomposed into the sum of different spectral components of the Laplacian.
 
-$${\bf L}_{\text{learn}} = \sum_{k=1}^K \theta_k {\mathbf u}_k {\mathbf u}_k^\top$$
+$$
+\begin{aligned}
+J &= {\bf x}^\top {\bf L} {\bf x} = {\bf x}^\top \left(\sum_{i=1}^N \lambda_i {\bf u}_i{\bf u}_i^\top \right)  {\bf x} = \sum_{i=1}^N \lambda_i ({\bf x}^\top {\bf u}_i)({\bf u}_i^\top {\bf x}) \\
+  &= \sum_{i=1}^N \lambda_i \underbrace{||{\bf x}^\top {\bf u}_i||^2}_{\text{alignment between } {\bf x} \text{ and } {\bf u}_i}
+\end{aligned}
+$$
 
-Layer operation:
-$${\bf x}^{(\ell+1)} = h\left( L_{\text{learn}} {\bf x}^{(\ell)}\right)$$
+But there is no *learnable* parameter yet. How would you design a *learnable* graph convolution 🤔?
 
-Where:
-- $\theta_k$: Learnable parameters
+</div>
+
+---
+
+<div class="admonition answer">
+
+Replace the "eigenvalues" with "learnable parameters":
+
+$$
+{\bf L}_{\text{learn}} = \sum_{k=1}^K \theta_k {\mathbf u}_k {\mathbf u}_k^\top
+$$
+
+where ${\mathbf u}_k$ is the eigenvector of the Laplacian, and $\theta_k$ is a learnable parameter. Then apply the graph convolution:
+
+$$
+{\bf x}^{(\ell+1)} = h\left( L_{\text{learn}} {\bf x}^{(\ell)}\right)
+$$
 - $h$: Activation function
 - $K$: Number of filters
-- https://arxiv.org/abs/1312.6203
+
+This is called **Spectral Graph Convolution**! https://arxiv.org/abs/1312.6203
+
+
+</div>
 
 ---
 
-# Multi-dimensional Features 📊
+<div class="admonition question">
 
-Let's consider the case where the node features are multi-dimensional. We want to map the $f_{\text{in}}$-dimensional features to $f_{\text{out}}$-dimensional features.
+Now, let's consider the case of multi-dimensional features. Namely, each node now has a feature vector ${\bf x}_i$ instead of a scalar.
 
-**Key idea**: Learn a separate filter for every combination of individual input and output features.
+How would you define the learnable graph convolution in this case?
 
+Scalar case:
 $$
-{\bf X}' _i = h\left( \sum_{j=1}^{f_{\text{in}}} L_{\text{learn}}^{(i,j)} {\bf X}^{(\ell)}_j\right), \quad \forall i \in \{1, \ldots, f_{\text{out}}\}
+x_1 = 1.0, x_2 = 2.0, x_3 = 3.0
 $$
 
-Where:
-- ${\bf X} \in \mathbb{R}^{N \times f_{\text{in}}}$
-- ${\bf X}' \in \mathbb{R}^{N \times f_{\text{out}}}$
-- $L^{(i,j)}_{\text{learn}} = \sum_{k=1}^K \theta_{k, (i,j)} {\mathbf u}_k {\mathbf u}_k^\top$
+Multi-dimensional case:
+$$
+{\bf x}_1 = \begin{bmatrix} 1.0 \\ 2.0 \\ 3.0 \end{bmatrix}, {\bf x}_2 = \begin{bmatrix} 4.0 \\ 5.0 \\ 6.0 \end{bmatrix}, {\bf x}_3 = \begin{bmatrix} 7.0 \\ 8.0 \\ 9.0 \end{bmatrix}
+$$
 
 
-![bg right:40% width:100%](https://d2l.ai/_images/conv-multi-in.svg)
-
+</div>
 
 ---
 
+<div class="admonition answer">
+
+For each pair $(i,j)$ of input and output features, we define a learnable filter:
+
+$$
+{\bf L}^{(i,j)}_{\text{learn}} = \sum_{k=1}^K \theta_{k, (i,j)} {\mathbf u}_k {\mathbf u}_k^\top
+$$
+
+Then, we apply the graph convolution:
+
+$$
+{\bf x}_i^{(j+1)} = h\left( \sum_{j=1}^{f_{\text{in}}} L_{\text{learn}}^{(i,j)} {\bf x}_j^{(j)}\right)
+$$
+
+</div>
+
+![bg right:50% width:100%](https://d2l.ai/_images/conv-multi-in.svg)
+
+---
+
+<div class="admonition question">
+
+Let's focus on the case of scalar features.
+
+$$
+{\bf L}_{\text{learn}} = \sum_{k=1}^K \theta_k {\mathbf u}_k {\mathbf u}_k^\top
+$$
+
+$$
+{\bf x}^{(\ell+1)} = h\left( L_{\text{learn}} {\bf x}^{(\ell)}\right)
+$$
+
+What is the time and space complexity of spectral graph convolution for a graph with $N$ nodes and $E$ edges?
+
+</div>
+
+---
+
+<div class="admonition answer">
+
+The time complexity is ${\cal O}(N^3)$ as it involves the eigendecomposition of the Laplacian matrix.
+
+The space complexity is ${\cal O}(N^2)$ as it involves the storage of the Laplacian matrix.
+
+
+
+</div>
+
+---
 # Limitations of Spectral GNNs ⚠️
 
 1. **Computational Cost**:
@@ -458,6 +530,12 @@ where:
 
 ---
 
+# Interactive Demo
+
+- https://marimo.io/p/@sadamori-kojaku/notebook-7qsxeq
+
+---
+
 # From Spectral to Spatial GNNs 🔄
 
 **Evolution of Graph Convolutional Networks**:
@@ -476,17 +554,20 @@ where:
 
 ---
 
-# Motivation 🤔
+<div class="admonition question">
 
-Problems with Previous Approaches:
-- Spectral GNNs: Computationally expensive
-- ChebNet: Still complex
-- Need for simpler, scalable solution
+What is the most simple form of ChebNet?
 
-Goals:
-- Simple architecture
-- Linear complexity
-- Good performance
+**ChebNet's Formulation**:
+$${\bf L}_{\text{learn}} \approx \sum_{k=0}^{K-1} \theta_k T_k(\tilde{{\bf L}})$$
+
+where:
+- $T_k$: Chebyshev polynomials, i.e., $T_0(x) = 1$, $T_1(x) = x$, $T_k(x) = 2xT_{k-1}(x) - T_{k-2}(x)$
+- $\tilde{{\bf L}}$: Scaled Laplacian, i.e., $\tilde{{\bf L}} = 2\lambda_{\text{max}}^{-1}{\bf L} - {\bf I}$
+
+</div>
+
+
 
 ---
 
@@ -561,15 +642,11 @@ $$\tilde{D}_{ii} = \sum_j \tilde{A}_{ij}$$
 
 ---
 
-# GraphSAGE 🎯
-
-- Previous GNNs are transductive: require the entire graph structure during training and cannot generalize to unseen nodes.
-- GraphSAGE is **inductive**: can generalize to unseen nodes.
-
-
-**Key idea**: Sample a fixed number of nodes within the neighborhood for each node.
+# GraphSAGE = GCN + Sampling
+**Key idea**:
+- Sample a fixed number of nodes within the neighborhood for each node based on random walks.
 - Allow for localized computation for each node.
-- Learns transferable patterns
+- Efficient and scalable to large graphs
 
 <img src="https://theaisummer.com/static/02e23adc75fe68e5dd249a94f3c1e8cc/c483d/graphsage.png" alt="GraphSAGE" width="75%" style="display: block; margin: 0 auto;">
 
@@ -587,6 +664,38 @@ $$
 
 ---
 
+<div class="admonition question">
+
+$$
+h_v^{(k+1)} = \text{CONCAT} \left(\underbrace{h_v^{(k)}}_{\text{self node feature}}, \underbrace{\text{AGGREGATE}}_{\text{Sum/Mean/Max/LTCM}}\left\{h_u^{(k)} \mid u \in \mathcal{N}(v)\right\}\right)
+$$
+
+In GraphSAGE, AGGREGATE is a function that takes a list of node features and returns a single feature vector.
+There are many choices of AGGREGATE functions.
+
+- mean
+- max/min
+- sum
+
+Aggregation entails the loss of information. Which one among the above is most likely to preserve the information of the neighborhood?
+
+</div>
+
+
+
+---
+
+# Graph Isomorphism Network (GIN) 🔍
+
+$$h_v^{(k+1)} = \text{MLP}^{(k)}\left((1 + \epsilon^{(k)}) \cdot h_v^{(k)} + \sum_{u \in \mathcal{N}(v)} h_u^{(k)}\right)$$
+
+Key Features:
+- Maximally powerful GNNs
+- Theoretical connections to graph isomorphism
+- Learnable or fixed $\epsilon$
+
+---
+
 # Graph Attention Networks (GAT) 👀
 
 Attention Mechanism:
@@ -601,18 +710,6 @@ Features:
 
 ![bg right:50% width:100%](https://production-media.paperswithcode.com/methods/Screen_Shot_2020-07-08_at_7.55.32_PM_vkdDcDx.png)
 
----
-
-# Graph Isomorphism Network (GIN) 🔍
-
-Based on Weisfeiler-Lehman Test:
-
-$$h_v^{(k+1)} = \text{MLP}^{(k)}\left((1 + \epsilon^{(k)}) \cdot h_v^{(k)} + \sum_{u \in \mathcal{N}(v)} h_u^{(k)}\right)$$
-
-Key Features:
-- Maximally powerful GNNs
-- Theoretical connections to graph isomorphism
-- Learnable or fixed $\epsilon$
 
 ---
 
