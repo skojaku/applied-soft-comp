@@ -32,11 +32,36 @@ igraph.plot(g, vertex_color=[palette[label] for label in g.vs["label"]], bbox=(3
 
 
 [0;31m---------------------------------------------------------------------------[0m
-[0;31mModuleNotFoundError[0m                       Traceback (most recent call last)
-Cell [0;32mIn[1], line 1[0m
-[0;32m----> 1[0m [38;5;28;01mimport[39;00m [38;5;21;01migraph[39;00m
-[1;32m      2[0m [38;5;28;01mimport[39;00m [38;5;21;01mnetworkx[39;00m [38;5;28;01mas[39;00m [38;5;21;01mnx[39;00m
-[1;32m      3[0m [38;5;28;01mimport[39;00m [38;5;21;01mnumpy[39;00m [38;5;28;01mas[39;00m [38;5;21;01mnp[39;00m
+[0;31mAttributeError[0m                            Traceback (most recent call last)
+Cell [0;32mIn[1], line 13[0m
+[1;32m     10[0m g[38;5;241m.[39mvs[[38;5;124m"[39m[38;5;124mlabel[39m[38;5;124m"[39m] [38;5;241m=[39m np[38;5;241m.[39munique([d[[38;5;241m1[39m][[38;5;124m'[39m[38;5;124mclub[39m[38;5;124m'[39m] [38;5;28;01mfor[39;00m d [38;5;129;01min[39;00m nx[38;5;241m.[39mkarate_club_graph()[38;5;241m.[39mnodes(data[38;5;241m=[39m[38;5;28;01mTrue[39;00m)], return_inverse[38;5;241m=[39m[38;5;28;01mTrue[39;00m)[[38;5;241m1[39m]
+[1;32m     12[0m palette [38;5;241m=[39m sns[38;5;241m.[39mcolor_palette()[38;5;241m.[39mas_hex()
+[0;32m---> 13[0m [43migraph[49m[38;5;241;43m.[39;49m[43mplot[49m[43m([49m[43mg[49m[43m,[49m[43m [49m[43mvertex_color[49m[38;5;241;43m=[39;49m[43m[[49m[43mpalette[49m[43m[[49m[43mlabel[49m[43m][49m[43m [49m[38;5;28;43;01mfor[39;49;00m[43m [49m[43mlabel[49m[43m [49m[38;5;129;43;01min[39;49;00m[43m [49m[43mg[49m[38;5;241;43m.[39;49m[43mvs[49m[43m[[49m[38;5;124;43m"[39;49m[38;5;124;43mlabel[39;49m[38;5;124;43m"[39;49m[43m][49m[43m][49m[43m,[49m[43m [49m[43mbbox[49m[38;5;241;43m=[39;49m[43m([49m[38;5;241;43m300[39;49m[43m,[49m[43m [49m[38;5;241;43m300[39;49m[43m)[49m[43m)[49m
 
-[0;31mModuleNotFoundError[0m: No module named 'igraph'
+File [0;32m~/miniforge3/envs/applsoftcomp/lib/python3.10/site-packages/igraph/drawing/__init__.py:299[0m, in [0;36mplot[0;34m(obj, target, bbox, *args, **kwds)[0m
+[1;32m    297[0m background [38;5;241m=[39m kwds[38;5;241m.[39mpop([38;5;124m"[39m[38;5;124mbackground[39m[38;5;124m"[39m, [38;5;124m"[39m[38;5;124mwhite[39m[38;5;124m"[39m)
+[1;32m    298[0m margin [38;5;241m=[39m [38;5;28mfloat[39m(kwds[38;5;241m.[39mpop([38;5;124m"[39m[38;5;124mmargin[39m[38;5;124m"[39m, [38;5;241m20[39m))
+[0;32m--> 299[0m result [38;5;241m=[39m [43mCairoPlot[49m[43m([49m
+[1;32m    300[0m [43m    [49m[43mtarget[49m[38;5;241;43m=[39;49m[43mtarget[49m[43m,[49m
+[1;32m    301[0m [43m    [49m[43mbbox[49m[38;5;241;43m=[39;49m[43mbbox[49m[43m,[49m
+[1;32m    302[0m [43m    [49m[43mpalette[49m[38;5;241;43m=[39;49m[43mpalette[49m[43m,[49m
+[1;32m    303[0m [43m    [49m[43mbackground[49m[38;5;241;43m=[39;49m[43mbackground[49m[43m,[49m
+[1;32m    304[0m [43m[49m[43m)[49m
+[1;32m    305[0m item_bbox [38;5;241m=[39m result[38;5;241m.[39mbbox[38;5;241m.[39mcontract(margin)
+[1;32m    306[0m result[38;5;241m.[39madd(obj, item_bbox, [38;5;241m*[39margs, [38;5;241m*[39m[38;5;241m*[39mkwds)
+
+File [0;32m~/miniforge3/envs/applsoftcomp/lib/python3.10/site-packages/igraph/drawing/cairo/plot.py:148[0m, in [0;36mCairoPlot.__init__[0;34m(self, target, bbox, palette, background)[0m
+[1;32m    146[0m [38;5;28;01mif[39;00m target [38;5;129;01mis[39;00m [38;5;28;01mNone[39;00m:
+[1;32m    147[0m     [38;5;28mself[39m[38;5;241m.[39m_need_tmpfile [38;5;241m=[39m [38;5;28;01mTrue[39;00m
+[0;32m--> 148[0m     [38;5;28mself[39m[38;5;241m.[39m_surface [38;5;241m=[39m [43mcairo[49m[38;5;241;43m.[39;49m[43mImageSurface[49m(
+[1;32m    149[0m         cairo[38;5;241m.[39mFORMAT_ARGB32, [38;5;28mint[39m([38;5;28mself[39m[38;5;241m.[39mbbox[38;5;241m.[39mwidth), [38;5;28mint[39m([38;5;28mself[39m[38;5;241m.[39mbbox[38;5;241m.[39mheight)
+[1;32m    150[0m     )
+[1;32m    151[0m [38;5;28;01melif[39;00m [38;5;28misinstance[39m(target, cairo[38;5;241m.[39mSurface):
+[1;32m    152[0m     [38;5;28mself[39m[38;5;241m.[39m_surface [38;5;241m=[39m target
+
+File [0;32m~/miniforge3/envs/applsoftcomp/lib/python3.10/site-packages/igraph/drawing/utils.py:428[0m, in [0;36mFakeModule.__getattr__[0;34m(self, _)[0m
+[1;32m    427[0m [38;5;28;01mdef[39;00m [38;5;21m__getattr__[39m([38;5;28mself[39m, _):
+[0;32m--> 428[0m     [38;5;28;01mraise[39;00m [38;5;167;01mAttributeError[39;00m([38;5;28mself[39m[38;5;241m.[39m_message)
+
+[0;31mAttributeError[0m: Plotting not available; please install pycairo or cairocffi
 

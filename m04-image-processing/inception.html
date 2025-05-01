@@ -64,7 +64,7 @@
     <script src="../_static/js/custom.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ResNet (Residual Neural Networks)" href="resnet.html" />
+    <link rel="next" title="Batch Normalization Explained" href="batch-normalization.html" />
     <link rel="prev" title="VGGNet - A Deep Convolutional Neural Network for Image Recognition" href="vgg.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -234,6 +234,7 @@
 <li class="toctree-l1"><a class="reference internal" href="alexnet.html">AlexNet: A Breakthrough in Deep Learning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vgg.html">VGGNet - A Deep Convolutional Neural Network for Image Recognition</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">GoogleNet and the Inception Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="batch-normalization.html">Batch Normalization Explained</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resnet.html">ResNet (Residual Neural Networks)</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Graphs</span></p>
@@ -702,7 +703,27 @@ These improvements increased accuracy and efficiency.</p></li>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Output shape from Inception module: torch.Size([1, 80, 56, 56])
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">import</span> <span class="nn">torch</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+
+<span class="n">File</span> <span class="o">~/</span><span class="n">miniforge3</span><span class="o">/</span><span class="n">envs</span><span class="o">/</span><span class="n">applsoftcomp</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.10</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">torch</span><span class="o">/</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">367</span>
+<span class="g g-Whitespace">    </span><span class="mi">365</span>     <span class="k">if</span> <span class="n">USE_GLOBAL_DEPS</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">366</span>         <span class="n">_load_global_deps</span><span class="p">()</span>
+<span class="ne">--&gt; </span><span class="mi">367</span>     <span class="kn">from</span> <span class="nn">torch._C</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c1"># noqa: F403</span>
+<span class="g g-Whitespace">    </span><span class="mi">370</span> <span class="k">class</span> <span class="nc">SymInt</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">371</span><span class="w">     </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="g g-Whitespace">    </span><span class="mi">372</span><span class="sd">     Like an int (including magic methods), but redirects all operations on the</span>
+<span class="g g-Whitespace">    </span><span class="mi">373</span><span class="sd">     wrapped node. This is used in particular to symbolically record operations</span>
+<span class="g g-Whitespace">    </span><span class="mi">374</span><span class="sd">     in the symbolic shape workflow.</span>
+<span class="g g-Whitespace">    </span><span class="mi">375</span><span class="sd">     &quot;&quot;&quot;</span>
+
+<span class="ne">ImportError</span>: dlopen(/Users/skojaku-admin/miniforge3/envs/applsoftcomp/lib/python3.10/site-packages/torch/_C.cpython-310-darwin.so, 0x0002): Symbol not found: __ZN2at3cpu20is_arm_sve_supportedEv
+  <span class="n">Referenced</span> <span class="n">from</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">D93D20A5</span><span class="o">-</span><span class="mi">7</span><span class="n">F4C</span><span class="o">-</span><span class="mi">32</span><span class="n">F1</span><span class="o">-</span><span class="mi">874</span><span class="n">B</span><span class="o">-</span><span class="n">FE7B416FFD91</span><span class="o">&gt;</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">skojaku</span><span class="o">-</span><span class="n">admin</span><span class="o">/</span><span class="n">miniforge3</span><span class="o">/</span><span class="n">envs</span><span class="o">/</span><span class="n">applsoftcomp</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.10</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">torch</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libtorch_python</span><span class="o">.</span><span class="n">dylib</span>
+  <span class="n">Expected</span> <span class="ow">in</span><span class="p">:</span>     <span class="o">&lt;</span><span class="mi">616791</span><span class="n">F0</span><span class="o">-</span><span class="mi">29</span><span class="n">C3</span><span class="o">-</span><span class="mi">3</span><span class="n">F88</span><span class="o">-</span><span class="mi">8</span><span class="n">A88</span><span class="o">-</span><span class="n">D072E7E40979</span><span class="o">&gt;</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">skojaku</span><span class="o">-</span><span class="n">admin</span><span class="o">/</span><span class="n">miniforge3</span><span class="o">/</span><span class="n">envs</span><span class="o">/</span><span class="n">applsoftcomp</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libtorch_cpu</span><span class="o">.</span><span class="n">dylib</span>
 </pre></div>
 </div>
 </div>
@@ -753,36 +774,6 @@ These improvements increased accuracy and efficiency.</p></li>
 <span class="n">_</span><span class="p">,</span> <span class="n">predicted_idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">predicted_category</span> <span class="o">=</span> <span class="n">categories</span><span class="p">[</span><span class="n">predicted_idx</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Predicted category:&quot;</span><span class="p">,</span> <span class="n">predicted_category</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/skojaku-admin/miniforge3/envs/applsoftcomp/lib/python3.10/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter &#39;pretrained&#39; is deprecated since 0.13 and may be removed in the future, please use &#39;weights&#39; instead.
-  warnings.warn(
-/Users/skojaku-admin/miniforge3/envs/applsoftcomp/lib/python3.10/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for &#39;weights&#39; are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=GoogLeNet_Weights.IMAGENET1K_V1`. You can also use `weights=GoogLeNet_Weights.DEFAULT` to get the most up-to-date weights.
-  warnings.warn(msg)
-</pre></div>
-</div>
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">UnidentifiedImageError</span><span class="g g-Whitespace">                    </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">15</span>
-<span class="g g-Whitespace">     </span><span class="mi">13</span> <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/pytorch/hub/master/imagenet_samples/imagenet_class_index.json&quot;</span>
-<span class="g g-Whitespace">     </span><span class="mi">14</span> <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://images.unsplash.com/photo-1595433562696-1e052b4d841d?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=500&amp;q=60&quot;</span><span class="p">)</span>
-<span class="ne">---&gt; </span><span class="mi">15</span> <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
-<span class="g g-Whitespace">     </span><span class="mi">17</span> <span class="c1"># 3. Define transformations: resize, center crop, convert to tensor, normalize</span>
-<span class="g g-Whitespace">     </span><span class="mi">18</span> <span class="n">transform</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span>
-<span class="g g-Whitespace">     </span><span class="mi">19</span>     <span class="n">T</span><span class="o">.</span><span class="n">Resize</span><span class="p">(</span><span class="mi">256</span><span class="p">),</span>
-<span class="g g-Whitespace">     </span><span class="mi">20</span>     <span class="n">T</span><span class="o">.</span><span class="n">CenterCrop</span><span class="p">(</span><span class="mi">224</span><span class="p">),</span>
-<span class="g g-Whitespace">     </span><span class="mi">21</span>     <span class="n">T</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
-<span class="g g-Whitespace">     </span><span class="mi">22</span>     <span class="n">T</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="p">[</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">],</span> <span class="n">std</span><span class="o">=</span><span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">])</span>
-<span class="g g-Whitespace">     </span><span class="mi">23</span> <span class="p">])</span>
-
-<span class="nn">File ~/miniforge3/envs/applsoftcomp/lib/python3.10/site-packages/PIL/Image.py:3532,</span> in <span class="ni">open</span><span class="nt">(fp, mode, formats)</span>
-<span class="g g-Whitespace">   </span><span class="mi">3530</span>     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-<span class="g g-Whitespace">   </span><span class="mi">3531</span> <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;cannot identify image file </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filename</span> <span class="k">if</span> <span class="n">filename</span> <span class="k">else</span> <span class="n">fp</span><span class="p">)</span>
-<span class="ne">-&gt; </span><span class="mi">3532</span> <span class="k">raise</span> <span class="n">UnidentifiedImageError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-<span class="ne">UnidentifiedImageError</span>: cannot identify image file &lt;_io.BytesIO object at 0x13b39f330&gt;
 </pre></div>
 </div>
 </div>
@@ -855,11 +846,11 @@ Replace GoogLeNet’s final classification layer and fine-tune on a custom datas
       </div>
     </a>
     <a class="right-next"
-       href="resnet.html"
+       href="batch-normalization.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ResNet (Residual Neural Networks)</p>
+        <p class="prev-next-title">Batch Normalization Explained</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

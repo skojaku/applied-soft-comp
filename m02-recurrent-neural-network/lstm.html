@@ -234,6 +234,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/alexnet.html">AlexNet: A Breakthrough in Deep Learning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/vgg.html">VGGNet - A Deep Convolutional Neural Network for Image Recognition</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/inception.html">GoogleNet and the Inception Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/batch-normalization.html">Batch Normalization Explained</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/resnet.html">ResNet (Residual Neural Networks)</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Graphs</span></p>
@@ -631,6 +632,31 @@ Think of this cell as a conveyor belt that runs straight through the network, al
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">import</span> <span class="nn">torch</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">TensorDataset</span><span class="p">,</span> <span class="n">DataLoader</span>
+
+<span class="n">File</span> <span class="o">~/</span><span class="n">miniforge3</span><span class="o">/</span><span class="n">envs</span><span class="o">/</span><span class="n">applsoftcomp</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.10</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">torch</span><span class="o">/</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">367</span>
+<span class="g g-Whitespace">    </span><span class="mi">365</span>     <span class="k">if</span> <span class="n">USE_GLOBAL_DEPS</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">366</span>         <span class="n">_load_global_deps</span><span class="p">()</span>
+<span class="ne">--&gt; </span><span class="mi">367</span>     <span class="kn">from</span> <span class="nn">torch._C</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c1"># noqa: F403</span>
+<span class="g g-Whitespace">    </span><span class="mi">370</span> <span class="k">class</span> <span class="nc">SymInt</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">371</span><span class="w">     </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="g g-Whitespace">    </span><span class="mi">372</span><span class="sd">     Like an int (including magic methods), but redirects all operations on the</span>
+<span class="g g-Whitespace">    </span><span class="mi">373</span><span class="sd">     wrapped node. This is used in particular to symbolically record operations</span>
+<span class="g g-Whitespace">    </span><span class="mi">374</span><span class="sd">     in the symbolic shape workflow.</span>
+<span class="g g-Whitespace">    </span><span class="mi">375</span><span class="sd">     &quot;&quot;&quot;</span>
+
+<span class="ne">ImportError</span>: dlopen(/Users/skojaku-admin/miniforge3/envs/applsoftcomp/lib/python3.10/site-packages/torch/_C.cpython-310-darwin.so, 0x0002): Symbol not found: __ZN2at3cpu20is_arm_sve_supportedEv
+  <span class="n">Referenced</span> <span class="n">from</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">D93D20A5</span><span class="o">-</span><span class="mi">7</span><span class="n">F4C</span><span class="o">-</span><span class="mi">32</span><span class="n">F1</span><span class="o">-</span><span class="mi">874</span><span class="n">B</span><span class="o">-</span><span class="n">FE7B416FFD91</span><span class="o">&gt;</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">skojaku</span><span class="o">-</span><span class="n">admin</span><span class="o">/</span><span class="n">miniforge3</span><span class="o">/</span><span class="n">envs</span><span class="o">/</span><span class="n">applsoftcomp</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.10</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">torch</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libtorch_python</span><span class="o">.</span><span class="n">dylib</span>
+  <span class="n">Expected</span> <span class="ow">in</span><span class="p">:</span>     <span class="o">&lt;</span><span class="mi">616791</span><span class="n">F0</span><span class="o">-</span><span class="mi">29</span><span class="n">C3</span><span class="o">-</span><span class="mi">3</span><span class="n">F88</span><span class="o">-</span><span class="mi">8</span><span class="n">A88</span><span class="o">-</span><span class="n">D072E7E40979</span><span class="o">&gt;</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">skojaku</span><span class="o">-</span><span class="n">admin</span><span class="o">/</span><span class="n">miniforge3</span><span class="o">/</span><span class="n">envs</span><span class="o">/</span><span class="n">applsoftcomp</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libtorch_cpu</span><span class="o">.</span><span class="n">dylib</span>
+</pre></div>
+</div>
+</div>
 </div>
 <p>Then, we define the data generation function.</p>
 <div class="cell tag_hide-input docutils container">
@@ -684,13 +710,6 @@ Think of this cell as a conveyor belt that runs straight through the network, al
 </div>
 </div>
 </details>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Sequence: VSOAZKBFJLQUCRDTMPHENYG&lt;I&gt;XW, Target: I
-Sequence: QEVLZJGMAXONBCRPIWUY&lt;F&gt;DTHKS, Target: F
-Sequence: KOAPHQ&lt;W&gt;BIDXSYEVZGULJFRCTMN, Target: W
-</pre></div>
-</div>
-</div>
 </div>
 <p>This function generates our training data by creating n_samples sequences, where each sequence is a random permutation of A-Z letters. In each sequence, one random character is wrapped with &lt;&gt; tags. The function returns both the generated sequences and their corresponding target characters (the wrapped ones) as separate lists.</p>
 <p>The next step is to convert the sequences into tokenized representations that can be fed into the LSTM model.</p>
@@ -717,15 +736,6 @@ Sequence: KOAPHQ&lt;W&gt;BIDXSYEVZGULJFRCTMN, Target: W
 </div>
 </div>
 </details>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>X: tensor([[ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17,
-         18, 19, 26, 20, 27, 21, 22, 23, 24, 25],
-        [ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17,
-         18, 19, 20, 26, 21, 27, 22, 23, 24, 25]])
-Shape of X: torch.Size([2, 28])
-</pre></div>
-</div>
-</div>
 </div>
 <p>The output tensor <code class="docutils literal notranslate"><span class="pre">X</span></code> is of shape <code class="docutils literal notranslate"><span class="pre">(2,</span> <span class="pre">28)</span></code>, where <code class="docutils literal notranslate"><span class="pre">2</span></code> is the number of samples, and <code class="docutils literal notranslate"><span class="pre">28</span></code> is the sequence length.</p>
 <p>Now, let’s prepare the data and train the LSTM model. As before, we will use PyTorch’s <code class="docutils literal notranslate"><span class="pre">TensorDataset</span></code> and <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> to handle the data.</p>
@@ -840,18 +850,6 @@ Shape of X: torch.Size([2, 28])
 </div>
 </div>
 </details>
-<div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">ModuleNotFoundError</span><span class="g g-Whitespace">                       </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">import</span> <span class="nn">pytorch_lightning</span> <span class="k">as</span> <span class="nn">pyl</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="k">class</span> <span class="nc">CharDecoder</span><span class="p">(</span><span class="n">pyl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span>     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vocab_size</span><span class="p">,</span> <span class="n">output_size</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">,</span> <span class="n">num_layers</span><span class="p">):</span>
-
-<span class="ne">ModuleNotFoundError</span>: No module named &#39;pytorch_lightning&#39;
-</pre></div>
-</div>
-</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">

@@ -234,6 +234,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/alexnet.html">AlexNet: A Breakthrough in Deep Learning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/vgg.html">VGGNet - A Deep Convolutional Neural Network for Image Recognition</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/inception.html">GoogleNet and the Inception Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/batch-normalization.html">Batch Normalization Explained</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../m04-image-processing/resnet.html">ResNet (Residual Neural Networks)</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Teaching Machine How to Understand Graphs</span></p>
@@ -631,18 +632,6 @@ $<span class="math notranslate nohighlight">\(h_{\text{high}}(\lambda) = \frac{\
 <h3>Example<a class="headerlink" href="#example" title="Link to this heading">#</a></h3>
 <p>Let us showcase the idea of spectral filtering with a simple example with the karate club network.</p>
 <div class="cell tag_remove-input docutils container">
-<div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">ModuleNotFoundError</span><span class="g g-Whitespace">                       </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">import</span> <span class="nn">igraph</span> <span class="k">as</span> <span class="nn">ig</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
-
-<span class="ne">ModuleNotFoundError</span>: No module named &#39;igraph&#39;
-</pre></div>
-</div>
-</div>
 </div>
 <p>We will first compute the laplacian matrix and its eigendecomposition.</p>
 <div class="cell docutils container">
@@ -672,6 +661,12 @@ $<span class="math notranslate nohighlight">\(h_{\text{high}}(\lambda) = \frac{\
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Size of low-pass filter:&quot;</span><span class="p">,</span> <span class="n">L_low</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Size of high-pass filter:&quot;</span><span class="p">,</span> <span class="n">L_high</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Size of low-pass filter: (34, 34)
+Size of high-pass filter: (34, 34)
 </pre></div>
 </div>
 </div>
@@ -733,6 +728,9 @@ $<span class="math notranslate nohighlight">\(h_{\text{high}}(\lambda) = \frac{\
 </div>
 </div>
 </details>
+<div class="cell_output docutils container">
+<img alt="../_images/1ab814205970396008cd22b7bf2ec314397af0a09d98e12fea232ee8201d3309.png" src="../_images/1ab814205970396008cd22b7bf2ec314397af0a09d98e12fea232ee8201d3309.png" />
+</div>
 </div>
 <p>We observe that the low-pass filter results in smoother <span class="math notranslate nohighlight">\({\bf x}\)</span> between connected nodes (i.e., neighboring nodes have similar <span class="math notranslate nohighlight">\({\bf x}\)</span>).
 The original <span class="math notranslate nohighlight">\({\bf x}\)</span> and <span class="math notranslate nohighlight">\({\bf x}'_{\text{low}}\)</span> are very similar because random variables are high-frequency components. In contrast, when we apply the high-pass filter, <span class="math notranslate nohighlight">\({\bf x}'_{\text{high}}\)</span> is similar to <span class="math notranslate nohighlight">\({\bf x}\)</span> because the high-frequency components are not filtered.</p>
@@ -773,6 +771,9 @@ The original <span class="math notranslate nohighlight">\({\bf x}\)</span> and <
 </div>
 </div>
 </details>
+<div class="cell_output docutils container">
+<img alt="../_images/07eda8b148b6375def95d3d91ebe3fcb39cefda31d25866152362af8d7faf42b.png" src="../_images/07eda8b148b6375def95d3d91ebe3fcb39cefda31d25866152362af8d7faf42b.png" />
+</div>
 </div>
 <p>The high-pass filter increases the contrast of the eigenvector centrality, emphasizing the differences between nodes. On the other hand, the low-pass filter smooths out the eigenvector centrality.</p>
 </section>
