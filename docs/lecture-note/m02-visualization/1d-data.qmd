@@ -12,9 +12,19 @@ Without seeing the raw data, you're flying blind. And unfortunately, many scient
 
 ## Why Showing All Data Matters
 
-In 2016, a group of researchers analyzed 118 papers in leading neuroscience journals and found something disturbing: when they requested the raw data and re-analyzed it, they found that the bar charts in many papers were misleading. The bar charts suggested clear differences between groups, but the raw data often told a different storywith substantial overlap between groups, unexpected distributions, or influential outliers.
+In 2016, a group of researchers analyzed 118 papers in leading neuroscience journals and found something disturbing: when they requested the raw data and re-analyzed it, they found that the bar charts in many papers were misleading. The bar charts suggested clear differences between groups, but the raw data often told a different story---with substantial overlap between groups, unexpected distributions, or influential outliers.
 
 This isn't about fraud. It's about the limitations of summary statistics. When you reduce your data to a mean and a standard error, you lose a tremendous amount of information. The data might be bimodal, skewed, or contain outliers. These patterns are invisible in a bar chart, but they're crucial for understanding what's really going on.
+
+## Dynamite Plots Must Die
+
+Statisticians have been campaigning against bar charts with error bars—called "dynamite plots"—for years. Yet a systematic review found that **85.6% of papers in top physiology journals still use them**. They appear everywhere: Nature, Science, Cell.
+
+Why is this a problem? A dynamite plot shows you exactly four numbers (two means and two standard errors), regardless of sample size. But worse, **completely different datasets produce identical bar charts**. A dataset with outliers, a uniform distribution, or a bimodal distribution can all generate the same plot.
+
+When Rafael Irizarry showed the actual data behind a blood pressure comparison, the story changed dramatically. The bar chart showed a clear, significant difference. But the raw data revealed an extreme outlier (possibly a data entry error) and substantial overlap between groups. Remove that single outlier, and the result was no longer significant.
+
+As Irizarry put it in his open letter to journal editors: dynamite plots conceal the data rather than showing it. The solution? Show the actual data points whenever possible, and use distributions (boxplots, histograms, density plots) when you can't.
 
 ## Start Simple: Show Every Point
 
@@ -130,8 +140,6 @@ plt.show()
 
 KDE plots are elegant and reveal the shape of your distribution without the arbitrary choices of histograms. However, they can be misleading at the edges of your data and may suggest data exists where it doesn't.
 
-**Pro tip**: Combine approaches! Show a histogram or KDE plot for the overall distribution, but overlay the actual data points as a strip plot or rug plot along the x-axis.
-
 ## For Heavy-Tailed Data: Cumulative Distributions
 
 Some data are extremely heterogeneousthink income distributions, city populations, or earthquake magnitudes. These distributions often have heavy tails: most values are small, but a few are enormous.
@@ -141,6 +149,8 @@ For this kind of data, histograms and KDE plots can be misleading because they c
 ### Cumulative Distribution Function (CDF)
 
 The **cumulative distribution function** shows the proportion of data points less than or equal to each value. Instead of asking "how many points are in this bin?", the CDF asks "what fraction of points are below this value?"
+
+**The CDF is a density estimation method that requires no parameter choices.** Unlike histograms (which require bin size) or KDE (which requires bandwidth), the CDF is completely determined by your data. There are no arbitrary decisions that change how your data looks—making it one of the most honest ways to visualize a distribution.
 
 ```python
 # CDF
@@ -216,7 +226,9 @@ Remember: means and error bars might be concise, but they're rarely the full sto
 
 ## Further Reading
 
+- [Dynamite Plots Must Die](https://simplystatistics.org/posts/2019-02-21-dynamite-plots-must-die/) - Rafael Irizarry's open letter to journal editors
 - [Beyond Bar and Line Graphs: Time for a New Data Presentation Paradigm](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1002128) - The paper that started the "show your data" movement
 - [Weissgerber et al. (2015). Why we need to report more than 'Data were Analyzed by t-tests or ANOVA'](https://elifesciences.org/articles/36163)
+- [Show the data, don't conceal them](https://bpspubs.onlinelibrary.wiley.com/doi/10.1111/j.1476-5381.2011.01251.x) - British Journal of Pharmacology (2011)
 - [Visualizing Samples with Box Plots](https://nightingaledvs.com/box-plots/)
 - [Kernel Density Estimation Explained](https://mathisonian.github.io/kde/) - Interactive tutorial
