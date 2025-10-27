@@ -1,0 +1,222 @@
+---
+title: "Visualizing One-Dimensional Data: Show Me the Data!"
+---
+
+## The Case of the Missing Data Points
+
+Imagine you're reading a research paper that claims "Treatment A is significantly better than Treatment B." The paper shows a bar chart with two bars and error bars. The difference looks impressive. But here's the question: what does the actual data look like? Are there 5 data points per group? 500? Are they normally distributed, or are there outliers? Are most points clustered together, or spread out?
+
+Without seeing the raw data, you're flying blind. And unfortunately, many scientific papers and reports make this same mistake: they summarize data without showing it.
+
+**The golden rule of data visualization: Show all the data, whenever possible.**
+
+## Why Showing All Data Matters
+
+In 2016, a group of researchers analyzed 118 papers in leading neuroscience journals and found something disturbing: when they requested the raw data and re-analyzed it, they found that the bar charts in many papers were misleading. The bar charts suggested clear differences between groups, but the raw data often told a different storywith substantial overlap between groups, unexpected distributions, or influential outliers.
+
+This isn't about fraud. It's about the limitations of summary statistics. When you reduce your data to a mean and a standard error, you lose a tremendous amount of information. The data might be bimodal, skewed, or contain outliers. These patterns are invisible in a bar chart, but they're crucial for understanding what's really going on.
+
+## Start Simple: Show Every Point
+
+### Swarm Plots (Beeswarm Plots)
+
+The most straightforward approach is to plot every single data point. A **swarm plot** (also called a beeswarm plot) does exactly this: it displays each observation as a point, with points arranged to avoid overlap.
+
+```python
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Generate sample data
+np.random.seed(42)
+group_a = np.random.normal(100, 15, 30)
+group_b = np.random.normal(120, 20, 30)
+data = {'Value': np.concatenate([group_a, group_b]),
+        'Group': ['A']*30 + ['B']*30}
+
+# Create swarm plot
+sns.swarmplot(data=data, x='Group', y='Value')
+plt.title('Swarm Plot: Every Point Visible')
+plt.show()
+```
+
+Swarm plots are perfect for small to moderate datasets (roughly up to 100-200 points per group). They let you see:
+- The actual sample size
+- The distribution shape
+- Individual outliers
+- The spread of the data
+
+### The Limits of Swarm Plots
+
+But what happens when you have more data? With hundreds or thousands of points, swarm plots become cluttered and difficult to read. The points start to pile up, and the plot becomes a blob. This is where we need more sophisticated techniques.
+
+## Handling More Data: Transparency and Jittering
+
+### Strip Plots with Jittering
+
+When you have too many points for a swarm plot, a **strip plot with jittering** can help. Instead of carefully arranging points to avoid overlap, we add random noise (jitter) to the x-position of each point.
+
+```python
+# Strip plot with jittering
+sns.stripplot(data=data, x='Group', y='Value', alpha=0.6, jitter=0.2)
+plt.title('Strip Plot with Jittering')
+plt.show()
+```
+
+The key parameters:
+- `alpha`: Controls transparency (0 = invisible, 1 = opaque). Values around 0.3-0.7 work well.
+- `jitter`: Amount of random horizontal displacement. Too much jitter and groups overlap; too little and points stack vertically.
+
+### Barcode Plots (Rug Plots)
+
+For even larger datasets, consider a **barcode plot** (also called a rug plot). This shows each data point as a small vertical tick mark along an axis. It's minimalist but effective for showing the distribution of many points.
+
+```python
+# Barcode plot using rug plot
+fig, ax = plt.subplots(figsize=(10, 2))
+for i, group in enumerate(['A', 'B']):
+    values = data[data['Group'] == group]['Value']
+    ax.plot(values, [i]*len(values), '|', markersize=10, alpha=0.7)
+ax.set_yticks([0, 1])
+ax.set_yticklabels(['A', 'B'])
+ax.set_xlabel('Value')
+ax.set_title('Barcode Plot')
+plt.show()
+```
+
+Barcode plots work well when you have thousands of points and want to show density patterns without losing the "raw data" feel.
+
+## Summarizing Distributions: Histograms
+
+When your dataset is large enough that individual points become impractical to show, you need to summarize the distribution. The most common approach is the **histogram**.
+
+A histogram divides your data range into bins and counts how many observations fall into each bin. It's a powerful tool for understanding the shape of your distribution.
+
+```python
+# Histogram
+plt.hist(group_a, bins=15, alpha=0.5, label='Group A', edgecolor='black')
+plt.hist(group_b, bins=15, alpha=0.5, label='Group B', edgecolor='black')
+plt.xlabel('Value')
+plt.ylabel('Count')
+plt.legend()
+plt.title('Histogram: Distribution Comparison')
+plt.show()
+```
+
+### The Art of Choosing Bins
+
+The number of bins dramatically affects how your histogram looks:
+- **Too few bins**: You lose detail and might miss important features like bimodality
+- **Too many bins**: The histogram becomes noisy and hard to interpret
+
+A good starting point is the **Sturges' rule**: number of bins H $\log_2(n) + 1$, where $n$ is the sample size. But always experiment! Try different bin numbers and see what reveals the most about your data's structure.
+
+## Smooth Alternatives: Kernel Density Estimation
+
+Histograms have a problem: they're sensitive to bin width and bin placement. Move your bins slightly, and the histogram can look quite different.
+
+**Kernel Density Estimation (KDE)** provides a smooth alternative. Instead of binning, KDE places a small "kernel" (usually a Gaussian curve) at each data point and sums them up. The result is a smooth density curve.
+
+```python
+# KDE plot
+sns.kdeplot(data=group_a, label='Group A', fill=True, alpha=0.5)
+sns.kdeplot(data=group_b, label='Group B', fill=True, alpha=0.5)
+plt.xlabel('Value')
+plt.ylabel('Density')
+plt.legend()
+plt.title('Kernel Density Estimate')
+plt.show()
+```
+
+KDE plots are elegant and reveal the shape of your distribution without the arbitrary choices of histograms. However, they can be misleading at the edges of your data and may suggest data exists where it doesn't.
+
+**Pro tip**: Combine approaches! Show a histogram or KDE plot for the overall distribution, but overlay the actual data points as a strip plot or rug plot along the x-axis.
+
+## For Heavy-Tailed Data: Cumulative Distributions
+
+Some data are extremely heterogeneousthink income distributions, city populations, or earthquake magnitudes. These distributions often have heavy tails: most values are small, but a few are enormous.
+
+For this kind of data, histograms and KDE plots can be misleading because they compress the tail into a tiny region of the plot.
+
+### Cumulative Distribution Function (CDF)
+
+The **cumulative distribution function** shows the proportion of data points less than or equal to each value. Instead of asking "how many points are in this bin?", the CDF asks "what fraction of points are below this value?"
+
+```python
+# CDF
+sorted_a = np.sort(group_a)
+cdf_a = np.arange(1, len(sorted_a) + 1) / len(sorted_a)
+
+sorted_b = np.sort(group_b)
+cdf_b = np.arange(1, len(sorted_b) + 1) / len(sorted_b)
+
+plt.plot(sorted_a, cdf_a, label='Group A', linewidth=2)
+plt.plot(sorted_b, cdf_b, label='Group B', linewidth=2)
+plt.xlabel('Value')
+plt.ylabel('Cumulative Probability')
+plt.legend()
+plt.title('Cumulative Distribution Function')
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+The CDF has several advantages:
+- **No binning decisions**: Every data point is shown
+- **Easy to read percentiles**: The median is where CDF = 0.5
+- **Great for comparisons**: Differences between groups are easy to spot
+
+### Complementary Cumulative Distribution Function (CCDF)
+
+For heavy-tailed distributions, the **complementary cumulative distribution function (CCDF)** is even more useful. The CCDF shows the proportion of data points *greater than* each value: CCDF(x) = 1 - CDF(x).
+
+The magic of the CCDF is that when plotted on a log-log scale, power-law distributions appear as straight lines. This makes it the go-to tool for studying phenomena like:
+- Income and wealth distributions
+- City size distributions
+- Social network degree distributions
+- Earthquake magnitudes
+
+```python
+# CCDF on log-log scale
+# Generate heavy-tailed data
+heavy_tailed = np.random.pareto(2, 1000) + 1
+
+sorted_data = np.sort(heavy_tailed)
+ccdf = 1 - (np.arange(1, len(sorted_data) + 1) / len(sorted_data))
+
+plt.loglog(sorted_data, ccdf, 'o', alpha=0.5, markersize=3)
+plt.xlabel('Value')
+plt.ylabel('P(X e x)')
+plt.title('Complementary Cumulative Distribution (CCDF)')
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+The CCDF reveals the tail behavior that's invisible in traditional histograms. For heterogeneous, heavy-tailed data, it's an essential tool.
+
+## Choosing the Right Visualization
+
+Here's a quick decision guide:
+
+| Scenario | Best Visualization | Why |
+|----------|-------------------|-----|
+| < 100 points per group | Swarm plot | Shows every data point clearly |
+| 100-500 points | Strip plot with jitter + transparency | Manageable with some overlap |
+| 500-5000 points | Histogram or KDE + rug plot | Need summary but show raw data on axis |
+| > 5000 points | KDE or histogram alone | Too many points to show individually |
+| Heavy-tailed/heterogeneous | CCDF (log-log scale) | Reveals tail behavior |
+| Comparing distributions | CDF or overlaid KDE | Easy to spot differences |
+
+## The Bigger Picture
+
+The methods you choose to visualize your data aren't just aesthetic choicesthey're scientific choices. Different visualizations reveal different aspects of your data, and some can hide important patterns.
+
+By starting with the raw data and building up to summaries, you ensure that you understand what you're working with. And by showing your data (not just summarizing it), you allow others to draw their own conclusions.
+
+Remember: means and error bars might be concise, but they're rarely the full story. Show the data. Your readersand your future selfwill thank you.
+
+## Further Reading
+
+- [Beyond Bar and Line Graphs: Time for a New Data Presentation Paradigm](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1002128) - The paper that started the "show your data" movement
+- [Weissgerber et al. (2015). Why we need to report more than 'Data were Analyzed by t-tests or ANOVA'](https://elifesciences.org/articles/36163)
+- [Visualizing Samples with Box Plots](https://nightingaledvs.com/box-plots/)
+- [Kernel Density Estimation Explained](https://mathisonian.github.io/kde/) - Interactive tutorial
