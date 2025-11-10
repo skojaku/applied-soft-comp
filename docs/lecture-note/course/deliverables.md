@@ -1,5 +1,6 @@
-# Deliverables
-
+---
+title: "Deliverables"
+---
 
 ## General remarks on the project reports
 

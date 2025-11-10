@@ -1,0 +1,92 @@
+---
+title: "Reproducible Environments & Projects"
+---
+
+## The Importance of Reproducibility
+
+Reproducibility is a cornerstone of good science and a fundamental principle in computational research. It is the ability of an independent researcher to duplicate the results of a prior study using the same materials and procedures as were used by the original investigator. In the context of data science and soft computing, this means that your code, given the same input data, should produce the exact same outputs, every single time, regardless of the machine it is run on.
+
+::: {.column-margin}
+While the terms are often used interchangeably, it's helpful to distinguish between them:
+
+-   **Reproducibility**: Can an independent researcher achieve the exact same results using the original author's data and code? This is a *computational* challenge.
+
+-   **Replicability**: Can an independent researcher corroborate the scientific conclusions of a study by conducting a new, independent study? This is a *scientific* challenge.
+
+This note focuses on achieving **computational reproducibility**, which is the essential first step. If your own analysis isn't reproducible, it's impossible for anyone to even attempt to replicate your scientific findings.
+:::
+
+## Pillars of a Reproducible Project
+
+Achieving reproducibility requires a conscious effort and the right set of tools. We can think of a reproducible project as having three main pillars: [Virtual Environments](https://aeturrell.github.io/python4DS/environments.html), [Workflow automation](https://aeturrell.github.io/python4DS/workflows.html), and [Comprehensive documentation](https://aeturrell.github.io/python4DS/documentation.html).
+
+### Virtual Environments
+
+![](https://www.saaspegasus.com/static/images/web/uv/no-venv.4e57a4b43eea.jpg)
+
+A virtual environment is an isolated container that holds all the necessary packages and dependencies for a specific project. This prevents conflicts between projects that might require different versions of the same library, a situation often referred to as "dependency hell."
+
+
+For this course, we recommend **[uv](https://astral.sh/uv)**. It is a modern and extremely fast Python package and environment manager, written in Rust. `uv` acts as an all-in-one tool, handling package installation (like `pip`) and virtual environment creation (like `venv`). Its integrated nature and high performance can significantly accelerate Python workflows.
+
+See the [documentation](https://docs.astral.sh/uv/concepts/projects/init/#packaged-applications) on how to get started with `uv`.
+
+::: {.column-margin}
+Why not `conda`?
+
+`conda` is an well-matuated and superior tool well-used in Python Community.
+Unlike `uv`, `conda` can have non-Python dependencies (like specific compilers or optimized BLAS/LAPACK libraries). Conda excels at managing these lower-level system packages.
+`uv`, on the other hand, focuses on Python packages. This apparently limited feature comes with some great benefits.
+Because `conda` supports non-Python packages, the virtual environment it created can have complex dependencies with your environments, preventing someone from recreating the same environment.
+`uv` has less issues since it focuses on Python packages.
+
+:::
+
+### Workflow Management
+
+::: {#fig-workflow}
+![](https://divingintogeneticsandgenomics.com/img/rule_graph_lancet.png)
+
+This diagram dipicts a workflow of a research project, with each box representing a script/code and boxes are connected if the output of one box is the input of another box. As your project grows, the workflow can become complicated. So much so that you may not be able to remember the order of the steps. This is where workflow management tools come in.
+:::
+
+For complex projects with multiple steps, manually running scripts in the correct order is tedious and error-prone. A workflow management tool automates this process, defining a "pipeline" of computational steps and their dependencies.
+
+A recommended tool is **[Snakemake](https://snakemake.readthedocs.io/en/stable/)**, a popular workflow management system that uses a human-readable, Python-based language. You define rules that specify how to create output files from input files. Snakemake automatically determines the order of execution and can parallelize tasks. See **Introductory Video:** [Link](https://www.youtube.com/watch?v=r9PWnEmz_tc) on how to use it.
+
+
+A key principle when designing workflows is to **make individual scripts atomic**. For example, have one script for preprocessing data, another for performing an analysis, and a third for generating a figure. By making scripts minimal and short, they become more readable, reusable, and easier to debug.
+
+### Comprehensive Documentation
+
+Code and data are not self-explanatory. Comprehensive documentation is crucial for another person (or your future self) to understand the what, why, and how of your project.
+
+#### README files
+At a minimum, every project should have a `README.md` file in its root directory. This file should explain what the project is about, what the files are, and how to run the analysis. Ideally, a good README gives details like:
+
+   - **Project Description:** What the project does and its goals.
+   - **File/Folder Structure:** A brief summary so others can find what they need.
+   - **Data Table Structure:** Describe columns and data format if example datasets are included.
+   - **Installation Instructions:** How to set up the environment and dependencies.
+   - **Usage:** How to run the main analysis/scripts.
+   - **Contact/License Information:** Who to ask for help, licensing, or citation.
+
+## Project Organization Best Practices
+
+Beyond the core tools, organizing your project thoughtfully is crucial for long-term reproducibility and collaboration.
+
+### File and Directory Structure
+
+It's important to have a system to organize files and stick to it. A logical structure makes it easier for others (and your future self) to find things.
+
+-   **Descriptive Naming**: Give files and directories clear, descriptive names. This is crucial to fully leverage keyword search.
+-   **Add Timestamps**: For files that evolve over time (like datasets or reports), consider adding a timestamp (e.g., `2025-10-20_report.qmd`) to keep track of versions.
+-   **Further Watching**:
+    -   [How to name files](https://www.youtube.com/watch?v=ES1LTlnpLMk)
+    -   [A Simple File Management System](https://www.youtube.com/watch?v=MM-MPS57qKA&t=230s)
+
+### Writing Clean Code
+
+The quality of your code directly impacts reproducibility. If your code is hard to read, it's hard to verify. The book [Clean Code: A Handbook of Agile Software Craftsmanship by Robert C. Martin](https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882) is an excellent resource on the principles of writing clean, maintainable code.
+
+By combining virtual environments, good documentation, workflow management, and thoughtful project organization, you can create robust, transparent, and fully reproducible computational projects.
