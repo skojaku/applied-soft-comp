@@ -2,8 +2,6 @@
 title: How to submit assignment
 ---
 
-# How to submit assignment
-
 In this course, we will use GitHub Classroom to submit & grade assignments. Please follow the instructions below to submit your assignment.
 
 ## Option 1: A simple workflow (Full local)

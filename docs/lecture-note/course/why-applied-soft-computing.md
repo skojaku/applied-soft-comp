@@ -1,4 +1,6 @@
-# Why applied soft computing?
+---
+title: "Why applied soft computing?"
+---
 
 Imagine trying to explain to someone how you recognize your friend's face. Sure, you do it instantly - but try writing down the exact rules! Should you measure the eye spacing? Check nose shape? It's nearly impossible to write rigid rules for something our brains do effortlessly.
 
