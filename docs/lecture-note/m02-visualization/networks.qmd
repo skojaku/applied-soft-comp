@@ -46,14 +46,21 @@ For trees, the structure is clear: there's a natural hierarchy. The **radial tre
 #| code-fold: true
 
 import graph_tool.all as gt
+import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 
 # Set random seed for reproducibility
 np.random.seed(42)
 
-# Generate a random tree
-g = gt.random_tree(50, directed=False)
+# Generate a random tree using NetworkX
+nx_tree = nx.random_tree(n=50, seed=42)
+
+# Convert to graph-tool
+g = gt.Graph(directed=False)
+g.add_vertex(nx_tree.number_of_nodes())
+for u, v in nx_tree.edges():
+    g.add_edge(g.vertex(u), g.vertex(v))
 
 # Create radial tree layout
 pos = gt.radial_tree_layout(g, g.vertex(0))
@@ -87,11 +94,20 @@ Let's compare this to a different tree layout approach:
 #| code-fold: true
 
 import graph_tool.all as gt
+import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 
 np.random.seed(42)
-g = gt.random_tree(50, directed=False)
+
+# Generate a random tree using NetworkX
+nx_tree = nx.random_tree(n=50, seed=42)
+
+# Convert to graph-tool
+g = gt.Graph(directed=False)
+g.add_vertex(nx_tree.number_of_nodes())
+for u, v in nx_tree.edges():
+    g.add_edge(g.vertex(u), g.vertex(v))
 
 # Radial layout
 pos_radial = gt.radial_tree_layout(g, g.vertex(0))
@@ -196,7 +212,7 @@ The layout does something remarkable: even though we didn't tell the algorithm a
 
 ### Tuning Force-Directed Layouts
 
-Force-directed algorithms have parameters that control the final layout. The most important is **the number of iterations**how long the simulation runs before stopping.
+Force-directed algorithms have parameters that control the final layout. The most important is **the number of iterations**---how long the simulation runs before stopping.
 
 ```{python}
 #| fig-cap: "Effect of iteration count on force-directed layout quality. Too few iterations (left) produce cramped layouts; optimal iterations (middle) balance clarity and structure; excessive iterations (right) offer minimal improvement."
@@ -233,7 +249,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-With too few iterations (50), the nodes haven't had time to spread out properlythey're still clustered near their initial positions. With sufficient iterations (500), the structure becomes clear. Beyond that (5000), you get diminishing returns: the layout looks similar but computation time increases.
+With too few iterations (50), the nodes haven't had time to spread out properly---they're still clustered near their initial positions. With sufficient iterations (500), the structure becomes clear. Beyond that (5000), you get diminishing returns: the layout looks similar but computation time increases.
 
 ::: {.callout-note}
 ## Rule of Thumb for Iterations
@@ -253,13 +269,20 @@ The Fruchterman-Reingold algorithm slows down dramatically as networks grow beca
 #| code-fold: true
 
 import graph_tool.all as gt
+import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 import time
 
-# Generate a larger scale-free network
+# Generate a larger scale-free network using NetworkX
 np.random.seed(123)
-g = gt.price_network(500)
+nx_g = nx.barabasi_albert_graph(n=500, m=2, seed=123)
+
+# Convert to graph-tool
+g = gt.Graph(directed=False)
+g.add_vertex(nx_g.number_of_nodes())
+for u, v in nx_g.edges():
+    g.add_edge(g.vertex(u), g.vertex(v))
 
 # Measure time for Fruchterman-Reingold
 start = time.time()
@@ -387,7 +410,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-Low beta (0.3) preserves individual edge information but creates visual clutter. High beta (0.9) emphasizes the hierarchical flow of connectionsyou can see which communities talk to whichbut individual edges become hard to trace.
+Low beta (0.3) preserves individual edge information but creates visual clutter. High beta (0.9) emphasizes the hierarchical flow of connections---you can see which communities talk to which---but individual edges become hard to trace.
 
 **Choose beta based on your goal**:
 - To show detailed connectivity: beta = 0.3-0.5
@@ -437,13 +460,13 @@ Every layout algorithm embodies a hypothesis about what makes nodes "similar" or
 - **Force-directed layout** hypothesizes that shared neighbors create similarity
 - **Hierarchical layout with edge bundling** hypothesizes that multi-scale community structure organizes the network
 
-None of these is objectively "correct"they're different lenses for viewing the same data. The critical skill is **matching the layout to the question you're asking**.
+None of these is objectively "correct"---they're different lenses for viewing the same data. The critical skill is **matching the layout to the question you're asking**.
 
 ### Limitations and Caveats
 
 Network visualization has fundamental limitations that you need to understand:
 
-**1. Layout is not analysis**. A clear visual pattern doesn't prove that pattern exists in the datait might be an artifact of the layout algorithm. Always validate visual insights with quantitative analysis (modularity scores, statistical tests, null models).
+**1. Layout is not analysis**. A clear visual pattern doesn't prove that pattern exists in the data---it might be an artifact of the layout algorithm. Always validate visual insights with quantitative analysis (modularity scores, statistical tests, null models).
 
 **2. 2D layouts lose information**. Projecting a high-dimensional graph structure into 2D necessarily distorts distances and relationships. Nodes that appear close might not be similar; nodes that appear far might be connected.
 
@@ -453,13 +476,13 @@ Network visualization has fundamental limitations that you need to understand:
    - **Interactive tools**: Allow zooming and panning
    - **Alternative representations**: Adjacency matrices, arc diagrams
 
-**4. Edge crossings are unavoidable** (except for planar graphs). Don't spend hours tweaking layouts to eliminate all crossingsfocus on revealing meaningful structure instead.
+**4. Edge crossings are unavoidable** (except for planar graphs). Don't spend hours tweaking layouts to eliminate all crossings---focus on revealing meaningful structure instead.
 
 ::: {.callout-note}
 ## Best Practices for Publication Figures
 
 - **Always set a random seed** for reproducible force-directed layouts
-- **Label important nodes** (but not all of themselective annotation is key)
+- **Label important nodes** (but not all of them---selective annotation is key)
 - **Use color meaningfully** (communities, node attributes) or not at all
 - **Make nodes proportional to importance** (degree, PageRank, betweenness)
 - **Include a caption that explains the layout algorithm** so readers know how to interpret spatial relationships
@@ -491,6 +514,6 @@ Network visualization is a rich field with decades of research. For deeper explo
 
 - **Graph-tool documentation**: Comprehensive guide to all layout algorithms
 - **The visual display of quantitative information** by Edward Tufte: Principles of effective visualization
-- **Network Science** by Albert-L�szl� Barab�si: Chapter on network visualization and its interpretation
+- **Network Science** by Albert-László Barabási: Chapter on network visualization and its interpretation
 
 Remember: **the best layout is the one that helps you answer your question**. Start with the structure you're looking for, then choose the layout that makes that structure visible.
