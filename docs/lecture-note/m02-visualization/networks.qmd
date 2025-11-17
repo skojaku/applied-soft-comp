@@ -65,18 +65,14 @@ for u, v in nx_tree.edges():
 # Create radial tree layout
 pos = gt.radial_tree_layout(g, g.vertex(0))
 
-# Draw the network
-fig, ax = plt.subplots(figsize=(20, 20))
+# Draw the network (let graph-tool handle rendering directly)
 gt.graph_draw(g, pos=pos,
               vertex_fill_color=[0.275, 0.510, 0.706, 1],  # steelblue
-              vertex_size=0.3,
+              vertex_size=15,
               edge_color=[0.5, 0.5, 0.5, 1],  # gray
-              edge_pen_width=0.5,
-              fit_view=True,
-              mplfig=ax)
-ax.axis('off')
-plt.tight_layout()
-plt.show()
+              edge_pen_width=1.5,
+              output_size=(800, 800),
+              inline=True)
 ```
 
 The radial layout immediately tells you several things:
@@ -121,23 +117,25 @@ fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 # Radial
 gt.graph_draw(g, pos=pos_radial,
               vertex_fill_color=[0.275, 0.510, 0.706, 1],  # steelblue
-              vertex_size=0.3,
+              vertex_size=15,
               edge_color=[0.5, 0.5, 0.5, 1],  # gray
-              edge_pen_width=0.5,
-              fit_view=True,
+              edge_pen_width=1.5,
+              output_size=(600, 600),
               mplfig=axes[0])
 axes[0].set_title("Radial Tree Layout", fontsize=14, pad=10)
+axes[0].axis('equal')
 axes[0].axis('off')
 
 # Force-directed
 gt.graph_draw(g, pos=pos_force,
               vertex_fill_color=[1.0, 0.498, 0.314, 1],  # coral
-              vertex_size=0.3,
+              vertex_size=15,
               edge_color=[0.5, 0.5, 0.5, 1],  # gray
-              edge_pen_width=0.5,
-              fit_view=True,
+              edge_pen_width=1.5,
+              output_size=(600, 600),
               mplfig=axes[1])
 axes[1].set_title("Force-Directed Layout", fontsize=14, pad=10)
+axes[1].axis('equal')
 axes[1].axis('off')
 
 plt.tight_layout()
@@ -200,11 +198,12 @@ for v in g.vertices():
 fig, ax = plt.subplots(figsize=(10, 8))
 gt.graph_draw(g, pos=pos,
               vertex_fill_color=vertex_color,
-              vertex_size=0.03,
+              vertex_size=20,
               edge_color=[0.584, 0.647, 0.651, 1],
-              edge_pen_width=1.5,
-              fit_view=True,
+              edge_pen_width=2,
+              output_size=(1000, 800),
               mplfig=ax)
+ax.axis('equal')
 ax.axis('off')
 plt.tight_layout()
 plt.show()
@@ -249,12 +248,13 @@ for idx, n_iter in enumerate(iterations):
     pos = gt.fruchterman_reingold_layout(g, n_iter=n_iter)
     gt.graph_draw(g, pos=pos,
                   vertex_fill_color=vertex_color,
-                  vertex_size=0.03,
+                  vertex_size=15,
                   edge_color=[0.584, 0.647, 0.651, 1],
-                  edge_pen_width=1.0,
-                  fit_view=True,
+                  edge_pen_width=1.5,
+                  output_size=(400, 400),
                   mplfig=axes[idx])
     axes[idx].set_title(f"{n_iter} iterations", fontsize=12)
+    axes[idx].axis('equal')
     axes[idx].axis('off')
 
 plt.tight_layout()
@@ -311,22 +311,24 @@ fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
 gt.graph_draw(g, pos=pos_fr,
               vertex_fill_color=[0.275, 0.510, 0.706, 1],  # steelblue
-              vertex_size=0.01,
+              vertex_size=5,
               edge_color=[0.584, 0.647, 0.651, 1],
-              edge_pen_width=0.3,
-              fit_view=True,
+              edge_pen_width=0.5,
+              output_size=(600, 600),
               mplfig=axes[0])
 axes[0].set_title(f"Fruchterman-Reingold ({time_fr:.2f}s)", fontsize=12)
+axes[0].axis('equal')
 axes[0].axis('off')
 
 gt.graph_draw(g, pos=pos_sfdp,
               vertex_fill_color=[1.0, 0.498, 0.314, 1],  # coral
-              vertex_size=0.01,
+              vertex_size=5,
               edge_color=[0.584, 0.647, 0.651, 1],
-              edge_pen_width=0.3,
-              fit_view=True,
+              edge_pen_width=0.5,
+              output_size=(600, 600),
               mplfig=axes[1])
 axes[1].set_title(f"SFDP ({time_sfdp:.2f}s)", fontsize=12)
+axes[1].axis('equal')
 axes[1].axis('off')
 
 plt.tight_layout()
