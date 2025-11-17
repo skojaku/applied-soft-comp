@@ -282,8 +282,30 @@ plt.tight_layout()
 
 For the Iris dataset, PCA and MDS look very similar. This is because Iris data is fairly linear---the relationships between features don't involve complex curves or non-linear structures.
 
-MDS shows its power on **non-linear data structures**:
+::: {.column-margin}
 
+**Why MDS isn't perfect here:** The S-curve has points that are close in Euclidean distance (across the bend) but far apart along the curved surface. MDS tries to preserve both types of distances, creating a compromise that partially straightens the curve but doesn't fully recover the underlying smooth 1D gradient.
+
+:::
+
+# Isomap: Preserving Geodesic Distances
+
+MDS preserves Euclidean distances---straight-line distances through space. But for curved manifolds, what matters is the **geodesic distance**: the distance along the surface.
+
+**Isomap** (Isometric Mapping) addresses this by approximating geodesic distances using the neighborhood graph:
+
+1. **Build a neighborhood graph**: Connect each point to its k nearest neighbors
+2. **Compute shortest paths**: The geodesic distance between points is approximated by the shortest path through this graph
+3. **Apply classical MDS**: Use MDS on these geodesic distances instead of Euclidean distances
+
+Think of it like this: MDS measures distance "as the crow flies," while Isomap measures distance "as you walk along the surface."
+
+```{python}
+#| fig-cap: "Isomap uses geodesic distances (along the surface) instead of Euclidean distances (through space), better recovering the S-curve structure"
+#| fig-width: 14
+#| fig-height: 6
+#| code-fold: true
+from sklearn.manifold import Isomap
 ```{python}
 #| fig-cap: "MDS can reveal non-linear structure that PCA misses. S-curve dataset shown."
 #| fig-width: 14
@@ -294,80 +316,13 @@ from sklearn.datasets import make_s_curve
 # Generate S-curve data (a 2D manifold embedded in 3D)
 n_samples = 1000
 X_scurve, color = make_s_curve(n_samples, noise=0.1, random_state=42)
-
-# Apply PCA and MDS
-pca_scurve = PCA(n_components=2)
-X_scurve_pca = pca_scurve.fit_transform(X_scurve)
-
-mds_scurve = MDS(n_components=2, random_state=42, n_init=1)
-X_scurve_mds = mds_scurve.fit_transform(X_scurve)
-
-# Plot
-fig, axes = plt.subplots(1, 2, figsize=(14, 6))
-
-# PCA
-scatter = axes[0].scatter(X_scurve_pca[:, 0], X_scurve_pca[:, 1], c=color,
-                          cmap='viridis', alpha=0.6, s=20)
-axes[0].set_xlabel('PC1')
-axes[0].set_ylabel('PC2')
-axes[0].set_title('PCA: Loses Non-Linear Structure')
-sns.despine(ax=axes[0])
-
-# MDS
-scatter = axes[1].scatter(X_scurve_mds[:, 0], X_scurve_mds[:, 1], c=color,
-                          cmap='viridis', alpha=0.6, s=20)
-axes[1].set_xlabel('MDS1')
-axes[1].set_ylabel('MDS2')
-axes[1].set_title('MDS: Partially Preserves Structure')
-sns.despine(ax=axes[1])
-
-plt.tight_layout()
 ```
 
-The S-curve is a 2D surface with a strong bend in 3D space. PCA projects along the directions of maximum variance, which "flattens" the S-shape and loses the smooth color gradient. MDS does better---it partially recovers the curve structure by preserving distances---but it's not perfect because MDS tries to preserve all pairwise distances, including distances that cut across the curve that shouldn't be preserved.
+# Apply Isomap
+isomap = Isomap(n_components=2, n_neighbors=10)
+X_scurve_isomap = isomap.fit_transform(X_scurve)
 
-::: {.column-margin}
-
-**Why MDS isn't perfect here:** The S-curve has points that are close in Euclidean distance (across the bend) but far apart along the curved surface. MDS tries to preserve both types of distances, creating a compromise that partially straightens the curve but doesn't fully recover the underlying smooth 1D gradient.
-
-:::
-
-This is where modern methods excel.
-
-# Modern Non-Linear Methods: t-SNE
-
-**t-Distributed Stochastic Neighbor Embedding (t-SNE)** has become the go-to method for visualizing high-dimensional data, especially in fields like single-cell genomics, natural language processing, and computer vision.
-
-Unlike PCA (which preserves variance) or MDS (which preserves all distances), t-SNE focuses on **preserving local structure**---keeping similar points close together in the low-dimensional projection.
-
-## How t-SNE works
-
-t-SNE operates in two conceptual steps:
-
-**Step 1: Define similarity in high dimensions**
-
-For each point, t-SNE looks at its neighbors and defines a probability distribution: "If I randomly pick a neighbor of point *i* based on distance, what's the probability I pick point *j*?"
-
-Points that are close in high-dimensional space have high probability; distant points have low probability. This creates a local similarity structure for each point.
-
-**Step 2: Arrange points in low dimensions**
-
-t-SNE then tries to place points in 2D (or 3D) such that the probability distributions match as closely as possible. It uses gradient descent to minimize the difference (KL divergence) between high-dimensional and low-dimensional similarities.
-
-The clever trick: t-SNE uses different probability distributions in high and low dimensions. In high dimensions, it uses a Gaussian (normal) distribution. In low dimensions, it uses a t-distribution with heavy tails. This allows separated clusters in high dimensions to spread out in 2D without overlapping---the heavy tails make moderate distances in 2D correspond to large distances in high dimensions.
-
-```{python}
-#| fig-cap: "t-SNE beautifully straightens the S-curve, preserving local neighborhood structure"
-#| fig-width: 14
-#| fig-height: 6
-#| code-fold: true
-from sklearn.manifold import TSNE
-
-# Apply t-SNE
-tsne = TSNE(n_components=2, random_state=42, perplexity=30)
-X_scurve_tsne = tsne.fit_transform(X_scurve)
-
-# Plot MDS vs t-SNE
+# Plot MDS vs Isomap
 fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
 # MDS
@@ -375,58 +330,99 @@ axes[0].scatter(X_scurve_mds[:, 0], X_scurve_mds[:, 1], c=color,
                 cmap='viridis', alpha=0.6, s=20)
 axes[0].set_xlabel('MDS1')
 axes[0].set_ylabel('MDS2')
-axes[0].set_title('MDS: Partially Recovers Structure')
+axes[0].set_title('MDS: Global Euclidean Distances')
 sns.despine(ax=axes[0])
 
-# t-SNE
-axes[1].scatter(X_scurve_tsne[:, 0], X_scurve_tsne[:, 1], c=color,
+# Isomap
+axes[1].scatter(X_scurve_isomap[:, 0], X_scurve_isomap[:, 1], c=color,
                 cmap='viridis', alpha=0.6, s=20)
-axes[1].set_xlabel('t-SNE1')
-axes[1].set_ylabel('t-SNE2')
-axes[1].set_title('t-SNE: Beautifully Straightens Curve')
+axes[1].set_xlabel('Isomap1')
+axes[1].set_ylabel('Isomap2')
+axes[1].set_title('Isomap: Geodesic Distances')
 sns.despine(ax=axes[1])
 
 plt.tight_layout()
 ```
 
-t-SNE beautifully straightens the S-curve into a smooth gradient where the color progression is preserved. Points that were neighbors along the curved surface remain neighbors in 2D. Unlike MDS, t-SNE focuses on preserving local neighborhoods rather than all pairwise distances, which allows it to "unfold" the curve more naturally.
+Isomap successfully "straightens" the S-curve because it respects the manifold structure. By computing distances along the neighborhood graph, it avoids the shortcuts across the bend that confused MDS.
 
-## The perplexity parameter
+**The key parameter: n_neighbors**
+- **Too few neighbors**: Graph becomes disconnected, distances become infinite
+- **Too many neighbors**: You create shortcuts across the manifold, reverting to MDS-like behavior
+- **Just right (5-15 typically)**: Captures local manifold structure
 
-t-SNE's most important parameter is **perplexity**, which roughly corresponds to the number of nearest neighbors each point considers. It balances local and global structure.
+::: {.callout-note}
+## Global vs Local: A fundamental trade-off
 
-- **Low perplexity (5-10)**: Focus on very local structure, tiny neighborhoods
-- **Medium perplexity (30-50)**: Balanced view (default is usually 30)
-- **High perplexity (100+)**: More global structure, larger neighborhoods
+We now see two extremes:
+- **MDS**: Preserves all pairwise distances globally (works on linear/convex data)
+- **Isomap**: Preserves geodesic distances using local neighborhoods (works on curved manifolds)
+
+But what if we **only care about local structure**? What if global relationships don't matter?
+:::
+
+# Modern Non-Linear Methods: t-SNE and UMAP
+
+Both **t-SNE** (t-Distributed Stochastic Neighbor Embedding) and **UMAP** (Uniform Manifold Approximation and Projection) take a middle ground between MDS's global approach and Isomap's geodesic approach: they **prioritize local structure** while allowing some flexibility in global positioning.
+
+The key insight: for visualization, we often care most about **which points are neighbors**. Whether distant clusters are placed left vs right, or how far apart they are, matters less than preserving the local neighborhood relationships within and between clusters.
+
+## How t-SNE works
+
+t-SNE converts distances into similarity probabilities and preserves these local relationships:
+
+1. **In high dimensions**: Define probability $p_{ij}$ that point $i$ picks point $j$ as a neighbor (based on Gaussian distance)
+2. **In low dimensions**: Define similar probability $q_{ij}$ using a t-distribution with heavy tails
+3. **Optimize**: Move points in 2D to make $q_{ij}$ match $p_{ij}$ (minimize KL divergence)
+
+The t-distribution's heavy tails are clever: they let well-separated clusters spread out in 2D without overlapping, while keeping local neighborhoods tight.
 
 ```{python}
-#| fig-cap: "Effect of perplexity on t-SNE visualization. Low perplexity creates fragmented clusters, high perplexity shows more global structure."
-#| fig-width: 14
+#| fig-cap: "Comparing global, geodesic, and local approaches on the S-curve"
+#| fig-width: 15
 #| fig-height: 5
 #| code-fold: true
-# Apply t-SNE with different perplexities to Iris
-perplexities = [5, 30, 50]
-fig, axes = plt.subplots(1, 3, figsize=(14, 5))
+from sklearn.manifold import TSNE
 
-for ax, perp in zip(axes, perplexities):
-    tsne = TSNE(n_components=2, random_state=42, perplexity=perp)
-    X_tsne = tsne.fit_transform(X_scaled)
+# Apply t-SNE
+tsne = TSNE(n_components=2, random_state=42, perplexity=30)
+X_scurve_tsne = tsne.fit_transform(X_scurve)
 
-    for species, color in zip(['setosa', 'versicolor', 'virginica'], sns.color_palette('muted', 3)):
-        mask = y == np.where(iris.target_names == species)[0][0]
-        ax.scatter(X_tsne[mask, 0], X_tsne[mask, 1],
-                  label=species, alpha=0.7, s=50, color=color, edgecolors='white', linewidth=0.5)
+# Plot all three methods
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
-    ax.set_xlabel('t-SNE1')
-    ax.set_ylabel('t-SNE2')
-    ax.set_title(f'Perplexity = {perp}')
-    ax.legend()
-    sns.despine(ax=ax)
+# MDS - Global Euclidean distances
+axes[0].scatter(X_scurve_mds[:, 0], X_scurve_mds[:, 1], c=color,
+                cmap='viridis', alpha=0.6, s=20)
+axes[0].set_xlabel('MDS1')
+axes[0].set_ylabel('MDS2')
+axes[0].set_title('MDS: Global Distances')
+sns.despine(ax=axes[0])
+
+# Isomap - Geodesic distances
+axes[1].scatter(X_scurve_isomap[:, 0], X_scurve_isomap[:, 1], c=color,
+                cmap='viridis', alpha=0.6, s=20)
+axes[1].set_xlabel('Isomap1')
+axes[1].set_ylabel('Isomap2')
+axes[1].set_title('Isomap: Geodesic Distances')
+sns.despine(ax=axes[1])
+
+# t-SNE - Local neighborhoods
+axes[2].scatter(X_scurve_tsne[:, 0], X_scurve_tsne[:, 1], c=color,
+                cmap='viridis', alpha=0.6, s=20)
+axes[2].set_xlabel('t-SNE1')
+axes[2].set_ylabel('t-SNE2')
+axes[2].set_title('t-SNE: Local Structure')
+sns.despine(ax=axes[2])
 
 plt.tight_layout()
 ```
 
-With perplexity = 5, clusters fragment into small sub-clusters (overfitting to local noise). With perplexity = 30-50, we see three clear groups matching the species. For most datasets, perplexity between 30-50 works well, but always experiment!
+All three methods successfully straighten the S-curve, but through different philosophies: MDS compromises between all distances, Isomap follows the manifold globally, and t-SNE focuses on preserving neighborhoods.
+
+## Key parameter: Perplexity
+
+**Perplexity** (typically 30-50) controls the effective neighborhood size. Too low fragments clusters; too high loses local detail.
 
 ## What t-SNE preserves (and what it doesn't)
 

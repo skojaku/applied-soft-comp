@@ -1,0 +1,496 @@
+---
+title: "Network Visualization"
+jupyter: advnetsci
+execute:
+    enabled: true
+---
+
+You've probably seen them before: network visualizations that look like tangled balls of yarn, where nodes cluster in impenetrable clumps and edges cross everywhere. These "hairball diagrams" are so common in publications that they've become a running joke in network science. The problem isn't that the networks are inherently messy---it's that **the layout fails to reveal the structure that's actually there**.
+
+The goal of network visualization is not to make pretty pictures. It's to **make structure visible**. A good layout should help you answer questions: Are there communities? Is there hierarchy? Are certain nodes central? A bad layout obscures these answers, no matter how much you adjust the colors or node sizes.
+
+In this lecture, we'll explore how to choose and use network layouts that reveal rather than obscure. We'll start with the simplest case---trees---then move to general networks with force-directed layouts, and finally to hierarchical structures that combine both approaches with edge bundling.
+
+**The core principle**: Layout is not decoration. It's a hypothesis about what structure matters in your network.
+
+## What is a Network?
+
+A **network** (or graph) is a collection of **nodes** (also called vertices) connected by **edges** (also called links). Networks can represent almost anything: social relationships, neural connections, citations between papers, roads between cities, or interactions between proteins.
+
+::: {.callout-note}
+## Mathematical Definition
+A network $G = (V, E)$ consists of:
+
+- A set of nodes $V = \{v_1, v_2, ..., v_n\}$
+- A set of edges $E \subseteq V \times V$ representing connections
+
+Networks can be **directed** (edges have direction, like citations) or **undirected** (edges are symmetric, like friendships).
+:::
+
+Why do we visualize networks? Because **topology is hard to grasp from data alone**. Looking at an adjacency matrix or edge list gives you facts but not insight. Visualization transforms abstract connectivity into spatial patterns your visual system can process.
+
+But here's the challenge: unlike data points that have inherent positions (latitude/longitude, time series), **networks have no natural layout**. The positions you see in a network visualization are entirely constructed by the layout algorithm. Different algorithms can make the same network look completely different.
+
+This means **choosing a layout is choosing what to emphasize**. Let's see how.
+
+## Visualizing Trees
+
+The simplest networks are **trees**: connected networks with no cycles. Every node except the root has exactly one parent. Trees appear everywhere: biological taxonomies, organizational charts, file systems, phylogenetic trees, decision trees.
+
+For trees, the structure is clear: there's a natural hierarchy. The **radial tree layout** makes this hierarchy visible by placing the root at the center and arranging descendants in concentric circles.
+
+```{python}
+#| fig-cap: "Radial tree layout of a random tree with 50 nodes. The root is at the center, and descendants are arranged in concentric circles by depth."
+#| fig-width: 8
+#| fig-height: 8
+#| code-fold: true
+
+import graph_tool.all as gt
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Set random seed for reproducibility
+np.random.seed(42)
+
+# Generate a random tree
+g = gt.random_tree(50, directed=False)
+
+# Create radial tree layout
+pos = gt.radial_tree_layout(g, g.vertex(0))
+
+# Draw the network
+fig, ax = plt.subplots(figsize=(8, 8))
+gt.graph_draw(g, pos=pos,
+              vertex_fill_color="steelblue",
+              vertex_size=15,
+              edge_color="gray",
+              edge_pen_width=1.5,
+              output_size=(800, 800),
+              mplfig=ax)
+ax.axis('off')
+plt.tight_layout()
+plt.show()
+```
+
+The radial layout immediately tells you several things:
+
+- **Depth**: How far each node is from the root (distance from center)
+- **Branching structure**: Where the tree splits into subtrees
+- **Balance**: Whether the tree is symmetric or lopsided
+
+Let's compare this to a different tree layout approach:
+
+```{python}
+#| fig-cap: "Comparison of radial layout (left) vs. force-directed layout (right) for the same tree. The radial layout emphasizes hierarchy, while force-directed layout treats all edges equally."
+#| fig-width: 14
+#| fig-height: 6
+#| code-fold: true
+
+import graph_tool.all as gt
+import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+g = gt.random_tree(50, directed=False)
+
+# Radial layout
+pos_radial = gt.radial_tree_layout(g, g.vertex(0))
+
+# Force-directed layout (Fruchterman-Reingold)
+pos_force = gt.fruchterman_reingold_layout(g, n_iter=1000)
+
+# Plot both
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+# Radial
+gt.graph_draw(g, pos=pos_radial,
+              vertex_fill_color="steelblue",
+              vertex_size=15,
+              edge_color="gray",
+              edge_pen_width=1.5,
+              output_size=(600, 600),
+              mplfig=axes[0])
+axes[0].set_title("Radial Tree Layout", fontsize=14, pad=10)
+axes[0].axis('off')
+
+# Force-directed
+gt.graph_draw(g, pos=pos_force,
+              vertex_fill_color="coral",
+              vertex_size=15,
+              edge_color="gray",
+              edge_pen_width=1.5,
+              output_size=(600, 600),
+              mplfig=axes[1])
+axes[1].set_title("Force-Directed Layout", fontsize=14, pad=10)
+axes[1].axis('off')
+
+plt.tight_layout()
+plt.show()
+```
+
+Notice how the radial layout makes the hierarchical structure immediately obvious, while the force-directed layout emphasizes local connectivity over global structure. **For trees, radial layouts are almost always superior** because they align with the inherent structure of the data.
+
+::: {.callout-warning}
+## Layout Choice Matters
+The same network can tell completely different visual stories depending on the layout algorithm. Always choose a layout that matches your network's structural properties.
+:::
+
+## Visualizing General Networks: Force-Directed Layouts
+
+Most networks aren't trees. They have cycles, cross-links, and complex connectivity patterns. For these networks, we need algorithms that can handle arbitrary topology. The most common approach is **force-directed layout**.
+
+The idea is elegant: treat nodes as charged particles that repel each other, and edges as springs that pull connected nodes together. Let the system simulate physics until it reaches equilibrium. Nodes that are closely connected end up near each other, while unconnected parts spread apart.
+
+### The Fruchterman-Reingold Algorithm
+
+The **Fruchterman-Reingold algorithm** is one of the most widely used force-directed methods. It balances two forces:
+
+- **Repulsive force**: All pairs of nodes repel each other (like charged particles)
+- **Attractive force**: Connected nodes are pulled together (like springs)
+
+Let's see it in action on a well-known network: the Zachary Karate Club, a social network of 34 members of a karate club, documenting friendships before the club split into two groups.
+
+```{python}
+#| fig-cap: "Zachary Karate Club network with Fruchterman-Reingold layout. Node colors indicate the two groups that formed after the club split. The layout naturally separates the two communities."
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+
+import graph_tool.all as gt
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load the karate club network
+g = gt.collection.data["karate"]
+
+# Get community labels (the two groups that split)
+# We'll use ground truth community structure
+state = gt.minimize_blockmodel_dl(g, B_max=2, B_min=2)
+community = state.get_blocks()
+
+# Create Fruchterman-Reingold layout
+pos = gt.fruchterman_reingold_layout(g, n_iter=1000)
+
+# Map communities to colors
+colors = [["#E74C3C", "#3498DB"][community[v]] for v in g.vertices()]
+
+# Draw the network
+fig, ax = plt.subplots(figsize=(10, 8))
+gt.graph_draw(g, pos=pos,
+              vertex_fill_color=colors,
+              vertex_size=20,
+              edge_color="#95a5a6",
+              edge_pen_width=2,
+              output_size=(1000, 800),
+              mplfig=ax)
+ax.axis('off')
+plt.tight_layout()
+plt.show()
+```
+
+::: {.column-margin}
+**The Karate Club dataset** comes from a study by Wayne Zachary (1977) documenting the split of a university karate club into two factions. It's one of the most famous small networks in network science.
+:::
+
+The layout does something remarkable: even though we didn't tell the algorithm about the two groups, **it naturally separates them in space**. This happens because nodes within each group are densely connected (many edges pulling them together), while connections between groups are sparse (less pull across the boundary).
+
+### Tuning Force-Directed Layouts
+
+Force-directed algorithms have parameters that control the final layout. The most important is **the number of iterations**how long the simulation runs before stopping.
+
+```{python}
+#| fig-cap: "Effect of iteration count on force-directed layout quality. Too few iterations (left) produce cramped layouts; optimal iterations (middle) balance clarity and structure; excessive iterations (right) offer minimal improvement."
+#| fig-width: 14
+#| fig-height: 4
+#| code-fold: true
+
+import graph_tool.all as gt
+import numpy as np
+import matplotlib.pyplot as plt
+
+g = gt.collection.data["karate"]
+state = gt.minimize_blockmodel_dl(g, B_max=2, B_min=2)
+community = state.get_blocks()
+colors = [["#E74C3C", "#3498DB"][community[v]] for v in g.vertices()]
+
+# Different iteration counts
+iterations = [50, 500, 5000]
+fig, axes = plt.subplots(1, 3, figsize=(14, 4))
+
+for idx, n_iter in enumerate(iterations):
+    pos = gt.fruchterman_reingold_layout(g, n_iter=n_iter)
+    gt.graph_draw(g, pos=pos,
+                  vertex_fill_color=colors,
+                  vertex_size=15,
+                  edge_color="#95a5a6",
+                  edge_pen_width=1.5,
+                  output_size=(400, 400),
+                  mplfig=axes[idx])
+    axes[idx].set_title(f"{n_iter} iterations", fontsize=12)
+    axes[idx].axis('off')
+
+plt.tight_layout()
+plt.show()
+```
+
+With too few iterations (50), the nodes haven't had time to spread out properlythey're still clustered near their initial positions. With sufficient iterations (500), the structure becomes clear. Beyond that (5000), you get diminishing returns: the layout looks similar but computation time increases.
+
+::: {.callout-note}
+## Rule of Thumb for Iterations
+For small networks (< 100 nodes): 500-1000 iterations
+For medium networks (100-1000 nodes): 1000-2000 iterations
+For large networks (> 1000 nodes): Consider faster algorithms like SFDP
+:::
+
+### SFDP: Scalable Force-Directed Placement
+
+The Fruchterman-Reingold algorithm slows down dramatically as networks grow because it computes forces between all pairs of nodes. For large networks, **SFDP (Scalable Force-Directed Placement)** is more efficient. It uses a multilevel approach, similar to the Barnes-Hut algorithm in physics simulations.
+
+```{python}
+#| fig-cap: "Comparison of Fruchterman-Reingold (left) vs. SFDP (right) on a larger network (500 nodes, scale-free topology). SFDP is much faster while producing comparable layouts."
+#| fig-width: 14
+#| fig-height: 6
+#| code-fold: true
+
+import graph_tool.all as gt
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+
+# Generate a larger scale-free network
+np.random.seed(123)
+g = gt.price_network(500)
+
+# Measure time for Fruchterman-Reingold
+start = time.time()
+pos_fr = gt.fruchterman_reingold_layout(g, n_iter=500)
+time_fr = time.time() - start
+
+# Measure time for SFDP
+start = time.time()
+pos_sfdp = gt.sfdp_layout(g)
+time_sfdp = time.time() - start
+
+# Plot both
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+gt.graph_draw(g, pos=pos_fr,
+              vertex_fill_color="steelblue",
+              vertex_size=5,
+              edge_color="#95a5a6",
+              edge_pen_width=0.5,
+              output_size=(600, 600),
+              mplfig=axes[0])
+axes[0].set_title(f"Fruchterman-Reingold ({time_fr:.2f}s)", fontsize=12)
+axes[0].axis('off')
+
+gt.graph_draw(g, pos=pos_sfdp,
+              vertex_fill_color="coral",
+              vertex_size=5,
+              edge_color="#95a5a6",
+              edge_pen_width=0.5,
+              output_size=(600, 600),
+              mplfig=axes[1])
+axes[1].set_title(f"SFDP ({time_sfdp:.2f}s)", fontsize=12)
+axes[1].axis('off')
+
+plt.tight_layout()
+plt.show()
+```
+
+SFDP is often 10-100x faster for large networks while producing layouts of comparable quality. **For networks with more than a few hundred nodes, SFDP is the better choice**.
+
+::: {.callout-warning}
+## Force-Directed Layouts Are Non-Deterministic
+Force-directed algorithms start from random initial positions and may converge to different layouts each time you run them. Always set a random seed if you need reproducible figures. The layout reveals **a** valid structure, not **the** structure.
+:::
+
+## Visualizing Hierarchical Structure
+
+Many real-world networks have **hierarchical community structure**: groups within groups, like departments within divisions within a company, or species within genera within families. Standard force-directed layouts can reveal communities, but they struggle to show the hierarchical relationships between them.
+
+For hierarchical networks, we need a different approach: **circular hierarchy layouts with edge bundling**.
+
+### The Nested Block Model Approach
+
+First, we need to identify the hierarchical structure. The **nested stochastic block model** finds a hierarchical partition by grouping nodes into communities, then grouping communities into super-communities, and so on. This is exactly what the `draw_hierarchy()` function visualizes.
+
+Let's demonstrate with the C. elegans neural network---the complete wiring diagram of a nematode's nervous system:
+
+```{python}
+#| fig-cap: "Hierarchical structure of the C. elegans neural network revealed through nested block model visualization with edge bundling. Inner rings represent higher-level communities, outer ring shows individual neurons. Edge bundling (beta=0.8) reduces visual clutter by routing edges through the hierarchy."
+#| fig-width: 12
+#| fig-height: 12
+#| code-fold: true
+
+import graph_tool.all as gt
+import matplotlib.pyplot as plt
+
+# Load C. elegans neural network
+g = gt.collection.data["celegansneural"]
+
+# Infer hierarchical community structure
+state = gt.minimize_nested_blockmodel_dl(g)
+
+# Draw hierarchy with edge bundling
+fig, ax = plt.subplots(figsize=(12, 12))
+pos, t, tpos = gt.draw_hierarchy(state,
+                                  beta=0.8,  # Edge bundling strength
+                                  output_size=(1200, 1200),
+                                  mplfig=ax)
+ax.axis('off')
+plt.tight_layout()
+plt.show()
+```
+
+::: {.column-margin}
+![Hierarchical edge bundling was introduced by Danny Holten (2006) for visualizing hierarchical data. The technique routes edges through their lowest common ancestor in the hierarchy tree.](https://ieeexplore.ieee.org/document/4015425)
+:::
+
+This visualization packs an enormous amount of information into a single image:
+
+- **Concentric rings**: Each ring represents a level in the hierarchy, from coarse (inner) to fine (outer)
+- **Colored wedges**: Each wedge is a community at that hierarchical level
+- **Edge bundling**: Edges are routed through the hierarchy tree, creating bundles that reveal large-scale connectivity patterns
+
+Without edge bundling, this network would be an incomprehensible hairball. The bundling reveals that most connections occur within communities or between closely related communities---exactly what you'd expect in a modular biological network.
+
+### Tuning Edge Bundling Strength
+
+The key parameter is **beta**, which controls how strongly edges are bundled. Beta ranges from 0 (no bundling, straight lines) to 1 (maximum bundling, edges follow the hierarchy tree exactly).
+
+```{python}
+#| fig-cap: "Effect of edge bundling strength (beta) on hierarchical network visualization. Low beta (left) shows individual edges but creates clutter; high beta (right) emphasizes hierarchical structure but may obscure detailed connectivity."
+#| fig-width: 14
+#| fig-height: 6
+#| code-fold: true
+
+import graph_tool.all as gt
+import matplotlib.pyplot as plt
+
+# Use a smaller network for clearer comparison
+g = gt.collection.data["karate"]
+state = gt.minimize_nested_blockmodel_dl(g)
+
+beta_values = [0.3, 0.9]
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+for idx, beta in enumerate(beta_values):
+    pos, t, tpos = gt.draw_hierarchy(state,
+                                      beta=beta,
+                                      output_size=(600, 600),
+                                      mplfig=axes[idx])
+    axes[idx].set_title(f"Beta = {beta}", fontsize=14)
+    axes[idx].axis('off')
+
+plt.tight_layout()
+plt.show()
+```
+
+Low beta (0.3) preserves individual edge information but creates visual clutter. High beta (0.9) emphasizes the hierarchical flow of connectionsyou can see which communities talk to whichbut individual edges become hard to trace.
+
+**Choose beta based on your goal**:
+- To show detailed connectivity: beta = 0.3-0.5
+- To show hierarchical structure: beta = 0.7-0.9
+- General-purpose visualization: beta = 0.6-0.8
+
+::: {.callout-important}
+## When to Use Hierarchical Layouts
+Circular hierarchy layouts are powerful but **only appropriate when your network actually has hierarchical structure**. If you force a random network into this layout, you'll create the illusion of hierarchy where none exists. Always validate the hierarchical partition (e.g., using the description length of the nested block model) before using this visualization.
+:::
+
+### Alternative: Bipartite Layout for Two-Level Hierarchies
+
+If your hierarchy has only two levels (e.g., nodes belonging to communities, but no super-communities), you can use a bipartite layout instead:
+
+```{python}
+#| fig-cap: "Bipartite hierarchy layout for a two-level community structure. Communities are arranged vertically, with nodes positioned horizontally within their community. This layout works well when you have a flat (non-nested) community structure."
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+
+import graph_tool.all as gt
+import matplotlib.pyplot as plt
+
+g = gt.collection.data["karate"]
+state = gt.minimize_nested_blockmodel_dl(g)
+
+fig, ax = plt.subplots(figsize=(10, 8))
+pos, t, tpos = gt.draw_hierarchy(state,
+                                  layout="bipartite",
+                                  beta=0.7,
+                                  bip_aspect=1.5,
+                                  output_size=(1000, 800),
+                                  mplfig=ax)
+ax.axis('off')
+plt.tight_layout()
+plt.show()
+```
+
+The bipartite layout is particularly useful for **comparing community structure** across different networks or different partitions of the same network, because communities are spatially separated rather than arranged in a circle.
+
+## The Bigger Picture: Layout as Hypothesis
+
+Every layout algorithm embodies a hypothesis about what makes nodes "similar" or "close":
+
+- **Radial tree layout** hypothesizes that hierarchy is the key structure
+- **Force-directed layout** hypothesizes that shared neighbors create similarity
+- **Hierarchical layout with edge bundling** hypothesizes that multi-scale community structure organizes the network
+
+None of these is objectively "correct"they're different lenses for viewing the same data. The critical skill is **matching the layout to the question you're asking**.
+
+### Limitations and Caveats
+
+Network visualization has fundamental limitations that you need to understand:
+
+**1. Layout is not analysis**. A clear visual pattern doesn't prove that pattern exists in the datait might be an artifact of the layout algorithm. Always validate visual insights with quantitative analysis (modularity scores, statistical tests, null models).
+
+**2. 2D layouts lose information**. Projecting a high-dimensional graph structure into 2D necessarily distorts distances and relationships. Nodes that appear close might not be similar; nodes that appear far might be connected.
+
+**3. Large networks don't scale**. Once you have thousands of nodes, even the best layouts become unreadable. At that point, consider:
+   - **Aggregation**: Show communities as super-nodes
+   - **Filtering**: Display only the most important nodes/edges
+   - **Interactive tools**: Allow zooming and panning
+   - **Alternative representations**: Adjacency matrices, arc diagrams
+
+**4. Edge crossings are unavoidable** (except for planar graphs). Don't spend hours tweaking layouts to eliminate all crossingsfocus on revealing meaningful structure instead.
+
+::: {.callout-note}
+## Best Practices for Publication Figures
+
+- **Always set a random seed** for reproducible force-directed layouts
+- **Label important nodes** (but not all of themselective annotation is key)
+- **Use color meaningfully** (communities, node attributes) or not at all
+- **Make nodes proportional to importance** (degree, PageRank, betweenness)
+- **Include a caption that explains the layout algorithm** so readers know how to interpret spatial relationships
+- **Provide network statistics** (number of nodes, edges, clustering coefficient) in the caption or main text
+:::
+
+### When Visualization Isn't Enough
+
+Sometimes network visualization isn't the right tool at all:
+
+- **Very large networks** (>10,000 nodes): Use statistical summaries (degree distribution, clustering) or dimensionality reduction techniques
+- **Dense networks** (many edges relative to nodes): Adjacency matrices often work better than node-link diagrams
+- **Temporal networks**: Animation rarely works; small multiples or stacked layouts are clearer
+- **Networks with important edge attributes**: Consider matrix representations where you can encode edge weights with color intensity
+
+The goal is **insight, not aesthetics**. If a bar chart of degree distribution tells the story better than a hairball diagram, use the bar chart. Visualization is a means to understanding, not an end in itself.
+
+### Further Reading
+
+::: {.column-margin}
+**Key References**:
+
+- Holten, D. (2006). "Hierarchical Edge Bundles: Visualization of Adjacency Relations in Hierarchical Data." IEEE TVCG 12(5):741-748.
+- Fruchterman, T.M.J., & Reingold, E.M. (1991). "Graph Drawing by Force-Directed Placement." Software: Practice and Experience 21(11):1129-1164.
+- Peixoto, T.P. (2014). "Hierarchical Block Structures and High-Resolution Model Selection in Large Networks." Physical Review X 4(1):011047.
+:::
+
+Network visualization is a rich field with decades of research. For deeper exploration:
+
+- **Graph-tool documentation**: Comprehensive guide to all layout algorithms
+- **The visual display of quantitative information** by Edward Tufte: Principles of effective visualization
+- **Network Science** by Albert-L�szl� Barab�si: Chapter on network visualization and its interpretation
+
+Remember: **the best layout is the one that helps you answer your question**. Start with the structure you're looking for, then choose the layout that makes that structure visible.
