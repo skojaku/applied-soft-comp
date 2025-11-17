@@ -9,9 +9,9 @@ Imagine you're analyzing data with 50 features per observation: gene expression 
 
 You can't plot 50 dimensions directly. Our visual system lives in three dimensions (or really, two dimensions on a screen). This creates a fundamental challenge: **how do you visualize data that lives in spaces you cannot see?**
 
-The answer is dimensionality reductionprojecting high-dimensional data into 2 or 3 dimensions while preserving important structure. But here's the critical question: **what structure matters?**
+The answer is dimensionality reduction---projecting high-dimensional data into 2 or 3 dimensions while preserving important structure. But here's the critical question: **what structure matters?**
 
-Different methods preserve different aspects of your data. Some preserve global structure (how groups relate to each other across the entire dataset). Others preserve local structure (which points are nearest neighbors). Understanding these trade-offs is essential for choosing the right methodand for not being misled by beautiful but misleading visualizations.
+Different methods preserve different aspects of your data. Some preserve global structure (how groups relate to each other across the entire dataset). Others preserve local structure (which points are nearest neighbors). Understanding these trade-offs is essential for choosing the right method---and for not being misled by beautiful but misleading visualizations.
 
 # The Curse of Dimensionality
 
@@ -47,29 +47,37 @@ for d in dimensions:
     X = np.random.randn(n_samples, d)
     # Calculate all pairwise distances
     distances = euclidean_distances(X)
-    # For each point, find nearest and farthest
+    # For each point, find nearest and farthest (excluding self)
     np.fill_diagonal(distances, np.inf)  # Ignore self-distance
     nearest = distances.min(axis=1)
-    farthest = distances.max(axis=1)
+    # For "farthest," ignore inf (self-distance), so set inf entries to -1 and use argmax
+    temp = distances.copy()
+    temp[temp == np.inf] = -1  # Now maximum is truly among finite values
+    farthest = temp.max(axis=1)
     # Calculate ratio
     ratio = nearest / farthest
     ratios.append(ratio)
 
 # Plot
+sns.set(font_scale=2.0)
+sns.set_style("white")
+
+blue, red = sns.color_palette('muted', 2)
+
 fig, ax = plt.subplots(figsize=(10, 5))
 positions = range(len(dimensions))
 bp = ax.boxplot(ratios, positions=positions, widths=0.6, patch_artist=True,
-                boxprops=dict(facecolor='lightblue', alpha=0.7))
+                boxprops=dict(facecolor="#f2f2f2", alpha=0.7))
 ax.set_xticklabels(dimensions)
 ax.set_xlabel('Number of Dimensions')
 ax.set_ylabel('Nearest Distance / Farthest Distance')
 ax.set_title('The Curse of Dimensionality: All Points Become Equidistant')
-ax.axhline(y=1.0, color='red', linestyle='--', alpha=0.5, label='Equal distances')
-ax.legend()
+ax.axhline(y=1.0, color=red, linestyle='--', alpha=0.5, label='Equal distances')
+ax.legend(frameon=False)
 sns.despine()
 ```
 
-This is why dimensionality reduction is necessary: we need to project data into lower dimensions where distances and neighborhoods become meaningful again.
+In order words, dimensionality reduction is useful not just for visualization, but also for analysis. For example, when you want to cluster data points, every point is equidistant from every other point, so you can't cluster them. By projecting the data into lower dimensions, you can remedy this curse of dimensionality.
 
 # Pairwise Scatter Plots: The Brute Force Approach
 
@@ -77,11 +85,14 @@ When you have a **moderate number of dimensions** (roughly 3-10), you can visual
 
 ```{python}
 #| fig-cap: "Scatter plot matrix showing all pairwise relationships in the Iris dataset"
-#| fig-width: 12
-#| fig-height: 12
+#| fig-width: 14
+#| fig-height: 14
 #| code-fold: true
 # Load classic iris dataset (4 dimensions)
 from sklearn.datasets import load_iris
+
+sns.set(font_scale=1.0)
+sns.set_style("white")
 
 iris = load_iris()
 iris_df = pd.DataFrame(iris.data, columns=iris.feature_names)
@@ -97,32 +108,17 @@ g.fig.suptitle('Iris Dataset: All Pairwise Relationships', y=1.01)
 
 The scatter plot matrix shows every possible 2D projection. The diagonal shows the univariate distribution of each feature (using KDE here), and off-diagonals show bivariate scatter plots.
 
-This visualization reveals:
-- **Petal length and petal width** are strongly correlated (elongated scatter plots)
-- **Setosa** (blue) is clearly separated from the other species in petal measurements
-- **Versicolor and virginica** overlap significantly in some projections but separate in others
-
-::: {.callout-note}
-## Reading scatter plot matrices
-
-- **Look for elongated clouds**: Strong correlations between features
-- **Look for separated clusters**: Features that discriminate between groups
-- **Look at all projections**: A group might be separated in one projection but overlapping in another
-:::
-
-The problem: scatter plot matrices don't scale. With 10 variables, you have 45 unique pairwise plotsmanageable but crowded. With 20 variables, you have 190 plotsoverwhelming. And you're still only seeing 2D projections, never the full high-dimensional structure.
+The problem: scatter plot matrices don't scale. With 10 variables, you have 45 unique pairwise plots---manageable but crowded. With 20 variables, you have 190 plots---overwhelming. And you're still only seeing 2D projections, never the full high-dimensional structure.
 
 This is where dimensionality reduction becomes essential.
 
 # Linear Dimensionality Reduction: PCA
 
-**Principal Component Analysis (PCA)** is the oldest and most widely used dimensionality reduction method. It finds the directions of maximum variance in your data.
-
-## How PCA works
+**Principal Component Analysis (PCA)** is a linear dimensionality reduction method that finds the directions of maximum variance in your data.
 
 Imagine you have a cloud of points in high-dimensional space. PCA asks: "What direction captures the most variation in the data?" This becomes the first principal component (PC1). Then it asks: "What direction, perpendicular to the first, captures the most remaining variation?" This becomes PC2. And so on.
 
-Mathematically, PCA finds the eigenvectors of the covariance matrix. But conceptually, it's rotating your coordinate system to align with the "natural axes" of your data's variation.
+Mathematically, PCA finds the eigenvectors of the covariance matrix. But conceptually, it's rotating your coordinate system to align with the the highest variance directions of your data.
 
 ```{python}
 #| fig-cap: "PCA finds directions of maximum variance. PC1 captures the most variation, PC2 the next most (perpendicular to PC1)."
@@ -141,16 +137,18 @@ data_2d = np.random.multivariate_normal(mean, cov, 300)
 pca = PCA(n_components=2)
 pca.fit(data_2d)
 
+colors = ["#f2f2f2", sns.color_palette('muted')[0], sns.color_palette('muted')[3]]
+
 # Plot original data with principal components
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(data_2d[:, 0], data_2d[:, 1], alpha=0.6, s=50)
+ax.scatter(data_2d[:, 0], data_2d[:, 1], alpha=0.9, s=50, color=colors[0], edgecolors='k', linewidth=0.5)
 
 # Draw principal components as arrows
 origin = pca.mean_
 for i, (component, variance) in enumerate(zip(pca.components_, pca.explained_variance_)):
     direction = component * np.sqrt(variance) * 3  # Scale for visibility
     ax.arrow(origin[0], origin[1], direction[0], direction[1],
-             head_width=0.3, head_length=0.3, fc=f'C{i+1}', ec=f'C{i+1}', linewidth=3,
+             head_width=0.3, head_length=0.3, fc=colors[i+1], ec=colors[i+1], linewidth=3,
              label=f'PC{i+1} ({variance/pca.explained_variance_.sum()*100:.1f}%)')
 
 ax.set_xlabel('Original X')
@@ -222,19 +220,6 @@ plt.tight_layout()
 
 PC1 and PC2 together explain over 95% of the variance in the 4D dataset. The 2D projection preserves the main structure: setosa is well-separated, while versicolor and virginica have some overlap.
 
-## When to use PCA
-
-PCA is best when:
-- **Linear relationships dominate**: Variables are correlated, not arranged in complex non-linear patterns
-- **You want interpretability**: Principal components can be interpreted as linear combinations of original features
-- **You have many dimensions**: PCA scales well to thousands of dimensions
-- **Global structure matters**: PCA preserves large-scale relationships and overall variance
-
-PCA struggles when:
-- **Data lies on non-linear manifolds**: Curved surfaces, spirals, Swiss rolls
-- **Local structure matters more**: You care about which points are neighbors, not overall variance
-- **Different groups have different scales**: PCA can be dominated by high-variance features
-
 ::: {.column-margin}
 
 **Always standardize before PCA!** If features have different units or scales, PCA will be dominated by high-variance features. Standardization (zero mean, unit variance) ensures all features contribute fairly.
@@ -245,9 +230,7 @@ PCA struggles when:
 
 **Multidimensional Scaling (MDS)** takes a different approach: instead of finding directions of maximum variance, it tries to **preserve distances between points**.
 
-You give MDS a distance matrixthe distance between every pair of points in high-dimensional spaceand it finds a low-dimensional configuration where those distances are preserved as well as possible.
-
-## How MDS works
+You give MDS a distance matrix---the distance between every pair of points in high-dimensional space---and it finds a low-dimensional configuration where those distances are preserved as well as possible.
 
 Think of it like arranging cities on a map. You know the distance between every pair of cities, but not their coordinates. MDS finds positions that preserve those distances.
 
@@ -260,8 +243,9 @@ Mathematically, MDS minimizes **stress**: the difference between high-dimensiona
 #| code-fold: true
 from sklearn.manifold import MDS
 
-# Apply MDS
-mds = MDS(n_components=2, random_state=42)
+# Suppress FutureWarning about n_init in MDS
+import warnings
+mds = MDS(n_components=2, random_state=42, n_init=1)
 X_mds = mds.fit_transform(X_scaled)
 
 # Create DataFrame
@@ -296,7 +280,7 @@ sns.despine(ax=axes[1])
 plt.tight_layout()
 ```
 
-For the Iris dataset, PCA and MDS look very similar. This is because Iris data is fairly linearthe relationships between features don't involve complex curves or non-linear structures.
+For the Iris dataset, PCA and MDS look very similar. This is because Iris data is fairly linear---the relationships between features don't involve complex curves or non-linear structures.
 
 MDS shows its power on **non-linear data structures**:
 
@@ -309,13 +293,13 @@ from sklearn.datasets import make_swiss_roll
 
 # Generate Swiss roll data
 n_samples = 1000
-X_swiss, color = make_swiss_roll(n_samples, noise=0.1, random_state=42)
+X_swiss, color = make_swiss_roll(n_samples, noise=0.2, random_state=42)
 
 # Apply PCA and MDS
 pca_swiss = PCA(n_components=2)
 X_swiss_pca = pca_swiss.fit_transform(X_swiss)
 
-mds_swiss = MDS(n_components=2, random_state=42)
+mds_swiss = MDS(n_components=2, random_state=41, n_init=1)
 X_swiss_mds = mds_swiss.fit_transform(X_swiss)
 
 # Plot
@@ -340,7 +324,13 @@ sns.despine(ax=axes[1])
 plt.tight_layout()
 ```
 
-The Swiss roll is a 2D surface rolled up in 3D space. PCA "squashes" it, losing the smooth gradient. MDS does betterit partially unrolls the structurebut it's not perfect because MDS tries to preserve all distances, including distances across the spiral that shouldn't be preserved.
+The Swiss roll is a 2D surface rolled up in 3D space. PCA "squashes" it, losing the smooth gradient. MDS does better---it partially unrolls the structure---but it's not perfect because MDS tries to preserve all distances, including distances across the spiral that shouldn't be preserved.
+
+::: {.column-margin}
+
+**Why MDS isn't perfect here:** The Swiss roll has points that are close in Euclidean distance (across the gap in the spiral) but far apart along the manifold surface. MDS tries to preserve both types of distances, creating a compromise that partially unrolls the structure but doesn't fully recover the underlying 2D surface.
+
+:::
 
 This is where modern methods excel.
 
@@ -348,7 +338,7 @@ This is where modern methods excel.
 
 **t-Distributed Stochastic Neighbor Embedding (t-SNE)** has become the go-to method for visualizing high-dimensional data, especially in fields like single-cell genomics, natural language processing, and computer vision.
 
-Unlike PCA (which preserves variance) or MDS (which preserves all distances), t-SNE focuses on **preserving local structure**keeping similar points close together in the low-dimensional projection.
+Unlike PCA (which preserves variance) or MDS (which preserves all distances), t-SNE focuses on **preserving local structure**---keeping similar points close together in the low-dimensional projection.
 
 ## How t-SNE works
 
@@ -364,7 +354,7 @@ Points that are close in high-dimensional space have high probability; distant p
 
 t-SNE then tries to place points in 2D (or 3D) such that the probability distributions match as closely as possible. It uses gradient descent to minimize the difference (KL divergence) between high-dimensional and low-dimensional similarities.
 
-The clever trick: t-SNE uses different probability distributions in high and low dimensions. In high dimensions, it uses a Gaussian (normal) distribution. In low dimensions, it uses a t-distribution with heavy tails. This allows separated clusters in high dimensions to spread out in 2D without overlappingthe heavy tails make moderate distances in 2D correspond to large distances in high dimensions.
+The clever trick: t-SNE uses different probability distributions in high and low dimensions. In high dimensions, it uses a Gaussian (normal) distribution. In low dimensions, it uses a t-distribution with heavy tails. This allows separated clusters in high dimensions to spread out in 2D without overlapping---the heavy tails make moderate distances in 2D correspond to large distances in high dimensions.
 
 ```{python}
 #| fig-cap: "t-SNE beautifully unrolls the Swiss roll, preserving local neighborhood structure"
@@ -469,10 +459,10 @@ t-SNE is powerful but has important limitations:
 
 ## Applying t-SNE to real data
 
-Let's apply t-SNE to a more realistic high-dimensional datasetthe MNIST digits dataset, which has 784 dimensions (28×28 pixel images):
+Let's apply t-SNE to a more realistic high-dimensional dataset---the MNIST digits dataset, which has 784 dimensions (28ï¿½28 pixel images):
 
 ```{python}
-#| fig-cap: "t-SNE visualization of MNIST digits (784 dimensions ’ 2D). Each color represents a digit class."
+#| fig-cap: "t-SNE visualization of MNIST digits (784 dimensions ï¿½ 2D). Each color represents a digit class."
 #| fig-width: 12
 #| fig-height: 10
 #| code-fold: true
@@ -499,7 +489,7 @@ scatter = ax.scatter(X_digits_tsne[:, 0], X_digits_tsne[:, 1],
                      c=y_subset, cmap='tab10', alpha=0.7, s=30)
 ax.set_xlabel('t-SNE1')
 ax.set_ylabel('t-SNE2')
-ax.set_title('t-SNE Visualization of Handwritten Digits (64D ’ 2D)')
+ax.set_title('t-SNE Visualization of Handwritten Digits (64D ï¿½ 2D)')
 cbar = plt.colorbar(scatter, ax=ax, ticks=range(10))
 cbar.set_label('Digit Class')
 sns.despine()
@@ -522,7 +512,7 @@ This demonstrates t-SNE's power: from 64 dimensions with no explicit information
 ## UMAP vs t-SNE
 
 **Advantages of UMAP:**
-- **Faster**: Can be 10-100× faster than t-SNE on large datasets
+- **Faster**: Can be 10-100ï¿½ faster than t-SNE on large datasets
 - **Scales better**: Works well on datasets with millions of points
 - **Better global structure**: Preserves more global relationships than t-SNE
 - **Theoretically grounded**: Based on Riemannian geometry and fuzzy topology
@@ -622,6 +612,6 @@ Dimensionality reduction can create apparent patterns that don't exist in the or
 **Always validate** important findings with statistical tests or domain knowledge. A beautiful t-SNE plot is a starting point for investigation, not a final conclusion.
 :::
 
-Visualizing high-dimensional data is as much art as science. The goal is not to find "the true projection"there is no single true way to flatten high-dimensional space onto a page. The goal is to **reveal structure that helps you understand your data and ask better questions**.
+Visualizing high-dimensional data is as much art as science. The goal is not to find "the true projection"---there is no single true way to flatten high-dimensional space onto a page. The goal is to **reveal structure that helps you understand your data and ask better questions**.
 
-As data scientist Jake VanderPlas wrote: "Dimensionality reduction is a form of lossy compression. The question is not whether you lose informationyou always dobut whether you lose the information you care about."
+As data scientist Jake VanderPlas wrote: "Dimensionality reduction is a form of lossy compression. The question is not whether you lose information---you always do---but whether you lose the information you care about."
