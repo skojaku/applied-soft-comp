@@ -180,8 +180,8 @@ import matplotlib.pyplot as plt
 g = gt.collection.data["karate"]
 
 # Get community labels (the two groups that split)
-# We'll use ground truth community structure
-state = gt.minimize_blockmodel_dl(g, B_max=2, B_min=2)
+# We'll use blockmodel inference with 2 communities
+state = gt.minimize_blockmodel_dl(g, state_args=dict(B=2))
 community = state.get_blocks()
 
 # Create Fruchterman-Reingold layout
@@ -225,7 +225,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 g = gt.collection.data["karate"]
-state = gt.minimize_blockmodel_dl(g, B_max=2, B_min=2)
+state = gt.minimize_blockmodel_dl(g, state_args=dict(B=2))
 community = state.get_blocks()
 colors = [["#E74C3C", "#3498DB"][community[v]] for v in g.vertices()]
 
