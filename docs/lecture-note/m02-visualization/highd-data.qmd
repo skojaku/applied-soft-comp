@@ -285,28 +285,28 @@ For the Iris dataset, PCA and MDS look very similar. This is because Iris data i
 MDS shows its power on **non-linear data structures**:
 
 ```{python}
-#| fig-cap: "MDS can reveal non-linear structure that PCA misses. Swiss roll dataset shown."
+#| fig-cap: "MDS can reveal non-linear structure that PCA misses. S-curve dataset shown."
 #| fig-width: 14
 #| fig-height: 6
 #| code-fold: true
-from sklearn.datasets import make_swiss_roll
+from sklearn.datasets import make_s_curve
 
-# Generate Swiss roll data
+# Generate S-curve data (a 2D manifold embedded in 3D)
 n_samples = 1000
-X_swiss, color = make_swiss_roll(n_samples, noise=0.2, random_state=42)
+X_scurve, color = make_s_curve(n_samples, noise=0.1, random_state=42)
 
 # Apply PCA and MDS
-pca_swiss = PCA(n_components=2)
-X_swiss_pca = pca_swiss.fit_transform(X_swiss)
+pca_scurve = PCA(n_components=2)
+X_scurve_pca = pca_scurve.fit_transform(X_scurve)
 
-mds_swiss = MDS(n_components=2, random_state=41, n_init=1)
-X_swiss_mds = mds_swiss.fit_transform(X_swiss)
+mds_scurve = MDS(n_components=2, random_state=42, n_init=1)
+X_scurve_mds = mds_scurve.fit_transform(X_scurve)
 
 # Plot
 fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
 # PCA
-scatter = axes[0].scatter(X_swiss_pca[:, 0], X_swiss_pca[:, 1], c=color,
+scatter = axes[0].scatter(X_scurve_pca[:, 0], X_scurve_pca[:, 1], c=color,
                           cmap='viridis', alpha=0.6, s=20)
 axes[0].set_xlabel('PC1')
 axes[0].set_ylabel('PC2')
@@ -314,7 +314,7 @@ axes[0].set_title('PCA: Loses Non-Linear Structure')
 sns.despine(ax=axes[0])
 
 # MDS
-scatter = axes[1].scatter(X_swiss_mds[:, 0], X_swiss_mds[:, 1], c=color,
+scatter = axes[1].scatter(X_scurve_mds[:, 0], X_scurve_mds[:, 1], c=color,
                           cmap='viridis', alpha=0.6, s=20)
 axes[1].set_xlabel('MDS1')
 axes[1].set_ylabel('MDS2')
@@ -324,11 +324,11 @@ sns.despine(ax=axes[1])
 plt.tight_layout()
 ```
 
-The Swiss roll is a 2D surface rolled up in 3D space. PCA "squashes" it, losing the smooth gradient. MDS does better---it partially unrolls the structure---but it's not perfect because MDS tries to preserve all distances, including distances across the spiral that shouldn't be preserved.
+The S-curve is a 2D surface with a strong bend in 3D space. PCA projects along the directions of maximum variance, which "flattens" the S-shape and loses the smooth color gradient. MDS does better---it partially recovers the curve structure by preserving distances---but it's not perfect because MDS tries to preserve all pairwise distances, including distances that cut across the curve that shouldn't be preserved.
 
 ::: {.column-margin}
 
-**Why MDS isn't perfect here:** The Swiss roll has points that are close in Euclidean distance (across the gap in the spiral) but far apart along the manifold surface. MDS tries to preserve both types of distances, creating a compromise that partially unrolls the structure but doesn't fully recover the underlying 2D surface.
+**Why MDS isn't perfect here:** The S-curve has points that are close in Euclidean distance (across the bend) but far apart along the curved surface. MDS tries to preserve both types of distances, creating a compromise that partially straightens the curve but doesn't fully recover the underlying smooth 1D gradient.
 
 :::
 
@@ -357,7 +357,7 @@ t-SNE then tries to place points in 2D (or 3D) such that the probability distrib
 The clever trick: t-SNE uses different probability distributions in high and low dimensions. In high dimensions, it uses a Gaussian (normal) distribution. In low dimensions, it uses a t-distribution with heavy tails. This allows separated clusters in high dimensions to spread out in 2D without overlapping---the heavy tails make moderate distances in 2D correspond to large distances in high dimensions.
 
 ```{python}
-#| fig-cap: "t-SNE beautifully unrolls the Swiss roll, preserving local neighborhood structure"
+#| fig-cap: "t-SNE beautifully straightens the S-curve, preserving local neighborhood structure"
 #| fig-width: 14
 #| fig-height: 6
 #| code-fold: true
@@ -365,31 +365,31 @@ from sklearn.manifold import TSNE
 
 # Apply t-SNE
 tsne = TSNE(n_components=2, random_state=42, perplexity=30)
-X_swiss_tsne = tsne.fit_transform(X_swiss)
+X_scurve_tsne = tsne.fit_transform(X_scurve)
 
 # Plot MDS vs t-SNE
 fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
 # MDS
-axes[0].scatter(X_swiss_mds[:, 0], X_swiss_mds[:, 1], c=color,
+axes[0].scatter(X_scurve_mds[:, 0], X_scurve_mds[:, 1], c=color,
                 cmap='viridis', alpha=0.6, s=20)
 axes[0].set_xlabel('MDS1')
 axes[0].set_ylabel('MDS2')
-axes[0].set_title('MDS: Partially Unrolls Structure')
+axes[0].set_title('MDS: Partially Recovers Structure')
 sns.despine(ax=axes[0])
 
 # t-SNE
-axes[1].scatter(X_swiss_tsne[:, 0], X_swiss_tsne[:, 1], c=color,
+axes[1].scatter(X_scurve_tsne[:, 0], X_scurve_tsne[:, 1], c=color,
                 cmap='viridis', alpha=0.6, s=20)
 axes[1].set_xlabel('t-SNE1')
 axes[1].set_ylabel('t-SNE2')
-axes[1].set_title('t-SNE: Beautifully Unrolls Structure')
+axes[1].set_title('t-SNE: Beautifully Straightens Curve')
 sns.despine(ax=axes[1])
 
 plt.tight_layout()
 ```
 
-t-SNE perfectly unrolls the Swiss roll into a smooth 2D surface where the color gradient is preserved. Points that were neighbors on the rolled surface remain neighbors in 2D.
+t-SNE beautifully straightens the S-curve into a smooth gradient where the color progression is preserved. Points that were neighbors along the curved surface remain neighbors in 2D. Unlike MDS, t-SNE focuses on preserving local neighborhoods rather than all pairwise distances, which allows it to "unfold" the curve more naturally.
 
 ## The perplexity parameter
 
