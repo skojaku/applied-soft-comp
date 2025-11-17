@@ -1,0 +1,551 @@
+---
+title: "Time Series Visualization"
+jupyter: advnetsci
+execute:
+    enabled: true
+---
+
+In March 2020, news outlets worldwide showed charts of COVID-19 cases rising exponentially. Some charts showed linear y-axes with curves shooting upward dramatically. Others used logarithmic y-axes where the same data appeared as straight lines. Politicians cherry-picked time windows to show "flattening curves." The same data told vastly different stories depending on how it was visualized.
+
+Or consider stock market charts: show the last month, and a 10% drop looks catastrophic. Zoom out to show the last decade, and the same drop becomes a minor blip barely visible on the chart.
+
+Time series dataobservations ordered by timeis everywhere. But time is special. Unlike other variables, it flows in one direction, has natural rhythms (daily, seasonal, cyclical), and carries momentum. **Your visualization choices can reveal genuine patterns or create misleading narratives.**
+
+The key principle to keep in mind:
+
+**Time is specialshow how your data changes over time honestly and clearly.**
+
+# Why Time Series Visualization Matters
+
+Time series visualizations are perhaps the most common type of chart in news media, scientific papers, and business dashboards. They answer fundamental questions: Is this trend going up or down? Are there cycles? When did something change?
+
+But they're also easy to manipulate. By selecting the time window, changing the y-axis scale, or choosing different aggregation levels, the same data can support contradictory conclusions.
+
+Consider these common pitfalls:
+- **Truncated y-axes** that exaggerate small changes
+- **Cherry-picked time windows** that hide long-term trends
+- **Inappropriate scales** (linear vs. log) that obscure or inflate patterns
+- **Over-smoothing** that removes real variation
+- **Under-smoothing** that shows only noise
+
+Good time series visualization is about making honest choices that reveal the actual patterns in your data.
+
+# Basic Time Series: Line Plots
+
+The most fundamental time series visualization is the **line plot**: time on the x-axis, values on the y-axis, points connected by lines.
+
+```{python}
+#| fig-cap: "Basic line plot showing a time series with trend and seasonality"
+#| fig-width: 12
+#| fig-height: 5
+#| code-fold: true
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Set style
+sns.set_style("white")
+sns.set(font_scale=1.2)
+
+# Generate synthetic time series with trend and seasonality
+np.random.seed(42)
+n_points = 365
+dates = pd.date_range('2023-01-01', periods=n_points, freq='D')
+trend = np.linspace(100, 150, n_points)
+seasonal = 10 * np.sin(2 * np.pi * np.arange(n_points) / 365 * 4)  # Quarterly seasonality
+noise = np.random.normal(0, 3, n_points)
+values = trend + seasonal + noise
+
+df = pd.DataFrame({'date': dates, 'value': values})
+
+# Create line plot
+fig, ax = plt.subplots(figsize=(12, 5))
+ax.plot(df['date'], df['value'], linewidth=1.5, color=sns.color_palette()[0])
+ax.set_xlabel('Date')
+ax.set_ylabel('Value')
+ax.set_title('Daily Time Series: Line Plot Shows Trend and Seasonality')
+ax.grid(True, alpha=0.3)
+sns.despine()
+```
+
+The line connecting points implies **continuity**that values exist between measurements. This is appropriate for continuous processes (temperature, stock prices, heart rate) but not for discrete events or counts measured at intervals.
+
+When should you **not** connect the dots? When your data represents discrete events or when measurements are too sparse to imply continuity.
+
+```{python}
+#| fig-cap: "Line plot vs scatter plot: connecting points implies continuity"
+#| fig-width: 14
+#| fig-height: 5
+#| code-fold: true
+# Generate sparse discrete event data
+np.random.seed(123)
+event_dates = pd.to_datetime(['2023-01-15', '2023-03-10', '2023-05-22',
+                               '2023-07-08', '2023-09-30', '2023-11-15'])
+event_values = np.random.randint(20, 80, len(event_dates))
+
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+# Line plot (implies continuity - misleading for discrete events)
+axes[0].plot(event_dates, event_values, marker='o', linewidth=2, markersize=8)
+axes[0].set_xlabel('Date')
+axes[0].set_ylabel('Event Count')
+axes[0].set_title('Line Plot: Implies Values Between Events (Misleading)')
+axes[0].grid(True, alpha=0.3)
+
+# Scatter plot (appropriate for discrete events)
+axes[1].scatter(event_dates, event_values, s=100, alpha=0.7)
+axes[1].set_xlabel('Date')
+axes[1].set_ylabel('Event Count')
+axes[1].set_title('Scatter Plot: Shows Only Observed Events (Honest)')
+axes[1].grid(True, alpha=0.3)
+
+for ax in axes:
+    sns.despine(ax=ax)
+
+plt.tight_layout()
+```
+
+For discrete events, stick with scatter plots or bar charts. Don't imply continuity where none exists.
+
+# Comparing Multiple Time Series
+
+Often you need to compare several time series. The natural approach is to overlay them on the same plot.
+
+```{python}
+#| fig-cap: "Multiple time series overlaid with different colors"
+#| fig-width: 12
+#| fig-height: 6
+#| code-fold: true
+# Generate three related time series
+np.random.seed(42)
+dates = pd.date_range('2023-01-01', periods=200, freq='D')
+
+series_a = 100 + np.linspace(0, 30, 200) + np.random.normal(0, 5, 200)
+series_b = 95 + np.linspace(0, 20, 200) + np.random.normal(0, 4, 200)
+series_c = 110 + np.linspace(0, 10, 200) + np.random.normal(0, 6, 200)
+
+df_multi = pd.DataFrame({
+    'date': dates,
+    'Product A': series_a,
+    'Product B': series_b,
+    'Product C': series_c
+})
+
+# Overlay plot
+fig, ax = plt.subplots(figsize=(12, 6))
+for column in ['Product A', 'Product B', 'Product C']:
+    ax.plot(df_multi['date'], df_multi[column], linewidth=2, label=column, alpha=0.8)
+
+ax.set_xlabel('Date')
+ax.set_ylabel('Sales')
+ax.set_title('Multiple Time Series: Overlaid Comparison')
+ax.legend(loc='upper left')
+ax.grid(True, alpha=0.3)
+sns.despine()
+```
+
+This works well for 2-4 series. Beyond that, you risk creating a **spaghetti plot**a tangled mess where individual series become impossible to follow.
+
+When you have many time series, use **small multiples** (faceting): separate plots arranged in a grid, each with the same axes for easy comparison.
+
+```{python}
+#| fig-cap: "Small multiples avoid spaghetti plots when comparing many time series"
+#| fig-width: 14
+#| fig-height: 8
+#| code-fold: true
+# Generate multiple time series
+np.random.seed(42)
+n_series = 6
+dates = pd.date_range('2023-01-01', periods=150, freq='D')
+
+data_list = []
+for i in range(n_series):
+    values = 50 + np.random.randn(150).cumsum() + 10 * np.sin(2 * np.pi * np.arange(150) / 30)
+    data_list.append(pd.DataFrame({
+        'date': dates,
+        'value': values,
+        'series': f'Region {i+1}'
+    }))
+
+df_many = pd.concat(data_list, ignore_index=True)
+
+# Small multiples using seaborn FacetGrid
+g = sns.FacetGrid(df_many, col='series', col_wrap=3, height=3, aspect=1.5, sharey=True)
+g.map_dataframe(sns.lineplot, x='date', y='value', linewidth=2, color=sns.color_palette()[0])
+g.set_axis_labels('Date', 'Value')
+g.set_titles('Region {col_name}')
+for ax in g.axes.flat:
+    ax.grid(True, alpha=0.3)
+    sns.despine(ax=ax)
+
+plt.tight_layout()
+```
+
+Small multiples let you see each series clearly while maintaining comparability through shared axes.
+
+# The Power of Scale: Linear vs. Logarithmic
+
+Perhaps the most consequential choice in time series visualization is the **y-axis scale**. The same data looks completely different on linear vs. logarithmic scales.
+
+When should you use a log scale?
+- When your data spans **multiple orders of magnitude** (e.g., 10 to 10,000)
+- When you care about **percentage changes** rather than absolute changes
+- When visualizing **exponential growth or decay**
+
+```{python}
+#| fig-cap: "The same exponential growth looks different on linear vs. log scales"
+#| fig-width: 14
+#| fig-height: 5
+#| code-fold: true
+# Generate exponential growth data (e.g., epidemic spread)
+np.random.seed(42)
+days = np.arange(0, 100)
+cases = 10 * np.exp(0.05 * days) * (1 + np.random.normal(0, 0.1, len(days)))
+
+df_exp = pd.DataFrame({'day': days, 'cases': cases})
+
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+# Linear scale
+axes[0].plot(df_exp['day'], df_exp['cases'], linewidth=2, color=sns.color_palette()[0])
+axes[0].set_xlabel('Days')
+axes[0].set_ylabel('Cases')
+axes[0].set_title('Linear Scale: Exponential Growth Looks Explosive')
+axes[0].grid(True, alpha=0.3)
+
+# Log scale
+axes[1].plot(df_exp['day'], df_exp['cases'], linewidth=2, color=sns.color_palette()[1])
+axes[1].set_xlabel('Days')
+axes[1].set_ylabel('Cases (log scale)')
+axes[1].set_yscale('log')
+axes[1].set_title('Log Scale: Exponential Growth Appears Linear')
+axes[1].grid(True, alpha=0.3, which='both')
+
+for ax in axes:
+    sns.despine(ax=ax)
+
+plt.tight_layout()
+```
+
+On a **linear scale**, exponential growth appears as a dramatic upward curvemost growth happens at the end. On a **log scale**, exponential growth becomes a straight line, making it easy to see if the growth rate is constant, accelerating, or decelerating.
+
+::: {.callout-warning}
+## Log Scales Can Hide Magnitude
+
+While log scales are essential for percentage changes and exponential processes, they can **downplay the absolute magnitude** of changes. A jump from 10,000 to 100,000 cases looks the same as a jump from 100 to 1,000both are one order of magnitude. But in human terms, 90,000 additional cases is far more significant than 900.
+
+**Always consider your audience and what you want to emphasize**: relative changes (use log) or absolute numbers (use linear).
+:::
+
+# Smoothing and Trends
+
+Real time series data is often noisy. **Smoothing** helps reveal underlying trends by averaging out short-term fluctuations.
+
+The most common approach is a **moving average**: replace each point with the average of nearby points.
+
+```{python}
+#| fig-cap: "Moving averages smooth noise to reveal underlying trends"
+#| fig-width: 12
+#| fig-height: 6
+#| code-fold: true
+# Generate noisy time series
+np.random.seed(42)
+dates = pd.date_range('2023-01-01', periods=200, freq='D')
+trend = 50 + 0.2 * np.arange(200)
+seasonal = 8 * np.sin(2 * np.pi * np.arange(200) / 30)
+noise = np.random.normal(0, 5, 200)
+values = trend + seasonal + noise
+
+df_noisy = pd.DataFrame({'date': dates, 'value': values})
+
+# Calculate moving averages
+df_noisy['MA_7'] = df_noisy['value'].rolling(window=7, center=True).mean()
+df_noisy['MA_30'] = df_noisy['value'].rolling(window=30, center=True).mean()
+
+# Plot
+fig, ax = plt.subplots(figsize=(12, 6))
+ax.plot(df_noisy['date'], df_noisy['value'], linewidth=0.8, alpha=0.3, label='Raw Data', color='gray')
+ax.plot(df_noisy['date'], df_noisy['MA_7'], linewidth=2, label='7-Day Moving Average', color=sns.color_palette()[0])
+ax.plot(df_noisy['date'], df_noisy['MA_30'], linewidth=2, label='30-Day Moving Average', color=sns.color_palette()[1])
+
+ax.set_xlabel('Date')
+ax.set_ylabel('Value')
+ax.set_title('Moving Averages Reveal Trends by Smoothing Noise')
+ax.legend()
+ax.grid(True, alpha=0.3)
+sns.despine()
+```
+
+The smoothing window creates a trade-off:
+- **Short windows** (e.g., 7 days) preserve more detail but still show fluctuations
+- **Long windows** (e.g., 30 days) reveal long-term trends but may over-smooth and miss real changes
+
+::: {.callout-note}
+## Choosing the Right Window
+
+The appropriate smoothing window depends on your data's frequency and the patterns you care about:
+- **Daily stock prices**: 5-20 day moving average
+- **Monthly sales**: 3-6 month moving average
+- **Annual measurements**: 3-5 year moving average
+
+Match your window to the timescale of meaningful variation in your domain.
+:::
+
+# Showing Uncertainty Over Time
+
+When forecasting or estimating, you don't just have point predictionsyou have **uncertainty**. Showing this uncertainty is crucial for honest communication.
+
+Use **ribbon plots** (also called envelope plots) to show confidence intervals or prediction intervals around your estimates.
+
+```{python}
+#| fig-cap: "Ribbon plots show uncertainty bands around predictions"
+#| fig-width: 12
+#| fig-height: 6
+#| code-fold: true
+# Generate data with trend
+np.random.seed(42)
+n = 150
+x = np.arange(n)
+true_trend = 50 + 0.3 * x
+observed = true_trend + np.random.normal(0, 5, n)
+
+# Simple linear forecast
+from scipy import stats
+slope, intercept, r_value, p_value, std_err = stats.linregress(x[:100], observed[:100])
+
+# Forecast period
+x_future = np.arange(100, 150)
+y_pred = slope * x_future + intercept
+
+# Estimate prediction interval (simplified)
+residuals = observed[:100] - (slope * x[:100] + intercept)
+std_residual = np.std(residuals)
+margin = 1.96 * std_residual  # 95% prediction interval
+
+# Plot
+fig, ax = plt.subplots(figsize=(12, 6))
+
+# Historical data
+ax.plot(x[:100], observed[:100], linewidth=2, label='Historical Data', color=sns.color_palette()[0])
+
+# Forecast with uncertainty
+ax.plot(x_future, y_pred, linewidth=2, label='Forecast', color=sns.color_palette()[1], linestyle='--')
+ax.fill_between(x_future, y_pred - margin, y_pred + margin,
+                alpha=0.3, color=sns.color_palette()[1], label='95% Prediction Interval')
+
+# Actual future (for comparison)
+ax.plot(x_future, observed[100:], linewidth=1.5, alpha=0.5, label='Actual (for comparison)',
+        color='gray', linestyle=':')
+
+ax.axvline(x=100, color='black', linestyle=':', alpha=0.5, label='Forecast Start')
+ax.set_xlabel('Time')
+ax.set_ylabel('Value')
+ax.set_title('Time Series Forecast with Uncertainty Bands')
+ax.legend()
+ax.grid(True, alpha=0.3)
+sns.despine()
+```
+
+The ribbon makes it clear that predictions further into the future are more uncertain. Without showing this uncertainty, forecasts can appear deceptively precise.
+
+# Temporal Aggregation: Choosing Your Time Scale
+
+How you aggregate time can dramatically change what patterns emerge. The same data aggregated hourly, daily, or monthly reveals different stories.
+
+**Heat maps** are excellent for visualizing patterns across two time dimensionssay, hour of day vs. day of week.
+
+```{python}
+#| fig-cap: "Heat map reveals daily and weekly patterns in temporal data"
+#| fig-width: 12
+#| fig-height: 8
+#| code-fold: true
+# Generate synthetic hourly data with daily and weekly patterns
+np.random.seed(42)
+hours = pd.date_range('2023-01-01', periods=24*7*4, freq='H')  # 4 weeks
+
+# Patterns: higher activity during business hours and weekdays
+hour_of_day = hours.hour
+day_of_week = hours.dayofweek
+
+# Activity pattern
+base_activity = 20
+hour_effect = 30 * np.exp(-((hour_of_day - 14)**2) / 20)  # Peak at 2 PM
+weekday_effect = np.where(day_of_week < 5, 20, -10)  # Weekdays higher
+noise = np.random.normal(0, 5, len(hours))
+
+activity = base_activity + hour_effect + weekday_effect + noise
+
+df_hourly = pd.DataFrame({
+    'datetime': hours,
+    'activity': activity,
+    'hour': hour_of_day,
+    'day_name': hours.day_name(),
+    'week': (hours.day // 7) + 1
+})
+
+# Take first week for heatmap
+df_week = df_hourly[df_hourly['week'] == 1].copy()
+
+# Pivot for heatmap
+heatmap_data = df_week.pivot_table(values='activity',
+                                     index='hour',
+                                     columns='day_name',
+                                     aggfunc='mean')
+
+# Reorder columns to start with Monday
+day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+heatmap_data = heatmap_data[[day for day in day_order if day in heatmap_data.columns]]
+
+# Plot heatmap
+fig, ax = plt.subplots(figsize=(12, 8))
+sns.heatmap(heatmap_data, cmap='YlOrRd', annot=False, fmt='.0f',
+            cbar_kws={'label': 'Activity Level'}, ax=ax)
+ax.set_xlabel('Day of Week')
+ax.set_ylabel('Hour of Day')
+ax.set_title('Temporal Heatmap: Activity by Hour and Day of Week')
+plt.tight_layout()
+```
+
+Heat maps immediately reveal patterns like "high activity on weekday afternoons" that would be invisible in a simple line plot.
+
+::: {.column-margin}
+![](https://raw.githubusercontent.com/scottlepp/plot-widget/master/resources/heatmap.png)
+
+Calendar heatmaps are widely used for visualizing GitHub contributions, showing commit activity over time in a compact, pattern-revealing format.
+:::
+
+# Visualizing Cycles and Seasonality
+
+Many time series have **seasonal patterns**: daily cycles, weekly patterns, annual seasons. **Cycle plots** decompose time series by season to reveal these patterns.
+
+```{python}
+#| fig-cap: "Cycle plot reveals seasonal patterns by separating each cycle"
+#| fig-width: 14
+#| fig-height: 6
+#| code-fold: true
+# Generate monthly data with strong annual seasonality
+np.random.seed(42)
+months = pd.date_range('2020-01-01', periods=48, freq='M')
+month_num = np.tile(np.arange(1, 13), 4)  # 4 years of monthly data
+
+# Seasonal pattern (higher in summer, lower in winter)
+seasonal_effect = 20 * np.sin(2 * np.pi * (month_num - 3) / 12)
+trend_effect = 0.5 * np.arange(48)
+noise = np.random.normal(0, 3, 48)
+
+values = 50 + seasonal_effect + trend_effect + noise
+
+df_seasonal = pd.DataFrame({
+    'date': months,
+    'value': values,
+    'month': month_num,
+    'year': months.year,
+    'month_name': months.month_name()
+})
+
+# Create cycle plot
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+# Traditional time series
+axes[0].plot(df_seasonal['date'], df_seasonal['value'], marker='o', linewidth=2)
+axes[0].set_xlabel('Date')
+axes[0].set_ylabel('Value')
+axes[0].set_title('Traditional Time Series: Seasonality Repeats')
+axes[0].grid(True, alpha=0.3)
+
+# Cycle plot
+month_names_short = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+for year in df_seasonal['year'].unique():
+    year_data = df_seasonal[df_seasonal['year'] == year]
+    axes[1].plot(year_data['month'], year_data['value'], marker='o',
+                linewidth=2, label=str(year), alpha=0.7)
+
+axes[1].set_xlabel('Month')
+axes[1].set_ylabel('Value')
+axes[1].set_xticks(range(1, 13))
+axes[1].set_xticklabels(month_names_short)
+axes[1].set_title('Cycle Plot: Each Year Overlaid to Show Seasonal Pattern')
+axes[1].legend(title='Year')
+axes[1].grid(True, alpha=0.3)
+
+for ax in axes:
+    sns.despine(ax=ax)
+
+plt.tight_layout()
+```
+
+By overlaying each year's cycle, the cycle plot makes it obvious that values peak in summer (months 6-8) and dip in winter (months 12-2), while also showing year-over-year trends.
+
+# Advanced: Lag Plots for Autocorrelation
+
+Time series data often exhibits **autocorrelation**: values depend on previous values. A **lag plot** helps visualize this by plotting each value against the previous value (lag-1) or earlier values.
+
+```{python}
+#| fig-cap: "Lag plots reveal autocorrelation structure in time series"
+#| fig-width: 14
+#| fig-height: 5
+#| code-fold: true
+# Generate time series with autocorrelation
+np.random.seed(42)
+n = 200
+
+# AR(1) process: strong autocorrelation
+ar_series = np.zeros(n)
+ar_series[0] = np.random.normal(0, 1)
+for i in range(1, n):
+    ar_series[i] = 0.7 * ar_series[i-1] + np.random.normal(0, 1)
+
+# Random walk: perfect autocorrelation at lag 1
+random_walk = np.random.normal(0, 1, n).cumsum()
+
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+# Lag-1 plot for AR(1) series
+axes[0].scatter(ar_series[:-1], ar_series[1:], alpha=0.6, s=30)
+axes[0].set_xlabel('Value at time t')
+axes[0].set_ylabel('Value at time t+1')
+axes[0].set_title('Lag-1 Plot: Strong Autocorrelation (AR Process)')
+axes[0].plot([-3, 3], [-3, 3], 'r--', alpha=0.5, linewidth=1)
+axes[0].grid(True, alpha=0.3)
+
+# Lag-1 plot for random walk
+axes[1].scatter(random_walk[:-1], random_walk[1:], alpha=0.6, s=30, color=sns.color_palette()[1])
+axes[1].set_xlabel('Value at time t')
+axes[1].set_ylabel('Value at time t+1')
+axes[1].set_title('Lag-1 Plot: Perfect Autocorrelation (Random Walk)')
+axes[1].plot([random_walk.min(), random_walk.max()],
+            [random_walk.min(), random_walk.max()], 'r--', alpha=0.5, linewidth=1)
+axes[1].grid(True, alpha=0.3)
+
+for ax in axes:
+    sns.despine(ax=ax)
+
+plt.tight_layout()
+```
+
+A strong linear pattern in a lag plot indicates high autocorrelationknowing the current value helps predict the next value. Random, scattered points suggest no autocorrelation (e.g., white noise).
+
+# The Bigger Picture
+
+Time series visualization is about making choices that honestly represent temporal patterns while avoiding common pitfalls:
+
+**Key principles to remember:**
+
+1. **Choose the right scale**: Linear for absolute changes, log for relative/percentage changes
+2. **Show uncertainty**: Predictions without confidence intervals are misleading
+3. **Avoid spaghetti plots**: Use small multiples when comparing many series
+4. **Match aggregation to your question**: Daily, weekly, monthly aggregation reveals different patterns
+5. **Be transparent about time windows**: The time range you show matters enormously
+6. **Smooth appropriately**: Balance between preserving detail and revealing trends
+
+**Common pitfalls to avoid:**
+
+- Truncating the y-axis to exaggerate small changes
+- Cherry-picking time windows to support a narrative
+- Using line plots for discrete events (implies false continuity)
+- Over-smoothing to hide inconvenient variation
+- Mixing scales when comparing series (e.g., comparing growth rates on linear scale)
+
+Time series visualization is powerful because time is a dimension we all understand intuitively. But that familiarity also makes us vulnerable to manipulation. By following principled visualization practices, you ensure your temporal data tells its true storynot the story you wish it told.
