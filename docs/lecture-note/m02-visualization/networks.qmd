@@ -434,14 +434,14 @@ Low beta (0.3) preserves individual edge information but creates visual clutter.
 Circular hierarchy layouts are powerful but **only appropriate when your network actually has hierarchical structure**. If you force a random network into this layout, you'll create the illusion of hierarchy where none exists. Always validate the hierarchical partition (e.g., using the description length of the nested block model) before using this visualization.
 :::
 
-### Alternative: Bipartite Layout for Two-Level Hierarchies
+### Alternative: SFDP Layout for Hierarchies
 
-If your hierarchy has only two levels (e.g., nodes belonging to communities, but no super-communities), you can use a bipartite layout instead:
+You can also use the SFDP layout algorithm with `draw_hierarchy()`, which positions the hierarchy tree using force-directed placement. This can be useful for very large hierarchies:
 
 ```{python}
-#| fig-cap: "Bipartite hierarchy layout for a two-level community structure. Communities are arranged vertically, with nodes positioned horizontally within their community. This layout works well when you have a flat (non-nested) community structure."
+#| fig-cap: "Hierarchical visualization with SFDP layout for the hierarchy tree. The SFDP algorithm positions hierarchy levels using force-directed placement, which can reveal different structural patterns."
 #| fig-width: 10
-#| fig-height: 8
+#| fig-height: 10
 #| code-fold: true
 
 import graph_tool.all as gt
@@ -450,19 +450,18 @@ import matplotlib.pyplot as plt
 g = gt.collection.data["karate"]
 state = gt.minimize_nested_blockmodel_dl(g)
 
-fig, ax = plt.subplots(figsize=(10, 8))
+fig, ax = plt.subplots(figsize=(10, 10))
 pos, t, tpos = gt.draw_hierarchy(state,
-                                  layout="bipartite",
-                                  beta=0.7,
-                                  bip_aspect=1.5,
-                                  output_size=(1000, 800),
+                                  layout="sfdp",
+                                  beta=0.8,
+                                  output_size=(1000, 1000),
                                   mplfig=ax)
 ax.axis('off')
 plt.tight_layout()
 plt.show()
 ```
 
-The bipartite layout is particularly useful for **comparing community structure** across different networks or different partitions of the same network, because communities are spatially separated rather than arranged in a circle.
+The SFDP layout for hierarchies is particularly useful for **very large networks** where the radial layout becomes too crowded, or when you want to emphasize local connectivity patterns over strict hierarchical levels.
 
 ## The Bigger Picture: Layout as Hypothesis
 
