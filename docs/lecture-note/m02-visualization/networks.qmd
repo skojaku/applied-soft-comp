@@ -188,14 +188,18 @@ community = state.get_blocks()
 pos = gt.fruchterman_reingold_layout(g, n_iter=1000)
 
 # Map communities to colors (RGB tuples)
-color_map = [[0.906, 0.298, 0.235, 1],  # Red
-             [0.204, 0.596, 0.859, 1]]  # Blue
-colors = [color_map[community[v]] for v in g.vertices()]
+color_map = {0: [0.906, 0.298, 0.235, 1],  # Red
+             1: [0.204, 0.596, 0.859, 1]}  # Blue
+
+# Create vertex property map for colors
+vertex_color = g.new_vertex_property("vector<double>")
+for v in g.vertices():
+    vertex_color[v] = color_map[community[v]]
 
 # Draw the network
 fig, ax = plt.subplots(figsize=(10, 8))
 gt.graph_draw(g, pos=pos,
-              vertex_fill_color=colors,
+              vertex_fill_color=vertex_color,
               vertex_size=20,
               edge_color=[0.584, 0.647, 0.651, 1],
               edge_pen_width=2,
@@ -229,9 +233,13 @@ import matplotlib.pyplot as plt
 g = gt.collection.data["karate"]
 state = gt.minimize_blockmodel_dl(g, state_args=dict(B=2))
 community = state.get_blocks()
-color_map = [[0.906, 0.298, 0.235, 1],  # Red
-             [0.204, 0.596, 0.859, 1]]  # Blue
-colors = [color_map[community[v]] for v in g.vertices()]
+color_map = {0: [0.906, 0.298, 0.235, 1],  # Red
+             1: [0.204, 0.596, 0.859, 1]}  # Blue
+
+# Create vertex property map for colors
+vertex_color = g.new_vertex_property("vector<double>")
+for v in g.vertices():
+    vertex_color[v] = color_map[community[v]]
 
 # Different iteration counts
 iterations = [50, 500, 5000]
@@ -240,7 +248,7 @@ fig, axes = plt.subplots(1, 3, figsize=(14, 4))
 for idx, n_iter in enumerate(iterations):
     pos = gt.fruchterman_reingold_layout(g, n_iter=n_iter)
     gt.graph_draw(g, pos=pos,
-                  vertex_fill_color=colors,
+                  vertex_fill_color=vertex_color,
                   vertex_size=15,
                   edge_color=[0.584, 0.647, 0.651, 1],
                   edge_pen_width=1.5,
