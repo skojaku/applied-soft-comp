@@ -1,0 +1,627 @@
+---
+title: "High-Dimensional Data Visualization"
+jupyter: advnetsci
+execute:
+    enabled: true
+---
+
+Imagine you're analyzing data with 50 features per observation: gene expression levels, user behavior metrics, or environmental measurements. You want to understand the patterns in your data. How do different observations relate to each other? Are there clusters? Outliers?
+
+You can't plot 50 dimensions directly. Our visual system lives in three dimensions (or really, two dimensions on a screen). This creates a fundamental challenge: **how do you visualize data that lives in spaces you cannot see?**
+
+The answer is dimensionality reductionprojecting high-dimensional data into 2 or 3 dimensions while preserving important structure. But here's the critical question: **what structure matters?**
+
+Different methods preserve different aspects of your data. Some preserve global structure (how groups relate to each other across the entire dataset). Others preserve local structure (which points are nearest neighbors). Understanding these trade-offs is essential for choosing the right methodand for not being misled by beautiful but misleading visualizations.
+
+# The Curse of Dimensionality
+
+Before we dive into methods, we need to understand what makes high-dimensional data fundamentally different.
+
+In high dimensions, **everything is far from everything else**. This sounds paradoxical, but it's mathematically inevitable. As dimensions increase, the volume of space grows exponentially, and data points become increasingly sparse.
+
+Consider this: in 1D, if you have 10 points uniformly distributed in [0, 1], the average distance between neighbors is about 0.1. To maintain the same density in 2D, you need 100 points. In 3D, you need 1,000 points. In 10D, you need 10 billion points.
+
+Even stranger: in high dimensions, **all distances become similar**. The nearest and farthest neighbors become roughly equidistant. This makes many of our intuitions about "closeness" break down.
+
+```{python}
+#| fig-cap: "As dimensions increase, the ratio of farthest to nearest distance approaches 1"
+#| fig-width: 10
+#| fig-height: 5
+#| code-fold: true
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+from sklearn.metrics.pairwise import euclidean_distances
+
+sns.set_style("white")
+np.random.seed(42)
+
+# Calculate distance ratio across dimensions
+dimensions = [2, 5, 10, 20, 50, 100, 200]
+n_samples = 100
+ratios = []
+
+for d in dimensions:
+    # Generate random data
+    X = np.random.randn(n_samples, d)
+    # Calculate all pairwise distances
+    distances = euclidean_distances(X)
+    # For each point, find nearest and farthest
+    np.fill_diagonal(distances, np.inf)  # Ignore self-distance
+    nearest = distances.min(axis=1)
+    farthest = distances.max(axis=1)
+    # Calculate ratio
+    ratio = nearest / farthest
+    ratios.append(ratio)
+
+# Plot
+fig, ax = plt.subplots(figsize=(10, 5))
+positions = range(len(dimensions))
+bp = ax.boxplot(ratios, positions=positions, widths=0.6, patch_artist=True,
+                boxprops=dict(facecolor='lightblue', alpha=0.7))
+ax.set_xticklabels(dimensions)
+ax.set_xlabel('Number of Dimensions')
+ax.set_ylabel('Nearest Distance / Farthest Distance')
+ax.set_title('The Curse of Dimensionality: All Points Become Equidistant')
+ax.axhline(y=1.0, color='red', linestyle='--', alpha=0.5, label='Equal distances')
+ax.legend()
+sns.despine()
+```
+
+This is why dimensionality reduction is necessary: we need to project data into lower dimensions where distances and neighborhoods become meaningful again.
+
+# Pairwise Scatter Plots: The Brute Force Approach
+
+When you have a **moderate number of dimensions** (roughly 3-10), you can visualize all pairwise relationships using a **scatter plot matrix** (also called a pairs plot or SPLOM).
+
+```{python}
+#| fig-cap: "Scatter plot matrix showing all pairwise relationships in the Iris dataset"
+#| fig-width: 12
+#| fig-height: 12
+#| code-fold: true
+# Load classic iris dataset (4 dimensions)
+from sklearn.datasets import load_iris
+
+iris = load_iris()
+iris_df = pd.DataFrame(iris.data, columns=iris.feature_names)
+iris_df['species'] = iris.target
+iris_df['species'] = iris_df['species'].map({0: 'setosa', 1: 'versicolor', 2: 'virginica'})
+
+# Create pairplot
+g = sns.pairplot(iris_df, hue='species', diag_kind='kde',
+                 plot_kws={'alpha': 0.6, 's': 50, 'edgecolor': 'white', 'linewidth': 0.5},
+                 diag_kws={'alpha': 0.7, 'linewidth': 2})
+g.fig.suptitle('Iris Dataset: All Pairwise Relationships', y=1.01)
+```
+
+The scatter plot matrix shows every possible 2D projection. The diagonal shows the univariate distribution of each feature (using KDE here), and off-diagonals show bivariate scatter plots.
+
+This visualization reveals:
+- **Petal length and petal width** are strongly correlated (elongated scatter plots)
+- **Setosa** (blue) is clearly separated from the other species in petal measurements
+- **Versicolor and virginica** overlap significantly in some projections but separate in others
+
+::: {.callout-note}
+## Reading scatter plot matrices
+
+- **Look for elongated clouds**: Strong correlations between features
+- **Look for separated clusters**: Features that discriminate between groups
+- **Look at all projections**: A group might be separated in one projection but overlapping in another
+:::
+
+The problem: scatter plot matrices don't scale. With 10 variables, you have 45 unique pairwise plotsmanageable but crowded. With 20 variables, you have 190 plotsoverwhelming. And you're still only seeing 2D projections, never the full high-dimensional structure.
+
+This is where dimensionality reduction becomes essential.
+
+# Linear Dimensionality Reduction: PCA
+
+**Principal Component Analysis (PCA)** is the oldest and most widely used dimensionality reduction method. It finds the directions of maximum variance in your data.
+
+## How PCA works
+
+Imagine you have a cloud of points in high-dimensional space. PCA asks: "What direction captures the most variation in the data?" This becomes the first principal component (PC1). Then it asks: "What direction, perpendicular to the first, captures the most remaining variation?" This becomes PC2. And so on.
+
+Mathematically, PCA finds the eigenvectors of the covariance matrix. But conceptually, it's rotating your coordinate system to align with the "natural axes" of your data's variation.
+
+```{python}
+#| fig-cap: "PCA finds directions of maximum variance. PC1 captures the most variation, PC2 the next most (perpendicular to PC1)."
+#| fig-width: 10
+#| fig-height: 6
+#| code-fold: true
+from sklearn.decomposition import PCA
+
+# Generate correlated 2D data (for visualization)
+np.random.seed(123)
+mean = [0, 0]
+cov = [[3, 2], [2, 2]]
+data_2d = np.random.multivariate_normal(mean, cov, 300)
+
+# Fit PCA
+pca = PCA(n_components=2)
+pca.fit(data_2d)
+
+# Plot original data with principal components
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.scatter(data_2d[:, 0], data_2d[:, 1], alpha=0.6, s=50)
+
+# Draw principal components as arrows
+origin = pca.mean_
+for i, (component, variance) in enumerate(zip(pca.components_, pca.explained_variance_)):
+    direction = component * np.sqrt(variance) * 3  # Scale for visibility
+    ax.arrow(origin[0], origin[1], direction[0], direction[1],
+             head_width=0.3, head_length=0.3, fc=f'C{i+1}', ec=f'C{i+1}', linewidth=3,
+             label=f'PC{i+1} ({variance/pca.explained_variance_.sum()*100:.1f}%)')
+
+ax.set_xlabel('Original X')
+ax.set_ylabel('Original Y')
+ax.set_title('Principal Components: Directions of Maximum Variance')
+ax.legend()
+ax.axis('equal')
+sns.despine()
+```
+
+PC1 (orange arrow) points along the direction of greatest spread. PC2 (green arrow) is perpendicular and captures the remaining variation.
+
+The percentage in parentheses shows how much variance each component explains. If PC1 explains 90% of variance, then projecting onto just PC1 preserves most of your data's structure.
+
+## Applying PCA to Iris
+
+Let's apply PCA to the 4-dimensional Iris dataset:
+
+```{python}
+#| fig-cap: "PCA projection of Iris dataset to 2D preserves the separation between species"
+#| fig-width: 14
+#| fig-height: 6
+#| code-fold: true
+# Prepare data
+X = iris.data
+y = iris.target
+
+# Standardize (important for PCA!)
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Apply PCA
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+# Create DataFrame for plotting
+pca_df = pd.DataFrame(X_pca, columns=['PC1', 'PC2'])
+pca_df['species'] = iris.target_names[y]
+
+# Plot
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+# Left: PCA projection
+for species, color in zip(['setosa', 'versicolor', 'virginica'], sns.color_palette('muted', 3)):
+    mask = pca_df['species'] == species
+    axes[0].scatter(pca_df.loc[mask, 'PC1'], pca_df.loc[mask, 'PC2'],
+                   label=species, alpha=0.7, s=50, color=color, edgecolors='white', linewidth=0.5)
+axes[0].set_xlabel(f'PC1 ({pca.explained_variance_ratio_[0]*100:.1f}% variance)')
+axes[0].set_ylabel(f'PC2 ({pca.explained_variance_ratio_[1]*100:.1f}% variance)')
+axes[0].set_title('PCA Projection of Iris Dataset')
+axes[0].legend()
+sns.despine(ax=axes[0])
+
+# Right: Variance explained
+variances = pca.explained_variance_ratio_
+axes[1].bar([1, 2], variances, color=sns.color_palette('muted', 2), alpha=0.7)
+axes[1].set_xlabel('Principal Component')
+axes[1].set_ylabel('Variance Explained')
+axes[1].set_title('Variance Explained by Each Component')
+axes[1].set_xticks([1, 2])
+axes[1].set_xticklabels(['PC1', 'PC2'])
+for i, v in enumerate(variances):
+    axes[1].text(i+1, v+0.01, f'{v*100:.1f}%', ha='center', va='bottom', fontsize=11)
+sns.despine(ax=axes[1])
+
+plt.tight_layout()
+```
+
+PC1 and PC2 together explain over 95% of the variance in the 4D dataset. The 2D projection preserves the main structure: setosa is well-separated, while versicolor and virginica have some overlap.
+
+## When to use PCA
+
+PCA is best when:
+- **Linear relationships dominate**: Variables are correlated, not arranged in complex non-linear patterns
+- **You want interpretability**: Principal components can be interpreted as linear combinations of original features
+- **You have many dimensions**: PCA scales well to thousands of dimensions
+- **Global structure matters**: PCA preserves large-scale relationships and overall variance
+
+PCA struggles when:
+- **Data lies on non-linear manifolds**: Curved surfaces, spirals, Swiss rolls
+- **Local structure matters more**: You care about which points are neighbors, not overall variance
+- **Different groups have different scales**: PCA can be dominated by high-variance features
+
+::: {.column-margin}
+
+**Always standardize before PCA!** If features have different units or scales, PCA will be dominated by high-variance features. Standardization (zero mean, unit variance) ensures all features contribute fairly.
+
+:::
+
+# Non-Linear Dimensionality Reduction: MDS
+
+**Multidimensional Scaling (MDS)** takes a different approach: instead of finding directions of maximum variance, it tries to **preserve distances between points**.
+
+You give MDS a distance matrixthe distance between every pair of points in high-dimensional spaceand it finds a low-dimensional configuration where those distances are preserved as well as possible.
+
+## How MDS works
+
+Think of it like arranging cities on a map. You know the distance between every pair of cities, but not their coordinates. MDS finds positions that preserve those distances.
+
+Mathematically, MDS minimizes **stress**: the difference between high-dimensional distances and low-dimensional distances. Classical MDS has a closed-form solution (like PCA), but more flexible variants use iterative optimization.
+
+```{python}
+#| fig-cap: "MDS vs PCA on Iris dataset. MDS preserves distances better but looks similar to PCA for this dataset."
+#| fig-width: 14
+#| fig-height: 6
+#| code-fold: true
+from sklearn.manifold import MDS
+
+# Apply MDS
+mds = MDS(n_components=2, random_state=42)
+X_mds = mds.fit_transform(X_scaled)
+
+# Create DataFrame
+mds_df = pd.DataFrame(X_mds, columns=['MDS1', 'MDS2'])
+mds_df['species'] = iris.target_names[y]
+
+# Plot both
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+# PCA
+for species, color in zip(['setosa', 'versicolor', 'virginica'], sns.color_palette('muted', 3)):
+    mask = pca_df['species'] == species
+    axes[0].scatter(pca_df.loc[mask, 'PC1'], pca_df.loc[mask, 'PC2'],
+                   label=species, alpha=0.7, s=50, color=color, edgecolors='white', linewidth=0.5)
+axes[0].set_xlabel('PC1')
+axes[0].set_ylabel('PC2')
+axes[0].set_title('PCA: Maximizes Variance')
+axes[0].legend()
+sns.despine(ax=axes[0])
+
+# MDS
+for species, color in zip(['setosa', 'versicolor', 'virginica'], sns.color_palette('muted', 3)):
+    mask = mds_df['species'] == species
+    axes[1].scatter(mds_df.loc[mask, 'MDS1'], mds_df.loc[mask, 'MDS2'],
+                   label=species, alpha=0.7, s=50, color=color, edgecolors='white', linewidth=0.5)
+axes[1].set_xlabel('MDS1')
+axes[1].set_ylabel('MDS2')
+axes[1].set_title('MDS: Preserves Distances')
+axes[1].legend()
+sns.despine(ax=axes[1])
+
+plt.tight_layout()
+```
+
+For the Iris dataset, PCA and MDS look very similar. This is because Iris data is fairly linearthe relationships between features don't involve complex curves or non-linear structures.
+
+MDS shows its power on **non-linear data structures**:
+
+```{python}
+#| fig-cap: "MDS can reveal non-linear structure that PCA misses. Swiss roll dataset shown."
+#| fig-width: 14
+#| fig-height: 6
+#| code-fold: true
+from sklearn.datasets import make_swiss_roll
+
+# Generate Swiss roll data
+n_samples = 1000
+X_swiss, color = make_swiss_roll(n_samples, noise=0.1, random_state=42)
+
+# Apply PCA and MDS
+pca_swiss = PCA(n_components=2)
+X_swiss_pca = pca_swiss.fit_transform(X_swiss)
+
+mds_swiss = MDS(n_components=2, random_state=42)
+X_swiss_mds = mds_swiss.fit_transform(X_swiss)
+
+# Plot
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+# PCA
+scatter = axes[0].scatter(X_swiss_pca[:, 0], X_swiss_pca[:, 1], c=color,
+                          cmap='viridis', alpha=0.6, s=20)
+axes[0].set_xlabel('PC1')
+axes[0].set_ylabel('PC2')
+axes[0].set_title('PCA: Loses Non-Linear Structure')
+sns.despine(ax=axes[0])
+
+# MDS
+scatter = axes[1].scatter(X_swiss_mds[:, 0], X_swiss_mds[:, 1], c=color,
+                          cmap='viridis', alpha=0.6, s=20)
+axes[1].set_xlabel('MDS1')
+axes[1].set_ylabel('MDS2')
+axes[1].set_title('MDS: Partially Preserves Structure')
+sns.despine(ax=axes[1])
+
+plt.tight_layout()
+```
+
+The Swiss roll is a 2D surface rolled up in 3D space. PCA "squashes" it, losing the smooth gradient. MDS does betterit partially unrolls the structurebut it's not perfect because MDS tries to preserve all distances, including distances across the spiral that shouldn't be preserved.
+
+This is where modern methods excel.
+
+# Modern Non-Linear Methods: t-SNE
+
+**t-Distributed Stochastic Neighbor Embedding (t-SNE)** has become the go-to method for visualizing high-dimensional data, especially in fields like single-cell genomics, natural language processing, and computer vision.
+
+Unlike PCA (which preserves variance) or MDS (which preserves all distances), t-SNE focuses on **preserving local structure**keeping similar points close together in the low-dimensional projection.
+
+## How t-SNE works
+
+t-SNE operates in two conceptual steps:
+
+**Step 1: Define similarity in high dimensions**
+
+For each point, t-SNE looks at its neighbors and defines a probability distribution: "If I randomly pick a neighbor of point *i* based on distance, what's the probability I pick point *j*?"
+
+Points that are close in high-dimensional space have high probability; distant points have low probability. This creates a local similarity structure for each point.
+
+**Step 2: Arrange points in low dimensions**
+
+t-SNE then tries to place points in 2D (or 3D) such that the probability distributions match as closely as possible. It uses gradient descent to minimize the difference (KL divergence) between high-dimensional and low-dimensional similarities.
+
+The clever trick: t-SNE uses different probability distributions in high and low dimensions. In high dimensions, it uses a Gaussian (normal) distribution. In low dimensions, it uses a t-distribution with heavy tails. This allows separated clusters in high dimensions to spread out in 2D without overlappingthe heavy tails make moderate distances in 2D correspond to large distances in high dimensions.
+
+```{python}
+#| fig-cap: "t-SNE beautifully unrolls the Swiss roll, preserving local neighborhood structure"
+#| fig-width: 14
+#| fig-height: 6
+#| code-fold: true
+from sklearn.manifold import TSNE
+
+# Apply t-SNE
+tsne = TSNE(n_components=2, random_state=42, perplexity=30)
+X_swiss_tsne = tsne.fit_transform(X_swiss)
+
+# Plot MDS vs t-SNE
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+# MDS
+axes[0].scatter(X_swiss_mds[:, 0], X_swiss_mds[:, 1], c=color,
+                cmap='viridis', alpha=0.6, s=20)
+axes[0].set_xlabel('MDS1')
+axes[0].set_ylabel('MDS2')
+axes[0].set_title('MDS: Partially Unrolls Structure')
+sns.despine(ax=axes[0])
+
+# t-SNE
+axes[1].scatter(X_swiss_tsne[:, 0], X_swiss_tsne[:, 1], c=color,
+                cmap='viridis', alpha=0.6, s=20)
+axes[1].set_xlabel('t-SNE1')
+axes[1].set_ylabel('t-SNE2')
+axes[1].set_title('t-SNE: Beautifully Unrolls Structure')
+sns.despine(ax=axes[1])
+
+plt.tight_layout()
+```
+
+t-SNE perfectly unrolls the Swiss roll into a smooth 2D surface where the color gradient is preserved. Points that were neighbors on the rolled surface remain neighbors in 2D.
+
+## The perplexity parameter
+
+t-SNE's most important parameter is **perplexity**, which roughly corresponds to the number of nearest neighbors each point considers. It balances local and global structure.
+
+- **Low perplexity (5-10)**: Focus on very local structure, tiny neighborhoods
+- **Medium perplexity (30-50)**: Balanced view (default is usually 30)
+- **High perplexity (100+)**: More global structure, larger neighborhoods
+
+```{python}
+#| fig-cap: "Effect of perplexity on t-SNE visualization. Low perplexity creates fragmented clusters, high perplexity shows more global structure."
+#| fig-width: 14
+#| fig-height: 5
+#| code-fold: true
+# Apply t-SNE with different perplexities to Iris
+perplexities = [5, 30, 50]
+fig, axes = plt.subplots(1, 3, figsize=(14, 5))
+
+for ax, perp in zip(axes, perplexities):
+    tsne = TSNE(n_components=2, random_state=42, perplexity=perp)
+    X_tsne = tsne.fit_transform(X_scaled)
+
+    for species, color in zip(['setosa', 'versicolor', 'virginica'], sns.color_palette('muted', 3)):
+        mask = y == np.where(iris.target_names == species)[0][0]
+        ax.scatter(X_tsne[mask, 0], X_tsne[mask, 1],
+                  label=species, alpha=0.7, s=50, color=color, edgecolors='white', linewidth=0.5)
+
+    ax.set_xlabel('t-SNE1')
+    ax.set_ylabel('t-SNE2')
+    ax.set_title(f'Perplexity = {perp}')
+    ax.legend()
+    sns.despine(ax=ax)
+
+plt.tight_layout()
+```
+
+With perplexity = 5, clusters fragment into small sub-clusters (overfitting to local noise). With perplexity = 30-50, we see three clear groups matching the species. For most datasets, perplexity between 30-50 works well, but always experiment!
+
+## What t-SNE preserves (and what it doesn't)
+
+t-SNE is powerful but has important limitations:
+
+**What t-SNE preserves:**
+-  **Local structure**: Points that are neighbors in high dimensions stay neighbors in 2D
+-  **Clusters**: Well-separated groups remain separated
+-  **Relative relationships within neighborhoods**: If A is closer to B than to C locally, this is preserved
+
+**What t-SNE does NOT preserve:**
+-  **Distances**: The actual distance between points is not meaningful
+-  **Global structure**: The relative position of distant clusters is arbitrary
+-  **Cluster sizes**: Large clusters may appear smaller, and vice versa
+-  **Density**: Tight clusters may be spread out; sparse regions may appear dense
+
+::: {.callout-warning}
+## Don't over-interpret t-SNE!
+
+**You cannot conclude** from a t-SNE plot:
+- "Cluster A is twice as far from B as from C" (distances are not preserved)
+- "Cluster A is twice the size of B" (sizes are not preserved)
+- "The data has exactly 5 clusters" (apparent clusters may be visualization artifacts)
+
+**You can conclude:**
+- "These points form a distinct group separate from others"
+- "These points are more similar to each other than to distant points"
+- "The data has local structure and is not uniformly random"
+:::
+
+## Applying t-SNE to real data
+
+Let's apply t-SNE to a more realistic high-dimensional datasetthe MNIST digits dataset, which has 784 dimensions (28×28 pixel images):
+
+```{python}
+#| fig-cap: "t-SNE visualization of MNIST digits (784 dimensions ’ 2D). Each color represents a digit class."
+#| fig-width: 12
+#| fig-height: 10
+#| code-fold: true
+from sklearn.datasets import load_digits
+
+# Load digits dataset (8x8 images, 64 dimensions - a smaller version of MNIST)
+digits = load_digits()
+X_digits = digits.data
+y_digits = digits.target
+
+# Take a subset for speed (t-SNE is slow on large datasets)
+np.random.seed(42)
+indices = np.random.choice(len(X_digits), size=1000, replace=False)
+X_subset = X_digits[indices]
+y_subset = y_digits[indices]
+
+# Apply t-SNE
+tsne_digits = TSNE(n_components=2, random_state=42, perplexity=40)
+X_digits_tsne = tsne_digits.fit_transform(X_subset)
+
+# Plot
+fig, ax = plt.subplots(figsize=(12, 10))
+scatter = ax.scatter(X_digits_tsne[:, 0], X_digits_tsne[:, 1],
+                     c=y_subset, cmap='tab10', alpha=0.7, s=30)
+ax.set_xlabel('t-SNE1')
+ax.set_ylabel('t-SNE2')
+ax.set_title('t-SNE Visualization of Handwritten Digits (64D ’ 2D)')
+cbar = plt.colorbar(scatter, ax=ax, ticks=range(10))
+cbar.set_label('Digit Class')
+sns.despine()
+```
+
+The t-SNE projection beautifully separates most digit classes. Digits that look similar (like 3, 5, and 8, or 4 and 9) cluster near each other, while visually distinct digits (like 0 and 1) are well separated.
+
+This demonstrates t-SNE's power: from 64 dimensions with no explicit information about what makes digits similar, t-SNE discovers the perceptual structure of handwritten digits.
+
+::: {.column-margin}
+
+**t-SNE is stochastic**: Different runs produce different layouts (though cluster structure remains consistent). Always check multiple runs with different random seeds, especially for important scientific conclusions.
+
+:::
+
+# UMAP: A Faster Alternative
+
+**Uniform Manifold Approximation and Projection (UMAP)** is a newer method (2018) that has become popular as an alternative to t-SNE. Like t-SNE, UMAP preserves local structure, but it's based on different mathematical foundations (manifold learning and topological data analysis).
+
+## UMAP vs t-SNE
+
+**Advantages of UMAP:**
+- **Faster**: Can be 10-100× faster than t-SNE on large datasets
+- **Scales better**: Works well on datasets with millions of points
+- **Better global structure**: Preserves more global relationships than t-SNE
+- **Theoretically grounded**: Based on Riemannian geometry and fuzzy topology
+
+**Trade-offs:**
+- Less battle-tested than t-SNE (newer method)
+- More hyperparameters to tune (though defaults work well)
+- Can produce similar-looking results to t-SNE, so choice often comes down to speed
+
+```{python}
+#| fig-cap: "UMAP vs t-SNE on digits dataset. UMAP often preserves more global structure while being much faster."
+#| fig-width: 14
+#| fig-height: 6
+#| code-fold: true
+import umap
+
+# Apply UMAP
+umap_model = umap.UMAP(n_components=2, random_state=42, n_neighbors=30)
+X_digits_umap = umap_model.fit_transform(X_subset)
+
+# Plot comparison
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+# t-SNE
+scatter = axes[0].scatter(X_digits_tsne[:, 0], X_digits_tsne[:, 1],
+                          c=y_subset, cmap='tab10', alpha=0.7, s=30)
+axes[0].set_xlabel('t-SNE1')
+axes[0].set_ylabel('t-SNE2')
+axes[0].set_title('t-SNE')
+sns.despine(ax=axes[0])
+
+# UMAP
+scatter = axes[1].scatter(X_digits_umap[:, 0], X_digits_umap[:, 1],
+                          c=y_subset, cmap='tab10', alpha=0.7, s=30)
+axes[1].set_xlabel('UMAP1')
+axes[1].set_ylabel('UMAP2')
+axes[1].set_title('UMAP')
+cbar = plt.colorbar(scatter, ax=axes[1], ticks=range(10))
+cbar.set_label('Digit Class')
+sns.despine(ax=axes[1])
+
+plt.tight_layout()
+```
+
+Both methods reveal similar cluster structure, but UMAP tends to space clusters more evenly and preserve more of the global topology. Notice how UMAP places similar digits (3, 5, 8) in a connected region, suggesting they share underlying structure.
+
+## When to use UMAP
+
+Use UMAP when:
+- You have very large datasets (>10,000 points) where t-SNE is slow
+- You want to preserve more global structure
+- You're doing exploratory analysis and want fast iteration
+- You need to project new data onto an existing embedding (UMAP supports this, t-SNE doesn't easily)
+
+Stick with t-SNE when:
+- You need the most established method with extensive literature
+- You're working with moderate-sized datasets where speed isn't critical
+- You're replicating published work that used t-SNE
+
+# The Bigger Picture: Choosing the Right Method
+
+Dimensionality reduction is not a one-size-fits-all solution. Different methods make different trade-offs:
+
+| Method | Preserves | Speed | Scalability | When to use |
+|--------|-----------|-------|-------------|-------------|
+| **Scatter plot matrix** | Everything (2D projections) | Fast | 3-10 dimensions | Exploring moderate-dimensional data |
+| **PCA** | Global variance | Very fast | Excellent (1000s of dims) | Linear structure, interpretability needed |
+| **MDS** | All distances | Slow | Poor (100s of points) | Distance preservation critical |
+| **t-SNE** | Local structure | Slow | Moderate (10,000s of points) | Revealing clusters, local relationships |
+| **UMAP** | Local + some global | Fast | Excellent (millions of points) | Large datasets, faster alternative to t-SNE |
+
+**A practical workflow:**
+
+1. **Start with PCA**: Always run PCA first. It's fast, interpretable, and if it works well, you're done. Check how much variance the first 2-3 components explain.
+
+2. **Check pairwise plots** (if feasible): If you have <10 dimensions, look at scatter plot matrices to understand pairwise relationships.
+
+3. **Try t-SNE or UMAP** if:
+   - PCA doesn't reveal clear structure (first 2 PCs explain <50% variance)
+   - You suspect non-linear relationships
+   - You want to find clusters
+
+4. **Validate your findings**: Don't trust a single visualization. Try:
+   - Different random seeds (for t-SNE/UMAP)
+   - Different hyperparameters (perplexity, number of neighbors)
+   - Different methods (does t-SNE and PCA agree?)
+   - Statistical tests on apparent clusters
+
+::: {.callout-important}
+## Beware of visualization artifacts
+
+Dimensionality reduction can create apparent patterns that don't exist in the original data:
+- **Spurious clusters**: t-SNE can split continuous data into false clusters
+- **Missing relationships**: Two clusters might be connected in high dimensions but appear separated in 2D
+- **Misleading distances**: Distance and size in t-SNE/UMAP are not meaningful
+
+**Always validate** important findings with statistical tests or domain knowledge. A beautiful t-SNE plot is a starting point for investigation, not a final conclusion.
+:::
+
+Visualizing high-dimensional data is as much art as science. The goal is not to find "the true projection"there is no single true way to flatten high-dimensional space onto a page. The goal is to **reveal structure that helps you understand your data and ask better questions**.
+
+As data scientist Jake VanderPlas wrote: "Dimensionality reduction is a form of lossy compression. The question is not whether you lose informationyou always dobut whether you lose the information you care about."
