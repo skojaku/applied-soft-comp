@@ -81,7 +81,19 @@ The radial layout immediately tells you several things:
 - **Branching structure**: Where the tree splits into subtrees
 - **Balance**: Whether the tree is symmetric or lopsided
 
-Let's compare this to a different tree layout approach:
+## Force-Directed Layouts
+
+Most networks aren't trees. They have cycles, cross-links, and complex connectivity patterns. For these networks, we need algorithms that can handle arbitrary topology. The most common approach is **force-directed layout**.
+
+The idea is simple: treat nodes as charged particles that repel each other, and edges as springs that pull connected nodes together. Let the system simulate physics until it reaches equilibrium. Nodes that are closely connected end up near each other, while unconnected parts spread apart.
+
+The **Fruchterman-Reingold algorithm** is one of the most widely used force-directed methods. It balances two forces:
+
+- **Repulsive force**: All pairs of nodes repel each other (like charged particles)
+- **Attractive force**: Connected nodes are pulled together (like springs)
+
+Let's see it in action on a well-known network: the Zachary Karate Club, a social network of 34 members of a karate club, documenting friendships before the club split into two groups.
+
 
 ```{python}
 #| fig-cap: "Comparison of radial layout (left) vs. force-directed layout (right) for the same tree. The radial layout emphasizes hierarchy, while force-directed layout treats all edges equally."
@@ -92,7 +104,6 @@ Let's compare this to a different tree layout approach:
 import graph_tool.all as gt
 import networkx as nx
 import numpy as np
-import matplotlib.pyplot as plt
 
 np.random.seed(42)
 
@@ -105,65 +116,21 @@ g.add_vertex(nx_tree.number_of_nodes())
 for u, v in nx_tree.edges():
     g.add_edge(g.vertex(u), g.vertex(v))
 
-# Radial layout
-pos_radial = gt.radial_tree_layout(g, g.vertex(0))
-
 # Force-directed layout (Fruchterman-Reingold)
 pos_force = gt.fruchterman_reingold_layout(g, n_iter=1000)
 
-# Plot both
-fig, axes = plt.subplots(1, 2, figsize=(14, 6))
-
-# Radial
-gt.graph_draw(g, pos=pos_radial,
-              vertex_fill_color=[0.275, 0.510, 0.706, 1],  # steelblue
-              vertex_size=15,
-              edge_color=[0.5, 0.5, 0.5, 1],  # gray
-              edge_pen_width=1.5,
-              output_size=(600, 600),
-              mplfig=axes[0])
-axes[0].set_title("Radial Tree Layout", fontsize=14, pad=10)
-axes[0].axis('equal')
-axes[0].axis('off')
-
-# Force-directed
-gt.graph_draw(g, pos=pos_force,
-              vertex_fill_color=[1.0, 0.498, 0.314, 1],  # coral
-              vertex_size=15,
-              edge_color=[0.5, 0.5, 0.5, 1],  # gray
-              edge_pen_width=1.5,
-              output_size=(600, 600),
-              mplfig=axes[1])
-axes[1].set_title("Force-Directed Layout", fontsize=14, pad=10)
-axes[1].axis('equal')
-axes[1].axis('off')
-
-plt.tight_layout()
-plt.show()
+# Draw force-directed layout inline
+gt.graph_draw(
+    g,
+    pos=pos_force,
+    vertex_fill_color=[1.0, 0.498, 0.314, 1],  # coral
+    vertex_size=15,
+    edge_color=[0.5, 0.5, 0.5, 1],  # gray
+    edge_pen_width=1.5,
+    output_size=(500, 500),
+    inline=True
+)
 ```
-
-Notice how the radial layout makes the hierarchical structure immediately obvious, while the force-directed layout emphasizes local connectivity over global structure. **For trees, radial layouts are almost always superior** because they align with the inherent structure of the data.
-
-::: {.callout-warning}
-## Layout Choice Matters
-The same network can tell completely different visual stories depending on the layout algorithm. Always choose a layout that matches your network's structural properties.
-:::
-
-## Visualizing General Networks: Force-Directed Layouts
-
-Most networks aren't trees. They have cycles, cross-links, and complex connectivity patterns. For these networks, we need algorithms that can handle arbitrary topology. The most common approach is **force-directed layout**.
-
-The idea is elegant: treat nodes as charged particles that repel each other, and edges as springs that pull connected nodes together. Let the system simulate physics until it reaches equilibrium. Nodes that are closely connected end up near each other, while unconnected parts spread apart.
-
-### The Fruchterman-Reingold Algorithm
-
-The **Fruchterman-Reingold algorithm** is one of the most widely used force-directed methods. It balances two forces:
-
-- **Repulsive force**: All pairs of nodes repel each other (like charged particles)
-- **Attractive force**: Connected nodes are pulled together (like springs)
-
-Let's see it in action on a well-known network: the Zachary Karate Club, a social network of 34 members of a karate club, documenting friendships before the club split into two groups.
-
 ```{python}
 #| fig-cap: "Zachary Karate Club network with Fruchterman-Reingold layout. Node colors indicate the two groups that formed after the club split. The layout naturally separates the two communities."
 #| fig-width: 10
@@ -235,25 +202,36 @@ vertex_color = g.new_vertex_property("vector<double>")
 for v in g.vertices():
     vertex_color[v] = color_map[community[v]]
 
-# Different iteration counts
-iterations = [50, 500, 5000]
-fig, axes = plt.subplots(1, 3, figsize=(14, 4))
+# Different iteration counts - show progression
+print("50 iterations:")
+pos = gt.fruchterman_reingold_layout(g, n_iter=50)
+gt.graph_draw(g, pos=pos,
+              vertex_fill_color=vertex_color,
+              vertex_size=15,
+              edge_color=[0.584, 0.647, 0.651, 1],
+              edge_pen_width=1.5,
+              output_size=(400, 400),
+              inline=True)
 
-for idx, n_iter in enumerate(iterations):
-    pos = gt.fruchterman_reingold_layout(g, n_iter=n_iter)
-    gt.graph_draw(g, pos=pos,
-                  vertex_fill_color=vertex_color,
-                  vertex_size=15,
-                  edge_color=[0.584, 0.647, 0.651, 1],
-                  edge_pen_width=1.5,
-                  output_size=(400, 400),
-                  mplfig=axes[idx])
-    axes[idx].set_title(f"{n_iter} iterations", fontsize=12)
-    axes[idx].axis('equal')
-    axes[idx].axis('off')
+print("\n500 iterations:")
+pos = gt.fruchterman_reingold_layout(g, n_iter=500)
+gt.graph_draw(g, pos=pos,
+              vertex_fill_color=vertex_color,
+              vertex_size=15,
+              edge_color=[0.584, 0.647, 0.651, 1],
+              edge_pen_width=1.5,
+              output_size=(400, 400),
+              inline=True)
 
-plt.tight_layout()
-plt.show()
+print("\n5000 iterations:")
+pos = gt.fruchterman_reingold_layout(g, n_iter=5000)
+gt.graph_draw(g, pos=pos,
+              vertex_fill_color=vertex_color,
+              vertex_size=15,
+              edge_color=[0.584, 0.647, 0.651, 1],
+              edge_pen_width=1.5,
+              output_size=(400, 400),
+              inline=True)
 ```
 
 With too few iterations (50), the nodes haven't had time to spread out properly---they're still clustered near their initial positions. With sufficient iterations (500), the structure becomes clear. Beyond that (5000), you get diminishing returns: the layout looks similar but computation time increases.
@@ -291,18 +269,12 @@ g.add_vertex(nx_g.number_of_nodes())
 for u, v in nx_g.edges():
     g.add_edge(g.vertex(u), g.vertex(v))
 
-# Measure time for Fruchterman-Reingold
+# Fruchterman-Reingold layout
+print("Fruchterman-Reingold layout:")
 start = time.time()
 pos_fr = gt.fruchterman_reingold_layout(g, n_iter=500)
 time_fr = time.time() - start
-
-# Measure time for SFDP
-start = time.time()
-pos_sfdp = gt.sfdp_layout(g)
-time_sfdp = time.time() - start
-
-# Plot both
-fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+print(f"Time: {time_fr:.2f}s")
 
 gt.graph_draw(g, pos=pos_fr,
               vertex_fill_color=[0.275, 0.510, 0.706, 1],  # steelblue
@@ -310,10 +282,14 @@ gt.graph_draw(g, pos=pos_fr,
               edge_color=[0.584, 0.647, 0.651, 1],
               edge_pen_width=0.5,
               output_size=(600, 600),
-              mplfig=axes[0])
-axes[0].set_title(f"Fruchterman-Reingold ({time_fr:.2f}s)", fontsize=12)
-axes[0].axis('equal')
-axes[0].axis('off')
+              inline=True)
+
+# SFDP layout
+print("\nSFDP layout:")
+start = time.time()
+pos_sfdp = gt.sfdp_layout(g)
+time_sfdp = time.time() - start
+print(f"Time: {time_sfdp:.2f}s")
 
 gt.graph_draw(g, pos=pos_sfdp,
               vertex_fill_color=[1.0, 0.498, 0.314, 1],  # coral
@@ -321,13 +297,7 @@ gt.graph_draw(g, pos=pos_sfdp,
               edge_color=[0.584, 0.647, 0.651, 1],
               edge_pen_width=0.5,
               output_size=(600, 600),
-              mplfig=axes[1])
-axes[1].set_title(f"SFDP ({time_sfdp:.2f}s)", fontsize=12)
-axes[1].axis('equal')
-axes[1].axis('off')
-
-plt.tight_layout()
-plt.show()
+              inline=True)
 ```
 
 SFDP is often 10-100x faster for large networks while producing layouts of comparable quality. **For networks with more than a few hundred nodes, SFDP is the better choice**.
@@ -400,18 +370,19 @@ import matplotlib.pyplot as plt
 g = gt.collection.data["karate"]
 state = gt.minimize_nested_blockmodel_dl(g)
 
-beta_values = [0.3, 0.9]
-fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+# Beta = 0.3 (low bundling)
+print("Beta = 0.3:")
+gt.draw_hierarchy(state,
+                  beta=0.3,
+                  output_size=(600, 600),
+                  inline=True)
 
-for idx, beta in enumerate(beta_values):
-    pos, t, tpos = gt.draw_hierarchy(state,
-                                      beta=beta,
-                                      mplfig=axes[idx])
-    axes[idx].set_title(f"Beta = {beta}", fontsize=14)
-    axes[idx].axis('off')
-
-plt.tight_layout()
-plt.show()
+# Beta = 0.9 (high bundling)
+print("\nBeta = 0.9:")
+gt.draw_hierarchy(state,
+                  beta=0.9,
+                  output_size=(600, 600),
+                  inline=True)
 ```
 
 Low beta (0.3) preserves individual edge information but creates visual clutter. High beta (0.9) emphasizes the hierarchical flow of connections---you can see which communities talk to which---but individual edges become hard to trace.
