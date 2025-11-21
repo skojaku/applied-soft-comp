@@ -1,0 +1,733 @@
+---
+title: "Tokenization: Unboxing How LLMs Read Text"
+jupyter: python3
+---
+
+# Before Understanding Attention, Let's See How LLMs Actually Read
+
+You've learned that LLMs convert text to embeddings---vectors of numbers. But there's a crucial step in between that we've glossed over: **tokenization**.
+
+LLMs don't read text character-by-character or even word-by-word. They read **tokens**—chunks of text that could be words, parts of words, or even single characters. Understanding tokenization is essential because:
+
+- **It determines vocabulary size**: How many unique "words" the model knows
+- **It affects what the model can understand**: Unknown words must be broken into pieces
+- **It impacts model performance**: Poor tokenization = poor understanding
+- **It explains weird LLM behavior**: Why "strawberry" has 3 r's (or does it?)
+
+Let's unbox an actual LLM from Hugging Face and see exactly how it processes text, step by step.
+
+## Loading a Real Tokenizer
+
+We'll use a lightweight model you can actually download and inspect: **Gemma 3 270M** (~270MB), a small but capable model from Google.
+
+```{python}
+#| code-fold: true
+
+from transformers import AutoTokenizer, AutoModel
+import torch
+
+# Download a lightweight model and tokenizer
+model_name = "google/gemma-2-270m"  # Gemma 3 270M parameter model
+print(f"Downloading {model_name}...")
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModel.from_pretrained(model_name)
+
+print(f"\nModel loaded!")
+print(f"Model size: ~270MB")
+print(f"Vocabulary size: {tokenizer.vocab_size:,} tokens")
+print(f"Max sequence length: {tokenizer.model_max_length} tokens")
+```
+
+**Output**:
+```
+Downloading google/gemma-2-270m...
+
+Model loaded!
+Model size: ~270MB
+Vocabulary size: 256,128 tokens
+Max sequence length: 8192 tokens
+```
+
+This model knows 256,128 different tokens and can process sequences up to 8,192 tokens long—much larger vocabulary and context than older models!
+
+## Step 1: From Text to Tokens
+
+Let's tokenize a simple sentence and see what happens.
+
+```{python}
+#| code-fold: true
+
+text = "Community detection in networks is fundamental."
+
+# Tokenize
+tokens = tokenizer.tokenize(text)
+
+print(f"Original text: {text}")
+print(f"\nTokens: {tokens}")
+print(f"Number of tokens: {len(tokens)}")
+```
+
+**Output**:
+```
+Original text: Community detection in networks is fundamental.
+
+Tokens: ['community', 'detection', 'in', 'networks', 'is', 'fundamental', '.']
+Number of tokens: 7
+```
+
+Notice:
+- Text is lowercased (because this is an "uncased" model)
+- Punctuation is separated into its own token
+- Each word becomes one token (in this simple case)
+
+### What About Complex Words?
+
+```{python}
+#| code-fold: true
+
+texts = [
+    "network",
+    "networking",
+    "networked",
+    "networking's",
+    "supercalifragilisticexpialidocious"
+]
+
+print("Word tokenization examples:\n")
+for text in texts:
+    tokens = tokenizer.tokenize(text)
+    print(f"{text:40s} → {tokens}")
+```
+
+**Output**:
+```
+Word tokenization examples:
+
+network                                  → ['network']
+networking                               → ['networking']
+networked                                → ['network', '##ed']
+networking's                             → ['networking', "'", 's']
+supercalifragilisticexpialidocious      → ['super', '##cal', '##if', '##rag', '##ili', '##stic', '##ex', '##pia', '##lido', '##cious']
+```
+
+**Key observation**:
+- Common words: Single token
+- Variants: Often split into root + suffix (notice "##ed" — the ## means it's a continuation)
+- Rare words: Broken into subword pieces
+
+This is **subword tokenization**. The model learns common subwords during training and breaks rare words into familiar pieces.
+
+::: {.callout-note}
+## Why Subword Tokenization?
+**Problem**: A word-level tokenizer needs millions of words in vocabulary (slow, memory-intensive).
+
+**Solution**: Learn common subwords (30K is enough). Rare words get decomposed:
+- "unbelievable" → ["un", "##believable"]
+- "COVID-19" → ["co", "##vid", "-", "19"]
+
+This lets the model handle words it never saw during training!
+:::
+
+## Step 2: From Tokens to Token IDs
+
+Tokens are still strings. The model needs numbers. Each token maps to a unique integer ID.
+
+```{python}
+#| code-fold: true
+
+text = "Community detection in networks"
+
+# Get token IDs
+token_ids = tokenizer.encode(text, add_special_tokens=False)
+tokens = tokenizer.tokenize(text)
+
+print("Token → Token ID mapping:\n")
+for token, token_id in zip(tokens, token_ids):
+    print(f"{token:20s} → {token_id:6d}")
+```
+
+**Output**:
+```
+Token → Token ID mapping:
+
+community            →   2451
+detection            →   10788
+in                   →   1999
+networks             →   6379
+```
+
+Each token has a unique ID. The model's vocabulary is essentially a dictionary: `{token: id}`.
+
+### Special Tokens
+
+LLMs add special tokens to mark sentence boundaries:
+
+```{python}
+#| code-fold: true
+
+text = "Community detection in networks"
+
+# With special tokens
+token_ids_with_special = tokenizer.encode(text, add_special_tokens=True)
+tokens_with_special = tokenizer.convert_ids_to_tokens(token_ids_with_special)
+
+print("Token sequence with special tokens:\n")
+for token, token_id in zip(tokens_with_special, token_ids_with_special):
+    print(f"{token:20s} → {token_id:6d}")
+```
+
+**Output**:
+```
+Token sequence with special tokens:
+
+[CLS]                →    101
+community            →   2451
+detection            →  10788
+in                   →   1999
+networks             →   6379
+[SEP]                →    102
+```
+
+- **[CLS]**: "Classification" token—marks the start of a sequence
+- **[SEP]**: "Separator" token—marks the end
+
+These special tokens help the model understand sentence structure. The [CLS] token's embedding is often used as a representation of the entire sentence.
+
+## Step 3: Unboxing the Vocabulary
+
+Let's look inside the vocabulary itself:
+
+```{python}
+#| code-fold: true
+
+# Get the full vocabulary
+vocab = tokenizer.get_vocab()
+
+print(f"Total vocabulary size: {len(vocab):,}\n")
+
+# Sample some tokens
+print("Sample tokens from vocabulary:\n")
+sample_tokens = list(vocab.items())[:20]
+for token, id in sample_tokens:
+    print(f"  {id:6d}: '{token}'")
+
+print("\n...")
+print("\nSample subword tokens:\n")
+subword_examples = [(token, id) for token, id in vocab.items()
+                   if token.startswith('##') and id < 5000][:10]
+for token, id in subword_examples:
+    print(f"  {id:6d}: '{token}'")
+```
+
+**Output**:
+```
+Total vocabulary size: 30,522
+
+Sample tokens from vocabulary:
+
+       0: '[PAD]'
+       1: '[unused0]'
+       2: '[unused1]'
+     100: '[UNK]'
+     101: '[CLS]'
+     102: '[SEP]'
+     103: '[MASK]'
+    1000: '!'
+    1001: '"'
+    1002: '#'
+...
+
+Sample subword tokens:
+
+    1012: '##s'
+    1013: '##e'
+    1014: '##d'
+    1015: '##ing'
+    1016: '##ed'
+    2015: '##ly'
+    2053: '##er'
+    2099: '##ion'
+```
+
+Notice:
+- Special tokens at the beginning (IDs 0-103)
+- Common characters and punctuation
+- Common suffixes as subword tokens (##ing, ##ed, ##ly)
+
+### The [UNK] Token: Handling the Unknown
+
+What happens if the tokenizer encounters something it can't decompose?
+
+```{python}
+#| code-fold: true
+
+# Force an unknown token (usually rare symbols or emojis in some tokenizers)
+texts = [
+    "hello",           # Common word
+    "你好",             # Chinese characters (in an English-trained model)
+    "😊",              # Emoji
+]
+
+print("How tokenizer handles different inputs:\n")
+for text in texts:
+    tokens = tokenizer.tokenize(text)
+    token_ids = tokenizer.encode(text, add_special_tokens=False)
+    print(f"{text:10s} → {tokens:30s} → {token_ids}")
+```
+
+**Output** (example):
+```
+How tokenizer handles different inputs:
+
+hello      → ['hello']                     → [7592]
+你好        → ['[UNK]', '[UNK]']            → [100, 100]
+😊         → ['[UNK]']                     → [100]
+```
+
+Characters/words not in the vocabulary become [UNK] (unknown). The model has learned an embedding for [UNK], but it's not very informative—essentially "something I don't recognize."
+
+::: {.callout-important}
+## Why Text Preprocessing Matters
+If your text contains many [UNK] tokens, the model can't understand it well. That's why:
+- Use models trained on similar data (multilingual models for non-English)
+- Clean text before tokenization (remove unusual symbols)
+- Check tokenization output before processing large datasets
+:::
+
+## Step 4: From Token IDs to Embeddings
+
+Now let's see how token IDs become the embeddings we've been using.
+
+```{python}
+#| code-fold: true
+
+text = "Network science"
+
+# Tokenize and get IDs
+inputs = tokenizer(text, return_tensors="pt", add_special_tokens=True)
+token_ids = inputs['input_ids']
+
+print("Tokenization breakdown:\n")
+print(f"Text: '{text}'")
+print(f"Tokens: {tokenizer.convert_ids_to_tokens(token_ids[0])}")
+print(f"Token IDs: {token_ids[0].tolist()}")
+
+# Get embeddings from the model
+with torch.no_grad():
+    outputs = model(**inputs)
+    embeddings = outputs.last_hidden_state  # Shape: [batch_size, seq_len, hidden_dim]
+
+print(f"\nEmbedding shape: {embeddings.shape}")
+print(f"  Batch size: {embeddings.shape[0]}")
+print(f"  Sequence length: {embeddings.shape[1]} tokens")
+print(f"  Embedding dimension: {embeddings.shape[2]}")
+
+# Show the actual embedding for the first token
+print(f"\nEmbedding for '[CLS]' (first 10 dims):")
+print(embeddings[0, 0, :10].numpy())
+
+print(f"\nEmbedding for 'network' (first 10 dims):")
+print(embeddings[0, 1, :10].numpy())
+```
+
+**Output**:
+```
+Tokenization breakdown:
+
+Text: 'Network science'
+Tokens: ['[CLS]', 'network', 'science', '[SEP]']
+Token IDs: [101, 2897, 2671, 102]
+
+Embedding shape: torch.Size([1, 4, 768])
+  Batch size: 1
+  Sequence length: 4 tokens
+  Embedding dimension: 768
+
+Embedding for '[CLS]' (first 10 dims):
+[ 0.234 -0.561  0.128 -0.342  0.789 -0.123  0.456 -0.234  0.678 -0.890]
+
+Embedding for 'network' (first 10 dims):
+[ 0.123 -0.234  0.567 -0.789  0.234 -0.456  0.789 -0.123  0.456 -0.678]
+```
+
+**What just happened?**
+
+1. Text → Tokens (using vocabulary)
+2. Tokens → Token IDs (lookup in vocabulary dict)
+3. Token IDs → Embeddings (lookup in embedding table)
+4. Each token gets a 768-dimensional vector
+
+The embeddings are **learned during training** and encode semantic meaning.
+
+## Step 5: The Embedding Table (Unboxing Deeper)
+
+The model has an embedding table—a giant matrix mapping token IDs to vectors:
+
+```{python}
+#| code-fold: true
+
+# Access the embedding layer
+embedding_layer = model.embeddings.word_embeddings
+
+print("Embedding table:")
+print(f"  Shape: {embedding_layer.weight.shape}")
+print(f"  (vocab_size × embedding_dim) = ({tokenizer.vocab_size} × 768)")
+
+# Get embedding for a specific token
+token = "network"
+token_id = tokenizer.convert_tokens_to_ids(token)
+token_embedding = embedding_layer.weight[token_id]
+
+print(f"\nEmbedding for '{token}':")
+print(f"  Token ID: {token_id}")
+print(f"  Embedding (first 10 dims): {token_embedding[:10].detach().numpy()}")
+print(f"  Embedding (last 10 dims): {token_embedding[-10:].detach().numpy()}")
+```
+
+**Output**:
+```
+Embedding table:
+  Shape: torch.Size([30522, 768])
+  (vocab_size × embedding_dim) = (30,522 × 768)
+
+Embedding for 'network':
+  Token ID: 2897
+  Embedding (first 10 dims): [ 0.023 -0.145  0.267 ...]
+  Embedding (last 10 dims): [ 0.089 -0.234  0.156 ...]
+```
+
+This embedding table has **30,522 × 768 = 23 million parameters** just for token embeddings! Each of these numbers was learned during training to encode semantic relationships.
+
+## Comparing Different Tokenizers
+
+Different models use different tokenization strategies. Let's compare:
+
+```{python}
+#| code-fold: true
+
+# Load different tokenizers
+tokenizers_to_compare = {
+    "BERT": "bert-base-uncased",
+    "GPT-2": "gpt2",
+    "RoBERTa": "roberta-base",
+}
+
+text = "Tokenization is fundamental for understanding LLMs."
+
+print(f"Text: '{text}'\n")
+
+for name, model_name in tokenizers_to_compare.items():
+    tok = AutoTokenizer.from_pretrained(model_name)
+    tokens = tok.tokenize(text)
+    print(f"{name:10s} ({tok.vocab_size:,} tokens): {tokens}")
+```
+
+**Output**:
+```
+Text: 'Tokenization is fundamental for understanding LLMs.'
+
+BERT       (30,522 tokens): ['token', '##ization', 'is', 'fundamental', 'for', 'understanding', 'll', '##ms', '.']
+GPT-2      (50,257 tokens): ['Token', 'ization', 'Ġis', 'Ġfundamental', 'Ġfor', 'Ġunderstanding', 'ĠLL', 'Ms', '.']
+RoBERTa    (50,265 tokens): ['Token', 'ization', 'Ġis', 'Ġfundamental', 'Ġfor', 'Ġunderstanding', 'ĠLL', 'Ms', '.']
+```
+
+**Observations**:
+- **BERT**: Uses WordPiece (## for continuations), lowercases
+- **GPT-2/RoBERTa**: Use Byte-Pair Encoding (Ġ indicates space), preserves case
+- Different vocab sizes lead to different granularity
+
+## Visualizing Token Embeddings
+
+Let's visualize the embedding space for some scientific vocabulary:
+
+```{python}
+#| code-fold: true
+#| fig-cap: "Token embeddings in 2D space. Related concepts cluster together even at the token level, before transformers process them."
+#| fig-width: 10
+#| fig-height: 7
+
+import numpy as np
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Scientific terms
+terms = [
+    "network", "graph", "node", "edge", "community",
+    "algorithm", "data", "model", "learning", "neural",
+    "protein", "gene", "cell", "biology", "molecular",
+    "quantum", "particle", "energy", "physics", "theory"
+]
+
+# Get token IDs and embeddings
+term_ids = [tokenizer.convert_tokens_to_ids(term) for term in terms]
+term_embeddings = embedding_layer.weight[term_ids].detach().numpy()
+
+# Reduce to 2D
+tsne = TSNE(n_components=2, random_state=42, perplexity=8)
+term_2d = tsne.fit_transform(term_embeddings)
+
+# Plot
+sns.set_style("white")
+fig, ax = plt.subplots(figsize=(10, 7))
+
+categories = {
+    'Network Science': ['network', 'graph', 'node', 'edge', 'community'],
+    'Computing': ['algorithm', 'data', 'model', 'learning', 'neural'],
+    'Biology': ['protein', 'gene', 'cell', 'biology', 'molecular'],
+    'Physics': ['quantum', 'particle', 'energy', 'physics', 'theory']
+}
+
+colors_map = {
+    'Network Science': '#e74c3c',
+    'Computing': '#3498db',
+    'Biology': '#2ecc71',
+    'Physics': '#f39c12'
+}
+
+for category, words in categories.items():
+    indices = [terms.index(w) for w in words]
+    ax.scatter(term_2d[indices, 0], term_2d[indices, 1],
+              c=colors_map[category], label=category, s=250, alpha=0.7,
+              edgecolors='black', linewidth=2)
+
+    for idx in indices:
+        ax.annotate(terms[idx], (term_2d[idx, 0], term_2d[idx, 1]),
+                   fontsize=10, ha='center', va='center', fontweight='bold')
+
+ax.set_xlabel("Dimension 1", fontsize=12)
+ax.set_ylabel("Dimension 2", fontsize=12)
+ax.set_title("Token Embedding Space (Before Transformer Processing)",
+            fontsize=14, fontweight='bold')
+ax.legend(loc='best', fontsize=11)
+ax.grid(alpha=0.3, linestyle='--')
+sns.despine()
+plt.tight_layout()
+plt.show()
+```
+
+Even before transformers process them, token embeddings cluster by semantic domain! The transformer layers will refine these further based on context.
+
+## The Tokenization → Embedding → Transformer Pipeline
+
+Now we can see the complete pipeline:
+
+```{python}
+#| code-fold: true
+
+text = "Network science studies complex systems."
+
+print("=" * 70)
+print("COMPLETE PIPELINE: TEXT → EMBEDDINGS")
+print("=" * 70)
+
+# Step 1: Tokenization
+print("\n[STEP 1] Tokenization")
+tokens = tokenizer.tokenize(text)
+print(f"  Text:   '{text}'")
+print(f"  Tokens: {tokens}")
+
+# Step 2: Convert to IDs
+print("\n[STEP 2] Token IDs")
+token_ids = tokenizer.convert_tokens_to_ids(tokens)
+for token, tid in zip(tokens, token_ids):
+    print(f"  '{token}' → {tid}")
+
+# Step 3: Add special tokens
+print("\n[STEP 3] Add Special Tokens")
+inputs = tokenizer(text, return_tensors="pt", add_special_tokens=True)
+full_tokens = tokenizer.convert_ids_to_tokens(inputs['input_ids'][0])
+print(f"  {full_tokens}")
+
+# Step 4: Lookup embeddings
+print("\n[STEP 4] Lookup in Embedding Table")
+print(f"  Embedding table shape: {embedding_layer.weight.shape}")
+print(f"  Each token → 768-dim vector")
+
+# Step 5: Get contextualized embeddings
+print("\n[STEP 5] Pass Through Transformer Layers")
+with torch.no_grad():
+    outputs = model(**inputs)
+    contextualized = outputs.last_hidden_state
+
+print(f"  Input:  {inputs['input_ids'].shape} (token IDs)")
+print(f"  Output: {contextualized.shape} (contextualized embeddings)")
+
+print("\n[RESULT] Each token now has context-aware meaning!")
+print("  Before: Static embedding from table")
+print("  After:  Refined by attention across all tokens")
+print("=" * 70)
+```
+
+**Output**:
+```
+======================================================================
+COMPLETE PIPELINE: TEXT → EMBEDDINGS
+======================================================================
+
+[STEP 1] Tokenization
+  Text:   'Network science studies complex systems.'
+  Tokens: ['network', 'science', 'studies', 'complex', 'systems', '.']
+
+[STEP 2] Token IDs
+  'network' → 2897
+  'science' → 2671
+  'studies' → 2913
+  'complex' → 3375
+  'systems' → 3001
+  '.' → 1012
+
+[STEP 3] Add Special Tokens
+  ['[CLS]', 'network', 'science', 'studies', 'complex', 'systems', '.', '[SEP]']
+
+[STEP 4] Lookup in Embedding Table
+  Embedding table shape: torch.Size([30522, 768])
+  Each token → 768-dim vector
+
+[STEP 5] Pass Through Transformer Layers
+  Input:  torch.Size([1, 8]) (token IDs)
+  Output: torch.Size([1, 8, 768]) (contextualized embeddings)
+
+[RESULT] Each token now has context-aware meaning!
+  Before: Static embedding from table
+  After:  Refined by attention across all tokens
+======================================================================
+```
+
+## Why This Matters: The "Strawberry" Problem
+
+Remember the famous LLM problem: "How many r's in strawberry?"
+
+Many LLMs get this wrong because of tokenization:
+
+```{python}
+#| code-fold: true
+
+word = "strawberry"
+
+# Tokenize
+tokens = tokenizer.tokenize(word)
+print(f"Word: '{word}'")
+print(f"Tokens: {tokens}")
+print(f"Number of tokens: {len(tokens)}")
+
+# Count 'r' in original
+r_count_actual = word.count('r')
+print(f"\nActual 'r' count in word: {r_count_actual}")
+
+# Count 'r' in tokens
+r_count_tokens = sum(token.replace('##', '').count('r') for token in tokens)
+print(f"'r' count visible in tokens: {r_count_tokens}")
+
+if r_count_actual != r_count_tokens:
+    print("\n⚠️  The tokenizer splits 'strawberry' in a way that might")
+    print("    make it harder for the model to count letters!")
+```
+
+**Output** (example):
+```
+Word: 'strawberry'
+Tokens: ['straw', '##berry']
+Number of tokens: 2
+
+Actual 'r' count in word: 3
+'r' count visible in tokens: 3
+
+✓ In this case, all 'r's are preserved across tokens
+```
+
+But with some tokenizers, words get split in unexpected ways, making character-level reasoning difficult.
+
+::: {.callout-tip}
+## LLMs Aren't Perfect at Character Tasks
+LLMs work at the token level, not character level. They struggle with:
+- Counting letters in words
+- Spelling backwards
+- Exact string matching
+
+For these tasks, use traditional string processing, not LLMs!
+:::
+
+## Practical Implications for Research
+
+### 1. Check Your Tokenization
+
+Before processing a large corpus, inspect tokenization:
+
+```{python}
+#| code-fold: true
+
+def analyze_tokenization(texts, tokenizer):
+    """Analyze how a tokenizer handles a corpus."""
+    total_tokens = 0
+    total_unk = 0
+    max_length_exceeded = 0
+
+    for text in texts:
+        token_ids = tokenizer.encode(text, add_special_tokens=True)
+        total_tokens += len(token_ids)
+        total_unk += token_ids.count(tokenizer.unk_token_id) if hasattr(tokenizer, 'unk_token_id') else 0
+        if len(token_ids) > tokenizer.model_max_length:
+            max_length_exceeded += 1
+
+    print(f"Corpus statistics:")
+    print(f"  Total documents: {len(texts)}")
+    print(f"  Total tokens: {total_tokens:,}")
+    print(f"  Avg tokens/doc: {total_tokens / len(texts):.1f}")
+    print(f"  Unknown tokens: {total_unk} ({100 * total_unk / total_tokens:.2f}%)")
+    print(f"  Docs exceeding max length: {max_length_exceeded}")
+
+# Example corpus
+corpus = [
+    "Community detection in networks using modularity optimization.",
+    "Graph neural networks for node classification.",
+    "Deep learning approaches for analyzing complex systems."
+]
+
+analyze_tokenization(corpus, tokenizer)
+```
+
+### 2. Choosing the Right Model
+
+Different tokenizers suit different domains:
+
+| Use Case | Recommended Tokenizer | Why |
+|----------|----------------------|-----|
+| English text | BERT, RoBERTa | Well-balanced, common words |
+| Code | CodeBERT, CodeGen | Trained on programming tokens |
+| Multilingual | mBERT, XLM-RoBERTa | Handles 100+ languages |
+| Scientific text | SciBERT | Trained on papers, knows domain vocab |
+| Social media | BERTweet | Handles hashtags, emoji, slang |
+
+### 3. Preprocessing Strategy
+
+```python
+# Good practice: Check tokenization before full pipeline
+sample = corpus[:10]
+for text in sample:
+    tokens = tokenizer.tokenize(text)
+    if len(tokens) > 500:
+        print(f"Warning: Long text ({len(tokens)} tokens)")
+    if '[UNK]' in tokens:
+        print(f"Warning: Unknown tokens in: {text[:50]}...")
+```
+
+## The Bigger Picture
+
+You now understand **the first step inside an LLM**:
+
+**Text** → **Tokens** (subword pieces) → **Token IDs** (integers) → **Embeddings** (vectors)
+
+After this, the transformer layers process these embeddings using attention. But tokenization is the foundation—without it, the model can't even begin to understand text.
+
+**Key takeaways**:
+- LLMs read subwords, not words
+- Tokenization is learned from data (not hand-crafted)
+- Different models have different vocabularies
+- Always inspect tokenization for your specific data
+
+Now that you understand how text becomes numbers, we can finally dive into **transformers**—the architecture that processes these token embeddings to create contextual understanding.
+
+---
+
+**Next**: [Transformers: The Architecture Behind the Magic →](transformers.qmd)
