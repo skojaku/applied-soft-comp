@@ -7,11 +7,11 @@ execute:
 
 # You've Been Using Transformers. Now Let's See How They Work.
 
-Every time you use an LLM, extract embeddings, or analyze text semantically, you're using **transformers**a neural network architecture introduced in 2017 that revolutionized natural language processing.
+Every time you use an LLM, extract embeddings, or analyze text semantically, you're using **transformers**---a neural network architecture introduced in 2017 that revolutionized natural language processing.
 
 Before transformers, NLP was slow, struggled with long texts, and couldn't capture complex context. After transformers: GPT, BERT, ChatGPT, and the entire modern AI landscape.
 
-What makes transformers so powerful? **Self-attention**a mechanism that lets models focus on relevant parts of text, no matter how far apart. Instead of processing words sequentially (like reading left-to-right), transformers process all words simultaneously while computing relationships between them.
+What makes transformers so powerful? **Self-attention**---a mechanism that lets models focus on relevant parts of text, no matter how far apart. Instead of processing words sequentially (like reading left-to-right), transformers process all words simultaneously while computing relationships between them.
 
 This section explains transformers intuitively, with minimal math and lots of visuals. You won't implement one from scratch (that's a whole course), but you'll understand how they work well enough to use them effectively and appreciate what's happening under the hood.
 
@@ -25,11 +25,11 @@ Before 2017, the dominant approach was **Recurrent Neural Networks (RNNs)**, whi
 Input: "The cat sat on the mat"
 
 Processing:
-Step 1: Read "The" í Update hidden state hÅ
-Step 2: Read "cat" í Update hidden state hÇ (remembers "The")
-Step 3: Read "sat" í Update hidden state hÉ (remembers "The cat")
+Step 1: Read "The" ÔøΩ Update hidden state hÔøΩ
+Step 2: Read "cat" ÔøΩ Update hidden state hÔøΩ (remembers "The")
+Step 3: Read "sat" ÔøΩ Update hidden state hÔøΩ (remembers "The cat")
 ...
-Step 6: Read "mat" í Final state hÜ (remembers everything... hopefully)
+Step 6: Read "mat" ÔøΩ Final state hÔøΩ (remembers everything... hopefully)
 ```
 
 **Problems with RNNs**:
@@ -60,7 +60,7 @@ For the word "sat":
 - Low attention to "the" (not semantically important here)
 ```
 
-The model learns what to pay attention tono hand-coded rules.
+The model learns what to pay attention to---no hand-coded rules.
 
 ::: {.callout-note}
 ## The Key Innovation
@@ -81,8 +81,8 @@ Consider two sentences:
 The word "bank" is ambiguous. How does a transformer decide which meaning?
 
 **Self-attention computes**:
-- In sentence 1: "bank" attends strongly to "deposited" and "money" í financial institution
-- In sentence 2: "bank" attends strongly to "river" and "sat" í river edge
+- In sentence 1: "bank" attends strongly to "deposited" and "money" ÔøΩ financial institution
+- In sentence 2: "bank" attends strongly to "river" and "sat" ÔøΩ river edge
 
 The model learns these attention patterns from data, without explicit programming.
 
@@ -124,12 +124,12 @@ n = len(words)
 
 # Manually crafted attention pattern (realistic but simplified)
 attention = np.array([
-    [0.6, 0.2, 0.1, 0.05, 0.03, 0.02],  # "The" í mostly attends to "cat"
-    [0.1, 0.5, 0.3, 0.05, 0.03, 0.02],  # "cat" í self + "sat"
-    [0.05, 0.4, 0.2, 0.15, 0.05, 0.15], # "sat" í "cat" (subject) + "mat" (object)
-    [0.05, 0.1, 0.2, 0.3, 0.15, 0.20],  # "on" í preposition, attends to surrounding context
-    [0.03, 0.05, 0.05, 0.1, 0.5, 0.27], # "the" í mostly "mat"
-    [0.02, 0.05, 0.15, 0.2, 0.15, 0.43] # "mat" í self + "on"
+    [0.6, 0.2, 0.1, 0.05, 0.03, 0.02],  # "The" ÔøΩ mostly attends to "cat"
+    [0.1, 0.5, 0.3, 0.05, 0.03, 0.02],  # "cat" ÔøΩ self + "sat"
+    [0.05, 0.4, 0.2, 0.15, 0.05, 0.15], # "sat" ÔøΩ "cat" (subject) + "mat" (object)
+    [0.05, 0.1, 0.2, 0.3, 0.15, 0.20],  # "on" ÔøΩ preposition, attends to surrounding context
+    [0.03, 0.05, 0.05, 0.1, 0.5, 0.27], # "the" ÔøΩ mostly "mat"
+    [0.02, 0.05, 0.15, 0.2, 0.15, 0.43] # "mat" ÔøΩ self + "on"
 ])
 
 sns.set_style("white")
@@ -146,10 +146,10 @@ plt.show()
 ```
 
 **Observations**:
-- "sat" (row 3) strongly attends to "cat" (0.40)  identifies the subject
-- "sat" also attends to "mat" (0.15)  identifies where the action happens
-- "The" (row 1) attends mostly to "cat"  articles attend to their nouns
-- Diagonal has moderate values  words always attend somewhat to themselves
+- "sat" (row 3) strongly attends to "cat" (0.40)---identifies the subject
+- "sat" also attends to "mat" (0.15)---identifies where the action happens
+- "The" (row 1) attends mostly to "cat"---articles attend to their nouns
+- Diagonal has moderate values---words always attend somewhat to themselves
 
 This pattern is **learned from data**, not hand-coded.
 
@@ -174,15 +174,15 @@ Each "head" is a different type of review.
 For "The cat sat on the mat":
 
 **Head 1** (Syntactic):
-- "sat" í "cat" (subject-verb relationship)
-- "on" í "mat" (preposition-object relationship)
+- "sat"---"cat" (subject-verb relationship)
+- "on"---"mat" (preposition-object relationship)
 
 **Head 2** (Semantic):
-- "cat" í "mat" (both are physical objects)
-- "sat" í "on" (action-location relationship)
+- "cat"---"mat" (both are physical objects)
+- "sat"---"on" (action-location relationship)
 
 **Head 3** (Coreference):
-- "the" í "cat", "the" í "mat" (determiners to nouns)
+- "the"---"cat", "the"---"mat" (determiners to nouns)
 
 The final representation combines all heads, capturing multiple aspects of meaning simultaneously.
 
@@ -197,21 +197,26 @@ A full transformer consists of multiple components. Let's break it down.
 
 ### Input Processing
 
+The transformer receives input through three key steps:
+
 1. **Tokenization**: Split text into tokens (words or subwords)
    ```
-   "Community detection" í ["Community", "detection"]
+   "Community detection" ‚Üí ["Community", "detection"]
    ```
+   *We covered this in detail in the [tokenization section](tokenization.qmd)‚Äîhow text becomes token IDs.*
 
-2. **Token embeddings**: Convert tokens to vectors (like we saw in the embeddings section)
+2. **Token embeddings**: Convert tokens to vectors (embedding table lookup)
    ```
-   "Community" í [0.23, -0.45, 0.67, ...]
+   "Community" ‚Üí [0.23, -0.45, 0.67, ...]
    ```
+   *Each token ID looks up its embedding in the learned embedding table.*
 
 3. **Positional encoding**: Add information about word order
    ```
    Without position: "cat sat mat" vs. "mat sat cat" look identical
    With position: Order is preserved in embeddings
    ```
+   *Positional encodings are added to embeddings so the model knows word order.*
 
 ### Transformer Block
 
@@ -235,17 +240,17 @@ Transformers stack multiple blocks (6-24 or more):
 
 ```
 Input: "The cat sat on the mat"
-   ì
+   ÔøΩ
 Layer 1: Basic patterns (word relationships)
-   ì
+   ÔøΩ
 Layer 2: Syntactic structure (grammar)
-   ì
+   ÔøΩ
 Layer 3: Semantic relationships (meaning)
-   ì
+   ÔøΩ
 ...
-   ì
+   ÔøΩ
 Layer 12: Abstract concepts (high-level understanding)
-   ì
+   ÔøΩ
 Output: Rich contextual representations
 ```
 
@@ -253,7 +258,8 @@ Early layers learn surface patterns (punctuation, common words). Deeper layers l
 
 ::: {.callout-note}
 ## Why Stack Layers?
-Each layer builds on the previous one, creating hierarchies of abstractionsimilar to how CNNs learn edges í textures í objects in image processing. In text, it's: words í phrases í sentences í concepts.
+Each layer builds on the previous one, creating hierarchies of abstraction<delete>
+similar to how CNNs learn edges---textures---objects in image processing. In text, it's: words---phrases---sentences---concepts.
 :::
 
 ## Encoder vs. Decoder: Two Transformer Flavors
@@ -298,9 +304,9 @@ There are two main transformer architectures:
 - Decoder: Generates "Bonjour"
 
 **Which one are you using?**
-- `sentence-transformers`: Encoder (BERT-based)  for embeddings
-- ChatGPT, Gemma: Decoder (GPT-based)  for generation
-- Translation models: Encoder-Decoder  for sequence mapping
+- `sentence-transformers`: Encoder (BERT-based)---for embeddings
+- ChatGPT, Gemma: Decoder (GPT-based)---for generation
+- Translation models: Encoder-Decoder---for sequence mapping
 
 ## Why Transformers Changed Everything
 
@@ -324,11 +330,11 @@ Pre-train one large model on massive data, then fine-tune for specific tasks:
 
 ```
 Pre-training (expensive, once):
-Train BERT on billions of words í learns general language
+Train BERT on billions of words---learns general language
 
 Fine-tuning (cheap, many times):
-Train on 1,000 medical abstracts í learns medical language
-Train on 5,000 legal documents í learns legal language
+Train on 1,000 medical abstracts---learns medical language
+Train on 5,000 legal documents---learns legal language
 ```
 
 Result: **State-of-the-art performance** with little task-specific data.
@@ -336,9 +342,9 @@ Result: **State-of-the-art performance** with little task-specific data.
 ### 4. Scalability
 
 Transformers scale beautifully:
-- More data í better performance
-- More parameters í better performance
-- Bigger models í emergent abilities (reasoning, math, code)
+- More data---better performance
+- More parameters---better performance
+- Bigger models---emergent abilities (reasoning, math, code)
 
 Result: **GPT-3 (175B params) vastly outperforms GPT-2 (1.5B params)**, even though the architecture is nearly identical.
 
@@ -368,11 +374,11 @@ Result: **GPT-3 (175B params) vastly outperforms GPT-2 (1.5B params)**, even tho
 - Efficient, fast, runs locally
 - **Use case**: Research, education, private applications
 
-**The trend**: More parameters, more data, more capabilities. But the core architectureself-attention and transformer blocksremains the same since 2017.
+**The trend**: More parameters, more data, more capabilities. But the core architecture---self-attention and transformer blocks---remains the same since 2017.
 
 ::: {.callout-important}
 ## Attention Is All You Need
-The original transformer paper (Vaswani et al., 2017) was titled "Attention Is All You Need." The name was bold but accurateself-attention turned out to be sufficient for nearly all NLP tasks, making RNNs largely obsolete.
+The original transformer paper (Vaswani et al., 2017) was titled "Attention Is All You Need." The name was bold but accurate---self-attention turned out to be sufficient for nearly all NLP tasks, making RNNs largely obsolete.
 :::
 
 ## Visualizing Attention in Real Models
@@ -395,10 +401,10 @@ n = len(words)
 
 # Attention for "her" (row 3)
 attention = np.array([
-    [0.5, 0.3, 0.1, 0.05, 0.05],  # "The" í "scientist"
+    [0.5, 0.3, 0.1, 0.05, 0.05],  # "The"---"scientist"
     [0.2, 0.5, 0.2, 0.05, 0.05],  # "scientist"
-    [0.05, 0.3, 0.4, 0.1, 0.15],  # "published" í "scientist", self
-    [0.05, 0.6, 0.1, 0.2, 0.05],  # "her" í "scientist" (coreference!)
+    [0.05, 0.3, 0.4, 0.1, 0.15],  # "published"---"scientist", self
+    [0.05, 0.6, 0.1, 0.2, 0.05],  # "her"---"scientist" (coreference!)
     [0.05, 0.2, 0.1, 0.15, 0.5],  # "paper"
 ])
 
@@ -410,7 +416,7 @@ sns.heatmap(attention, annot=True, fmt=".2f",
             cbar_kws={'label': 'Attention Weight'}, ax=ax)
 ax.set_xlabel("Attends To", fontsize=12, fontweight='bold')
 ax.set_ylabel("Word", fontsize=12, fontweight='bold')
-ax.set_title("Attention: Resolving 'her' í 'scientist'", fontsize=14, fontweight='bold')
+ax.set_title("Attention: Resolving 'her'---'scientist'", fontsize=14, fontweight='bold')
 
 # Highlight the key attention
 from matplotlib.patches import Rectangle
@@ -442,7 +448,7 @@ Transformers only "remember" what's in the current context window. For conversat
 
 ### 3. Lack of True Understanding
 
-Transformers are pattern matchers. They don't have beliefs, goals, or understandingthey predict probable text based on patterns. This leads to:
+Transformers are pattern matchers. They don't have beliefs, goals, or understanding---they predict probable text based on patterns. This leads to:
 - Hallucinations (confident false statements)
 - Lack of common sense
 - Brittleness on out-of-distribution inputs
@@ -459,7 +465,7 @@ Training large transformers requires:
 
 ## The Bigger Picture
 
-You now understand the **transformer architecture**the engine behind modern NLP:
+You now understand the **transformer architecture**---the engine behind modern NLP:
 
 - **Self-attention**: Models learn to focus on relevant context
 - **Multi-head attention**: Captures multiple types of relationships simultaneously
@@ -467,12 +473,12 @@ You now understand the **transformer architecture**the engine behind modern NLP
 - **Encoder/Decoder variants**: Different architectures for different tasks
 
 When you use an LLM:
-1. Text í Embeddings (tokens to vectors)
-2. Embeddings í Transformer layers (attention + feed-forward)
-3. Transformer output í Task-specific head (classification, generation, etc.)
+1. Text---Embeddings (tokens to vectors)
+2. Embeddings---Transformer layers (attention + feed-forward)
+3. Transformer output---Task-specific head (classification, generation, etc.)
 
-**But transformers weren't the first technique for text embeddings.** Before BERT and GPT, there was **Word2vec**a simpler, faster method that's still useful today. Let's step back and see where embeddings came from.
+**But transformers weren't the first technique for text embeddings.** Before BERT and GPT, there was **Word2vec**---a simpler, faster method that's still useful today. Let's step back and see where embeddings came from.
 
 ---
 
-**Next**: [Word Embeddings: Where It Started í](word-embeddings.qmd)
+**Next**: [Word Embeddings: Where It Started?](word-embeddings.qmd)
