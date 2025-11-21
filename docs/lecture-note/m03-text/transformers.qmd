@@ -86,23 +86,53 @@ The word "bank" is ambiguous. How does a transformer decide which meaning?
 
 The model learns these attention patterns from data, without explicit programming.
 
-### How Attention Works (Conceptually)
+### How Attention Works: Query, Key, Value
 
-For each word, the model asks three questions:
+For each word, the attention mechanism creates three different vector representations:
 
-1. **Query**: "What am I looking for?" (What context do I need?)
-2. **Key**: "What do I offer?" (What information do I have?)
-3. **Value**: "What do I actually contain?" (What's my semantic content?)
+1. **Query (Q)**: "What am I looking for?" (What context do I need?)
+2. **Key (K)**: "What do I offer?" (What information do I have?)
+3. **Value (V)**: "What do I actually contain?" (What's my semantic content?)
 
-Then it computes:
-- **Attention score** between Query and Keys (how relevant is each word?)
-- **Weighted sum** of Values based on attention scores
+**How are these created?**
+
+Each vector is generated through a **linear transformation** of the original word embedding:
+
+$$
+Q = XW_Q + b_Q, \quad K = XW_K + b_K, \quad V = XW_V + b_V
+$$
+
+where $X$ is the input embedding, and $W_Q, W_K, W_V$ are learned weight matrices.
+
+**The Attention Computation:**
+
+1. **Compute attention scores**: For each query word, calculate how much it should attend to each key word using dot products:
+   $$
+   \text{Attention Score}_{ij} = Q_i \cdot K_j^T
+   $$
+
+2. **Create QK matrix**: This produces a matrix where entry $(i,j)$ tells us how much word $i$ attends to word $j$:
+   $$
+   \text{QK} = QK^T
+   $$
+
+3. **Apply softmax**: Normalize the scores to get attention weights that sum to 1:
+   $$
+   \text{Attention Weights} = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)
+   $$
+   where $d_k$ is the dimension of the key vectors (the division helps stabilize training)
+
+4. **Weighted sum of Values**: Multiply attention weights by value vectors to get the final output:
+   $$
+   \text{Output} = \text{Attention Weights} \times V
+   $$
 
 **Analogy**: You're in a library (the sentence). You have a question (Query). Books have titles (Keys) and content (Values). You:
-1. Compare your question to all book titles (compute attention scores)
-2. Take a weighted combination of relevant books' content (weighted sum of Values)
+1. Compare your question to all book titles (compute attention scores via $QK^T$)
+2. Decide which books are most relevant (apply softmax to get weights)
+3. Take a weighted combination of relevant books' content (weighted sum of Values)
 
-The result is a context-aware representation of your word.
+The result is a context-aware representation that focuses on the most relevant words.
 
 ### Visual Example
 
@@ -162,12 +192,37 @@ One attention mechanism captures one type of relationship. But language has many
 
 **Multi-head attention** runs multiple attention mechanisms in parallel, each learning different patterns.
 
-**Analogy**: You're editing a document. You might review it multiple times:
-- Grammar check (syntax)
-- Fact-checking (semantics)
-- Flow and coherence (discourse)
+### How Multi-Head Attention Works
 
-Each "head" is a different type of review.
+Instead of having one set of Q, K, V transformations, we have $h$ different sets (where $h$ is the number of heads):
+
+$$
+\text{head}_i = \text{Attention}(XW_i^Q, XW_i^K, XW_i^V)
+$$
+
+Each head has its own learned weight matrices $W_i^Q, W_i^K, W_i^V$, allowing it to focus on different aspects of the relationships.
+
+The outputs from all heads are then **concatenated** and linearly transformed:
+
+$$
+\text{MultiHead}(X) = \text{Concat}(\text{head}_1, ..., \text{head}_h)W^O
+$$
+
+where $W^O$ is another learned weight matrix.
+
+**Why this works:**
+- Each head can learn to attend to different positions and relationships
+- Head 1 might focus on syntactic dependencies (subject-verb)
+- Head 2 might capture semantic similarity
+- Head 3 might track long-range dependencies
+- The final linear layer combines all perspectives into a unified representation
+
+**Analogy**: You're editing a document. You might review it multiple times:
+- Grammar check (syntax) - Head 1
+- Fact-checking (semantics) - Head 2
+- Flow and coherence (discourse) - Head 3
+
+Each "head" is a different type of review, and you combine all insights at the end.
 
 ### Example: Different Heads, Different Patterns
 
@@ -218,21 +273,61 @@ The transformer receives input through three key steps:
    ```
    *Positional encodings are added to embeddings so the model knows word order.*
 
-### Transformer Block
+### Transformer Block Components
 
-Each transformer block has two main components:
+Each transformer block consists of several key components that work together:
 
 **1. Multi-Head Self-Attention**
 - Computes attention between all word pairs
-- Multiple heads capture different relationships
+- Multiple heads capture different relationships simultaneously
+- Each head learns different attention patterns (syntax, semantics, discourse)
+- Outputs are concatenated and linearly transformed
 - Output: Context-aware representations
 
-**2. Feed-Forward Network**
-- Applies nonlinear transformations
-- Independent for each position
-- Adds expressive power beyond attention
+**2. Layer Normalization**
+- Normalizes the features within each token embedding
+- Addresses **internal covariate shift** (when earlier layer updates change activation distributions)
+- Formula:
+  $$
+  \text{LayerNorm}(x) = \gamma \cdot \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}} + \beta
+  $$
+  where $\mu$ and $\sigma^2$ are mean and variance computed across features, and $\gamma$, $\beta$ are learnable parameters
+- Makes training more stable by keeping activations in a consistent range
+- Independent of batch size (unlike batch normalization)
 
-**Plus**: Residual connections and layer normalization (help with training)
+**3. Residual Connections**
+- Adds the input directly to the output: $\text{output} = F(x) + x$
+- Creates "shortcuts" for gradient flow during backpropagation
+- Allows network to learn incremental refinements rather than complete transformations
+- Prevents degradation in very deep networks
+- Makes it easier to train networks with dozens of layers
+
+**4. Feed-Forward Network**
+- Fully connected network applied to each position independently
+- Two linear transformations with a nonlinearity (typically ReLU or GELU) in between:
+  $$
+  \text{FFN}(x) = \text{max}(0, xW_1 + b_1)W_2 + b_2
+  $$
+- Adds expressive power and nonlinearity beyond attention
+- Typically expands dimension (e.g., 768 → 3072) then projects back
+
+**The Complete Flow:**
+
+```
+Input Token Embeddings
+   ↓
+Multi-Head Attention → Add & Norm (residual connection + layer norm)
+   ↓
+Feed-Forward Network → Add & Norm (residual connection + layer norm)
+   ↓
+Output Token Embeddings
+```
+
+Each component plays a crucial role:
+- **Attention**: Captures relationships between tokens
+- **Layer Norm**: Stabilizes training
+- **Residual Connections**: Enables deep architectures
+- **FFN**: Adds nonlinear transformations
 
 ### Stacking Layers
 
@@ -262,6 +357,132 @@ Each layer builds on the previous one, creating hierarchies of abstraction<delet
 similar to how CNNs learn edges---textures---objects in image processing. In text, it's: words---phrases---sentences---concepts.
 :::
 
+## Positional Encoding: Teaching Transformers About Order
+
+Unlike RNNs that process words sequentially, transformers process all words simultaneously. This parallelization is powerful but creates a problem: **the model has no sense of word order**.
+
+Without positional information:
+- "The cat sat on the mat"
+- "Mat the on sat cat the"
+
+...would look identical to the transformer!
+
+### Why Not Just Add Position Numbers?
+
+You might think: why not just add 1, 2, 3, ... to each word embedding?
+
+```python
+# DON'T DO THIS
+word_embedding[0] += 1  # First word
+word_embedding[1] += 2  # Second word
+word_embedding[2] += 3  # Third word
+```
+
+**Problems with this approach:**
+
+1. **Scale issues**: Position numbers grow unbounded (1, 2, 3, ..., 1000, ...), while embeddings are typically normalized
+2. **Poor generalization**: The model can't handle sequences longer than it saw during training
+3. **No smooth relationships**: Position 5 and 6 aren't "smoothly related" - they're just different integers
+
+### The Solution: Sinusoidal Positional Encoding
+
+Transformers use sinusoidal functions to encode position:
+
+$$
+\begin{aligned}
+PE_{(pos, 2i)} &= \sin\left(\frac{pos}{10000^{2i/d}}\right) \\
+PE_{(pos, 2i+1)} &= \cos\left(\frac{pos}{10000^{2i/d}}\right)
+\end{aligned}
+$$
+
+where:
+- $pos$ is the position (0, 1, 2, ...)
+- $i$ is the dimension index
+- $d$ is the embedding dimension
+
+**Key properties:**
+
+1. **Bounded values**: Sine and cosine always stay between -1 and 1
+2. **Deterministic**: Same position always gets the same encoding (no learnable parameters)
+3. **Smooth relationships**: Nearby positions have similar encodings
+4. **Generalizes to any length**: Can encode positions the model never saw during training
+
+### Visualizing Positional Encodings
+
+```{python}
+#| code-fold: true
+#| fig-cap: "Positional encoding creates a unique 'signature' for each position. Each position traces a spiral pattern in 2D space, with adjacent positions close together."
+#| fig-width: 8
+#| fig-height: 6
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def get_positional_encoding(seq_len, d_model):
+    """Generate sinusoidal positional encodings"""
+    pos_enc = np.zeros((seq_len, d_model))
+    for pos in range(seq_len):
+        for i in range(0, d_model, 2):
+            pos_enc[pos, i] = np.sin(pos / (10000 ** (i / d_model)))
+            if i + 1 < d_model:
+                pos_enc[pos, i + 1] = np.cos(pos / (10000 ** (i / d_model)))
+    return pos_enc
+
+# Generate encodings
+seq_len = 50
+d_model = 2  # Use 2D for visualization
+pos_enc = get_positional_encoding(seq_len, d_model)
+
+# Create visualization
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+
+# Left plot: 2D trajectory
+ax1.plot(pos_enc[:, 0], pos_enc[:, 1], 'o-', alpha=0.6, markersize=4)
+ax1.scatter(pos_enc[0, 0], pos_enc[0, 1], c='green', s=100, label='Position 0', zorder=5)
+ax1.scatter(pos_enc[-1, 0], pos_enc[-1, 1], c='red', s=100, label=f'Position {seq_len-1}', zorder=5)
+ax1.set_xlabel('Dimension 0 (sin)', fontweight='bold')
+ax1.set_ylabel('Dimension 1 (cos)', fontweight='bold')
+ax1.set_title('Positional Encoding Trajectory', fontweight='bold')
+ax1.legend()
+ax1.grid(True, alpha=0.3)
+ax1.axis('equal')
+
+# Right plot: Heatmap of encodings
+im = ax2.imshow(pos_enc.T, aspect='auto', cmap='RdBu', vmin=-1, vmax=1)
+ax2.set_xlabel('Position', fontweight='bold')
+ax2.set_ylabel('Dimension', fontweight='bold')
+ax2.set_title('Positional Encoding Heatmap', fontweight='bold')
+plt.colorbar(im, ax=ax2, label='Encoding Value')
+
+plt.tight_layout()
+plt.show()
+```
+
+**What's happening:**
+- Each position gets a unique "coordinate" in high-dimensional space
+- Adjacent positions are smoothly related (nearby in the space)
+- Different dimensions oscillate at different frequencies (slow for dimension 0, faster for higher dimensions)
+- The spiral pattern shows how positions naturally form a sequence
+
+### How It's Used
+
+Positional encodings are **added** to token embeddings at the input:
+
+$$
+\text{Input} = \text{Token Embedding} + \text{Positional Encoding}
+$$
+
+This way, each word's representation contains both:
+- **What** the word is (from token embedding)
+- **Where** the word is (from positional encoding)
+
+::: {.callout-tip}
+## Why Sinusoids?
+Sinusoidal functions were chosen because they have a special property: any position's encoding can be represented as a linear combination of other positions' encodings. This helps the model learn relative positions (e.g., "3 words before this one") in addition to absolute positions.
+
+Modern variants like learned positional embeddings or rotary positional encodings (RoPE) have also been developed, but the sinusoidal approach remains elegant and effective.
+:::
+
 ## Encoder vs. Decoder: Two Transformer Flavors
 
 There are two main transformer architectures:
@@ -283,25 +504,60 @@ There are two main transformer architectures:
 **Purpose**: Generating text (completion, chat, writing)
 
 **Architecture**:
-- Causal attention (can only see previous words, not future)
+- **Causal attention** (masked attention): can only see previous words, not future ones
+- This prevents the model from "cheating" by looking ahead during generation
+- Implemented by masking out future positions in the attention matrix
 - Used for: Text generation, dialogue, completion
 
 **Example task**: "Complete this sentence: 'The cat sat on the...'"
 - Input: Partial sentence
 - Output: Continuation ("mat", "sofa", etc.)
 
+**Why causal attention?**
+When generating "The cat sat on the mat", the model generates one word at a time:
+1. Given "The" → predict "cat"
+2. Given "The cat" → predict "sat"
+3. Given "The cat sat" → predict "on"
+
+At each step, it can only attend to previous tokens, not future ones.
+
 ### Encoder-Decoder (Original Transformer)
 
 **Purpose**: Sequence-to-sequence tasks (translation, summarization)
 
 **Architecture**:
-- Encoder processes input (bidirectional)
-- Decoder generates output (causal, with attention to encoder)
+- **Encoder** processes input with bidirectional attention
+- **Decoder** generates output with:
+  1. Masked self-attention (causal, like GPT)
+  2. **Cross-attention** to encoder outputs
 - Used for: Translation, summarization, question answering
 
-**Example task**: "Translate 'Hello' to French"
-- Encoder: Understands "Hello"
-- Decoder: Generates "Bonjour"
+**What is Cross-Attention?**
+
+Cross-attention allows the decoder to attend to the encoder's output. Unlike self-attention (where Q, K, V all come from the same sequence), in cross-attention:
+- **Query (Q)**: comes from the decoder (what the decoder is generating)
+- **Key (K) and Value (V)**: come from the encoder (the input sequence)
+
+$$
+\text{CrossAttention}(Q_{\text{decoder}}, K_{\text{encoder}}, V_{\text{encoder}})
+$$
+
+This lets the decoder focus on relevant parts of the input while generating output.
+
+**Example task**: "Translate 'Hello world' to French"
+
+1. **Encoder**: Processes "Hello world" with bidirectional attention
+   - Creates rich representations understanding the full context
+
+2. **Decoder**: Generates "Bonjour monde" word by word
+   - Step 1: Generate "Bonjour"
+     - Self-attention: looks at previously generated tokens (none yet)
+     - Cross-attention: attends to "Hello" in encoder output
+   - Step 2: Generate "monde"
+     - Self-attention: looks at "Bonjour"
+     - Cross-attention: attends to "world" in encoder output
+
+The cross-attention mechanism is what allows the decoder to "align" the output with the input, crucial for translation and similar tasks.
 
 **Which one are you using?**
 - `sentence-transformers`: Encoder (BERT-based)---for embeddings
