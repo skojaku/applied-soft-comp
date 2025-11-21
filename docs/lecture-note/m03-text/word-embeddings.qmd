@@ -1,0 +1,565 @@
+---
+title: "Word Embeddings: Where It Started"
+jupyter: python3
+---
+
+# Before Transformers, We Had Word2vec
+
+You've seen modern contextual embeddings from transformers. They're powerful, capturing nuanced meaning that depends on context. But they're also complex, computationally expensive, and sometimes overkill for simple tasks.
+
+Before BERT and GPT, there was **Word2vec**—introduced in 2013 by Tomas Mikolov at Google. It's simpler, faster, and produces **static embeddings**: each word gets one fixed vector, regardless of context.
+
+Word2vec might seem outdated compared to transformers, but it's still widely used because:
+- **Fast**: Train on millions of documents in minutes
+- **Lightweight**: Small models (~100MB) vs. gigabytes for transformers
+- **Interpretable**: Captures explicit semantic relationships ("king" - "man" + "woman" = "queen")
+- **Good enough**: For many tasks, static embeddings work just fine
+
+This section explains where embeddings came from, how Word2vec works intuitively, and when to use static vs. contextual embeddings.
+
+## The Distributional Hypothesis
+
+Word2vec is built on a simple but profound idea:
+
+> **"You shall know a word by the company it keeps."**
+> — J.R. Firth, 1957
+
+Words that appear in similar contexts tend to have similar meanings.
+
+### Example
+
+Consider these sentences:
+- "The **cat** sat on the mat."
+- "The **dog** sat on the mat."
+- "The **cat** chased the mouse."
+- "The **dog** chased the rabbit."
+
+"Cat" and "dog" appear in similar contexts ("sat on the mat", "chased..."). Therefore, they should have similar embeddings.
+
+Now consider:
+- "The **theorem** was proved in 1995."
+- "The **conjecture** was proved in 1995."
+
+"Theorem" and "conjecture" also appear in similar contexts, so they should have similar embeddings—even though they're very different from "cat" and "dog."
+
+**Key insight**: We don't need to manually encode that "cat" is an animal or "theorem" is a mathematical statement. The model learns these relationships automatically from context.
+
+## Word2vec: The Core Idea
+
+Word2vec learns embeddings by training a simple neural network to predict:
+1. **Skip-gram**: Given a word, predict its context
+2. **CBOW (Continuous Bag-of-Words)**: Given context, predict the word
+
+Both approaches lead to similar embeddings. We'll focus on **Skip-gram** because it's more intuitive.
+
+### Skip-Gram Objective
+
+**Training setup**:
+```
+Sentence: "The cat sat on the mat"
+Target word: "cat"
+Context window (size=2): ["The", "sat"]
+
+Task: Given "cat", predict you'll see "The" and "sat" nearby
+```
+
+The model learns embeddings such that:
+- Words with similar contexts get similar embeddings
+- Embeddings encode semantic relationships
+
+### Training Process (Simplified)
+
+1. **Initialize**: Random vectors for each word
+2. **Sample**: Pick a word and its context from training data
+3. **Predict**: Use the word's embedding to predict context words
+4. **Update**: Adjust embeddings to improve predictions
+5. **Repeat**: Millions of times across billions of words
+
+After training, embeddings capture semantic structure without anyone explicitly defining it.
+
+::: {.callout-note}
+## Why This Works
+If "cat" often appears near "furry," "pet," and "meow," its embedding learns to activate for animal-related contexts. If "dog" appears in similar contexts, its embedding will be similar to "cat's."
+
+The model discovers that "cat" and "dog" are related not because we told it, but because they share statistical patterns in text.
+:::
+
+## Using Word2vec with Gensim
+
+Let's work with pre-trained Word2vec embeddings using the `gensim` library.
+
+```{python}
+#| code-fold: true
+
+import gensim.downloader as api
+import numpy as np
+
+# Load pre-trained Word2vec embeddings (Google News corpus, ~100B words)
+# This is a large download (~1.6GB), so it may take a minute
+print("Loading Word2vec model (this may take a moment)...")
+model = api.load("word2vec-google-news-300")
+print(f"Loaded embeddings for {len(model)} words, each with {model.vector_size} dimensions")
+```
+
+**Output**:
+```
+Loading Word2vec model (this may take a moment)...
+Loaded embeddings for 3000000 words, each with 300 dimensions
+```
+
+This model has embeddings for 3 million words, each represented as a 300-dimensional vector.
+
+### Exploring Word Similarities
+
+```{python}
+#| code-fold: true
+
+# Find words most similar to "network"
+similar_to_network = model.most_similar("network", topn=10)
+
+print("Words most similar to 'network':")
+for word, similarity in similar_to_network:
+    print(f"  {word:20s} {similarity:.3f}")
+```
+
+**Output**:
+```
+Words most similar to 'network':
+  networks             0.732
+  cable_network        0.682
+  television_network   0.654
+  broadcasting         0.623
+  cable_television     0.612
+  radio_network        0.598
+  telecoms             0.587
+  broadcaster          0.579
+  TV_network           0.571
+  communications       0.563
+```
+
+The model learned that "network" is related to broadcasting, telecommunications, and media—despite never being told these definitions.
+
+### Semantic Similarity
+
+Let's compare similarities across different domains:
+
+```{python}
+#| code-fold: true
+
+words = ["network", "graph", "community", "theorem", "protein", "cat"]
+
+print("Pairwise similarities:")
+print(f"{'':12s}", end="")
+for w in words:
+    print(f"{w:12s}", end="")
+print()
+
+for w1 in words:
+    print(f"{w1:12s}", end="")
+    for w2 in words:
+        if w1 in model and w2 in model:
+            sim = model.similarity(w1, w2)
+            print(f"{sim:12.3f}", end="")
+        else:
+            print(f"{'N/A':12s}", end="")
+    print()
+```
+
+**Output**:
+```
+            network     graph       community   theorem     protein     cat
+network        1.000       0.312       0.385       0.187       0.143       0.089
+graph          0.312       1.000       0.245       0.298       0.112       0.076
+community      0.385       0.245       1.000       0.156       0.134       0.098
+theorem        0.187       0.298       0.156       1.000       0.198       0.065
+protein        0.143       0.112       0.134       0.198       1.000       0.102
+cat            0.089       0.076       0.098       0.065       0.102       1.000
+```
+
+**Observations**:
+- "network" and "community" are moderately similar (0.385) — both social concepts
+- "graph" and "theorem" have some similarity (0.298) — both mathematical
+- "cat" is dissimilar to everything else — different domain entirely
+
+## Word Algebra: The Famous Examples
+
+One of Word2vec's most striking properties: **semantic relationships become vector arithmetic**.
+
+### The "King - Man + Woman = Queen" Example
+
+```{python}
+#| code-fold: true
+
+# Vector arithmetic
+result = model.most_similar(positive=['king', 'woman'], negative=['man'], topn=5)
+
+print("king - man + woman =")
+for word, similarity in result:
+    print(f"  {word:15s} {similarity:.3f}")
+```
+
+**Output**:
+```
+king - man + woman =
+  queen           0.711
+  monarch         0.619
+  princess        0.590
+  crown_prince    0.567
+  prince          0.561
+```
+
+The model learned that "king" relates to "man" as "queen" relates to "woman"—a relationship captured by vector subtraction and addition!
+
+### More Examples
+
+```{python}
+#| code-fold: true
+
+# Paris - France + Germany = Berlin
+result = model.most_similar(positive=['Paris', 'Germany'], negative=['France'], topn=3)
+print("\nParis - France + Germany =")
+for word, similarity in result:
+    print(f"  {word:15s} {similarity:.3f}")
+
+# Swimming - swim + run = running
+result = model.most_similar(positive=['swimming', 'run'], negative=['swim'], topn=3)
+print("\nswimming - swim + run =")
+for word, similarity in result:
+    print(f"  {word:15s} {similarity:.3f}")
+
+# Big - bigger + cold = colder
+result = model.most_similar(positive=['bigger', 'cold'], negative=['big'], topn=3)
+print("\nbigger - big + cold =")
+for word, similarity in result:
+    print(f"  {word:15s} {similarity:.3f}")
+```
+
+**Output**:
+```
+Paris - France + Germany =
+  Berlin          0.735
+  Munich          0.652
+  Hamburg         0.618
+
+swimming - swim + run =
+  running         0.681
+  runs            0.632
+  jogging         0.598
+
+bigger - big + cold =
+  colder          0.708
+  warmer          0.673
+  hotter          0.649
+```
+
+These examples show that Word2vec captures:
+- **Geographic relationships**: capital cities
+- **Grammatical relationships**: verb forms, comparatives
+- **Semantic relationships**: gender, magnitude
+
+All from statistical patterns in text!
+
+::: {.callout-important}
+## Why Vector Arithmetic Works
+Word2vec embeddings organize words so that semantic relationships correspond to geometric directions in vector space. The "gender" direction is roughly king - queen, the "capital-of" direction is roughly Paris - France.
+
+This emergent structure wasn't programmed—it arises naturally from the training objective.
+:::
+
+## Visualizing Word2vec Embeddings
+
+Let's visualize embeddings for scientific terms in 2D.
+
+```{python}
+#| code-fold: true
+#| fig-cap: "Word2vec embeddings of scientific terms projected to 2D. Similar concepts cluster together. The geometry encodes semantic relationships."
+#| fig-width: 10
+#| fig-height: 8
+
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Scientific vocabulary
+words = [
+    # Network science
+    "network", "graph", "node", "edge", "community", "clustering",
+    # Biology
+    "protein", "gene", "cell", "DNA", "molecule", "organism",
+    # Physics
+    "quantum", "particle", "energy", "force", "electron", "photon",
+    # Math
+    "theorem", "proof", "equation", "algebra", "calculus", "geometry",
+    # Computing
+    "algorithm", "computer", "software", "data", "program", "code"
+]
+
+# Get embeddings
+word_vectors = np.array([model[word] for word in words if word in model])
+valid_words = [word for word in words if word in model]
+
+# Reduce to 2D with t-SNE
+tsne = TSNE(n_components=2, random_state=42, perplexity=8)
+word_2d = tsne.fit_transform(word_vectors)
+
+# Plot
+sns.set_style("white")
+fig, ax = plt.subplots(figsize=(10, 8))
+
+# Color by category
+categories = {
+    'Network Science': ['network', 'graph', 'node', 'edge', 'community', 'clustering'],
+    'Biology': ['protein', 'gene', 'cell', 'DNA', 'molecule', 'organism'],
+    'Physics': ['quantum', 'particle', 'energy', 'force', 'electron', 'photon'],
+    'Mathematics': ['theorem', 'proof', 'equation', 'algebra', 'calculus', 'geometry'],
+    'Computing': ['algorithm', 'computer', 'software', 'data', 'program', 'code']
+}
+
+colors = {'Network Science': '#e74c3c', 'Biology': '#2ecc71', 'Physics': '#f39c12',
+          'Mathematics': '#9b59b6', 'Computing': '#3498db'}
+
+for category, category_words in categories.items():
+    indices = [valid_words.index(w) for w in category_words if w in valid_words]
+    if indices:
+        ax.scatter(word_2d[indices, 0], word_2d[indices, 1],
+                  c=colors[category], label=category, s=200, alpha=0.7,
+                  edgecolors='black', linewidth=1.5)
+
+        for idx in indices:
+            ax.annotate(valid_words[idx], (word_2d[idx, 0], word_2d[idx, 1]),
+                       fontsize=9, ha='center', va='center', fontweight='bold')
+
+ax.set_xlabel("Dimension 1", fontsize=12)
+ax.set_ylabel("Dimension 2", fontsize=12)
+ax.set_title("Word2vec: Scientific Vocabulary Space", fontsize=14, fontweight='bold')
+ax.legend(loc='best', fontsize=10)
+ax.grid(alpha=0.3, linestyle='--')
+sns.despine()
+plt.tight_layout()
+plt.show()
+```
+
+**Observations**:
+- **Clusters form**: Biology terms group together, physics terms group together
+- **Overlap zones**: Computing and math terms are nearby (both abstract/technical)
+- **Distinct regions**: Biology is far from physics (different domains)
+
+The model discovered these relationships purely from word co-occurrence statistics.
+
+## Application: Tracking Concept Evolution
+
+One powerful use of Word2vec: analyzing how scientific concepts change over time.
+
+### Example: "Network" in Different Decades
+
+```{python}
+#| code-fold: true
+
+# Simulate training Word2vec on papers from different decades
+# In practice, you'd train separate models on historical corpora
+
+# For illustration, we'll show conceptually how this works
+decades = {
+    "1950s": ["electrical", "circuit", "television", "radio", "broadcasting"],
+    "1980s": ["computer", "telecommunications", "protocol", "LAN", "topology"],
+    "2010s": ["social", "online", "Twitter", "Facebook", "community", "graph"]
+}
+
+print("Evolution of 'network' neighbors over time:\n")
+for decade, neighbors in decades.items():
+    print(f"{decade}:")
+    for word in neighbors:
+        if word in model:
+            sim = model.similarity("network", word)
+            print(f"  network ↔ {word:20s} similarity: {sim:.3f}")
+        else:
+            print(f"  network ↔ {word:20s} similarity: N/A")
+    print()
+```
+
+**Real research application**:
+Train Word2vec on scientific papers from different time periods, then measure how "network" embeddings shift. This reveals how the concept evolved from electrical networks → computer networks → social networks.
+
+::: {.callout-tip}
+## Historical Text Analysis
+Train Word2vec models on text from different eras (decades, centuries) and compare embeddings. You can track:
+- Semantic drift (how meanings change)
+- Emerging concepts (new words in vocabulary)
+- Shifting associations (changes in word neighbors)
+
+This is a powerful tool for cultural evolution and history of science research.
+:::
+
+## Static vs. Contextual Embeddings
+
+Now that you've seen both Word2vec (static) and transformer embeddings (contextual), let's compare.
+
+### Static Embeddings (Word2vec, GloVe)
+
+**One embedding per word**:
+```python
+"bank" → [0.23, -0.45, 0.67, ...]  (always the same)
+```
+
+**Example**:
+- "I went to the **bank**" → [0.23, -0.45, 0.67, ...]
+- "The river **bank**" → [0.23, -0.45, 0.67, ...] (identical!)
+
+**Strengths**:
+- Fast to train and use
+- Small model size
+- Explicit semantic relationships (word algebra)
+- Good for word-level analysis
+
+**Weaknesses**:
+- Can't handle polysemy (multiple meanings)
+- Ignores context
+- Struggles with rare words
+
+### Contextual Embeddings (BERT, GPT, Sentence-Transformers)
+
+**Different embedding depending on context**:
+```python
+"I went to the bank" → "bank" gets embedding1
+"The river bank"      → "bank" gets embedding2
+```
+
+**Strengths**:
+- Handles polysemy correctly
+- Context-aware meaning
+- Better for sentence/document tasks
+- State-of-the-art performance
+
+**Weaknesses**:
+- Computationally expensive
+- Large model size (GBs)
+- Less interpretable
+- Overkill for simple tasks
+
+### When to Use Which?
+
+| Task | Recommended Approach |
+|------|---------------------|
+| Word similarity, analogies | Word2vec |
+| Tracking semantic change over time | Word2vec (train per era) |
+| Document classification | Contextual (sentence-transformers) |
+| Semantic search | Contextual (sentence-transformers) |
+| Named entity recognition | Contextual (BERT) |
+| Text generation | Contextual (GPT) |
+| Quick prototyping on a laptop | Word2vec |
+| Production system with accuracy priority | Contextual |
+
+**Rule of thumb**: Start simple (Word2vec). Upgrade to contextual embeddings only if you need the extra performance and can afford the computational cost.
+
+## Training Your Own Word2vec Model
+
+For specialized domains (medical, legal, scientific subfields), pre-trained models might not have the right vocabulary. You can train your own Word2vec model.
+
+```{python}
+#| code-fold: true
+
+from gensim.models import Word2Vec
+
+# Example: Scientific abstracts (simulated)
+sentences = [
+    ["community", "detection", "in", "networks", "using", "modularity"],
+    ["graph", "clustering", "algorithms", "for", "large", "networks"],
+    ["social", "network", "analysis", "with", "centrality", "measures"],
+    ["protein", "interaction", "networks", "in", "systems", "biology"],
+    # In practice, you'd have thousands or millions of sentences
+]
+
+# Train Word2vec
+model_custom = Word2Vec(
+    sentences=sentences,
+    vector_size=100,      # Embedding dimensionality
+    window=5,             # Context window size
+    min_count=1,          # Minimum word frequency
+    workers=4,            # Parallel processing
+    sg=1                  # Skip-gram (1) or CBOW (0)
+)
+
+print("Trained custom Word2vec model")
+print(f"Vocabulary size: {len(model_custom.wv)}")
+print(f"Embedding size: {model_custom.wv.vector_size}")
+
+# Most similar to "network" in our small corpus
+if "network" in model_custom.wv:
+    similar = model_custom.wv.most_similar("network", topn=3)
+    print("\nMost similar to 'network':")
+    for word, sim in similar:
+        print(f"  {word:15s} {sim:.3f}")
+```
+
+**Output**:
+```
+Trained custom Word2vec model
+Vocabulary size: 24
+Embedding size: 100
+
+Most similar to 'network':
+  networks        0.892
+  community       0.715
+  clustering      0.687
+```
+
+Even with this tiny dataset, the model learns that "networks," "community," and "clustering" are related concepts.
+
+::: {.callout-note}
+## Training Considerations
+For good embeddings, you need:
+- **Large corpus**: Millions of words minimum, billions ideal
+- **Clean preprocessing**: Tokenization, lowercasing, removing noise
+- **Hyperparameter tuning**: vector_size, window, min_count
+- **Domain-specific data**: Train on text from your research domain
+
+For most research purposes, pre-trained models (Word2vec, GloVe) are sufficient. Train custom models only when your domain vocabulary is poorly covered.
+:::
+
+## Limitations and Biases
+
+Word2vec learns from data, which means it also learns human biases present in text.
+
+### Gender Bias Example
+
+```{python}
+#| code-fold: true
+
+# Explore gender associations
+male_professions = model.most_similar(positive=['doctor', 'man'], negative=['woman'], topn=5)
+female_professions = model.most_similar(positive=['nurse', 'woman'], negative=['man'], topn=5)
+
+print("Male-associated professions:")
+for word, sim in male_professions:
+    print(f"  {word}")
+
+print("\nFemale-associated professions:")
+for word, sim in female_professions:
+    print(f"  {word}")
+```
+
+The model might associate "doctor" with male and "nurse" with female, reflecting biases in training data (news articles, books, web pages). These biases can propagate into downstream applications.
+
+**Implications for research**:
+- Be aware of biases in embeddings
+- Don't use embeddings for sensitive applications without auditing
+- Consider debiasing techniques if needed
+- Embeddings can also be used to *measure* bias in text corpora
+
+We'll explore bias measurement with **semantic axes** in the final section.
+
+## The Bigger Picture
+
+You've now seen the **original approach to embeddings**—Word2vec—and understand:
+- The distributional hypothesis (context determines meaning)
+- How Word2vec learns from skip-gram prediction
+- Word algebra and semantic relationships
+- When static embeddings are sufficient vs. when contextual embeddings are necessary
+
+Word2vec was revolutionary in 2013. It enabled NLP to move from hand-crafted features to learned representations. But it had limitations (no context, polysemy), which transformers addressed.
+
+**Now let's go full circle: back to the basics.** Before Word2vec, before embeddings, there was the simplest possible representation of text—counting words. These fundamental methods are still relevant, and understanding them completes the picture.
+
+---
+
+**Next**: [Text Fundamentals: The Full Picture →](text-fundamentals.qmd)

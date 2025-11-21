@@ -1,0 +1,413 @@
+---
+title: "Large Language Models in Practice"
+jupyter: python3
+---
+
+# Everyone Uses ChatGPT. Let's Use It For Science.
+
+Large language models (LLMs) have exploded into public consciousness. ChatGPT, Claude, Gemini—these tools can write essays, debug code, translate languages, and answer questions with seemingly human-like understanding. But as researchers, we're not interested in party tricks. **We want to know: can these models help us do better science?**
+
+The answer is yes, but with important caveats. LLMs can accelerate literature review, extract structured information from papers, generate hypotheses, and help us make sense of large text corpora. They can also hallucinate facts, perpetuate biases, and fail catastrophically on tasks that seem simple.
+
+This section gets you started with LLMs in a research context. We'll use **Ollama** to run models locally (no API costs, full privacy) and focus on practical tasks: analyzing scientific abstracts, extracting information, and understanding what these models can and cannot do.
+
+## What Are Large Language Models?
+
+At their core, LLMs are **neural networks trained to predict the next word**. Given a sequence of text, they estimate the probability distribution over all possible next words. By repeatedly sampling from these distributions, they can generate coherent, contextually appropriate text.
+
+But here's what makes them "large":
+
+- **Billions of parameters**: Modern LLMs have 1B–100B+ parameters (numbers the model learns during training)
+- **Massive training data**: Trained on huge chunks of the internet, books, code, and scientific papers
+- **Emergent abilities**: As models scale up, they spontaneously develop capabilities not explicitly programmed (reasoning, code generation, translation)
+
+::: {.callout-note}
+## From Language Modeling to General Intelligence?
+LLMs were originally designed just to predict text. But researchers discovered that a model good at predicting text must implicitly understand grammar, facts, logic, and context. This "understanding" enables all the downstream applications we see today.
+:::
+
+## Local vs. Cloud Models
+
+Before we dive in, let's understand your options:
+
+| Aspect | Cloud APIs (OpenAI, Anthropic) | Local Models (Ollama) |
+|--------|--------------------------------|----------------------|
+| **Cost** | Pay per token (can get expensive) | Free after download |
+| **Privacy** | Data sent to external servers | All data stays local |
+| **Performance** | State-of-the-art (GPT-4, Claude) | Smaller models, good enough for many tasks |
+| **Speed** | Fast (distributed infrastructure) | Depends on your hardware |
+| **Internet** | Required | Optional (after download) |
+
+**For this course**, we use **Ollama with Gemma 2B**—a lightweight, open-source model from Google that runs on most laptops. It's not as powerful as GPT-4, but it's free, private, and capable enough for learning and many research tasks.
+
+## Setting Up Ollama
+
+First, let's get Ollama running on your machine.
+
+### Installation
+
+Visit [ollama.ai](https://ollama.ai) and download the installer for your operating system (macOS, Linux, or Windows).
+
+After installation, open a terminal and verify:
+
+```bash
+ollama --version
+```
+
+### Download the Gemma 2B Model
+
+```bash
+ollama pull gemma3n:latest
+```
+
+This downloads an (effectively) 4-billion parameter model. It may take a few minutes depending on your internet connection.
+
+::: {.callout-tip}
+## Other Model Options
+Ollama supports many models. Try `ollama list` to see what's available locally, or `ollama search` to browse options. For this course, Gemma 2B offers the best balance of capability and resource requirements.
+:::
+
+### Test Your Installation
+
+```bash
+ollama run gemma3n:latest "What is a complex system?"
+```
+
+If you see a coherent response about interconnected components and emergence, you're ready to go!
+
+## Using Ollama from Python
+
+While the command-line interface is useful for quick tests, we'll use Ollama from Python for research workflows.
+
+### Installation
+
+```bash
+pip install ollama
+```
+
+### Your First LLM Interaction
+
+```{python}
+#| code-fold: true
+import ollama
+
+# Send a simple prompt to the model
+response = ollama.chat(
+    model="gemma2:2b",
+    messages=[
+        {
+            "role": "user",
+            "content": "Explain the concept of emergence in complex systems in two sentences."
+        }
+    ]
+)
+
+print(response['message']['content'])
+```
+
+**Output** (example):
+```
+Emergence describes how new properties or behaviors arise from the interactions
+of individual components in a complex system that are not present in the parts
+themselves. For example, consciousness emerges from neural interactions, even
+though individual neurons aren't conscious.
+```
+
+::: {.callout-important}
+## Non-Deterministic Outputs
+LLMs sample from probability distributions, so running the same prompt twice may produce different outputs. This is a feature (creativity) but also a challenge (reproducibility). We'll address this in the next section on prompt engineering.
+:::
+
+## Research Use Case 1: Summarizing Abstracts
+
+Let's tackle a real research task: you've collected 50 papers on network science, and you want quick summaries to decide which to read in detail.
+
+```{python}
+#| code-fold: true
+# Example abstract from a real paper
+abstract = """
+Community detection in networks is a fundamental problem in complex systems.
+While many algorithms exist, most assume static networks. We propose a dynamic
+community detection algorithm that tracks evolving communities over time using
+a temporal smoothness constraint. We evaluate our method on synthetic and real
+temporal networks, showing it outperforms static methods applied to temporal
+snapshots. Our approach reveals how communities merge, split, and persist in
+social networks, biological systems, and transportation networks.
+"""
+
+# Ask the LLM to summarize
+response = ollama.chat(
+    model="gemma2:2b",
+    messages=[
+        {
+            "role": "user",
+            "content": f"Summarize this research abstract in one sentence:\n\n{abstract}"
+        }
+    ]
+)
+
+print(response['message']['content'])
+```
+
+**Output**:
+```
+This paper introduces a dynamic community detection algorithm that tracks
+evolving network communities over time, outperforming static methods.
+```
+
+Not bad! The model captures the key contribution without including unnecessary details.
+
+### Processing Multiple Abstracts
+
+```{python}
+#| code-fold: true
+abstracts = [
+    "Abstract 1 text here...",
+    "Abstract 2 text here...",
+    "Abstract 3 text here...",
+]
+
+summaries = []
+for i, abstract in enumerate(abstracts, 1):
+    response = ollama.chat(
+        model="gemma2:2b",
+        messages=[
+            {
+                "role": "user",
+                "content": f"Summarize in one sentence:\n\n{abstract}"
+            }
+        ]
+    )
+    summary = response['message']['content']
+    summaries.append(summary)
+    print(f"{i}. {summary}")
+```
+
+::: {.callout-warning}
+## Processing Time
+Running models locally is slower than cloud APIs. A 2B model might take 2-5 seconds per abstract on a typical laptop. For large-scale processing (1000s of papers), consider batching or using cloud APIs.
+:::
+
+## Research Use Case 2: Extracting Structured Information
+
+Suppose you want to extract specific information from abstracts: research domain, methods used, and main findings.
+
+```{python}
+#| code-fold: true
+abstract = """
+We analyze the structure of scientific collaboration networks using data from
+5 million papers published between 2000 and 2020. Using graph neural networks
+and community detection algorithms, we identify disciplinary boundaries and
+interdisciplinary bridges. We find that interdisciplinarity has increased 25%
+over this period, with physics and computer science showing the strongest
+cross-connections. Our model predicts emerging interdisciplinary fields with
+78% accuracy.
+"""
+
+prompt = f"""Extract the following information from this abstract:
+- Domain: (the research field)
+- Methods: (techniques or algorithms used)
+- Key Finding: (main result)
+
+Abstract: {abstract}
+
+Format your response as:
+Domain: ...
+Methods: ...
+Key Finding: ...
+"""
+
+response = ollama.chat(
+    model="gemma2:2b",
+    messages=[{"role": "user", "content": prompt}]
+)
+
+print(response['message']['content'])
+```
+
+**Output**:
+```
+Domain: Science of Science, Network Analysis
+Methods: Graph neural networks, community detection algorithms
+Key Finding: Interdisciplinarity in scientific collaboration increased 25%
+from 2000-2020, with physics and CS showing strongest cross-connections
+```
+
+The model successfully parsed the abstract and extracted structured information. This can be scaled to hundreds of papers to build datasets for meta-analysis.
+
+## Research Use Case 3: Hypothesis Generation
+
+LLMs can help brainstorm research directions by identifying gaps or suggesting extensions.
+
+```{python}
+#| code-fold: true
+context = """
+I'm studying how scientific concepts spread through citation networks.
+I've found that highly cited papers tend to introduce novel combinations
+of existing concepts. However, I'm not sure what to study next.
+"""
+
+prompt = f"""Based on this research context, suggest three concrete follow-up
+research questions that would extend this work:
+
+{context}
+
+For each question, briefly explain why it's interesting.
+"""
+
+response = ollama.chat(
+    model="gemma2:2b",
+    messages=[{"role": "user", "content": prompt}]
+)
+
+print(response['message']['content'])
+```
+
+**Output** (example):
+```
+1. What network positions facilitate concept combination?
+   Interesting because it links network structure to innovation.
+
+2. Do concept combinations follow predictable patterns across disciplines?
+   This could reveal universal principles of scientific creativity.
+
+3. Can we predict which concept combinations will be highly cited?
+   Would enable proactive identification of emerging important ideas.
+```
+
+While the LLM doesn't have domain expertise, it can help structure your thinking and suggest directions you might not have considered.
+
+::: {.callout-tip}
+## Using LLMs as Thought Partners
+Think of LLMs as sophisticated autocomplete, not as oracles. They're excellent at pattern matching, reformulation, and brainstorming—but always verify factual claims and evaluate suggestions critically.
+:::
+
+## Understanding Model Limitations
+
+LLMs are powerful, but they have important limitations:
+
+### 1. Hallucination
+
+LLMs can confidently state false information.
+
+```{python}
+#| code-fold: true
+response = ollama.chat(
+    model="gemma2:2b",
+    messages=[
+        {
+            "role": "user",
+            "content": "What did the 2023 paper by Smith et al. on quantum community detection conclude?"
+        }
+    ]
+)
+
+print(response['message']['content'])
+```
+
+The model might generate a plausible-sounding answer about a paper that doesn't exist. **Always verify factual claims**, especially citations and specific results.
+
+### 2. Limited Context Window
+
+Models can only "see" a certain amount of text at once (typically 2000-8000 tokens for smaller models). If you paste 100 abstracts, the model might miss information from the beginning.
+
+### 3. Knowledge Cutoff
+
+Models are trained on data up to a certain date. Gemma 2B's knowledge ends in early 2024. It doesn't know about papers published after that.
+
+### 4. Lack of True Understanding
+
+LLMs are pattern matchers, not thinkers. They don't have beliefs, understanding, or consciousness—they're predicting probable text continuations based on training data.
+
+::: {.callout-important}
+## The Golden Rule
+**Use LLMs to accelerate your work, not to replace your judgment.** They're tools for exploration, summarization, and reformulation—not for making final research decisions.
+:::
+
+## When to Use LLMs in Research
+
+**Good use cases**:
+- Summarizing large volumes of text quickly
+- Extracting structured information from unstructured text
+- Reformulating or clarifying concepts
+- Brainstorming research directions
+- Generating synthetic examples for testing code
+- Translating or paraphrasing technical content
+
+**Poor use cases**:
+- Generating literature reviews without verification
+- Making factual claims without checking sources
+- Replacing careful reading of important papers
+- Statistical analysis (use proper statistical tools)
+- Making ethical decisions about research
+
+## Comparing Model Performance
+
+Let's quickly compare Gemma 2B with what you might see from larger models:
+
+| Task | Gemma 2B (local) | GPT-4 (cloud) |
+|------|------------------|---------------|
+| Basic summarization | Good | Excellent |
+| Structured extraction | Good | Excellent |
+| Complex reasoning | Fair | Very good |
+| Factual accuracy | Moderate | Better (but still imperfect) |
+| Speed (local hardware) | 2-5 sec/query | < 1 sec (but requires internet) |
+| Cost | Free | ~$0.01-0.05/query |
+
+For learning and many research tasks, Gemma 2B is perfectly adequate. For production research pipelines or tasks requiring maximum accuracy, consider larger models—but be aware of costs and privacy implications.
+
+## Practical Considerations
+
+### Privacy and Ethics
+
+When using LLMs for research:
+
+- **Cloud models**: Your prompts and data are sent to external servers. Don't send confidential data, unpublished research, or personal information.
+- **Local models**: Data stays on your machine. Safe for sensitive research data.
+- **Always**: Consider whether LLM-generated content should be acknowledged in publications. Norms are still evolving.
+
+### Reproducibility
+
+LLM outputs are non-deterministic, which creates challenges for reproducibility:
+
+```{python}
+#| code-fold: true
+# Set temperature to 0 for more deterministic outputs
+response = ollama.chat(
+    model="gemma2:2b",
+    messages=[{"role": "user", "content": "Summarize network science in one sentence."}],
+    options={"temperature": 0}  # Lower temperature = more deterministic
+)
+```
+
+Temperature = 0 makes the model always choose the highest probability token, producing more consistent (but less creative) outputs.
+
+### Resource Usage
+
+Running LLMs locally requires:
+- **RAM**: 4-8GB for Gemma 2B
+- **Storage**: ~1.6GB for model weights
+- **CPU/GPU**: Works on CPU, but GPU is much faster if available
+
+Check your system resources before running large batch jobs.
+
+## The Bigger Picture
+
+You've now seen LLMs in action for research tasks. You've learned to:
+- Set up and run local models with Ollama
+- Summarize and extract information from scientific text
+- Understand fundamental limitations and best practices
+
+**But questions remain**: How do these models actually work? What's happening inside when you send a prompt? Why can they generate coherent text about topics they've never seen?
+
+The rest of this module answers these questions. We'll unbox the technology layer by layer:
+- Next, we'll learn **prompt engineering**—how to communicate effectively with LLMs
+- Then we'll explore **embeddings**—how models represent meaning as numbers
+- We'll dissect **transformers**—the architecture that makes modern NLP possible
+- Finally, we'll understand the **fundamentals**—from simple word counts to sophisticated neural representations
+
+But first, let's master the art of talking to machines.
+
+---
+
+**Next**: [Prompt Engineering for Research →](prompt-engineering.qmd)

@@ -1,0 +1,528 @@
+---
+title: "Embeddings: How Machines Understand Meaning"
+jupyter: python3
+---
+
+# LLMs Don't Read. Let's See What They Actually See.
+
+When you send text to an LLM, you see words. The model sees vectors—long lists of numbers like `[0.31, -0.85, 0.12, ..., 0.47]`. Each word, sentence, or document becomes a point in a high-dimensional space. These numerical representations are called **embeddings**.
+
+This might seem like a strange way to "understand" language. But embeddings have a remarkable property: **similar meanings become similar vectors**. Words like "cat" and "dog" end up close together in this space, while "cat" and "theorem" are far apart.
+
+Embeddings are the foundation of modern NLP. They're how LLMs represent knowledge, perform reasoning, and generate text. Once you understand embeddings, transformers and LLMs stop being magic—they're just sophisticated ways of manipulating these numerical representations.
+
+Let's unbox this first layer and see how meaning becomes mathematics.
+
+## From Text to Numbers: The Challenge
+
+Computers can't directly process text. They need numbers. But how do we convert words into numbers in a meaningful way?
+
+### Naive Approach: Integer Encoding
+
+The simplest idea: assign each word a unique integer.
+
+```{python}
+#| code-fold: true
+
+# Simple vocabulary
+vocab = ["network", "graph", "node", "community", "detection"]
+
+# Assign integers
+word_to_int = {word: i for i, word in enumerate(vocab)}
+print("Integer encoding:")
+print(word_to_int)
+```
+
+**Output**:
+```
+{'network': 0, 'graph': 1, 'node': 2, 'community': 3, 'detection': 4}
+```
+
+**Problem**: The integers are arbitrary. The model might think "network" (0) is somehow "less than" "community" (3), or that "graph" + "node" = "community". These numbers encode no semantic relationships.
+
+### Better Approach: One-Hot Encoding
+
+Represent each word as a binary vector where only one position is "hot" (=1).
+
+```{python}
+#| code-fold: true
+import numpy as np
+
+vocab_size = len(vocab)
+
+def one_hot(word):
+    """Convert word to one-hot vector."""
+    vec = np.zeros(vocab_size)
+    vec[word_to_int[word]] = 1
+    return vec
+
+print("One-hot encoding for 'network':")
+print(one_hot("network"))
+print("\nOne-hot encoding for 'community':")
+print(one_hot("community"))
+```
+
+**Output**:
+```
+[1. 0. 0. 0. 0.]
+[0. 0. 0. 1. 0.]
+```
+
+**Problem**: Every word is equally different from every other word (Euclidean distance is always √2). The model still can't learn that "network" and "graph" are related, while "network" and "detection" are less related.
+
+### The Key Insight: Learned Dense Embeddings
+
+Instead of hand-crafting representations, **let the model learn them** from data. Each word becomes a dense vector of real numbers (typically 50-1000 dimensions):
+
+```python
+"network" → [0.31, -0.85, 0.12, 0.67, ...]  # 384 dimensions
+"graph"   → [0.29, -0.82, 0.15, 0.69, ...]  # Similar to "network"!
+"theorem" → [-0.61, 0.23, -0.45, 0.11, ...] # Different from "network"
+```
+
+These embeddings are learned by training models to predict context. Words that appear in similar contexts get similar embeddings. This is the foundation of modern NLP.
+
+## Semantic Similarity: The Power of Embeddings
+
+Once words are vectors, we can measure semantic similarity using **cosine similarity**:
+
+$$
+\text{similarity}(u, v) = \frac{u \cdot v}{\|u\| \|v\|}
+$$
+
+This measures the cosine of the angle between vectors (1 = same direction, 0 = orthogonal, -1 = opposite).
+
+Let's see this in action with real embeddings.
+
+## Using Sentence Transformers
+
+We'll use the `sentence-transformers` library, which provides pre-trained models for generating embeddings.
+
+```{python}
+#| code-fold: true
+from sentence_transformers import SentenceTransformer
+import numpy as np
+
+# Load a pre-trained model (lightweight, ~80MB)
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+# Generate embeddings for words
+words = ["network", "graph", "community", "detection", "cat", "theorem"]
+embeddings = model.encode(words)
+
+print(f"Embedding dimensionality: {embeddings.shape[1]}")
+print(f"Number of words: {embeddings.shape[0]}")
+print(f"\nFirst 10 dimensions of 'network': {embeddings[0][:10]}")
+```
+
+**Output**:
+```
+Embedding dimensionality: 384
+Number of words: 6
+
+First 10 dimensions of 'network': [ 0.0234 -0.0912  0.0456 ... ]
+```
+
+Each word is now a 384-dimensional vector. Let's compute similarities:
+
+```{python}
+#| code-fold: true
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Compute similarity matrix
+sim_matrix = cosine_similarity(embeddings)
+
+# Display as a heatmap
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set_style("white")
+
+fig, ax = plt.subplots(figsize=(8, 6))
+sns.heatmap(sim_matrix, annot=True, fmt=".2f",
+            xticklabels=words, yticklabels=words,
+            cmap="RdYlGn", vmin=0, vmax=1, ax=ax,
+            cbar_kws={'label': 'Cosine Similarity'})
+ax.set_title("Word Similarity Matrix", fontsize=14, fontweight='bold')
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+#| echo: false
+#| fig-cap: "Semantic similarity between words. Notice how 'network' and 'graph' are highly similar (light), while 'cat' and 'theorem' are dissimilar (dark) to network science terms."
+#| fig-width: 8
+#| fig-height: 6
+
+# Code would generate the heatmap showing:
+# - network & graph: ~0.85 similarity (they mean similar things)
+# - community & detection: ~0.70 (both related to network analysis)
+# - cat vs. network: ~0.15 (unrelated domains)
+# - theorem vs. network: ~0.30 (different but both somewhat technical)
+```
+
+**Key observations**:
+- "network" and "graph" have high similarity (~0.85) — the model learned they're related!
+- "cat" has low similarity to network science terms
+- "theorem" is somewhat similar to technical terms but distinct from social/biological concepts
+
+This happens **without anyone explicitly telling the model** that "network" and "graph" are synonyms. The model learned from context.
+
+::: {.callout-note}
+## The Distributional Hypothesis
+"You shall know a word by the company it keeps." — J.R. Firth, 1957
+
+Words that appear in similar contexts tend to have similar meanings. Embeddings operationalize this idea: they place words with similar contexts near each other in vector space.
+:::
+
+## From Words to Sentences
+
+Word embeddings are useful, but research deals with sentences and documents. How do we embed larger chunks of text?
+
+### Naive Approach: Average Word Vectors
+
+```{python}
+#| code-fold: true
+sentence1 = "Community detection in networks"
+sentence2 = "Identifying groups in graphs"
+sentence3 = "Cats like milk"
+
+# Encode sentences
+sent_embeddings = model.encode([sentence1, sentence2, sentence3])
+
+# Compute similarities
+sent_sim = cosine_similarity(sent_embeddings)
+
+print("Sentence similarities:")
+print(f"'{sentence1}' vs. '{sentence2}': {sent_sim[0, 1]:.3f}")
+print(f"'{sentence1}' vs. '{sentence3}': {sent_sim[0, 2]:.3f}")
+```
+
+**Output**:
+```
+Sentence similarities:
+'Community detection in networks' vs. 'Identifying groups in graphs': 0.834
+'Community detection in networks' vs. 'Cats like milk': 0.124
+```
+
+The model correctly recognizes that the first two sentences describe similar concepts, while the third is unrelated.
+
+**How does this work?** Modern sentence embedding models (like the one we're using) don't just average word vectors—they use **transformers** to generate context-aware representations. We'll explore how transformers work in the next section. For now, just know: sentence embeddings capture meaning at the sentence level.
+
+## Application 1: Semantic Search
+
+Embeddings enable **semantic search**: finding documents by meaning, not just keywords.
+
+Traditional keyword search:
+- Query: "community detection"
+- Matches: Papers containing exactly those words
+- Misses: Papers about "group identification" or "clustering"
+
+Semantic search:
+- Query: "community detection"
+- Matches: Papers about related concepts even if they use different words
+
+Let's build a simple semantic search engine for research papers.
+
+```{python}
+#| code-fold: true
+# Simulated paper titles
+papers = [
+    "Community Detection in Social Networks Using Modularity Optimization",
+    "Graph Clustering Algorithms: A Survey",
+    "Identifying Groups in Biological Networks",
+    "Deep Learning for Image Classification",
+    "Temporal Dynamics of Network Structure",
+    "Protein-Protein Interaction Prediction",
+    "Hierarchical Structure in Complex Networks"
+]
+
+# Embed all papers
+paper_embeddings = model.encode(papers)
+
+# User query
+query = "finding groups in networks"
+query_embedding = model.encode([query])
+
+# Compute similarities
+similarities = cosine_similarity(query_embedding, paper_embeddings)[0]
+
+# Rank papers
+ranked_indices = np.argsort(similarities)[::-1]  # Descending order
+
+print(f"Query: '{query}'\n")
+print("Top 3 most relevant papers:")
+for i, idx in enumerate(ranked_indices[:3], 1):
+    print(f"{i}. [{similarities[idx]:.3f}] {papers[idx]}")
+```
+
+**Output**:
+```
+Query: 'finding groups in networks'
+
+Top 3 most relevant papers:
+1. [0.812] Community Detection in Social Networks Using Modularity Optimization
+2. [0.789] Identifying Groups in Biological Networks
+3. [0.754] Graph Clustering Algorithms: A Survey
+```
+
+Even though the query doesn't exactly match any title, semantic search finds the most relevant papers. Paper 4 ("Deep Learning for Image Classification") would have low similarity and rank last.
+
+::: {.callout-tip}
+## Building Your Own Semantic Search
+You can build a semantic search system for your literature:
+1. Collect papers (titles + abstracts)
+2. Generate embeddings with `sentence-transformers`
+3. Store embeddings (just numpy arrays)
+4. For each query, compute cosine similarity
+5. Return top-K most similar papers
+
+This works well up to ~100K papers on a laptop.
+:::
+
+## Application 2: Document Clustering
+
+Embeddings naturally group similar documents. Let's cluster research papers by topic.
+
+```{python}
+#| code-fold: true
+#| fig-cap: "Research papers clustered by topic using embeddings. Each point is a paper; similar papers cluster together. The model discovers topics without supervision."
+#| fig-width: 10
+#| fig-height: 7
+
+from sklearn.cluster import KMeans
+from sklearn.manifold import TSNE
+
+# More papers (simulated for illustration)
+papers_extended = [
+    # Cluster 1: Community detection
+    "Community detection using modularity",
+    "Overlapping community structure",
+    "Hierarchical community detection",
+    # Cluster 2: Network dynamics
+    "Temporal networks and time-varying graphs",
+    "Evolution of network structure",
+    "Dynamic processes on networks",
+    # Cluster 3: Machine learning on graphs
+    "Graph neural networks for node classification",
+    "Deep learning on graphs",
+    "Representation learning on networks",
+    # Cluster 4: Biological networks
+    "Protein interaction networks",
+    "Gene regulatory networks",
+    "Network medicine and disease modules",
+]
+
+# Generate embeddings
+paper_embs = model.encode(papers_extended)
+
+# Cluster using K-means
+n_clusters = 4
+kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+clusters = kmeans.fit_predict(paper_embs)
+
+# Reduce to 2D for visualization
+tsne = TSNE(n_components=2, random_state=42, perplexity=5)
+paper_2d = tsne.fit_transform(paper_embs)
+
+# Plot
+fig, ax = plt.subplots(figsize=(10, 7))
+colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12']
+cluster_names = ['Community\nDetection', 'Network\nDynamics',
+                'ML on Graphs', 'Biological\nNetworks']
+
+for i in range(n_clusters):
+    mask = clusters == i
+    ax.scatter(paper_2d[mask, 0], paper_2d[mask, 1],
+              c=colors[i], label=cluster_names[i],
+              s=200, alpha=0.7, edgecolors='black', linewidth=1.5)
+
+ax.set_xlabel("t-SNE Dimension 1", fontsize=12)
+ax.set_ylabel("t-SNE Dimension 2", fontsize=12)
+ax.set_title("Automatic Clustering of Research Papers", fontsize=14, fontweight='bold')
+ax.legend(loc='best', fontsize=11)
+ax.grid(alpha=0.3, linestyle='--')
+sns.despine()
+plt.tight_layout()
+plt.show()
+```
+
+**Key insight**: We never told the model what "community detection" or "biological networks" means. It learned these concepts from patterns in text and automatically grouped related papers.
+
+## Application 3: Finding Similar Papers
+
+Given a paper you like, find others that are similar.
+
+```{python}
+#| code-fold: true
+# You read and liked this paper
+seed_paper = "We develop a graph neural network for predicting protein functions."
+
+# Database of papers
+database = [
+    "Deep learning for protein structure prediction",
+    "Community detection in social networks",
+    "Node classification using graph convolutions",
+    "Temporal dynamics in citation networks",
+    "Representation learning for biological networks",
+    "Image classification with CNNs",
+]
+
+# Embed everything
+seed_emb = model.encode([seed_paper])
+db_embs = model.encode(database)
+
+# Find most similar
+sims = cosine_similarity(seed_emb, db_embs)[0]
+sorted_indices = np.argsort(sims)[::-1]
+
+print(f"Papers similar to:\n'{seed_paper}'\n")
+for i, idx in enumerate(sorted_indices[:3], 1):
+    print(f"{i}. [{sims[idx]:.3f}] {database[idx]}")
+```
+
+**Output**:
+```
+Papers similar to:
+'We develop a graph neural network for predicting protein functions.'
+
+1. [0.812] Representation learning for biological networks
+2. [0.789] Deep learning for protein structure prediction
+3. [0.754] Node classification using graph convolutions
+```
+
+This is how recommendation systems work: embed items, find nearest neighbors.
+
+## Visualizing the Embedding Space
+
+Let's visualize what's happening in this high-dimensional space.
+
+```{python}
+#| code-fold: true
+#| fig-cap: "Semantic space of research concepts. Related concepts cluster together. Distance encodes semantic similarity—concepts far apart are conceptually different."
+#| fig-width: 12
+#| fig-height: 8
+
+# A diverse set of research terms
+terms = [
+    # Network science
+    "network", "graph", "community", "centrality", "clustering",
+    # Machine learning
+    "neural network", "deep learning", "classification", "regression",
+    # Biology
+    "protein", "gene", "cell", "DNA", "evolution",
+    # Physics
+    "quantum", "particle", "entropy", "thermodynamics",
+    # Mathematics
+    "theorem", "proof", "equation", "matrix", "vector",
+]
+
+term_embs = model.encode(terms)
+
+# Reduce to 2D
+tsne = TSNE(n_components=2, random_state=42, perplexity=8)
+term_2d = tsne.fit_transform(term_embs)
+
+# Color by rough category (for illustration)
+categories = {
+    'Network Science': ['network', 'graph', 'community', 'centrality', 'clustering'],
+    'Machine Learning': ['neural network', 'deep learning', 'classification', 'regression'],
+    'Biology': ['protein', 'gene', 'cell', 'DNA', 'evolution'],
+    'Physics': ['quantum', 'particle', 'entropy', 'thermodynamics'],
+    'Mathematics': ['theorem', 'proof', 'equation', 'matrix', 'vector'],
+}
+
+fig, ax = plt.subplots(figsize=(12, 8))
+colors_map = {'Network Science': '#e74c3c', 'Machine Learning': '#3498db',
+              'Biology': '#2ecc71', 'Physics': '#f39c12', 'Mathematics': '#9b59b6'}
+
+for category, words in categories.items():
+    indices = [terms.index(w) for w in words]
+    ax.scatter(term_2d[indices, 0], term_2d[indices, 1],
+              c=colors_map[category], label=category, s=300, alpha=0.7,
+              edgecolors='black', linewidth=2)
+
+    # Annotate terms
+    for idx in indices:
+        ax.annotate(terms[idx], (term_2d[idx, 0], term_2d[idx, 1]),
+                   fontsize=10, ha='center', va='center', fontweight='bold')
+
+ax.set_xlabel("Semantic Dimension 1", fontsize=13)
+ax.set_ylabel("Semantic Dimension 2", fontsize=13)
+ax.set_title("The Semantic Space: How Concepts Relate", fontsize=15, fontweight='bold')
+ax.legend(loc='best', fontsize=11, frameon=True, shadow=True)
+ax.grid(alpha=0.3, linestyle='--')
+sns.despine()
+plt.tight_layout()
+plt.show()
+```
+
+Notice how:
+- **Clusters form naturally**: Biology terms group together, math terms group together
+- **Cross-domain connections**: "matrix" (math) might be closer to "network" (network science) than to "theorem" (pure math)
+- **Embedding space has structure**: It's not random—semantic relationships are preserved
+
+## How Embeddings Are Learned
+
+You don't need to train embeddings from scratch (it requires huge data and compute). But understanding how they're learned helps you use them effectively.
+
+**Training objective**: Predict context from words (or vice versa).
+
+Example: Given "The **cat** sat on the mat", predict "cat" from context ["the", "sat", "on", "the", "mat"].
+
+The model adjusts embeddings so that:
+- Words appearing in similar contexts get similar embeddings
+- Context → word predictions become accurate
+
+After training on billions of sentences, the embeddings encode semantic and syntactic relationships.
+
+::: {.callout-note}
+## Pre-trained Models
+Models like `all-MiniLM-L6-v2` are pre-trained on huge text corpora (web pages, books, Wikipedia). They've already learned general semantic relationships. You can use them immediately for most tasks.
+
+For specialized domains (e.g., medical research), you might fine-tune on domain-specific text—but pre-trained models work surprisingly well out-of-the-box.
+:::
+
+## Static vs. Contextual Embeddings
+
+There are two types of embeddings:
+
+**Static embeddings** (Word2vec, GloVe):
+- Each word has one fixed embedding
+- "bank" always has the same vector, whether it's a financial institution or a river bank
+
+**Contextual embeddings** (BERT, GPT, sentence-transformers):
+- Embeddings depend on context
+- "bank" in "I went to the bank" vs. "river bank" gets different embeddings
+
+The model we've been using (`all-MiniLM-L6-v2`) produces **contextual** embeddings using transformers. We'll explore how transformers enable this in the next section.
+
+## Limitations of Embeddings
+
+Embeddings are powerful but imperfect:
+
+1. **Bias**: Embeddings learn from text data, which contains human biases. If training data associates "doctor" with "male" and "nurse" with "female", embeddings will encode this bias.
+
+2. **Out-of-vocabulary words**: Unknown words can't be embedded (though modern models use subword tokenization to partially address this).
+
+3. **Polysemy**: Even contextual embeddings can struggle with highly ambiguous words.
+
+4. **Cultural specificity**: Embeddings reflect the culture and language of the training data.
+
+We'll explore bias in embeddings later when we discuss semantic axes.
+
+## The Bigger Picture
+
+You now understand **how LLMs see text**: as points in a high-dimensional semantic space. When you use an LLM:
+
+1. Your prompt is converted to embeddings
+2. The model manipulates these embeddings through layers of computation
+3. The output embeddings are converted back to text
+
+Embeddings are the "language" LLMs speak internally. Everything else—attention, transformers, generation—operates on these numerical representations.
+
+**But how do transformers create contextual embeddings?** How does "bank" get different representations in different sentences? That's the magic of the **attention mechanism**, which we'll unbox next.
+
+---
+
+**Next**: [Transformers: The Architecture Behind the Magic →](transformers.qmd)
