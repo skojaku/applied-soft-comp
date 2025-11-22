@@ -13,117 +13,82 @@ Large language models are not intelligent. They are statistical machines trained
 
 ## The Naive Intuition
 
-When ChatGPT exploded into public consciousness in late 2022, the narrative was immediate: machines can now think. They write essays, debug code, translate languages, and answer questions with seemingly human-like understanding. The temptation is to anthropomorphize, to imagine that something capable of producing coherent prose must possess comprehension in the way humans do.
+When ChatGPT launched in late 2022, the narrative was immediate: machines can now think. But this error has a lineage. In 1950, Turing proposed his famous test, enshrining a dangerous confusion: **the appearance of intelligence is not intelligence itself.** ELIZA, the 1960s chatbot that mimicked a therapist through keyword substitution, convinced users it understood them. No comprehension. Just pattern matching.
 
-This error has a lineage. In 1950, Alan Turing proposed his famous test: if a machine can convince a human interlocutor that it is human, then we should grant it the status of "thinking." Turing was pragmatic; he sidestepped the philosophical quagmire of consciousness by focusing on observable behavior. But the Turing Test enshrines a dangerous confusion: **the appearance of intelligence is not intelligence itself.**
-
-For decades, AI researchers chased this mirage. ELIZA, the 1960s chatbot that mimicked a Rogerian psychotherapist by reflecting questions back to users, convinced some people they were talking to a real therapist. It worked through simple pattern matching and keyword substitution. No understanding. No therapy. Just clever reflection.
-
-Large language models are ELIZA's descendants, scaled up by thirteen orders of magnitude and trained on the entire internet. The question is not whether they think—they don't. The question is: **can these pattern-matching machines help us do better science?**
+Large language models are ELIZA's descendants, scaled up by thirteen orders of magnitude. The question is not whether they think—they don't. The question is: **can these pattern-matching machines help us do better science?**
 
 ## The Theoretical Failure
 
-The standard model of language is compositional and rule-based. Noam Chomsky spent his career arguing that human language is governed by an innate, universal grammar—a finite set of recursive rules that generate an infinite set of valid sentences. Under this model, understanding language means understanding the rules.
+The standard model of language is compositional. Chomsky spent his career arguing that language is governed by universal grammar—recursive rules that generate infinite valid sentences. Understanding language means understanding the rules.
 
-LLMs break this model entirely. They are not taught grammar. They are not given rules. They are simply fed billions of sentences and trained to predict the next word. The training objective is brutally simple: given a sequence of words $w_1, w_2, \ldots, w_n$, estimate the probability distribution $P(w_{n+1} \mid w_1, \ldots, w_n)$ over the entire vocabulary. By iteratively sampling from these distributions, the model generates text.
+LLMs break this model. They are not taught grammar or given rules. They are fed billions of sentences and trained to predict the next word: given $w_1, w_2, \ldots, w_n$, estimate $P(w_{n+1} \mid w_1, \ldots, w_n)$.
 
 ![](../figs/llm-next-word.gif){width=50% fig-alt="A GIF showing how LLMs predict the next word by estimating probability distributions over the vocabulary. The model processes the input sequence and generates a probability distribution for the next token, then samples from this distribution to produce text." fig-align="center"}
 
-Chomsky would hate this. There are no rules here, only correlations. The model doesn't "know" that subjects and verbs must agree in number; it has simply seen enough examples where they do that it predicts accordingly. It doesn't understand the concept of emergence when it defines the term; it has memorized the statistical distribution of words that appear near "emergence" in its training corpus.
+Chomsky would hate this. There are no rules here, only correlations. The model doesn't "know" grammar; it has seen enough examples to predict accordingly. And yet, this crude statistical approach works. When OpenAI trained ever-larger models on ever-more data, capabilities emerged that were never programmed—translation, math, coding in languages invented after training.
 
-And yet, this crude statistical approach works. A model trained only to predict text turns out to implicitly encode grammar, facts, logic, and context. The researchers at OpenAI discovered this by accident: when they trained ever-larger models on ever-more data, capabilities emerged that were never explicitly programmed. The model learned to translate languages it was never taught to translate, solve math problems it had never seen, and write code in programming languages invented after its training cutoff.
-
-This is the central paradox: **a system optimized for prediction develops representations that look suspiciously like understanding.** But the average case is misleading. Most of the time, LLMs produce fluent, contextually appropriate text. But when you probe the extremes—when you ask about events after the knowledge cutoff, or request precise factual recall, or demand genuine reasoning—the illusion shatters.
+The central paradox: **a system optimized for prediction develops representations that look suspiciously like understanding.** But when you probe the extremes—events after the knowledge cutoff, precise factual recall, genuine reasoning—the illusion shatters.
 
 ## The Hidden Mechanism
 
-The mechanism that enables LLMs to generate coherent text is not reasoning. It is **compression through pattern matching at scale.**
+The mechanism is **lossy compression.** To predict "The capital of France is ___," the model compresses not just facts but statistical regularities governing how facts are expressed. It stores which words tend to follow which in which contexts—a probabilistic representation, not a database.
 
-Consider the task of predicting the next word in this sentence: "The capital of France is ___." To do this well, the model must compress the fact that Paris is the capital of France somewhere in its 70 billion parameters. But it must also compress the fact that capitals are typically mentioned after "The capital of," that France is a country, and that countries have capitals. Every sentence in the training corpus forces the model to encode not just individual facts, but the statistical regularities that govern how facts are expressed in human language.
+This creates hallucination. The model optimizes for probability, not truth. If it has seen 1,000 sentences about quantum networks and 10 about quantum community detection, it fabricates plausible results for a non-existent "Smith et al. paper" because that pattern fits academic writing. Truth and fluency correlate in human text, so the model is mostly truthful. But in the tails—obscure topics, recent events, precise recall—fluency diverges from truth, and the model follows fluency.
 
-This compression is lossy. The model doesn't store a database of facts that it can query reliably. Instead, it stores a probabilistic representation of which words tend to follow which other words in which contexts. Most of the time, this is sufficient. But occasionally, the model "hallucinates"—it generates text that is fluent and contextually appropriate but factually false. This happens because the model is optimizing for probability, not truth. If it has seen 1,000 sentences about quantum networks and 10 about quantum community detection, it might confidently fabricate results for a non-existent "2023 paper by Smith et al. on quantum community detection" because that pattern fits the statistical distribution of how academic results are typically described.
-
-This is not a bug. It is a fundamental consequence of the training objective. The model is not penalized for lying; it is only penalized for assigning low probability to the next word in the training data. Truth and fluency are correlated in human text, so the model learns to be mostly truthful. But in the tails of the distribution—when asked about obscure topics, recent events, or precise factual recall—fluency diverges from truth, and the model follows fluency.
-
-The second mechanism is **contextual interpolation.** LLMs do not have memory in the traditional sense. They process each input sequence from scratch, using the attention mechanism to determine which words in the sequence are relevant for predicting the next word. This means they can adapt to new contexts on the fly, but they are fundamentally limited by their context window (typically 2,000 to 8,000 tokens for smaller models like Gemma 3N). If you paste 100 abstracts into a prompt, the model might lose track of information from the beginning because it can only attend to a fixed amount of text at once.
-
-The third mechanism is **stochasticity.** LLMs do not deterministically map inputs to outputs. They sample from probability distributions, which means running the same prompt twice can produce different results. This is often framed as "creativity," but it is more accurately described as noise. The model has no preferences, no beliefs, no consistent worldview. It is a stochastic parrot, as the researchers Emily Bender and Timnit Gebru memorably put it—fluent, contextually sensitive, but ultimately indifferent to meaning.
+Two other mechanisms matter. **Limited context:** LLMs can only "see" 2,000–8,000 tokens. Paste 100 abstracts and early ones vanish. **Stochasticity:** The same prompt yields different outputs. This is framed as "creativity" but is noise. The model is a stochastic parrot—fluent, contextually sensitive, indifferent to meaning.
 
 ## The Existential Conclusion
 
-So what should you do with this knowledge? If LLMs are pattern matchers rather than thinkers, compressors rather than reasoners, how should you deploy them in your research?
+**Use LLMs to scale your judgment, not replace it.** They excel where speed trumps precision—summarizing text, extracting structure, brainstorming. They fail where precision is paramount—citations, decisions, analysis.
 
-The answer is: **use them to scale your judgment, not replace it.** LLMs are extraordinary tools for tasks where speed matters more than precision—summarizing large volumes of text, extracting structured information, reformulating ideas, brainstorming directions. They are useless for tasks where precision is paramount—verifying citations, making ethical decisions, performing statistical analysis, or producing literature reviews without human oversight.
+Think of an LLM as a research assistant who has read the internet but remembers imperfectly and fabricates occasionally. You delegate skimming 50 abstracts, not writing the paper. You extract findings, then verify everything.
 
-Think of an LLM as a research assistant who has read the entire internet but remembers everything imperfectly and occasionally makes things up. You wouldn't trust this assistant to write your paper unsupervised, but you would absolutely delegate the tedious work of skimming 50 abstracts to identify the 10 worth reading in detail. You would ask them to extract key findings from papers, generate synthetic examples for testing code, or suggest research directions you hadn't considered—and then you would verify everything they produce.
-
-The existential lesson is this: **the average is a lie; the truth is in the distribution.** Most of the time, LLMs produce fluent, useful text. But the events that matter—the hallucinated citation that undermines your credibility, the missed context that skews your analysis, the over-reliance that atrophies your critical thinking—live in the tail. Your job is to harvest the value from the center of the distribution while defending against the risks in the extremes.
-
-Now let's get practical.
+**The average is a lie; the truth is in the distribution.** Most of the time, LLMs produce fluent text. But the events that matter—the hallucinated citation, the missed context, the atrophied thinking—live in the tail. Harvest the center. Defend against the extremes.
 
 ---
 
 ## Setting Up Ollama
 
-You have two options for running LLMs: send your data to commercial APIs like OpenAI or Anthropic, or run models locally on your own hardware. The former offers state-of-the-art performance at a cost; the latter offers privacy and autonomy with some performance trade-offs. For this course, we use Ollama with Gemma 3N, a lightweight open-source model from Google that runs on most laptops. It is not as powerful as GPT-4, but it is free, private, and capable enough for learning and many research tasks.
+For this course, we use Ollama with Gemma 3N—a lightweight open-source model that runs locally. Free, private, capable enough.
 
-Visit [ollama.ai](https://ollama.ai) and download the installer for your operating system. After installation, verify it worked:
+Visit [ollama.ai](https://ollama.ai), download the installer, then:
 
 ```bash
 ollama --version
-```
-
-Download the Gemma 3N model:
-
-```bash
 ollama pull gemma3n:latest
-```
-
-This downloads a 4-billion parameter model. It may take a few minutes depending on your internet connection. Test your installation:
-
-```bash
 ollama run gemma3n:latest "What is a complex system?"
 ```
 
-If you see a coherent response about interconnected components and emergence, you are ready.
-
----
-
-## Using Ollama from Python
-
-While the command-line interface is useful for quick tests, research workflows demand programmatic access. Install the Ollama Python client:
+If you get a coherent response, you're ready. Now install the Python client:
 
 ```bash
 pip install ollama
 ```
 
-Now send your first prompt:
+Send your first prompt:
 
 ```{python}
 import ollama
 
-# Set up model parameters
 params_llm = {"model": "gemma3n:latest", "options": {"temperature": 0.3}}
 
-# Send a simple prompt to the model
 response = ollama.generate(
-    prompt="Explain the concept of emergence in complex systems in two sentences.",
+    prompt="Explain emergence in complex systems in two sentences.",
     **params_llm
 )
 
 print(response.response)
 ```
 
-Note that running this code twice may produce different outputs. LLMs sample from probability distributions, so they are inherently stochastic. This is a feature (it prevents repetitive outputs) but also a challenge (it complicates reproducibility). Lower the `temperature` parameter to reduce randomness, but understand that determinism is not guaranteed.
+Running this twice produces different outputs—LLMs sample from probability distributions. Lower `temperature` reduces randomness but doesn't guarantee determinism.
 
 ---
 
 ## Research Use Case 1: Summarizing Abstracts
 
-Suppose you have collected 50 papers on network science, and you need to decide which to read in detail. Manually skimming 50 abstracts takes time. An LLM can produce rough summaries in seconds.
+You have 50 papers. Which deserve detailed reading? An LLM can summarize in seconds.
 
 ```{python}
-# Example abstract from a real paper
 abstract = """
 Community detection in networks is a fundamental problem in complex systems.
 While many algorithms exist, most assume static networks. We propose a dynamic
@@ -134,163 +99,87 @@ snapshots. Our approach reveals how communities merge, split, and persist in
 social networks, biological systems, and transportation networks.
 """
 
-# Ask the LLM to summarize
-prompt = f"Summarize this research abstract in one sentence:\n\n{abstract}"
-
+prompt = f"Summarize this abstract in one sentence:\n\n{abstract}"
 response = ollama.generate(prompt=prompt, **params_llm)
-
 print(response.response)
 ```
 
-The model captures the key contribution without unnecessary details. It does not understand the paper, but it has seen enough similar abstracts in its training data to recognize the pattern: propose a method, evaluate it, show it outperforms baselines.
-
-To process multiple abstracts, loop over them:
+The model captures the key contribution. It doesn't understand the paper—it recognizes the pattern: propose method, evaluate, outperform baselines. For multiple abstracts, loop:
 
 ```{python}
-abstracts = [
-    "Abstract 1 text here...",
-    "Abstract 2 text here...",
-    "Abstract 3 text here...",
-]
-
-summaries = []
-for i, abstract in enumerate(abstracts, 1):
-    prompt = f"Summarize in one sentence:\n\n{abstract}"
-    response = ollama.generate(prompt=prompt, **params_llm)
-    summary = response.response
-    summaries.append(summary)
-    print(f"{i}. {summary}")
+for i, abstract in enumerate(["Abstract 1...", "Abstract 2..."], 1):
+    response = ollama.generate(prompt=f"Summarize:\n\n{abstract}", **params_llm)
+    print(f"{i}. {response.response}")
 ```
 
-Be warned: running models locally is slower than cloud APIs. Gemma 3N might take 2–5 seconds per abstract on a typical laptop. For large-scale processing (thousands of papers), consider batching or switching to cloud APIs.
+Local models are slow (2–5 seconds per abstract). For thousands of papers, use cloud APIs.
 
 ---
 
 ## Research Use Case 2: Extracting Structured Information
 
-Suppose you want to extract specific information from abstracts: the research domain, the methods used, and the main findings. This is tedious manual labor. An LLM can automate it.
+Extract domain, methods, findings from abstracts automatically.
 
 ```{python}
 abstract = """
-We analyze the structure of scientific collaboration networks using data from
-5 million papers published between 2000 and 2020. Using graph neural networks
-and community detection algorithms, we identify disciplinary boundaries and
-interdisciplinary bridges. We find that interdisciplinarity has increased 25%
-over this period, with physics and computer science showing the strongest
-cross-connections. Our model predicts emerging interdisciplinary fields with
-78% accuracy.
+We analyze scientific collaboration networks using 5 million papers from
+2000-2020. Using graph neural networks and community detection, we identify
+disciplinary boundaries and interdisciplinary bridges. Interdisciplinarity
+increased 25%, with physics and CS showing strongest cross-connections.
 """
 
-prompt = f"""Extract the following information from this abstract. Keep each response concise (1-2 sentences):
-- Domain: (the research field)
-- Methods: (techniques or algorithms used)
-- Key Finding: (main result)
-
-Abstract: {abstract}
-
-Format your response as:
-Domain: ...
-Methods: ...
-Key Finding: ...
-"""
-
+prompt = f"""Extract: Domain, Methods, Key Finding\n\n{abstract}\n\nFormat:\nDomain:...\nMethods:...\nKey Finding:..."""
 response = ollama.generate(prompt=prompt, **params_llm)
-
 print(response.response)
 ```
 
-The model successfully parses the abstract and extracts structured information. This can be scaled to hundreds of papers to build datasets for meta-analysis. Again, verify the outputs—LLMs occasionally misinterpret or fabricate details.
+Scale to hundreds of papers for meta-analysis. Verify outputs—LLMs misinterpret and fabricate.
 
 ---
 
 ## Research Use Case 3: Hypothesis Generation
 
-LLMs can help brainstorm research directions by identifying gaps or suggesting extensions. They do not have domain expertise, but they are excellent at pattern matching against the space of research questions they have seen before.
+LLMs pattern-match against research questions they've seen. Not groundbreaking, but useful for brainstorming.
 
 ```{python}
-context = """
-I'm studying how scientific concepts spread through citation networks.
-I've found that highly cited papers tend to introduce novel combinations
-of existing concepts. However, I'm not sure what to study next.
-"""
+context = """I study concept spread in citation networks. Highly cited papers
+combine existing concepts novelty. What should I study next?"""
 
-prompt = f"""Based on this research context, suggest three concrete follow-up
-research questions that would extend this work:
-
-{context}
-
-For each question, briefly explain why it's interesting. Keep each question and explanation to 1-2 sentences.
-"""
-
+prompt = f"""Suggest three follow-up research questions:\n\n{context}"""
 response = ollama.generate(prompt=prompt, **params_llm)
-
 print(response.response)
 ```
 
-The suggestions are not groundbreaking, but they help structure your thinking. Treat the LLM as a thought partner, not an oracle.
+Treat as thought partner, not oracle.
 
 ---
 
-## Understanding Model Limitations
+## Failure Modes
 
-LLMs are powerful, but they fail in predictable ways. Understanding these failure modes is essential for deploying them responsibly.
+**Hallucination:** LLMs fabricate plausibly. Ask about a non-existent "Smith et al. quantum paper" and get fluent academic prose describing results that never happened. Always verify citations.
 
-**Hallucination.** LLMs can confidently state false information. Ask about a non-existent paper, and the model might fabricate a plausible-sounding summary:
+**Limited context:** Models see 2,000–8,000 tokens. Paste 100 abstracts and early ones vanish.
 
-```{python}
-prompt = "What did the 2023 paper by Smith et al. on quantum community detection conclude? Respond in 1-2 sentences."
+**Knowledge cutoff:** Gemma 3N's training ended early 2024. Ask about recent events, get outdated info or fabrications.
 
-response = ollama.generate(prompt=prompt, **params_llm)
+**No understanding:** LLMs pattern-match, don't reason. Ask "How many r's in 'Strawberry'?" They might answer 3 (correct) via pattern matching, not counting. Sometimes right, often wrong.
 
-print(response.response)
-```
-
-The model generates fluent text that matches the statistical pattern of how academic results are typically described, even though the paper does not exist. Always verify factual claims, especially citations and specific results.
-
-**Limited context window.** Models can only "see" a certain amount of text at once (typically 2,000–8,000 tokens for smaller models). If you paste 100 abstracts, the model might miss information from the beginning.
-
-**Knowledge cutoff.** Models are trained on data up to a certain date. Gemma 3N's knowledge ends in early 2024. It does not know about papers published after that. Ask about current events, and it will answer based on outdated information or fabricate plausible-sounding updates:
-
-```{python}
-# Ask about current events that may be after the knowledge cutoff
-prompt = "Who is the current president of the United States? Respond in 1-2 sentences."
-
-response = ollama.generate(prompt=prompt, **params_llm)
-
-print(response.response)
-```
-
-**Lack of true understanding.** LLMs are pattern matchers, not thinkers. They do not have beliefs, understanding, or consciousness. This becomes apparent when you ask questions that require genuine reasoning rather than pattern matching:
-
-```{python}
-# A simple counting task that requires actual processing
-prompt = "How many r's are in the word 'Strawberry'? Just give me the number."
-
-response = ollama.generate(prompt=prompt, **params_llm)
-
-print(response.response)
-```
-
-Humans count the letters and arrive at 3. LLMs might get this right through pattern matching (they have seen similar questions in training data), but they do not "count" in any meaningful sense. They predict the token that is most likely to follow the prompt based on statistical regularities. Sometimes this yields the correct answer. Sometimes it does not.
-
-The golden rule: **use LLMs to accelerate your work, not to replace your judgment.** They are tools for exploration, summarization, and reformulation—not for making final research decisions.
+**Use to accelerate work, not replace judgment.**
 
 ---
 
-## When to Use LLMs in Research
+## When to Use LLMs
 
-**Good use cases:** Summarizing large volumes of text quickly. Extracting structured information from unstructured text. Reformulating or clarifying concepts. Brainstorming research directions. Generating synthetic examples for testing code. Translating or paraphrasing technical content.
+**Good:** Summarizing text. Extracting structure. Reformulating concepts. Brainstorming. Synthetic examples. Translation.
 
-**Poor use cases:** Generating literature reviews without verification. Making factual claims without checking sources. Replacing careful reading of important papers. Performing statistical analysis (use proper statistical tools). Making ethical decisions about research.
+**Poor:** Literature reviews without verification. Factual claims without sources. Statistical analysis. Ethical decisions.
 
 ---
 
-## The Bigger Picture
+## Next
 
-You have now seen LLMs in action for research tasks. You have learned to set up and run local models with Ollama, summarize and extract information from scientific text, and understand their fundamental limitations and best practices.
+You've seen LLMs work—setup, summarization, extraction, limitations. But how do they actually work? What happens inside when you send a prompt?
 
-But questions remain: How do these models actually work? What is happening inside when you send a prompt? Why can they generate coherent text about topics they have never seen?
+The rest of this module unboxes the technology: prompt engineering (communicating with LLMs), embeddings (meaning as numbers), transformers (the architecture), fundamentals (word counts to neural representations).
 
-The rest of this module answers these questions. We will unbox the technology layer by layer. Next, we will learn prompt engineering—how to communicate effectively with LLMs. Then we will explore embeddings—how models represent meaning as numbers. We will dissect transformers—the architecture that makes modern NLP possible. Finally, we will understand the fundamentals—from simple word counts to sophisticated neural representations.
-
-But first, let's master the art of talking to machines.
+First, let's master talking to machines.
