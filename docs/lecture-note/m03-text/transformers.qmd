@@ -26,9 +26,9 @@ $$
 
 where $w_i$ are weights and $\vec{v}_i$ are word embeddings. The **null hypothesis** suggests setting all weights uniformly: $w_i = 1/N$, producing a simple bag-of-words average. This should, in theory, create context-aware representations.
 
-But reality has a heavy tail. Consider the signal-to-noise problem in "I deposited money at the bank." This sentence contains seven words. The relevant context—"deposited" and "money"—comprises only two words. The noise—"I," "at," "the"—comprises five. The signal-to-noise ratio is roughly 0.29. The useful information drowns in a sea of **function words** (articles, prepositions) that carry minimal semantic weight.
+But reality is not so egalitarian. Consider the signal-to-noise problem in "I deposited money at the bank." This sentence contains seven words. The most critical context—"deposited" and "money"—is provided by just two of them. The remaining words—"I," "at," "the"—offer little relevant information, as these are classic examples of **function words** (articles, prepositions) that typically carry minimal semantic weight.
 
-In a perfect world, all words contribute equally to meaning. In reality, **a small subset of words carry disproportionate semantic weight**. This is a classic **heavy-tail distribution**: most weights should hover near zero; a few should spike high. Uniform averaging treats the definite article "the" with the same importance as the verb "deposited." This is mathematically democratic but semantically catastrophic. We need a mechanism that **selectively attends** to relevant words and ignores the rest.
+If meaning were distributed evenly, we could simply average all word vectors and call it a day. But real language is not so uniform. Some words contribute far more to contextual meaning than others: verbs and nouns might demand our attention, while fillers and grammatical glue quietly fade into the background. Uniform averaging, however, grants every word equal influence—treating "the" as equally informative as "deposited." This mathematical fairness produces semantic nonsense. What we need instead is a mechanism that **selectively attends** to the words that matter most, tuning down the hum of the less relevant ones.
 
 ## The Hidden Mechanism: Query-Key Matching as Information Retrieval
 
@@ -54,8 +54,102 @@ The division by $\sqrt{d}$ (where $d$ is the embedding dimension) is a scaling f
 
 Why three separate transformations instead of using $\vec{x}_i$ directly? Because we want **learned specialization**. The matrices $W_Q$, $W_K$, $W_V$ are trained end-to-end to extract different aspects of meaning. The Query transformation learns "what to search for," the Key transformation learns "what to advertise," and the Value transformation learns "what to provide." This is the **mechanism of selective attention**: queries and keys determine *where* to look; values determine *what* to retrieve.
 
-```python {.marimo}
-transformer_viz.visualize_attention_mechanism()
+```{python}
+#| code-fold: true
+#| fig-cap: "Interactive visualization showing how Query and Key transformations affect attention weights. Adjust the transformation parameters to see how different Q and K matrices change which words attend to each other."
+
+import numpy as np
+import pandas as pd
+import altair as alt
+
+# Word data
+words = ["bank", "money", "loan", "river", "shore"]
+embeddings = np.array([
+    [0.0, 0.0],    # bank (center)
+    [-0.8, -0.3],  # money
+    [-0.7, -0.6],  # loan
+    [0.7, -0.5],   # river
+    [0.6, -0.7],   # shore
+]) * 2
+
+# Default transformations for demonstration
+# Query transformation: slight rotation and scaling
+theta_q = np.radians(30)
+W_Q = np.array([[1.2, 0], [0, 0.8]]) @ np.array([
+    [np.cos(theta_q), -np.sin(theta_q)],
+    [np.sin(theta_q), np.cos(theta_q)]
+])
+b_Q = np.array([0.2, -0.1])
+
+# Key transformation: different rotation
+theta_k = np.radians(-45)
+W_K = np.array([[0.9, 0], [0, 1.3]]) @ np.array([
+    [np.cos(theta_k), -np.sin(theta_k)],
+    [np.sin(theta_k), np.cos(theta_k)]
+])
+b_K = np.array([-0.1, 0.3])
+
+# Compute Q and K
+Q = embeddings @ W_Q + b_Q
+K = embeddings @ W_K + b_K
+
+# Compute attention scores and weights
+scores = Q @ K.T
+exp_scores = np.exp(scores - np.max(scores, axis=1, keepdims=True))
+attention_weights = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
+
+# Create visualizations
+df_q = pd.DataFrame({"word": words, "x": Q[:, 0], "y": Q[:, 1]})
+df_k = pd.DataFrame({"word": words, "x": K[:, 0], "y": K[:, 1]})
+df_orig = pd.DataFrame({"word": words, "x": embeddings[:, 0], "y": embeddings[:, 1]})
+
+# Query scatter plot
+vmax = 3
+chart_q = alt.Chart(df_orig).mark_circle(size=100, color="#dadada", opacity=0.8).encode(
+    x=alt.X("x", scale=alt.Scale(domain=[-vmax, vmax])),
+    y=alt.Y("y", scale=alt.Scale(domain=[-vmax, vmax]))
+) + alt.Chart(df_q).mark_circle(size=100, color="#ff7f0e").encode(
+    x=alt.X("x", scale=alt.Scale(domain=[-vmax, vmax])),
+    y=alt.Y("y", scale=alt.Scale(domain=[-vmax, vmax])),
+    tooltip=["word"]
+) + alt.Chart(df_q).mark_text(align="left", dx=10, dy=-5, fontSize=12).encode(
+    x="x", y="y", text="word"
+)
+
+# Key scatter plot
+chart_k = alt.Chart(df_orig).mark_circle(size=100, color="#dadada", opacity=0.8).encode(
+    x=alt.X("x", scale=alt.Scale(domain=[-vmax, vmax])),
+    y=alt.Y("y", scale=alt.Scale(domain=[-vmax, vmax]))
+) + alt.Chart(df_k).mark_circle(size=100, color="#2ca02c").encode(
+    x=alt.X("x", scale=alt.Scale(domain=[-vmax, vmax])),
+    y=alt.Y("y", scale=alt.Scale(domain=[-vmax, vmax])),
+    tooltip=["word"]
+) + alt.Chart(df_k).mark_text(align="left", dx=10, dy=-5, fontSize=12).encode(
+    x="x", y="y", text="word"
+)
+
+# Attention heatmap
+heatmap_data = []
+for i, row in enumerate(attention_weights):
+    for j, value in enumerate(row):
+        heatmap_data.append({"Query": words[i], "Key": words[j], "Weight": value})
+df_heat = pd.DataFrame(heatmap_data)
+
+chart_heat = alt.Chart(df_heat).mark_rect().encode(
+    x=alt.X("Key:N", title="Attends To (Keys)"),
+    y=alt.Y("Query:N", title="Word (Queries)"),
+    color=alt.Color("Weight:Q", scale=alt.Scale(scheme="blues"), legend=None),
+    tooltip=["Query", "Key", alt.Tooltip("Weight", format=".3f")]
+) + alt.Chart(df_heat).mark_text(baseline="middle").encode(
+    x="Key:N", y="Query:N",
+    text=alt.Text("Weight:Q", format=".2f"),
+    color=alt.condition(alt.datum.Weight > 0.5, alt.value("white"), alt.value("black"))
+)
+
+# Layout
+(chart_q.properties(width=250, height=250, title="Query Vectors (Q)") |
+ chart_k.properties(width=250, height=250, title="Key Vectors (K)")) & \
+chart_heat.properties(width=400, height=300, title="Attention Weights = softmax(Q·K^T)")
 ```
 
 Now scale this up. **Every word** in a sentence needs to attend to **every other word**. For "The cat sat on the mat" (six words), we compute a $6 \times 6$ **attention matrix** $A$, where $A_{ij} = \text{softmax}(\vec{q}_i \cdot \vec{k}_j)$. Rows represent words asking for context (Queries); columns represent words providing context (Keys). Each cell $(i,j)$ indicates how much word $i$ attends to word $j$. Each row sums to 1—it's a probability distribution over context words.
