@@ -6,109 +6,35 @@ filters:
   - marimo-team/marimo
 ---
 
-# The Spoiler
+**The Spoiler:** The entire transformer revolution boils down to this—static embeddings assign one vector per word, ignoring that "bank" near "river" is mathematically different from "bank" near "money." Transformers solve this by computing context-aware representations through weighted mixing, and the weights themselves emerge from learned comparisons (Query × Key) between words. The result: machines finally understand that meaning isn't in the word; it's in the *distribution* of words around it.
 
-**The entire transformer revolution boils down to this**: Static embeddings assign one vector per word, ignoring that "bank" near "river" is mathematically different from "bank" near "money." Transformers solve this by computing context-aware representations through weighted mixing—and the weights themselves emerge from learned comparisons (Query × Key) between words. The result: machines finally understand that meaning isn't in the word; it's in the *distribution* of words around it.
+## The Naive Intuition: One Word, One Vector
 
----
+Here's the worldview that dominated natural language processing for decades: words have meanings, and we can capture those meanings as vectors. The word "bank" becomes a point in 300-dimensional space, represented as `[0.23, -0.45, 0.67, 0.12, ...]`. This **static embedding** philosophy assumes that the essence of "bank" can be distilled into a single coordinate in vector space, independent of context. It's the linguistic equivalent of saying a person has one personality, regardless of whether they're at a funeral or a party.
 
-# 1. The Naive Model: One Word, One Vector
+This idea has deep roots. J.R. Firth declared in 1957: "You shall know a word by the company it keeps." This is **distributional semantics**—meaning emerges from co-occurrence statistics. If "bank" appears near "loan," "mortgage," "interest," you infer *financial institution*. If it appears near "river," "shore," "erosion," you infer *geological feature*. Word2vec, introduced in 2013, operationalized this idea by training neural networks to predict a word from its neighbors. The learned vectors encoded co-occurrence patterns beautifully.
 
-Here's the worldview that dominated NLP for decades:
+But here's the fundamental limitation that haunted this entire paradigm: Word2vec still outputs **one vector per word type**. It collapses all contexts into a single average representation. The word "bank" gets the same vector whether it's surrounded by "money" or "river." This is like computing the average height of all humans and declaring that everyone is 5'7". The average exists, but it obscures the very differences that matter.
 
-> "Words have meanings. We can capture those meanings as vectors. 'Bank' is a point in 300-dimensional space."
+## The Theoretical Failure: When Averaging Destroys the Signal
 
-```python
-"bank" → [0.23, -0.45, 0.67, 0.12, ...]  # Static embedding
-```
-
-This **static embedding** philosophy assumes that the essence of "bank" can be distilled into a single coordinate in vector space, independent of context.
-
-It's the linguistic equivalent of saying: *"A person has one personality, regardless of whether they're at a funeral or a party."*
-
-Obviously, that's wrong. But *why* is it wrong, and more importantly—*how* do we fix it?
-
----
-
-# 2. The Historical Anchor: Distributional Semantics (1950s)
-
-The solution was actually proposed before computers could run it.
-
-**J.R. Firth (1957)** famously declared:
-
-> "You shall know a word by the company it keeps."
-
-This is **distributional semantics**: meaning emerges from co-occurrence statistics. If "bank" appears near "loan," "mortgage," "interest," you infer *financial institution*. If it appears near "river," "shore," "erosion," you infer *geological feature*.
-
-Word2vec (2013) operationalized this idea: predict a word from its neighbors, and the learned vectors encode co-occurrence patterns.
-
-But here's the fundamental limitation: Word2vec still outputs **one vector per word type**. It collapses all contexts into a single average representation.
-
-What we need is a system that computes **context-dependent** representations on-the-fly.
-
----
-
-# 3. The Theoretical Baseline: Linear Mixing
-
-**Naive hypothesis**: What if we just *mix* the target word with its neighbors?
-
-For "I deposited money at the **bank**":
+The naive hypothesis went like this: what if we just *mix* the target word with its neighbors? For the sentence "I deposited money at the bank," we could compute a contextualized representation as:
 
 $$
 \text{contextualized}_{\text{bank}} = w_1 \cdot \vec{v}_{\text{bank}} + w_2 \cdot \vec{v}_{\text{deposited}} + w_3 \cdot \vec{v}_{\text{money}} + \cdots
 $$
 
-where $w_i$ are weights and $\vec{v}_i$ are word embeddings.
+where $w_i$ are weights and $\vec{v}_i$ are word embeddings. The **null hypothesis** suggests setting all weights uniformly: $w_i = 1/N$, producing a simple bag-of-words average. This should, in theory, create context-aware representations.
 
-**The null hypothesis**: If we set all weights uniformly ($w_i = 1/N$), we get a simple bag-of-words average.
+But reality has a heavy tail. Consider the signal-to-noise problem in "I deposited money at the bank." This sentence contains seven words. The relevant context—"deposited" and "money"—comprises only two words. The noise—"I," "at," "the"—comprises five. The signal-to-noise ratio is roughly 0.29. The useful information drowns in a sea of **function words** (articles, prepositions) that carry minimal semantic weight.
 
-**Prediction**: This should produce context-aware representations!
+In a perfect world, all words contribute equally to meaning. In reality, **a small subset of words carry disproportionate semantic weight**. This is a classic **heavy-tail distribution**: most weights should hover near zero; a few should spike high. Uniform averaging treats the definite article "the" with the same importance as the verb "deposited." This is mathematically democratic but semantically catastrophic. We need a mechanism that **selectively attends** to relevant words and ignores the rest.
 
-**Reality check**: It *kind of* works, but only if we can learn **adaptive weights**—high $w_i$ for contextually relevant words, low for irrelevant ones.
+## The Hidden Mechanism: Query-Key Matching as Information Retrieval
 
-The critical question: **How do we compute $w_i$ automatically?**
+The breakthrough came from reframing contextualization as a **search problem**. Imagine you're in a library—your sentence—looking for information to understand "bank." You have a question (what context do I need?). Each book has a label advertising what it offers: "I offer financial concepts" or "I offer spatial concepts." You compute relevance by matching your question against each book's label. Then you read the relevant books, weighting your attention based on those relevance scores. This is **attention**.
 
----
-
-# 4. The Heavy Tail: Why Uniform Weights Fail
-
-If you average all words equally, you dilute the signal.
-
-Consider:
-
-- "I deposited money at the **bank**" (7 words)
-- Relevant context: "deposited," "money" (2 words)
-- Noise: "I," "at," "the" (5 words)
-
-**Signal-to-noise ratio**: $2/7 \approx 0.29$
-
-The useful information is drowned out by **function words** (articles, prepositions) that carry minimal semantic weight.
-
-::: {.callout-note}
-## The Deviation from Theory
-In a perfect world, all words contribute equally to meaning. In reality, **a small subset of words carry disproportionate semantic weight**. This is a classic **heavy-tail distribution**: most weights should be near zero; a few should be large.
-:::
-
-We need a mechanism that **selectively attends** to relevant words and ignores the rest.
-
----
-
-# 5. The Hidden Mechanism: Query-Key Matching
-
-Here's the breakthrough insight, expressed as a **search problem**:
-
-Imagine you're in a library (your sentence), looking for information to understand "bank."
-
-1. **You have a question** (Query): "What context do I need?"
-2. **Each book has a label** (Key): "I offer financial concepts" or "I offer spatial concepts"
-3. **You compute relevance** (Dot Product): How well does my question match each book's offer?
-4. **You read the relevant books** (Value): Weighted sum based on relevance scores
-
-This is **attention**.
-
-### The Math
-
-For each word $i$ in a sentence, create three transformations of its embedding $\vec{x}_i$:
+The mathematical implementation is elegant. For each word $i$ in a sentence with embedding $\vec{x}_i$, create three linear transformations:
 
 $$
 \begin{align}
@@ -118,70 +44,21 @@ $$
 \end{align}
 $$
 
-To contextualize word $i$, compute its relevance to all other words $j$ via **dot products**:
-
-$$
-\text{score}(i, j) = \vec{q}_i \cdot \vec{k}_j
-$$
-
-High score → strong relevance. Low score → ignore.
-
-Convert scores to **probabilities** using softmax:
+To contextualize word $i$, compute its relevance to all other words $j$ via **dot products**: $\text{score}(i, j) = \vec{q}_i \cdot \vec{k}_j$. High scores indicate strong relevance; low scores indicate noise to ignore. These scores are converted to probabilities using softmax:
 
 $$
 w_{ij} = \frac{\exp(\vec{q}_i \cdot \vec{k}_j / \sqrt{d})}{\sum_{\ell} \exp(\vec{q}_i \cdot \vec{k}_\ell / \sqrt{d})}
 $$
 
-(The $\sqrt{d}$ is a scaling factor to prevent vanishing gradients; $d$ is the embedding dimension.)
+The division by $\sqrt{d}$ (where $d$ is the embedding dimension) is a scaling factor that prevents vanishing gradients during training. Finally, compute the **contextualized representation** as a weighted sum: $\text{contextualized}_i = \sum_j w_{ij} \vec{v}_j$.
 
-Finally, compute the **contextualized representation**:
-
-$$
-\text{contextualized}_i = \sum_j w_{ij} \vec{v}_j
-$$
-
-::: {.callout-tip}
-## Why Three Separate Transformations?
-You might ask: "Why not just use $\vec{x}_i$ directly for Q, K, V?"
-
-Because we want **learned specialization**. The matrices $W_Q$, $W_K$, $W_V$ are trained to extract different aspects:
-
-- $W_Q$: "What to search for"
-- $W_K$: "What to advertise"
-- $W_V$: "What to provide"
-
-This is the **mechanism of selective attention**: queries and keys determine *where* to look; values determine *what* to retrieve.
-:::
-
----
-
-### Interactive Demo: Attention Mechanism
-
-Explore how Query (Q) and Key (K) transformations affect the attention scores.
+Why three separate transformations instead of using $\vec{x}_i$ directly? Because we want **learned specialization**. The matrices $W_Q$, $W_K$, $W_V$ are trained end-to-end to extract different aspects of meaning. The Query transformation learns "what to search for," the Key transformation learns "what to advertise," and the Value transformation learns "what to provide." This is the **mechanism of selective attention**: queries and keys determine *where* to look; values determine *what* to retrieve.
 
 ```python {.marimo}
 transformer_viz.visualize_attention_mechanism()
 ```
 
----
-
-# 6. The Attention Matrix: All Pairwise Relationships
-
-Now scale this up: **every word** in a sentence needs to attend to **every other word**.
-
-For "The cat sat on the mat" (6 words), we compute a $6 \times 6$ **attention matrix** $A$, where:
-
-$$
-A_{ij} = \text{softmax}(\vec{q}_i \cdot \vec{k}_j)
-$$
-
-- **Rows**: Words asking for context (Queries)
-- **Columns**: Words providing context (Keys)
-- **Cell $(i,j)$**: How much word $i$ attends to word $j$
-
-Each row sums to 1 (it's a probability distribution over context words).
-
-### Visualizing the Matrix
+Now scale this up. **Every word** in a sentence needs to attend to **every other word**. For "The cat sat on the mat" (six words), we compute a $6 \times 6$ **attention matrix** $A$, where $A_{ij} = \text{softmax}(\vec{q}_i \cdot \vec{k}_j)$. Rows represent words asking for context (Queries); columns represent words providing context (Keys). Each cell $(i,j)$ indicates how much word $i$ attends to word $j$. Each row sums to 1—it's a probability distribution over context words.
 
 ```{python}
 #| code-fold: true
@@ -219,187 +96,37 @@ plt.tight_layout()
 plt.show()
 ```
 
-**Key observations**:
+Look at row 3, corresponding to "sat." The verb attends most strongly to "cat" (0.40) and "mat" (0.15)—the subject and object of the sentence. The diagonal shows moderate values because words always attend somewhat to themselves. Determiners like "The" attend to their nouns ("cat"). These patterns are **emergent, not programmed**. No one told the model "verbs should attend to subjects." The patterns emerge from backpropagation on prediction tasks. The model discovers grammar as a side effect of learning to predict words.
 
-1. **Row 3 ("sat")**: Peaks at "cat" (0.40) and "mat" (0.15)—verb attending to subject and object
-2. **Diagonal**: Moderate values—words always attend somewhat to themselves
-3. **Determiners ("The")**: Attend to their nouns ("cat")
+But here's the final complication: **one attention matrix captures one type of relationship**. Language is multidimensional. There are syntactic relationships (subject-verb-object), semantic relationships (conceptual similarity between "cat" and "mat" as physical objects), positional relationships (local word order), and pragmatic relationships (coreference, where "her" links to "scientist"). A single attention mechanism can't capture all of these simultaneously.
 
-::: {.callout-important}
-## This Is Emergent, Not Programmed
-No one told the model "verbs should attend to subjects." The patterns emerge from **backpropagation on prediction tasks**. The model discovers grammar as a side effect of learning to predict words.
-:::
+The solution is **multi-head attention**: run multiple attention mechanisms in parallel, each with its own $W_Q$, $W_K$, $W_V$ matrices. Mathematically, $\text{MultiHead}(X) = \text{Concat}(\text{head}_1, \text{head}_2, \ldots, \text{head}_h) W^O$. Each head learns a different attention pattern. Modern transformers use 8-16 heads per layer: BERT uses 12, GPT-3 uses 96. It's like having twelve different experts analyze the sentence simultaneously—one focusing on syntax, one on semantics, one on coreference—and then combining their insights through a learned linear transformation.
 
----
+## The Complete Architecture: Engineering for Scale
 
-# 7. Multi-Head Attention: Multiple Simultaneous Perspectives
+You've now discovered the core innovation: **self-attention via Query-Key-Value**. But a working transformer needs additional engineering to make this mechanism trainable at scale.
 
-Here's the final twist: **one attention matrix captures one type of relationship**.
+**Positional encoding** solves the problem that attention is permutation-invariant. Without extra information, "cat sat" equals "sat cat" because the dot products don't encode order. The solution is to add position-dependent vectors to embeddings: $\text{input}_i = \text{embedding}_i + \text{position}_i$. Transformers use sinusoidal functions of varying frequencies: $\text{PE}(pos, 2i) = \sin(pos / 10000^{2i/d})$ and $\text{PE}(pos, 2i+1) = \cos(pos / 10000^{2i/d})$. This gives the model access to both absolute position and relative distances between words.
 
-Language is multidimensional:
+**Residual connections** create highways for gradient flow. Deep networks suffer from vanishing gradients—signals decay exponentially as they backpropagate through layers. The solution is skip connections: $\text{output} = \text{LayerNorm}(x + \text{Attention}(x))$. This allows gradients to flow backward through 12-24 layers without vanishing.
 
-1. **Syntactic**: Subject-verb-object
-2. **Semantic**: Conceptual similarity ("cat" and "mat" are both physical objects)
-3. **Positional**: Local word order
-4. **Pragmatic**: Coreference ("her" → "scientist")
+**Feed-forward networks** add processing power beyond attention. After the attention sublayer, each word's representation passes through a small multi-layer perceptron independently: $\text{FFN}(x) = \text{ReLU}(x W_1 + b_1) W_2 + b_2$. This introduces non-linearity and gives the model capacity to learn complex transformations.
 
-**Solution**: Run **multiple attention mechanisms in parallel**, each with its own $W_Q$, $W_K$, $W_V$ matrices.
+**Layer normalization** keeps activations in a stable numerical range during training, preventing exploding or vanishing values that would make gradient descent unstable.
 
-$$
-\text{MultiHead}(X) = \text{Concat}(\text{head}_1, \text{head}_2, \ldots, \text{head}_h) W^O
-$$
+The complete transformer block, repeated 12 or more times, looks like this: Input → Multi-Head Self-Attention → Add & LayerNorm (residual) → Feed-Forward Network → Add & LayerNorm (residual) → Output passed to next block.
 
-Each head learns a **different attention pattern**. Modern transformers use:
+Here's what matters: residual connections, layer normalization, and feed-forward networks all existed before 2017. The transformer's innovation is self-attention. That single mechanism replaced recurrent neural networks (RNNs), long short-term memory networks (LSTMs), and convolutional approaches for natural language processing. The original paper's title—*"Attention Is All You Need"*—was provocative but accurate.
 
-- BERT: 12 heads per layer
-- GPT-3: 96 heads per layer
+The attention mechanism gets deployed differently depending on the task. **Encoder-only architectures** like BERT use bidirectional attention where word $i$ can attend to all words, past and future. These models excel at understanding text for classification, embeddings, and extraction tasks. You feed in "Is this paper about networks or biology?" and get back a classification. **Decoder-only architectures** like GPT and Gemma use causal attention (masked) where word $i$ can only attend to words at positions $\leq i$. This prevents "looking into the future" during autoregressive generation. When generating text word-by-word, you can't use words you haven't generated yet. These models excel at completion and chat. **Encoder-decoder architectures** like the original transformer use bidirectional attention in the encoder to process input, causal attention in the decoder for output generation, plus **cross-attention** where the decoder's Query vectors attend to the encoder's Key and Value vectors. These models excel at sequence-to-sequence tasks like translation: "Hello world" → "Bonjour monde."
 
-**Intuition**: It's like having 12 different "experts" analyze the sentence simultaneously—one focusing on syntax, one on semantics, one on coreference, etc.—and then **combining their insights**.
+## Why This Changed Everything
 
----
+Before transformers, natural language processing used **sequential processing** via recurrent neural networks. The computational graph looked like: Word 1 → Hidden State 1 → Word 2 → Hidden State 2 → and so on. This architecture had three fatal flaws. First, sequential computation is inherently slow—you can't parallelize across words because each hidden state depends on the previous one. Second, information decays over long distances due to vanishing gradients; dependencies 100+ words apart become nearly impossible to learn. Third, the fixed-size hidden state creates an information bottleneck for long sequences.
 
-# 8. The Complete Architecture: From Tokens to Context
+Transformers solved all three problems simultaneously. **Parallel processing** means all words are processed simultaneously, yielding 100× faster training on modern GPUs. **Arbitrary long-range dependencies** become tractable because "bank" in position 50 can directly attend to "money" in position 2 through a single matrix multiplication—no gradients need to flow through 48 intermediate steps. **Scalability** emerged as a predictable phenomenon: performance scales logarithmically with parameters. This revealed a stunning empirical fact—bigger models aren't just incrementally better; they unlock **qualitatively new capabilities** like in-context learning and multi-step reasoning. This is why GPT-4 dramatically exceeds GPT-3, which dramatically exceeds GPT-2, despite using essentially the same architecture.
 
-You've now discovered the core: **self-attention via Query-Key-Value**.
-
-But a working transformer needs a few more components:
-
-### 1. Positional Encoding
-
-**Problem**: Attention is **permutation-invariant**. Without extra information, "cat sat" = "sat cat".
-
-**Solution**: Add position-dependent vectors to embeddings:
-
-$$
-\text{input}_i = \text{embedding}_i + \text{position}_i
-$$
-
-Transformers use sinusoidal functions: $\text{PE}(pos, 2i) = \sin(pos / 10000^{2i/d})$, $\text{PE}(pos, 2i+1) = \cos(pos / 10000^{2i/d})$.
-
-### 2. Residual Connections
-
-**Problem**: Deep networks suffer from **vanishing gradients**.
-
-**Solution**: Add skip connections:
-
-$$
-\text{output} = \text{LayerNorm}(x + \text{Attention}(x))
-$$
-
-This creates highways for gradients to flow backward through 12–24 layers.
-
-### 3. Feed-Forward Networks
-
-After attention, each word's representation passes through a small MLP **independently**:
-
-$$
-\text{FFN}(x) = \text{ReLU}(x W_1 + b_1) W_2 + b_2
-$$
-
-This adds non-linear processing power beyond attention.
-
-### 4. Layer Normalization
-
-Keeps activations in a stable range during training.
-
----
-
-**The Complete Block** (repeated 12+ times):
-
-```
-Input
-  ↓
-Multi-Head Self-Attention
-  ↓
-Add & LayerNorm (residual)
-  ↓
-Feed-Forward Network
-  ↓
-Add & LayerNorm (residual)
-  ↓
-Output → Next Block
-```
-
-::: {.callout-note}
-## What's Actually New?
-Residual connections, layer norm, and FFNs existed before 2017. The **transformer's innovation** is self-attention. That single mechanism replaced RNNs, LSTMs, and convolutions for NLP.
-
-The original paper's title—*"Attention Is All You Need"*—was provocative but accurate.
-:::
-
----
-
-# 9. Encoder vs. Decoder: Three Architectural Variants
-
-The attention mechanism is used differently depending on the task:
-
-### Encoder-Only (BERT)
-**Purpose**: Understanding text (classification, embeddings)
-
-- **Bidirectional attention**: Word $i$ can attend to all words (past and future)
-- Used when you have the full context upfront
-- Example: "Classify this document's topic"
-
-### Decoder-Only (GPT, Gemma)
-**Purpose**: Generating text (completion, chat)
-
-- **Causal attention** (masked): Word $i$ can only attend to words $\leq i$
-- Prevents "looking into the future" during autoregressive generation
-- Example: "The cat sat on the..." → predict "mat"
-
-**Why mask?** When generating word-by-word, you can't use words you haven't generated yet!
-
-### Encoder-Decoder (Original Transformer)
-**Purpose**: Sequence-to-sequence (translation, summarization)
-
-- Encoder: Bidirectional attention on input
-- Decoder: Causal attention on output + **cross-attention** to encoder
-- Example: "Hello world" → "Bonjour monde"
-
----
-
-# 10. Why This Changed Everything
-
-### The Old World: Recurrent Neural Networks (RNNs)
-
-Before transformers, NLP used **sequential processing**:
-
-```
-Word 1 → Hidden State 1 → Word 2 → Hidden State 2 → ...
-```
-
-**Problems**:
-
-1. **Sequential = slow**: Can't parallelize across words
-2. **Vanishing gradients**: Information decays over long distances
-3. **Fixed context window**: Struggles with dependencies 100+ words apart
-
-### The New World: Transformers
-
-**Parallel processing**: All words processed simultaneously → **100× faster training**
-
-**Arbitrary long-range dependencies**: "bank" in position 50 can directly attend to "money" in position 2
-
-**Scalability**: Performance scales predictably with parameters (GPT-3: 175B params)
-
-**Transfer learning**: Pre-train once, fine-tune for any task
-
----
-
-::: {.callout-important}
-## The Scaling Law Discovery
-Transformers revealed a stunning empirical fact: **performance ∝ log(parameters)**.
-
-Bigger models aren't just incrementally better—they unlock **qualitatively new capabilities** (e.g., in-context learning, reasoning). This is why GPT-4 > GPT-3 > GPT-2, despite using the same architecture.
-:::
-
----
-
-# 11. Real-World Example: Coreference Resolution
-
-Let's see attention in action on a linguistic task: linking pronouns to referents.
-
-**Sentence**: "The scientist published her paper."
+Consider a concrete example of how attention captures linguistic structure. Take the sentence "The scientist published her paper." We want to resolve the coreference: what does "her" refer to?
 
 ```{python}
 #| code-fold: true
@@ -438,62 +165,16 @@ plt.tight_layout()
 plt.show()
 ```
 
-**Row 3 ("her")**: Strongly attends to "scientist" (0.60).
+Row 3 corresponds to "her." The pronoun attends most strongly to "scientist" (0.60), correctly identifying the referent. The model **discovered** that pronouns link to earlier nouns through statistical patterns in training data—no one programmed this grammatical rule. This is the profound insight: transformers learn the structure of language as a side effect of optimizing a simple prediction objective.
 
-The model **discovered** that pronouns link to earlier nouns—no one programmed this rule.
+## The Existential Conclusion
 
----
+When you use `sentence-transformers` to generate embeddings for your research, you're using encoder transformers (BERT-based) with bidirectional attention. When you interact with ChatGPT or run Gemma locally, you're using decoder transformers with causal attention. When you see attention visualizations in papers, you now understand they represent **learned relevance weights** computed from Query-Key comparisons. The models don't understand language the way humans do—they perform **pattern matching at scale**—but the patterns they discover are often the same syntactic and semantic structures that linguists have documented for decades.
 
-# 12. The Existential Conclusion: What You Should Do With This Knowledge
+The limitations are worth remembering. Attention has **quadratic complexity**: computing $O(N^2)$ pairwise scores becomes prohibitively expensive for very long texts, which is why context windows typically cap at 2K-32K tokens. Transformers have **no true memory** beyond the current window—they can't learn facts across documents without retraining. They produce fluent text through statistical pattern matching but lack grounded understanding, leading to **hallucinations** when they confidently generate plausible-sounding nonsense. Training costs are astronomical: GPT-3 required roughly \$5 million in compute. But you don't need to train your own models; you can use pre-trained ones and fine-tune them for specific tasks with orders of magnitude less data and compute.
 
-### When Using Transformers in Research
+Return to where we started: the "bank" problem. Static embeddings treated "bank" as one point in space, averaging across all contexts. Transformers compute a **distribution** of representations, conditioned on the surrounding words. The revolution wasn't in the complexity—it was in recognizing that **meaning is relational, not absolute**. Words are like atoms in a molecule: their properties depend on what they're bonded to. Transformers formalized this intuition mathematically through a simple mechanism: weighted mixing based on learned relevance.
 
-1. **Embeddings** ([sentence-transformers](https://www.sbert.net/)): You're using **encoder transformers** (BERT-based) with bidirectional attention
-2. **Text generation** (ChatGPT, Gemma): You're using **decoder transformers** with causal attention
-3. **Interpreting attention**: When visualizations show attention maps, you now understand they represent **learned relevance weights** from Query-Key comparisons
-
-### Limitations to Keep in Mind
-
-**Quadratic complexity**: Attention computes $O(N^2)$ pairwise scores → expensive for long texts (typical context: 2K–32K tokens)
-
-**No true memory**: Only "remembers" what's in the current window → can't learn facts across documents without retraining
-
-**Stochastic parrots?**: Produces fluent text by pattern-matching, but lacks grounded understanding → **hallucinations**
-
-**Training cost**: GPT-3 training: ~$5M in compute. (But you can use pre-trained models!)
-
----
-
-### The Callback to the Beginning
-
-Remember the "bank" problem?
-
-- **Static embeddings** treated "bank" as one point in space.
-- **Transformers** compute a **distribution** of representations, conditioned on context.
-
-The revolution wasn't in the complexity—it was in recognizing that **meaning is relational, not absolute**.
-
-Words are like atoms in a molecule: their properties depend on what they're bonded to. Transformers formalized this intuition mathematically.
-
----
-
-::: {.callout-tip}
-## The Meta-Lesson
-This entire architecture emerged from asking: *"What's the simplest mechanism that lets representations adapt to context?"*
-
-Answer: **Weighted mixing based on learned relevance.**
-
-Everything else (multi-head, layer norm, FFNs) is engineering to make that core idea scale.
-:::
-
----
-
-# The Journey Continues
-
-You've discovered how transformers work from first principles. But transformers weren't the first technique for text embeddings. Before BERT and GPT, there was **Word2vec**—a simpler, faster method that's still useful today.
-
-Let's step back and see where embeddings came from.
-
----
+This entire architecture emerged from asking a single question: *What's the simplest mechanism that lets representations adapt to context?* The answer was weighted mixing where the weights come from comparing what each word needs (Query) against what other words offer (Key). Everything else—multi-head attention, layer normalization, feed-forward networks—is engineering to make that core idea scale to 175 billion parameters and beyond.
 
 **Next**: [Word Embeddings: Where It Started](word-embeddings.qmd)
