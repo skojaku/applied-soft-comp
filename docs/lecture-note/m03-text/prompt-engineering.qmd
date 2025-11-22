@@ -1,47 +1,52 @@
 ---
-title: "Prompt Engineering for Research"
-jupyter: python3
+title: "Prompt Engineering"
+execute:
+    enabled: true
 ---
 
-# The Art of Asking the Right Questions
+![](../figs/top-prompt-engineering.png)
 
-You've learned to use LLMs for basic research tasks. But you've probably noticed something frustrating: **the same question asked slightly differently can produce dramatically different results**.
+::: {.callout-note appearance="minimal"}
+## Spoiler
+LLMs are stateless pattern matchers that sample from probability distributions—the same question phrased differently activates different statistical patterns, producing dramatically different outputs.
+:::
 
-One prompt gives you exactly what you need. Another prompt makes the model hallucinate, ramble, or miss the point entirely. This isn't a bug—it's a fundamental property of how LLMs work. They're highly sensitive to how you phrase your requests.
+## The Naive Model vs. The Reality
 
-**Prompt engineering** is the art and science of designing inputs that reliably produce desired outputs. For researchers, this means crafting prompts that extract accurate information, maintain consistency across large datasets, and fail gracefully when the model doesn't know something.
+If a machine can answer questions, it should respond consistently regardless of phrasing. You're asking for the same information; the answer shouldn't change. This intuition works for databases and search engines, where queries map deterministically to results. We expect robustness to variation.
 
-This section teaches you practical prompt engineering techniques specifically for scientific workflows.
+LLMs shatter this expectation. Ask "Summarize this abstract" and get a concise two-sentence summary. Ask "What's this abstract about?" and get three rambling paragraphs. Same content, different phrasing, completely different outputs. This isn't a bug—it's fundamental to how LLMs work. They don't retrieve information; they **sample from probability distributions conditioned on your exact phrasing.** Every word in your prompt shifts the distribution. Change "Summarize" to "What's this about?" and you activate different statistical patterns from the training data, patterns that correlate with different response lengths, structures, and styles.
 
-## Why Prompts Matter
+The paradox: LLMs are simultaneously powerful and brittle. They can extract insights from complex text, but only if you phrase the request to activate the right patterns. Prompt engineering is the discipline of designing inputs that reliably activate desired patterns across varied tasks.
 
-LLMs don't have "understanding" in the human sense. They predict probable text continuations based on patterns in training data. Your prompt sets the context that determines which patterns the model activates.
+## The Hidden Mechanism
 
-Consider these two prompts for the same task:
+Imagine you're playing a word association game. Someone says "capital," and you must say the next word. If the previous sentence was "The capital of France is," you say "Paris." If it was "We need more capital to," you say "fund" or "invest." The word "capital" doesn't have one meaning—it activates different patterns depending on context. LLMs work identically, but at massive scale.
 
-**Prompt A**: "What's community detection?"
+When you submit a prompt, the model converts it into tokens and embeds those tokens in high-dimensional space. Each token's position in that space depends on surrounding tokens—context shapes meaning. The model then samples the next token from a probability distribution over its vocabulary, conditioned on all previous tokens. It repeats this process until it generates a complete response. Critically, **your exact phrasing determines which region of probability space the model occupies when it begins sampling.** Slightly different prompts place the model in different regions, where different tokens have high probability.
 
-**Prompt B**: "You are a network science expert. Explain community detection in networks to a graduate student familiar with graph theory. Focus on the intuition, not the math. Keep it under 100 words."
+This creates extreme sensitivity to phrasing. Adding "Think step by step" at the end of a prompt shifts the probability distribution toward reasoning patterns that include intermediate steps, because the training data contains many examples where "think step by step" preceded structured reasoning. Adding "You are an expert researcher" shifts the distribution toward formal, technical language patterns. Specifying "Output format: Domain: ..., Methods: ..." shifts toward structured extraction patterns. Each modification activates different statistical regularities compressed during training.
 
-Prompt B will typically produce better results because it:
-- **Sets a role** ("network science expert")
-- **Defines the audience** ("graduate student familiar with graph theory")
-- **Specifies the style** ("intuition, not math")
-- **Constrains the output** ("under 100 words")
+The model has no internal representation of what you "really want." It only knows which tokens tend to follow which other tokens in which contexts. Prompt engineering exploits this by deliberately activating patterns that produce desired outputs.
 
-Let's learn to craft prompts like Prompt B systematically.
+## The Strategic Application
 
-## Core Principle 1: Be Specific
+![](https://learnprompting.org/docs/assets/basics/formal_prompt.svg){width="25%" fig-align="center"}
 
-Vague prompts produce vague outputs. Specific prompts produce specific outputs.
+Effective prompts activate desired patterns by combining structural components that mirror patterns in training data. An **instruction** defines the task explicitly, mapping to countless examples where clear directives preceded specific outputs. **Data** provides the input to process. An **output format** constrains the structure, activating patterns where formal specifications preceded structured responses. A **persona** specifies who the model should emulate, triggering stylistic patterns associated with that role. **Context** provides background information—why the task matters, who the response serves, relevant constraints—that helps the model select appropriate patterns from ambiguous alternatives.
 
-### Example: Summarizing Papers
+Not every component is necessary. Simple extraction tasks need only instruction, data, and format. Style-sensitive tasks benefit from persona. Complex scenarios with ambiguity require context to disambiguate. The strategy is to provide exactly enough structure to activate the desired pattern without overloading the prompt with irrelevant information that dilutes the signal.
+
+We'll build a prompt progressively, adding components one at a time to observe how each shifts the output distribution.
+
+
+### Building from Instruction and Data
+
+The most basic prompt consists of an instruction that defines the task and data that provides the input to process:
 
 ```{python}
-#| code-fold: true
-import ollama
-
-abstract = """
+instruction = "Summarize this abstract"
+data = """
 We develop a graph neural network for predicting protein-protein interactions
 from sequence data. Our model uses attention mechanisms to identify functionally
 important amino acid subsequences. We achieve 89% accuracy on benchmark datasets,
@@ -49,65 +54,158 @@ outperforming previous methods by 7%. The model also provides interpretable
 attention weights showing which protein regions drive predictions.
 """
 
-# Vague prompt
-vague_prompt = "Summarize this abstract."
-
-# Specific prompt
-specific_prompt = """Summarize this abstract in exactly 2 sentences:
-- First sentence: What problem and method
-- Second sentence: Key result with numbers
-
-Abstract: {abstract}
-"""
-
-response_vague = ollama.chat(
-    model="gemma2:2b",
-    messages=[{"role": "user", "content": vague_prompt.format(abstract=abstract)}]
-)
-
-response_specific = ollama.chat(
-    model="gemma2:2b",
-    messages=[{"role": "user", "content": specific_prompt.format(abstract=abstract)}]
-)
-
-print("VAGUE PROMPT OUTPUT:")
-print(response_vague['message']['content'])
-print("\nSPECIFIC PROMPT OUTPUT:")
-print(response_specific['message']['content'])
+prompt = f"{instruction}. {data}"
 ```
-
-**Output**:
-```
-VAGUE PROMPT OUTPUT:
-This research presents a graph neural network that predicts protein-protein
-interactions with high accuracy and interpretability. [... possibly more rambling]
-
-SPECIFIC PROMPT OUTPUT:
-This paper develops a graph neural network with attention mechanisms to predict
-protein-protein interactions from sequence data. The model achieves 89% accuracy,
-outperforming previous methods by 7%, and provides interpretable attention weights.
-```
-
-The specific prompt produces structured, information-dense output. This matters when processing hundreds of papers—you want consistent format and length.
-
-::: {.callout-tip}
-## Specificity Checklist
-- What format should the output take?
-- How long should it be?
-- What information must be included?
-- What should be excluded?
-- What perspective or style?
-:::
-
-## Core Principle 2: Provide Examples (Few-Shot Learning)
-
-Instead of just describing what you want, **show the model examples**. This is called "few-shot prompting."
-
-### Example: Extracting Research Metadata
 
 ```{python}
 #| code-fold: true
-# Zero-shot (no examples)
+
+import ollama
+
+params_llm = {"model": "gemma3:270m", "options": {"temperature": 0.3}}
+
+response = ollama.generate(prompt=prompt, **params_llm)
+print(response.response)
+```
+
+This basic prompt works, but output varies—the model might produce a long summary, a short one, or change format across runs. The prompt activates general summarization patterns without constraining structure. Adding an output format specification narrows the distribution:
+
+```{python}
+output_format = """Provide the summary in exactly 2 sentences:
+- First sentence: What problem and method
+- Second sentence: Key result with numbers"""
+
+prompt_with_format = f"""{instruction}. {data}. {output_format}"""
+```
+
+The output format constraint produces structured, consistent output by activating patterns where format specifications preceded conforming responses. This becomes critical when processing hundreds of papers—you need programmatically parseable structure, not freeform text.
+
+### Adding Persona to Control Style
+
+A persona tells the LLM who it should emulate, activating stylistic patterns associated with that role in training data. Consider a customer support scenario where tone matters:
+
+```{python}
+# New example for persona demonstration
+instruction = "Help the customer reconnect to the service by providing troubleshooting instructions."
+data = "Customer: I cannot see any webpage. Need help ASAP!"
+output_format = "Keep the response concise and polite. Provide a clear resolution in 2-3 sentences."
+
+formal_persona = "You are a professional customer support agent who responds formally and ensures clarity and professionalism."
+
+prompt_with_persona = f"""{formal_persona}. {instruction}. {data}. {output_format}"""
+```
+
+```{python}
+#| code-fold: true
+print("BASE (no persona):")
+print(ollama.generate(prompt=instruction + ". " + data + ". " + output_format, **params_llm).response)
+print("\n" + "="*60 + "\n")
+print("WITH PERSONA:")
+print(ollama.generate(prompt=prompt_with_persona, **params_llm).response)
+```
+
+The persona shifts tone and style. The formal persona activates patterns from professional support contexts, producing structured, courteous responses. Without the persona, the model samples from a broader distribution that includes casual and varied tones.
+
+### Adding Context to Disambiguate
+
+Context provides additional information that helps the model select appropriate patterns when multiple valid interpretations exist. Context can include background information explaining why the task matters, audience information specifying who the response serves, and constraints defining special circumstances. Consider adding background urgency:
+
+```{python}
+context_background = """The customer is extremely frustrated because their internet has been down for three days, and they need it for an important online job interview. They emphasize that 'This is a life-or-death situation for my career!'"""
+
+prompt_with_context = f"""{formal_persona}. {instruction}. {data}. {output_format}. Context: {context_background}"""
+```
+
+```{python}
+#| code-fold: true
+print("WITH PERSONA:")
+print(ollama.generate(prompt=prompt_with_persona, **params_llm).response)
+print("\n" + "="*60 + "\n")
+print("WITH PERSONA + CONTEXT (background):")
+print(ollama.generate(prompt=prompt_with_context, **params_llm).response)
+```
+
+Background context adds urgency and emotional weight, activating patterns where high-stakes situations preceded empathetic, prioritized responses. The model doesn't understand emotion, but it has seen urgency markers correlate with specific response patterns.
+
+Audience information creates even more dramatic shifts. Compare responses for non-technical versus technical users:
+
+```{python}
+# Context with audience information for non-technical user
+context_with_audience_nontech = f"""{context_background} The customer does not know any technical terms like modem, router, networks, etc."""
+
+context_with_audience_tech = f"""{context_background} The customer is Head of IT Infrastructure of our company."""
+
+prompt_with_context_nontech = f"""{formal_persona}. {instruction}. {data}. {output_format}. Context: {context_with_audience_nontech}"""
+prompt_with_context_tech = f"""{formal_persona}. {instruction}. {data}. {output_format}. Context: {context_with_audience_tech}"""
+```
+
+```{python}
+#| code-fold: true
+print("WITH PERSONA + CONTEXT (background only):")
+print(ollama.generate(prompt=prompt_with_context, **params_llm).response)
+print("\n" + "="*60 + "\n")
+print("WITH PERSONA + CONTEXT (background + non-tech audience):")
+print(ollama.generate(prompt=prompt_with_context_nontech, **params_llm).response)
+print("\n" + "="*60 + "\n")
+print("WITH PERSONA + CONTEXT (background + tech audience):")
+print(ollama.generate(prompt=prompt_with_context_tech, **params_llm).response)
+```
+
+Audience information dramatically shifts technical level and terminology. For non-technical users, the response avoids jargon because the training data contains many examples where "does not know technical terms" preceded simplified explanations. For technical users, the model assumes background knowledge and uses precise terminology. Same underlying mechanism—pattern matching—but different patterns activated.
+
+The complete template combines all components, but not every prompt needs every component. Simple extraction tasks need only instruction, data, and output format. Style-sensitive tasks benefit from persona. Complex scenarios with ambiguity require context:
+
+```{python}
+prompt_template = """
+{persona}
+
+{instruction}
+
+{data}
+
+Context: {context}
+
+{output_format}
+"""
+```
+
+::: {.callout-note}
+## When Personas Help (and When They Don't)
+
+Research shows that adding personas can improve tone and style, but **does not necessarily improve performance on factual tasks**. In some cases, personas may even degrade performance or introduce biases.
+
+**Use personas when:** You need specific tone/style, responses tailored to an audience, or a particular perspective.
+
+**Avoid personas when:** You need maximum factual accuracy, the task is purely extraction/classification, or you're concerned about bias introduction.
+
+Additionally, when prompted to adopt specific socio-demographic personas, LLMs may produce responses that reflect societal stereotypes. Be careful when designing persona prompts to avoid reinforcing harmful biases.
+
+**References:**
+- [When "A Helpful Assistant" Is Not Really Helpful](https://arxiv.org/abs/2311.10054)
+- [Bias Runs Deep: Implicit Reasoning Biases in Persona-Assigned LLMs](https://arxiv.org/abs/2311.04892)
+:::
+
+::: {.callout-tip}
+## Context and Emotion Prompting
+
+Context can include:
+- **Background information**: Why the task is important, what led to this request
+- **Audience information**: Who the response is for (technical level, expertise, role)
+- **Emotional cues**: Research shows that including emotional cues (e.g., "This is very important to my career") can enhance response quality
+- **Constraints**: Special circumstances, deadlines, limitations
+
+However, avoid overloading with unnecessary information that distracts from the main task.
+
+**Reference:** [Same Task, More Tokens: the Impact of Input Length on the Reasoning Performance of Large Language Models](https://arxiv.org/abs/2402.14848)
+:::
+
+## Showing Rather Than Telling
+
+Instead of describing what you want in words, show the model examples. This technique—called **few-shot learning** or in-context learning—exploits how LLMs compress patterns. When you provide examples, you're not teaching the model new information; you're activating pre-existing patterns by demonstrating the exact structure you want.
+
+The spectrum ranges from zero-shot (no examples, relying solely on the model's prior knowledge) to few-shot (typically two to five examples, the sweet spot for most tasks) to many-shot (ten or more examples, where diminishing returns and context limits become problematic). Consider a zero-shot prompt first:
+
+```{python}
 zero_shot_prompt = """Extract the domain and methods from this abstract:
 
 Abstract: We apply reinforcement learning to optimize traffic flow in urban networks.
@@ -117,8 +215,11 @@ Output format:
 Domain: ...
 Methods: ...
 """
+```
 
-# Few-shot (with examples)
+Now add examples to activate more specific patterns:
+
+```{python}
 few_shot_prompt = """Extract the domain and methods from abstracts. Here are examples:
 
 Example 1:
@@ -139,62 +240,55 @@ Using deep Q-networks trained on simulation data, we reduce average commute time
 Domain: ...
 Methods: ...
 """
-
-response_zero = ollama.chat(
-    model="gemma2:2b",
-    messages=[{"role": "user", "content": zero_shot_prompt}]
-)
-
-response_few = ollama.chat(
-    model="gemma2:2b",
-    messages=[{"role": "user", "content": few_shot_prompt}]
-)
-
-print("ZERO-SHOT:")
-print(response_zero['message']['content'])
-print("\nFEW-SHOT:")
-print(response_few['message']['content'])
 ```
-
-Few-shot prompting dramatically improves consistency, especially for extraction tasks. The examples teach the model:
-- What level of specificity you want
-- How to handle edge cases
-- The exact format you expect
-
-::: {.callout-note}
-## How Many Examples?
-- **Zero-shot**: No examples (relies on model's prior knowledge)
-- **One-shot**: One example (often sufficient)
-- **Few-shot**: 2-5 examples (sweet spot for most tasks)
-- **Many-shot**: 10+ examples (diminishing returns, context limits)
-
-More examples aren't always better—they take up context space and processing time.
-:::
-
-## Core Principle 3: Chain-of-Thought Reasoning
-
-For complex tasks, ask the model to **show its reasoning process** before giving the final answer.
-
-### Example: Identifying Research Gaps
 
 ```{python}
 #| code-fold: true
+response_zero = ollama.generate(prompt=zero_shot_prompt, **params_llm)
+response_few = ollama.generate(prompt=few_shot_prompt, **params_llm)
+
+print("ZERO-SHOT:")
+print(response_zero.response)
+print("\nFEW-SHOT:")
+print(response_few.response)
+```
+
+Few-shot prompting improves consistency because the examples demonstrate specificity level, edge case handling, and exact format. The model has seen countless abstract-extraction patterns, but your examples narrow the distribution to the specific pattern you want. This becomes critical when processing hundreds of abstracts—you need every output to match the same structure.
+
+::: {.callout-warning}
+## Biases in Few-Shot Prompting
+
+Be aware that few-shot examples can introduce biases:
+
+- **Recency bias**: Models may favor the most recent examples. The order of examples matters!
+- **Majority label bias**: If most examples have the same label/answer, the model may favor that label even when it's not appropriate.
+
+To mitigate: Vary the order of examples when testing, ensure examples are diverse and representative, and don't overload examples with one particular pattern.
+:::
+
+## Forcing Intermediate Steps
+
+For complex tasks, asking for the final answer directly often produces shallow or incorrect results. The solution: ask the model to show its reasoning process before giving the final answer. This technique—called **chain-of-thought prompting**—activates patterns where intermediate reasoning steps preceded conclusions. Compare a direct prompt that asks for immediate answers:
+
+```{python}
 papers = """
 Paper 1: Community detection in static networks using modularity optimization.
 Paper 2: Temporal network analysis with sliding windows.
 Paper 3: Hierarchical community structure in social networks.
 """
 
-# Direct prompt
-direct_prompt = f"""Based on these paper titles, what research gap exists?
+direct_prompt = f"""Based on these paper titles, what research gap exists? Just give the answer, no explanation.
 
 {papers}
 
 Gap: ...
 """
+```
 
-# Chain-of-thought prompt
-cot_prompt = f"""Based on these paper titles, identify a research gap.
+Against a chain-of-thought prompt that requests explicit reasoning steps:
+
+```{python}
+cot_prompt = f"""Based on these paper titles, identify a research gap. Think step by step.
 
 Papers:
 {papers}
@@ -207,46 +301,38 @@ Think step by step:
 
 Final answer: The research gap is...
 """
-
-response_direct = ollama.chat(
-    model="gemma2:2b",
-    messages=[{"role": "user", "content": direct_prompt}]
-)
-
-response_cot = ollama.chat(
-    model="gemma2:2b",
-    messages=[{"role": "user", "content": cot_prompt}]
-)
-
-print("DIRECT PROMPT:")
-print(response_direct['message']['content'])
-print("\nCHAIN-OF-THOUGHT:")
-print(response_cot['message']['content'])
 ```
-
-The chain-of-thought prompt produces more thoughtful, nuanced answers because it forces the model to decompose the problem into steps.
-
-**When to use chain-of-thought**:
-- Comparing multiple papers or concepts
-- Identifying patterns or trends
-- Making recommendations
-- Analyzing arguments
-- Complex reasoning tasks
-
-**When not to use it**:
-- Simple extraction tasks
-- When you need concise outputs
-- Time-critical applications (it's slower)
-
-## Core Principle 4: Constrain the Output Format
-
-For research workflows, you often need structured data you can parse programmatically.
-
-### Example: Building a Dataset from Abstracts
 
 ```{python}
 #| code-fold: true
+response_direct = ollama.generate(prompt=direct_prompt, **params_llm)
+response_cot = ollama.generate(prompt=cot_prompt, **params_llm)
+
+print("DIRECT PROMPT:")
+print(response_direct.response)
+print("\nCHAIN-OF-THOUGHT:")
+print(response_cot.response)
+```
+
+Chain-of-thought produces more thoughtful, nuanced answers by forcing the model to decompose the problem into steps before committing to a conclusion. The mechanism is pattern matching: the training data contains many examples where "think step by step" preceded structured reasoning, so including that phrase activates those patterns. The model doesn't actually reason—it generates text that looks like reasoning because that pattern correlates with higher-quality outputs in the training data.
+
+Use chain-of-thought when comparing multiple papers or concepts, identifying patterns, making recommendations, or analyzing arguments. Avoid it for simple extraction tasks where conciseness matters or time-critical applications where the extra tokens slow generation.
+
+::: {.callout-warning}
+## Can We Trust Chain-of-Thought Reasoning?
+
+Research indicates that chain-of-thought reasoning can be **unfaithful**—the explanations don't always accurately reflect the model's true decision-making process. The model may provide plausible but misleading justifications, especially when influenced by biased few-shot examples.
+
+Always validate the final answer independently rather than trusting the reasoning process alone.
+:::
+
+## Constraining Format for Structured Extraction
+
+Research workflows often require structured data you can parse programmatically, not freeform text. The solution: constrain output format explicitly. Consider a prompt that requests JSON output:
+
+```{python}
 import json
+from pydantic import BaseModel
 
 abstract = """
 We analyze 10,000 scientific collaborations using network analysis and machine
@@ -254,7 +340,7 @@ learning. Our random forest classifier predicts collaboration success with 76%
 accuracy. Key factors include prior co-authorship and institutional proximity.
 """
 
-prompt = f"""Extract information from this abstract and return ONLY valid JSON:
+prompt_json = f"""Extract information from this abstract and return ONLY valid JSON:
 
 Abstract: {abstract}
 
@@ -267,57 +353,79 @@ Return this exact structure:
 }}
 
 JSON:"""
+```
 
-response = ollama.chat(
-    model="gemma2:2b",
-    messages=[{"role": "user", "content": prompt}],
-    options={"temperature": 0}  # More deterministic
-)
+```{python}
+#| code-fold: true
+# Use lower temperature for structured output
+params_structured = {"model": "gemma3n:latest", "options": {"temperature": 0}}
+response = ollama.generate(prompt=prompt_json, **params_structured)
 
-# Parse the JSON
 try:
-    data = json.loads(response['message']['content'])
+    data = json.loads(response.response)
     print("Extracted data:")
     print(json.dumps(data, indent=2))
 except json.JSONDecodeError:
     print("Failed to parse JSON. Raw output:")
-    print(response['message']['content'])
+    print(response.response)
 ```
 
-**Output**:
-```json
-{
-  "n_samples": 10000,
-  "methods": ["network analysis", "machine learning", "random forest classifier"],
-  "accuracy": 0.76,
-  "domain": "Science of Science"
-}
+This works by activating patterns where "return ONLY valid JSON" preceded JSON-formatted outputs. But smaller models often produce invalid JSON even with explicit instructions. For more reliability, use JSON schema constraints that enforce format during token generation—the model literally cannot generate tokens that violate the schema. Define the schema using Pydantic:
+
+```{python}
+from pydantic import BaseModel
+
+class PaperMetadata(BaseModel):
+    domain: str
+    methods: list[str]
+    n_samples: int | None
+    accuracy: float | None
+
+json_schema = PaperMetadata.model_json_schema()
 ```
 
-By constraining the format to JSON, you can:
-- Process outputs programmatically
-- Build datasets automatically
-- Catch errors when format deviates
-- Integrate LLM outputs into data pipelines
+Then pass the schema directly to the API, which constrains token generation:
 
-::: {.callout-warning}
-## JSON Parsing Reliability
-Smaller models (like Gemma 2B) sometimes produce invalid JSON. Always wrap parsing in try-except blocks and validate outputs. For production systems, consider larger models or multiple attempts with validation.
-:::
+```{python}
+prompt_schema = f"""Extract information from this abstract:
 
-## Core Principle 5: Handle Uncertainty Explicitly
-
-LLMs will confidently make up facts when they don't know the answer. You need to **give them permission to say "I don't know."**
-
-### Example: Checking Paper Existence
+Abstract: {abstract}"""
+```
 
 ```{python}
 #| code-fold: true
-# Bad prompt (encourages hallucination)
+response = ollama.generate(prompt=prompt_schema, format=json_schema, **params_structured)
+
+try:
+    data = json.loads(response.response)
+    metadata = PaperMetadata(**data)
+    print("Extracted and validated data:")
+    print(json.dumps(data, indent=2))
+except (json.JSONDecodeError, ValueError) as e:
+    print(f"Error: {e}")
+    print("Raw output:", response.response)
+```
+
+JSON schema constraints are more reliable than prompt-based requests because they operate at the token level—the model cannot sample tokens that would create invalid JSON. The prompt activates extraction patterns; the schema enforces structure.
+
+::: {.callout-warning}
+## JSON Parsing Reliability
+
+Smaller models (like Gemma 3N) sometimes produce invalid JSON even with schema constraints. Always wrap parsing in try-except blocks and validate outputs. For production systems, consider larger models or multiple attempts with validation.
+:::
+
+## Allowing Uncertainty to Reduce Hallucination
+
+LLMs confidently fabricate facts when they don't know the answer because they optimize for fluency, not truth. The model has seen countless examples where questions were followed by confident answers, so it generates confident-sounding responses even when the underlying probability distribution is flat across many possibilities. The solution: explicitly give the model permission to admit ignorance. Compare a prompt that implicitly demands an answer:
+
+```{python}
 bad_prompt = """Summarize the main findings from the 2023 paper by Johnson et al.
 on quantum community detection in biological networks."""
+```
 
-# Good prompt (allows uncertainty)
+Against a prompt that explicitly allows uncertainty:
+
+```{python}
 good_prompt = """I'm looking for a 2023 paper by Johnson et al. on quantum
 community detection in biological networks.
 
@@ -326,202 +434,82 @@ If you're not certain this paper exists, say "I cannot verify this paper exists"
 and do NOT make up details.
 
 Response:"""
+```
 
-response_bad = ollama.chat(
-    model="gemma2:2b",
-    messages=[{"role": "user", "content": bad_prompt}]
-)
-
-response_good = ollama.chat(
-    model="gemma2:2b",
-    messages=[{"role": "user", "content": good_prompt}]
-)
+```{python}
+#| code-fold: true
+response_bad = ollama.generate(prompt=bad_prompt, **params_llm)
+response_good = ollama.generate(prompt=good_prompt, **params_llm)
 
 print("BAD PROMPT (encourages hallucination):")
-print(response_bad['message']['content'])
+print(response_bad.response)
 print("\nGOOD PROMPT (allows uncertainty):")
-print(response_good['message']['content'])
+print(response_good.response)
 ```
 
-The good prompt explicitly gives the model an "out"—a way to admit uncertainty without failing the task.
-
-**Strategies for handling uncertainty**:
-- Explicitly say "If you don't know, say so"
-- Ask for confidence levels ("How confident are you?")
-- Request citations or sources (though models often still hallucinate)
-- Cross-validate critical information with external sources
-
-## Advanced Technique 1: Role-Playing
-
-Setting a role can dramatically improve output quality by activating relevant patterns in the training data.
-
-```{python}
-#| code-fold: true
-abstract = """
-We propose a novel algorithm for detecting communities in networks with overlapping
-membership. Using non-negative matrix factorization, we decompose the adjacency
-matrix into low-rank factors. Experiments show our method handles overlaps better
-than previous approaches.
-"""
-
-# No role
-no_role = f"Explain this abstract simply:\n{abstract}"
-
-# With role
-with_role = f"""You are a network science professor explaining a paper to first-year
-PhD students who just learned about graphs and matrices but haven't seen community
-detection yet.
-
-Explain this abstract in simple terms, using analogies where helpful:
-
-{abstract}
-
-Explanation:"""
-
-response_no_role = ollama.chat(
-    model="gemma2:2b",
-    messages=[{"role": "user", "content": no_role}]
-)
-
-response_with_role = ollama.chat(
-    model="gemma2:2b",
-    messages=[{"role": "user", "content": with_role}]
-)
-
-print("NO ROLE:")
-print(response_no_role['message']['content'])
-print("\nWITH ROLE:")
-print(response_with_role['message']['content'])
-```
-
-The role-playing prompt produces explanations better tailored to the specified audience.
-
-**Useful roles for research**:
-- "You are a domain expert in [field]..."
-- "You are a critical peer reviewer..."
-- "You are a research librarian helping find sources..."
-- "You are a careful fact-checker..."
-
-## Advanced Technique 2: Iterative Refinement
-
-For complex tasks, break the work into multiple steps with separate prompts.
-
-```{python}
-#| code-fold: true
-abstract = """
-We develop a deep learning model for predicting citation counts from paper abstracts.
-Using BERT embeddings and a regression head, we achieve R²=0.64 on a dataset of
-50,000 computer science papers from 2010-2020. Feature importance analysis reveals
-that novelty and clarity are key predictors. We release our code and dataset.
-"""
-
-# Step 1: Extract key information
-step1_prompt = f"""Extract these fields from the abstract:
-- Problem
-- Method
-- Dataset size and domain
-- Key result (with metric)
-
-Abstract: {abstract}
-
-Extraction:"""
-
-response1 = ollama.chat(
-    model="gemma2:2b",
-    messages=[{"role": "user", "content": step1_prompt}]
-)
-
-extraction = response1['message']['content']
-print("STEP 1 - Extraction:")
-print(extraction)
-
-# Step 2: Identify strengths and weaknesses
-step2_prompt = f"""Based on this paper summary, list 2 strengths and 2 potential
-limitations:
-
-{extraction}
-
-Format:
-Strengths:
-1. ...
-2. ...
-
-Limitations:
-1. ...
-2. ...
-"""
-
-response2 = ollama.chat(
-    model="gemma2:2b",
-    messages=[{"role": "user", "content": step2_prompt}]
-)
-
-print("\nSTEP 2 - Analysis:")
-print(response2['message']['content'])
-```
-
-Iterative refinement:
-- Breaks complex tasks into manageable steps
-- Allows you to validate intermediate outputs
-- Produces more accurate final results
-- Makes debugging easier
+The good prompt activates patterns where explicit permission to admit ignorance preceded honest uncertainty statements. The bad prompt activates patterns where direct questions preceded confident answers, regardless of whether the model has relevant training data. Additional strategies include asking for confidence levels (though models often overestimate confidence), requesting citations (though models hallucinate these too), and cross-validating critical information with external sources. The fundamental issue remains: LLMs have no internal representation of what they "know" versus what they're fabricating.
 
 ::: {.callout-tip}
-## When to Use Multi-Step Prompting
-Use iterative refinement when:
-- The task requires multiple types of reasoning
-- You need to validate intermediate results
-- A single prompt would be too long/complex
-- Different steps benefit from different prompting strategies
+## Be a Good "Boss" to Your LLM
+
+**Let LLMs admit ignorance**: LLMs closely follow your instructions—even when they shouldn't. They often attempt to answer beyond their actual capabilities. Explicitly tell your model: "If you don't know the answer, just say so," or "If you need more information, please ask."
+
+**Encourage critical feedback**: LLMs are trained to be agreeable, which can hinder productive brainstorming or honest critique. Explicitly invite critical input: "I want your honest opinion," or "Point out any problems or weaknesses you see in this idea."
 :::
 
-## Advanced Technique 3: Self-Consistency
 
-For tasks requiring reasoning, generate multiple responses and take the most common answer.
+### Sampling Multiple Times for Consistency
+
+For tasks requiring reasoning, generating multiple responses and selecting the most common answer often improves accuracy. The technique—called **self-consistency**—exploits the fact that correct reasoning tends to converge on the same answer, while hallucinations vary randomly across samples. Define the prompt:
 
 ```{python}
-#| code-fold: true
-prompt = """Three papers study network robustness:
+from collections import Counter
+
+prompt_consistency = """Three papers study network robustness:
 - Paper A: Targeted attacks are most damaging
 - Paper B: Random failures rarely cause collapse
 - Paper C: Hub nodes are critical for robustness
 
 What is the research consensus on network robustness? Give a one-sentence answer.
 """
+```
+
+Generate multiple responses with higher temperature to increase diversity, then identify the most common answer:
+
+```{python}
+#| code-fold: true
+# Use higher temperature for diversity
+params_creative = {"model": "gemma3n:latest", "options": {"temperature": 0.7}}
 
 # Generate 5 responses
 responses = []
 for i in range(5):
-    response = ollama.chat(
-        model="gemma2:2b",
-        messages=[{"role": "user", "content": prompt}],
-        options={"temperature": 0.7}  # Some randomness
-    )
-    answer = response['message']['content']
-    responses.append(answer)
-    print(f"Response {i+1}: {answer}\n")
+    response = ollama.generate(prompt=prompt_consistency, **params_creative)
+    responses.append(response.response.strip())
+    print(f"Response {i+1}: {responses[-1]}\n")
 
 # In practice, you'd programmatically identify the most common theme
 print("The most consistent theme across responses would be selected.")
 ```
 
-Self-consistency works because:
-- Correct reasoning tends to lead to the same answer
-- Hallucinations are often random and inconsistent
-- Averaging over multiple attempts reduces noise
+Self-consistency works because correct reasoning patterns converge toward the same conclusion when sampled multiple times, while fabricated details vary randomly. The tradeoff: generating five responses means five times the API calls, five times the cost, five times the latency. Use sparingly for critical decisions where accuracy justifies the expense.
 
-**Trade-off**: 5x the API calls = 5x the cost/time. Use sparingly for critical decisions.
+::: {.callout-note}
+## Alternative: Tree of Thought
+
+For even more sophisticated exploration, you can use "Tree of Thought" prompting, where the model explicitly explores multiple reasoning paths, evaluates them, and selects the best one. This is more complex to implement but can yield better results for very difficult problems.
+:::
 
 ## Practical Workflow: Building a Paper Classifier
 
-Let's combine techniques to build a complete workflow: classifying papers by methodology (experimental, theoretical, computational, review).
+Let's combine techniques to build a complete workflow:
 
 ```{python}
-#| code-fold: true
-def classify_paper(abstract, examples=None):
-    """Classify a paper's methodology type."""
+# Use low temperature for consistency
+params_classifier = {"model": "gemma3n:latest", "options": {"temperature": 0}}
 
-    # Build prompt with few-shot examples
+def classify_paper(abstract):
+    """Classify a paper's methodology type."""
     prompt = """Classify research papers by methodology type.
 
 Categories:
@@ -555,14 +543,8 @@ Think step by step:
 Classification: ...
 Reasoning: ...
 """
-
-    response = ollama.chat(
-        model="gemma2:2b",
-        messages=[{"role": "user", "content": prompt.format(abstract=abstract)}],
-        options={"temperature": 0}
-    )
-
-    return response['message']['content']
+    response = ollama.generate(prompt=prompt.format(abstract=abstract), **params_classifier)
+    return response.response
 
 # Test with different paper types
 test_abstracts = [
@@ -577,101 +559,12 @@ for abstract in test_abstracts:
     print("-" * 80)
 ```
 
-This workflow uses:
-- **Few-shot learning** (examples)
-- **Chain-of-thought** (step-by-step reasoning)
-- **Constrained format** (Classification + Reasoning)
-- **Low temperature** (consistency)
+This workflow uses: **Few-shot learning** (examples), **Chain-of-thought** (step-by-step reasoning), **Constrained format** (Classification + Reasoning), and **Low temperature** (consistency).
 
-## Prompt Engineering Checklist
+## The Takeaway
 
-Before deploying a prompt on real research data:
+Prompt engineering is not magic—it's deliberate activation of statistical patterns compressed during training. Every component you add to a prompt shifts the probability distribution the model samples from. Instructions activate task-specific patterns. Output formats activate structured-response patterns. Personas activate stylistic patterns. Context disambiguates when multiple patterns compete. Examples demonstrate exact structure. Chain-of-thought activates reasoning-like patterns. Format constraints enforce structure at the token level. Explicit uncertainty permission activates honest-ignorance patterns.
 
-**Clarity**:
-- [ ] Is the task clearly defined?
-- [ ] Are all terms unambiguous?
-- [ ] Is the desired output format specified?
+None of this requires the model to understand what you want. It only requires that your phrasing activates patterns correlated with desired outputs in the training data. You're not communicating intent; you're manipulating probability distributions. Master this, and you can reliably extract value from LLMs for research workflows—summarization, structured extraction, hypothesis generation, literature analysis.
 
-**Examples**:
-- [ ] Do I need few-shot examples?
-- [ ] Are examples diverse enough to cover edge cases?
-- [ ] Do examples show the exact format I want?
-
-**Output**:
-- [ ] Is the output format machine-readable if needed?
-- [ ] Is the length constrained appropriately?
-- [ ] Can I validate the output programmatically?
-
-**Robustness**:
-- [ ] Does the prompt allow for uncertainty?
-- [ ] Have I tested on edge cases?
-- [ ] Does it handle missing information gracefully?
-
-**Efficiency**:
-- [ ] Is the prompt as concise as possible?
-- [ ] Have I removed unnecessary instructions?
-- [ ] Is temperature set appropriately?
-
-## Common Pitfalls and Solutions
-
-| Pitfall | Example | Solution |
-|---------|---------|----------|
-| Too vague | "Analyze this paper" | Specify what to analyze and how |
-| Too long | 1000-word prompt | Break into multiple steps |
-| Assumes knowledge | "Use the Smith method" | Explain or define domain-specific terms |
-| No error handling | Expects perfect input | Handle edge cases explicitly |
-| No validation | Blindly trusts output | Validate format and sanity-check results |
-
-## Temperature and Sampling Parameters
-
-We've mentioned `temperature` several times. Let's clarify what it does:
-
-```{python}
-#| code-fold: true
-prompt = "Name a complex system (just the name, nothing else):"
-
-print("Temperature = 0 (deterministic):")
-for i in range(3):
-    response = ollama.chat(
-        model="gemma2:2b",
-        messages=[{"role": "user", "content": prompt}],
-        options={"temperature": 0}
-    )
-    print(f"  {i+1}. {response['message']['content']}")
-
-print("\nTemperature = 1.0 (creative):")
-for i in range(3):
-    response = ollama.chat(
-        model="gemma2:2b",
-        messages=[{"role": "user", "content": prompt}],
-        options={"temperature": 1.0}
-    )
-    print(f"  {i+1}. {response['message']['content']}")
-```
-
-**Temperature** controls randomness:
-- **0**: Always picks the most probable token (deterministic)
-- **0.3-0.7**: Balanced (default is usually ~0.7)
-- **1.0+**: Very creative, more random
-
-**When to adjust**:
-- **Low temperature (0-0.3)**: Extraction, classification, consistency-critical tasks
-- **Medium temperature (0.5-0.8)**: Summarization, explanation, general usage
-- **High temperature (0.9+)**: Creative brainstorming, idea generation
-
-## The Bigger Picture
-
-You've now learned to **talk to LLMs effectively**. You can:
-- Craft specific, well-structured prompts
-- Use few-shot learning to teach by example
-- Apply chain-of-thought for complex reasoning
-- Extract structured data for research pipelines
-- Handle uncertainty and edge cases gracefully
-
-But a question remains: **how do these models represent and "understand" text internally?** When you send a prompt, the model doesn't see English words—it sees numbers. Millions of numbers arranged in high-dimensional space.
-
-These numbers are called **embeddings**, and they're the foundation of everything LLMs do. Let's unbox the first layer and see how meaning becomes mathematics.
-
----
-
-**Next**: [Embeddings: How Machines Understand Meaning →](embeddings-concepts.qmd)
+But a question remains: how do these models represent text internally? When you send a prompt, the model doesn't see English words—it sees numbers. Millions of numbers arranged in high-dimensional space. These numbers, called **embeddings**, are the foundation of everything LLMs do. Let's unbox the first layer and see how meaning becomes mathematics.
