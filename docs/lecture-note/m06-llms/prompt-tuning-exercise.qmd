@@ -1,0 +1,82 @@
+# Prompt Tuning Exercise
+
+::: {.callout-note appearance="minimal"}
+## Spoiler
+LLMs are deterministic pattern matchers that cannot generate true randomness—but they can be prompted to generate sequences that statistically approximate random distributions by activating patterns where similar constraints preceded statistically valid outputs.
+:::
+
+## The Challenge
+
+LLMs optimize for fluency and pattern matching, not mathematical computation. When asked to generate random numbers, they typically produce sequences that fail statistical tests for randomness—numbers cluster, patterns emerge, distributions skew. The model has seen random numbers in training data, but it has no internal representation of what randomness means. It cannot compute true randomness; it can only recall patterns that look random.
+
+Yet with careful prompting, you can bias the model toward outputs that pass statistical validation. The task: craft a prompt that makes an LLM generate at least 100 normally distributed random numbers (comma-separated, like `0.5,-1.2,0.8,...`) that pass a Kolmogorov-Smirnov test with p-value greater than 0.20. Use Gemma3 27B on [Google AI Studio](https://aistudio.google.com/app/prompts/new_chat) or [OpenRouter](https://openrouter.ai/google/gemma-3-27b-it:free). No external tools—the model must generate the numbers directly from its internal patterns.
+
+The constraint forces you to think about what patterns in the training data correlate with valid statistical outputs. Asking for "just the numbers" eliminates extraneous tokens that disrupt parsing. Requesting the model to "think about how normal distributions work" before generating may activate patterns where reasoning preceded statistically valid sequences. You're not teaching the model statistics; you're activating pre-existing patterns where statistical reasoning preceded appropriate outputs.
+
+
+<div>
+<marimo-iframe data-height="600px" data-show-code="false">
+
+```python
+import marimo as mo
+import altair as alt
+import pandas as pd
+import scipy.stats as stats
+import numpy as np
+```
+
+```python
+text_area = mo.ui.text_area(placeholder = "Enter numbers separated by commas", value = "1,2,3,4,5,6,7,8,9,10")
+button = mo.ui.button("Runt test")
+
+mo.vstack([text_area, button])
+```
+
+```python
+try:
+    numbers = np.array([float(num.strip()) for num in text_area.value.split(",")])
+    if len(numbers) >= 100:
+        # KS test
+        pval = stats.kstest(numbers, stats.norm(loc=0.0, scale=1.0).cdf)[1]
+        test_result = "The numbers are normal distributed (p-value = {:.2f})".format(pval) if pval > 0.20 else "The numbers are not normal distributed (p-value = {:.2f})".format(pval)
+        message = mo.callout(test_result, kind = "success" if pval > 0.20 else "danger")
+    else:
+        message = mo.callout("The number of samples is too small. Need at least 100 samples.", kind = "warn")
+
+    # Convert the numbers to a DataFrame for Altair
+    df = pd.DataFrame({'value': numbers})
+
+    # Create an Altair histogram
+    fig = alt.Chart(df).mark_bar().encode(
+        x=alt.X('value:Q', bin=alt.Bin(maxbins=30)),
+        y='count()'
+    ).properties(
+        title='Histogram of Values'
+    )
+
+    mo.hstack([fig, message])
+except:
+    message = mo.callout("Parse failed. Please check if your input follows the specified format.", kind = "danger")
+    fig = None
+
+mo.hstack([fig, message]) if fig is not None else message
+```
+
+</marimo-iframe>
+</div>
+
+## Generating Structured Visual Code
+
+LLMs can generate syntactically valid code in languages they've seen during training—including SVG, the XML-based vector graphics format. The challenge: prompt Gemma3 27B to generate an SVG diagram of a neural network with specific structural requirements. The network must have same-colored neurons within each layer, connections between all neurons across adjacent layers, and labels for "Input layer," "Hidden layer," and "Output layer."
+
+Test your prompt on [Google AI Studio](https://aistudio.google.com/app/prompts/new_chat) or [OpenRouter](https://openrouter.ai/google/gemma-3-27b-it:free), then paste the generated SVG code into [SVG Viewer](https://www.svgviewer.dev/) to visualize the result. The model has seen countless SVG examples during training, but it has no internal representation of what a neural network diagram "should" look like. It can only pattern match against examples where similar prompts preceded valid SVG structures.
+
+<div style="text-align: center;">
+  <img src="https://www.researchgate.net/publication/329777725/figure/fig2/AS:705569090465794@1545232188535/A-simple-neural-network-diagram-with-one-hidden-layer.ppm" width="50%">
+</div>
+
+## The Takeaway
+
+These exercises expose the boundary between pattern matching and computation. LLMs cannot perform true mathematical operations or generate genuine randomness—they can only recall patterns that resemble these capabilities. Success requires understanding what patterns in training data correlate with desired outputs, then crafting prompts that activate those patterns. You're not teaching the model to compute; you're navigating its compressed representation of how computation appears in text. The constraint is the teacher: when the model fails, the failure reveals what patterns are missing or weak in its training data.
+
+<script src="https://cdn.jsdelivr.net/npm/@marimo-team/marimo-snippets@1"></script>
