@@ -10,11 +10,11 @@ filters:
 
 ## The Naive Intuition: One Word, One Vector
 
-Here's the worldview that dominated natural language processing for decades: words have meanings, and we can capture those meanings as vectors. The word "bank" becomes a point in 300-dimensional space, represented as `[0.23, -0.45, 0.67, 0.12, ...]`. This **static embedding** philosophy assumes that the essence of "bank" can be distilled into a single coordinate in vector space, independent of context. It's the linguistic equivalent of saying a person has one personality, regardless of whether they're at a funeral or a party.
+For many years, natural language processing treated words as having fixed meanings. We represented each word—like "bank"—as a single vector of numbers, such as `[0.23, -0.45, 0.67, ...]`. This approach, called **static embeddings**, assumed a word’s meaning could be fully captured with one point in space, no matter where the word appeared.
 
-This idea has deep roots. J.R. Firth declared in 1957: "You shall know a word by the company it keeps." This is **distributional semantics**—meaning emerges from co-occurrence statistics. If "bank" appears near "loan," "mortgage," "interest," you infer *financial institution*. If it appears near "river," "shore," "erosion," you infer *geological feature*. Word2vec, introduced in 2013, operationalized this idea by training neural networks to predict a word from its neighbors. The learned vectors encoded co-occurrence patterns beautifully.
+The foundation for this dates back to 1957, when J.R. Firth said: "You shall know a word by the company it keeps." This led to **distributional semantics**: a word's meaning comes from the other words nearby. If "bank" is near "mortgage" or "loan," we assume it means a financial place; if it's near "river" or "shore," we assume a landform. Word2vec (2013) brought this to life by learning word vectors from their neighbors.
 
-But here's the fundamental limitation that haunted this entire paradigm: Word2vec still outputs **one vector per word type**. It collapses all contexts into a single average representation. The word "bank" gets the same vector whether it's surrounded by "money" or "river." This is like computing the average height of all humans and declaring that everyone is 5'7". The average exists, but it obscures the very differences that matter.
+But the big problem: Word2vec still gives just **one vector per word**. "Bank" has the same representation in "I deposited money at the bank" as in "We had a picnic by the bank." It averages all possible uses together—like saying everyone is 5'7" tall—hiding the differences that matter most.
 
 ## The Theoretical Failure: When Averaging Destroys the Signal
 
@@ -26,15 +26,113 @@ $$
 
 where $w_i$ are weights and $\vec{v}_i$ are word embeddings. The **null hypothesis** suggests setting all weights uniformly: $w_i = 1/N$, producing a simple bag-of-words average. This should, in theory, create context-aware representations.
 
-But reality is not so egalitarian. Consider the signal-to-noise problem in "I deposited money at the bank." This sentence contains seven words. The most critical context—"deposited" and "money"—is provided by just two of them. The remaining words—"I," "at," "the"—offer little relevant information, as these are classic examples of **function words** (articles, prepositions) that typically carry minimal semantic weight.
+First, let's see how "bank" sits in embedding space relative to its potential neighbors:
 
-If meaning were distributed evenly, we could simply average all word vectors and call it a day. But real language is not so uniform. Some words contribute far more to contextual meaning than others: verbs and nouns might demand our attention, while fillers and grammatical glue quietly fade into the background. Uniform averaging, however, grants every word equal influence—treating "the" as equally informative as "deposited." This mathematical fairness produces semantic nonsense. What we need instead is a mechanism that **selectively attends** to the words that matter most, tuning down the hum of the less relevant ones.
+<div>
+<marimo-iframe data-height="400px" data-show-code="false">
+
+```python
+import marimo as mo
+import numpy as np
+import pandas as pd
+import altair as alt
+```
+
+```python
+words = ["bank", "money", "loan", "river", "shore"]
+embeddings = np.array([
+    [0.0, 0.0],  # bank (center)
+    [-0.8, -0.3],  # money
+    [-0.7, -0.6],  # loan
+    [0.7, -0.5],  # river
+    [0.6, -0.7],  # shore
+]) * 2
+
+df = pd.DataFrame({"word": words, "x": embeddings[:, 0], "y": embeddings[:, 1]})
+
+chart = alt.Chart(df).mark_circle(size=200).encode(
+    x=alt.X('x:Q', scale=alt.Scale(domain=[-2, 2]), title='Dimension 1'),
+    y=alt.Y('y:Q', scale=alt.Scale(domain=[-2, 2]), title='Dimension 2'),
+    text='word:N',
+    tooltip=['word:N', 'x:Q', 'y:Q']
+).properties(width=300, height=300, title="Static Word Embeddings")
+
+text = chart.mark_text(dy=-15, fontSize=14, fontWeight='bold').encode(text='word:N')
+
+chart + text
+```
+
+</marimo-iframe>
+</div>
+
+Notice "bank" sits neutrally between financial terms (money, loan) on the left and geographical terms (river, shore) on the right. Now try manually adjusting the weights to contextualize "bank":
+
+<div>
+<marimo-iframe data-height="500px" data-show-code="false">
+
+```python
+import marimo as mo
+import numpy as np
+import pandas as pd
+import altair as alt
+```
+
+```python
+words = ["bank", "money", "loan", "river", "shore"]
+embeddings = np.array([
+    [0.0, 0.0],  # bank (center)
+    [-0.8, -0.3],  # money
+    [-0.7, -0.6],  # loan
+    [0.7, -0.5],  # river
+    [0.6, -0.7],  # shore
+]) * 2
+
+slider_bank = mo.ui.slider(0, 1, 0.01, value=1.0, label="Bank Weight")
+slider_money = mo.ui.slider(0, 1, 0.01, value=0, label="Money Weight")
+slider_loan = mo.ui.slider(0, 1, 0.01, value=0, label="Loan Weight")
+slider_river = mo.ui.slider(0, 1, 0.01, value=0, label="River Weight")
+slider_shore = mo.ui.slider(0, 1, 0.01, value=0, label="Shore Weight")
+
+sliders = mo.vstack([slider_bank, slider_money, slider_loan, slider_river, slider_shore])
+```
+
+```python
+weights = np.array([slider_bank.value, slider_money.value, slider_loan.value, slider_river.value, slider_shore.value])
+total = weights.sum()
+if total > 0:
+    weights = weights / total
+    new_vec = embeddings.T @ weights
+else:
+    new_vec = np.zeros(2)
+
+df_orig = pd.DataFrame({"word": words, "x": embeddings[:, 0], "y": embeddings[:, 1], "type": ["Original"] * 5})
+df_new = pd.DataFrame({"word": ["Contextualized Bank"], "x": [new_vec[0]], "y": [new_vec[1]], "type": ["Contextualized"]})
+df_combined = pd.concat([df_orig, df_new])
+
+chart = alt.Chart(df_combined).mark_circle(size=200).encode(
+    x=alt.X('x:Q', scale=alt.Scale(domain=[-2, 2]), title='Dimension 1'),
+    y=alt.Y('y:Q', scale=alt.Scale(domain=[-2, 2]), title='Dimension 2'),
+    color=alt.Color('type:N', scale=alt.Scale(domain=['Original', 'Contextualized'], range=['#dadada', '#ff7f0e'])),
+    tooltip=['word:N', 'x:Q', 'y:Q']
+).properties(width=350, height=350, title="Contextualized Bank via Weighted Mixing")
+
+text = chart.mark_text(dy=-15, fontSize=14, fontWeight='bold').encode(text='word:N', color=alt.value('black'))
+
+mo.hstack([sliders, chart + text], align="center")
+```
+
+</marimo-iframe>
+</div>
+
+But real sentences aren't fair: not all words matter equally. In "I deposited money at the bank," the crucial clues are "deposited" and "money"—while words like "I," "at," and "the" add almost nothing to the meaning. If we just averaged every word together, we'd treat them all as equally important, which blurs the message. Instead, we need a way to pay extra attention to the words that really matter, and tune down the ones that don’t.
 
 ## The Hidden Mechanism: Query-Key Matching as Information Retrieval
 
-The breakthrough came from reframing contextualization as a **search problem**. Imagine you're in a library—your sentence—looking for information to understand "bank." You have a question (what context do I need?). Each book has a label advertising what it offers: "I offer financial concepts" or "I offer spatial concepts." You compute relevance by matching your question against each book's label. Then you read the relevant books, weighting your attention based on those relevance scores. This is **attention**.
+The key insight is to treat context as a **search**. Picture a sentence as a library where each word is a book. To understand "bank," you ask: "Which words around me are most relevant?" You quickly check each book's label—some offer financial clues, others talk about geography. You focus most on the ones that match what you're looking for. This process of deciding which words to pay attention to, based on their relevance, is called **attention**.
 
-The mathematical implementation is elegant. For each word $i$ in a sentence with embedding $\vec{x}_i$, create three linear transformations:
+![](../figs/transformer-attention.jpg)
+
+For each word $i$ in a sentence with embedding $\vec{x}_i$, we create three linear transformations:
 
 $$
 \begin{align}
@@ -44,6 +142,9 @@ $$
 \end{align}
 $$
 
+Why have three transformations instead of just using $\vec{x}_i$? Because each plays a different role: the Query asks "what am I looking for?", the Key answers "what do I have?", and the Value says "here’s my info." By training $W_Q$, $W_K$, and $W_V$ separately, the model learns to focus on the right parts of the sentence for each word, mixing the most relevant information together.
+
+
 To contextualize word $i$, compute its relevance to all other words $j$ via **dot products**: $\text{score}(i, j) = \vec{q}_i \cdot \vec{k}_j$. High scores indicate strong relevance; low scores indicate noise to ignore. These scores are converted to probabilities using softmax:
 
 $$
@@ -52,48 +153,54 @@ $$
 
 The division by $\sqrt{d}$ (where $d$ is the embedding dimension) is a scaling factor that prevents vanishing gradients during training. Finally, compute the **contextualized representation** as a weighted sum: $\text{contextualized}_i = \sum_j w_{ij} \vec{v}_j$.
 
-Why three separate transformations instead of using $\vec{x}_i$ directly? Because we want **learned specialization**. The matrices $W_Q$, $W_K$, $W_V$ are trained end-to-end to extract different aspects of meaning. The Query transformation learns "what to search for," the Key transformation learns "what to advertise," and the Value transformation learns "what to provide." This is the **mechanism of selective attention**: queries and keys determine *where* to look; values determine *what* to retrieve.
+Explore how different Query and Key transformations produce different attention patterns. Adjust the transformation parameters below to see how $W_Q$ and $W_K$ matrices change which words attend to which:
 
-```{python}
-#| code-fold: true
-#| fig-cap: "Interactive visualization showing how Query and Key transformations affect attention weights. Adjust the transformation parameters to see how different Q and K matrices change which words attend to each other."
+<div>
+<marimo-iframe data-height="700px" data-show-code="false">
 
+```python
+import marimo as mo
 import numpy as np
 import pandas as pd
 import altair as alt
+```
 
-# Word data
+```python
 words = ["bank", "money", "loan", "river", "shore"]
 embeddings = np.array([
-    [0.0, 0.0],    # bank (center)
+    [0.0, 0.0],  # bank (center)
     [-0.8, -0.3],  # money
     [-0.7, -0.6],  # loan
-    [0.7, -0.5],   # river
-    [0.6, -0.7],   # shore
+    [0.7, -0.5],  # river
+    [0.6, -0.7],  # shore
 ]) * 2
 
-# Default transformations for demonstration
-# Query transformation: slight rotation and scaling
-theta_q = np.radians(30)
-W_Q = np.array([[1.2, 0], [0, 0.8]]) @ np.array([
-    [np.cos(theta_q), -np.sin(theta_q)],
-    [np.sin(theta_q), np.cos(theta_q)]
-])
-b_Q = np.array([0.2, -0.1])
+# Query controls
+q_scale_x = mo.ui.slider(-2, 2, 0.1, value=1.0, label="Q Scale X")
+q_scale_y = mo.ui.slider(-2, 2, 0.1, value=1.0, label="Q Scale Y")
+q_rotate = mo.ui.slider(-180, 180, 5, value=0, label="Q Rotate (deg)")
 
-# Key transformation: different rotation
-theta_k = np.radians(-45)
-W_K = np.array([[0.9, 0], [0, 1.3]]) @ np.array([
-    [np.cos(theta_k), -np.sin(theta_k)],
-    [np.sin(theta_k), np.cos(theta_k)]
-])
-b_K = np.array([-0.1, 0.3])
+# Key controls
+k_scale_x = mo.ui.slider(-2, 2, 0.1, value=1.0, label="K Scale X")
+k_scale_y = mo.ui.slider(-2, 2, 0.1, value=1.0, label="K Scale Y")
+k_rotate = mo.ui.slider(-180, 180, 5, value=0, label="K Rotate (deg)")
 
-# Compute Q and K
-Q = embeddings @ W_Q + b_Q
-K = embeddings @ W_K + b_K
+q_controls = mo.vstack([mo.md("**Query Transformation (W_Q)**"), q_scale_x, q_scale_y, q_rotate])
+k_controls = mo.vstack([mo.md("**Key Transformation (W_K)**"), k_scale_x, k_scale_y, k_rotate])
+```
 
-# Compute attention scores and weights
+```python
+def transform_embeddings(emb, scale_x, scale_y, rotate_deg):
+    theta = np.radians(rotate_deg)
+    rot_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+    scale_matrix = np.diag([scale_x, scale_y])
+    W = rot_matrix @ scale_matrix
+    return emb @ W.T
+
+Q = transform_embeddings(embeddings, q_scale_x.value, q_scale_y.value, q_rotate.value)
+K = transform_embeddings(embeddings, k_scale_x.value, k_scale_y.value, k_rotate.value)
+
+# Compute attention scores
 scores = Q @ K.T
 exp_scores = np.exp(scores - np.max(scores, axis=1, keepdims=True))
 attention_weights = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
@@ -101,98 +208,49 @@ attention_weights = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
 # Create visualizations
 df_q = pd.DataFrame({"word": words, "x": Q[:, 0], "y": Q[:, 1]})
 df_k = pd.DataFrame({"word": words, "x": K[:, 0], "y": K[:, 1]})
-df_orig = pd.DataFrame({"word": words, "x": embeddings[:, 0], "y": embeddings[:, 1]})
 
-# Query scatter plot
-vmax = 3
-chart_q = alt.Chart(df_orig).mark_circle(size=100, color="#dadada", opacity=0.8).encode(
-    x=alt.X("x", scale=alt.Scale(domain=[-vmax, vmax])),
-    y=alt.Y("y", scale=alt.Scale(domain=[-vmax, vmax]))
-) + alt.Chart(df_q).mark_circle(size=100, color="#ff7f0e").encode(
-    x=alt.X("x", scale=alt.Scale(domain=[-vmax, vmax])),
-    y=alt.Y("y", scale=alt.Scale(domain=[-vmax, vmax])),
-    tooltip=["word"]
-) + alt.Chart(df_q).mark_text(align="left", dx=10, dy=-5, fontSize=12).encode(
-    x="x", y="y", text="word"
-)
+chart_q = alt.Chart(df_q).mark_circle(size=100).encode(
+    x=alt.X('x:Q', scale=alt.Scale(domain=[-4, 4]), title='Q1'),
+    y=alt.Y('y:Q', scale=alt.Scale(domain=[-4, 4]), title='Q2'),
+    tooltip=['word:N']
+).properties(width=200, height=200, title="Query Space")
+text_q = chart_q.mark_text(dy=-12, fontSize=10, fontWeight='bold').encode(text='word:N')
 
-# Key scatter plot
-chart_k = alt.Chart(df_orig).mark_circle(size=100, color="#dadada", opacity=0.8).encode(
-    x=alt.X("x", scale=alt.Scale(domain=[-vmax, vmax])),
-    y=alt.Y("y", scale=alt.Scale(domain=[-vmax, vmax]))
-) + alt.Chart(df_k).mark_circle(size=100, color="#2ca02c").encode(
-    x=alt.X("x", scale=alt.Scale(domain=[-vmax, vmax])),
-    y=alt.Y("y", scale=alt.Scale(domain=[-vmax, vmax])),
-    tooltip=["word"]
-) + alt.Chart(df_k).mark_text(align="left", dx=10, dy=-5, fontSize=12).encode(
-    x="x", y="y", text="word"
-)
+chart_k = alt.Chart(df_k).mark_circle(size=100).encode(
+    x=alt.X('x:Q', scale=alt.Scale(domain=[-4, 4]), title='K1'),
+    y=alt.Y('y:Q', scale=alt.Scale(domain=[-4, 4]), title='K2'),
+    tooltip=['word:N']
+).properties(width=200, height=200, title="Key Space")
+text_k = chart_k.mark_text(dy=-12, fontSize=10, fontWeight='bold').encode(text='word:N')
 
-# Attention heatmap
+# Heatmap
 heatmap_data = []
-for i, row in enumerate(attention_weights):
-    for j, value in enumerate(row):
-        heatmap_data.append({"Query": words[i], "Key": words[j], "Weight": value})
-df_heat = pd.DataFrame(heatmap_data)
+for i, word_i in enumerate(words):
+    for j, word_j in enumerate(words):
+        heatmap_data.append({"Query": word_i, "Key": word_j, "Weight": attention_weights[i, j]})
+df_heatmap = pd.DataFrame(heatmap_data)
 
-chart_heat = alt.Chart(df_heat).mark_rect().encode(
-    x=alt.X("Key:N", title="Attends To (Keys)"),
-    y=alt.Y("Query:N", title="Word (Queries)"),
-    color=alt.Color("Weight:Q", scale=alt.Scale(scheme="blues"), legend=None),
-    tooltip=["Query", "Key", alt.Tooltip("Weight", format=".3f")]
-) + alt.Chart(df_heat).mark_text(baseline="middle").encode(
-    x="Key:N", y="Query:N",
-    text=alt.Text("Weight:Q", format=".2f"),
-    color=alt.condition(alt.datum.Weight > 0.5, alt.value("white"), alt.value("black"))
-)
+heatmap = alt.Chart(df_heatmap).mark_rect().encode(
+    x=alt.X('Key:N', title='Key Word'),
+    y=alt.Y('Query:N', title='Query Word'),
+    color=alt.Color('Weight:Q', scale=alt.Scale(scheme='blues'), title='Attention'),
+    tooltip=['Query:N', 'Key:N', alt.Tooltip('Weight:Q', format='.3f')]
+).properties(width=250, height=250, title="Attention Weights (Softmax)")
 
-# Layout
-(chart_q.properties(width=250, height=250, title="Query Vectors (Q)") |
- chart_k.properties(width=250, height=250, title="Key Vectors (K)")) & \
-chart_heat.properties(width=400, height=300, title="Attention Weights = softmax(Q·K^T)")
+mo.vstack([
+    mo.hstack([q_controls, k_controls], align="center"),
+    mo.hstack([chart_q + text_q, chart_k + text_k, heatmap], align="center")
+])
 ```
+
+</marimo-iframe>
+</div>
 
 Now scale this up. **Every word** in a sentence needs to attend to **every other word**. For "The cat sat on the mat" (six words), we compute a $6 \times 6$ **attention matrix** $A$, where $A_{ij} = \text{softmax}(\vec{q}_i \cdot \vec{k}_j)$. Rows represent words asking for context (Queries); columns represent words providing context (Keys). Each cell $(i,j)$ indicates how much word $i$ attends to word $j$. Each row sums to 1—it's a probability distribution over context words.
 
-```{python}
-#| code-fold: true
-#| fig-cap: "Self-attention heatmap: Notice how 'sat' (row 3) strongly attends to 'cat' (subject) and 'mat' (object)—syntactic relationships discovered purely from data."
-#| fig-width: 8
-#| fig-height: 6
-
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-words = ["The", "cat", "sat", "on", "the", "mat"]
-n = len(words)
-
-# Realistic attention pattern (learned, not programmed)
-attention = np.array([
-    [0.6, 0.2, 0.1, 0.05, 0.03, 0.02],  # "The" → "cat" (determiner-noun)
-    [0.1, 0.5, 0.3, 0.05, 0.03, 0.02],  # "cat" → self + "sat"
-    [0.05, 0.4, 0.2, 0.15, 0.05, 0.15], # "sat" → "cat" (subj) + "mat" (obj)
-    [0.05, 0.1, 0.2, 0.3, 0.15, 0.20],  # "on" → contextual spread
-    [0.03, 0.05, 0.05, 0.1, 0.5, 0.27], # "the" → "mat"
-    [0.02, 0.05, 0.15, 0.2, 0.15, 0.43] # "mat" → self + "on"
-])
-
-sns.set_style("white")
-fig, ax = plt.subplots(figsize=(8, 6))
-sns.heatmap(attention, annot=True, fmt=".2f",
-            xticklabels=words, yticklabels=words,
-            cmap="YlOrRd", vmin=0, vmax=0.6,
-            cbar_kws={'label': 'Attention Weight'}, ax=ax)
-ax.set_xlabel("Attends To (Keys)", fontsize=12, fontweight='bold')
-ax.set_ylabel("Word (Queries)", fontsize=12, fontweight='bold')
-ax.set_title("Self-Attention Matrix: Learned Syntax", fontsize=14, fontweight='bold')
-plt.tight_layout()
-plt.show()
-```
-
-Look at row 3, corresponding to "sat." The verb attends most strongly to "cat" (0.40) and "mat" (0.15)—the subject and object of the sentence. The diagonal shows moderate values because words always attend somewhat to themselves. Determiners like "The" attend to their nouns ("cat"). These patterns are **emergent, not programmed**. No one told the model "verbs should attend to subjects." The patterns emerge from backpropagation on prediction tasks. The model discovers grammar as a side effect of learning to predict words.
-
 But here's the final complication: **one attention matrix captures one type of relationship**. Language is multidimensional. There are syntactic relationships (subject-verb-object), semantic relationships (conceptual similarity between "cat" and "mat" as physical objects), positional relationships (local word order), and pragmatic relationships (coreference, where "her" links to "scientist"). A single attention mechanism can't capture all of these simultaneously.
+
+![](../figs/transformer-multihead-attention.jpg)
 
 The solution is **multi-head attention**: run multiple attention mechanisms in parallel, each with its own $W_Q$, $W_K$, $W_V$ matrices. Mathematically, $\text{MultiHead}(X) = \text{Concat}(\text{head}_1, \text{head}_2, \ldots, \text{head}_h) W^O$. Each head learns a different attention pattern. Modern transformers use 8-16 heads per layer: BERT uses 12, GPT-3 uses 96. It's like having twelve different experts analyze the sentence simultaneously—one focusing on syntax, one on semantics, one on coreference—and then combining their insights through a learned linear transformation.
 
@@ -272,3 +330,5 @@ Return to where we started: the "bank" problem. Static embeddings treated "bank"
 This entire architecture emerged from asking a single question: *What's the simplest mechanism that lets representations adapt to context?* The answer was weighted mixing where the weights come from comparing what each word needs (Query) against what other words offer (Key). Everything else—multi-head attention, layer normalization, feed-forward networks—is engineering to make that core idea scale to 175 billion parameters and beyond.
 
 **Next**: [Word Embeddings: Where It Started](word-embeddings.qmd)
+
+<script src="https://cdn.jsdelivr.net/npm/@marimo-team/marimo-snippets@1"></script>
