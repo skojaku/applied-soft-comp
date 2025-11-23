@@ -1,4 +1,5 @@
 ---
+title: "Transformers"
 jupytext:
   formats: md:myst
   text_representation:
@@ -8,6 +9,10 @@ kernelspec:
   display_name: Python 3
   language: python
   name: python3
+execute:
+  enabled: true
+filters:
+  - marimo-team/marimo
 ---
 
 # Transformers
@@ -95,7 +100,200 @@ $$
 
 where $Q \in \mathbb{R}^{n \times d_k}$, $K \in \mathbb{R}^{n \times d_k}$, and $V \in \mathbb{R}^{n \times d_v}$ represent matrices containing $n$ query, key, and value vectors respectively.
 
+The interactive visualization below demonstrates how learned Query and Key transformations produce different attention patterns. Adjust the transformation parameters to see how different $W_Q$ and $W_K$ matrices change which words attend to which:
+
+<div>
+<marimo-iframe data-height="700px" data-show-code="false">
+
+```python
+import marimo as mo
+import numpy as np
+import pandas as pd
+import altair as alt
+```
+
+```python
+words = ["bank", "money", "loan", "river", "shore"]
+embeddings = np.array([
+    [0.0, 0.0],  # bank (center)
+    [-0.8, -0.3],  # money
+    [-0.7, -0.6],  # loan
+    [0.7, -0.5],  # river
+    [0.6, -0.7],  # shore
+]) * 2
+
+# Query controls
+q_scale_x = mo.ui.slider(-2, 2, 0.1, value=1.0, label="Q Scale X")
+q_scale_y = mo.ui.slider(-2, 2, 0.1, value=1.0, label="Q Scale Y")
+q_rotate = mo.ui.slider(-180, 180, 5, value=0, label="Q Rotate (deg)")
+
+# Key controls
+k_scale_x = mo.ui.slider(-2, 2, 0.1, value=1.0, label="K Scale X")
+k_scale_y = mo.ui.slider(-2, 2, 0.1, value=1.0, label="K Scale Y")
+k_rotate = mo.ui.slider(-180, 180, 5, value=0, label="K Rotate (deg)")
+
+q_controls = mo.vstack([mo.md("**Query Transformation**"), q_scale_x, q_scale_y, q_rotate])
+k_controls = mo.vstack([mo.md("**Key Transformation**"), k_scale_x, k_scale_y, k_rotate])
+```
+
+```python
+def transform_embeddings(emb, scale_x, scale_y, rotate_deg):
+    theta = np.radians(rotate_deg)
+    rot_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+    scale_matrix = np.diag([scale_x, scale_y])
+    W = rot_matrix @ scale_matrix
+    return emb @ W.T
+
+Q = transform_embeddings(embeddings, q_scale_x.value, q_scale_y.value, q_rotate.value)
+K = transform_embeddings(embeddings, k_scale_x.value, k_scale_y.value, k_rotate.value)
+
+# Compute attention scores
+scores = Q @ K.T
+exp_scores = np.exp(scores - np.max(scores, axis=1, keepdims=True))
+attention_weights = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
+
+# Create visualizations
+df_q = pd.DataFrame({"word": words, "x": Q[:, 0], "y": Q[:, 1]})
+df_k = pd.DataFrame({"word": words, "x": K[:, 0], "y": K[:, 1]})
+
+chart_q = alt.Chart(df_q).mark_circle(size=100).encode(
+    x=alt.X('x:Q', scale=alt.Scale(domain=[-4, 4]), title='Q1'),
+    y=alt.Y('y:Q', scale=alt.Scale(domain=[-4, 4]), title='Q2'),
+    tooltip=['word:N']
+).properties(width=200, height=200, title="Query (Q)")
+text_q = chart_q.mark_text(dy=-12, fontSize=10, fontWeight='bold').encode(text='word:N')
+
+chart_k = alt.Chart(df_k).mark_circle(size=100).encode(
+    x=alt.X('x:Q', scale=alt.Scale(domain=[-4, 4]), title='K1'),
+    y=alt.Y('y:Q', scale=alt.Scale(domain=[-4, 4]), title='K2'),
+    tooltip=['word:N']
+).properties(width=200, height=200, title="Key (K)")
+text_k = chart_k.mark_text(dy=-12, fontSize=10, fontWeight='bold').encode(text='word:N')
+
+# Heatmap
+heatmap_data = []
+for i, word_i in enumerate(words):
+    for j, word_j in enumerate(words):
+        heatmap_data.append({"Query": word_i, "Key": word_j, "Weight": attention_weights[i, j]})
+df_heatmap = pd.DataFrame(heatmap_data)
+
+heatmap = alt.Chart(df_heatmap).mark_rect().encode(
+    x=alt.X('Key:N', title='Key Word'),
+    y=alt.Y('Query:N', title='Query Word'),
+    color=alt.Color('Weight:Q', scale=alt.Scale(scheme='blues'), title='Attention'),
+    tooltip=['Query:N', 'Key:N', alt.Tooltip('Weight:Q', format='.3f')]
+).properties(width=250, height=250, title="Attention Weights (Softmax)")
+
+mo.vstack([
+    mo.hstack([q_controls, k_controls], align="center"),
+    mo.hstack([chart_q + text_q, chart_k + text_k, heatmap], align="center")
+])
+```
+
+</marimo-iframe>
+</div>
+
 The output is a **contextualized vector** for each word—a representation that changes based on surrounding context. The word "bank" produces different vectors in "river bank" versus "financial bank" because the attention mechanism incorporates information from neighboring words.
+
+To see this in action, consider how we might contextualize the word "bank" by mixing it with surrounding words. The visualization below shows static word embeddings—notice how "bank" sits neutrally between financial terms (money, loan) and geographical terms (river, shore).
+
+<div>
+<marimo-iframe data-height="400px" data-show-code="false">
+
+```python
+import marimo as mo
+import numpy as np
+import pandas as pd
+import altair as alt
+```
+
+```python
+words = ["bank", "money", "loan", "river", "shore"]
+embeddings = np.array([
+    [0.0, 0.0],  # bank (center)
+    [-0.8, -0.3],  # money
+    [-0.7, -0.6],  # loan
+    [0.7, -0.5],  # river
+    [0.6, -0.7],  # shore
+]) * 2
+
+df = pd.DataFrame({"word": words, "x": embeddings[:, 0], "y": embeddings[:, 1]})
+
+chart = alt.Chart(df).mark_circle(size=200).encode(
+    x=alt.X('x:Q', scale=alt.Scale(domain=[-2, 2]), title='Dimension 1'),
+    y=alt.Y('y:Q', scale=alt.Scale(domain=[-2, 2]), title='Dimension 2'),
+    text='word:N',
+    tooltip=['word:N', 'x:Q', 'y:Q']
+).properties(width=300, height=300, title="Static Word Embeddings")
+
+text = chart.mark_text(dy=-15, fontSize=14, fontWeight='bold').encode(text='word:N')
+
+chart + text
+```
+
+</marimo-iframe>
+</div>
+
+Now, try adjusting the weights below to create a contextualized version of "bank." If the sentence is "Money in bank," adjust the weights to shift "bank" toward "money." If the sentence is "River bank," shift it toward "river."
+
+<div>
+<marimo-iframe data-height="500px" data-show-code="false">
+
+```python
+import marimo as mo
+import numpy as np
+import pandas as pd
+import altair as alt
+```
+
+```python
+words = ["bank", "money", "loan", "river", "shore"]
+embeddings = np.array([
+    [0.0, 0.0],  # bank (center)
+    [-0.8, -0.3],  # money
+    [-0.7, -0.6],  # loan
+    [0.7, -0.5],  # river
+    [0.6, -0.7],  # shore
+]) * 2
+
+slider_bank = mo.ui.slider(0, 1, 0.01, value=1.0, label="Bank Weight")
+slider_money = mo.ui.slider(0, 1, 0.01, value=0, label="Money Weight")
+slider_loan = mo.ui.slider(0, 1, 0.01, value=0, label="Loan Weight")
+slider_river = mo.ui.slider(0, 1, 0.01, value=0, label="River Weight")
+slider_shore = mo.ui.slider(0, 1, 0.01, value=0, label="Shore Weight")
+
+sliders = mo.vstack([slider_bank, slider_money, slider_loan, slider_river, slider_shore])
+```
+
+```python
+weights = np.array([slider_bank.value, slider_money.value, slider_loan.value, slider_river.value, slider_shore.value])
+total = weights.sum()
+if total > 0:
+    weights = weights / total
+    new_vec = embeddings.T @ weights
+else:
+    new_vec = np.zeros(2)
+
+df_orig = pd.DataFrame({"word": words, "x": embeddings[:, 0], "y": embeddings[:, 1], "type": ["Original"] * 5})
+df_new = pd.DataFrame({"word": ["Contextualized Bank"], "x": [new_vec[0]], "y": [new_vec[1]], "type": ["Contextualized"]})
+df_combined = pd.concat([df_orig, df_new])
+
+chart = alt.Chart(df_combined).mark_circle(size=200).encode(
+    x=alt.X('x:Q', scale=alt.Scale(domain=[-2, 2]), title='Dimension 1'),
+    y=alt.Y('y:Q', scale=alt.Scale(domain=[-2, 2]), title='Dimension 2'),
+    color=alt.Color('type:N', scale=alt.Scale(domain=['Original', 'Contextualized'], range=['#dadada', '#ff7f0e'])),
+    tooltip=['word:N', 'x:Q', 'y:Q']
+).properties(width=350, height=350, title="Contextualized Bank")
+
+text = chart.mark_text(dy=-15, fontSize=14, fontWeight='bold').encode(text='word:N', color=alt.value('black'))
+
+mo.hstack([sliders, chart + text], align="center")
+```
+
+</marimo-iframe>
+</div>
+
+This manual weighting captures the intuition, but how do we learn which words to attend to? This is where queries and keys come in.
 
 ### Multi-Head Attention: Multiple Perspectives
 
@@ -306,3 +504,5 @@ Transformers replaced sequential computation with parallel relationship mapping.
 :style: unsrt
 :filter: docname in docnames
 ```
+
+<script src="https://cdn.jsdelivr.net/npm/@marimo-team/marimo-snippets@1"></script>
