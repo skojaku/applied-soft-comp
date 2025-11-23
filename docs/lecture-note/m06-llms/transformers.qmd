@@ -105,16 +105,16 @@ The interactive visualization below demonstrates how learned Query and Key trans
 <div>
 <marimo-iframe data-height="700px" data-show-code="false">
 
-```python
+```python {marimo}
 import marimo as mo
 import numpy as np
 import pandas as pd
 import altair as alt
 ```
 
-```python
-words = ["bank", "money", "loan", "river", "shore"]
-embeddings = np.array([
+```python {marimo}
+attention_words = ["bank", "money", "loan", "river", "shore"]
+attention_embeddings = np.array([
     [0.0, 0.0],  # bank (center)
     [-0.8, -0.3],  # money
     [-0.7, -0.6],  # loan
@@ -136,48 +136,48 @@ q_controls = mo.vstack([mo.md("**Query Transformation**"), q_scale_x, q_scale_y,
 k_controls = mo.vstack([mo.md("**Key Transformation**"), k_scale_x, k_scale_y, k_rotate])
 ```
 
-```python
-def transform_embeddings(emb, scale_x, scale_y, rotate_deg):
+```python {marimo}
+def _transform_embeddings(emb, scale_x, scale_y, rotate_deg):
     theta = np.radians(rotate_deg)
     rot_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
     scale_matrix = np.diag([scale_x, scale_y])
     W = rot_matrix @ scale_matrix
     return emb @ W.T
 
-Q = transform_embeddings(embeddings, q_scale_x.value, q_scale_y.value, q_rotate.value)
-K = transform_embeddings(embeddings, k_scale_x.value, k_scale_y.value, k_rotate.value)
+Q = _transform_embeddings(attention_embeddings, q_scale_x.value, q_scale_y.value, q_rotate.value)
+K = _transform_embeddings(attention_embeddings, k_scale_x.value, k_scale_y.value, k_rotate.value)
 
 # Compute attention scores
-scores = Q @ K.T
-exp_scores = np.exp(scores - np.max(scores, axis=1, keepdims=True))
-attention_weights = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
+_scores = Q @ K.T
+_exp_scores = np.exp(_scores - np.max(_scores, axis=1, keepdims=True))
+attention_weights = _exp_scores / np.sum(_exp_scores, axis=1, keepdims=True)
 
 # Create visualizations
-df_q = pd.DataFrame({"word": words, "x": Q[:, 0], "y": Q[:, 1]})
-df_k = pd.DataFrame({"word": words, "x": K[:, 0], "y": K[:, 1]})
+_df_q = pd.DataFrame({"word": attention_words, "x": Q[:, 0], "y": Q[:, 1]})
+_df_k = pd.DataFrame({"word": attention_words, "x": K[:, 0], "y": K[:, 1]})
 
-chart_q = alt.Chart(df_q).mark_circle(size=100).encode(
+_chart_q = alt.Chart(_df_q).mark_circle(size=100).encode(
     x=alt.X('x:Q', scale=alt.Scale(domain=[-4, 4]), title='Q1'),
     y=alt.Y('y:Q', scale=alt.Scale(domain=[-4, 4]), title='Q2'),
     tooltip=['word:N']
 ).properties(width=200, height=200, title="Query (Q)")
-text_q = chart_q.mark_text(dy=-12, fontSize=10, fontWeight='bold').encode(text='word:N')
+_text_q = _chart_q.mark_text(dy=-12, fontSize=10, fontWeight='bold').encode(text='word:N')
 
-chart_k = alt.Chart(df_k).mark_circle(size=100).encode(
+_chart_k = alt.Chart(_df_k).mark_circle(size=100).encode(
     x=alt.X('x:Q', scale=alt.Scale(domain=[-4, 4]), title='K1'),
     y=alt.Y('y:Q', scale=alt.Scale(domain=[-4, 4]), title='K2'),
     tooltip=['word:N']
 ).properties(width=200, height=200, title="Key (K)")
-text_k = chart_k.mark_text(dy=-12, fontSize=10, fontWeight='bold').encode(text='word:N')
+_text_k = _chart_k.mark_text(dy=-12, fontSize=10, fontWeight='bold').encode(text='word:N')
 
 # Heatmap
-heatmap_data = []
-for i, word_i in enumerate(words):
-    for j, word_j in enumerate(words):
-        heatmap_data.append({"Query": word_i, "Key": word_j, "Weight": attention_weights[i, j]})
-df_heatmap = pd.DataFrame(heatmap_data)
+_heatmap_data = []
+for i, word_i in enumerate(attention_words):
+    for j, word_j in enumerate(attention_words):
+        _heatmap_data.append({"Query": word_i, "Key": word_j, "Weight": attention_weights[i, j]})
+_df_heatmap = pd.DataFrame(_heatmap_data)
 
-heatmap = alt.Chart(df_heatmap).mark_rect().encode(
+_heatmap = alt.Chart(_df_heatmap).mark_rect().encode(
     x=alt.X('Key:N', title='Key Word'),
     y=alt.Y('Query:N', title='Query Word'),
     color=alt.Color('Weight:Q', scale=alt.Scale(scheme='blues'), title='Attention'),
@@ -186,7 +186,7 @@ heatmap = alt.Chart(df_heatmap).mark_rect().encode(
 
 mo.vstack([
     mo.hstack([q_controls, k_controls], align="center"),
-    mo.hstack([chart_q + text_q, chart_k + text_k, heatmap], align="center")
+    mo.hstack([_chart_q + _text_q, _chart_k + _text_k, _heatmap], align="center")
 ])
 ```
 
@@ -200,16 +200,9 @@ To see this in action, consider how we might contextualize the word "bank" by mi
 <div>
 <marimo-iframe data-height="400px" data-show-code="false">
 
-```python
-import marimo as mo
-import numpy as np
-import pandas as pd
-import altair as alt
-```
-
-```python
-words = ["bank", "money", "loan", "river", "shore"]
-embeddings = np.array([
+```python {marimo}
+static_words = ["bank", "money", "loan", "river", "shore"]
+static_embeddings = np.array([
     [0.0, 0.0],  # bank (center)
     [-0.8, -0.3],  # money
     [-0.7, -0.6],  # loan
@@ -217,18 +210,18 @@ embeddings = np.array([
     [0.6, -0.7],  # shore
 ]) * 2
 
-df = pd.DataFrame({"word": words, "x": embeddings[:, 0], "y": embeddings[:, 1]})
+_df_static = pd.DataFrame({"word": static_words, "x": static_embeddings[:, 0], "y": static_embeddings[:, 1]})
 
-chart = alt.Chart(df).mark_circle(size=200).encode(
+_chart_static = alt.Chart(_df_static).mark_circle(size=200).encode(
     x=alt.X('x:Q', scale=alt.Scale(domain=[-2, 2]), title='Dimension 1'),
     y=alt.Y('y:Q', scale=alt.Scale(domain=[-2, 2]), title='Dimension 2'),
     text='word:N',
     tooltip=['word:N', 'x:Q', 'y:Q']
 ).properties(width=300, height=300, title="Static Word Embeddings")
 
-text = chart.mark_text(dy=-15, fontSize=14, fontWeight='bold').encode(text='word:N')
+_text_static = _chart_static.mark_text(dy=-15, fontSize=14, fontWeight='bold').encode(text='word:N')
 
-chart + text
+_chart_static + _text_static
 ```
 
 </marimo-iframe>
@@ -239,16 +232,9 @@ Now, try adjusting the weights below to create a contextualized version of "bank
 <div>
 <marimo-iframe data-height="500px" data-show-code="false">
 
-```python
-import marimo as mo
-import numpy as np
-import pandas as pd
-import altair as alt
-```
-
-```python
-words = ["bank", "money", "loan", "river", "shore"]
-embeddings = np.array([
+```python {marimo}
+context_words = ["bank", "money", "loan", "river", "shore"]
+context_embeddings = np.array([
     [0.0, 0.0],  # bank (center)
     [-0.8, -0.3],  # money
     [-0.7, -0.6],  # loan
@@ -262,32 +248,32 @@ slider_loan = mo.ui.slider(0, 1, 0.01, value=0, label="Loan Weight")
 slider_river = mo.ui.slider(0, 1, 0.01, value=0, label="River Weight")
 slider_shore = mo.ui.slider(0, 1, 0.01, value=0, label="Shore Weight")
 
-sliders = mo.vstack([slider_bank, slider_money, slider_loan, slider_river, slider_shore])
+context_sliders = mo.vstack([slider_bank, slider_money, slider_loan, slider_river, slider_shore])
 ```
 
-```python
-weights = np.array([slider_bank.value, slider_money.value, slider_loan.value, slider_river.value, slider_shore.value])
-total = weights.sum()
-if total > 0:
-    weights = weights / total
-    new_vec = embeddings.T @ weights
+```python {marimo}
+_weights = np.array([slider_bank.value, slider_money.value, slider_loan.value, slider_river.value, slider_shore.value])
+_total = _weights.sum()
+if _total > 0:
+    _weights = _weights / _total
+    _new_vec = context_embeddings.T @ _weights
 else:
-    new_vec = np.zeros(2)
+    _new_vec = np.zeros(2)
 
-df_orig = pd.DataFrame({"word": words, "x": embeddings[:, 0], "y": embeddings[:, 1], "type": ["Original"] * 5})
-df_new = pd.DataFrame({"word": ["Contextualized Bank"], "x": [new_vec[0]], "y": [new_vec[1]], "type": ["Contextualized"]})
-df_combined = pd.concat([df_orig, df_new])
+_df_orig = pd.DataFrame({"word": context_words, "x": context_embeddings[:, 0], "y": context_embeddings[:, 1], "type": ["Original"] * 5})
+_df_new = pd.DataFrame({"word": ["Contextualized Bank"], "x": [_new_vec[0]], "y": [_new_vec[1]], "type": ["Contextualized"]})
+_df_combined = pd.concat([_df_orig, _df_new])
 
-chart = alt.Chart(df_combined).mark_circle(size=200).encode(
+_chart_context = alt.Chart(_df_combined).mark_circle(size=200).encode(
     x=alt.X('x:Q', scale=alt.Scale(domain=[-2, 2]), title='Dimension 1'),
     y=alt.Y('y:Q', scale=alt.Scale(domain=[-2, 2]), title='Dimension 2'),
     color=alt.Color('type:N', scale=alt.Scale(domain=['Original', 'Contextualized'], range=['#dadada', '#ff7f0e'])),
     tooltip=['word:N', 'x:Q', 'y:Q']
 ).properties(width=350, height=350, title="Contextualized Bank")
 
-text = chart.mark_text(dy=-15, fontSize=14, fontWeight='bold').encode(text='word:N', color=alt.value('black'))
+_text_context = _chart_context.mark_text(dy=-15, fontSize=14, fontWeight='bold').encode(text='word:N', color=alt.value('black'))
 
-mo.hstack([sliders, chart + text], align="center")
+mo.hstack([context_sliders, _chart_context + _text_context], align="center")
 ```
 
 </marimo-iframe>
