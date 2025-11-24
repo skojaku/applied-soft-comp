@@ -26,96 +26,106 @@ $$
 
 where $w_i$ are weights and $\vec{v}_i$ are word embeddings. The **null hypothesis** suggests setting all weights uniformly: $w_i = 1/N$, producing a simple bag-of-words average. This should, in theory, create context-aware representations.
 
-First, let's see how "bank" sits in embedding space relative to its potential neighbors:
+Consider the following example. Notice that "bank" sits neutrally between financial terms (money) and geographical terms (river). Now try manually adjusting the weights to contextualize "bank":
 
-<div>
-<marimo-iframe data-height="400px" data-show-code="false">
+```{ojs}
+//| echo: false
 
-```python {marimo}
-import marimo as mo
-import numpy as np
-import pandas as pd
-import altair as alt
+viewof bankWeight = Inputs.range([0, 1], {value: 1.0, step: 0.01, label: "Bank Weight"})
+viewof moneyWeight = Inputs.range([0, 1], {value: 0, step: 0.01, label: "Money Weight"})
+viewof riverWeight = Inputs.range([0, 1], {value: 0, step: 0.01, label: "River Weight"})
+
+{
+  // Word embeddings in 2D space
+  const contextWords = ["bank", "money", "river"];
+  const contextEmbeddings = [
+    [0.0, 0.0],   // bank (center)
+    [-1.6, -0.6], // money (financial, left)
+    [1.4, -1.0]   // river (geographical, right)
+  ];
+
+  // Calculate weighted average
+  const weights = [bankWeight, moneyWeight, riverWeight];
+  const total = weights.reduce((a, b) => a + b, 0);
+  const normalizedWeights = total > 0 ? weights.map(w => w / total) : [0, 0, 0];
+
+  const newVec = [
+    normalizedWeights[0] * contextEmbeddings[0][0] +
+    normalizedWeights[1] * contextEmbeddings[1][0] +
+    normalizedWeights[2] * contextEmbeddings[2][0],
+    normalizedWeights[0] * contextEmbeddings[0][1] +
+    normalizedWeights[1] * contextEmbeddings[1][1] +
+    normalizedWeights[2] * contextEmbeddings[2][1]
+  ];
+
+  // Prepare data for visualization
+  const originalData = contextWords.map((word, i) => ({
+    word: word,
+    x: contextEmbeddings[i][0],
+    y: contextEmbeddings[i][1],
+    type: "Original"
+  }));
+
+  const contextualizedData = [{
+    word: "Contextualized Bank",
+    x: newVec[0],
+    y: newVec[1],
+    type: "Contextualized"
+  }];
+
+  const data = [...originalData, ...contextualizedData];
+
+  // Create visualization
+  const width = 450;
+  const height = 450;
+  const margin = {top: 40, right: 20, bottom: 50, left: 60};
+
+  return Plot.plot({
+    width: width,
+    height: height,
+    marginTop: margin.top,
+    marginRight: margin.right,
+    marginBottom: margin.bottom,
+    marginLeft: margin.left,
+    x: {
+      domain: [-2, 2],
+      label: "Dimension 1"
+    },
+    y: {
+      domain: [-2, 2],
+      label: "Dimension 2"
+    },
+    color: {
+      domain: ["Original", "Contextualized"],
+      range: ["#dadada", "#ff7f0e"],
+      legend: true
+    },
+    marks: [
+      Plot.dot(data, {
+        x: "x",
+        y: "y",
+        fill: "type",
+        r: 8,
+        tip: true
+      }),
+      Plot.text(data, {
+        x: "x",
+        y: "y",
+        text: "word",
+        dy: -15,
+        fontSize: 12,
+        fontWeight: "bold"
+      }),
+      Plot.text([{x: 0, y: 2.3}], {
+        x: "x",
+        y: "y",
+        text: () => `Weights: Bank=${normalizedWeights[0].toFixed(2)}, Money=${normalizedWeights[1].toFixed(2)}, River=${normalizedWeights[2].toFixed(2)}`,
+        fontSize: 11
+      })
+    ]
+  });
+}
 ```
-
-```python {marimo}
-static_words = ["bank", "money", "loan", "river", "shore"]
-static_embeddings = np.array([
-    [0.0, 0.0],  # bank (center)
-    [-0.8, -0.3],  # money
-    [-0.7, -0.6],  # loan
-    [0.7, -0.5],  # river
-    [0.6, -0.7],  # shore
-]) * 2
-
-_df_static = pd.DataFrame({"word": static_words, "x": static_embeddings[:, 0], "y": static_embeddings[:, 1]})
-
-_chart_static = alt.Chart(_df_static).mark_circle(size=200).encode(
-    x=alt.X('x:Q', scale=alt.Scale(domain=[-2, 2]), title='Dimension 1'),
-    y=alt.Y('y:Q', scale=alt.Scale(domain=[-2, 2]), title='Dimension 2'),
-    text='word:N',
-    tooltip=['word:N', 'x:Q', 'y:Q']
-).properties(width=300, height=300, title="Static Word Embeddings")
-
-_text_static = _chart_static.mark_text(dy=-15, fontSize=14, fontWeight='bold').encode(text='word:N')
-
-_chart_static + _text_static
-```
-
-</marimo-iframe>
-</div>
-
-Notice "bank" sits neutrally between financial terms (money, loan) on the left and geographical terms (river, shore) on the right. Now try manually adjusting the weights to contextualize "bank":
-
-<div>
-<marimo-iframe data-height="500px" data-show-code="false">
-
-```python {marimo}
-context_words = ["bank", "money", "loan", "river", "shore"]
-context_embeddings = np.array([
-    [0.0, 0.0],  # bank (center)
-    [-0.8, -0.3],  # money
-    [-0.7, -0.6],  # loan
-    [0.7, -0.5],  # river
-    [0.6, -0.7],  # shore
-]) * 2
-
-slider_bank = mo.ui.slider(0, 1, 0.01, value=1.0, label="Bank Weight")
-slider_money = mo.ui.slider(0, 1, 0.01, value=0, label="Money Weight")
-slider_loan = mo.ui.slider(0, 1, 0.01, value=0, label="Loan Weight")
-slider_river = mo.ui.slider(0, 1, 0.01, value=0, label="River Weight")
-slider_shore = mo.ui.slider(0, 1, 0.01, value=0, label="Shore Weight")
-
-context_sliders = mo.vstack([slider_bank, slider_money, slider_loan, slider_river, slider_shore])
-```
-
-```python {marimo}
-_weights = np.array([slider_bank.value, slider_money.value, slider_loan.value, slider_river.value, slider_shore.value])
-_total = _weights.sum()
-if _total > 0:
-    _weights = _weights / _total
-    _new_vec = context_embeddings.T @ _weights
-else:
-    _new_vec = np.zeros(2)
-
-_df_orig = pd.DataFrame({"word": context_words, "x": context_embeddings[:, 0], "y": context_embeddings[:, 1], "type": ["Original"] * 5})
-_df_new = pd.DataFrame({"word": ["Contextualized Bank"], "x": [_new_vec[0]], "y": [_new_vec[1]], "type": ["Contextualized"]})
-_df_combined = pd.concat([_df_orig, _df_new])
-
-_chart_context = alt.Chart(_df_combined).mark_circle(size=200).encode(
-    x=alt.X('x:Q', scale=alt.Scale(domain=[-2, 2]), title='Dimension 1'),
-    y=alt.Y('y:Q', scale=alt.Scale(domain=[-2, 2]), title='Dimension 2'),
-    color=alt.Color('type:N', scale=alt.Scale(domain=['Original', 'Contextualized'], range=['#dadada', '#ff7f0e'])),
-    tooltip=['word:N', 'x:Q', 'y:Q']
-).properties(width=350, height=350, title="Contextualized Bank via Weighted Mixing")
-
-_text_context = _chart_context.mark_text(dy=-15, fontSize=14, fontWeight='bold').encode(text='word:N', color=alt.value('black'))
-
-mo.hstack([context_sliders, _chart_context + _text_context], align="center")
-```
-
-</marimo-iframe>
-</div>
 
 But real sentences aren't fair: not all words matter equally. In "I deposited money at the bank," the crucial clues are "deposited" and "money"—while words like "I," "at," and "the" add almost nothing to the meaning. If we just averaged every word together, we'd treat them all as equally important, which blurs the message. Instead, we need a way to pay extra attention to the words that really matter, and tune down the ones that don’t.
 
@@ -148,10 +158,7 @@ The division by $\sqrt{d}$ (where $d$ is the embedding dimension) is a scaling f
 
 Explore how different Query and Key transformations produce different attention patterns. Adjust the transformation parameters below to see how $W_Q$ and $W_K$ matrices change which words attend to which:
 
-<div>
-<marimo-iframe data-height="700px" data-show-code="false">
-
-```python {marimo}
+```python {.marimo}
 attention_words = ["bank", "money", "loan", "river", "shore"]
 attention_embeddings = np.array([
     [0.0, 0.0],  # bank (center)
@@ -175,7 +182,7 @@ q_controls = mo.vstack([mo.md("**Query Transformation (W_Q)**"), q_scale_x, q_sc
 k_controls = mo.vstack([mo.md("**Key Transformation (W_K)**"), k_scale_x, k_scale_y, k_rotate])
 ```
 
-```python {marimo}
+```python {.marimo}
 def _transform_embeddings(emb, scale_x, scale_y, rotate_deg):
     theta = np.radians(rotate_deg)
     rot_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
@@ -229,9 +236,6 @@ mo.vstack([
 ])
 ```
 
-</marimo-iframe>
-</div>
-
 Now scale this up. **Every word** in a sentence needs to attend to **every other word**. For "The cat sat on the mat" (six words), we compute a $6 \times 6$ **attention matrix** $A$, where $A_{ij} = \text{softmax}(\vec{q}_i \cdot \vec{k}_j)$. Rows represent words asking for context (Queries); columns represent words providing context (Keys). Each cell $(i,j)$ indicates how much word $i$ attends to word $j$. Each row sums to 1—it's a probability distribution over context words.
 
 But here's the final complication: **one attention matrix captures one type of relationship**. Language is multidimensional. There are syntactic relationships (subject-verb-object), semantic relationships (conceptual similarity between "cat" and "mat" as physical objects), positional relationships (local word order), and pragmatic relationships (coreference, where "her" links to "scientist"). A single attention mechanism can't capture all of these simultaneously.
@@ -272,7 +276,6 @@ Consider a concrete example of how attention captures linguistic structure. Take
 #| fig-width: 8
 #| fig-height: 6
 
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
