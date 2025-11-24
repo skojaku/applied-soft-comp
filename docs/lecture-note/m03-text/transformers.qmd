@@ -288,8 +288,10 @@ Explore how different Query and Key transformations produce different attention 
     { name: "river", vector: [0.5, 1.5] }
   ];
 
-  // Create plot container
-  const plotContainer = document.createElement("div");
+  // Create plot containers
+  const qPlotContainer = document.createElement("div");
+  const kPlotContainer = document.createElement("div");
+  const vPlotContainer = document.createElement("div");
 
   // Function to transform vector
   function transformVector(vec, scaleX, scaleY, rotateDeg) {
@@ -317,40 +319,54 @@ Explore how different Query and Key transformations produce different attention 
     const vScaleY = vScaleYSlider.slider.value();
     const vRotate = vRotateSlider.slider.value();
 
-    // Prepare data for visualization
-    const data = [];
+    // Prepare data for each plot
+    const originalData = originalVectors.map(item => ({
+      name: item.name,
+      x: item.vector[0],
+      y: item.vector[1],
+      type: "Original"
+    }));
 
-    // Add all original vectors
-    originalVectors.forEach(item => {
-      data.push({
-        name: item.name,
-        x: item.vector[0],
-        y: item.vector[1],
-        type: "Original"
-      });
-    });
-
-    // Apply transformations to each vector
-    originalVectors.forEach(item => {
+    const qData = originalVectors.map(item => {
       const qVec = transformVector(item.vector, qScaleX, qScaleY, qRotate);
-      const kVec = transformVector(item.vector, kScaleX, kScaleY, kRotate);
-      const vVec = transformVector(item.vector, vScaleX, vScaleY, vRotate);
-
-      data.push(
-        { name: `q_${item.name}`, x: qVec[0], y: qVec[1], type: "Query" },
-        { name: `k_${item.name}`, x: kVec[0], y: kVec[1], type: "Key" },
-        { name: `v_${item.name}`, x: vVec[0], y: vVec[1], type: "Value" }
-      );
+      return {
+        name: `q_${item.name}`,
+        x: qVec[0],
+        y: qVec[1],
+        type: "Query"
+      };
     });
 
-    // Clear and update plot
-    d3.select(plotContainer).selectAll("*").remove();
+    const kData = originalVectors.map(item => {
+      const kVec = transformVector(item.vector, kScaleX, kScaleY, kRotate);
+      return {
+        name: `k_${item.name}`,
+        x: kVec[0],
+        y: kVec[1],
+        type: "Key"
+      };
+    });
 
-    // Create visualization
-    const plot = Plot.plot({
-      width: 400,
-      height: 400,
-      marginTop: 60,
+    const vData = originalVectors.map(item => {
+      const vVec = transformVector(item.vector, vScaleX, vScaleY, vRotate);
+      return {
+        name: `v_${item.name}`,
+        x: vVec[0],
+        y: vVec[1],
+        type: "Value"
+      };
+    });
+
+    // Clear and update plots
+    d3.select(qPlotContainer).selectAll("*").remove();
+    d3.select(kPlotContainer).selectAll("*").remove();
+    d3.select(vPlotContainer).selectAll("*").remove();
+
+    // Create Query plot
+    const qPlot = Plot.plot({
+      width: 250,
+      height: 250,
+      marginTop: 40,
       marginRight: 20,
       marginBottom: 50,
       marginLeft: 60,
@@ -359,86 +375,209 @@ Explore how different Query and Key transformations produce different attention 
         color: "black"
       },
       x: {
-        domain: [-2.5, 2.5],
+        domain: [-3, 3],
         label: "Dimension 1",
         grid: true,
         ticks: 10
       },
       y: {
-        domain: [-2.5, 2.5],
+        domain: [-3, 3],
         label: "Dimension 2",
         grid: true,
         ticks: 10
       },
-      color: {
-        domain: ["Original", "Query", "Key", "Value"],
-        range: ["#666666", "#4682b4", "#2e8b57", "#d2691e"]
-      },
       marks: [
-        // Origin point
         Plot.dot([{x: 0, y: 0}], {
           x: "x",
           y: "y",
           r: 3,
           fill: "black"
         }),
-        // Arrows from origin to vectors
-        Plot.arrow(data, {
+        Plot.arrow([...originalData, ...qData], {
           x1: 0,
           y1: 0,
           x2: "x",
           y2: "y",
           stroke: "type",
           strokeWidth: 2,
-          headLength: 10
+          headLength: 8
         }),
-        // Vector endpoint dots
-        Plot.dot(data, {
+        Plot.dot([...originalData, ...qData], {
           x: "x",
           y: "y",
           fill: "type",
           r: 5,
           tip: true
         }),
-        // Labels
-        Plot.text(data, {
+        Plot.text([...originalData, ...qData], {
           x: "x",
           y: "y",
           text: "name",
-          dy: -15,
-          fontSize: 11,
+          dy: -12,
+          fontSize: 9,
           fontWeight: "bold",
           fill: "black"
         }),
-        // Custom legend at top center
-        Plot.dot([
-          {x: -1.8, y: 2.8, color: "#666666"},
-          {x: -0.6, y: 2.8, color: "#4682b4"},
-          {x: 0.6, y: 2.8, color: "#2e8b57"},
-          {x: 1.8, y: 2.8, color: "#d2691e"}
-        ], {
+        Plot.text([{ x: 0, y: 3.4 }], {
           x: "x",
           y: "y",
-          fill: "color",
-          r: 5
-        }),
-        Plot.text([
-          {x: -1.5, y: 2.8, label: "Original"},
-          {x: -0.3, y: 2.8, label: "Query"},
-          {x: 0.9, y: 2.8, label: "Key"},
-          {x: 2.1, y: 2.8, label: "Value"}
-        ], {
-          x: "x",
-          y: "y",
-          text: "label",
-          fontSize: 10,
-          fill: "black",
-          textAnchor: "start"
+          text: () => "Query Space",
+          fontSize: 12,
+          fontWeight: "bold",
+          fill: "black"
         })
-      ]
+      ],
+      color: {
+        domain: ["Original", "Query"],
+        range: ["#666666", "#4682b4"]
+      }
     });
 
-    d3.select(plotContainer).node().appendChild(plot);
+    // Create Key plot
+    const kPlot = Plot.plot({
+      width: 250,
+      height: 250,
+      marginTop: 40,
+      marginRight: 20,
+      marginBottom: 50,
+      marginLeft: 60,
+      style: {
+        background: "white",
+        color: "black"
+      },
+      x: {
+        domain: [-3, 3],
+        label: "Dimension 1",
+        grid: true,
+        ticks: 10
+      },
+      y: {
+        domain: [-3, 3],
+        label: "Dimension 2",
+        grid: true,
+        ticks: 10
+      },
+      marks: [
+        Plot.dot([{x: 0, y: 0}], {
+          x: "x",
+          y: "y",
+          r: 3,
+          fill: "black"
+        }),
+        Plot.arrow([...originalData, ...kData], {
+          x1: 0,
+          y1: 0,
+          x2: "x",
+          y2: "y",
+          stroke: "type",
+          strokeWidth: 2,
+          headLength: 8
+        }),
+        Plot.dot([...originalData, ...kData], {
+          x: "x",
+          y: "y",
+          fill: "type",
+          r: 5,
+          tip: true
+        }),
+        Plot.text([...originalData, ...kData], {
+          x: "x",
+          y: "y",
+          text: "name",
+          dy: -12,
+          fontSize: 9,
+          fontWeight: "bold",
+          fill: "black"
+        }),
+        Plot.text([{ x: 0, y: 3.4 }], {
+          x: "x",
+          y: "y",
+          text: () => "Key Space",
+          fontSize: 12,
+          fontWeight: "bold",
+          fill: "black"
+        })
+      ],
+      color: {
+        domain: ["Original", "Key"],
+        range: ["#666666", "#2e8b57"]
+      }
+    });
+
+    // Create Value plot
+    const vPlot = Plot.plot({
+      width: 250,
+      height: 250,
+      marginTop: 40,
+      marginRight: 20,
+      marginBottom: 50,
+      marginLeft: 60,
+      style: {
+        background: "white",
+        color: "black"
+      },
+      x: {
+        domain: [-3, 3],
+        label: "Dimension 1",
+        grid: true,
+        ticks: 10
+      },
+      y: {
+        domain: [-3, 3],
+        label: "Dimension 2",
+        grid: true,
+        ticks: 10
+      },
+      marks: [
+        Plot.dot([{x: 0, y: 0}], {
+          x: "x",
+          y: "y",
+          r: 3,
+          fill: "black"
+        }),
+        Plot.arrow([...originalData, ...vData], {
+          x1: 0,
+          y1: 0,
+          x2: "x",
+          y2: "y",
+          stroke: "type",
+          strokeWidth: 2,
+          headLength: 8
+        }),
+        Plot.dot([...originalData, ...vData], {
+          x: "x",
+          y: "y",
+          fill: "type",
+          r: 5,
+          tip: true
+        }),
+        Plot.text([...originalData, ...vData], {
+          x: "x",
+          y: "y",
+          text: "name",
+          dy: -12,
+          fontSize: 9,
+          fontWeight: "bold",
+          fill: "black"
+        }),
+        Plot.text([{ x: 0, y: 3.4 }], {
+          x: "x",
+          y: "y",
+          text: () => "Value Space",
+          fontSize: 12,
+          fontWeight: "bold",
+          fill: "black"
+        })
+      ],
+      color: {
+        domain: ["Original", "Value"],
+        range: ["#666666", "#d2691e"]
+      }
+    });
+
+    d3.select(qPlotContainer).node().appendChild(qPlot);
+    d3.select(kPlotContainer).node().appendChild(kPlot);
+    d3.select(vPlotContainer).node().appendChild(vPlot);
   }
 
   // Add event listeners to sliders
@@ -476,8 +615,10 @@ Explore how different Query and Key transformations produce different attention 
         ${vRotateSlider.node}
       </div>
     </div>
-    <div>
-      ${plotContainer}
+    <div style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
+      ${qPlotContainer}
+      ${kPlotContainer}
+      ${vPlotContainer}
     </div>
   </div>`;
 }
