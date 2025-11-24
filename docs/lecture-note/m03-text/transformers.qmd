@@ -271,26 +271,33 @@ Explore how different Query and Key transformations produce different attention 
   }
 
   // Create sliders for Q, K, V transformations
-  const qScaleSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "Q Scale");
+  const qScaleXSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "Q Scale X");
+  const qScaleYSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "Q Scale Y");
   const qRotateSlider = createQKVSlider(-180, 180, 5, 150, 0, "Q Rotate (deg)");
-  const kScaleSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "K Scale");
+  const kScaleXSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "K Scale X");
+  const kScaleYSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "K Scale Y");
   const kRotateSlider = createQKVSlider(-180, 180, 5, 150, 0, "K Rotate (deg)");
-  const vScaleSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "V Scale");
+  const vScaleXSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "V Scale X");
+  const vScaleYSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "V Scale Y");
   const vRotateSlider = createQKVSlider(-180, 180, 5, 150, 0, "V Rotate (deg)");
 
-  // Original word vector (bank)
-  const originalVector = [1.0, 0.5];
+  // Original word vectors (bank, money, river)
+  const originalVectors = [
+    { name: "bank", vector: [1.5, 0.5] },
+    { name: "money", vector: [1.8, 0.8] },
+    { name: "river", vector: [0.5, 1.5] }
+  ];
 
   // Create plot container
   const plotContainer = document.createElement("div");
 
   // Function to transform vector
-  function transformVector(vec, scale, rotateDeg) {
+  function transformVector(vec, scaleX, scaleY, rotateDeg) {
     const theta = (rotateDeg * Math.PI) / 180;
     const cos = Math.cos(theta);
     const sin = Math.sin(theta);
-    const scaledX = vec[0] * scale;
-    const scaledY = vec[1] * scale;
+    const scaledX = vec[0] * scaleX;
+    const scaledY = vec[1] * scaleY;
     return [
       scaledX * cos - scaledY * sin,
       scaledX * sin + scaledY * cos
@@ -300,25 +307,41 @@ Explore how different Query and Key transformations produce different attention 
   // Function to update visualization
   function update() {
     // Get current slider values
-    const qScale = qScaleSlider.slider.value();
+    const qScaleX = qScaleXSlider.slider.value();
+    const qScaleY = qScaleYSlider.slider.value();
     const qRotate = qRotateSlider.slider.value();
-    const kScale = kScaleSlider.slider.value();
+    const kScaleX = kScaleXSlider.slider.value();
+    const kScaleY = kScaleYSlider.slider.value();
     const kRotate = kRotateSlider.slider.value();
-    const vScale = vScaleSlider.slider.value();
+    const vScaleX = vScaleXSlider.slider.value();
+    const vScaleY = vScaleYSlider.slider.value();
     const vRotate = vRotateSlider.slider.value();
 
-    // Apply transformations
-    const qVec = transformVector(originalVector, qScale, qRotate);
-    const kVec = transformVector(originalVector, kScale, kRotate);
-    const vVec = transformVector(originalVector, vScale, vRotate);
-
     // Prepare data for visualization
-    const data = [
-      { name: "Original (x)", x: originalVector[0], y: originalVector[1], type: "Original" },
-      { name: "Query (q)", x: qVec[0], y: qVec[1], type: "Query" },
-      { name: "Key (k)", x: kVec[0], y: kVec[1], type: "Key" },
-      { name: "Value (v)", x: vVec[0], y: vVec[1], type: "Value" }
-    ];
+    const data = [];
+
+    // Add all original vectors
+    originalVectors.forEach(item => {
+      data.push({
+        name: item.name,
+        x: item.vector[0],
+        y: item.vector[1],
+        type: "Original"
+      });
+    });
+
+    // Apply transformations to each vector
+    originalVectors.forEach(item => {
+      const qVec = transformVector(item.vector, qScaleX, qScaleY, qRotate);
+      const kVec = transformVector(item.vector, kScaleX, kScaleY, kRotate);
+      const vVec = transformVector(item.vector, vScaleX, vScaleY, vRotate);
+
+      data.push(
+        { name: `q_${item.name}`, x: qVec[0], y: qVec[1], type: "Query" },
+        { name: `k_${item.name}`, x: kVec[0], y: kVec[1], type: "Key" },
+        { name: `v_${item.name}`, x: vVec[0], y: vVec[1], type: "Value" }
+      );
+    });
 
     // Clear and update plot
     d3.select(plotContainer).selectAll("*").remove();
@@ -419,11 +442,14 @@ Explore how different Query and Key transformations produce different attention 
   }
 
   // Add event listeners to sliders
-  qScaleSlider.slider.on("onchange", update);
+  qScaleXSlider.slider.on("onchange", update);
+  qScaleYSlider.slider.on("onchange", update);
   qRotateSlider.slider.on("onchange", update);
-  kScaleSlider.slider.on("onchange", update);
+  kScaleXSlider.slider.on("onchange", update);
+  kScaleYSlider.slider.on("onchange", update);
   kRotateSlider.slider.on("onchange", update);
-  vScaleSlider.slider.on("onchange", update);
+  vScaleXSlider.slider.on("onchange", update);
+  vScaleYSlider.slider.on("onchange", update);
   vRotateSlider.slider.on("onchange", update);
 
   // Initial render
@@ -433,17 +459,20 @@ Explore how different Query and Key transformations produce different attention 
     <div style="display: flex; flex-direction: column; gap: 20px;">
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <div style="font-weight: bold; margin-bottom: 3px;">Query (W_Q)</div>
-        ${qScaleSlider.node}
+        ${qScaleXSlider.node}
+        ${qScaleYSlider.node}
         ${qRotateSlider.node}
       </div>
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <div style="font-weight: bold; margin-bottom: 3px;">Key (W_K)</div>
-        ${kScaleSlider.node}
+        ${kScaleXSlider.node}
+        ${kScaleYSlider.node}
         ${kRotateSlider.node}
       </div>
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <div style="font-weight: bold; margin-bottom: 3px;">Value (W_V)</div>
-        ${vScaleSlider.node}
+        ${vScaleXSlider.node}
+        ${vScaleYSlider.node}
         ${vRotateSlider.node}
       </div>
     </div>
