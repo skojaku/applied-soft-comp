@@ -31,9 +31,7 @@ Consider the following example. Notice that "bank" sits neutrally between financ
 ```{ojs}
 //| echo: false
 
-viewof bankWeight = Inputs.range([0, 1], {value: 1.0, step: 0.01, label: "Bank Weight"})
-viewof moneyWeight = Inputs.range([0, 1], {value: 0, step: 0.01, label: "Money Weight"})
-viewof riverWeight = Inputs.range([0, 1], {value: 0, step: 0.01, label: "River Weight"})
+d3 = require("d3@7", "d3-simple-slider@1")
 
 {
   // Word embeddings in 2D space
@@ -43,6 +41,11 @@ viewof riverWeight = Inputs.range([0, 1], {value: 0, step: 0.01, label: "River W
     [-1.6, -0.6], // money (financial, left)
     [1.4, -1.0]   // river (geographical, right)
   ];
+
+  // Mutable state for weights
+  const bankWeight = Mutable(1.0);
+  const moneyWeight = Mutable(0.0);
+  const riverWeight = Mutable(0.0);
 
   // Calculate weighted average
   const weights = [bankWeight, moneyWeight, riverWeight];
@@ -127,10 +130,47 @@ viewof riverWeight = Inputs.range([0, 1], {value: 0, step: 0.01, label: "River W
     ]
   });
 
-  const sliders = html`<div style="display: flex; flex-direction: column; gap: 15px;">
-    ${viewof bankWeight}
-    ${viewof moneyWeight}
-    ${viewof riverWeight}
+  // Create D3 sliders
+  const bankSlider = d3.sliderBottom()
+    .min(0)
+    .max(1)
+    .step(0.01)
+    .width(200)
+    .default(1.0)
+    .on('onchange', val => bankWeight.value = val);
+
+  const moneySlider = d3.sliderBottom()
+    .min(0)
+    .max(1)
+    .step(0.01)
+    .width(200)
+    .default(0.0)
+    .on('onchange', val => moneyWeight.value = val);
+
+  const riverSlider = d3.sliderBottom()
+    .min(0)
+    .max(1)
+    .step(0.01)
+    .width(200)
+    .default(0.0)
+    .on('onchange', val => riverWeight.value = val);
+
+  const bankSliderSvg = d3.create("svg").attr("width", 250).attr("height", 60);
+  bankSliderSvg.append("g").attr("transform", "translate(25,20)").call(bankSlider);
+  bankSliderSvg.append("text").attr("x", 125).attr("y", 10).attr("text-anchor", "middle").style("font-size", "12px").text("Bank Weight");
+
+  const moneySliderSvg = d3.create("svg").attr("width", 250).attr("height", 60);
+  moneySliderSvg.append("g").attr("transform", "translate(25,20)").call(moneySlider);
+  moneySliderSvg.append("text").attr("x", 125).attr("y", 10).attr("text-anchor", "middle").style("font-size", "12px").text("Money Weight");
+
+  const riverSliderSvg = d3.create("svg").attr("width", 250).attr("height", 60);
+  riverSliderSvg.append("g").attr("transform", "translate(25,20)").call(riverSlider);
+  riverSliderSvg.append("text").attr("x", 125).attr("y", 10).attr("text-anchor", "middle").style("font-size", "12px").text("River Weight");
+
+  const sliders = html`<div style="display: flex; flex-direction: column; gap: 10px;">
+    ${bankSliderSvg.node()}
+    ${moneySliderSvg.node()}
+    ${riverSliderSvg.node()}
   </div>`;
 
   return html`<div style="display: flex; align-items: center; gap: 40px; justify-content: center;">
@@ -176,17 +216,15 @@ Explore how different Query and Key transformations produce different attention 
 ```{ojs}
 //| echo: false
 
-// Query transformation controls
-viewof qScaleX = Inputs.range([-2, 2], {value: 1.0, step: 0.1, label: "Q Scale X"})
-viewof qScaleY = Inputs.range([-2, 2], {value: 1.0, step: 0.1, label: "Q Scale Y"})
-viewof qRotate = Inputs.range([-180, 180], {value: 0, step: 5, label: "Q Rotate (deg)"})
-
-// Key transformation controls
-viewof kScaleX = Inputs.range([-2, 2], {value: 1.0, step: 0.1, label: "K Scale X"})
-viewof kScaleY = Inputs.range([-2, 2], {value: 1.0, step: 0.1, label: "K Scale Y"})
-viewof kRotate = Inputs.range([-180, 180], {value: 0, step: 5, label: "K Rotate (deg)"})
-
 {
+  // Mutable state for transformations
+  const qScaleX = Mutable(1.0);
+  const qScaleY = Mutable(1.0);
+  const qRotate = Mutable(0);
+  const kScaleX = Mutable(1.0);
+  const kScaleY = Mutable(1.0);
+  const kRotate = Mutable(0);
+
   // Word embeddings in 2D space
   const attentionWords = ["bank", "money", "loan", "river", "shore"];
   const attentionEmbeddings = [
@@ -343,22 +381,68 @@ viewof kRotate = Inputs.range([-180, 180], {value: 0, step: 5, label: "K Rotate 
     ]
   });
 
+  // Create D3 sliders for Q transformations
+  const qScaleXSlider = d3.sliderBottom()
+    .min(-2).max(2).step(0.1).width(180).default(1.0)
+    .on('onchange', val => qScaleX.value = val);
+  const qScaleYSlider = d3.sliderBottom()
+    .min(-2).max(2).step(0.1).width(180).default(1.0)
+    .on('onchange', val => qScaleY.value = val);
+  const qRotateSlider = d3.sliderBottom()
+    .min(-180).max(180).step(5).width(180).default(0)
+    .on('onchange', val => qRotate.value = val);
+
+  const qScaleXSvg = d3.create("svg").attr("width", 220).attr("height", 50);
+  qScaleXSvg.append("g").attr("transform", "translate(20,15)").call(qScaleXSlider);
+  qScaleXSvg.append("text").attr("x", 110).attr("y", 10).attr("text-anchor", "middle").style("font-size", "11px").text("Q Scale X");
+
+  const qScaleYSvg = d3.create("svg").attr("width", 220).attr("height", 50);
+  qScaleYSvg.append("g").attr("transform", "translate(20,15)").call(qScaleYSlider);
+  qScaleYSvg.append("text").attr("x", 110).attr("y", 10).attr("text-anchor", "middle").style("font-size", "11px").text("Q Scale Y");
+
+  const qRotateSvg = d3.create("svg").attr("width", 220).attr("height", 50);
+  qRotateSvg.append("g").attr("transform", "translate(20,15)").call(qRotateSlider);
+  qRotateSvg.append("text").attr("x", 110).attr("y", 10).attr("text-anchor", "middle").style("font-size", "11px").text("Q Rotate (deg)");
+
+  // Create D3 sliders for K transformations
+  const kScaleXSlider = d3.sliderBottom()
+    .min(-2).max(2).step(0.1).width(180).default(1.0)
+    .on('onchange', val => kScaleX.value = val);
+  const kScaleYSlider = d3.sliderBottom()
+    .min(-2).max(2).step(0.1).width(180).default(1.0)
+    .on('onchange', val => kScaleY.value = val);
+  const kRotateSlider = d3.sliderBottom()
+    .min(-180).max(180).step(5).width(180).default(0)
+    .on('onchange', val => kRotate.value = val);
+
+  const kScaleXSvg = d3.create("svg").attr("width", 220).attr("height", 50);
+  kScaleXSvg.append("g").attr("transform", "translate(20,15)").call(kScaleXSlider);
+  kScaleXSvg.append("text").attr("x", 110).attr("y", 10).attr("text-anchor", "middle").style("font-size", "11px").text("K Scale X");
+
+  const kScaleYSvg = d3.create("svg").attr("width", 220).attr("height", 50);
+  kScaleYSvg.append("g").attr("transform", "translate(20,15)").call(kScaleYSlider);
+  kScaleYSvg.append("text").attr("x", 110).attr("y", 10).attr("text-anchor", "middle").style("font-size", "11px").text("K Scale Y");
+
+  const kRotateSvg = d3.create("svg").attr("width", 220).attr("height", 50);
+  kRotateSvg.append("g").attr("transform", "translate(20,15)").call(kRotateSlider);
+  kRotateSvg.append("text").attr("x", 110).attr("y", 10).attr("text-anchor", "middle").style("font-size", "11px").text("K Rotate (deg)");
+
   // Create controls layout
-  const qControls = html`<div style="display: flex; flex-direction: column; gap: 10px;">
-    <div style="font-weight: bold; margin-bottom: 5px;">Query Transformation (W_Q)</div>
-    ${viewof qScaleX}
-    ${viewof qScaleY}
-    ${viewof qRotate}
+  const qControls = html`<div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-weight: bold; margin-bottom: 3px;">Query Transformation (W_Q)</div>
+    ${qScaleXSvg.node()}
+    ${qScaleYSvg.node()}
+    ${qRotateSvg.node()}
   </div>`;
 
-  const kControls = html`<div style="display: flex; flex-direction: column; gap: 10px;">
-    <div style="font-weight: bold; margin-bottom: 5px;">Key Transformation (W_K)</div>
-    ${viewof kScaleX}
-    ${viewof kScaleY}
-    ${viewof kRotate}
+  const kControls = html`<div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-weight: bold; margin-bottom: 3px;">Key Transformation (W_K)</div>
+    ${kScaleXSvg.node()}
+    ${kScaleYSvg.node()}
+    ${kRotateSvg.node()}
   </div>`;
 
-  const controls = html`<div style="display: flex; flex-direction: column; gap: 30px;">
+  const controls = html`<div style="display: flex; flex-direction: column; gap: 25px;">
     ${qControls}
     ${kControls}
   </div>`;
