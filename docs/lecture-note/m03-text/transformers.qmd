@@ -106,7 +106,7 @@ function sliderWithLabel(min, max, step, width, defaultValue, label) {
     }));
 
     const contextualizedData = [{
-      word: "Contextualized Bank",
+      word: "bank (new)",
       x: newVec[0],
       y: newVec[1],
       type: "Contextualized"
@@ -121,7 +121,7 @@ function sliderWithLabel(min, max, step, width, defaultValue, label) {
     const plot = Plot.plot({
       width: 300,
       height: 300,
-      marginTop: 40,
+      marginTop: 60,
       marginRight: 20,
       marginBottom: 50,
       marginLeft: 60,
@@ -143,8 +143,7 @@ function sliderWithLabel(min, max, step, width, defaultValue, label) {
       },
       color: {
         domain: ["Original", "Contextualized"],
-        range: ["#dadada", "#ff7f0e"],
-        legend: true
+        range: ["#dadada", "#ff7f0e"]
       },
       marks: [
         Plot.dot(data, {
@@ -159,7 +158,7 @@ function sliderWithLabel(min, max, step, width, defaultValue, label) {
           y: "y",
           text: "word",
           dy: -15,
-          fontSize: 12,
+          fontSize: 8,
           fontWeight: "bold",
           fill: "black"
         }),
@@ -169,6 +168,21 @@ function sliderWithLabel(min, max, step, width, defaultValue, label) {
           text: () => `Weights: Bank=${normalizedWeights[0].toFixed(2)}, Money=${normalizedWeights[1].toFixed(2)}, River=${normalizedWeights[2].toFixed(2)}`,
           fontSize: 11,
           fill: "black"
+        }),
+        // Custom legend at top center
+        Plot.dot([{x: -0.8, y: 2.7}, {x: 0.8, y: 2.7}], {
+          x: "x",
+          y: "y",
+          fill: () => ["#dadada", "#ff7f0e"],
+          r: 6
+        }),
+        Plot.text([{x: -0.5, y: 2.7, label: "Original"}, {x: 1.1, y: 2.7, label: "Contextualized"}], {
+          x: "x",
+          y: "y",
+          text: "label",
+          fontSize: 10,
+          fill: "black",
+          textAnchor: "start"
         })
       ]
     });
