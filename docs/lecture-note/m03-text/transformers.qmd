@@ -47,55 +47,53 @@ function sliderWithLabel(min, max, step, width, defaultValue, label) {
 
 ```{ojs}
 //| echo: false
-//| output: false
-viewof bankWeight = sliderWithLabel(0, 1, 0.01, 200, 1.0, "Bank Weight")
-viewof moneyWeight = sliderWithLabel(0, 1, 0.01, 200, 0.0, "Money Weight")
-viewof riverWeight = sliderWithLabel(0, 1, 0.01, 200, 0.0, "River Weight")
-```
+{
+  // Create sliders
+  const bankSlider = sliderWithLabel(0, 1, 0.01, 200, 1.0, "Bank Weight");
+  const moneySlider = sliderWithLabel(0, 1, 0.01, 200, 0.0, "Money Weight");
+  const riverSlider = sliderWithLabel(0, 1, 0.01, 200, 0.0, "River Weight");
 
-```{ojs}
-//| echo: false
-// Word embeddings in 2D space
-contextWords = ["bank", "money", "river"]
-contextEmbeddings = [
-  [0.0, 0.0],   // bank (center)
-  [-1.6, -0.6], // money (financial, left)
-  [1.4, -1.0]   // river (geographical, right)
-]
+  // Word embeddings in 2D space
+  const contextWords = ["bank", "money", "river"];
+  const contextEmbeddings = [
+    [0.0, 0.0],   // bank (center)
+    [-1.6, -0.6], // money (financial, left)
+    [1.4, -1.0]   // river (geographical, right)
+  ];
 
-// Calculate weighted average
-weights = [bankWeight, moneyWeight, riverWeight]
-total = weights.reduce((a, b) => a + b, 0)
-normalizedWeights = total > 0 ? weights.map(w => w / total) : [0, 0, 0]
+  // Calculate weighted average
+  const weights = [bankWeight, moneyWeight, riverWeight];
+  const total = weights.reduce((a, b) => a + b, 0);
+  const normalizedWeights = total > 0 ? weights.map(w => w / total) : [0, 0, 0];
 
-newVec = [
-  normalizedWeights[0] * contextEmbeddings[0][0] +
-  normalizedWeights[1] * contextEmbeddings[1][0] +
-  normalizedWeights[2] * contextEmbeddings[2][0],
-  normalizedWeights[0] * contextEmbeddings[0][1] +
-  normalizedWeights[1] * contextEmbeddings[1][1] +
-  normalizedWeights[2] * contextEmbeddings[2][1]
-]
+  const newVec = [
+    normalizedWeights[0] * contextEmbeddings[0][0] +
+    normalizedWeights[1] * contextEmbeddings[1][0] +
+    normalizedWeights[2] * contextEmbeddings[2][0],
+    normalizedWeights[0] * contextEmbeddings[0][1] +
+    normalizedWeights[1] * contextEmbeddings[1][1] +
+    normalizedWeights[2] * contextEmbeddings[2][1]
+  ];
 
-// Prepare data for visualization
-originalData = contextWords.map((word, i) => ({
-  word: word,
-  x: contextEmbeddings[i][0],
-  y: contextEmbeddings[i][1],
-  type: "Original"
-}))
+  // Prepare data for visualization
+  const originalData = contextWords.map((word, i) => ({
+    word: word,
+    x: contextEmbeddings[i][0],
+    y: contextEmbeddings[i][1],
+    type: "Original"
+  }));
 
-contextualizedData = [{
-  word: "Contextualized Bank",
-  x: newVec[0],
-  y: newVec[1],
-  type: "Contextualized"
-}]
+  const contextualizedData = [{
+    word: "Contextualized Bank",
+    x: newVec[0],
+    y: newVec[1],
+    type: "Contextualized"
+  }];
 
-data = [...originalData, ...contextualizedData]
+  const data = [...originalData, ...contextualizedData];
 
-// Create visualization
-bankPlot = Plot.plot({
+  // Create visualization
+  const plot = Plot.plot({
     width: 450,
     height: 450,
     marginTop: 40,
@@ -144,21 +142,19 @@ bankPlot = Plot.plot({
         fill: "black"
       })
     ]
-})
-```
+  });
 
-```{ojs}
-//| echo: false
-html`<div style="display: flex; align-items: center; gap: 40px; justify-content: center;">
-  <div style="display: flex; flex-direction: column; gap: 10px;">
-    ${viewof bankWeight}
-    ${viewof moneyWeight}
-    ${viewof riverWeight}
-  </div>
-  <div>
-    ${bankPlot}
-  </div>
-</div>`
+  return html`<div style="display: flex; align-items: center; gap: 40px; justify-content: center;">
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      ${bankSlider}
+      ${moneySlider}
+      ${riverSlider}
+    </div>
+    <div>
+      ${plot}
+    </div>
+  </div>`;
+}
 ```
 
 But real sentences aren't fair: not all words matter equally. In "I deposited money at the bank," the crucial clues are "deposited" and "money"—while words like "I," "at," and "the" add almost nothing to the meaning. If we just averaged every word together, we'd treat them all as equally important, which blurs the message. Instead, we need a way to pay extra attention to the words that really matter, and tune down the ones that don’t.
@@ -206,209 +202,255 @@ function compactSlider(min, max, step, width, defaultValue, label) {
 
 ```{ojs}
 //| echo: false
-//| output: false
-viewof qScaleX = compactSlider(-2, 2, 0.1, 180, 1.0, "Q Scale X")
-viewof qScaleY = compactSlider(-2, 2, 0.1, 180, 1.0, "Q Scale Y")
-viewof qRotate = compactSlider(-180, 180, 5, 180, 0, "Q Rotate (deg)")
-viewof kScaleX = compactSlider(-2, 2, 0.1, 180, 1.0, "K Scale X")
-viewof kScaleY = compactSlider(-2, 2, 0.1, 180, 1.0, "K Scale Y")
-viewof kRotate = compactSlider(-180, 180, 5, 180, 0, "K Rotate (deg)")
-```
-
-```{ojs}
-//| echo: false
-// Word embeddings in 2D space
-attentionWords = ["bank", "money", "loan", "river", "shore"]
-attentionEmbeddings = [
-  [0.0, 0.0],    // bank (center)
-  [-0.8, -0.3],  // money
-  [-0.7, -0.6],  // loan
-  [0.7, -0.5],   // river
-  [0.6, -0.7]    // shore
-].map(([x, y]) => [x * 2, y * 2])
-
-// Transform embeddings function
-function transformEmbeddings(embeddings, scaleX, scaleY, rotateDeg) {
-  const theta = (rotateDeg * Math.PI) / 180;
-  const cos = Math.cos(theta);
-  const sin = Math.sin(theta);
-
-  return embeddings.map(([x, y]) => {
-    // First scale
-    const scaledX = x * scaleX;
-    const scaledY = y * scaleY;
-    // Then rotate
-    return [
-      scaledX * cos - scaledY * sin,
-      scaledX * sin + scaledY * cos
-    ];
-  });
-}
-
-// Apply transformations
-Q = transformEmbeddings(attentionEmbeddings, qScaleX, qScaleY, qRotate)
-K = transformEmbeddings(attentionEmbeddings, kScaleX, kScaleY, kRotate)
-
-// Compute attention scores (Q @ K^T)
-scores = Q.map(q => K.map(k => q[0] * k[0] + q[1] * k[1]))
-
-// Apply softmax to each row
-attentionWeights = scores.map(row => {
-  const maxScore = Math.max(...row);
-  const expScores = row.map(s => Math.exp(s - maxScore));
-  const sumExp = expScores.reduce((a, b) => a + b, 0);
-  return expScores.map(e => e / sumExp);
-})
-
-// Prepare data for Query space
-qData = attentionWords.map((word, i) => ({
-  word: word,
-  x: Q[i][0],
-  y: Q[i][1]
-}))
-
-// Prepare data for Key space
-kData = attentionWords.map((word, i) => ({
-  word: word,
-  x: K[i][0],
-  y: K[i][1]
-}))
-
-// Prepare data for heatmap
-heatmapData = (() => {
-  const data = [];
-  for (let i = 0; i < attentionWords.length; i++) {
-    for (let j = 0; j < attentionWords.length; j++) {
-      data.push({
-        Query: attentionWords[i],
-        Key: attentionWords[j],
-        Weight: attentionWeights[i][j]
-      });
-    }
+{
+  // Create slider function that returns both the element and a reactive value
+  function createSlider(min, max, step, width, defaultValue, label) {
+    const slider = d3.sliderBottom()
+      .min(min).max(max).step(step).width(width).default(defaultValue);
+    const svg = d3.create("svg").attr("width", width + 40).attr("height", 50);
+    const g = svg.append("g").attr("transform", "translate(20,15)");
+    g.call(slider);
+    svg.append("text").attr("x", (width + 40) / 2).attr("y", 10)
+       .attr("text-anchor", "middle").style("font-size", "11px").text(label);
+    return { node: svg.node(), slider: slider };
   }
-  return data;
-})()
 
-// Create Query space visualization
-qPlot = Plot.plot({
-    width: 220,
-    height: 220,
-    marginTop: 30,
-    marginBottom: 40,
-    marginLeft: 50,
-    marginRight: 20,
-    style: {
-      background: "white",
-      color: "black"
-    },
-    x: { domain: [-4, 4], label: "Q1" },
-    y: { domain: [-4, 4], label: "Q2" },
-    marks: [
-      Plot.dot(qData, { x: "x", y: "y", r: 6, fill: "#4682b4" }),
-      Plot.text(qData, { x: "x", y: "y", text: "word", dy: -12, fontSize: 10, fontWeight: "bold", fill: "black" }),
-      Plot.text([{ x: 0, y: 4.5 }], { x: "x", y: "y", text: () => "Query Space", fontSize: 12, fontWeight: "bold", fill: "black" })
-    ]
-})
+  // Create all sliders
+  const qScaleXObj = createSlider(-2, 2, 0.1, 180, 1.0, "Q Scale X");
+  const qScaleYObj = createSlider(-2, 2, 0.1, 180, 1.0, "Q Scale Y");
+  const qRotateObj = createSlider(-180, 180, 5, 180, 0, "Q Rotate (deg)");
+  const kScaleXObj = createSlider(-2, 2, 0.1, 180, 1.0, "K Scale X");
+  const kScaleYObj = createSlider(-2, 2, 0.1, 180, 1.0, "K Scale Y");
+  const kRotateObj = createSlider(-180, 180, 5, 180, 0, "K Rotate (deg)");
 
-// Create Key space visualization
-kPlot = Plot.plot({
-    width: 220,
-    height: 220,
-    marginTop: 30,
-    marginBottom: 40,
-    marginLeft: 50,
-    marginRight: 20,
-    style: {
-      background: "white",
-      color: "black"
-    },
-    x: { domain: [-4, 4], label: "K1" },
-    y: { domain: [-4, 4], label: "K2" },
-    marks: [
-      Plot.dot(kData, { x: "x", y: "y", r: 6, fill: "#2e8b57" }),
-      Plot.text(kData, { x: "x", y: "y", text: "word", dy: -12, fontSize: 10, fontWeight: "bold", fill: "black" }),
-      Plot.text([{ x: 0, y: 4.5 }], { x: "x", y: "y", text: () => "Key Space", fontSize: 12, fontWeight: "bold", fill: "black" })
-    ]
-})
+  // Get slider values
+  const qScaleX = qScaleXObj.slider.value();
+  const qScaleY = qScaleYObj.slider.value();
+  const qRotate = qRotateObj.slider.value();
+  const kScaleX = kScaleXObj.slider.value();
+  const kScaleY = kScaleYObj.slider.value();
+  const kRotate = kRotateObj.slider.value();
 
-// Create attention heatmap
-heatmapPlot = Plot.plot({
-    width: 280,
-    height: 280,
-    marginTop: 50,
-    marginBottom: 50,
-    marginLeft: 70,
-    marginRight: 80,
-    style: {
-      background: "white",
-      color: "black"
-    },
-    x: { label: "Key Word" },
-    y: { label: "Query Word" },
-    color: {
-      scheme: "Blues",
-      label: "Attention",
-      legend: true
-    },
-    marks: [
-      Plot.cell(heatmapData, {
-        x: "Key",
-        y: "Query",
-        fill: "Weight",
-        tip: true
-      }),
-      Plot.text(heatmapData, {
-        x: "Key",
-        y: "Query",
-        text: d => d.Weight.toFixed(2),
-        fill: d => d.Weight > 0.35 ? "white" : "black",
-        fontSize: 9
-      }),
-      Plot.text([{ x: 0, y: 0 }], {
-        x: () => attentionWords.length / 2 - 0.5,
-        y: () => -0.8,
-        text: () => "Attention Weights (Softmax)",
-        fontSize: 12,
-        fontWeight: "bold",
-        frameAnchor: "top",
-        fill: "black"
-      })
-    ]
-})
+  // Word embeddings in 2D space
+  const attentionWords = ["bank", "money", "loan", "river", "shore"];
+  const attentionEmbeddings = [
+    [0.0, 0.0],    // bank (center)
+    [-0.8, -0.3],  // money
+    [-0.7, -0.6],  // loan
+    [0.7, -0.5],   // river
+    [0.6, -0.7]    // shore
+  ].map(([x, y]) => [x * 2, y * 2]);
 
-// Combined plots
-attentionPlots = html`<div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
-  <div style="display: flex; gap: 20px; align-items: center;">
-    ${qPlot}
-    ${kPlot}
-  </div>
-  <div>
-    ${heatmapPlot}
-  </div>
-</div>`
-```
+  // Transform embeddings function
+  function transformEmbeddings(embeddings, scaleX, scaleY, rotateDeg) {
+    const theta = (rotateDeg * Math.PI) / 180;
+    const cos = Math.cos(theta);
+    const sin = Math.sin(theta);
 
-```{ojs}
-//| echo: false
-html`<div style="display: flex; align-items: flex-start; gap: 40px; justify-content: center;">
-  <div style="display: flex; flex-direction: column; gap: 25px;">
-    <div style="display: flex; flex-direction: column; gap: 8px;">
-      <div style="font-weight: bold; margin-bottom: 3px;">Query Transformation (W_Q)</div>
-      ${viewof qScaleX}
-      ${viewof qScaleY}
-      ${viewof qRotate}
+    return embeddings.map(([x, y]) => {
+      const scaledX = x * scaleX;
+      const scaledY = y * scaleY;
+      return [
+        scaledX * cos - scaledY * sin,
+        scaledX * sin + scaledY * cos
+      ];
+    });
+  }
+
+  // Function to update visualization
+  function update() {
+    // Get current values
+    const qScaleX = qScaleXObj.slider.value();
+    const qScaleY = qScaleYObj.slider.value();
+    const qRotate = qRotateObj.slider.value();
+    const kScaleX = kScaleXObj.slider.value();
+    const kScaleY = kScaleYObj.slider.value();
+    const kRotate = kRotateObj.slider.value();
+
+    // Apply transformations
+    const Q = transformEmbeddings(attentionEmbeddings, qScaleX, qScaleY, qRotate);
+    const K = transformEmbeddings(attentionEmbeddings, kScaleX, kScaleY, kRotate);
+
+    // Compute attention scores (Q @ K^T)
+    const scores = Q.map(q => K.map(k => q[0] * k[0] + q[1] * k[1]));
+
+    // Apply softmax to each row
+    const attentionWeights = scores.map(row => {
+      const maxScore = Math.max(...row);
+      const expScores = row.map(s => Math.exp(s - maxScore));
+      const sumExp = expScores.reduce((a, b) => a + b, 0);
+      return expScores.map(e => e / sumExp);
+    });
+
+    // Prepare data for Query space
+    const qData = attentionWords.map((word, i) => ({
+      word: word,
+      x: Q[i][0],
+      y: Q[i][1]
+    }));
+
+    // Prepare data for Key space
+    const kData = attentionWords.map((word, i) => ({
+      word: word,
+      x: K[i][0],
+      y: K[i][1]
+    }));
+
+    // Prepare data for heatmap
+    const heatmapData = (() => {
+      const data = [];
+      for (let i = 0; i < attentionWords.length; i++) {
+        for (let j = 0; j < attentionWords.length; j++) {
+          data.push({
+            Query: attentionWords[i],
+            Key: attentionWords[j],
+            Weight: attentionWeights[i][j]
+          });
+        }
+      }
+      return data;
+    })();
+
+    // Clear and update plots
+    d3.select(qPlotContainer).selectAll("*").remove();
+    d3.select(kPlotContainer).selectAll("*").remove();
+    d3.select(heatmapPlotContainer).selectAll("*").remove();
+
+    // Create Query space visualization
+    const qPlot = Plot.plot({
+      width: 220,
+      height: 220,
+      marginTop: 30,
+      marginBottom: 40,
+      marginLeft: 50,
+      marginRight: 20,
+      style: {
+        background: "white",
+        color: "black"
+      },
+      x: { domain: [-4, 4], label: "Q1" },
+      y: { domain: [-4, 4], label: "Q2" },
+      marks: [
+        Plot.dot(qData, { x: "x", y: "y", r: 6, fill: "#4682b4" }),
+        Plot.text(qData, { x: "x", y: "y", text: "word", dy: -12, fontSize: 10, fontWeight: "bold", fill: "black" }),
+        Plot.text([{ x: 0, y: 4.5 }], { x: "x", y: "y", text: () => "Query Space", fontSize: 12, fontWeight: "bold", fill: "black" })
+      ]
+    });
+
+    // Create Key space visualization
+    const kPlot = Plot.plot({
+      width: 220,
+      height: 220,
+      marginTop: 30,
+      marginBottom: 40,
+      marginLeft: 50,
+      marginRight: 20,
+      style: {
+        background: "white",
+        color: "black"
+      },
+      x: { domain: [-4, 4], label: "K1" },
+      y: { domain: [-4, 4], label: "K2" },
+      marks: [
+        Plot.dot(kData, { x: "x", y: "y", r: 6, fill: "#2e8b57" }),
+        Plot.text(kData, { x: "x", y: "y", text: "word", dy: -12, fontSize: 10, fontWeight: "bold", fill: "black" }),
+        Plot.text([{ x: 0, y: 4.5 }], { x: "x", y: "y", text: () => "Key Space", fontSize: 12, fontWeight: "bold", fill: "black" })
+      ]
+    });
+
+    // Create attention heatmap
+    const heatmapPlot = Plot.plot({
+      width: 280,
+      height: 280,
+      marginTop: 50,
+      marginBottom: 50,
+      marginLeft: 70,
+      marginRight: 80,
+      style: {
+        background: "white",
+        color: "black"
+      },
+      x: { label: "Key Word" },
+      y: { label: "Query Word" },
+      color: {
+        scheme: "Blues",
+        label: "Attention",
+        legend: true
+      },
+      marks: [
+        Plot.cell(heatmapData, {
+          x: "Key",
+          y: "Query",
+          fill: "Weight",
+          tip: true
+        }),
+        Plot.text(heatmapData, {
+          x: "Key",
+          y: "Query",
+          text: d => d.Weight.toFixed(2),
+          fill: d => d.Weight > 0.35 ? "white" : "black",
+          fontSize: 9
+        }),
+        Plot.text([{ x: 0, y: 0 }], {
+          x: () => attentionWords.length / 2 - 0.5,
+          y: () => -0.8,
+          text: () => "Attention Weights (Softmax)",
+          fontSize: 12,
+          fontWeight: "bold",
+          frameAnchor: "top",
+          fill: "black"
+        })
+      ]
+    });
+
+    d3.select(qPlotContainer).node().appendChild(qPlot);
+    d3.select(kPlotContainer).node().appendChild(kPlot);
+    d3.select(heatmapPlotContainer).node().appendChild(heatmapPlot);
+  }
+
+  // Create plot containers
+  const qPlotContainer = document.createElement("div");
+  const kPlotContainer = document.createElement("div");
+  const heatmapPlotContainer = document.createElement("div");
+
+  // Add event listeners to sliders
+  qScaleXObj.slider.on("onchange", update);
+  qScaleYObj.slider.on("onchange", update);
+  qRotateObj.slider.on("onchange", update);
+  kScaleXObj.slider.on("onchange", update);
+  kScaleYObj.slider.on("onchange", update);
+  kRotateObj.slider.on("onchange", update);
+
+  // Initial render
+  update();
+
+  // Return combined layout
+  return html`<div style="display: flex; align-items: flex-start; gap: 40px; justify-content: center;">
+    <div style="display: flex; flex-direction: column; gap: 25px;">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-weight: bold; margin-bottom: 3px;">Query Transformation (W_Q)</div>
+        ${qScaleXObj.node}
+        ${qScaleYObj.node}
+        ${qRotateObj.node}
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-weight: bold; margin-bottom: 3px;">Key Transformation (W_K)</div>
+        ${kScaleXObj.node}
+        ${kScaleYObj.node}
+        ${kRotateObj.node}
+      </div>
     </div>
-    <div style="display: flex; flex-direction: column; gap: 8px;">
-      <div style="font-weight: bold; margin-bottom: 3px;">Key Transformation (W_K)</div>
-      ${viewof kScaleX}
-      ${viewof kScaleY}
-      ${viewof kRotate}
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+      <div style="display: flex; gap: 20px; align-items: center;">
+        ${qPlotContainer}
+        ${kPlotContainer}
+      </div>
+      <div>
+        ${heatmapPlotContainer}
+      </div>
     </div>
-  </div>
-  <div>
-    ${attentionPlots}
-  </div>
-</div>`
+  </div>`;
+}
 ```
 
 Now scale this up. **Every word** in a sentence needs to attend to **every other word**. For "The cat sat on the mat" (six words), we compute a $6 \times 6$ **attention matrix** $A$, where $A_{ij} = \text{softmax}(\vec{q}_i \cdot \vec{k}_j)$. Rows represent words asking for context (Queries); columns represent words providing context (Keys). Each cell $(i,j)$ indicates how much word $i$ attends to word $j$. Each row sums to 1—it's a probability distribution over context words.
