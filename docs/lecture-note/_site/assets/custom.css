@@ -1,0 +1,394 @@
+/* Terminal-dark theme for code output - presenterm inspired */
+/* Apply globally to all Quarto documents */
+:root {
+  --terminal-bg: #040312;
+  --terminal-text: #e6e6e6;
+  --terminal-bg-elevated: #1a1a2e;
+  --terminal-green: #66ff66;
+  --terminal-cyan: #00ffff;
+  --terminal-yellow: #ffff00;
+  --terminal-orange: #ff8c00;
+  --terminal-pink: #ff00ff;
+  --terminal-purple: #bd93f9;
+  --terminal-red: #ff6b6b;
+  --terminal-blue: #6b9eff;
+  --terminal-gray: #999999;
+  --terminal-dark-gray: #393952;
+}
+
+/* Global styles for all code outputs across all documents - ensure consistency */
+body .cell-output,
+.quarto-content .cell-output,
+main .cell-output,
+.cell-output {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace !important;
+  font-size: 0.9em !important;
+  line-height: 1.3 !important;
+  margin-top: 0.2em !important;
+  margin-bottom: 1.5em !important;
+  max-width: 100% !important;
+  text-rendering: optimizeLegibility;
+  color: var(--terminal-text) !important;
+  background: transparent !important;
+}
+
+/* Ensure all output containers match */
+.cell-output > * {
+  background: inherit;
+}
+
+/* Apply to all stdout outputs globally - ensure consistency across all documents */
+body .cell-output-stdout,
+.quarto-content .cell-output-stdout,
+main .cell-output-stdout,
+.cell-output-stdout {
+  background-color: var(--terminal-bg-elevated) !important;
+  border-left: 4px solid var(--terminal-green);
+  border-radius: 4px;
+  padding: 0.3em 0.6em;
+  margin: 0.2em 0 1.5em 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  line-height: 1.3;
+  text-align: left;
+  hyphens: auto;
+  word-spacing: 0.02em;
+  letter-spacing: 0.005em;
+  color: var(--terminal-yellow);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--terminal-dark-gray);
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Remove prompt prefix */
+.cell-output-stdout::before {
+  display: none;
+}
+
+@media print {
+  .cell-output-stdout,
+  .cell-output-stderr {
+    background-color: #ffffff;
+    box-shadow: none;
+    border-left: 2px solid #ddd;
+    border: 1px solid #ddd;
+    color: #000000;
+    page-break-inside: avoid;
+  }
+  .cell-output-stdout::before,
+  .cell-output-stderr::before {
+    display: none;
+  }
+}
+
+/* Apply to all stderr outputs globally - ensure consistency across all documents */
+body .cell-output-stderr,
+.quarto-content .cell-output-stderr,
+main .cell-output-stderr,
+.cell-output-stderr {
+  background-color: var(--terminal-bg-elevated) !important;
+  border-left: 4px solid var(--terminal-red) !important;
+  border-radius: 4px !important;
+  padding: 0.3em 0.6em !important;
+  margin: 0.2em 0 1.5em 0 !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+  line-height: 1.3 !important;
+  text-align: left !important;
+  hyphens: auto;
+  word-spacing: 0.02em;
+  letter-spacing: 0.005em;
+  color: var(--terminal-yellow) !important;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid var(--terminal-dark-gray) !important;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+/* Remove prompt prefix */
+.cell-output-stderr::before {
+  display: none;
+}
+
+/* Terminal-style output text - match wrapper background */
+.cell-output pre,
+.cell-output pre code,
+.cell-output-stdout pre,
+.cell-output-stdout pre code,
+.cell-output-stderr pre,
+.cell-output-stderr pre code {
+  margin: 0;
+  padding: 0;
+  background: var(--terminal-bg-elevated) !important;
+  border: none;
+  font-size: inherit;
+  line-height: 1.3;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  white-space: pre-wrap !important;
+  max-width: 100%;
+  overflow-x: hidden;
+  color: var(--terminal-yellow) !important;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace !important;
+}
+
+/* Override any Quarto default code block styling */
+.cell-output-stdout code,
+.cell-output-stderr code,
+.cell-output code {
+  background: var(--terminal-bg-elevated) !important;
+  color: var(--terminal-text) !important;
+}
+
+/* Ensure the entire output block has consistent background */
+.cell-output-stdout *,
+.cell-output-stderr * {
+  background-color: inherit !important;
+}
+
+.cell-output-stdout pre *,
+.cell-output-stderr pre * {
+  background-color: transparent !important;
+  color: var(--terminal-text) !important;
+}
+
+/* Terminal-style inline code */
+.cell-output code,
+.cell-output-stdout code,
+.cell-output-stderr code {
+  background: var(--terminal-bg) !important;
+  color: var(--terminal-green) !important;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace !important;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+@media print {
+  .cell-output pre,
+  .cell-output-stdout pre,
+  .cell-output-stderr pre {
+    background: transparent !important;
+    color: #000000 !important;
+  }
+  .cell-output code,
+  .cell-output-stdout code,
+  .cell-output-stderr code {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}
+
+/* Style for code cells with output */
+.quarto-layout-panel .sourceCode {
+  margin-bottom: 0.5em;
+}
+
+/* Ensure output doesn't overflow and fold long text */
+.cell-output-stdout,
+.cell-output-stderr {
+  max-width: 100%;
+  overflow-x: auto;
+  /* Limit height for long outputs - scrollable after this */
+  max-height: 400px;
+  overflow-y: auto;
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+}
+
+/* Style the scrollbar for better appearance */
+.cell-output-stdout::-webkit-scrollbar,
+.cell-output-stderr::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cell-output-stdout::-webkit-scrollbar-track,
+.cell-output-stderr::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.cell-output-stdout::-webkit-scrollbar-thumb,
+.cell-output-stderr::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.cell-output-stdout::-webkit-scrollbar-thumb:hover,
+.cell-output-stderr::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Style for inline code output in text */
+.cell-output-display {
+  margin: 1em 0;
+}
+
+/* Minimalist - no animations */
+
+/* Terminal-style code blocks */
+.sourceCode {
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--terminal-dark-gray);
+  background-color: var(--terminal-bg-elevated) !important;
+}
+
+/* Code blocks - terminal dark theme - preserve syntax highlighting */
+.sourceCode pre {
+  background: var(--terminal-bg-elevated) !important;
+  padding: 1em;
+  color: var(--terminal-text) !important;
+  border: none;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace !important;
+  max-width: 100%;
+  overflow-x: auto;
+  /* Wrap long lines while preserving whitespace */
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Allow syntax highlighting colors to work, just ensure background is terminal */
+.sourceCode pre code {
+  background: var(--terminal-bg-elevated) !important;
+  color: var(--terminal-text) !important;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace !important;
+  /* Wrap long lines while preserving whitespace */
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  display: block;
+  max-width: 100%;
+}
+
+/* Preserve syntax highlighting span colors but ensure transparent backgrounds */
+.sourceCode pre code span {
+  background: transparent !important;
+  /* Let syntax highlighting colors show through */
+}
+
+@media print {
+  .sourceCode {
+    border: 1px solid #ddd;
+    background-color: #ffffff;
+  }
+  .sourceCode pre {
+    background: #ffffff;
+    border: none;
+    color: #000000;
+  }
+}
+
+/* Terminal-style scrollbar */
+.cell-output-stdout::-webkit-scrollbar-track,
+.cell-output-stderr::-webkit-scrollbar-track {
+  background: var(--terminal-bg);
+  border-radius: 4px;
+}
+
+.cell-output-stdout::-webkit-scrollbar-thumb {
+  background: var(--terminal-green);
+  border-radius: 4px;
+}
+
+.cell-output-stdout::-webkit-scrollbar-thumb:hover {
+  background: var(--terminal-cyan);
+}
+
+.cell-output-stderr::-webkit-scrollbar-thumb {
+  background: var(--terminal-red);
+  border-radius: 4px;
+}
+
+.cell-output-stderr::-webkit-scrollbar-thumb:hover {
+  background: var(--terminal-orange);
+}
+
+/* Style tables in cell outputs to have readable text */
+.cell-output table,
+.cell-output-stdout table,
+.cell-output-stderr table,
+.cell-output-display table {
+  color: #333333 !important;
+  background-color: #ffffff !important;
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+.cell-output table th,
+.cell-output-stdout table th,
+.cell-output-stderr table th,
+.cell-output-display table th {
+  background-color: #f5f5f5 !important;
+  color: #333333 !important;
+  font-weight: bold;
+  padding: 0.5em;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.cell-output table td,
+.cell-output-stdout table td,
+.cell-output-stderr table td,
+.cell-output-display table td {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  padding: 0.5em;
+  border: 1px solid #ddd;
+}
+
+.cell-output table tr:nth-child(even),
+.cell-output-stdout table tr:nth-child(even),
+.cell-output-stderr table tr:nth-child(even),
+.cell-output-display table tr:nth-child(even) {
+  background-color: #f9f9f9 !important;
+}
+
+.cell-output table tr:hover,
+.cell-output-stdout table tr:hover,
+.cell-output-stderr table tr:hover,
+.cell-output-display table tr:hover {
+  background-color: #f0f0f0 !important;
+}
+
+/*
+   Fix for Observable JS output visibility
+   The global terminal theme forces white text, which breaks Observable plots
+   that assume a white background (and thus need black text).
+   Also resetting font to sans-serif and normal size as monospace looks too big/clunky in plots.
+*/
+.cell-output-display .observablehq,
+.observablehq,
+.observablehq-plot,
+.observablehq-input {
+  color: #1a1a1a !important;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji" !important;
+  font-size: 14px !important;
+}
+
+/* Ensure form inputs in observable cells are readable and sized correctly */
+.observablehq input[type="range"],
+.observablehq input[type="number"],
+.observablehq input[type="text"],
+.observablehq select {
+  color: #1a1a1a !important;
+  background-color: #ffffff;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji" !important;
+  font-size: 14px !important;
+}
+
+/* Typography overrides */
+h2 {
+  font-size: 1.5em !important;
+  margin-top: 1.5em !important;
+}

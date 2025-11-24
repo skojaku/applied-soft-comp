@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Sadamori Kojaku">
+<meta name="dcterms.date" content="2025-10-19">
+
+<title>Applied Soft Computing: Modeling Complex Systems with Deep Learning – Applied Soft Computing</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-0348920b7671f696dc9078d39bff215e.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-fee01c958fd55f7b3b50896185ea610a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "|"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../assets/custom.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../logo.jpg" alt="" class="navbar-logo">
+    </a>
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Applied Soft Computing</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-toolkit--workflow" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Toolkit &amp; Workflow</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-toolkit--workflow">    
+        <li class="dropdown-header">─── Module 1 ───</li>
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/git-github.html">
+ <span class="dropdown-text">Git &amp; GitHub</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/tidy-data.html">
+ <span class="dropdown-text">Tidy Data</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/data-provenance.html">
+ <span class="dropdown-text">Data Provenance</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/environments.html">
+ <span class="dropdown-text">Environments</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-visualization" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Visualization</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-visualization">    
+        <li class="dropdown-header">─── Module 2 ───</li>
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/principles.html">
+ <span class="dropdown-text">Principles</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/dimensionality-reduction.html">
+ <span class="dropdown-text">High-Dimensional Data</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/networks.html">
+ <span class="dropdown-text">Networks</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/time-series.html">
+ <span class="dropdown-text">Time-Series</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-deep-learning" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Deep Learning</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-deep-learning">    
+        <li class="dropdown-header">─── Module 3: Text ───</li>
+        <li>
+    <a class="dropdown-item" href="../m03-text/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m03-text/word2vec.md">
+ <span class="dropdown-text">Word2Vec</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m03-text/lstm.md">
+ <span class="dropdown-text">RNNs &amp; LSTMs</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 4: Images ───</li>
+        <li>
+    <a class="dropdown-item" href="../m04-images/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m04-images/cnn.md">
+ <span class="dropdown-text">CNNs</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m04-images/resnet.md">
+ <span class="dropdown-text">ResNet</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 5: Graphs ───</li>
+        <li>
+    <a class="dropdown-item" href="../m05-graphs/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m05-graphs/graph-embedding-w-word2vec.html">
+ <span class="dropdown-text">Graph Embeddings</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m05-graphs/graph-convolutional-network.html">
+ <span class="dropdown-text">GNNs</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-advanced-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Advanced Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-advanced-topics">    
+        <li class="dropdown-header">─── Module 6: LLMs ───</li>
+        <li>
+    <a class="dropdown-item" href="../m06-llms/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m06-llms/transformers.html">
+ <span class="dropdown-text">Transformers</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m06-llms/scaling-emergence.html">
+ <span class="dropdown-text">Scaling &amp; Emergence</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 7: Self-Supervised ───</li>
+        <li>
+    <a class="dropdown-item" href="../m07-self-supervised/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m07-self-supervised/contrastive-learning.html">
+ <span class="dropdown-text">Contrastive Learning</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 8: Explainability ───</li>
+        <li>
+    <a class="dropdown-item" href="../m08-explainability/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m08-explainability/fairness.html">
+ <span class="dropdown-text">Fairness &amp; Ethics</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Applied Soft Computing: Modeling Complex Systems with Deep Learning</li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Course Information</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Applied Soft Computing: Modeling Complex Systems with Deep Learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/welcome.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/about.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">About Us</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/why-applied-soft-computing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Applied Soft Computing: Modeling Complex Systems with Deep Learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/discord.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Discord</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Setup</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/minidora-usage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Using Minidora</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/how-to-submit-assignment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to submit assignment</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/deliverables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Applied Soft Computing: Modeling Complex Systems with Deep Learning</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 1: The Data Scientist’s Toolkit</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/git-github.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Version Control with Git &amp; GitHub</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/tidy-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Tidy Data Philosophy</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/data-provenance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Provenance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/environments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Reproducible Environments</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 2: Visualizing Complexity</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/principles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Principles of Effective Visualization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/dimensionality-reduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing High-Dimensional Data (t-SNE, UMAP)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/time-series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing Time-Series</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 3: Deep Learning for Text</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/tf-idf.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">TF-IDF: Bag-of-Words Representation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/word2vec.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word Embeddings (Word2Vec)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/word2vec_plus.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Advanced Word2Vec Techniques</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/sem-axis.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Semantic Axes &amp; Historical Bias</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/bias-in-embedding.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bias in Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/doc2vec.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Document Embeddings (Doc2Vec)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/reccurrent-neural-net.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Recurrent Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/lstm.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LSTM Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/elmo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ELMo: Contextual Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/seq2seq.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sequence-to-Sequence Models</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 4: Deep Learning for Images</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/image-processing.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Image Processing Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/cnn.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Convolutional Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/lenet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LeNet Architecture</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/alexnet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">AlexNet: Deep CNN Revolution</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/vgg.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">VGG Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/inception.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Inception &amp; Multi-Scale Features</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/batch-normalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Batch Normalization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/resnet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ResNet &amp; Skip Connections</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 5: Deep Learning for Graphs</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/spectral-embedding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spectral Graph Embedding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/graph-embedding-w-word2vec.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graph Embeddings with Word2Vec</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/spectral-vs-neural-embedding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spectral vs.&nbsp;Neural Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/from-image-to-graph.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Images to Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/graph-convolutional-network.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graph Convolutional Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/popular-gnn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Popular GNN Architectures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/software.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GNN Software &amp; Tools</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 6: Large Language Models &amp; Emergent Behavior</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/transformers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Transformer Architecture</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/bert.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">BERT &amp; Contextual Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/sentence-bert.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sentence-BERT for Semantic Similarity</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/gpt.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GPT &amp; Generative Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/from-language-model-to-instruction-following.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Language Models to Instruction Following</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/prompt-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prompt Engineering &amp; In-Context Learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/scaling-emergence.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Scaling Laws &amp; Emergent Abilities</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/llms-as-complex-systems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LLMs as Complex Systems</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 7: Self-Supervised Learning</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/paradigm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Self-Supervised Paradigm</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/contrastive-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contrastive Learning (SimCLR)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/graphs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Self-Supervised Learning for Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/time-series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Self-Supervised Learning for Time-Series</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 8: Explainability &amp; Ethics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/need.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Need for Explainability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/attention.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Attention Visualization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/lime-shap.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LIME &amp; SHAP</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/fairness.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Algorithmic Fairness &amp; Bias</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Causality vs.&nbsp;Correlation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false">
+ <span class="menu-text">Legacy Materials</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/what-to-learn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word &amp; Document Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/what-to-learn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Recurrent Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/what-to-learn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Image Processing (CNNs)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Applied Soft Computing: Modeling Complex Systems with Deep Learning</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Sadamori Kojaku </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 19, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="googlenet-and-the-inception-module" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> GoogleNet and the Inception Module</h1>
+<p>Imagine you’re looking at a painting in an art gallery. You might step close to examine the tiny brushstrokes or stand far away to observe the overall composition. <strong>How can a neural network do something similar with images?</strong> The <strong>Inception module</strong> proposed by Szegedy et al.&nbsp;in “Going Deeper with Convolutions” tackles this by letting different convolutional filters (big and small) work together in parallel—capturing both fine details and large-scale context at once.</p>
+<section id="conceptual-foundation" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="conceptual-foundation"><span class="header-section-number">1.1</span> Conceptual Foundation</h2>
+<section id="multi-scale-feature-extraction" class="level3">
+<h3 class="anchored" data-anchor-id="multi-scale-feature-extraction">Multi-Scale Feature Extraction</h3>
+<p>In a traditional CNN layer, you pick <strong>one</strong> filter size (like <span class="math inline">3 \times 3</span>). But an Inception module uses <strong>multiple</strong> filter sizes (like <span class="math inline">1 \times 1</span>, <span class="math inline">3 \times 3</span>, and <span class="math inline">5 \times 5</span>) all at once. Each filter “looks” at the same input but focuses on different scales—much like zooming in and out of a scene.</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:1400/1*DKjGRDd_lJeUfVlY50ojOA.png" class="img-fluid"></p>
+</section>
+<section id="sparse-connectivity-by-1x1-convolutions" class="level3">
+<h3 class="anchored" data-anchor-id="sparse-connectivity-by-1x1-convolutions">Sparse Connectivity by 1x1 Convolutions</h3>
+<p>From a theoretical perspective, not every pixel in a feature map needs to connect to every pixel in the next layer (i.e., connectivity is often sparse). However, sparse operations can be slow on current hardware. Inception approximates this “sparse” idea by using <em>1x1 convolutions</em>.</p>
+<p>The 1x1 convolutions appear unnatural at first glance but they are actually a very elegant solution to “sparcify” the convolutional filters. The core idea is that pixel values at different spatial locations are often less correlated than the values across different channels. Thus, <strong>1x1 convolutions</strong> focus on compressing or expanding information across channels, reducing the effective parameter count for the subsequent larger filters.</p>
+<p>For example, for a <span class="math inline">3 \times 3</span> convolution filter, the 1x1 convolution reduces the number of parameters from <span class="math inline">3 \times 3 \times C_{\text{in}} \times C_{\text{out}}</span> to <span class="math inline">1 \times 1 \times C_{\text{in}}</span> (1x1 convolution) plus <span class="math inline">3 \times 3 \times C_{\text{out}}</span> (3x3 convolution). This is <span class="math inline">C_{\text{in}} + 9C_{\text{out}}</span> versus <span class="math inline">9C_{\text{in}} \times C_{\text{out}}</span>, yielding a substantial parameter reduction when <span class="math inline">C_{\text{out}}</span> or <span class="math inline">C_{\text{in}}</span> is large.</p>
+<pre class="{note}"><code>**Connection to Sparse Representations**
+Early theoretical work suggested that a sparse network with many filter sizes could approximate a wide variety of feature types. However, directly implementing a sparse network can be very memory-intensive. The Inception module cleverly approximates a sparse structure by mixing 1x1, 3x3, and 5x5 convolutions in an efficient manner{footcite}`paperswithcode-inception`.</code></pre>
+</section>
+<section id="filter-concatenation" class="level3">
+<h3 class="anchored" data-anchor-id="filter-concatenation">Filter Concatenation</h3>
+<p>After each branch applies its own sequence of convolutions (or pooling), the results are <strong>merged</strong> by concatenating them along the channel dimension. Think of it as stacking the feature maps from each branch side by side. This “merge” step is powerful because:</p>
+<ul>
+<li>It combines multi-scale features into a single tensor.</li>
+<li>Each branch contributes a unique perspective (e.g., the <span class="math inline">1\times1</span> branch might capture fine details, while the <span class="math inline">5\times5</span> branch looks at broader context).</li>
+<li>The network can learn how to best blend and leverage these feature maps for the next stage of processing.</li>
+</ul>
+<p>As a result, the <strong>final</strong> output of an Inception module is a multi-channel representation that integrates information from multiple scales and pooling operations.</p>
+</section>
+<section id="parallel-pooling" class="level3">
+<h3 class="anchored" data-anchor-id="parallel-pooling">Parallel Pooling</h3>
+<p>GoogleNet is a stack of the Inception modules explained above, followed by a module that transform the feature maps of the last Inception module into a single vector that is used for classification. This last module is also one of the key feature of GoogleNet that sets it apart from the previous architectures.</p>
+<p>GoogleNet uses <strong>max pooling</strong> for each channel of the feature maps. For example, if the feature maps has 10 channel, the max pooling will reduce it to 10-dimensional vector, regardless of the spatial dimension of the feature maps, by taking the maximum value across the spatial dimension.</p>
+<p>This design choice was motivated, in part, by observations like in VGG16 (which uses the full-connected layers to this transformation), where 123 million of its 138 million parameters come from fully-connected layers alone. Reducing or eliminating these layers via pooling can dramatically cut down on model size and overfitting risk{footcite}<code>lin2013network</code>.</p>
+</section>
+<section id="auxiliary-classifiers" class="level3">
+<h3 class="anchored" data-anchor-id="auxiliary-classifiers">Auxiliary Classifiers</h3>
+<p>As GoogleNet grew deeper, the authors noticed that early layers sometimes struggled with vanishing gradients. To combat this, <strong>auxiliary classifiers</strong> were placed at intermediate layers. The authors take the output from the classifier attached to these intermediate layers, and add its loss to the overall loss. When backpropagating, the gradient from the auxiliary classifier is also added to the gradient of the earlier layers, which guides the earlier layers to learn more discriminative features.</p>
+<p>```zrjktvph https://production-media.paperswithcode.com/methods/GoogleNet-structure-and-auxiliary-classifier-units_CM5xsxk.png :name: inception-auxiliary-classifier :align: center</p>
+<p>An illustration of the GoogleNet architecture, including the auxiliary classifier units.</p>
+<pre><code>
+## Mathematical Framework (Light Overview)
+
+Let’s denote the input to an Inception module as a 3D tensor $ X $ with shape $(H \times W \times C)$, where $H$ and $W$ are the spatial dimensions and $C$ is the channel depth.
+
+1. **1x1 path**:
+
+   $$
+   Y_{1\times1} = \text{Conv}_{1\times1}(X)
+   $$
+
+2. **1x1 -&gt; 3x3 path**:
+
+   $$
+   X_{\text{reduced}} = \text{Conv}_{1\times1}(X),
+   \quad
+   Y_{3\times3} = \text{Conv}_{3\times3}(X_{\text{reduced}})
+   $$
+
+3. **1x1 -&gt; 5x5 path**:
+
+   $$
+   X_{\text{reduced}}' = \text{Conv}_{1\times1}(X),
+   \quad
+   Y_{5\times5} = \text{Conv}_{5\times5}(X_{\text{reduced}}')
+   $$
+
+4. **Pooling path**:
+
+   $$
+   Y_{\text{pool}} = \text{Pool}(X)
+   \quad\text{(often followed by Conv}_{1\times1})
+   $$
+
+After computing these branches, the final output of the Inception module is:
+
+$$
+Y_{\text{inception}} = \text{Concat}\big(Y_{1\times1}, \,Y_{3\times3}, \,Y_{5\times5}, \,Y_{\text{pool}}\big).
+$$
+
+## Recent Advancements and Improvements
+
+1. **Inception v2 &amp; v3**
+   - Introduced **Batch Normalization**, reducing internal covariate shift.
+   - Factorized larger filters (e.g., 5x5 → two 3x3) to cut cost.
+   These improvements increased accuracy and efficiency{footcite}`visoai`.
+
+2. **Inception v4 &amp; Inception-ResNet**
+   - Integrated **residual connections**, further improving training stability and depth{footcite}`cvpr2016`.
+
+3. **Xception**
+   - Proposed **depthwise separable convolutions**, pushing the Inception idea further by decoupling spatial and channel-wise processing, leading to better efficiency{footcite}`visoai`.
+
+4. **Simplified Inception with Hadamard Attention**
+   - Targeted at **medical image classification**.
+   - Uses attention mechanisms to focus on crucial parts of the image, enhancing accuracy without exploding parameter size{footcite}`srp-hadamard`.
+
+## Implementation Example
+
+Below is a simplified PyTorch-like example of how we can define a single Inception module. This code demonstrates the parallel branches and concatenation of outputs. While not an exact reproduction of GoogleNet, it captures the core idea.
+
+```{code-cell} ipython3
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class InceptionModule(nn.Module):
+    def __init__(self, in_channels, out_1x1, red_3x3, out_3x3, red_5x5, out_5x5, pool_proj):
+        super(InceptionModule, self).__init__()
+
+        # Branch 1: 1x1 Conv
+        self.branch1 = nn.Conv2d(in_channels, out_1x1, kernel_size=1)
+
+        # Branch 2: 1x1 Conv -&gt; 3x3 Conv
+        self.branch2_reduce = nn.Conv2d(in_channels, red_3x3, kernel_size=1)
+        self.branch2 = nn.Conv2d(red_3x3, out_3x3, kernel_size=3, padding=1)
+
+        # Branch 3: 1x1 Conv -&gt; 5x5 Conv
+        self.branch3_reduce = nn.Conv2d(in_channels, red_5x5, kernel_size=1)
+        self.branch3 = nn.Conv2d(red_5x5, out_5x5, kernel_size=5, padding=2)
+
+        # Branch 4: Max Pool -&gt; 1x1 Conv
+        self.branch4_pool = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
+        self.branch4 = nn.Conv2d(in_channels, pool_proj, kernel_size=1)
+
+    def forward(self, x):
+        branch1_out = F.relu(self.branch1(x))
+
+        branch2_out = F.relu(self.branch2(F.relu(self.branch2_reduce(x))))
+
+        branch3_out = F.relu(self.branch3(F.relu(self.branch3_reduce(x))))
+
+        branch4_out = F.relu(self.branch4(self.branch4_pool(x)))
+
+        # Concatenate along channel dimension
+        return torch.cat([branch1_out, branch2_out, branch3_out, branch4_out], dim=1)
+
+# Example usage:
+if __name__ == "__main__":
+    inception = InceptionModule(64, 16, 16, 24, 16, 24, 16)
+    dummy_input = torch.randn(1, 64, 56, 56)  # (batch_size, channels, height, width)
+    output = inception(dummy_input)
+    print("Output shape from Inception module:", output.shape)</code></pre>
+</section>
+</section>
+<section id="coding-exercise-using-pre-trained-googlenet-in-pytorch" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="coding-exercise-using-pre-trained-googlenet-in-pytorch"><span class="header-section-number">1.2</span> Coding Exercise: Using Pre-trained GoogLeNet in PyTorch</h2>
+<p>Below is a simple exercise that uses the pre-trained GoogLeNet model available in <code>torchvision</code>. You can try this out in a local Jupyter notebook or a cloud environment like Google Colab.</p>
+<p>```vqmttkkygvm ipython3 :tags: [remove-cell]</p>
+</section>
+</section>
+<section id="if-needed-install-torchvision-in-colab-or-local-environment" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> If needed, install torchvision (in Colab or local environment)</h1>
+</section>
+<section id="pip-install-torch-torchvision" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> !pip install torch torchvision</h1>
+<pre><code>
+```{code-cell} ipython3
+import torch
+import torchvision
+import torchvision.transforms as T
+from PIL import Image
+import requests
+from io import BytesIO
+
+# 1. Load the pre-trained GoogLeNet model
+googlenet = torchvision.models.googlenet(pretrained=True)
+googlenet.eval()  # set the model to inference mode
+
+# 2. Load an example image from the web (replace with any image URL you want)
+url = "https://raw.githubusercontent.com/pytorch/hub/master/imagenet_samples/imagenet_class_index.json"
+response = requests.get("https://images.unsplash.com/photo-1595433562696-1e052b4d841d?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=500&amp;q=60")
+img = Image.open(BytesIO(response.content))
+
+# 3. Define transformations: resize, center crop, convert to tensor, normalize
+transform = T.Compose([
+    T.Resize(256),
+    T.CenterCrop(224),
+    T.ToTensor(),
+    T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+
+input_tensor = transform(img).unsqueeze(0)  # add batch dimension
+
+# 4. Run a forward pass
+with torch.no_grad():
+    output = googlenet(input_tensor)
+
+# 5. Load ImageNet labels for interpreting the output
+# In a standard environment, you can download labels like below or store them locally
+labels_url = "https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt"
+labels_response = requests.get(labels_url)
+categories = labels_response.text.strip().split("\n")
+
+# 6. Get the predicted class
+_, predicted_idx = torch.max(output, 1)
+predicted_category = categories[predicted_idx]
+print("Predicted category:", predicted_category)</code></pre>
+<section id="exercise-suggestions" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-suggestions">Exercise Suggestions</h3>
+<ol type="1">
+<li><strong>Try Different Images</strong> Download or use different image URLs to see how well GoogLeNet classifies them.</li>
+<li><strong>Visualize Feature Maps</strong> Try to hook into intermediate layers of GoogLeNet (e.g., after an early Inception module) and visualize the feature maps to see what features are being extracted.</li>
+<li><strong>Compare with Other Models</strong> Load other models (e.g., ResNet, VGG) from <code>torchvision.models</code> and compare their predictions and performance on the same images.</li>
+<li><strong>Fine-Tuning</strong> Replace GoogLeNet’s final classification layer and fine-tune on a custom dataset of your choice. Observe how quickly the network adapts.</li>
+</ol>
+<pre class="{footbibliography}"><code>:style: unsrt</code></pre>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb5" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="an">jupytext:</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">  formats: md:myst</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">  text_representation:</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">    extension: .md</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">    format_name: myst</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="an">kernelspec:</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">  display_name: Python 3</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">  language: python</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">  name: python3</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="fu"># GoogleNet and the Inception Module</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>Imagine you’re looking at a painting in an art gallery. You might step close to examine the tiny brushstrokes or stand far away to observe the overall composition. **How can a neural network do something similar with images?** The **Inception module** proposed by Szegedy et al. in "Going Deeper with Convolutions" tackles this by letting different convolutional filters (big and small) work together in parallel—capturing both fine details and large-scale context at once.</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="fu">## Conceptual Foundation</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="fu">### Multi-Scale Feature Extraction</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>In a traditional CNN layer, you pick **one** filter size (like $3 \times 3$). But an Inception module uses **multiple** filter sizes (like $1 \times 1$, $3 \times 3$, and $5 \times 5$) all at once. Each filter “looks” at the same input but focuses on different scales—much like zooming in and out of a scene.</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="al">![](https://miro.medium.com/v2/resize:fit:1400/1*DKjGRDd_lJeUfVlY50ojOA.png)</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="fu">### Sparse Connectivity by 1x1 Convolutions</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>From a theoretical perspective, not every pixel in a feature map needs to connect to every pixel in the next layer (i.e., connectivity is often sparse). However, sparse operations can be slow on current hardware. Inception approximates this “sparse” idea by using *1x1 convolutions*.</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>The 1x1 convolutions appear unnatural at first glance but they are actually a very elegant solution to “sparcify” the convolutional filters. The core idea is that pixel values at different spatial locations are often less correlated than the values across different channels. Thus, **1x1 convolutions** focus on compressing or expanding information across channels, reducing the effective parameter count for the subsequent larger filters.</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>For example, for a $3 \times 3$ convolution filter, the 1x1 convolution reduces the number of parameters from $3 \times 3 \times C_{\text{in}} \times C_{\text{out}}$ to $1 \times 1 \times C_{\text{in}}$ (1x1 convolution) plus $3 \times 3 \times C_{\text{out}}$ (3x3 convolution). This is $C_{\text{in}} + 9C_{\text{out}}$ versus $9C_{\text{in}} \times C_{\text{out}}$, yielding a substantial parameter reduction when $C_{\text{out}}$ or $C_{\text{in}}$ is large.</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a><span class="in">```{note}</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a><span class="in">**Connection to Sparse Representations**</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="in">Early theoretical work suggested that a sparse network with many filter sizes could approximate a wide variety of feature types. However, directly implementing a sparse network can be very memory-intensive. The Inception module cleverly approximates a sparse structure by mixing 1x1, 3x3, and 5x5 convolutions in an efficient manner{footcite}`paperswithcode-inception`.</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a><span class="fu">### Filter Concatenation</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>After each branch applies its own sequence of convolutions (or pooling), the results are **merged** by concatenating them along the channel dimension. Think of it as stacking the feature maps from each branch side by side. This “merge” step is powerful because:</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>It combines multi-scale features into a single tensor.</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Each branch contributes a unique perspective (e.g., the $1\times1$ branch might capture fine details, while the $5\times5$ branch looks at broader context).</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The network can learn how to best blend and leverage these feature maps for the next stage of processing.</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>As a result, the **final** output of an Inception module is a multi-channel representation that integrates information from multiple scales and pooling operations.</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a><span class="fu">### Parallel Pooling</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>GoogleNet is a stack of the Inception modules explained above, followed by a module that transform the feature maps of the last Inception module into a single vector that is used for classification. This last module is also one of the key feature of GoogleNet that sets it apart from the previous architectures.</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>GoogleNet uses **max pooling** for each channel of the feature maps.</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>For example, if the feature maps has 10 channel, the max pooling will reduce it to 10-dimensional vector, regardless of the spatial dimension of the feature maps, by taking the maximum value across the spatial dimension.</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>This design choice was motivated, in part, by observations like in VGG16 (which uses the full-connected layers to this transformation), where 123 million of its 138 million parameters come from fully-connected layers alone. Reducing or eliminating these layers via pooling can dramatically cut down on model size and overfitting risk{footcite}<span class="in">`lin2013network`</span>.</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a><span class="fu">### Auxiliary Classifiers</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>As GoogleNet grew deeper, the authors noticed that early layers sometimes struggled with vanishing gradients. To combat this, **auxiliary classifiers** were placed at intermediate layers. The authors take the output from the classifier attached to these intermediate layers, and add its loss to the overall loss. When backpropagating, the gradient from the auxiliary classifier is also added to the gradient of the earlier layers, which guides the earlier layers to learn more discriminative features.</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a><span class="in">```{figure} https://production-media.paperswithcode.com/methods/GoogleNet-structure-and-auxiliary-classifier-units_CM5xsxk.png</span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a><span class="in">:name: inception-auxiliary-classifier</span></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a><span class="in">:align: center</span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a><span class="in">An illustration of the GoogleNet architecture, including the auxiliary classifier units.</span></span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a><span class="fu">## Mathematical Framework (Light Overview)</span></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a>Let’s denote the input to an Inception module as a 3D tensor $ X $ with shape $(H \times W \times C)$, where $H$ and $W$ are the spatial dimensions and $C$ is the channel depth.</span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**1x1 path**:</span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>   $$</span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>   Y_{1\times1} = \text{Conv}_{1\times1}(X)</span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>   $$</span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**1x1 -&gt; 3x3 path**:</span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>   $$</span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>   X_{\text{reduced}} = \text{Conv}_{1\times1}(X),</span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a>   \quad</span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>   Y_{3\times3} = \text{Conv}_{3\times3}(X_{\text{reduced}})</span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a>   $$</span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**1x1 -&gt; 5x5 path**:</span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a>   $$</span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>   X_{\text{reduced}}' = \text{Conv}_{1\times1}(X),</span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a>   \quad</span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>   Y_{5\times5} = \text{Conv}_{5\times5}(X_{\text{reduced}}')</span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a>   $$</span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>**Pooling path**:</span>
+<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a>   $$</span>
+<span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a>   Y_{\text{pool}} = \text{Pool}(X)</span>
+<span id="cb5-100"><a href="#cb5-100" aria-hidden="true" tabindex="-1"></a>   \quad\text{(often followed by Conv}_{1\times1})</span>
+<span id="cb5-101"><a href="#cb5-101" aria-hidden="true" tabindex="-1"></a>   $$</span>
+<span id="cb5-102"><a href="#cb5-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-103"><a href="#cb5-103" aria-hidden="true" tabindex="-1"></a>After computing these branches, the final output of the Inception module is:</span>
+<span id="cb5-104"><a href="#cb5-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-105"><a href="#cb5-105" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb5-106"><a href="#cb5-106" aria-hidden="true" tabindex="-1"></a>Y_{\text{inception}} = \text{Concat}\big(Y_{1\times1}, \,Y_{3\times3}, \,Y_{5\times5}, \,Y_{\text{pool}}\big).</span>
+<span id="cb5-107"><a href="#cb5-107" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb5-108"><a href="#cb5-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-109"><a href="#cb5-109" aria-hidden="true" tabindex="-1"></a><span class="fu">## Recent Advancements and Improvements</span></span>
+<span id="cb5-110"><a href="#cb5-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-111"><a href="#cb5-111" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Inception v2 &amp; v3**</span>
+<span id="cb5-112"><a href="#cb5-112" aria-hidden="true" tabindex="-1"></a><span class="ss">   - </span>Introduced **Batch Normalization**, reducing internal covariate shift.</span>
+<span id="cb5-113"><a href="#cb5-113" aria-hidden="true" tabindex="-1"></a><span class="ss">   - </span>Factorized larger filters (e.g., 5x5 → two 3x3) to cut cost.</span>
+<span id="cb5-114"><a href="#cb5-114" aria-hidden="true" tabindex="-1"></a>   These improvements increased accuracy and efficiency{footcite}<span class="in">`visoai`</span>.</span>
+<span id="cb5-115"><a href="#cb5-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-116"><a href="#cb5-116" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Inception v4 &amp; Inception-ResNet**</span>
+<span id="cb5-117"><a href="#cb5-117" aria-hidden="true" tabindex="-1"></a><span class="ss">   - </span>Integrated **residual connections**, further improving training stability and depth{footcite}<span class="in">`cvpr2016`</span>.</span>
+<span id="cb5-118"><a href="#cb5-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-119"><a href="#cb5-119" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Xception**</span>
+<span id="cb5-120"><a href="#cb5-120" aria-hidden="true" tabindex="-1"></a><span class="ss">   - </span>Proposed **depthwise separable convolutions**, pushing the Inception idea further by decoupling spatial and channel-wise processing, leading to better efficiency{footcite}<span class="in">`visoai`</span>.</span>
+<span id="cb5-121"><a href="#cb5-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-122"><a href="#cb5-122" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>**Simplified Inception with Hadamard Attention**</span>
+<span id="cb5-123"><a href="#cb5-123" aria-hidden="true" tabindex="-1"></a><span class="ss">   - </span>Targeted at **medical image classification**.</span>
+<span id="cb5-124"><a href="#cb5-124" aria-hidden="true" tabindex="-1"></a><span class="ss">   - </span>Uses attention mechanisms to focus on crucial parts of the image, enhancing accuracy without exploding parameter size{footcite}<span class="in">`srp-hadamard`</span>.</span>
+<span id="cb5-125"><a href="#cb5-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-126"><a href="#cb5-126" aria-hidden="true" tabindex="-1"></a><span class="fu">## Implementation Example</span></span>
+<span id="cb5-127"><a href="#cb5-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-128"><a href="#cb5-128" aria-hidden="true" tabindex="-1"></a>Below is a simplified PyTorch-like example of how we can define a single Inception module. This code demonstrates the parallel branches and concatenation of outputs. While not an exact reproduction of GoogleNet, it captures the core idea.</span>
+<span id="cb5-129"><a href="#cb5-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-130"><a href="#cb5-130" aria-hidden="true" tabindex="-1"></a><span class="in">```{code-cell} ipython3</span></span>
+<span id="cb5-131"><a href="#cb5-131" aria-hidden="true" tabindex="-1"></a>import torch</span>
+<span id="cb5-132"><a href="#cb5-132" aria-hidden="true" tabindex="-1"></a>import torch<span class="op">.</span>nn as nn</span>
+<span id="cb5-133"><a href="#cb5-133" aria-hidden="true" tabindex="-1"></a>import torch<span class="op">.</span>nn<span class="op">.</span>functional as F</span>
+<span id="cb5-134"><a href="#cb5-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-135"><a href="#cb5-135" aria-hidden="true" tabindex="-1"></a>class InceptionModule<span class="op">(</span>nn<span class="op">.</span>Module<span class="op">):</span></span>
+<span id="cb5-136"><a href="#cb5-136" aria-hidden="true" tabindex="-1"></a>    def __init__<span class="op">(</span>self<span class="op">,</span> in_channels<span class="op">,</span> out_1x1<span class="op">,</span> red_3x3<span class="op">,</span> out_3x3<span class="op">,</span> red_5x5<span class="op">,</span> out_5x5<span class="op">,</span> pool_proj<span class="op">):</span></span>
+<span id="cb5-137"><a href="#cb5-137" aria-hidden="true" tabindex="-1"></a>        super<span class="op">(</span>InceptionModule<span class="op">,</span> self<span class="op">).</span>__init__<span class="op">()</span></span>
+<span id="cb5-138"><a href="#cb5-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-139"><a href="#cb5-139" aria-hidden="true" tabindex="-1"></a>        <span class="pp"># </span><span class="er">Branch 1: 1x1 Conv</span></span>
+<span id="cb5-140"><a href="#cb5-140" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>branch1 <span class="op">=</span> nn<span class="op">.</span>Conv2d<span class="op">(</span>in_channels<span class="op">,</span> out_1x1<span class="op">,</span> kernel_size<span class="op">=</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb5-141"><a href="#cb5-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-142"><a href="#cb5-142" aria-hidden="true" tabindex="-1"></a>        <span class="pp"># </span><span class="er">Branch 2: 1x1 Conv -&gt; 3x3 Conv</span></span>
+<span id="cb5-143"><a href="#cb5-143" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>branch2_reduce <span class="op">=</span> nn<span class="op">.</span>Conv2d<span class="op">(</span>in_channels<span class="op">,</span> red_3x3<span class="op">,</span> kernel_size<span class="op">=</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb5-144"><a href="#cb5-144" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>branch2 <span class="op">=</span> nn<span class="op">.</span>Conv2d<span class="op">(</span>red_3x3<span class="op">,</span> out_3x3<span class="op">,</span> kernel_size<span class="op">=</span><span class="dv">3</span><span class="op">,</span> padding<span class="op">=</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb5-145"><a href="#cb5-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-146"><a href="#cb5-146" aria-hidden="true" tabindex="-1"></a>        <span class="pp"># </span><span class="er">Branch 3: 1x1 Conv -&gt; 5x5 Conv</span></span>
+<span id="cb5-147"><a href="#cb5-147" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>branch3_reduce <span class="op">=</span> nn<span class="op">.</span>Conv2d<span class="op">(</span>in_channels<span class="op">,</span> red_5x5<span class="op">,</span> kernel_size<span class="op">=</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb5-148"><a href="#cb5-148" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>branch3 <span class="op">=</span> nn<span class="op">.</span>Conv2d<span class="op">(</span>red_5x5<span class="op">,</span> out_5x5<span class="op">,</span> kernel_size<span class="op">=</span><span class="dv">5</span><span class="op">,</span> padding<span class="op">=</span><span class="dv">2</span><span class="op">)</span></span>
+<span id="cb5-149"><a href="#cb5-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-150"><a href="#cb5-150" aria-hidden="true" tabindex="-1"></a>        <span class="pp"># </span><span class="er">Branch 4: Max Pool -&gt; 1x1 Conv</span></span>
+<span id="cb5-151"><a href="#cb5-151" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>branch4_pool <span class="op">=</span> nn<span class="op">.</span>MaxPool2d<span class="op">(</span>kernel_size<span class="op">=</span><span class="dv">3</span><span class="op">,</span> stride<span class="op">=</span><span class="dv">1</span><span class="op">,</span> padding<span class="op">=</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb5-152"><a href="#cb5-152" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>branch4 <span class="op">=</span> nn<span class="op">.</span>Conv2d<span class="op">(</span>in_channels<span class="op">,</span> pool_proj<span class="op">,</span> kernel_size<span class="op">=</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb5-153"><a href="#cb5-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-154"><a href="#cb5-154" aria-hidden="true" tabindex="-1"></a>    def forward<span class="op">(</span>self<span class="op">,</span> x<span class="op">):</span></span>
+<span id="cb5-155"><a href="#cb5-155" aria-hidden="true" tabindex="-1"></a>        branch1_out <span class="op">=</span> F<span class="op">.</span>relu<span class="op">(</span>self<span class="op">.</span>branch1<span class="op">(</span>x<span class="op">))</span></span>
+<span id="cb5-156"><a href="#cb5-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-157"><a href="#cb5-157" aria-hidden="true" tabindex="-1"></a>        branch2_out <span class="op">=</span> F<span class="op">.</span>relu<span class="op">(</span>self<span class="op">.</span>branch2<span class="op">(</span>F<span class="op">.</span>relu<span class="op">(</span>self<span class="op">.</span>branch2_reduce<span class="op">(</span>x<span class="op">))))</span></span>
+<span id="cb5-158"><a href="#cb5-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-159"><a href="#cb5-159" aria-hidden="true" tabindex="-1"></a>        branch3_out <span class="op">=</span> F<span class="op">.</span>relu<span class="op">(</span>self<span class="op">.</span>branch3<span class="op">(</span>F<span class="op">.</span>relu<span class="op">(</span>self<span class="op">.</span>branch3_reduce<span class="op">(</span>x<span class="op">))))</span></span>
+<span id="cb5-160"><a href="#cb5-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-161"><a href="#cb5-161" aria-hidden="true" tabindex="-1"></a>        branch4_out <span class="op">=</span> F<span class="op">.</span>relu<span class="op">(</span>self<span class="op">.</span>branch4<span class="op">(</span>self<span class="op">.</span>branch4_pool<span class="op">(</span>x<span class="op">)))</span></span>
+<span id="cb5-162"><a href="#cb5-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-163"><a href="#cb5-163" aria-hidden="true" tabindex="-1"></a>        <span class="pp"># </span><span class="er">Concatenate along channel dimension</span></span>
+<span id="cb5-164"><a href="#cb5-164" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> torch<span class="op">.</span>cat<span class="op">([</span>branch1_out<span class="op">,</span> branch2_out<span class="op">,</span> branch3_out<span class="op">,</span> branch4_out<span class="op">],</span> dim<span class="op">=</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb5-165"><a href="#cb5-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-166"><a href="#cb5-166" aria-hidden="true" tabindex="-1"></a><span class="pp"># </span><span class="er">Example usage:</span></span>
+<span id="cb5-167"><a href="#cb5-167" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> __name__ <span class="op">==</span> <span class="st">"__main__"</span><span class="op">:</span></span>
+<span id="cb5-168"><a href="#cb5-168" aria-hidden="true" tabindex="-1"></a>    inception <span class="op">=</span> InceptionModule<span class="op">(</span><span class="dv">64</span><span class="op">,</span> <span class="dv">16</span><span class="op">,</span> <span class="dv">16</span><span class="op">,</span> <span class="dv">24</span><span class="op">,</span> <span class="dv">16</span><span class="op">,</span> <span class="dv">24</span><span class="op">,</span> <span class="dv">16</span><span class="op">)</span></span>
+<span id="cb5-169"><a href="#cb5-169" aria-hidden="true" tabindex="-1"></a>    dummy_input <span class="op">=</span> torch<span class="op">.</span>randn<span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">64</span><span class="op">,</span> <span class="dv">56</span><span class="op">,</span> <span class="dv">56</span><span class="op">)</span>  # <span class="op">(</span>batch_size<span class="op">,</span> channels<span class="op">,</span> height<span class="op">,</span> width<span class="op">)</span></span>
+<span id="cb5-170"><a href="#cb5-170" aria-hidden="true" tabindex="-1"></a>    output <span class="op">=</span> inception<span class="op">(</span>dummy_input<span class="op">)</span></span>
+<span id="cb5-171"><a href="#cb5-171" aria-hidden="true" tabindex="-1"></a>    print<span class="op">(</span><span class="st">"Output shape from Inception module:"</span><span class="op">,</span> output<span class="op">.</span>shape<span class="op">)</span></span>
+<span id="cb5-172"><a href="#cb5-172" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb5-173"><a href="#cb5-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-174"><a href="#cb5-174" aria-hidden="true" tabindex="-1"></a><span class="fu">## Coding Exercise: Using Pre-trained GoogLeNet in PyTorch</span></span>
+<span id="cb5-175"><a href="#cb5-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-176"><a href="#cb5-176" aria-hidden="true" tabindex="-1"></a>Below is a simple exercise that uses the pre-trained GoogLeNet model available in <span class="in">`torchvision`</span>. You can try this out in a local Jupyter notebook or a cloud environment like Google Colab.</span>
+<span id="cb5-177"><a href="#cb5-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-178"><a href="#cb5-178" aria-hidden="true" tabindex="-1"></a><span class="in">```{code-cell} ipython3</span></span>
+<span id="cb5-179"><a href="#cb5-179" aria-hidden="true" tabindex="-1"></a><span class="op">:</span>tags<span class="op">:</span> <span class="op">[</span>remove<span class="op">-</span>cell<span class="op">]</span></span>
+<span id="cb5-180"><a href="#cb5-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-181"><a href="#cb5-181" aria-hidden="true" tabindex="-1"></a><span class="pp"># If needed, install torchvision (in Colab or local environment)</span></span>
+<span id="cb5-182"><a href="#cb5-182" aria-hidden="true" tabindex="-1"></a><span class="pp"># </span><span class="er">!pip install torch torchvision</span></span>
+<span id="cb5-183"><a href="#cb5-183" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb5-184"><a href="#cb5-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-185"><a href="#cb5-185" aria-hidden="true" tabindex="-1"></a><span class="in">```{code-cell} ipython3</span></span>
+<span id="cb5-186"><a href="#cb5-186" aria-hidden="true" tabindex="-1"></a>import torch</span>
+<span id="cb5-187"><a href="#cb5-187" aria-hidden="true" tabindex="-1"></a>import torchvision</span>
+<span id="cb5-188"><a href="#cb5-188" aria-hidden="true" tabindex="-1"></a>import torchvision<span class="op">.</span>transforms as T</span>
+<span id="cb5-189"><a href="#cb5-189" aria-hidden="true" tabindex="-1"></a>from PIL import Image</span>
+<span id="cb5-190"><a href="#cb5-190" aria-hidden="true" tabindex="-1"></a>import requests</span>
+<span id="cb5-191"><a href="#cb5-191" aria-hidden="true" tabindex="-1"></a>from io import BytesIO</span>
+<span id="cb5-192"><a href="#cb5-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-193"><a href="#cb5-193" aria-hidden="true" tabindex="-1"></a><span class="pp"># 1. Load the pre-trained GoogLeNet model</span></span>
+<span id="cb5-194"><a href="#cb5-194" aria-hidden="true" tabindex="-1"></a>googlenet <span class="op">=</span> torchvision<span class="op">.</span>models<span class="op">.</span>googlenet<span class="op">(</span>pretrained<span class="op">=</span>True<span class="op">)</span></span>
+<span id="cb5-195"><a href="#cb5-195" aria-hidden="true" tabindex="-1"></a>googlenet<span class="op">.</span>eval<span class="op">()</span>  # set the model to inference mode</span>
+<span id="cb5-196"><a href="#cb5-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-197"><a href="#cb5-197" aria-hidden="true" tabindex="-1"></a><span class="pp"># 2. Load an example image from the web (replace with any image URL you want)</span></span>
+<span id="cb5-198"><a href="#cb5-198" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/pytorch/hub/master/imagenet_samples/imagenet_class_index.json"</span></span>
+<span id="cb5-199"><a href="#cb5-199" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> requests<span class="op">.</span>get<span class="op">(</span><span class="st">"https://images.unsplash.com/photo-1595433562696-1e052b4d841d?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=500&amp;q=60"</span><span class="op">)</span></span>
+<span id="cb5-200"><a href="#cb5-200" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> Image<span class="op">.</span>open<span class="op">(</span>BytesIO<span class="op">(</span>response<span class="op">.</span>content<span class="op">))</span></span>
+<span id="cb5-201"><a href="#cb5-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-202"><a href="#cb5-202" aria-hidden="true" tabindex="-1"></a><span class="pp"># 3. Define transformations: resize, center crop, convert to tensor, normalize</span></span>
+<span id="cb5-203"><a href="#cb5-203" aria-hidden="true" tabindex="-1"></a>transform <span class="op">=</span> T<span class="op">.</span>Compose<span class="op">([</span></span>
+<span id="cb5-204"><a href="#cb5-204" aria-hidden="true" tabindex="-1"></a>    T<span class="op">.</span>Resize<span class="op">(</span><span class="dv">256</span><span class="op">),</span></span>
+<span id="cb5-205"><a href="#cb5-205" aria-hidden="true" tabindex="-1"></a>    T<span class="op">.</span>CenterCrop<span class="op">(</span><span class="dv">224</span><span class="op">),</span></span>
+<span id="cb5-206"><a href="#cb5-206" aria-hidden="true" tabindex="-1"></a>    T<span class="op">.</span>ToTensor<span class="op">(),</span></span>
+<span id="cb5-207"><a href="#cb5-207" aria-hidden="true" tabindex="-1"></a>    T<span class="op">.</span>Normalize<span class="op">(</span>mean<span class="op">=[</span><span class="fl">0.485</span><span class="op">,</span> <span class="fl">0.456</span><span class="op">,</span> <span class="fl">0.406</span><span class="op">],</span> std<span class="op">=[</span><span class="fl">0.229</span><span class="op">,</span> <span class="fl">0.224</span><span class="op">,</span> <span class="fl">0.225</span><span class="op">])</span></span>
+<span id="cb5-208"><a href="#cb5-208" aria-hidden="true" tabindex="-1"></a><span class="op">])</span></span>
+<span id="cb5-209"><a href="#cb5-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-210"><a href="#cb5-210" aria-hidden="true" tabindex="-1"></a>input_tensor <span class="op">=</span> transform<span class="op">(</span>img<span class="op">).</span>unsqueeze<span class="op">(</span><span class="dv">0</span><span class="op">)</span>  # add batch dimension</span>
+<span id="cb5-211"><a href="#cb5-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-212"><a href="#cb5-212" aria-hidden="true" tabindex="-1"></a><span class="pp"># 4. Run a forward pass</span></span>
+<span id="cb5-213"><a href="#cb5-213" aria-hidden="true" tabindex="-1"></a>with torch<span class="op">.</span>no_grad<span class="op">():</span></span>
+<span id="cb5-214"><a href="#cb5-214" aria-hidden="true" tabindex="-1"></a>    output <span class="op">=</span> googlenet<span class="op">(</span>input_tensor<span class="op">)</span></span>
+<span id="cb5-215"><a href="#cb5-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-216"><a href="#cb5-216" aria-hidden="true" tabindex="-1"></a><span class="pp"># 5. Load ImageNet labels for interpreting the output</span></span>
+<span id="cb5-217"><a href="#cb5-217" aria-hidden="true" tabindex="-1"></a><span class="pp"># </span><span class="er">In a standard environment, you can download labels like below or store them locally</span></span>
+<span id="cb5-218"><a href="#cb5-218" aria-hidden="true" tabindex="-1"></a>labels_url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt"</span></span>
+<span id="cb5-219"><a href="#cb5-219" aria-hidden="true" tabindex="-1"></a>labels_response <span class="op">=</span> requests<span class="op">.</span>get<span class="op">(</span>labels_url<span class="op">)</span></span>
+<span id="cb5-220"><a href="#cb5-220" aria-hidden="true" tabindex="-1"></a>categories <span class="op">=</span> labels_response<span class="op">.</span>text<span class="op">.</span>strip<span class="op">().</span>split<span class="op">(</span><span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="op">)</span></span>
+<span id="cb5-221"><a href="#cb5-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-222"><a href="#cb5-222" aria-hidden="true" tabindex="-1"></a><span class="pp"># 6. Get the predicted class</span></span>
+<span id="cb5-223"><a href="#cb5-223" aria-hidden="true" tabindex="-1"></a>_<span class="op">,</span> predicted_idx <span class="op">=</span> torch<span class="op">.</span>max<span class="op">(</span>output<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb5-224"><a href="#cb5-224" aria-hidden="true" tabindex="-1"></a>predicted_category <span class="op">=</span> categories<span class="op">[</span>predicted_idx<span class="op">]</span></span>
+<span id="cb5-225"><a href="#cb5-225" aria-hidden="true" tabindex="-1"></a>print<span class="op">(</span><span class="st">"Predicted category:"</span><span class="op">,</span> predicted_category<span class="op">)</span></span>
+<span id="cb5-226"><a href="#cb5-226" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb5-227"><a href="#cb5-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-228"><a href="#cb5-228" aria-hidden="true" tabindex="-1"></a><span class="fu">### Exercise Suggestions</span></span>
+<span id="cb5-229"><a href="#cb5-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-230"><a href="#cb5-230" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Try Different Images**</span>
+<span id="cb5-231"><a href="#cb5-231" aria-hidden="true" tabindex="-1"></a>   Download or use different image URLs to see how well GoogLeNet classifies them.</span>
+<span id="cb5-232"><a href="#cb5-232" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Visualize Feature Maps**</span>
+<span id="cb5-233"><a href="#cb5-233" aria-hidden="true" tabindex="-1"></a>   Try to hook into intermediate layers of GoogLeNet (e.g., after an early Inception module) and visualize the feature maps to see what features are being extracted.</span>
+<span id="cb5-234"><a href="#cb5-234" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Compare with Other Models**</span>
+<span id="cb5-235"><a href="#cb5-235" aria-hidden="true" tabindex="-1"></a>   Load other models (e.g., ResNet, VGG) from <span class="in">`torchvision.models`</span> and compare their predictions and performance on the same images.</span>
+<span id="cb5-236"><a href="#cb5-236" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>**Fine-Tuning**</span>
+<span id="cb5-237"><a href="#cb5-237" aria-hidden="true" tabindex="-1"></a>   Replace GoogLeNet’s final classification layer and fine-tune on a custom dataset of your choice. Observe how quickly the network adapts.</span>
+<span id="cb5-238"><a href="#cb5-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-239"><a href="#cb5-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-242"><a href="#cb5-242" aria-hidden="true" tabindex="-1"></a><span class="in">```{footbibliography}</span></span>
+<span id="cb5-243"><a href="#cb5-243" aria-hidden="true" tabindex="-1"></a><span class="in">:style: unsrt</span></span>
+<span id="cb5-244"><a href="#cb5-244" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Copyright 2025, Sadamori Kojaku</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions"><ul><li><a href="https://github.com/skojaku/applied-soft-comp/edit/main/m04-images/inception.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/skojaku/applied-soft-comp/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/skojaku/applied-soft-comp">
+      <i class="bi bi-github" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

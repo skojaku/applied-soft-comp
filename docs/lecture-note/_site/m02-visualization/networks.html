@@ -1,0 +1,2242 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Sadamori Kojaku">
+<meta name="dcterms.date" content="2025-11-21">
+
+<title>Network Visualization – Applied Soft Computing</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../m02-visualization/time-series.html" rel="next">
+<link href="../m02-visualization/highd-data.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-0348920b7671f696dc9078d39bff215e.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-fee01c958fd55f7b3b50896185ea610a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "|"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../assets/custom.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed slimcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../logo.jpg" alt="" class="navbar-logo">
+    </a>
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Applied Soft Computing</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-toolkit--workflow" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Toolkit &amp; Workflow</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-toolkit--workflow">    
+        <li class="dropdown-header">─── Module 1 ───</li>
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/git-github.html">
+ <span class="dropdown-text">Git &amp; GitHub</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/tidy-data.html">
+ <span class="dropdown-text">Tidy Data</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/data-provenance.html">
+ <span class="dropdown-text">Data Provenance</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/environments.qmd">
+ <span class="dropdown-text">Environments</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-visualization" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Visualization</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-visualization">    
+        <li class="dropdown-header">─── Module 2 ───</li>
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/principles.html">
+ <span class="dropdown-text">Principles</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/dimensionality-reduction.html">
+ <span class="dropdown-text">High-Dimensional Data</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/networks.html">
+ <span class="dropdown-text">Networks</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/time-series.html">
+ <span class="dropdown-text">Time-Series</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-deep-learning" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Deep Learning</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-deep-learning">    
+        <li class="dropdown-header">─── Module 3: Text ───</li>
+        <li>
+    <a class="dropdown-item" href="../m03-text/overview.qmd">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m03-text/word2vec.md">
+ <span class="dropdown-text">Word2Vec</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m03-text/lstm.md">
+ <span class="dropdown-text">RNNs &amp; LSTMs</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 4: Images ───</li>
+        <li>
+    <a class="dropdown-item" href="../m04-images/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m04-images/cnn.md">
+ <span class="dropdown-text">CNNs</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m04-images/resnet.md">
+ <span class="dropdown-text">ResNet</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 5: Graphs ───</li>
+        <li>
+    <a class="dropdown-item" href="../m05-graphs/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m05-graphs/graph-embedding-w-word2vec.html">
+ <span class="dropdown-text">Graph Embeddings</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m05-graphs/graph-convolutional-network.html">
+ <span class="dropdown-text">GNNs</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-advanced-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Advanced Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-advanced-topics">    
+        <li class="dropdown-header">─── Module 6: LLMs ───</li>
+        <li>
+    <a class="dropdown-item" href="../m06-llms/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m06-llms/transformers.md">
+ <span class="dropdown-text">Transformers</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m06-llms/scaling-emergence.html">
+ <span class="dropdown-text">Scaling &amp; Emergence</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 7: Self-Supervised ───</li>
+        <li>
+    <a class="dropdown-item" href="../m07-self-supervised/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m07-self-supervised/contrastive-learning.html">
+ <span class="dropdown-text">Contrastive Learning</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 8: Explainability ───</li>
+        <li>
+    <a class="dropdown-item" href="../m08-explainability/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m08-explainability/fairness.html">
+ <span class="dropdown-text">Fairness &amp; Ethics</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../m02-visualization/overview.html">Module 2: Visualizing Complexity</a></li><li class="breadcrumb-item"><a href="../m02-visualization/networks.html">Visualizing Networks</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Course Information</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Home</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/welcome.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/about.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">About Us</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/why-applied-soft-computing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Why applied soft computing?</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/discord.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Discord</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Setup</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/minidora-usage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Using Minidora</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/how-to-submit-assignment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to submit assignment</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/deliverables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deliverables</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 1: The Data Scientist’s Toolkit</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/git-github.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Version Control with Git &amp; GitHub</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/tidy-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Tidy Data Philosophy</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/data-provenance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Provenance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/reproduceability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Reproducibility</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module 2: Visualizing Complexity</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/principles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Principles of Effective Visualization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/1d-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing 1D Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/2d-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing 2D Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/highd-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing High-Dimensional Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/networks.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Visualizing Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/time-series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing Time-Series</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 3: Deep Learning for Text</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/overview.qmd" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/llm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Large Language Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/word2vec_plus.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Advanced Word2Vec Techniques</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/sem-axis.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Semantic Axes &amp; Historical Bias</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/bias-in-embedding.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bias in Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/doc2vec.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Document Embeddings (Doc2Vec)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/reccurrent-neural-net.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Recurrent Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/lstm.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LSTM Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/elmo.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ELMo: Contextual Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/seq2seq.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sequence-to-Sequence Models</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 4: Deep Learning for Images</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/image-processing.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Image Processing Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/cnn.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Convolutional Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/lenet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LeNet Architecture</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/alexnet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">AlexNet: Deep CNN Revolution</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/vgg.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">VGG Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/inception.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Inception &amp; Multi-Scale Features</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/batch-normalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Batch Normalization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/resnet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ResNet &amp; Skip Connections</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 5: Deep Learning for Graphs</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/spectral-embedding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spectral Graph Embedding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/graph-embedding-w-word2vec.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graph Embeddings with Word2Vec</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/spectral-vs-neural-embedding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spectral vs.&nbsp;Neural Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/from-image-to-graph.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Images to Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/graph-convolutional-network.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graph Convolutional Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/popular-gnn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Popular GNN Architectures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/software.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GNN Software &amp; Tools</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 6: Large Language Models &amp; Emergent Behavior</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/transformers.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Transformer Architecture</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/bert.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">BERT &amp; Contextual Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/sentence-bert.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sentence-BERT for Semantic Similarity</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/gpt.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GPT &amp; Generative Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/from-language-model-to-instruction-following.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Language Models to Instruction Following</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/prompt-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prompt Engineering &amp; In-Context Learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/scaling-emergence.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Scaling Laws &amp; Emergent Abilities</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/llms-as-complex-systems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LLMs as Complex Systems</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 7: Self-Supervised Learning</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/paradigm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Self-Supervised Paradigm</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/contrastive-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contrastive Learning (SimCLR)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/graphs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Self-Supervised Learning for Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/time-series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Self-Supervised Learning for Time-Series</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 8: Explainability &amp; Ethics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/need.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Need for Explainability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/attention.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Attention Visualization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/lime-shap.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LIME &amp; SHAP</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/fairness.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Algorithmic Fairness &amp; Bias</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Causality vs.&nbsp;Correlation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false">
+ <span class="menu-text">Legacy Materials</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/what-to-learn.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word &amp; Document Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/what-to-learn.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Recurrent Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/what-to-learn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Image Processing (CNNs)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../m02-visualization/overview.html">Module 2: Visualizing Complexity</a></li><li class="breadcrumb-item"><a href="../m02-visualization/networks.html">Visualizing Networks</a></li></ol></nav>
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Network Visualization</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Sadamori Kojaku </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">November 21, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>You’ve probably seen them before: network visualizations that look like tangled balls of yarn, where nodes cluster in impenetrable clumps and edges cross everywhere. These “hairball diagrams” are so common in publications that they’ve become a running joke in network science. The problem isn’t that the networks are inherently messy—it’s that <strong>the layout fails to reveal the structure that’s actually there</strong>.</p>
+<p>The goal of network visualization is not to make pretty pictures. It’s to <strong>make structure visible</strong>. A good layout should help you answer questions: Are there communities? Is there hierarchy? Are certain nodes central? A bad layout obscures these answers, no matter how much you adjust the colors or node sizes.</p>
+<p>In this lecture, we’ll explore how to choose and use network layouts that reveal rather than obscure. We’ll start with the simplest case—trees—then move to general networks with force-directed layouts, and finally to hierarchical structures that combine both approaches with edge bundling.</p>
+<p><strong>The core principle</strong>: Layout is not decoration. It’s a hypothesis about what structure matters in your network.</p>
+<section id="what-is-a-network" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="what-is-a-network"><span class="header-section-number">1</span> What is a Network?</h2>
+<p>A <strong>network</strong> (or graph) is a collection of <strong>nodes</strong> (also called vertices) connected by <strong>edges</strong> (also called links). Networks can represent almost anything: social relationships, neural connections, citations between papers, roads between cities, or interactions between proteins.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Mathematical Definition
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A network <span class="math inline">G = (V, E)</span> consists of:</p>
+<ul>
+<li>A set of nodes <span class="math inline">V = \{v_1, v_2, ..., v_n\}</span></li>
+<li>A set of edges <span class="math inline">E \subseteq V \times V</span> representing connections</li>
+</ul>
+<p>Networks can be <strong>directed</strong> (edges have direction, like citations) or <strong>undirected</strong> (edges are symmetric, like friendships).</p>
+</div>
+</div>
+<p>Why do we visualize networks? Because <strong>topology is hard to grasp from data alone</strong>. Looking at an adjacency matrix or edge list gives you facts but not insight. Visualization transforms abstract connectivity into spatial patterns your visual system can process.</p>
+<p>But here’s the challenge: unlike data points that have inherent positions (latitude/longitude, time series), <strong>networks have no natural layout</strong>. The positions you see in a network visualization are entirely constructed by the layout algorithm. Different algorithms can make the same network look completely different.</p>
+<p>This means <strong>choosing a layout is choosing what to emphasize</strong>. Let’s see how.</p>
+</section>
+<section id="visualizing-trees" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="visualizing-trees"><span class="header-section-number">2</span> Visualizing Trees</h2>
+<p>The simplest networks are <strong>trees</strong>: connected networks with no cycles. Every node except the root has exactly one parent. Trees appear everywhere: biological taxonomies, organizational charts, file systems, phylogenetic trees, decision trees.</p>
+<p>For trees, the structure is clear: there’s a natural hierarchy. The <strong>radial tree layout</strong> makes this hierarchy visible by placing the root at the center and arranging descendants in concentric circles.</p>
+<div id="ff36d9c8" class="cell" data-fig-height="8" data-fig-width="8" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> graph_tool.<span class="bu">all</span> <span class="im">as</span> gt</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> networkx <span class="im">as</span> nx</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Set random seed for reproducibility</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate a random tree using NetworkX</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>nx_tree <span class="op">=</span> nx.random_labeled_tree(n<span class="op">=</span><span class="dv">50</span>, seed<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to graph-tool</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> gt.Graph(directed<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>g.add_vertex(nx_tree.number_of_nodes())</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> u, v <span class="kw">in</span> nx_tree.edges():</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    g.add_edge(g.vertex(u), g.vertex(v))</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Create radial tree layout</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> gt.radial_tree_layout(g, g.vertex(<span class="dv">0</span>))</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Draw the network (let graph-tool handle rendering directly)</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>gt.graph_draw(g, pos<span class="op">=</span>pos,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>              vertex_fill_color<span class="op">=</span>[<span class="fl">0.275</span>, <span class="fl">0.510</span>, <span class="fl">0.706</span>, <span class="dv">1</span>],  <span class="co"># steelblue</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>              vertex_size<span class="op">=</span><span class="dv">15</span>,</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>              edge_color<span class="op">=</span>[<span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="dv">1</span>],  <span class="co"># gray</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>              edge_pen_width<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>              output_size<span class="op">=</span>(<span class="dv">500</span>, <span class="dv">500</span>),</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>              inline<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="networks_files/figure-html/cell-2-output-1.png" width="436" height="500" class="figure-img"></p>
+<figcaption>Radial tree layout of a random tree with 50 nodes. The root is at the center, and descendants are arranged in concentric circles by depth.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The radial layout immediately tells you several things:</p>
+<ul>
+<li><strong>Depth</strong>: How far each node is from the root (distance from center)</li>
+<li><strong>Branching structure</strong>: Where the tree splits into subtrees</li>
+<li><strong>Balance</strong>: Whether the tree is symmetric or lopsided</li>
+</ul>
+</section>
+<section id="force-directed-layouts" class="level2 page-columns page-full" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="force-directed-layouts"><span class="header-section-number">3</span> Force-Directed Layouts</h2>
+<p>Most networks aren’t trees. They have cycles, cross-links, and complex connectivity patterns. For these networks, we need algorithms that can handle arbitrary topology. The most common approach is <strong>force-directed layout</strong>.</p>
+<p>The idea is simple: treat nodes as charged particles that repel each other, and edges as springs that pull connected nodes together. Let the system simulate physics until it reaches equilibrium. Nodes that are closely connected end up near each other, while unconnected parts spread apart.</p>
+<p>The <strong>Fruchterman-Reingold algorithm</strong> is one of the most widely used force-directed methods. It balances two forces:</p>
+<ul>
+<li><strong>Repulsive force</strong>: All pairs of nodes repel each other (like charged particles)</li>
+<li><strong>Attractive force</strong>: Connected nodes are pulled together (like springs)</li>
+</ul>
+<p>Let’s see it in action on a well-known network: the Zachary Karate Club, a social network of 34 members of a karate club, documenting friendships before the club split into two groups.</p>
+<div id="862f01bc" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> graph_tool.<span class="bu">all</span> <span class="im">as</span> gt</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> networkx <span class="im">as</span> nx</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate a random tree using NetworkX</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>nx_tree <span class="op">=</span> nx.random_labeled_tree(n<span class="op">=</span><span class="dv">50</span>, seed<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to graph-tool</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> gt.Graph(directed<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>g.add_vertex(nx_tree.number_of_nodes())</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> u, v <span class="kw">in</span> nx_tree.edges():</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    g.add_edge(g.vertex(u), g.vertex(v))</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Force-directed layout (Fruchterman-Reingold)</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>pos_force <span class="op">=</span> gt.fruchterman_reingold_layout(g, n_iter<span class="op">=</span><span class="dv">1000</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Draw force-directed layout inline</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>gt.graph_draw(</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    g,</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    pos<span class="op">=</span>pos_force,</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    vertex_fill_color<span class="op">=</span>[<span class="fl">1.0</span>, <span class="fl">0.498</span>, <span class="fl">0.314</span>, <span class="dv">1</span>],  <span class="co"># coral</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    vertex_size<span class="op">=</span><span class="dv">15</span>,</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    edge_color<span class="op">=</span>[<span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="dv">1</span>],  <span class="co"># gray</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    edge_pen_width<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    output_size<span class="op">=</span>(<span class="dv">500</span>, <span class="dv">500</span>),</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    inline<span class="op">=</span><span class="va">True</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="networks_files/figure-html/cell-3-output-1.png" width="311" height="500" class="figure-img"></p>
+<figcaption>Comparison of radial layout (left) vs.&nbsp;force-directed layout (right) for the same tree. The radial layout emphasizes hierarchy, while force-directed layout treats all edges equally.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="61c33417" class="cell" data-fig-height="8" data-fig-width="10" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> graph_tool.<span class="bu">all</span> <span class="im">as</span> gt</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the karate club network</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> gt.collection.data[<span class="st">"karate"</span>]</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Create Fruchterman-Reingold layout</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> gt.fruchterman_reingold_layout(g, n_iter<span class="op">=</span><span class="dv">1000</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Map communities to colors (RGB tuples)</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>color_map <span class="op">=</span> {<span class="dv">0</span>: [<span class="fl">0.906</span>, <span class="fl">0.298</span>, <span class="fl">0.235</span>, <span class="dv">1</span>],  <span class="co"># Red</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>             <span class="dv">1</span>: [<span class="fl">0.204</span>, <span class="fl">0.596</span>, <span class="fl">0.859</span>, <span class="dv">1</span>]}  <span class="co"># Blue</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Create vertex property map for colors</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>vertex_color <span class="op">=</span> g.new_vertex_property(<span class="st">"vector&lt;double&gt;"</span>)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> v <span class="kw">in</span> g.vertices():</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    vertex_color[v] <span class="op">=</span> color_map[<span class="dv">0</span>]</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Draw the network</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>gt.graph_draw(g, pos<span class="op">=</span>pos,</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>              vertex_fill_color<span class="op">=</span>vertex_color,</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>              vertex_size<span class="op">=</span><span class="dv">20</span>,</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>              edge_color<span class="op">=</span>[<span class="fl">0.584</span>, <span class="fl">0.647</span>, <span class="fl">0.651</span>, <span class="dv">1</span>],</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>              edge_pen_width<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>              output_size<span class="op">=</span>(<span class="dv">500</span>, <span class="dv">500</span>),</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>              inline<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="networks_files/figure-html/cell-4-output-1.png" width="264" height="500" class="figure-img"></p>
+<figcaption>Zachary Karate Club network with Fruchterman-Reingold layout. Node colors indicate the two groups that formed after the club split. The layout naturally separates the two communities.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>The Karate Club dataset</strong> comes from a study by Wayne Zachary (1977) documenting the split of a university karate club into two factions. It’s one of the most famous small networks in network science.</p>
+</div></div><p>The layout does something remarkable: even though we didn’t tell the algorithm about the two groups, <strong>it naturally separates them in space</strong>. This happens because nodes within each group are densely connected (many edges pulling them together), while connections between groups are sparse (less pull across the boundary).</p>
+<section id="sfdp-scalable-force-directed-placement" class="level3">
+<h3 class="anchored" data-anchor-id="sfdp-scalable-force-directed-placement">SFDP: Scalable Force-Directed Placement</h3>
+<p>The Fruchterman-Reingold algorithm slows down dramatically as networks grow because it computes forces between all pairs of nodes. For large networks, <strong>SFDP (Scalable Force-Directed Placement)</strong> is more efficient. It uses a multilevel approach, similar to the Barnes-Hut algorithm in physics simulations.</p>
+<div id="ab2c80ec" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> graph_tool.<span class="bu">all</span> <span class="im">as</span> gt</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> networkx <span class="im">as</span> nx</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate a larger scale-free network using NetworkX</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">123</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>nx_g <span class="op">=</span> nx.barabasi_albert_graph(n<span class="op">=</span><span class="dv">500</span>, m<span class="op">=</span><span class="dv">2</span>, seed<span class="op">=</span><span class="dv">123</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to graph-tool</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> gt.Graph(directed<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>g.add_vertex(nx_g.number_of_nodes())</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> u, v <span class="kw">in</span> nx_g.edges():</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    g.add_edge(g.vertex(u), g.vertex(v))</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Fruchterman-Reingold layout</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Fruchterman-Reingold layout:"</span>)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>start <span class="op">=</span> time.time()</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>pos_fr <span class="op">=</span> gt.fruchterman_reingold_layout(g, n_iter<span class="op">=</span><span class="dv">500</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>time_fr <span class="op">=</span> time.time() <span class="op">-</span> start</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Time: </span><span class="sc">{</span>time_fr<span class="sc">:.2f}</span><span class="ss">s"</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>gt.graph_draw(g, pos<span class="op">=</span>pos_fr,</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>              vertex_fill_color<span class="op">=</span>[<span class="fl">0.275</span>, <span class="fl">0.510</span>, <span class="fl">0.706</span>, <span class="dv">1</span>],  <span class="co"># steelblue</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>              vertex_size<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>              edge_color<span class="op">=</span>[<span class="fl">0.584</span>, <span class="fl">0.647</span>, <span class="fl">0.651</span>, <span class="dv">1</span>],</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>              edge_pen_width<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>              output_size<span class="op">=</span>(<span class="dv">600</span>, <span class="dv">600</span>),</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>              inline<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Fruchterman-Reingold layout:
+Time: 8.78s</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="networks_files/figure-html/cell-5-output-2.png" width="552" height="600" class="figure-img"></p>
+<figcaption>Comparison of Fruchterman-Reingold (left) vs.&nbsp;SFDP (right) on a larger network (500 nodes, scale-free topology). SFDP is much faster while producing comparable layouts.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="3a32b659" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># SFDP layout</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">SFDP layout:"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>start <span class="op">=</span> time.time()</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>pos_sfdp <span class="op">=</span> gt.sfdp_layout(g)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>time_sfdp <span class="op">=</span> time.time() <span class="op">-</span> start</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Time: </span><span class="sc">{</span>time_sfdp<span class="sc">:.2f}</span><span class="ss">s"</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>gt.graph_draw(g, pos<span class="op">=</span>pos_sfdp,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>              vertex_fill_color<span class="op">=</span>[<span class="fl">1.0</span>, <span class="fl">0.498</span>, <span class="fl">0.314</span>, <span class="dv">1</span>],  <span class="co"># coral</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>              vertex_size<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>              edge_color<span class="op">=</span>[<span class="fl">0.584</span>, <span class="fl">0.647</span>, <span class="fl">0.651</span>, <span class="dv">1</span>],</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>              edge_pen_width<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>              output_size<span class="op">=</span>(<span class="dv">600</span>, <span class="dv">600</span>),</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>              inline<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+SFDP layout:
+Time: 0.61s</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="networks_files/figure-html/cell-6-output-2.png" width="591" height="600" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>SFDP is often 10-100x faster for large networks while producing layouts of comparable quality. <strong>For networks with more than a few hundred nodes, SFDP is the better choice</strong>.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Force-Directed Layouts Are Non-Deterministic
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Force-directed algorithms start from random initial positions and may converge to different layouts each time you run them. Always set a random seed if you need reproducible figures. The layout reveals <strong>a</strong> valid structure, not <strong>the</strong> structure.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="visualizing-hierarchical-structure" class="level2 page-columns page-full" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="visualizing-hierarchical-structure"><span class="header-section-number">4</span> Visualizing Hierarchical Structure</h2>
+<p>Many real-world networks have <strong>hierarchical community structure</strong>: groups within groups, like departments within divisions within a company, or species within genera within families. Standard force-directed layouts can reveal communities, but they struggle to show the hierarchical relationships between them.</p>
+<p>We can explicitly encode the hierarchical structure into the layout in the following way.</p>
+<p>First, in many cases, we don’t know the hierarchical structure of a given network. So let’s assume that we have to infer it from the data. The <strong>nested stochastic block model</strong> finds a hierarchical partition by grouping nodes into communities, then grouping communities into super-communities, and so on. This is exactly what the <code>draw_hierarchy()</code> function visualizes.</p>
+<p>Let’s demonstrate with the C. elegans neural network—the complete wiring diagram of a nematode’s nervous system:</p>
+<div id="9dc3aeac" class="cell" data-fig-height="12" data-fig-width="12" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> graph_tool.<span class="bu">all</span> <span class="im">as</span> gt</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Load C. elegans neural network</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> gt.collection.data[<span class="st">"celegansneural"</span>]</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Infer hierarchical community structure</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>state <span class="op">=</span> gt.minimize_nested_blockmodel_dl(g)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Draw hierarchy with edge bundling</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>gt.draw_hierarchy(state,</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>                  beta<span class="op">=</span><span class="fl">0.8</span>,  <span class="co"># Edge bundling strength</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>                  output_size<span class="op">=</span>(<span class="dv">500</span>, <span class="dv">500</span>),</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>                  inline<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="networks_files/figure-html/cell-7-output-1.png" width="500" height="499" class="figure-img"></p>
+<figcaption>Hierarchical structure of the C. elegans neural network revealed through nested block model visualization with edge bundling. Inner rings represent higher-level communities, outer ring shows individual neurons. Edge bundling (beta=0.8) reduces visual clutter by routing edges through the hierarchy.</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>(&lt;VertexPropertyMap object with value type 'vector&lt;double&gt;', for Graph 0x107178e90, at 0x14294bb50&gt;,
+ &lt;GraphView object, directed, with 322 vertices and 321 edges, edges filtered by (&lt;EdgePropertyMap object with value type 'bool', for Graph 0x337c14f50, at 0x337c78090&gt;, False), vertices filtered by (&lt;VertexPropertyMap object with value type 'bool', for Graph 0x337c14f50, at 0x337cc4090&gt;, False), at 0x337c14f50&gt;,
+ &lt;VertexPropertyMap object with value type 'vector&lt;double&gt;', for Graph 0x337c14f50, at 0x337c0ec10&gt;)</code></pre>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>See <a href="https://ieeexplore.ieee.org/abstract/document/4015425">this paper by Holten (2006)</a> that introduced hierarchical edge bundling.</p>
+</div></div><p>This visualization packs an enormous amount of information into a single image:</p>
+<ul>
+<li><strong>Concentric rings</strong>: Each ring represents a level in the hierarchy, from coarse (inner) to fine (outer)</li>
+<li><strong>Colored wedges</strong>: Each wedge is a community at that hierarchical level</li>
+<li><strong>Edge bundling</strong>: Edges are routed through the hierarchy tree, creating bundles that reveal large-scale connectivity patterns</li>
+</ul>
+<p>Without edge bundling, this network would be an incomprehensible hairball. The bundling reveals that most connections occur within communities or between closely related communities—exactly what you’d expect in a modular biological network.</p>
+<section id="tuning-edge-bundling-strength" class="level3">
+<h3 class="anchored" data-anchor-id="tuning-edge-bundling-strength">Tuning Edge Bundling Strength</h3>
+<p>The key parameter is <strong>beta</strong>, which controls how strongly edges are bundled. Beta ranges from 0 (no bundling, straight lines) to 1 (maximum bundling, edges follow the hierarchy tree exactly).</p>
+<div id="2e70d76f" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> graph_tool.<span class="bu">all</span> <span class="im">as</span> gt</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Use a smaller network for clearer comparison</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> gt.collection.data[<span class="st">"karate"</span>]</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>state <span class="op">=</span> gt.minimize_nested_blockmodel_dl(g)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Beta = 0.3 (low bundling)</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Beta = 0.3:"</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>gt.draw_hierarchy(state,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>                  beta<span class="op">=</span><span class="fl">0.3</span>,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>                  output_size<span class="op">=</span>(<span class="dv">500</span>, <span class="dv">500</span>),</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>                  inline<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Beta = 0.9 (high bundling)</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Beta = 0.9:"</span>)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>gt.draw_hierarchy(state,</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>                  beta<span class="op">=</span><span class="fl">0.9</span>,</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>                  output_size<span class="op">=</span>(<span class="dv">500</span>, <span class="dv">500</span>),</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>                  inline<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Beta = 0.3:</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="networks_files/figure-html/cell-8-output-2.png" width="500" height="497" class="figure-img"></p>
+<figcaption>Effect of edge bundling strength (beta) on hierarchical network visualization. Low beta (left) shows individual edges but creates clutter; high beta (right) emphasizes hierarchical structure but may obscure detailed connectivity.</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Beta = 0.9:</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="networks_files/figure-html/cell-8-output-4.png" width="500" height="497" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<pre><code>(&lt;VertexPropertyMap object with value type 'vector&lt;double&gt;', for Graph 0x337c160d0, at 0x142ceac10&gt;,
+ &lt;GraphView object, directed, with 35 vertices and 34 edges, edges filtered by (&lt;EdgePropertyMap object with value type 'bool', for Graph 0x32d000050, at 0x337c91f90&gt;, False), vertices filtered by (&lt;VertexPropertyMap object with value type 'bool', for Graph 0x32d000050, at 0x337c0e950&gt;, False), at 0x32d000050&gt;,
+ &lt;VertexPropertyMap object with value type 'vector&lt;double&gt;', for Graph 0x32d000050, at 0x3141f6c50&gt;)</code></pre>
+</div>
+</div>
+<p>Low beta (0.3) preserves individual edge information but creates visual clutter. High beta (0.9) emphasizes the hierarchical flow of connections—you can see which communities talk to which—but individual edges become hard to trace.</p>
+<p><strong>Choose beta based on your goal</strong>: - To show detailed connectivity: beta = 0.3-0.5 - To show hierarchical structure: beta = 0.7-0.9 - General-purpose visualization: beta = 0.6-0.8</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+When to Use Hierarchical Layouts
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Circular hierarchy layouts are powerful but <strong>only appropriate when your network actually has hierarchical structure</strong>. If you force a random network into this layout, you’ll create the illusion of hierarchy where none exists. Always validate the hierarchical partition (e.g., using the description length of the nested block model) before using this visualization.</p>
+</div>
+</div>
+</section>
+<section id="alternative-sfdp-layout-for-hierarchies" class="level3">
+<h3 class="anchored" data-anchor-id="alternative-sfdp-layout-for-hierarchies">Alternative: SFDP Layout for Hierarchies</h3>
+<p>You can also use the SFDP layout algorithm with <code>draw_hierarchy()</code>, which positions the hierarchy tree using force-directed placement. This can be useful for very large hierarchies:</p>
+<div id="0939f702" class="cell" data-fig-height="10" data-fig-width="10" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> graph_tool.<span class="bu">all</span> <span class="im">as</span> gt</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> gt.collection.data[<span class="st">"karate"</span>]</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>state <span class="op">=</span> gt.minimize_nested_blockmodel_dl(g)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>gt.draw_hierarchy(state,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>                  layout<span class="op">=</span><span class="st">"sfdp"</span>,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>                  beta<span class="op">=</span><span class="fl">0.8</span>,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>                  output_size<span class="op">=</span>(<span class="dv">500</span>, <span class="dv">500</span>),</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>                  inline<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="networks_files/figure-html/cell-9-output-1.png" width="488" height="500" class="figure-img"></p>
+<figcaption>Hierarchical visualization with SFDP layout for the hierarchy tree. The SFDP algorithm positions hierarchy levels using force-directed placement, which can reveal different structural patterns.</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>(&lt;VertexPropertyMap object with value type 'vector&lt;double&gt;', for Graph 0x337c160d0, at 0x16a660e50&gt;,
+ &lt;GraphView object, directed, with 35 vertices and 34 edges, edges filtered by (&lt;EdgePropertyMap object with value type 'bool', for Graph 0x337cc6d10, at 0x314e201d0&gt;, False), vertices filtered by (&lt;VertexPropertyMap object with value type 'bool', for Graph 0x337cc6d10, at 0x337c3acd0&gt;, False), at 0x337cc6d10&gt;,
+ &lt;VertexPropertyMap object with value type 'vector&lt;double&gt;', for Graph 0x337cc6d10, at 0x337cc5a10&gt;)</code></pre>
+</div>
+</div>
+<p>The SFDP layout for hierarchies is particularly useful for <strong>very large networks</strong> where the radial layout becomes too crowded, or when you want to emphasize local connectivity patterns over strict hierarchical levels.</p>
+</section>
+</section>
+<section id="the-bigger-picture-layout-as-hypothesis" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="the-bigger-picture-layout-as-hypothesis"><span class="header-section-number">5</span> The Bigger Picture: Layout as Hypothesis</h2>
+<p>Every layout algorithm embodies a hypothesis about what makes nodes “similar” or “close”:</p>
+<ul>
+<li><strong>Radial tree layout</strong> hypothesizes that hierarchy is the key structure</li>
+<li><strong>Force-directed layout</strong> hypothesizes that shared neighbors create similarity</li>
+<li><strong>Hierarchical layout with edge bundling</strong> hypothesizes that multi-scale community structure organizes the network</li>
+</ul>
+<p>None of these is objectively “correct”—they’re different lenses for viewing the same data. The critical skill is <strong>matching the layout to the question you’re asking</strong>.</p>
+<section id="limitations-and-caveats" class="level3">
+<h3 class="anchored" data-anchor-id="limitations-and-caveats">Limitations and Caveats</h3>
+<p>Network visualization has fundamental limitations that you need to understand:</p>
+<p><strong>1. Layout is not analysis</strong>. A clear visual pattern doesn’t prove that pattern exists in the data—it might be an artifact of the layout algorithm. Always validate visual insights with quantitative analysis (modularity scores, statistical tests, null models).</p>
+<p><strong>2. 2D layouts lose information</strong>. Projecting a high-dimensional graph structure into 2D necessarily distorts distances and relationships. Nodes that appear close might not be similar; nodes that appear far might be connected.</p>
+<p><strong>3. Large networks don’t scale</strong>. Once you have thousands of nodes, even the best layouts become unreadable. At that point, consider: - <strong>Aggregation</strong>: Show communities as super-nodes - <strong>Filtering</strong>: Display only the most important nodes/edges - <strong>Interactive tools</strong>: Allow zooming and panning - <strong>Alternative representations</strong>: Adjacency matrices, arc diagrams</p>
+<p><strong>4. Edge crossings are unavoidable</strong> (except for planar graphs). Don’t spend hours tweaking layouts to eliminate all crossings—focus on revealing meaningful structure instead.</p>
+<p>Network visualization is a rich field with decades of research. For deeper exploration:</p>
+<ul>
+<li><strong>Graph-tool documentation</strong>: Comprehensive guide to all layout algorithms</li>
+<li><strong>The visual display of quantitative information</strong> by Edward Tufte: Principles of effective visualization</li>
+<li><strong>Network Science</strong> by Albert-László Barabási: Chapter on network visualization and its interpretation</li>
+</ul>
+<p>Remember: <strong>the best layout is the one that helps you answer your question</strong>. Start with the structure you’re looking for, then choose the layout that makes that structure visible.</p>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../m02-visualization/highd-data.html" class="pagination-link" aria-label="Visualizing High-Dimensional Data">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Visualizing High-Dimensional Data</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../m02-visualization/time-series.html" class="pagination-link" aria-label="Visualizing Time-Series">
+        <span class="nav-page-text">Visualizing Time-Series</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb16" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Network Visualization"</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="an">jupyter:</span><span class="co"> advnetsci</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="an">execute:</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">    enabled: true</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>You've probably seen them before: network visualizations that look like tangled balls of yarn, where nodes cluster in impenetrable clumps and edges cross everywhere. These "hairball diagrams" are so common in publications that they've become a running joke in network science. The problem isn't that the networks are inherently messy---it's that **the layout fails to reveal the structure that's actually there**.</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>The goal of network visualization is not to make pretty pictures. It's to **make structure visible**. A good layout should help you answer questions: Are there communities? Is there hierarchy? Are certain nodes central? A bad layout obscures these answers, no matter how much you adjust the colors or node sizes.</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>In this lecture, we'll explore how to choose and use network layouts that reveal rather than obscure. We'll start with the simplest case---trees---then move to general networks with force-directed layouts, and finally to hierarchical structures that combine both approaches with edge bundling.</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>**The core principle**: Layout is not decoration. It's a hypothesis about what structure matters in your network.</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="fu">## What is a Network?</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>A **network** (or graph) is a collection of **nodes** (also called vertices) connected by **edges** (also called links). Networks can represent almost anything: social relationships, neural connections, citations between papers, roads between cities, or interactions between proteins.</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="fu">## Mathematical Definition</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>A network $G = (V, E)$ consists of:</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A set of nodes $V = <span class="sc">\{</span>v_1, v_2, ..., v_n<span class="sc">\}</span>$</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A set of edges $E \subseteq V \times V$ representing connections</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>Networks can be **directed** (edges have direction, like citations) or **undirected** (edges are symmetric, like friendships).</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>Why do we visualize networks? Because **topology is hard to grasp from data alone**. Looking at an adjacency matrix or edge list gives you facts but not insight. Visualization transforms abstract connectivity into spatial patterns your visual system can process.</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>But here's the challenge: unlike data points that have inherent positions (latitude/longitude, time series), **networks have no natural layout**. The positions you see in a network visualization are entirely constructed by the layout algorithm. Different algorithms can make the same network look completely different.</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>This means **choosing a layout is choosing what to emphasize**. Let's see how.</span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a><span class="fu">## Visualizing Trees</span></span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>The simplest networks are **trees**: connected networks with no cycles. Every node except the root has exactly one parent. Trees appear everywhere: biological taxonomies, organizational charts, file systems, phylogenetic trees, decision trees.</span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a>For trees, the structure is clear: there's a natural hierarchy. The **radial tree layout** makes this hierarchy visible by placing the root at the center and arranging descendants in concentric circles.</span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Radial tree layout of a random tree with 50 nodes. The root is at the center, and descendants are arranged in concentric circles by depth."</span></span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 8</span></span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 8</span></span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> graph_tool.<span class="bu">all</span> <span class="im">as</span> gt</span>
+<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> networkx <span class="im">as</span> nx</span>
+<span id="cb16-52"><a href="#cb16-52" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb16-53"><a href="#cb16-53" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb16-54"><a href="#cb16-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-55"><a href="#cb16-55" aria-hidden="true" tabindex="-1"></a><span class="co"># Set random seed for reproducibility</span></span>
+<span id="cb16-56"><a href="#cb16-56" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
+<span id="cb16-57"><a href="#cb16-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-58"><a href="#cb16-58" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate a random tree using NetworkX</span></span>
+<span id="cb16-59"><a href="#cb16-59" aria-hidden="true" tabindex="-1"></a>nx_tree <span class="op">=</span> nx.random_labeled_tree(n<span class="op">=</span><span class="dv">50</span>, seed<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb16-60"><a href="#cb16-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-61"><a href="#cb16-61" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to graph-tool</span></span>
+<span id="cb16-62"><a href="#cb16-62" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> gt.Graph(directed<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb16-63"><a href="#cb16-63" aria-hidden="true" tabindex="-1"></a>g.add_vertex(nx_tree.number_of_nodes())</span>
+<span id="cb16-64"><a href="#cb16-64" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> u, v <span class="kw">in</span> nx_tree.edges():</span>
+<span id="cb16-65"><a href="#cb16-65" aria-hidden="true" tabindex="-1"></a>    g.add_edge(g.vertex(u), g.vertex(v))</span>
+<span id="cb16-66"><a href="#cb16-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-67"><a href="#cb16-67" aria-hidden="true" tabindex="-1"></a><span class="co"># Create radial tree layout</span></span>
+<span id="cb16-68"><a href="#cb16-68" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> gt.radial_tree_layout(g, g.vertex(<span class="dv">0</span>))</span>
+<span id="cb16-69"><a href="#cb16-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-70"><a href="#cb16-70" aria-hidden="true" tabindex="-1"></a><span class="co"># Draw the network (let graph-tool handle rendering directly)</span></span>
+<span id="cb16-71"><a href="#cb16-71" aria-hidden="true" tabindex="-1"></a>gt.graph_draw(g, pos<span class="op">=</span>pos,</span>
+<span id="cb16-72"><a href="#cb16-72" aria-hidden="true" tabindex="-1"></a>              vertex_fill_color<span class="op">=</span>[<span class="fl">0.275</span>, <span class="fl">0.510</span>, <span class="fl">0.706</span>, <span class="dv">1</span>],  <span class="co"># steelblue</span></span>
+<span id="cb16-73"><a href="#cb16-73" aria-hidden="true" tabindex="-1"></a>              vertex_size<span class="op">=</span><span class="dv">15</span>,</span>
+<span id="cb16-74"><a href="#cb16-74" aria-hidden="true" tabindex="-1"></a>              edge_color<span class="op">=</span>[<span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="dv">1</span>],  <span class="co"># gray</span></span>
+<span id="cb16-75"><a href="#cb16-75" aria-hidden="true" tabindex="-1"></a>              edge_pen_width<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb16-76"><a href="#cb16-76" aria-hidden="true" tabindex="-1"></a>              output_size<span class="op">=</span>(<span class="dv">500</span>, <span class="dv">500</span>),</span>
+<span id="cb16-77"><a href="#cb16-77" aria-hidden="true" tabindex="-1"></a>              inline<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-78"><a href="#cb16-78" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-79"><a href="#cb16-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-80"><a href="#cb16-80" aria-hidden="true" tabindex="-1"></a>The radial layout immediately tells you several things:</span>
+<span id="cb16-81"><a href="#cb16-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-82"><a href="#cb16-82" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Depth**: How far each node is from the root (distance from center)</span>
+<span id="cb16-83"><a href="#cb16-83" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Branching structure**: Where the tree splits into subtrees</span>
+<span id="cb16-84"><a href="#cb16-84" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Balance**: Whether the tree is symmetric or lopsided</span>
+<span id="cb16-85"><a href="#cb16-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-86"><a href="#cb16-86" aria-hidden="true" tabindex="-1"></a><span class="fu">## Force-Directed Layouts</span></span>
+<span id="cb16-87"><a href="#cb16-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-88"><a href="#cb16-88" aria-hidden="true" tabindex="-1"></a>Most networks aren't trees. They have cycles, cross-links, and complex connectivity patterns. For these networks, we need algorithms that can handle arbitrary topology. The most common approach is **force-directed layout**.</span>
+<span id="cb16-89"><a href="#cb16-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-90"><a href="#cb16-90" aria-hidden="true" tabindex="-1"></a>The idea is simple: treat nodes as charged particles that repel each other, and edges as springs that pull connected nodes together. Let the system simulate physics until it reaches equilibrium. Nodes that are closely connected end up near each other, while unconnected parts spread apart.</span>
+<span id="cb16-91"><a href="#cb16-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-92"><a href="#cb16-92" aria-hidden="true" tabindex="-1"></a>The **Fruchterman-Reingold algorithm** is one of the most widely used force-directed methods. It balances two forces:</span>
+<span id="cb16-93"><a href="#cb16-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-94"><a href="#cb16-94" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Repulsive force**: All pairs of nodes repel each other (like charged particles)</span>
+<span id="cb16-95"><a href="#cb16-95" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Attractive force**: Connected nodes are pulled together (like springs)</span>
+<span id="cb16-96"><a href="#cb16-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-97"><a href="#cb16-97" aria-hidden="true" tabindex="-1"></a>Let's see it in action on a well-known network: the Zachary Karate Club, a social network of 34 members of a karate club, documenting friendships before the club split into two groups.</span>
+<span id="cb16-98"><a href="#cb16-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-99"><a href="#cb16-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-102"><a href="#cb16-102" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-103"><a href="#cb16-103" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Comparison of radial layout (left) vs. force-directed layout (right) for the same tree. The radial layout emphasizes hierarchy, while force-directed layout treats all edges equally."</span></span>
+<span id="cb16-104"><a href="#cb16-104" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 14</span></span>
+<span id="cb16-105"><a href="#cb16-105" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 6</span></span>
+<span id="cb16-106"><a href="#cb16-106" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb16-107"><a href="#cb16-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-108"><a href="#cb16-108" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> graph_tool.<span class="bu">all</span> <span class="im">as</span> gt</span>
+<span id="cb16-109"><a href="#cb16-109" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> networkx <span class="im">as</span> nx</span>
+<span id="cb16-110"><a href="#cb16-110" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb16-111"><a href="#cb16-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-112"><a href="#cb16-112" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
+<span id="cb16-113"><a href="#cb16-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-114"><a href="#cb16-114" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate a random tree using NetworkX</span></span>
+<span id="cb16-115"><a href="#cb16-115" aria-hidden="true" tabindex="-1"></a>nx_tree <span class="op">=</span> nx.random_labeled_tree(n<span class="op">=</span><span class="dv">50</span>, seed<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb16-116"><a href="#cb16-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-117"><a href="#cb16-117" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to graph-tool</span></span>
+<span id="cb16-118"><a href="#cb16-118" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> gt.Graph(directed<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb16-119"><a href="#cb16-119" aria-hidden="true" tabindex="-1"></a>g.add_vertex(nx_tree.number_of_nodes())</span>
+<span id="cb16-120"><a href="#cb16-120" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> u, v <span class="kw">in</span> nx_tree.edges():</span>
+<span id="cb16-121"><a href="#cb16-121" aria-hidden="true" tabindex="-1"></a>    g.add_edge(g.vertex(u), g.vertex(v))</span>
+<span id="cb16-122"><a href="#cb16-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-123"><a href="#cb16-123" aria-hidden="true" tabindex="-1"></a><span class="co"># Force-directed layout (Fruchterman-Reingold)</span></span>
+<span id="cb16-124"><a href="#cb16-124" aria-hidden="true" tabindex="-1"></a>pos_force <span class="op">=</span> gt.fruchterman_reingold_layout(g, n_iter<span class="op">=</span><span class="dv">1000</span>)</span>
+<span id="cb16-125"><a href="#cb16-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-126"><a href="#cb16-126" aria-hidden="true" tabindex="-1"></a><span class="co"># Draw force-directed layout inline</span></span>
+<span id="cb16-127"><a href="#cb16-127" aria-hidden="true" tabindex="-1"></a>gt.graph_draw(</span>
+<span id="cb16-128"><a href="#cb16-128" aria-hidden="true" tabindex="-1"></a>    g,</span>
+<span id="cb16-129"><a href="#cb16-129" aria-hidden="true" tabindex="-1"></a>    pos<span class="op">=</span>pos_force,</span>
+<span id="cb16-130"><a href="#cb16-130" aria-hidden="true" tabindex="-1"></a>    vertex_fill_color<span class="op">=</span>[<span class="fl">1.0</span>, <span class="fl">0.498</span>, <span class="fl">0.314</span>, <span class="dv">1</span>],  <span class="co"># coral</span></span>
+<span id="cb16-131"><a href="#cb16-131" aria-hidden="true" tabindex="-1"></a>    vertex_size<span class="op">=</span><span class="dv">15</span>,</span>
+<span id="cb16-132"><a href="#cb16-132" aria-hidden="true" tabindex="-1"></a>    edge_color<span class="op">=</span>[<span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="dv">1</span>],  <span class="co"># gray</span></span>
+<span id="cb16-133"><a href="#cb16-133" aria-hidden="true" tabindex="-1"></a>    edge_pen_width<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb16-134"><a href="#cb16-134" aria-hidden="true" tabindex="-1"></a>    output_size<span class="op">=</span>(<span class="dv">500</span>, <span class="dv">500</span>),</span>
+<span id="cb16-135"><a href="#cb16-135" aria-hidden="true" tabindex="-1"></a>    inline<span class="op">=</span><span class="va">True</span></span>
+<span id="cb16-136"><a href="#cb16-136" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-137"><a href="#cb16-137" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-140"><a href="#cb16-140" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-141"><a href="#cb16-141" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Zachary Karate Club network with Fruchterman-Reingold layout. Node colors indicate the two groups that formed after the club split. The layout naturally separates the two communities."</span></span>
+<span id="cb16-142"><a href="#cb16-142" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 10</span></span>
+<span id="cb16-143"><a href="#cb16-143" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 8</span></span>
+<span id="cb16-144"><a href="#cb16-144" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb16-145"><a href="#cb16-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-146"><a href="#cb16-146" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> graph_tool.<span class="bu">all</span> <span class="im">as</span> gt</span>
+<span id="cb16-147"><a href="#cb16-147" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb16-148"><a href="#cb16-148" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb16-149"><a href="#cb16-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-150"><a href="#cb16-150" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the karate club network</span></span>
+<span id="cb16-151"><a href="#cb16-151" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> gt.collection.data[<span class="st">"karate"</span>]</span>
+<span id="cb16-152"><a href="#cb16-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-153"><a href="#cb16-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-154"><a href="#cb16-154" aria-hidden="true" tabindex="-1"></a><span class="co"># Create Fruchterman-Reingold layout</span></span>
+<span id="cb16-155"><a href="#cb16-155" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> gt.fruchterman_reingold_layout(g, n_iter<span class="op">=</span><span class="dv">1000</span>)</span>
+<span id="cb16-156"><a href="#cb16-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-157"><a href="#cb16-157" aria-hidden="true" tabindex="-1"></a><span class="co"># Map communities to colors (RGB tuples)</span></span>
+<span id="cb16-158"><a href="#cb16-158" aria-hidden="true" tabindex="-1"></a>color_map <span class="op">=</span> {<span class="dv">0</span>: [<span class="fl">0.906</span>, <span class="fl">0.298</span>, <span class="fl">0.235</span>, <span class="dv">1</span>],  <span class="co"># Red</span></span>
+<span id="cb16-159"><a href="#cb16-159" aria-hidden="true" tabindex="-1"></a>             <span class="dv">1</span>: [<span class="fl">0.204</span>, <span class="fl">0.596</span>, <span class="fl">0.859</span>, <span class="dv">1</span>]}  <span class="co"># Blue</span></span>
+<span id="cb16-160"><a href="#cb16-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-161"><a href="#cb16-161" aria-hidden="true" tabindex="-1"></a><span class="co"># Create vertex property map for colors</span></span>
+<span id="cb16-162"><a href="#cb16-162" aria-hidden="true" tabindex="-1"></a>vertex_color <span class="op">=</span> g.new_vertex_property(<span class="st">"vector&lt;double&gt;"</span>)</span>
+<span id="cb16-163"><a href="#cb16-163" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> v <span class="kw">in</span> g.vertices():</span>
+<span id="cb16-164"><a href="#cb16-164" aria-hidden="true" tabindex="-1"></a>    vertex_color[v] <span class="op">=</span> color_map[<span class="dv">0</span>]</span>
+<span id="cb16-165"><a href="#cb16-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-166"><a href="#cb16-166" aria-hidden="true" tabindex="-1"></a><span class="co"># Draw the network</span></span>
+<span id="cb16-167"><a href="#cb16-167" aria-hidden="true" tabindex="-1"></a>gt.graph_draw(g, pos<span class="op">=</span>pos,</span>
+<span id="cb16-168"><a href="#cb16-168" aria-hidden="true" tabindex="-1"></a>              vertex_fill_color<span class="op">=</span>vertex_color,</span>
+<span id="cb16-169"><a href="#cb16-169" aria-hidden="true" tabindex="-1"></a>              vertex_size<span class="op">=</span><span class="dv">20</span>,</span>
+<span id="cb16-170"><a href="#cb16-170" aria-hidden="true" tabindex="-1"></a>              edge_color<span class="op">=</span>[<span class="fl">0.584</span>, <span class="fl">0.647</span>, <span class="fl">0.651</span>, <span class="dv">1</span>],</span>
+<span id="cb16-171"><a href="#cb16-171" aria-hidden="true" tabindex="-1"></a>              edge_pen_width<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb16-172"><a href="#cb16-172" aria-hidden="true" tabindex="-1"></a>              output_size<span class="op">=</span>(<span class="dv">500</span>, <span class="dv">500</span>),</span>
+<span id="cb16-173"><a href="#cb16-173" aria-hidden="true" tabindex="-1"></a>              inline<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-174"><a href="#cb16-174" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-175"><a href="#cb16-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-176"><a href="#cb16-176" aria-hidden="true" tabindex="-1"></a>::: {.column-margin}</span>
+<span id="cb16-177"><a href="#cb16-177" aria-hidden="true" tabindex="-1"></a>**The Karate Club dataset** comes from a study by Wayne Zachary (1977) documenting the split of a university karate club into two factions. It's one of the most famous small networks in network science.</span>
+<span id="cb16-178"><a href="#cb16-178" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb16-179"><a href="#cb16-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-180"><a href="#cb16-180" aria-hidden="true" tabindex="-1"></a>The layout does something remarkable: even though we didn't tell the algorithm about the two groups, **it naturally separates them in space**. This happens because nodes within each group are densely connected (many edges pulling them together), while connections between groups are sparse (less pull across the boundary).</span>
+<span id="cb16-181"><a href="#cb16-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-182"><a href="#cb16-182" aria-hidden="true" tabindex="-1"></a><span class="fu">### SFDP: Scalable Force-Directed Placement</span></span>
+<span id="cb16-183"><a href="#cb16-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-184"><a href="#cb16-184" aria-hidden="true" tabindex="-1"></a>The Fruchterman-Reingold algorithm slows down dramatically as networks grow because it computes forces between all pairs of nodes. For large networks, **SFDP (Scalable Force-Directed Placement)** is more efficient. It uses a multilevel approach, similar to the Barnes-Hut algorithm in physics simulations.</span>
+<span id="cb16-185"><a href="#cb16-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-188"><a href="#cb16-188" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-189"><a href="#cb16-189" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Comparison of Fruchterman-Reingold (left) vs. SFDP (right) on a larger network (500 nodes, scale-free topology). SFDP is much faster while producing comparable layouts."</span></span>
+<span id="cb16-190"><a href="#cb16-190" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 14</span></span>
+<span id="cb16-191"><a href="#cb16-191" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 6</span></span>
+<span id="cb16-192"><a href="#cb16-192" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb16-193"><a href="#cb16-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-194"><a href="#cb16-194" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> graph_tool.<span class="bu">all</span> <span class="im">as</span> gt</span>
+<span id="cb16-195"><a href="#cb16-195" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> networkx <span class="im">as</span> nx</span>
+<span id="cb16-196"><a href="#cb16-196" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb16-197"><a href="#cb16-197" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb16-198"><a href="#cb16-198" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb16-199"><a href="#cb16-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-200"><a href="#cb16-200" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate a larger scale-free network using NetworkX</span></span>
+<span id="cb16-201"><a href="#cb16-201" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">123</span>)</span>
+<span id="cb16-202"><a href="#cb16-202" aria-hidden="true" tabindex="-1"></a>nx_g <span class="op">=</span> nx.barabasi_albert_graph(n<span class="op">=</span><span class="dv">500</span>, m<span class="op">=</span><span class="dv">2</span>, seed<span class="op">=</span><span class="dv">123</span>)</span>
+<span id="cb16-203"><a href="#cb16-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-204"><a href="#cb16-204" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to graph-tool</span></span>
+<span id="cb16-205"><a href="#cb16-205" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> gt.Graph(directed<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb16-206"><a href="#cb16-206" aria-hidden="true" tabindex="-1"></a>g.add_vertex(nx_g.number_of_nodes())</span>
+<span id="cb16-207"><a href="#cb16-207" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> u, v <span class="kw">in</span> nx_g.edges():</span>
+<span id="cb16-208"><a href="#cb16-208" aria-hidden="true" tabindex="-1"></a>    g.add_edge(g.vertex(u), g.vertex(v))</span>
+<span id="cb16-209"><a href="#cb16-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-210"><a href="#cb16-210" aria-hidden="true" tabindex="-1"></a><span class="co"># Fruchterman-Reingold layout</span></span>
+<span id="cb16-211"><a href="#cb16-211" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Fruchterman-Reingold layout:"</span>)</span>
+<span id="cb16-212"><a href="#cb16-212" aria-hidden="true" tabindex="-1"></a>start <span class="op">=</span> time.time()</span>
+<span id="cb16-213"><a href="#cb16-213" aria-hidden="true" tabindex="-1"></a>pos_fr <span class="op">=</span> gt.fruchterman_reingold_layout(g, n_iter<span class="op">=</span><span class="dv">500</span>)</span>
+<span id="cb16-214"><a href="#cb16-214" aria-hidden="true" tabindex="-1"></a>time_fr <span class="op">=</span> time.time() <span class="op">-</span> start</span>
+<span id="cb16-215"><a href="#cb16-215" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Time: </span><span class="sc">{</span>time_fr<span class="sc">:.2f}</span><span class="ss">s"</span>)</span>
+<span id="cb16-216"><a href="#cb16-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-217"><a href="#cb16-217" aria-hidden="true" tabindex="-1"></a>gt.graph_draw(g, pos<span class="op">=</span>pos_fr,</span>
+<span id="cb16-218"><a href="#cb16-218" aria-hidden="true" tabindex="-1"></a>              vertex_fill_color<span class="op">=</span>[<span class="fl">0.275</span>, <span class="fl">0.510</span>, <span class="fl">0.706</span>, <span class="dv">1</span>],  <span class="co"># steelblue</span></span>
+<span id="cb16-219"><a href="#cb16-219" aria-hidden="true" tabindex="-1"></a>              vertex_size<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb16-220"><a href="#cb16-220" aria-hidden="true" tabindex="-1"></a>              edge_color<span class="op">=</span>[<span class="fl">0.584</span>, <span class="fl">0.647</span>, <span class="fl">0.651</span>, <span class="dv">1</span>],</span>
+<span id="cb16-221"><a href="#cb16-221" aria-hidden="true" tabindex="-1"></a>              edge_pen_width<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb16-222"><a href="#cb16-222" aria-hidden="true" tabindex="-1"></a>              output_size<span class="op">=</span>(<span class="dv">600</span>, <span class="dv">600</span>),</span>
+<span id="cb16-223"><a href="#cb16-223" aria-hidden="true" tabindex="-1"></a>              inline<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-224"><a href="#cb16-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-225"><a href="#cb16-225" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-226"><a href="#cb16-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-229"><a href="#cb16-229" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-230"><a href="#cb16-230" aria-hidden="true" tabindex="-1"></a><span class="co"># SFDP layout</span></span>
+<span id="cb16-231"><a href="#cb16-231" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">SFDP layout:"</span>)</span>
+<span id="cb16-232"><a href="#cb16-232" aria-hidden="true" tabindex="-1"></a>start <span class="op">=</span> time.time()</span>
+<span id="cb16-233"><a href="#cb16-233" aria-hidden="true" tabindex="-1"></a>pos_sfdp <span class="op">=</span> gt.sfdp_layout(g)</span>
+<span id="cb16-234"><a href="#cb16-234" aria-hidden="true" tabindex="-1"></a>time_sfdp <span class="op">=</span> time.time() <span class="op">-</span> start</span>
+<span id="cb16-235"><a href="#cb16-235" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Time: </span><span class="sc">{</span>time_sfdp<span class="sc">:.2f}</span><span class="ss">s"</span>)</span>
+<span id="cb16-236"><a href="#cb16-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-237"><a href="#cb16-237" aria-hidden="true" tabindex="-1"></a>gt.graph_draw(g, pos<span class="op">=</span>pos_sfdp,</span>
+<span id="cb16-238"><a href="#cb16-238" aria-hidden="true" tabindex="-1"></a>              vertex_fill_color<span class="op">=</span>[<span class="fl">1.0</span>, <span class="fl">0.498</span>, <span class="fl">0.314</span>, <span class="dv">1</span>],  <span class="co"># coral</span></span>
+<span id="cb16-239"><a href="#cb16-239" aria-hidden="true" tabindex="-1"></a>              vertex_size<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb16-240"><a href="#cb16-240" aria-hidden="true" tabindex="-1"></a>              edge_color<span class="op">=</span>[<span class="fl">0.584</span>, <span class="fl">0.647</span>, <span class="fl">0.651</span>, <span class="dv">1</span>],</span>
+<span id="cb16-241"><a href="#cb16-241" aria-hidden="true" tabindex="-1"></a>              edge_pen_width<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb16-242"><a href="#cb16-242" aria-hidden="true" tabindex="-1"></a>              output_size<span class="op">=</span>(<span class="dv">600</span>, <span class="dv">600</span>),</span>
+<span id="cb16-243"><a href="#cb16-243" aria-hidden="true" tabindex="-1"></a>              inline<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-244"><a href="#cb16-244" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-245"><a href="#cb16-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-246"><a href="#cb16-246" aria-hidden="true" tabindex="-1"></a>SFDP is often 10-100x faster for large networks while producing layouts of comparable quality. **For networks with more than a few hundred nodes, SFDP is the better choice**.</span>
+<span id="cb16-247"><a href="#cb16-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-248"><a href="#cb16-248" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning}</span>
+<span id="cb16-249"><a href="#cb16-249" aria-hidden="true" tabindex="-1"></a><span class="fu">## Force-Directed Layouts Are Non-Deterministic</span></span>
+<span id="cb16-250"><a href="#cb16-250" aria-hidden="true" tabindex="-1"></a>Force-directed algorithms start from random initial positions and may converge to different layouts each time you run them. Always set a random seed if you need reproducible figures. The layout reveals **a** valid structure, not **the** structure.</span>
+<span id="cb16-251"><a href="#cb16-251" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb16-252"><a href="#cb16-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-253"><a href="#cb16-253" aria-hidden="true" tabindex="-1"></a><span class="fu">## Visualizing Hierarchical Structure</span></span>
+<span id="cb16-254"><a href="#cb16-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-255"><a href="#cb16-255" aria-hidden="true" tabindex="-1"></a>Many real-world networks have **hierarchical community structure**: groups within groups, like departments within divisions within a company, or species within genera within families. Standard force-directed layouts can reveal communities, but they struggle to show the hierarchical relationships between them.</span>
+<span id="cb16-256"><a href="#cb16-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-257"><a href="#cb16-257" aria-hidden="true" tabindex="-1"></a>We can explicitly encode the hierarchical structure into the layout in the following way.</span>
+<span id="cb16-258"><a href="#cb16-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-259"><a href="#cb16-259" aria-hidden="true" tabindex="-1"></a>First, in many cases, we don't know the hierarchical structure of a given network. So let's assume that we have to infer it from the data.</span>
+<span id="cb16-260"><a href="#cb16-260" aria-hidden="true" tabindex="-1"></a>The **nested stochastic block model** finds a hierarchical partition by grouping nodes into communities, then grouping communities into super-communities, and so on. This is exactly what the <span class="in">`draw_hierarchy()`</span> function visualizes.</span>
+<span id="cb16-261"><a href="#cb16-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-262"><a href="#cb16-262" aria-hidden="true" tabindex="-1"></a>Let's demonstrate with the C. elegans neural network---the complete wiring diagram of a nematode's nervous system:</span>
+<span id="cb16-263"><a href="#cb16-263" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-266"><a href="#cb16-266" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-267"><a href="#cb16-267" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Hierarchical structure of the C. elegans neural network revealed through nested block model visualization with edge bundling. Inner rings represent higher-level communities, outer ring shows individual neurons. Edge bundling (beta=0.8) reduces visual clutter by routing edges through the hierarchy."</span></span>
+<span id="cb16-268"><a href="#cb16-268" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 12</span></span>
+<span id="cb16-269"><a href="#cb16-269" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 12</span></span>
+<span id="cb16-270"><a href="#cb16-270" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb16-271"><a href="#cb16-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-272"><a href="#cb16-272" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> graph_tool.<span class="bu">all</span> <span class="im">as</span> gt</span>
+<span id="cb16-273"><a href="#cb16-273" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb16-274"><a href="#cb16-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-275"><a href="#cb16-275" aria-hidden="true" tabindex="-1"></a><span class="co"># Load C. elegans neural network</span></span>
+<span id="cb16-276"><a href="#cb16-276" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> gt.collection.data[<span class="st">"celegansneural"</span>]</span>
+<span id="cb16-277"><a href="#cb16-277" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-278"><a href="#cb16-278" aria-hidden="true" tabindex="-1"></a><span class="co"># Infer hierarchical community structure</span></span>
+<span id="cb16-279"><a href="#cb16-279" aria-hidden="true" tabindex="-1"></a>state <span class="op">=</span> gt.minimize_nested_blockmodel_dl(g)</span>
+<span id="cb16-280"><a href="#cb16-280" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-281"><a href="#cb16-281" aria-hidden="true" tabindex="-1"></a><span class="co"># Draw hierarchy with edge bundling</span></span>
+<span id="cb16-282"><a href="#cb16-282" aria-hidden="true" tabindex="-1"></a>gt.draw_hierarchy(state,</span>
+<span id="cb16-283"><a href="#cb16-283" aria-hidden="true" tabindex="-1"></a>                  beta<span class="op">=</span><span class="fl">0.8</span>,  <span class="co"># Edge bundling strength</span></span>
+<span id="cb16-284"><a href="#cb16-284" aria-hidden="true" tabindex="-1"></a>                  output_size<span class="op">=</span>(<span class="dv">500</span>, <span class="dv">500</span>),</span>
+<span id="cb16-285"><a href="#cb16-285" aria-hidden="true" tabindex="-1"></a>                  inline<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-286"><a href="#cb16-286" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-287"><a href="#cb16-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-288"><a href="#cb16-288" aria-hidden="true" tabindex="-1"></a>::: {.column-margin}</span>
+<span id="cb16-289"><a href="#cb16-289" aria-hidden="true" tabindex="-1"></a>See <span class="co">[</span><span class="ot">this paper by Holten (2006)</span><span class="co">](https://ieeexplore.ieee.org/abstract/document/4015425)</span> that introduced hierarchical edge bundling.</span>
+<span id="cb16-290"><a href="#cb16-290" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb16-291"><a href="#cb16-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-292"><a href="#cb16-292" aria-hidden="true" tabindex="-1"></a>This visualization packs an enormous amount of information into a single image:</span>
+<span id="cb16-293"><a href="#cb16-293" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-294"><a href="#cb16-294" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Concentric rings**: Each ring represents a level in the hierarchy, from coarse (inner) to fine (outer)</span>
+<span id="cb16-295"><a href="#cb16-295" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Colored wedges**: Each wedge is a community at that hierarchical level</span>
+<span id="cb16-296"><a href="#cb16-296" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Edge bundling**: Edges are routed through the hierarchy tree, creating bundles that reveal large-scale connectivity patterns</span>
+<span id="cb16-297"><a href="#cb16-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-298"><a href="#cb16-298" aria-hidden="true" tabindex="-1"></a>Without edge bundling, this network would be an incomprehensible hairball. The bundling reveals that most connections occur within communities or between closely related communities---exactly what you'd expect in a modular biological network.</span>
+<span id="cb16-299"><a href="#cb16-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-300"><a href="#cb16-300" aria-hidden="true" tabindex="-1"></a><span class="fu">### Tuning Edge Bundling Strength</span></span>
+<span id="cb16-301"><a href="#cb16-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-302"><a href="#cb16-302" aria-hidden="true" tabindex="-1"></a>The key parameter is **beta**, which controls how strongly edges are bundled. Beta ranges from 0 (no bundling, straight lines) to 1 (maximum bundling, edges follow the hierarchy tree exactly).</span>
+<span id="cb16-303"><a href="#cb16-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-306"><a href="#cb16-306" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-307"><a href="#cb16-307" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Effect of edge bundling strength (beta) on hierarchical network visualization. Low beta (left) shows individual edges but creates clutter; high beta (right) emphasizes hierarchical structure but may obscure detailed connectivity."</span></span>
+<span id="cb16-308"><a href="#cb16-308" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 14</span></span>
+<span id="cb16-309"><a href="#cb16-309" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 6</span></span>
+<span id="cb16-310"><a href="#cb16-310" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb16-311"><a href="#cb16-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-312"><a href="#cb16-312" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> graph_tool.<span class="bu">all</span> <span class="im">as</span> gt</span>
+<span id="cb16-313"><a href="#cb16-313" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb16-314"><a href="#cb16-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-315"><a href="#cb16-315" aria-hidden="true" tabindex="-1"></a><span class="co"># Use a smaller network for clearer comparison</span></span>
+<span id="cb16-316"><a href="#cb16-316" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> gt.collection.data[<span class="st">"karate"</span>]</span>
+<span id="cb16-317"><a href="#cb16-317" aria-hidden="true" tabindex="-1"></a>state <span class="op">=</span> gt.minimize_nested_blockmodel_dl(g)</span>
+<span id="cb16-318"><a href="#cb16-318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-319"><a href="#cb16-319" aria-hidden="true" tabindex="-1"></a><span class="co"># Beta = 0.3 (low bundling)</span></span>
+<span id="cb16-320"><a href="#cb16-320" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Beta = 0.3:"</span>)</span>
+<span id="cb16-321"><a href="#cb16-321" aria-hidden="true" tabindex="-1"></a>gt.draw_hierarchy(state,</span>
+<span id="cb16-322"><a href="#cb16-322" aria-hidden="true" tabindex="-1"></a>                  beta<span class="op">=</span><span class="fl">0.3</span>,</span>
+<span id="cb16-323"><a href="#cb16-323" aria-hidden="true" tabindex="-1"></a>                  output_size<span class="op">=</span>(<span class="dv">500</span>, <span class="dv">500</span>),</span>
+<span id="cb16-324"><a href="#cb16-324" aria-hidden="true" tabindex="-1"></a>                  inline<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-325"><a href="#cb16-325" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-326"><a href="#cb16-326" aria-hidden="true" tabindex="-1"></a><span class="co"># Beta = 0.9 (high bundling)</span></span>
+<span id="cb16-327"><a href="#cb16-327" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Beta = 0.9:"</span>)</span>
+<span id="cb16-328"><a href="#cb16-328" aria-hidden="true" tabindex="-1"></a>gt.draw_hierarchy(state,</span>
+<span id="cb16-329"><a href="#cb16-329" aria-hidden="true" tabindex="-1"></a>                  beta<span class="op">=</span><span class="fl">0.9</span>,</span>
+<span id="cb16-330"><a href="#cb16-330" aria-hidden="true" tabindex="-1"></a>                  output_size<span class="op">=</span>(<span class="dv">500</span>, <span class="dv">500</span>),</span>
+<span id="cb16-331"><a href="#cb16-331" aria-hidden="true" tabindex="-1"></a>                  inline<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-332"><a href="#cb16-332" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-333"><a href="#cb16-333" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-334"><a href="#cb16-334" aria-hidden="true" tabindex="-1"></a>Low beta (0.3) preserves individual edge information but creates visual clutter. High beta (0.9) emphasizes the hierarchical flow of connections---you can see which communities talk to which---but individual edges become hard to trace.</span>
+<span id="cb16-335"><a href="#cb16-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-336"><a href="#cb16-336" aria-hidden="true" tabindex="-1"></a>**Choose beta based on your goal**:</span>
+<span id="cb16-337"><a href="#cb16-337" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>To show detailed connectivity: beta = 0.3-0.5</span>
+<span id="cb16-338"><a href="#cb16-338" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>To show hierarchical structure: beta = 0.7-0.9</span>
+<span id="cb16-339"><a href="#cb16-339" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>General-purpose visualization: beta = 0.6-0.8</span>
+<span id="cb16-340"><a href="#cb16-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-341"><a href="#cb16-341" aria-hidden="true" tabindex="-1"></a>::: {.callout-important}</span>
+<span id="cb16-342"><a href="#cb16-342" aria-hidden="true" tabindex="-1"></a><span class="fu">## When to Use Hierarchical Layouts</span></span>
+<span id="cb16-343"><a href="#cb16-343" aria-hidden="true" tabindex="-1"></a>Circular hierarchy layouts are powerful but **only appropriate when your network actually has hierarchical structure**. If you force a random network into this layout, you'll create the illusion of hierarchy where none exists. Always validate the hierarchical partition (e.g., using the description length of the nested block model) before using this visualization.</span>
+<span id="cb16-344"><a href="#cb16-344" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb16-345"><a href="#cb16-345" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-346"><a href="#cb16-346" aria-hidden="true" tabindex="-1"></a><span class="fu">### Alternative: SFDP Layout for Hierarchies</span></span>
+<span id="cb16-347"><a href="#cb16-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-348"><a href="#cb16-348" aria-hidden="true" tabindex="-1"></a>You can also use the SFDP layout algorithm with <span class="in">`draw_hierarchy()`</span>, which positions the hierarchy tree using force-directed placement. This can be useful for very large hierarchies:</span>
+<span id="cb16-349"><a href="#cb16-349" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-352"><a href="#cb16-352" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-353"><a href="#cb16-353" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Hierarchical visualization with SFDP layout for the hierarchy tree. The SFDP algorithm positions hierarchy levels using force-directed placement, which can reveal different structural patterns."</span></span>
+<span id="cb16-354"><a href="#cb16-354" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 10</span></span>
+<span id="cb16-355"><a href="#cb16-355" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 10</span></span>
+<span id="cb16-356"><a href="#cb16-356" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb16-357"><a href="#cb16-357" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-358"><a href="#cb16-358" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> graph_tool.<span class="bu">all</span> <span class="im">as</span> gt</span>
+<span id="cb16-359"><a href="#cb16-359" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb16-360"><a href="#cb16-360" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-361"><a href="#cb16-361" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> gt.collection.data[<span class="st">"karate"</span>]</span>
+<span id="cb16-362"><a href="#cb16-362" aria-hidden="true" tabindex="-1"></a>state <span class="op">=</span> gt.minimize_nested_blockmodel_dl(g)</span>
+<span id="cb16-363"><a href="#cb16-363" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-364"><a href="#cb16-364" aria-hidden="true" tabindex="-1"></a>gt.draw_hierarchy(state,</span>
+<span id="cb16-365"><a href="#cb16-365" aria-hidden="true" tabindex="-1"></a>                  layout<span class="op">=</span><span class="st">"sfdp"</span>,</span>
+<span id="cb16-366"><a href="#cb16-366" aria-hidden="true" tabindex="-1"></a>                  beta<span class="op">=</span><span class="fl">0.8</span>,</span>
+<span id="cb16-367"><a href="#cb16-367" aria-hidden="true" tabindex="-1"></a>                  output_size<span class="op">=</span>(<span class="dv">500</span>, <span class="dv">500</span>),</span>
+<span id="cb16-368"><a href="#cb16-368" aria-hidden="true" tabindex="-1"></a>                  inline<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-369"><a href="#cb16-369" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-370"><a href="#cb16-370" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-371"><a href="#cb16-371" aria-hidden="true" tabindex="-1"></a>The SFDP layout for hierarchies is particularly useful for **very large networks** where the radial layout becomes too crowded, or when you want to emphasize local connectivity patterns over strict hierarchical levels.</span>
+<span id="cb16-372"><a href="#cb16-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-373"><a href="#cb16-373" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Bigger Picture: Layout as Hypothesis</span></span>
+<span id="cb16-374"><a href="#cb16-374" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-375"><a href="#cb16-375" aria-hidden="true" tabindex="-1"></a>Every layout algorithm embodies a hypothesis about what makes nodes "similar" or "close":</span>
+<span id="cb16-376"><a href="#cb16-376" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-377"><a href="#cb16-377" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Radial tree layout** hypothesizes that hierarchy is the key structure</span>
+<span id="cb16-378"><a href="#cb16-378" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Force-directed layout** hypothesizes that shared neighbors create similarity</span>
+<span id="cb16-379"><a href="#cb16-379" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Hierarchical layout with edge bundling** hypothesizes that multi-scale community structure organizes the network</span>
+<span id="cb16-380"><a href="#cb16-380" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-381"><a href="#cb16-381" aria-hidden="true" tabindex="-1"></a>None of these is objectively "correct"---they're different lenses for viewing the same data. The critical skill is **matching the layout to the question you're asking**.</span>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Copyright 2025, Sadamori Kojaku</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions"><ul><li><a href="https://github.com/skojaku/applied-soft-comp/edit/main/m02-visualization/networks.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/skojaku/applied-soft-comp/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/skojaku/applied-soft-comp">
+      <i class="bi bi-github" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
