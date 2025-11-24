@@ -306,17 +306,15 @@ Think of it like this: MDS measures distance "as the crow flies," while Isomap m
 #| fig-height: 6
 #| code-fold: true
 from sklearn.manifold import Isomap
-```{python}
-#| fig-cap: "MDS can reveal non-linear structure that PCA misses. S-curve dataset shown."
-#| fig-width: 14
-#| fig-height: 6
-#| code-fold: true
 from sklearn.datasets import make_s_curve
 
 # Generate S-curve data (a 2D manifold embedded in 3D)
 n_samples = 1000
 X_scurve, color = make_s_curve(n_samples, noise=0.1, random_state=42)
-```
+
+# Apply MDS
+mds_scurve = MDS(n_components=2, random_state=42, n_init=1)
+X_scurve_mds = mds_scurve.fit_transform(X_scurve)
 
 # Apply Isomap
 isomap = Isomap(n_components=2, n_neighbors=10)
