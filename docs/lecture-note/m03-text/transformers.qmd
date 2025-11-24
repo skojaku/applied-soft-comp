@@ -1,5 +1,5 @@
 ---
-title: "Transformers: Why Context Is Everything (And One Vector Is Nothing)"
+title: "Transformers"
 execute:
     enabled: true
 filters:
@@ -8,20 +8,16 @@ filters:
 
 **The Spoiler:** The entire transformer revolution boils down to this—static embeddings assign one vector per word, ignoring that "bank" near "river" is mathematically different from "bank" near "money." Transformers solve this by computing context-aware representations through weighted mixing, and the weights themselves emerge from learned comparisons (Query × Key) between words. The result: machines finally understand that meaning isn't in the word; it's in the *distribution* of words around it.
 
-## The Naive Intuition: One Word, One Vector
+## One word, one vector is not enough
 
-For many years, natural language processing treated words as having fixed meanings. We represented each word—like "bank"—as a single vector of numbers, such as `[0.23, -0.45, 0.67, ...]`. This approach, called **static embeddings**, assumed a word’s meaning could be fully captured with one point in space, no matter where the word appeared.
+For many years, natural language processing treated words as having fixed meanings. We represented each word—like "bank"—as a single vector of numbers, called **static embeddings**.
 
-The foundation for this dates back to 1957, when J.R. Firth said: "You shall know a word by the company it keeps." This led to **distributional semantics**: a word's meaning comes from the other words nearby. If "bank" is near "mortgage" or "loan," we assume it means a financial place; if it's near "river" or "shore," we assume a landform. Word2vec (2013) brought this to life by learning word vectors from their neighbors.
+But there's a hidden catch in this "one meaning per word" mindset: with just a single fixed entry in the dictionary, "bank" means exactly the same thing in "I deposited money at the bank" as in "We had a picnic by the bank." Every possible meaning gets mashed into a one-size-fits-all average—like describing the population by its *average* height and pretending that nobody's any shorter or taller. The interesting details—the outliers, the context clues—vanish in the mix.
 
-But the big problem: Word2vec still gives just **one vector per word**. "Bank" has the same representation in "I deposited money at the bank" as in "We had a picnic by the bank." It averages all possible uses together—like saying everyone is 5'7" tall—hiding the differences that matter most.
-
-## The Theoretical Failure: When Averaging Destroys the Signal
-
-The naive hypothesis went like this: what if we just *mix* the target word with its neighbors? For the sentence "I deposited money at the bank," we could compute a contextualized representation as:
+The naive hypothesis went like this: what if we just *mix* the target word with its neighbors? For the sentence "I deposited money at the bank," we could compute a *contextualized representation* as:
 
 $$
-\vec{v}_{\text{bank (contextualized)}} = w_1 \cdot \vec{v}_{\text{bank}} + w_2 \cdot \vec{v}_{\text{deposited}} + w_3 \cdot \vec{v}_{\text{money}} + \cdots
+\vec{v}_{\text{bank (new)}} = w_1 \cdot \vec{v}_{\text{bank}} + w_2 \cdot \vec{v}_{\text{deposited}} + w_3 \cdot \vec{v}_{\text{money}} + \cdots
 $$
 
 where $w_i$ are weights and $\vec{v}_i$ are word embeddings.
@@ -212,36 +208,254 @@ function sliderWithLabel(min, max, step, width, defaultValue, label) {
 ```
 
 By changing the weights, we can see that the vector for "bank" can lean more towards the financial terms or the geographical terms. So how can we determine the weights?
+
+
 The simplest idea is to give each word an equal weight: $w_i = 1/N$. This creates a basic "bag-of-words" average. But sentences aren’t actually this fair—some words are much more important than others. For example, in "I deposited money at the bank," the words "deposited" and "money" are key, while "I," "at," and "the" add little meaning. If we treat all words the same, we lose the details that matter. We need a way to highlight the important words and downplay the rest.
 
-## The Hidden Mechanism: Query-Key Matching as Information Retrieval
+## Attention mechanism
 
-The key insight is to treat context as a **search**. Picture a sentence as a library where each word is a book. To understand "bank," you ask: "Which words around me are most relevant?" You quickly check each book's label—some offer financial clues, others talk about geography. You focus most on the ones that match what you're looking for. This process of deciding which words to pay attention to, based on their relevance, is called **attention**.
+Let's walk through how transformers identify the surrounding words that are relevant to a focal word to be contextualized, which is called the **attention mechanism**. Before we dive into the attention mechanism, let's first prepare some terminology.
 
-![](../figs/transformer-attention.jpg)
+Suppose we have a sentence "I deposited money at the bank". Given a word "bank", we want to determine the weights $w_i$ for the surrounding words "I", "deposited", "money", and "at". We call the word "bank" the **query** word, and the surrounding words the **key** words. At a high level, we want to compute the weights $w_i$ for each query and key pair, and then average them.
 
-For each word $i$ in a sentence with embedding $\vec{x}_i$, we create three linear transformations:
+$$
+\vec{v}_{\text{query}} ^{\text{c}} = \sum_{i=1}^N w_i \cdot \vec{v}_{i}
+$$
+
+with weights $w_i$ being determined by the query and key vectors $w_{i}:=f(\vec{v}_{\text{query}}, \vec{v}_{i})$.
+This function, $f$, is calle the **attention score function**.
+
+In transformers, the attention score function $f$ is implemented as follows.
+Given the original vector for a word (regardless of whether it is the query word or the key word), we linearly transform it into three vectors: Query, Key, and Value.
 
 $$
 \begin{align}
-\vec{q}_i &= W_Q \vec{x}_i \quad \text{(Query: what I'm looking for)} \\
-\vec{k}_i &= W_K \vec{x}_i \quad \text{(Key: what I offer)} \\
-\vec{v}_i &= W_V \vec{x}_i \quad \text{(Value: what I contain)}
+\vec{q}_i &= W_Q \vec{x}_i\\
+\vec{k}_i &= W_K \vec{x}_i\\
+\vec{v}_i &= W_V \vec{x}_i
 \end{align}
 $$
 
-Why have three transformations instead of just using $\vec{x}_i$? Because each plays a different role: the Query asks "what am I looking for?", the Key answers "what do I have?", and the Value says "here’s my info." By training $W_Q$, $W_K$, and $W_V$ separately, the model learns to focus on the right parts of the sentence for each word, mixing the most relevant information together.
+Why do we need three different vectors?
+Imagine you are participating in a dinner party. You want to identify the people who are talking about a topic you care about. You listen to the surrounding people, playing as a 'listener'. At the same time, you also broadcast your own interests, playing as a 'speaker'. The query vector is representing you as a listener, the key vector is representing the people as speakers. And the value vector is representing the content of the conversation.
 
+Once we have the query, key, and value vectors, we can compute the attention scores between the query and key vector as follows:
 
-To contextualize word $i$, compute its relevance to all other words $j$ via **dot products**: $\text{score}(i, j) = \vec{q}_i \cdot \vec{k}_j$. High scores indicate strong relevance; low scores indicate noise to ignore. These scores are converted to probabilities using softmax:
 
 $$
-w_{ij} = \frac{\exp(\vec{q}_i \cdot \vec{k}_j / \sqrt{d})}{\sum_{\ell} \exp(\vec{q}_i \cdot \vec{k}_\ell / \sqrt{d})}
+w_{ij} = \frac{\exp(\vec{q}_i \cdot \vec{k}_j / \sqrt{d})}{\sum_{\ell} \exp(\vec{q}_i \cdot \vec{k}_\ell / \sqrt{d})},
 $$
 
+where $\vec{q}_i \cdot \vec{k}_j$ is the dot product between the query and key vectors, which is larger when the query and key vectors are *similar* (e.g., pointing to a similar direction).
 The division by $\sqrt{d}$ (where $d$ is the embedding dimension) is a scaling factor that prevents vanishing gradients during training. Finally, compute the **contextualized representation** as a weighted sum: $\text{contextualized}_i = \sum_j w_{ij} \vec{v}_j$.
 
-Explore how different Query and Key transformations produce different attention patterns. Adjust the transformation parameters below to see how $W_Q$ and $W_K$ matrices change which words attend to which:
+::: {.column-margin}
+What is the vanishing gradient problem? It is a problem that the gradients of the loss function with respect to the weights become too small to be effective during training.
+:::
+
+Explore how different Query and Key transformations produce different attention patterns. First, let us create the key, query, and value vectors. In 2d, the linear transformation is just a scaling and a rotation.
+
+```{ojs}
+//| echo: false
+{
+  // Create slider function
+  function createQKVSlider(min, max, step, width, defaultValue, label) {
+    const slider = d3.sliderBottom()
+      .min(min).max(max).step(step).width(width).default(defaultValue);
+    const svg = d3.create("svg").attr("width", width + 40).attr("height", 50);
+    const g = svg.append("g").attr("transform", "translate(20,15)");
+    g.call(slider);
+    svg.append("text").attr("x", (width + 40) / 2).attr("y", 10)
+       .attr("text-anchor", "middle").style("font-size", "11px").text(label);
+    return { node: svg.node(), slider: slider };
+  }
+
+  // Create sliders for Q, K, V transformations
+  const qScaleSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "Q Scale");
+  const qRotateSlider = createQKVSlider(-180, 180, 5, 150, 0, "Q Rotate (deg)");
+  const kScaleSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "K Scale");
+  const kRotateSlider = createQKVSlider(-180, 180, 5, 150, 0, "K Rotate (deg)");
+  const vScaleSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "V Scale");
+  const vRotateSlider = createQKVSlider(-180, 180, 5, 150, 0, "V Rotate (deg)");
+
+  // Original word vector (bank)
+  const originalVector = [1.0, 0.5];
+
+  // Create plot container
+  const plotContainer = document.createElement("div");
+
+  // Function to transform vector
+  function transformVector(vec, scale, rotateDeg) {
+    const theta = (rotateDeg * Math.PI) / 180;
+    const cos = Math.cos(theta);
+    const sin = Math.sin(theta);
+    const scaledX = vec[0] * scale;
+    const scaledY = vec[1] * scale;
+    return [
+      scaledX * cos - scaledY * sin,
+      scaledX * sin + scaledY * cos
+    ];
+  }
+
+  // Function to update visualization
+  function update() {
+    // Get current slider values
+    const qScale = qScaleSlider.slider.value();
+    const qRotate = qRotateSlider.slider.value();
+    const kScale = kScaleSlider.slider.value();
+    const kRotate = kRotateSlider.slider.value();
+    const vScale = vScaleSlider.slider.value();
+    const vRotate = vRotateSlider.slider.value();
+
+    // Apply transformations
+    const qVec = transformVector(originalVector, qScale, qRotate);
+    const kVec = transformVector(originalVector, kScale, kRotate);
+    const vVec = transformVector(originalVector, vScale, vRotate);
+
+    // Prepare data for visualization
+    const data = [
+      { name: "Original (x)", x: originalVector[0], y: originalVector[1], type: "Original" },
+      { name: "Query (q)", x: qVec[0], y: qVec[1], type: "Query" },
+      { name: "Key (k)", x: kVec[0], y: kVec[1], type: "Key" },
+      { name: "Value (v)", x: vVec[0], y: vVec[1], type: "Value" }
+    ];
+
+    // Clear and update plot
+    d3.select(plotContainer).selectAll("*").remove();
+
+    // Create visualization
+    const plot = Plot.plot({
+      width: 400,
+      height: 400,
+      marginTop: 60,
+      marginRight: 20,
+      marginBottom: 50,
+      marginLeft: 60,
+      style: {
+        background: "white",
+        color: "black"
+      },
+      x: {
+        domain: [-2.5, 2.5],
+        label: "Dimension 1",
+        grid: true,
+        ticks: 10
+      },
+      y: {
+        domain: [-2.5, 2.5],
+        label: "Dimension 2",
+        grid: true,
+        ticks: 10
+      },
+      color: {
+        domain: ["Original", "Query", "Key", "Value"],
+        range: ["#666666", "#4682b4", "#2e8b57", "#d2691e"]
+      },
+      marks: [
+        // Origin point
+        Plot.dot([{x: 0, y: 0}], {
+          x: "x",
+          y: "y",
+          r: 3,
+          fill: "black"
+        }),
+        // Arrows from origin to vectors
+        Plot.arrow(data, {
+          x1: 0,
+          y1: 0,
+          x2: "x",
+          y2: "y",
+          stroke: "type",
+          strokeWidth: 2,
+          headLength: 10
+        }),
+        // Vector endpoint dots
+        Plot.dot(data, {
+          x: "x",
+          y: "y",
+          fill: "type",
+          r: 5,
+          tip: true
+        }),
+        // Labels
+        Plot.text(data, {
+          x: "x",
+          y: "y",
+          text: "name",
+          dy: -15,
+          fontSize: 11,
+          fontWeight: "bold",
+          fill: "black"
+        }),
+        // Custom legend at top center
+        Plot.dot([
+          {x: -1.8, y: 2.8, color: "#666666"},
+          {x: -0.6, y: 2.8, color: "#4682b4"},
+          {x: 0.6, y: 2.8, color: "#2e8b57"},
+          {x: 1.8, y: 2.8, color: "#d2691e"}
+        ], {
+          x: "x",
+          y: "y",
+          fill: "color",
+          r: 5
+        }),
+        Plot.text([
+          {x: -1.5, y: 2.8, label: "Original"},
+          {x: -0.3, y: 2.8, label: "Query"},
+          {x: 0.9, y: 2.8, label: "Key"},
+          {x: 2.1, y: 2.8, label: "Value"}
+        ], {
+          x: "x",
+          y: "y",
+          text: "label",
+          fontSize: 10,
+          fill: "black",
+          textAnchor: "start"
+        })
+      ]
+    });
+
+    d3.select(plotContainer).node().appendChild(plot);
+  }
+
+  // Add event listeners to sliders
+  qScaleSlider.slider.on("onchange", update);
+  qRotateSlider.slider.on("onchange", update);
+  kScaleSlider.slider.on("onchange", update);
+  kRotateSlider.slider.on("onchange", update);
+  vScaleSlider.slider.on("onchange", update);
+  vRotateSlider.slider.on("onchange", update);
+
+  // Initial render
+  update();
+
+  return html`<div style="display: flex; align-items: flex-start; gap: 40px; justify-content: center;">
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-weight: bold; margin-bottom: 3px;">Query (W_Q)</div>
+        ${qScaleSlider.node}
+        ${qRotateSlider.node}
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-weight: bold; margin-bottom: 3px;">Key (W_K)</div>
+        ${kScaleSlider.node}
+        ${kRotateSlider.node}
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-weight: bold; margin-bottom: 3px;">Value (W_V)</div>
+        ${vScaleSlider.node}
+        ${vRotateSlider.node}
+      </div>
+    </div>
+    <div>
+      ${plotContainer}
+    </div>
+  </div>`;
+}
+```
+
+
+Adjust the transformation parameters below to see how $W_Q$ and $W_K$ matrices change which words attend to which:
 
 ```{ojs}
 //| echo: false
