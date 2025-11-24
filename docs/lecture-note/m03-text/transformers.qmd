@@ -154,18 +154,7 @@ viewof riverWeight = sliderWithLabel(0, 1, 0.01, 200, 0.0, "River Weight")
     ]
   });
 
-  const sliders = html`<div style="display: flex; flex-direction: column; gap: 10px;">
-    ${viewof bankWeight}
-    ${viewof moneyWeight}
-    ${viewof riverWeight}
-  </div>`;
-
-  return html`<div style="display: flex; align-items: center; gap: 40px; justify-content: center;">
-    ${sliders}
-    <div style="color: black !important;">
-      ${plot}
-    </div>
-  </div>`;
+  return plot;
 }
 ```
 
@@ -401,40 +390,14 @@ viewof kRotate = compactSlider(-180, 180, 5, 180, 0, "K Rotate (deg)")
     ]
   });
 
-  // Create controls layout
-  const qControls = html`<div style="display: flex; flex-direction: column; gap: 8px;">
-    <div style="font-weight: bold; margin-bottom: 3px;">Query Transformation (W_Q)</div>
-    ${viewof qScaleX}
-    ${viewof qScaleY}
-    ${viewof qRotate}
-  </div>`;
-
-  const kControls = html`<div style="display: flex; flex-direction: column; gap: 8px;">
-    <div style="font-weight: bold; margin-bottom: 3px;">Key Transformation (W_K)</div>
-    ${viewof kScaleX}
-    ${viewof kScaleY}
-    ${viewof kRotate}
-  </div>`;
-
-  const controls = html`<div style="display: flex; flex-direction: column; gap: 25px;">
-    ${qControls}
-    ${kControls}
-  </div>`;
-
-  const plots = html`<div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+  // Return combined visualization
+  return html`<div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
     <div style="display: flex; gap: 20px; align-items: center;">
       ${qPlot}
       ${kPlot}
     </div>
     <div>
       ${heatmapPlot}
-    </div>
-  </div>`;
-
-  return html`<div style="display: flex; align-items: center; gap: 40px; justify-content: center;">
-    ${controls}
-    <div style="color: black !important;">
-      ${plots}
     </div>
   </div>`;
 }
