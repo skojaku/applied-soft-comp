@@ -76,17 +76,13 @@ viewof riverWeight = Inputs.range([0, 1], {value: 0, step: 0.01, label: "River W
   const data = [...originalData, ...contextualizedData];
 
   // Create visualization
-  const width = 450;
-  const height = 450;
-  const margin = {top: 40, right: 20, bottom: 50, left: 60};
-
-  return Plot.plot({
-    width: width,
-    height: height,
-    marginTop: margin.top,
-    marginRight: margin.right,
-    marginBottom: margin.bottom,
-    marginLeft: margin.left,
+  const plot = Plot.plot({
+    width: 450,
+    height: 450,
+    marginTop: 40,
+    marginRight: 20,
+    marginBottom: 50,
+    marginLeft: 60,
     x: {
       domain: [-2, 2],
       label: "Dimension 1"
@@ -124,6 +120,17 @@ viewof riverWeight = Inputs.range([0, 1], {value: 0, step: 0.01, label: "River W
       })
     ]
   });
+
+  const sliders = html`<div style="display: flex; flex-direction: column; gap: 15px;">
+    ${viewof bankWeight}
+    ${viewof moneyWeight}
+    ${viewof riverWeight}
+  </div>`;
+
+  return html`<div style="display: flex; align-items: center; gap: 40px; justify-content: center;">
+    ${sliders}
+    ${plot}
+  </div>`;
 }
 ```
 
@@ -170,10 +177,6 @@ viewof qRotate = Inputs.range([-180, 180], {value: 0, step: 5, label: "Q Rotate 
 viewof kScaleX = Inputs.range([-2, 2], {value: 1.0, step: 0.1, label: "K Scale X"})
 viewof kScaleY = Inputs.range([-2, 2], {value: 1.0, step: 0.1, label: "K Scale Y"})
 viewof kRotate = Inputs.range([-180, 180], {value: 0, step: 5, label: "K Rotate (deg)"})
-```
-
-```{ojs}
-//| echo: false
 
 {
   // Word embeddings in 2D space
@@ -319,18 +322,40 @@ viewof kRotate = Inputs.range([-180, 180], {value: 0, step: 5, label: "K Rotate 
     ]
   });
 
-  // Return all three plots
-  return html`
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
-      <div style="display: flex; gap: 20px; align-items: center;">
-        ${qPlot}
-        ${kPlot}
-      </div>
-      <div>
-        ${heatmapPlot}
-      </div>
+  // Create controls layout
+  const qControls = html`<div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-weight: bold; margin-bottom: 5px;">Query Transformation (W_Q)</div>
+    ${viewof qScaleX}
+    ${viewof qScaleY}
+    ${viewof qRotate}
+  </div>`;
+
+  const kControls = html`<div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-weight: bold; margin-bottom: 5px;">Key Transformation (W_K)</div>
+    ${viewof kScaleX}
+    ${viewof kScaleY}
+    ${viewof kRotate}
+  </div>`;
+
+  const controls = html`<div style="display: flex; flex-direction: column; gap: 30px;">
+    ${qControls}
+    ${kControls}
+  </div>`;
+
+  const plots = html`<div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+    <div style="display: flex; gap: 20px; align-items: center;">
+      ${qPlot}
+      ${kPlot}
     </div>
-  `;
+    <div>
+      ${heatmapPlot}
+    </div>
+  </div>`;
+
+  return html`<div style="display: flex; align-items: center; gap: 40px; justify-content: center;">
+    ${controls}
+    ${plots}
+  </div>`;
 }
 ```
 
