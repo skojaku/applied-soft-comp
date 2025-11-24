@@ -48,10 +48,22 @@ function sliderWithLabel(min, max, step, width, defaultValue, label) {
 ```{ojs}
 //| echo: false
 {
+  // Create slider function that returns both the element and a reactive value
+  function createWeightSlider(min, max, step, width, defaultValue, label) {
+    const slider = d3.sliderBottom()
+      .min(min).max(max).step(step).width(width).default(defaultValue);
+    const svg = d3.create("svg").attr("width", width + 50).attr("height", 60);
+    const g = svg.append("g").attr("transform", "translate(25,20)");
+    g.call(slider);
+    svg.append("text").attr("x", (width + 50) / 2).attr("y", 10)
+       .attr("text-anchor", "middle").style("font-size", "12px").text(label);
+    return { node: svg.node(), slider: slider };
+  }
+
   // Create sliders
-  const bankSlider = sliderWithLabel(0, 1, 0.01, 200, 1.0, "Bank Weight");
-  const moneySlider = sliderWithLabel(0, 1, 0.01, 200, 0.0, "Money Weight");
-  const riverSlider = sliderWithLabel(0, 1, 0.01, 200, 0.0, "River Weight");
+  const bankSliderObj = createWeightSlider(0, 1, 0.01, 200, 1.0, "Bank Weight");
+  const moneySliderObj = createWeightSlider(0, 1, 0.01, 200, 0.0, "Money Weight");
+  const riverSliderObj = createWeightSlider(0, 1, 0.01, 200, 0.0, "River Weight");
 
   // Word embeddings in 2D space
   const contextWords = ["bank", "money", "river"];
@@ -61,97 +73,121 @@ function sliderWithLabel(min, max, step, width, defaultValue, label) {
     [1.4, -1.0]   // river (geographical, right)
   ];
 
-  // Calculate weighted average
-  const weights = [bankWeight, moneyWeight, riverWeight];
-  const total = weights.reduce((a, b) => a + b, 0);
-  const normalizedWeights = total > 0 ? weights.map(w => w / total) : [0, 0, 0];
+  // Create plot container
+  const plotContainer = document.createElement("div");
 
-  const newVec = [
-    normalizedWeights[0] * contextEmbeddings[0][0] +
-    normalizedWeights[1] * contextEmbeddings[1][0] +
-    normalizedWeights[2] * contextEmbeddings[2][0],
-    normalizedWeights[0] * contextEmbeddings[0][1] +
-    normalizedWeights[1] * contextEmbeddings[1][1] +
-    normalizedWeights[2] * contextEmbeddings[2][1]
-  ];
+  // Function to update visualization
+  function update() {
+    // Get current slider values
+    const bankWeight = bankSliderObj.slider.value();
+    const moneyWeight = moneySliderObj.slider.value();
+    const riverWeight = riverSliderObj.slider.value();
 
-  // Prepare data for visualization
-  const originalData = contextWords.map((word, i) => ({
-    word: word,
-    x: contextEmbeddings[i][0],
-    y: contextEmbeddings[i][1],
-    type: "Original"
-  }));
+    // Calculate weighted average
+    const weights = [bankWeight, moneyWeight, riverWeight];
+    const total = weights.reduce((a, b) => a + b, 0);
+    const normalizedWeights = total > 0 ? weights.map(w => w / total) : [0, 0, 0];
 
-  const contextualizedData = [{
-    word: "Contextualized Bank",
-    x: newVec[0],
-    y: newVec[1],
-    type: "Contextualized"
-  }];
+    const newVec = [
+      normalizedWeights[0] * contextEmbeddings[0][0] +
+      normalizedWeights[1] * contextEmbeddings[1][0] +
+      normalizedWeights[2] * contextEmbeddings[2][0],
+      normalizedWeights[0] * contextEmbeddings[0][1] +
+      normalizedWeights[1] * contextEmbeddings[1][1] +
+      normalizedWeights[2] * contextEmbeddings[2][1]
+    ];
 
-  const data = [...originalData, ...contextualizedData];
+    // Prepare data for visualization
+    const originalData = contextWords.map((word, i) => ({
+      word: word,
+      x: contextEmbeddings[i][0],
+      y: contextEmbeddings[i][1],
+      type: "Original"
+    }));
 
-  // Create visualization
-  const plot = Plot.plot({
-    width: 450,
-    height: 450,
-    marginTop: 40,
-    marginRight: 20,
-    marginBottom: 50,
-    marginLeft: 60,
-    style: {
-      background: "white",
-      color: "black"
-    },
-    x: {
-      domain: [-2, 2],
-      label: "Dimension 1"
-    },
-    y: {
-      domain: [-2, 2],
-      label: "Dimension 2"
-    },
-    color: {
-      domain: ["Original", "Contextualized"],
-      range: ["#dadada", "#ff7f0e"],
-      legend: true
-    },
-    marks: [
-      Plot.dot(data, {
-        x: "x",
-        y: "y",
-        fill: "type",
-        r: 8,
-        tip: true
-      }),
-      Plot.text(data, {
-        x: "x",
-        y: "y",
-        text: "word",
-        dy: -15,
-        fontSize: 12,
-        fontWeight: "bold",
-        fill: "black"
-      }),
-      Plot.text([{x: 0, y: 2.3}], {
-        x: "x",
-        y: "y",
-        text: () => `Weights: Bank=${normalizedWeights[0].toFixed(2)}, Money=${normalizedWeights[1].toFixed(2)}, River=${normalizedWeights[2].toFixed(2)}`,
-        fontSize: 11,
-        fill: "black"
-      })
-    ]
-  });
+    const contextualizedData = [{
+      word: "Contextualized Bank",
+      x: newVec[0],
+      y: newVec[1],
+      type: "Contextualized"
+    }];
+
+    const data = [...originalData, ...contextualizedData];
+
+    // Clear and update plot
+    d3.select(plotContainer).selectAll("*").remove();
+
+    // Create visualization
+    const plot = Plot.plot({
+      width: 450,
+      height: 450,
+      marginTop: 40,
+      marginRight: 20,
+      marginBottom: 50,
+      marginLeft: 60,
+      style: {
+        background: "white",
+        color: "black"
+      },
+      x: {
+        domain: [-2, 2],
+        label: "Dimension 1"
+      },
+      y: {
+        domain: [-2, 2],
+        label: "Dimension 2"
+      },
+      color: {
+        domain: ["Original", "Contextualized"],
+        range: ["#dadada", "#ff7f0e"],
+        legend: true
+      },
+      marks: [
+        Plot.dot(data, {
+          x: "x",
+          y: "y",
+          fill: "type",
+          r: 8,
+          tip: true
+        }),
+        Plot.text(data, {
+          x: "x",
+          y: "y",
+          text: "word",
+          dy: -15,
+          fontSize: 12,
+          fontWeight: "bold",
+          fill: "black"
+        }),
+        Plot.text([{x: 0, y: 2.3}], {
+          x: "x",
+          y: "y",
+          text: () => `Weights: Bank=${normalizedWeights[0].toFixed(2)}, Money=${normalizedWeights[1].toFixed(2)}, River=${normalizedWeights[2].toFixed(2)}`,
+          fontSize: 11,
+          fill: "black"
+        })
+      ]
+    });
+
+    d3.select(plotContainer).node().appendChild(plot);
+  }
+
+  // Add event listeners to sliders
+  bankSliderObj.slider.on("onchange", update);
+  moneySliderObj.slider.on("onchange", update);
+  riverSliderObj.slider.on("onchange", update);
+
+  // Initial render
+  update();
 
   return html`<div style="display: flex; align-items: center; gap: 40px; justify-content: center;">
     <div style="display: flex; flex-direction: column; gap: 10px;">
-      ${bankSlider}
-      ${moneySlider}
-      ${riverSlider}
+      ${bankSliderObj.node}
+      ${moneySliderObj.node}
+      ${riverSliderObj.node}
     </div>
     <div>
-      ${plot}
+      ${plotContainer}
     </div>
   </div>`;
 }
