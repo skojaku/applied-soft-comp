@@ -14,11 +14,35 @@ d3 = require("d3@7", "d3-simple-slider@1")
 
 We want computers to understand that "apple" and "pear" are similar, while "apple" and "democracy" are not. The naive approach treats words as unique database IDs. In this **one-hot encoding** scheme, "King" (ID: 452) and "Queen" (ID: 991) are orthogonal vectors—mathematically perpendicular. The distance between "King" and "Queen" is identical to the distance between "King" and "Cabbage." This is computational nonsense.
 
-The solution came from British linguist J.R. Firth in 1957: *"You shall know a word by the company it keeps."* This is the **distributional hypothesis**—the idea that meaning isn't intrinsic but contextual. Words that appear in similar environments must be semantically similar. If "dog" and "cat" both precede "barked," "chased," and "sat," they occupy the same region of semantic space.
+The solution came from British linguist J.R. Firth in 1957: *"You shall know a word by the company it keeps."* This is the **distributional hypothesis**—the idea that meaning isn't intrinsic but contextual. But Firth's insight remained theoretical until 2013, when Tomas Mikolov at Google operationalized it through a radical simplification: shrink the context window from entire documents to just 5-10 surrounding words. In the sentence "The cat chases mice in the garden," with a window size of 2, the context for "chases" becomes ["The", "cat", "mice", "in"]. This local window captures the grammatical and semantic relationships that define a word.
 
-In 2013, Tomas Mikolov at Google turned this philosophy into code. **Word2vec** doesn't try to "understand" text. It solves a fake problem to learn a real solution. The algorithm plays a guessing game: given a word like "fox," predict its neighbors—"quick," "brown," "jumps," "over." To win, the model forces "fox" to live near words that share its context. Since "dog" also appears near "jumps" and "quick," their vectors converge. Words become coordinates, and similarity becomes distance.
+**Word2vec** doesn't try to "understand" text. It plays two variants of a prediction game. **Skip-gram** takes a center word like "cat" and predicts its surrounding context—a set like {garden, in, the, mice, chases, The}. Order doesn't matter; it's predicting which words exist nearby. **CBOW** (Continuous Bag of Words) reverses this: given the context words, predict the missing center word, like a fill-in-the-blank test. Both tasks force words that share contexts to occupy similar positions in vector space. Since "dog" appears near the same words as "cat," their vectors converge. Words become coordinates, and similarity becomes distance.
 
-This is compression disguised as intelligence. The model learns that "closeness" in vector space corresponds to "substitutability" in language. Once words are numbers, you can do algebra with meaning.
+This is compression disguised as intelligence. The model learns that closeness in vector space corresponds to substitutability in language.
+
+### The Neural Architecture
+
+Word2vec is a three-layer neural network with elegant symmetry. The **input layer** has $N$ neurons (one per vocabulary word) and acts as a lookup mechanism—when you input "cat," its neuron activates and all others stay silent. The **hidden layer** is much smaller (typically 100-300 neurons), and its activation pattern *is* the word embedding. The **output layer** also has $N$ neurons, but unlike the input, multiple can activate simultaneously. Each output neuron's strength represents the probability of that word appearing in the context.
+
+For Skip-gram, given a center word $w_c$ and a potential context word $w_o$, we compute:
+
+$$ P(w_o|w_c) = \frac{\exp(\mathbf{v}_{w_o}^\top \mathbf{v}_{w_c})}{\sum_{w \in V} \exp(\mathbf{v}_w^\top \mathbf{v}_{w_c})} $$
+
+where $\mathbf{v}_{w_c}$ is the center word's vector, $\mathbf{v}_{w_o}$ is the output word's vector, and $V$ is the vocabulary. The denominator—the **softmax normalization**—is the computational bottleneck. For a 100,000-word vocabulary, every prediction requires computing 100,000 exponentials. This is intractable at scale.
+
+Word2vec sidesteps this through **hierarchical softmax**, which arranges words in a binary tree (typically a Huffman tree based on word frequency). Instead of comparing against all words simultaneously, the model makes a sequence of binary decisions: "Is the target word in the left or right subtree?" This reduces computation from $O(|V|)$ to $O(\log |V|)$. It's the difference between checking every person in a city versus playing 20 questions.
+
+### The Hidden Matrix
+
+Word2vec appears to be a neural network, but it's secretly performing matrix factorization. Levy and Goldberg (2014) proved that Word2vec implicitly factorizes the **pointwise mutual information** (PMI) matrix:
+
+$$ M_{ij} = \log \frac{P(w_i, w_j)}{P(w_i)P(w_j)} $$
+
+where $P(w_i, w_j)$ is the probability that words $w_i$ and $w_j$ co-occur within the context window, and $P(w_i)$, $P(w_j)$ are their individual probabilities. PMI is zero when words appear independently and highest when they always co-occur. The dot product of word vectors approximates PMI:
+
+$$ \mathbf{v}_{w_i}^\top \mathbf{v}_{w_j} \approx M_{ij} $$
+
+This reveals the mechanism: Word2vec is finding a low-dimensional representation that preserves co-occurrence statistics. Words that share contexts (high PMI) end up geometrically close. The softmax adds a twist—it transforms the problem into a Boltzmann machine, giving us proper probabilities but at the cost of computational complexity.
 
 ## The Application
 
@@ -120,17 +144,17 @@ print(f"Loaded embeddings for {len(model):,} words, each with {model.vector_size
 
 ### Test 1: The "Company It Keeps"
 
-If Firth was right, "network" should cluster with words from similar contexts—tech, broadcasting, infrastructure—not random nouns.
+If Firth was right, "king" should cluster with words from similar contexts—royalty, leadership, sovereignty—not random nouns.
 
 ```{python}
-similar_to_network = model.most_similar("network", topn=10)
+similar_to_king = model.most_similar("king", topn=10)
 
-print("Words most similar to 'network':")
-for word, similarity in similar_to_network:
+print("Words most similar to 'king':")
+for word, similarity in similar_to_king:
     print(f"  {word:20s} {similarity:.3f}")
 ```
 
-The model wasn't told that "network" relates to broadcasting or connectivity. It discovered this by observing that these words appear in the same sentences.
+The model wasn't told that "king" relates to monarchy or power. It discovered this by observing that these words appear in similar local contexts.
 
 ### Test 2: Vector Arithmetic
 
@@ -170,15 +194,81 @@ for word, similarity in result:
 
 ### Visualizing Semantic Space
 
-We can't perceive 300 dimensions, but we can compress them to 2 using **t-SNE** (t-Distributed Stochastic Neighbor Embedding). This reveals whether scientific fields form natural clusters in the model's latent space.
+We can't perceive 300 dimensions, but we can compress them to 2 using **PCA** (Principal Component Analysis). Let's examine how countries and their capitals organize in this space.
 
 ```{python}
-#| fig-cap: "Word2vec embeddings of scientific terms projected to 2D. Distinct disciplines form separate continents of meaning."
+#| fig-cap: "Word2vec embeddings of countries and capitals projected to 2D. The country-capital relationship is preserved as parallel displacement vectors."
+#| fig-width: 12
+#| fig-height: 10
+
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+import pandas as pd
+
+countries = ['Germany', 'France', 'Italy', 'Spain', 'Portugal', 'Greece']
+capitals = ['Berlin', 'Paris', 'Rome', 'Madrid', 'Lisbon', 'Athens']
+
+# Get embeddings
+country_embeddings = np.array([model[country] for country in countries])
+capital_embeddings = np.array([model[capital] for capital in capitals])
+
+# PCA to 2D
+pca = PCA(n_components=2)
+embeddings = np.vstack([country_embeddings, capital_embeddings])
+embeddings_pca = pca.fit_transform(embeddings)
+
+# Create DataFrame
+df = pd.DataFrame(embeddings_pca, columns=['PC1', 'PC2'])
+df['Label'] = countries + capitals
+df['Type'] = ['Country'] * len(countries) + ['Capital'] * len(capitals)
+
+# Plot
+fig, ax = plt.subplots(figsize=(12, 10))
+
+# Plot countries and capitals
+for idx, row in df.iterrows():
+    color = '#e74c3c' if row['Type'] == 'Country' else '#3498db'
+    marker = 'o' if row['Type'] == 'Country' else 's'
+    ax.scatter(row['PC1'], row['PC2'], c=color, marker=marker, s=200,
+               edgecolors='black', linewidth=1.5, alpha=0.7, zorder=3)
+    ax.text(row['PC1'], row['PC2'] + 0.15, row['Label'], fontsize=12,
+            ha='center', va='bottom', fontweight='bold',
+            bbox=dict(facecolor='white', edgecolor='none', alpha=0.8))
+
+# Draw arrows between countries and capitals
+for i in range(len(countries)):
+    country_pos = df.iloc[i][['PC1', 'PC2']].values
+    capital_pos = df.iloc[i + len(countries)][['PC1', 'PC2']].values
+    ax.arrow(country_pos[0], country_pos[1],
+             capital_pos[0] - country_pos[0],
+             capital_pos[1] - country_pos[1],
+             color='gray', alpha=0.6, linewidth=2,
+             head_width=0.15, head_length=0.1, zorder=2)
+
+ax.set_title('Country-Capital Relationships in Word2vec Space', fontsize=16, fontweight='bold', pad=20)
+ax.set_xlabel('Principal Component 1', fontsize=14)
+ax.set_ylabel('Principal Component 2', fontsize=14)
+ax.grid(alpha=0.3, linestyle='--')
+ax.legend(handles=[
+    plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='#e74c3c',
+               markersize=10, label='Country', markeredgecolor='black'),
+    plt.Line2D([0], [0], marker='s', color='w', markerfacecolor='#3498db',
+               markersize=10, label='Capital', markeredgecolor='black')
+], fontsize=12, loc='best')
+plt.tight_layout()
+plt.show()
+```
+
+The vectors from Germany→Berlin, France→Paris, and Italy→Rome are roughly parallel. This is the geometry of analogy. The model learned that the "capital of" relationship has a consistent directional structure in vector space.
+
+Let's now visualize a different clustering pattern using scientific vocabulary:
+
+```{python}
+#| fig-cap: "Word2vec embeddings of scientific terms projected to 2D using t-SNE. Distinct disciplines form separate continents of meaning."
 #| fig-width: 10
 #| fig-height: 8
 
 from sklearn.manifold import TSNE
-import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Scientific vocabulary
@@ -199,7 +289,7 @@ words = [
 word_vectors = np.array([model[word] for word in words if word in model])
 valid_words = [word for word in words if word in model]
 
-# Reduce to 2D
+# Reduce to 2D with t-SNE
 tsne = TSNE(n_components=2, random_state=42, perplexity=8)
 word_2d = tsne.fit_transform(word_vectors)
 
@@ -250,7 +340,7 @@ In Word2vec, both instances receive the same vector. The model averages the fina
 
 ## The Takeaway
 
-Word2vec revealed that meaning is relational, not definitional. We understand "hot" by its distance from "cold." We understand "king" by its offset from "man." If language has geometry, then thought has geometry. And once thought has coordinates, you can navigate it.
+Word2vec revealed that meaning is relational, not definitional. We understand "hot" by its distance from "cold." We understand "king" by its offset from "man." The algorithm's power comes from shrinking the context window to where syntax and semantics overlap, then compressing those patterns through matrix factorization disguised as a neural network. Once words have coordinates, language has navigable geometry.
 
 ---
 
