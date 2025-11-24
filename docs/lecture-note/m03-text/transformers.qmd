@@ -102,7 +102,7 @@ contextualizedData = [{
 data = [...originalData, ...contextualizedData]
 
 // Create visualization
-Plot.plot({
+bankPlot = Plot.plot({
     width: 450,
     height: 450,
     marginTop: 40,
@@ -152,6 +152,20 @@ Plot.plot({
       })
     ]
 })
+```
+
+```{ojs}
+//| echo: false
+html`<div style="display: flex; align-items: center; gap: 40px; justify-content: center;">
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    ${viewof bankWeight}
+    ${viewof moneyWeight}
+    ${viewof riverWeight}
+  </div>
+  <div>
+    ${bankPlot}
+  </div>
+</div>`
 ```
 
 But real sentences aren't fair: not all words matter equally. In "I deposited money at the bank," the crucial clues are "deposited" and "money"—while words like "I," "at," and "the" add almost nothing to the meaning. If we just averaged every word together, we'd treat them all as equally important, which blurs the message. Instead, we need a way to pay extra attention to the words that really matter, and tune down the ones that don’t.
@@ -388,14 +402,37 @@ heatmapPlot = Plot.plot({
     ]
 })
 
-// Return combined visualization
-html`<div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+// Combined plots
+attentionPlots = html`<div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
   <div style="display: flex; gap: 20px; align-items: center;">
     ${qPlot}
     ${kPlot}
   </div>
   <div>
     ${heatmapPlot}
+  </div>
+</div>`
+```
+
+```{ojs}
+//| echo: false
+html`<div style="display: flex; align-items: flex-start; gap: 40px; justify-content: center;">
+  <div style="display: flex; flex-direction: column; gap: 25px;">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="font-weight: bold; margin-bottom: 3px;">Query Transformation (W_Q)</div>
+      ${viewof qScaleX}
+      ${viewof qScaleY}
+      ${viewof qRotate}
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="font-weight: bold; margin-bottom: 3px;">Key Transformation (W_K)</div>
+      ${viewof kScaleX}
+      ${viewof kScaleY}
+      ${viewof kRotate}
+    </div>
+  </div>
+  <div>
+    ${attentionPlots}
   </div>
 </div>`
 ```
