@@ -57,9 +57,9 @@ function sliderWithLabel(min, max, step, width, defaultValue, label) {
   }
 
   // Create sliders
-  const bankSliderObj = createWeightSlider(0, 1, 0.01, 200, 1.0, "Bank weight");
-  const moneySliderObj = createWeightSlider(0, 1, 0.01, 200, 0.0, "Money weight");
-  const riverSliderObj = createWeightSlider(0, 1, 0.01, 200, 0.0, "River weight");
+  const bankSliderObj = createWeightSlider(0, 1, 0.01, 120, 1.0, "Bank weight");
+  const moneySliderObj = createWeightSlider(0, 1, 0.01, 120, 0.0, "Money weight");
+  const riverSliderObj = createWeightSlider(0, 1, 0.01, 120, 0.0, "River weight");
 
   // Word embeddings in 2D space
   const contextWords = ["bank", "money", "river"];
@@ -594,31 +594,35 @@ Explore how different Query and Key transformations produce different attention 
   // Initial render
   update();
 
-  return html`<div style="display: flex; align-items: flex-start; gap: 40px; justify-content: center;">
+  return html`<div style="display: flex; justify-content: center; gap: 40px;">
     <div style="display: flex; flex-direction: column; gap: 20px;">
-      <div style="display: flex; flex-direction: column; gap: 8px;">
-        <div style="font-weight: bold; margin-bottom: 3px;">Query (W_Q)</div>
-        ${qScaleXSlider.node}
-        ${qScaleYSlider.node}
-        ${qRotateSlider.node}
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-weight: bold; margin-bottom: 3px;">Query (W_Q)</div>
+          ${qScaleXSlider.node}
+          ${qScaleYSlider.node}
+          ${qRotateSlider.node}
+        </div>
+        ${qPlotContainer}
       </div>
-      <div style="display: flex; flex-direction: column; gap: 8px;">
-        <div style="font-weight: bold; margin-bottom: 3px;">Key (W_K)</div>
-        ${kScaleXSlider.node}
-        ${kScaleYSlider.node}
-        ${kRotateSlider.node}
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-weight: bold; margin-bottom: 3px;">Key (W_K)</div>
+          ${kScaleXSlider.node}
+          ${kScaleYSlider.node}
+          ${kRotateSlider.node}
+        </div>
+        ${kPlotContainer}
       </div>
-      <div style="display: flex; flex-direction: column; gap: 8px;">
-        <div style="font-weight: bold; margin-bottom: 3px;">Value (W_V)</div>
-        ${vScaleXSlider.node}
-        ${vScaleYSlider.node}
-        ${vRotateSlider.node}
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-weight: bold; margin-bottom: 3px;">Value (W_V)</div>
+          ${vScaleXSlider.node}
+          ${vScaleYSlider.node}
+          ${vRotateSlider.node}
+        </div>
+        ${vPlotContainer}
       </div>
-    </div>
-    <div style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
-      ${qPlotContainer}
-      ${kPlotContainer}
-      ${vPlotContainer}
     </div>
   </div>`;
 }
