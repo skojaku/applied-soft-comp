@@ -21,7 +21,7 @@ But the big problem: Word2vec still gives just **one vector per word**. "Bank" h
 The naive hypothesis went like this: what if we just *mix* the target word with its neighbors? For the sentence "I deposited money at the bank," we could compute a contextualized representation as:
 
 $$
-\text{contextualized}_{\text{bank}} = w_1 \cdot \vec{v}_{\text{bank}} + w_2 \cdot \vec{v}_{\text{deposited}} + w_3 \cdot \vec{v}_{\text{money}} + \cdots
+\vec{v}_{\text{bank (contextualized)}} = w_1 \cdot \vec{v}_{\text{bank}} + w_2 \cdot \vec{v}_{\text{deposited}} + w_3 \cdot \vec{v}_{\text{money}} + \cdots
 $$
 
 where $w_i$ are weights and $\vec{v}_i$ are word embeddings. The **null hypothesis** suggests setting all weights uniformly: $w_i = 1/N$, producing a simple bag-of-words average. This should, in theory, create context-aware representations.
@@ -119,8 +119,8 @@ function sliderWithLabel(min, max, step, width, defaultValue, label) {
 
     // Create visualization
     const plot = Plot.plot({
-      width: 450,
-      height: 450,
+      width: 300,
+      height: 300,
       marginTop: 40,
       marginRight: 20,
       marginBottom: 50,
@@ -131,11 +131,13 @@ function sliderWithLabel(min, max, step, width, defaultValue, label) {
       },
       x: {
         domain: [-2, 2],
-        label: "Dimension 1"
+        label: "Dimension 1",
+        grid: true
       },
       y: {
         domain: [-2, 2],
-        label: "Dimension 2"
+        label: "Dimension 2",
+        grid: true
       },
       color: {
         domain: ["Original", "Contextualized"],
@@ -364,8 +366,8 @@ function compactSlider(min, max, step, width, defaultValue, label) {
         background: "white",
         color: "black"
       },
-      x: { domain: [-4, 4], label: "Q1" },
-      y: { domain: [-4, 4], label: "Q2" },
+      x: { domain: [-4, 4], label: "Q1", grid: true },
+      y: { domain: [-4, 4], label: "Q2", grid: true },
       marks: [
         Plot.dot(qData, { x: "x", y: "y", r: 6, fill: "#4682b4" }),
         Plot.text(qData, { x: "x", y: "y", text: "word", dy: -12, fontSize: 10, fontWeight: "bold", fill: "black" }),
@@ -385,8 +387,8 @@ function compactSlider(min, max, step, width, defaultValue, label) {
         background: "white",
         color: "black"
       },
-      x: { domain: [-4, 4], label: "K1" },
-      y: { domain: [-4, 4], label: "K2" },
+      x: { domain: [-4, 4], label: "K1", grid: true },
+      y: { domain: [-4, 4], label: "K2", grid: true },
       marks: [
         Plot.dot(kData, { x: "x", y: "y", r: 6, fill: "#2e8b57" }),
         Plot.text(kData, { x: "x", y: "y", text: "word", dy: -12, fontSize: 10, fontWeight: "bold", fill: "black" }),
