@@ -1,0 +1,2099 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Sadamori Kojaku">
+<meta name="dcterms.date" content="2025-10-19">
+
+<title>Applied Soft Computing: Modeling Complex Systems with Deep Learning – Applied Soft Computing</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-0348920b7671f696dc9078d39bff215e.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-fee01c958fd55f7b3b50896185ea610a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "|"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../assets/custom.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../logo.jpg" alt="" class="navbar-logo">
+    </a>
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Applied Soft Computing</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-toolkit--workflow" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Toolkit &amp; Workflow</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-toolkit--workflow">    
+        <li class="dropdown-header">
+ ─── Module 1 ───</li>
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/git-github.html">
+ <span class="dropdown-text">Git &amp; GitHub</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/tidy-data.html">
+ <span class="dropdown-text">Tidy Data</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/data-provenance.html">
+ <span class="dropdown-text">Data Provenance</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/environments.html">
+ <span class="dropdown-text">Environments</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-visualization" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Visualization</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-visualization">    
+        <li class="dropdown-header">
+ ─── Module 2 ───</li>
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/principles.html">
+ <span class="dropdown-text">Principles</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/dimensionality-reduction.html">
+ <span class="dropdown-text">High-Dimensional Data</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/networks.html">
+ <span class="dropdown-text">Networks</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/time-series.html">
+ <span class="dropdown-text">Time-Series</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-deep-learning" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Deep Learning</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-deep-learning">    
+        <li class="dropdown-header">
+ ─── Module 3: Text ───</li>
+        <li>
+    <a class="dropdown-item" href="../m03-text/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m03-text/word2vec.md">
+ <span class="dropdown-text">Word2Vec</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m03-text/lstm.md">
+ <span class="dropdown-text">RNNs &amp; LSTMs</span></a>
+  </li>  
+        <li class="dropdown-header">
+ ─── Module 4: Images ───</li>
+        <li>
+    <a class="dropdown-item" href="../m04-images/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m04-images/cnn.md">
+ <span class="dropdown-text">CNNs</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m04-images/resnet.md">
+ <span class="dropdown-text">ResNet</span></a>
+  </li>  
+        <li class="dropdown-header">
+ ─── Module 5: Graphs ───</li>
+        <li>
+    <a class="dropdown-item" href="../m05-graphs/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m05-graphs/graph-embedding-w-word2vec.html">
+ <span class="dropdown-text">Graph Embeddings</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m05-graphs/graph-convolutional-network.html">
+ <span class="dropdown-text">GNNs</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-advanced-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Advanced Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-advanced-topics">    
+        <li class="dropdown-header">
+ ─── Module 6: LLMs ───</li>
+        <li>
+    <a class="dropdown-item" href="../m06-llms/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m06-llms/transformers.html">
+ <span class="dropdown-text">Transformers</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m06-llms/scaling-emergence.html">
+ <span class="dropdown-text">Scaling &amp; Emergence</span></a>
+  </li>  
+        <li class="dropdown-header">
+ ─── Module 7: Self-Supervised ───</li>
+        <li>
+    <a class="dropdown-item" href="../m07-self-supervised/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m07-self-supervised/contrastive-learning.html">
+ <span class="dropdown-text">Contrastive Learning</span></a>
+  </li>  
+        <li class="dropdown-header">
+ ─── Module 8: Explainability ───</li>
+        <li>
+    <a class="dropdown-item" href="../m08-explainability/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m08-explainability/fairness.html">
+ <span class="dropdown-text">Fairness &amp; Ethics</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Applied Soft Computing: Modeling Complex Systems with Deep Learning</li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Course Information</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Applied Soft Computing: Modeling Complex Systems with Deep Learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/welcome.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/about.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">About Us</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/why-applied-soft-computing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Applied Soft Computing: Modeling Complex Systems with Deep Learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/discord.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Discord</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Setup</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/minidora-usage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Using Minidora</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/how-to-submit-assignment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to submit assignment</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/deliverables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Applied Soft Computing: Modeling Complex Systems with Deep Learning</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 1: The Data Scientist's Toolkit</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/git-github.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Version Control with Git &amp; GitHub</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/tidy-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Tidy Data Philosophy</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/data-provenance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Provenance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/environments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Reproducible Environments</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 2: Visualizing Complexity</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/principles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Principles of Effective Visualization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/dimensionality-reduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing High-Dimensional Data (t-SNE, UMAP)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/time-series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing Time-Series</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 3: Deep Learning for Text</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/tf-idf.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">TF-IDF: Bag-of-Words Representation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/word2vec.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word Embeddings (Word2Vec)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/word2vec_plus.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Advanced Word2Vec Techniques</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/sem-axis.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Semantic Axes &amp; Historical Bias</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/bias-in-embedding.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bias in Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/doc2vec.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Document Embeddings (Doc2Vec)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/reccurrent-neural-net.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Recurrent Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/lstm.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LSTM Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/elmo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ELMo: Contextual Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/seq2seq.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sequence-to-Sequence Models</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 4: Deep Learning for Images</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/image-processing.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Image Processing Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/cnn.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Convolutional Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/lenet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LeNet Architecture</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/alexnet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">AlexNet: Deep CNN Revolution</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/vgg.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">VGG Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/inception.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Inception &amp; Multi-Scale Features</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/batch-normalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Batch Normalization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/resnet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ResNet &amp; Skip Connections</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 5: Deep Learning for Graphs</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/spectral-embedding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spectral Graph Embedding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/graph-embedding-w-word2vec.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graph Embeddings with Word2Vec</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/spectral-vs-neural-embedding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spectral vs. Neural Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/from-image-to-graph.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Images to Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/graph-convolutional-network.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graph Convolutional Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/popular-gnn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Popular GNN Architectures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/software.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GNN Software &amp; Tools</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 6: Large Language Models &amp; Emergent Behavior</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/transformers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Transformer Architecture</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/bert.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">BERT &amp; Contextual Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/sentence-bert.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sentence-BERT for Semantic Similarity</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/gpt.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GPT &amp; Generative Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/from-language-model-to-instruction-following.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Language Models to Instruction Following</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/prompt-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prompt Engineering &amp; In-Context Learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/scaling-emergence.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Scaling Laws &amp; Emergent Abilities</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/llms-as-complex-systems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LLMs as Complex Systems</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 7: Self-Supervised Learning</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/paradigm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Self-Supervised Paradigm</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/contrastive-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contrastive Learning (SimCLR)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/graphs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Self-Supervised Learning for Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/time-series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Self-Supervised Learning for Time-Series</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 8: Explainability &amp; Ethics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/need.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Need for Explainability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/attention.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Attention Visualization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/lime-shap.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LIME &amp; SHAP</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/fairness.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Algorithmic Fairness &amp; Bias</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Causality vs. Correlation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false">
+ <span class="menu-text">Legacy Materials</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/what-to-learn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word &amp; Document Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/what-to-learn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Recurrent Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/what-to-learn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Image Processing (CNNs)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Applied Soft Computing: Modeling Complex Systems with Deep Learning</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Sadamori Kojaku </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 19, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="recurrent-neural-network-rnn" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Recurrent Neural Network (RNN)</h1>
+<p>Human language is sequential. A word is a sequence of letters, a sentence is a sequence of words, and a paragraph is a sequence of sentences. One key aspect of human language is that the meaning of a word depends on the context. For example, the word “bank” has different meanings in the sentences “I went to the bank to deposit money.” and “I went to the bank to catch fish.” Human can understand the contextual nuance because they can maintain a “working memory” that captures information from previous words. This is the core idea of Recurrent Neural Networks (RNNs).</p>
+<section id="the-core-idea" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="the-core-idea"><span class="header-section-number">1.1</span> The Core Idea</h2>
+<p>Imagine reading a book while maintaining a “summary” in your mind that you update with each new sentence. This is similar to how RNNs work. Operationally, RNNs process a sequence of inputs <span class="math inline">(x_1, x_2, \ldots, x_T)</span> one at a time, updating a <em>hidden state</em> <span class="math inline">h_t</span> that acts as a “working memory” that captures information from previous inputs.</p>
+<p><span class="math display"> h_t = f(x_t, h_{t-1}) </span></p>
+<p>This captures the essence of RNNs: the current hidden state (<span class="math inline">h_t</span>) depends on both the current input (<span class="math inline">x_t</span>) and the previous hidden state (<span class="math inline">h_{t-1}</span>). Function <span class="math inline">f</span> is a neural network that takes the current input and the previous hidden state as input and outputs the current hidden state.</p>
+<pre class="{note}"><code>Think of the hidden state as a "working memory" that's constantly being updated. Just as you might remember key plot points while reading a novel but forget minor details, the hidden state learns to maintain relevant information for the task at hand.</code></pre>
+</section>
+<section id="model" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="model"><span class="header-section-number">1.2</span> Model</h2>
+<p>```vfzdwyyd ../figs/rnn.jpg :alt: RNN Model :width: 500px :align: center</p>
+<p>A recurrent neural network (RNN) showing both architectural views. Left: Compact representation where NN processes input <span class="math inline">x_t \in \mathbb{R}^n</span> and hidden state <span class="math inline">h_t \in \mathbb{R}^d</span> to produce output <span class="math inline">o_t \in \mathbb{R}^m</span>. Right: Expanded view showing the concatenation <span class="math inline">[x_t, h_{t-1}]</span>, linear transformations (<span class="math inline">W, b_h</span>), and <span class="math inline">\tanh</span> activation. Colors indicate corresponding components: inputs (blue), hidden states (green), outputs (pink), and transformations (yellow).</p>
+<pre><code>
+The forward pass of an RNN processes sequential data through a series of transformations as follows:
+
+1. The RNN first combines the current input vector $x_t \in \mathbb{R}^n$ and the previous hidden state $h_{t-1} \in \mathbb{R}^d$ to form a new vector.
+
+    $$
+    v_t = [x_t, h_{t-1}]
+    $$
+
+2. The concatenated vector is then transformed to the hidden state $h_t \in \mathbb{R}^d$ via a linear transformation followed by the $\tanh$ activation function:
+
+    $$
+    h_t = \tanh(W_h v_t + b_h)
+    $$
+
+3. Meanwhile, the output is generated by transforming the hidden state $h_t$ using the output weight matrix $W_{o} \in \mathbb{R}^{m \times d}$:
+
+    $$
+    o_t = W_o v_t + b_o
+    $$
+
+These steps produce an output vector $o_t \in \mathbb{R}^m$ that represents the network's prediction or response at the current time step. The hidden state $h_t$ serves as the network's memory, carrying forward relevant information from previous time steps to influence future predictions.
+
+
+```{admonition} Interactive Example
+:class: tip
+
+Let us see how the RNN works by [creating a Physics simulator with RNN 🚀🔮](rnn-mapping-challenge.md).</code></pre>
+</section>
+<section id="optimization" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="optimization"><span class="header-section-number">1.3</span> Optimization</h2>
+<p>```vfzdwyyd ../figs/rnn-expanded.jpg :alt: RNN expanded :width: 500px :align: center</p>
+<p>An RNN unrolled through time, showing parameter sharing across timesteps. Each vertical slice represents one timestep, with shared weights <span class="math inline">W</span> and biases <span class="math inline">b</span> across all timesteps. This unrolled view illustrates how gradients flow backwards through time during training (BPTT).</p>
+<pre><code>
+RNNs can be trained using backpropagation. One can think of the RNN as a chain of layers, where each layer shares the same weights and takes the previous layer's output as input, i.e.,
+
+$$
+\begin{align}
+h_1 &amp;= f(x_1, h_0; \theta) \\
+h_2 &amp;= f(x_2, h_1; \theta) \\
+\vdots \\
+h_t &amp;= f(x_t, h_{t-1}; \theta)
+\end{align}
+$$
+
+where $\theta$ is the model parameters. Note that the same parameters are used for all time steps. The hidden state at the last time step $h_T$ is then compared to the target value $y_T$ to calculate the loss function ${\cal L}$.
+
+$$ \mathcal{L}(h_T, y_T; \theta) $$
+
+To learn the parameters $\theta$, one can take the gradient with respect to $\theta$ $\partial \mathcal{L} / \partial \theta$, which can be computed using the chain rule.
+
+$$ \frac{\partial \mathcal{L}}{\partial \theta} = \frac{\partial \mathcal{L}}{\partial h_T} \frac{\partial h_T}{\partial h_{T-1}} \frac{\partial h_{T-1}}{\partial h_{T-2}} \cdots \frac{\partial h_1}{\partial h_0} \frac{\partial h_0}{\partial \theta} $$
+
+The gradient flows backwards through time from $\partial \mathcal{L} / \partial h_T$ to $\partial \mathcal{L} / \partial h_0$, which is called backpropagation through time (BPTT).
+
+```{admonition} Chain rule
+:class: tip, dropdown
+:name: chain-rule
+
+The chain rule is a fundamental principle in calculus that allows us to break down complex derivatives into simpler parts. For a composite function $f(g(x))$, the chain rule states:
+
+$$ \frac{d}{dx}f(g(x)) = \frac{df}{dg} \cdot \frac{dg}{dx} $$
+
+For example, if $f(x) = \sin(x^2)$, we can break this down as:
+$$ \frac{d}{dx}\sin(x^2) = \cos(x^2) \cdot \frac{d}{dx}(x^2) = \cos(x^2) \cdot 2x $$
+
+In neural networks, we often deal with many nested functions, making the chain rule essential for computing gradients during backpropagation. The chain rule allows us to calculate how changes in early layers affect the final output by multiplying gradients through each layer.</code></pre>
+<p>```yqkafekcbuwu Why not forward propagation? :class: note, dropdown :name: forward-vs-backward-propagation</p>
+<p>Neural networks can be trained using either forward or backward propagation, but backward propagation (backprop) is far more efficient. Consider a neural network with <span class="math inline">n</span> layers and <span class="math inline">m</span> parameters per layer. In forward propagation, for each parameter, we must propagate through all subsequent layers: first layer parameters need propagation through <span class="math inline">n</span> layers, second layer through <span class="math inline">(n-1)</span> layers, and last layer through <span class="math inline">1</span> layer. With <span class="math inline">m</span> operations per layer, this means <span class="math inline">(m</span> parameters <span class="math inline">\times</span> <span class="math inline">n</span> layers <span class="math inline">\times</span> <span class="math inline">m</span> ops) + <span class="math inline">(m</span> parameters <span class="math inline">\times</span> <span class="math inline">(n-1)</span> layers <span class="math inline">\times</span> <span class="math inline">m</span> ops) + … + <span class="math inline">(m</span> parameters <span class="math inline">\times</span> <span class="math inline">1</span> layer <span class="math inline">\times</span> <span class="math inline">m</span> ops) = <span class="math inline">O(m^2 n^2)</span> operations total. In contrast, backpropagation makes just one forward and one backward pass to collect all derivatives, requiring only <span class="math inline">O(mn)</span> operations.</p>
+<pre><code>
+### Vanishing Gradient Problem
+
+Now, think about what happens when these partial derivatives are consistently less than 1. For example, if each $\frac{\partial h_{i+1}}{\partial h_i}$ is 0.5, and we're looking 10 timesteps back, the gradient becomes $(0.5)^{10} = 0.000977$ - practically zero! This is the vanishing gradient problem, making it extremely difficult for RNNs to learn from long-term dependencies.
+Conversely, if these derivatives are greater than 1, the gradients can explode, making training unstable. This is why architectures like LSTMs and GRUs were developed to better handle long-term dependencies, which we will cover in the next section.
+
+Gradient clipping prevents the vanishing and exploding gradient problem in RNNs by constraining how much the model parameters can change in a single update. Think of it as a "speed limit" - without clipping, parameter updates can become too large due to exploding gradients during backpropagation, causing the model to overshoot optimal values. By clipping gradients to a maximum norm (1.0 in this case), we keep updates within a reasonable range and maintain stable training.
+
+![](https://spotintelligence.com/wp-content/uploads/2023/12/gradient-clipping-example.jpg)
+
+
+## Hands-on Example
+
+Let us demonstrate RNN's capability with a task - predicting sine waves 🔥. We will generate two sine waves - one for training and one for testing.
+
+```{code-cell} ipython
+# Generate sine wave data
+import torch
+import matplotlib.pyplot as plt
+import numpy as np
+
+window_size = 15
+dt = 0.1
+tmax = 75
+
+# Training data
+t_data = torch.arange(0, tmax, dt)
+sine_wave = torch.sin(t_data).view(-1, 1)
+
+# Testing data
+t_ext = torch.arange(tmax, tmax + 100, dt)
+sine_wave_ext = torch.sin(t_ext).view(-1, 1)
+
+plt.plot(t_data, sine_wave)
+plt.show()</code></pre>
+<p>Since the RNN is not good at learning a long sequence, we will chunk the sequence into shorter sequences, i.e.,</p>
+<p><span class="math display">
+X = \begin{bmatrix}
+x_1 &amp; x_2 &amp; \cdots &amp; x_{L} \\
+x_2 &amp; x_3 &amp; \cdots &amp; x_{L+1} \\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+x_{T-L} &amp; x_{T-L+1} &amp; \cdots &amp; x_{T-1}
+\end{bmatrix}
+\quad
+y = \begin{bmatrix}
+x_{L+1} \\
+x_{L+2} \\
+\vdots \\
+x_{T}
+\end{bmatrix}
+</span></p>
+<p>```szguehoyilm ipython :tags: [hide-input]</p>
+<p>def to_sliding_window_form(sine_wave, window_size): X, y = [], [] for _t in range(len(sine_wave)-window_size-1): # Input is current window X.append(sine_wave[_t:_t+window_size]) # Target is next single value y.append(sine_wave[_t+window_size])</p>
+<pre><code>X = torch.stack(X)  # Shape: (n_samples, window_size, 1)
+y = torch.stack(y).unsqueeze(1)  # Shape: (n_samples, 1, 1)
+return X, y</code></pre>
+<p>X_train, y_train = to_sliding_window_form(sine_wave, window_size) print(“Shape of X_train (number of samples, sequence length, feature size):”, X_train.shape) print(“Shape of y_train (number of samples, sequence length, feature size):”, y_train.shape)</p>
+<pre><code>
+We will create a simple dataloader for the training data using Pytorch.
+The key data modules in Pytorch are *Dataset* and *Dataloader*. *Dataset* is a wrapper of the data with some common functions. *Dataloader* takes care of *batching* the data, *shuffling* the data, and *loading* the data.
+
+We will create the dataset from the torch array using `torch.utils.data.TensorDataset`. We then split the dataset into training and validation datasets using `torch.utils.data.random_split`. Finally, we create the dataloader for the training and validation datasets using `torch.utils.data.DataLoader`.
+
+```{code-cell} ipython
+:tags: [hide-input]
+
+# Create a dataset
+dataset = torch.utils.data.TensorDataset(X_train, y_train)
+
+# Split the dataset into training and validation datasets
+train_dataset_sz = int(len(dataset) * 0.8)
+val_dataset_sz = len(dataset) - train_dataset_sz
+train_dataset, val_dataset = torch.utils.data.random_split(
+    dataset,
+    [train_dataset_sz, val_dataset_sz],
+    generator=torch.Generator().manual_seed(42),
+)
+
+# Create a dataloader for the training dataset
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128, shuffle=True)
+
+# Create a dataloader for the validation dataset
+val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=128)</code></pre>
+<pre class="{tip}"><code>The train and validation datasets are mutually exclusive subsets of the original dataset. The train dataset is used for training the model, while the validation dataset is used for evaluating the model.
+It is often useful to keep track of the validation loss during training to stop the training when the validation loss stops improving. This helps to prevent overfitting and save computational resources.</code></pre>
+<p>Let us now define the RNN model. We will use <a href="https://pytorch-lightning.readthedocs.io/en/stable/">Pytorch Lightning</a> to define the model.</p>
+<p>```szguehoyilm ipython :tags: [hide-input]</p>
+<p>import pytorch_lightning as pyl import torch from typing import Tuple</p>
+<p>class AutoRegressiveRNN(pyl.LightningModule): “““A simple RNN model that processes sequences one timestep at a time.”“”</p>
+<pre><code>def __init__(self, input_size, hidden_size, output_size):
+    super().__init__()
+    self.hidden_size = hidden_size
+
+    # Define the two key transformations of RNN
+    self.i2h = torch.nn.Linear(
+        input_size + hidden_size, hidden_size
+    )  # input to hidden
+    self.i2o = torch.nn.Linear(
+        input_size + hidden_size, output_size
+    )  # input to output
+    self.tanh = torch.nn.Tanh()  # activation function
+
+    self.val_losses = []
+
+def forward(self, input: torch.Tensor, hidden: torch.Tensor):
+    """Forward pass of the RNN model."""
+    batch_size, seq_length, _ = input.size()
+    outputs = torch.zeros(
+        batch_size, seq_length, self.i2o.out_features, device=self.device
+    )
+
+    # Process sequence
+    for t in range(seq_length):
+        # Combine current input with previous hidden state
+        combined = torch.cat((input[:, t, :], hidden), 1)
+
+        # Update hidden state and compute output
+        hidden = self.tanh(self.i2h(combined))
+        outputs[:, t, :] = self.i2o(combined)
+
+    return outputs.squeeze(1) if seq_length == 1 else outputs, hidden
+
+def training_step(self, batch, batch_idx):
+    x, y = batch
+    outputs, _ = self.forward(x, self.init_hidden(x.size(0)))
+    last_output = outputs[:, -1, :]
+
+    loss = torch.nn.functional.mse_loss(last_output.reshape(-1), y.reshape(-1))
+    self.log("train_loss", loss)
+    return loss
+
+def validation_step(self, batch, batch_idx):
+    with torch.no_grad():
+        x, y = batch
+        outputs, _ = self.forward(x, self.init_hidden(x.size(0)))
+        last_output = outputs[:, -1, :]
+
+        loss = torch.nn.functional.mse_loss(last_output.reshape(-1), y.reshape(-1))
+        self.log("val_loss", loss, on_epoch=True)
+        self.val_losses.append(loss.cpu().item())
+
+def configure_optimizers(self):
+    optimizer = torch.optim.Adam(self.parameters(), lr=1e-2)
+    return optimizer
+
+def init_hidden(self, batch_size: int = 1) -&gt; torch.Tensor:
+    """Initialize hidden state with zeros."""
+    return torch.zeros(batch_size, self.hidden_size, device=self.device)</code></pre>
+<p>model = AutoRegressiveRNN(input_size=1, hidden_size=10, output_size=1)</p>
+<pre><code>
+```{tip}
+PyTorch Lightning is a framework that provides a high-level interface for training and evaluating PyTorch models. It provides a lot of useful functions for training and evaluating the model, such as `train()`, `val()`, `test()`, `fit()`, `predict()`, etc.</code></pre>
+<p>```szguehoyilm ipython :tags: [hide-input]</p>
+<p>trainer = pyl.Trainer( max_epochs=50, # Number of epochs to train the model enable_progress_bar=False, # Whether to show the progress bar enable_model_summary=False # Whether to show the model summary ) trainer.fit(model, train_loader, val_loader)</p>
+<pre><code>
+To see how the model performs, we can plot the validation loss during training.
+
+```{code-cell} ipython
+plt.plot(model.val_losses)
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.title('Loss during training')
+plt.show()</code></pre>
+<pre class="{warning}"><code>Always label the axes!!!! It is very common that a figure is not self-explanatory due to the lack of labels.</code></pre>
+<p>Now, let us use the trained model to extrapolate the sine wave.</p>
+<p>```szguehoyilm ipython model.eval() pred_seq = sine_wave[-window_size:].view(-1).tolist() for _t in range(len(t_ext)): # Feed the window sequence to the RNN hidden = model.init_hidden(batch_size=1) x_t = torch.tensor(pred_seq[_t : _t + window_size]).reshape( 1, -1, 1 ) # This is a 1D tensor of shape (sequence_length,) output, hidden = model(x_t, hidden) pred_seq.append(output[0, -1, 0].item())</p>
+<p>pred_seq = torch.tensor(pred_seq)[window_size:] plt.plot(t_ext, pred_seq, label=“RNN prediction”) plt.plot(t_ext, sine_wave_ext, label=“Actual”) plt.legend() plt.show()</p>
+<pre><code>
+
+We observed that the RNN is able to predict the sine wave with a reasonable accuracy, with errors increasing over time. This is because, at each time step, the RNN made some errors, which were accumulated over time, resulting in a larger error.
+
+## 🔥 Exercise 🔥
+
+1. Turn off the gradient clipping and see how the model performs.
+
+2. Try to predict the sine wave with a longer sequence
+
+3. Change the sequence length and see how the model performs.
+
+4. Create a new dataset and see how the model performs.
+
+
+
+
+
+:::{#quarto-navigation-envelope .hidden}
+[Applied Soft Computing]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyLXRpdGxl"}
+[Applied Soft Computing]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXItdGl0bGU="}
+[Course Information]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOnF1YXJ0by1zaWRlYmFyLXNlY3Rpb24tMQ=="}
+[Applied Soft Computing: Modeling Complex Systems with Deep Learning]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9pbmRleC5odG1sQXBwbGllZC1Tb2Z0LUNvbXB1dGluZzotTW9kZWxpbmctQ29tcGxleC1TeXN0ZW1zLXdpdGgtRGVlcC1MZWFybmluZw=="}
+[Welcome]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9jb3Vyc2Uvd2VsY29tZS5odG1sV2VsY29tZQ=="}
+[About Us]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9jb3Vyc2UvYWJvdXQuaHRtbEFib3V0LVVz"}
+[Applied Soft Computing: Modeling Complex Systems with Deep Learning]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9jb3Vyc2Uvd2h5LWFwcGxpZWQtc29mdC1jb21wdXRpbmcuaHRtbEFwcGxpZWQtU29mdC1Db21wdXRpbmc6LU1vZGVsaW5nLUNvbXBsZXgtU3lzdGVtcy13aXRoLURlZXAtTGVhcm5pbmc="}
+[Discord]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9jb3Vyc2UvZGlzY29yZC5odG1sRGlzY29yZA=="}
+[Setup]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9jb3Vyc2Uvc2V0dXAuaHRtbFNldHVw"}
+[Using Minidora]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9jb3Vyc2UvbWluaWRvcmEtdXNhZ2UuaHRtbFVzaW5nLU1pbmlkb3Jh"}
+[How to submit assignment]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9jb3Vyc2UvaG93LXRvLXN1Ym1pdC1hc3NpZ25tZW50Lmh0bWxIb3ctdG8tc3VibWl0LWFzc2lnbm1lbnQ="}
+[Applied Soft Computing: Modeling Complex Systems with Deep Learning]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9jb3Vyc2UvZGVsaXZlcmFibGVzLmh0bWxBcHBsaWVkLVNvZnQtQ29tcHV0aW5nOi1Nb2RlbGluZy1Db21wbGV4LVN5c3RlbXMtd2l0aC1EZWVwLUxlYXJuaW5n"}
+[Module 1: The Data Scientist's Toolkit]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOnF1YXJ0by1zaWRlYmFyLXNlY3Rpb24tMg=="}
+[Overview]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDEtdG9vbGtpdC9vdmVydmlldy5odG1sT3ZlcnZpZXc="}
+[Version Control with Git &amp; GitHub]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDEtdG9vbGtpdC9naXQtZ2l0aHViLmh0bWxWZXJzaW9uLUNvbnRyb2wtd2l0aC1HaXQtJi1HaXRIdWI="}
+[The Tidy Data Philosophy]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDEtdG9vbGtpdC90aWR5LWRhdGEuaHRtbFRoZS1UaWR5LURhdGEtUGhpbG9zb3BoeQ=="}
+[Data Provenance]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDEtdG9vbGtpdC9kYXRhLXByb3ZlbmFuY2UuaHRtbERhdGEtUHJvdmVuYW5jZQ=="}
+[Reproducible Environments]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDEtdG9vbGtpdC9lbnZpcm9ubWVudHMuaHRtbFJlcHJvZHVjaWJsZS1FbnZpcm9ubWVudHM="}
+[Module 2: Visualizing Complexity]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOnF1YXJ0by1zaWRlYmFyLXNlY3Rpb24tMw=="}
+[Overview]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDItdmlzdWFsaXphdGlvbi9vdmVydmlldy5odG1sT3ZlcnZpZXc="}
+[Principles of Effective Visualization]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDItdmlzdWFsaXphdGlvbi9wcmluY2lwbGVzLmh0bWxQcmluY2lwbGVzLW9mLUVmZmVjdGl2ZS1WaXN1YWxpemF0aW9u"}
+[Visualizing High-Dimensional Data (t-SNE, UMAP)]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDItdmlzdWFsaXphdGlvbi9kaW1lbnNpb25hbGl0eS1yZWR1Y3Rpb24uaHRtbFZpc3VhbGl6aW5nLUhpZ2gtRGltZW5zaW9uYWwtRGF0YS0odC1TTkUsLVVNQVAp"}
+[Visualizing Networks]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDItdmlzdWFsaXphdGlvbi9uZXR3b3Jrcy5odG1sVmlzdWFsaXppbmctTmV0d29ya3M="}
+[Visualizing Time-Series]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDItdmlzdWFsaXphdGlvbi90aW1lLXNlcmllcy5odG1sVmlzdWFsaXppbmctVGltZS1TZXJpZXM="}
+[Module 3: Deep Learning for Text]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOnF1YXJ0by1zaWRlYmFyLXNlY3Rpb24tNA=="}
+[Overview]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDMtdGV4dC9vdmVydmlldy5odG1sT3ZlcnZpZXc="}
+[TF-IDF: Bag-of-Words Representation]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDMtdGV4dC90Zi1pZGYubWRURi1JREY6LUJhZy1vZi1Xb3Jkcy1SZXByZXNlbnRhdGlvbg=="}
+[Word Embeddings (Word2Vec)]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDMtdGV4dC93b3JkMnZlYy5tZFdvcmQtRW1iZWRkaW5ncy0oV29yZDJWZWMp"}
+[Advanced Word2Vec Techniques]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDMtdGV4dC93b3JkMnZlY19wbHVzLm1kQWR2YW5jZWQtV29yZDJWZWMtVGVjaG5pcXVlcw=="}
+[Semantic Axes &amp; Historical Bias]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDMtdGV4dC9zZW0tYXhpcy5tZFNlbWFudGljLUF4ZXMtJi1IaXN0b3JpY2FsLUJpYXM="}
+[Bias in Embeddings]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDMtdGV4dC9iaWFzLWluLWVtYmVkZGluZy5tZEJpYXMtaW4tRW1iZWRkaW5ncw=="}
+[Document Embeddings (Doc2Vec)]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDMtdGV4dC9kb2MydmVjLm1kRG9jdW1lbnQtRW1iZWRkaW5ncy0oRG9jMlZlYyk="}
+[Recurrent Neural Networks]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDMtdGV4dC9yZWNjdXJyZW50LW5ldXJhbC1uZXQubWRSZWN1cnJlbnQtTmV1cmFsLU5ldHdvcmtz"}
+[LSTM Networks]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDMtdGV4dC9sc3RtLm1kTFNUTS1OZXR3b3Jrcw=="}
+[ELMo: Contextual Embeddings]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDMtdGV4dC9lbG1vLmh0bWxFTE1vOi1Db250ZXh0dWFsLUVtYmVkZGluZ3M="}
+[Sequence-to-Sequence Models]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDMtdGV4dC9zZXEyc2VxLm1kU2VxdWVuY2UtdG8tU2VxdWVuY2UtTW9kZWxz"}
+[Module 4: Deep Learning for Images]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOnF1YXJ0by1zaWRlYmFyLXNlY3Rpb24tNQ=="}
+[Overview]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDQtaW1hZ2VzL292ZXJ2aWV3Lmh0bWxPdmVydmlldw=="}
+[Image Processing Fundamentals]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDQtaW1hZ2VzL2ltYWdlLXByb2Nlc3NpbmcubWRJbWFnZS1Qcm9jZXNzaW5nLUZ1bmRhbWVudGFscw=="}
+[Convolutional Neural Networks]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDQtaW1hZ2VzL2Nubi5tZENvbnZvbHV0aW9uYWwtTmV1cmFsLU5ldHdvcmtz"}
+[LeNet Architecture]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDQtaW1hZ2VzL2xlbmV0Lm1kTGVOZXQtQXJjaGl0ZWN0dXJl"}
+[AlexNet: Deep CNN Revolution]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDQtaW1hZ2VzL2FsZXhuZXQubWRBbGV4TmV0Oi1EZWVwLUNOTi1SZXZvbHV0aW9u"}
+[VGG Networks]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDQtaW1hZ2VzL3ZnZy5tZFZHRy1OZXR3b3Jrcw=="}
+[Inception &amp; Multi-Scale Features]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDQtaW1hZ2VzL2luY2VwdGlvbi5tZEluY2VwdGlvbi0mLU11bHRpLVNjYWxlLUZlYXR1cmVz"}
+[Batch Normalization]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDQtaW1hZ2VzL2JhdGNoLW5vcm1hbGl6YXRpb24uaHRtbEJhdGNoLU5vcm1hbGl6YXRpb24="}
+[ResNet &amp; Skip Connections]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDQtaW1hZ2VzL3Jlc25ldC5tZFJlc05ldC0mLVNraXAtQ29ubmVjdGlvbnM="}
+[Module 5: Deep Learning for Graphs]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOnF1YXJ0by1zaWRlYmFyLXNlY3Rpb24tNg=="}
+[Overview]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDUtZ3JhcGhzL292ZXJ2aWV3Lmh0bWxPdmVydmlldw=="}
+[Spectral Graph Embedding]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDUtZ3JhcGhzL3NwZWN0cmFsLWVtYmVkZGluZy5odG1sU3BlY3RyYWwtR3JhcGgtRW1iZWRkaW5n"}
+[Graph Embeddings with Word2Vec]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDUtZ3JhcGhzL2dyYXBoLWVtYmVkZGluZy13LXdvcmQydmVjLmh0bWxHcmFwaC1FbWJlZGRpbmdzLXdpdGgtV29yZDJWZWM="}
+[Spectral vs. Neural Embeddings]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDUtZ3JhcGhzL3NwZWN0cmFsLXZzLW5ldXJhbC1lbWJlZGRpbmcuaHRtbFNwZWN0cmFsLXZzLi1OZXVyYWwtRW1iZWRkaW5ncw=="}
+[From Images to Graphs]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDUtZ3JhcGhzL2Zyb20taW1hZ2UtdG8tZ3JhcGguaHRtbEZyb20tSW1hZ2VzLXRvLUdyYXBocw=="}
+[Graph Convolutional Networks]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDUtZ3JhcGhzL2dyYXBoLWNvbnZvbHV0aW9uYWwtbmV0d29yay5odG1sR3JhcGgtQ29udm9sdXRpb25hbC1OZXR3b3Jrcw=="}
+[Popular GNN Architectures]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDUtZ3JhcGhzL3BvcHVsYXItZ25uLmh0bWxQb3B1bGFyLUdOTi1BcmNoaXRlY3R1cmVz"}
+[GNN Software &amp; Tools]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDUtZ3JhcGhzL3NvZnR3YXJlLmh0bWxHTk4tU29mdHdhcmUtJi1Ub29scw=="}
+[Module 6: Large Language Models &amp; Emergent Behavior]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOnF1YXJ0by1zaWRlYmFyLXNlY3Rpb24tNw=="}
+[Overview]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDYtbGxtcy9vdmVydmlldy5odG1sT3ZlcnZpZXc="}
+[The Transformer Architecture]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDYtbGxtcy90cmFuc2Zvcm1lcnMuaHRtbFRoZS1UcmFuc2Zvcm1lci1BcmNoaXRlY3R1cmU="}
+[BERT &amp; Contextual Embeddings]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDYtbGxtcy9iZXJ0Lm1kQkVSVC0mLUNvbnRleHR1YWwtRW1iZWRkaW5ncw=="}
+[Sentence-BERT for Semantic Similarity]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDYtbGxtcy9zZW50ZW5jZS1iZXJ0Lmh0bWxTZW50ZW5jZS1CRVJULWZvci1TZW1hbnRpYy1TaW1pbGFyaXR5"}
+[GPT &amp; Generative Models]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDYtbGxtcy9ncHQuaHRtbEdQVC0mLUdlbmVyYXRpdmUtTW9kZWxz"}
+[From Language Models to Instruction Following]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDYtbGxtcy9mcm9tLWxhbmd1YWdlLW1vZGVsLXRvLWluc3RydWN0aW9uLWZvbGxvd2luZy5odG1sRnJvbS1MYW5ndWFnZS1Nb2RlbHMtdG8tSW5zdHJ1Y3Rpb24tRm9sbG93aW5n"}
+[Prompt Engineering &amp; In-Context Learning]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDYtbGxtcy9wcm9tcHQtdHVuaW5nLmh0bWxQcm9tcHQtRW5naW5lZXJpbmctJi1Jbi1Db250ZXh0LUxlYXJuaW5n"}
+[Scaling Laws &amp; Emergent Abilities]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDYtbGxtcy9zY2FsaW5nLWVtZXJnZW5jZS5odG1sU2NhbGluZy1MYXdzLSYtRW1lcmdlbnQtQWJpbGl0aWVz"}
+[LLMs as Complex Systems]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDYtbGxtcy9sbG1zLWFzLWNvbXBsZXgtc3lzdGVtcy5odG1sTExNcy1hcy1Db21wbGV4LVN5c3RlbXM="}
+[Module 7: Self-Supervised Learning]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOnF1YXJ0by1zaWRlYmFyLXNlY3Rpb24tOA=="}
+[Overview]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDctc2VsZi1zdXBlcnZpc2VkL292ZXJ2aWV3Lmh0bWxPdmVydmlldw=="}
+[The Self-Supervised Paradigm]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDctc2VsZi1zdXBlcnZpc2VkL3BhcmFkaWdtLmh0bWxUaGUtU2VsZi1TdXBlcnZpc2VkLVBhcmFkaWdt"}
+[Contrastive Learning (SimCLR)]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDctc2VsZi1zdXBlcnZpc2VkL2NvbnRyYXN0aXZlLWxlYXJuaW5nLmh0bWxDb250cmFzdGl2ZS1MZWFybmluZy0oU2ltQ0xSKQ=="}
+[Self-Supervised Learning for Graphs]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDctc2VsZi1zdXBlcnZpc2VkL2dyYXBocy5odG1sU2VsZi1TdXBlcnZpc2VkLUxlYXJuaW5nLWZvci1HcmFwaHM="}
+[Self-Supervised Learning for Time-Series]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDctc2VsZi1zdXBlcnZpc2VkL3RpbWUtc2VyaWVzLmh0bWxTZWxmLVN1cGVydmlzZWQtTGVhcm5pbmctZm9yLVRpbWUtU2VyaWVz"}
+[Module 8: Explainability &amp; Ethics]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOnF1YXJ0by1zaWRlYmFyLXNlY3Rpb24tOQ=="}
+[Overview]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDgtZXhwbGFpbmFiaWxpdHkvb3ZlcnZpZXcuaHRtbE92ZXJ2aWV3"}
+[The Need for Explainability]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDgtZXhwbGFpbmFiaWxpdHkvbmVlZC5odG1sVGhlLU5lZWQtZm9yLUV4cGxhaW5hYmlsaXR5"}
+[Attention Visualization]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDgtZXhwbGFpbmFiaWxpdHkvYXR0ZW50aW9uLmh0bWxBdHRlbnRpb24tVmlzdWFsaXphdGlvbg=="}
+[LIME &amp; SHAP]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDgtZXhwbGFpbmFiaWxpdHkvbGltZS1zaGFwLmh0bWxMSU1FLSYtU0hBUA=="}
+[Algorithmic Fairness &amp; Bias]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDgtZXhwbGFpbmFiaWxpdHkvZmFpcm5lc3MuaHRtbEFsZ29yaXRobWljLUZhaXJuZXNzLSYtQmlhcw=="}
+[Causality vs. Correlation]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDgtZXhwbGFpbmFiaWxpdHkvY2F1c2FsaXR5Lmh0bWxDYXVzYWxpdHktdnMuLUNvcnJlbGF0aW9u"}
+[Legacy Materials]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOnF1YXJ0by1zaWRlYmFyLXNlY3Rpb24tMTA="}
+[Word &amp; Document Embeddings]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDMtdGV4dC93aGF0LXRvLWxlYXJuLmh0bWxXb3JkLSYtRG9jdW1lbnQtRW1iZWRkaW5ncw=="}
+[Recurrent Neural Networks]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDMtdGV4dC93aGF0LXRvLWxlYXJuLmh0bWxSZWN1cnJlbnQtTmV1cmFsLU5ldHdvcmtz"}
+[Image Processing (CNNs)]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1zaWRlYmFyOi9tMDQtaW1hZ2VzL3doYXQtdG8tbGVhcm4uaHRtbEltYWdlLVByb2Nlc3NpbmctKENOTnMp"}
+[Home]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6SG9tZQ=="}
+[/index.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L2luZGV4Lmh0bWw="}
+[Toolkit &amp; Workflow]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6VG9vbGtpdCAmIFdvcmtmbG93"}
+[─── Module 1 ───]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI64pSA4pSA4pSAIE1vZHVsZSAxIOKUgOKUgOKUgA=="}
+[Overview]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6T3ZlcnZpZXc="}
+[/m01-toolkit/overview.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wMS10b29sa2l0L292ZXJ2aWV3Lmh0bWw="}
+[Git &amp; GitHub]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6R2l0ICYgR2l0SHVi"}
+[/m01-toolkit/git-github.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wMS10b29sa2l0L2dpdC1naXRodWIuaHRtbA=="}
+[Tidy Data]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6VGlkeSBEYXRh"}
+[/m01-toolkit/tidy-data.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wMS10b29sa2l0L3RpZHktZGF0YS5odG1s"}
+[Data Provenance]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6RGF0YSBQcm92ZW5hbmNl"}
+[/m01-toolkit/data-provenance.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wMS10b29sa2l0L2RhdGEtcHJvdmVuYW5jZS5odG1s"}
+[Environments]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6RW52aXJvbm1lbnRz"}
+[/m01-toolkit/environments.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wMS10b29sa2l0L2Vudmlyb25tZW50cy5odG1s"}
+[Visualization]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6VmlzdWFsaXphdGlvbg=="}
+[─── Module 2 ───]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI64pSA4pSA4pSAIE1vZHVsZSAyIOKUgOKUgOKUgA=="}
+[/m02-visualization/overview.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wMi12aXN1YWxpemF0aW9uL292ZXJ2aWV3Lmh0bWw="}
+[Principles]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6UHJpbmNpcGxlcw=="}
+[/m02-visualization/principles.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wMi12aXN1YWxpemF0aW9uL3ByaW5jaXBsZXMuaHRtbA=="}
+[High-Dimensional Data]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6SGlnaC1EaW1lbnNpb25hbCBEYXRh"}
+[/m02-visualization/dimensionality-reduction.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wMi12aXN1YWxpemF0aW9uL2RpbWVuc2lvbmFsaXR5LXJlZHVjdGlvbi5odG1s"}
+[Networks]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6TmV0d29ya3M="}
+[/m02-visualization/networks.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wMi12aXN1YWxpemF0aW9uL25ldHdvcmtzLmh0bWw="}
+[Time-Series]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6VGltZS1TZXJpZXM="}
+[/m02-visualization/time-series.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wMi12aXN1YWxpemF0aW9uL3RpbWUtc2VyaWVzLmh0bWw="}
+[Deep Learning]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6RGVlcCBMZWFybmluZw=="}
+[─── Module 3: Text ───]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI64pSA4pSA4pSAIE1vZHVsZSAzOiBUZXh0IOKUgOKUgOKUgA=="}
+[/m03-text/overview.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wMy10ZXh0L292ZXJ2aWV3Lmh0bWw="}
+[Word2Vec]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6V29yZDJWZWM="}
+[/m03-text/word2vec.md]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wMy10ZXh0L3dvcmQydmVjLm1k"}
+[RNNs &amp; LSTMs]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6Uk5OcyAmIExTVE1z"}
+[/m03-text/lstm.md]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wMy10ZXh0L2xzdG0ubWQ="}
+[─── Module 4: Images ───]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI64pSA4pSA4pSAIE1vZHVsZSA0OiBJbWFnZXMg4pSA4pSA4pSA"}
+[/m04-images/overview.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wNC1pbWFnZXMvb3ZlcnZpZXcuaHRtbA=="}
+[CNNs]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6Q05Ocw=="}
+[/m04-images/cnn.md]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wNC1pbWFnZXMvY25uLm1k"}
+[ResNet]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6UmVzTmV0"}
+[/m04-images/resnet.md]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wNC1pbWFnZXMvcmVzbmV0Lm1k"}
+[─── Module 5: Graphs ───]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI64pSA4pSA4pSAIE1vZHVsZSA1OiBHcmFwaHMg4pSA4pSA4pSA"}
+[/m05-graphs/overview.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wNS1ncmFwaHMvb3ZlcnZpZXcuaHRtbA=="}
+[Graph Embeddings]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6R3JhcGggRW1iZWRkaW5ncw=="}
+[/m05-graphs/graph-embedding-w-word2vec.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wNS1ncmFwaHMvZ3JhcGgtZW1iZWRkaW5nLXctd29yZDJ2ZWMuaHRtbA=="}
+[GNNs]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6R05Ocw=="}
+[/m05-graphs/graph-convolutional-network.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wNS1ncmFwaHMvZ3JhcGgtY29udm9sdXRpb25hbC1uZXR3b3JrLmh0bWw="}
+[Advanced Topics]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6QWR2YW5jZWQgVG9waWNz"}
+[─── Module 6: LLMs ───]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI64pSA4pSA4pSAIE1vZHVsZSA2OiBMTE1zIOKUgOKUgOKUgA=="}
+[/m06-llms/overview.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wNi1sbG1zL292ZXJ2aWV3Lmh0bWw="}
+[Transformers]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6VHJhbnNmb3JtZXJz"}
+[/m06-llms/transformers.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wNi1sbG1zL3RyYW5zZm9ybWVycy5odG1s"}
+[Scaling &amp; Emergence]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6U2NhbGluZyAmIEVtZXJnZW5jZQ=="}
+[/m06-llms/scaling-emergence.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wNi1sbG1zL3NjYWxpbmctZW1lcmdlbmNlLmh0bWw="}
+[─── Module 7: Self-Supervised ───]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI64pSA4pSA4pSAIE1vZHVsZSA3OiBTZWxmLVN1cGVydmlzZWQg4pSA4pSA4pSA"}
+[/m07-self-supervised/overview.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wNy1zZWxmLXN1cGVydmlzZWQvb3ZlcnZpZXcuaHRtbA=="}
+[Contrastive Learning]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6Q29udHJhc3RpdmUgTGVhcm5pbmc="}
+[/m07-self-supervised/contrastive-learning.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wNy1zZWxmLXN1cGVydmlzZWQvY29udHJhc3RpdmUtbGVhcm5pbmcuaHRtbA=="}
+[─── Module 8: Explainability ───]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI64pSA4pSA4pSAIE1vZHVsZSA4OiBFeHBsYWluYWJpbGl0eSDilIDilIDilIA="}
+[/m08-explainability/overview.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wOC1leHBsYWluYWJpbGl0eS9vdmVydmlldy5odG1s"}
+[Fairness &amp; Ethics]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6RmFpcm5lc3MgJiBFdGhpY3M="}
+[/m08-explainability/fairness.html]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLWludC1uYXZiYXI6L20wOC1leHBsYWluYWJpbGl0eS9mYWlybmVzcy5odG1s"}
+
+:::{.hidden .quarto-markdown-envelope-contents render-id="Zm9vdGVyLWxlZnQ="}
+Copyright 2025, Sadamori Kojaku
+:::
+
+:::
+
+
+
+:::{#quarto-meta-markdown .hidden}
+[Applied Soft Computing: Modeling Complex Systems with Deep Learning – Applied Soft Computing]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLW1ldGF0aXRsZQ=="}
+[Applied Soft Computing: Modeling Complex Systems with Deep Learning – Applied Soft Computing]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLXR3aXR0ZXJjYXJkdGl0bGU="}
+[Applied Soft Computing: Modeling Complex Systems with Deep Learning – Applied Soft Computing]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLW9nY2FyZHRpdGxl"}
+[Applied Soft Computing]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLW1ldGFzaXRlbmFtZQ=="}
+[]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLXR3aXR0ZXJjYXJkZGVzYw=="}
+[]{.hidden .quarto-markdown-envelope-contents render-id="cXVhcnRvLW9nY2FyZGRkZXNj"}
+:::
+
+
+
+
+&lt;!-- --&gt;
+
+::: {.quarto-embedded-source-code}
+```````````````````{.markdown shortcodes="false"}
+---
+jupytext:
+  formats: md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
+
+# Recurrent Neural Network (RNN)
+
+Human language is sequential. A word is a sequence of letters, a sentence is a sequence of words, and a paragraph is a sequence of sentences. One key aspect of human language is that the meaning of a word depends on the context. For example, the word "bank" has different meanings in the sentences "I went to the bank to deposit money." and "I went to the bank to catch fish." Human can understand the contextual nuance because they can maintain a "working memory" that captures information from previous words.
+This is the core idea of Recurrent Neural Networks (RNNs).
+
+
+## The Core Idea
+
+Imagine reading a book while maintaining a "summary" in your mind that you update with each new sentence. This is similar to how RNNs work. Operationally, RNNs process a sequence of inputs $(x_1, x_2, \ldots, x_T)$ one at a time, updating a *hidden state* $h_t$ that acts as a "working memory" that captures information from previous inputs.
+
+$$ h_t = f(x_t, h_{t-1}) $$
+
+This captures the essence of RNNs: the current hidden state ($h_t$) depends on both the current input ($x_t$) and the previous hidden state ($h_{t-1}$).
+Function $f$ is a neural network that takes the current input and the previous hidden state as input and outputs the current hidden state.
+
+quarto-executable-code-5450563D
+
+```note
+Think of the hidden state as a "working memory" that's constantly being updated. Just as you might remember key plot points while reading a novel but forget minor details, the hidden state learns to maintain relevant information for the task at hand.</code></pre>
+</section>
+<section id="model-1" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="model-1"><span class="header-section-number">1.4</span> Model</h2>
+<p>```vfzdwyyd ../figs/rnn.jpg :alt: RNN Model :width: 500px :align: center</p>
+<p>A recurrent neural network (RNN) showing both architectural views. Left: Compact representation where NN processes input <span class="math inline">x_t \in \mathbb{R}^n</span> and hidden state <span class="math inline">h_t \in \mathbb{R}^d</span> to produce output <span class="math inline">o_t \in \mathbb{R}^m</span>. Right: Expanded view showing the concatenation <span class="math inline">[x_t, h_{t-1}]</span>, linear transformations (<span class="math inline">W, b_h</span>), and <span class="math inline">\tanh</span> activation. Colors indicate corresponding components: inputs (blue), hidden states (green), outputs (pink), and transformations (yellow).</p>
+<pre><code>
+The forward pass of an RNN processes sequential data through a series of transformations as follows:
+
+1. The RNN first combines the current input vector $x_t \in \mathbb{R}^n$ and the previous hidden state $h_{t-1} \in \mathbb{R}^d$ to form a new vector.
+
+    $$
+    v_t = [x_t, h_{t-1}]
+    $$
+
+2. The concatenated vector is then transformed to the hidden state $h_t \in \mathbb{R}^d$ via a linear transformation followed by the $\tanh$ activation function:
+
+    $$
+    h_t = \tanh(W_h v_t + b_h)
+    $$
+
+3. Meanwhile, the output is generated by transforming the hidden state $h_t$ using the output weight matrix $W_{o} \in \mathbb{R}^{m \times d}$:
+
+    $$
+    o_t = W_o v_t + b_o
+    $$
+
+These steps produce an output vector $o_t \in \mathbb{R}^m$ that represents the network's prediction or response at the current time step. The hidden state $h_t$ serves as the network's memory, carrying forward relevant information from previous time steps to influence future predictions.
+
+
+```{admonition} Interactive Example
+:class: tip
+
+Let us see how the RNN works by [creating a Physics simulator with RNN 🚀🔮](rnn-mapping-challenge.md).</code></pre>
+</section>
+<section id="optimization-1" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="optimization-1"><span class="header-section-number">1.5</span> Optimization</h2>
+<p>```vfzdwyyd ../figs/rnn-expanded.jpg :alt: RNN expanded :width: 500px :align: center</p>
+<p>An RNN unrolled through time, showing parameter sharing across timesteps. Each vertical slice represents one timestep, with shared weights <span class="math inline">W</span> and biases <span class="math inline">b</span> across all timesteps. This unrolled view illustrates how gradients flow backwards through time during training (BPTT).</p>
+<pre><code>
+RNNs can be trained using backpropagation. One can think of the RNN as a chain of layers, where each layer shares the same weights and takes the previous layer's output as input, i.e.,
+
+$$
+\begin{align}
+h_1 &amp;= f(x_1, h_0; \theta) \\
+h_2 &amp;= f(x_2, h_1; \theta) \\
+\vdots \\
+h_t &amp;= f(x_t, h_{t-1}; \theta)
+\end{align}
+$$
+
+where $\theta$ is the model parameters. Note that the same parameters are used for all time steps. The hidden state at the last time step $h_T$ is then compared to the target value $y_T$ to calculate the loss function ${\cal L}$.
+
+$$ \mathcal{L}(h_T, y_T; \theta) $$
+
+To learn the parameters $\theta$, one can take the gradient with respect to $\theta$ $\partial \mathcal{L} / \partial \theta$, which can be computed using the chain rule.
+
+$$ \frac{\partial \mathcal{L}}{\partial \theta} = \frac{\partial \mathcal{L}}{\partial h_T} \frac{\partial h_T}{\partial h_{T-1}} \frac{\partial h_{T-1}}{\partial h_{T-2}} \cdots \frac{\partial h_1}{\partial h_0} \frac{\partial h_0}{\partial \theta} $$
+
+The gradient flows backwards through time from $\partial \mathcal{L} / \partial h_T$ to $\partial \mathcal{L} / \partial h_0$, which is called backpropagation through time (BPTT).
+
+```{admonition} Chain rule
+:class: tip, dropdown
+:name: chain-rule
+
+The chain rule is a fundamental principle in calculus that allows us to break down complex derivatives into simpler parts. For a composite function $f(g(x))$, the chain rule states:
+
+$$ \frac{d}{dx}f(g(x)) = \frac{df}{dg} \cdot \frac{dg}{dx} $$
+
+For example, if $f(x) = \sin(x^2)$, we can break this down as:
+$$ \frac{d}{dx}\sin(x^2) = \cos(x^2) \cdot \frac{d}{dx}(x^2) = \cos(x^2) \cdot 2x $$
+
+In neural networks, we often deal with many nested functions, making the chain rule essential for computing gradients during backpropagation. The chain rule allows us to calculate how changes in early layers affect the final output by multiplying gradients through each layer.</code></pre>
+<p>```yqkafekcbuwu Why not forward propagation? :class: note, dropdown :name: forward-vs-backward-propagation</p>
+<p>Neural networks can be trained using either forward or backward propagation, but backward propagation (backprop) is far more efficient. Consider a neural network with <span class="math inline">n</span> layers and <span class="math inline">m</span> parameters per layer. In forward propagation, for each parameter, we must propagate through all subsequent layers: first layer parameters need propagation through <span class="math inline">n</span> layers, second layer through <span class="math inline">(n-1)</span> layers, and last layer through <span class="math inline">1</span> layer. With <span class="math inline">m</span> operations per layer, this means <span class="math inline">(m</span> parameters <span class="math inline">\times</span> <span class="math inline">n</span> layers <span class="math inline">\times</span> <span class="math inline">m</span> ops) + <span class="math inline">(m</span> parameters <span class="math inline">\times</span> <span class="math inline">(n-1)</span> layers <span class="math inline">\times</span> <span class="math inline">m</span> ops) + … + <span class="math inline">(m</span> parameters <span class="math inline">\times</span> <span class="math inline">1</span> layer <span class="math inline">\times</span> <span class="math inline">m</span> ops) = <span class="math inline">O(m^2 n^2)</span> operations total. In contrast, backpropagation makes just one forward and one backward pass to collect all derivatives, requiring only <span class="math inline">O(mn)</span> operations.</p>
+<pre><code>
+### Vanishing Gradient Problem
+
+Now, think about what happens when these partial derivatives are consistently less than 1. For example, if each $\frac{\partial h_{i+1}}{\partial h_i}$ is 0.5, and we're looking 10 timesteps back, the gradient becomes $(0.5)^{10} = 0.000977$ - practically zero! This is the vanishing gradient problem, making it extremely difficult for RNNs to learn from long-term dependencies.
+Conversely, if these derivatives are greater than 1, the gradients can explode, making training unstable. This is why architectures like LSTMs and GRUs were developed to better handle long-term dependencies, which we will cover in the next section.
+
+Gradient clipping prevents the vanishing and exploding gradient problem in RNNs by constraining how much the model parameters can change in a single update. Think of it as a "speed limit" - without clipping, parameter updates can become too large due to exploding gradients during backpropagation, causing the model to overshoot optimal values. By clipping gradients to a maximum norm (1.0 in this case), we keep updates within a reasonable range and maintain stable training.
+
+![](https://spotintelligence.com/wp-content/uploads/2023/12/gradient-clipping-example.jpg)
+
+
+## Hands-on Example
+
+Let us demonstrate RNN's capability with a task - predicting sine waves 🔥. We will generate two sine waves - one for training and one for testing.
+
+```{code-cell} ipython
+# Generate sine wave data
+import torch
+import matplotlib.pyplot as plt
+import numpy as np
+
+window_size = 15
+dt = 0.1
+tmax = 75
+
+# Training data
+t_data = torch.arange(0, tmax, dt)
+sine_wave = torch.sin(t_data).view(-1, 1)
+
+# Testing data
+t_ext = torch.arange(tmax, tmax + 100, dt)
+sine_wave_ext = torch.sin(t_ext).view(-1, 1)
+
+plt.plot(t_data, sine_wave)
+plt.show()</code></pre>
+<p>Since the RNN is not good at learning a long sequence, we will chunk the sequence into shorter sequences, i.e.,</p>
+<p><span class="math display">
+X = \begin{bmatrix}
+x_1 &amp; x_2 &amp; \cdots &amp; x_{L} \\
+x_2 &amp; x_3 &amp; \cdots &amp; x_{L+1} \\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+x_{T-L} &amp; x_{T-L+1} &amp; \cdots &amp; x_{T-1}
+\end{bmatrix}
+\quad
+y = \begin{bmatrix}
+x_{L+1} \\
+x_{L+2} \\
+\vdots \\
+x_{T}
+\end{bmatrix}
+</span></p>
+<p>```szguehoyilm ipython :tags: [hide-input]</p>
+<p>def to_sliding_window_form(sine_wave, window_size): X, y = [], [] for _t in range(len(sine_wave)-window_size-1): # Input is current window X.append(sine_wave[_t:_t+window_size]) # Target is next single value y.append(sine_wave[_t+window_size])</p>
+<pre><code>X = torch.stack(X)  # Shape: (n_samples, window_size, 1)
+y = torch.stack(y).unsqueeze(1)  # Shape: (n_samples, 1, 1)
+return X, y</code></pre>
+<p>X_train, y_train = to_sliding_window_form(sine_wave, window_size) print(“Shape of X_train (number of samples, sequence length, feature size):”, X_train.shape) print(“Shape of y_train (number of samples, sequence length, feature size):”, y_train.shape)</p>
+<pre><code>
+We will create a simple dataloader for the training data using Pytorch.
+The key data modules in Pytorch are *Dataset* and *Dataloader*. *Dataset* is a wrapper of the data with some common functions. *Dataloader* takes care of *batching* the data, *shuffling* the data, and *loading* the data.
+
+We will create the dataset from the torch array using `torch.utils.data.TensorDataset`. We then split the dataset into training and validation datasets using `torch.utils.data.random_split`. Finally, we create the dataloader for the training and validation datasets using `torch.utils.data.DataLoader`.
+
+```{code-cell} ipython
+:tags: [hide-input]
+
+# Create a dataset
+dataset = torch.utils.data.TensorDataset(X_train, y_train)
+
+# Split the dataset into training and validation datasets
+train_dataset_sz = int(len(dataset) * 0.8)
+val_dataset_sz = len(dataset) - train_dataset_sz
+train_dataset, val_dataset = torch.utils.data.random_split(
+    dataset,
+    [train_dataset_sz, val_dataset_sz],
+    generator=torch.Generator().manual_seed(42),
+)
+
+# Create a dataloader for the training dataset
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128, shuffle=True)
+
+# Create a dataloader for the validation dataset
+val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=128)</code></pre>
+<p>quarto-executable-code-5450563D</p>
+<pre class="tip"><code>The train and validation datasets are mutually exclusive subsets of the original dataset. The train dataset is used for training the model, while the validation dataset is used for evaluating the model.
+It is often useful to keep track of the validation loss during training to stop the training when the validation loss stops improving. This helps to prevent overfitting and save computational resources.</code></pre>
+<p>Let us now define the RNN model. We will use <a href="https://pytorch-lightning.readthedocs.io/en/stable/">Pytorch Lightning</a> to define the model.</p>
+<p>```szguehoyilm ipython :tags: [hide-input]</p>
+<p>import pytorch_lightning as pyl import torch from typing import Tuple</p>
+<p>class AutoRegressiveRNN(pyl.LightningModule): “““A simple RNN model that processes sequences one timestep at a time.”“”</p>
+<pre><code>def __init__(self, input_size, hidden_size, output_size):
+    super().__init__()
+    self.hidden_size = hidden_size
+
+    # Define the two key transformations of RNN
+    self.i2h = torch.nn.Linear(
+        input_size + hidden_size, hidden_size
+    )  # input to hidden
+    self.i2o = torch.nn.Linear(
+        input_size + hidden_size, output_size
+    )  # input to output
+    self.tanh = torch.nn.Tanh()  # activation function
+
+    self.val_losses = []
+
+def forward(self, input: torch.Tensor, hidden: torch.Tensor):
+    """Forward pass of the RNN model."""
+    batch_size, seq_length, _ = input.size()
+    outputs = torch.zeros(
+        batch_size, seq_length, self.i2o.out_features, device=self.device
+    )
+
+    # Process sequence
+    for t in range(seq_length):
+        # Combine current input with previous hidden state
+        combined = torch.cat((input[:, t, :], hidden), 1)
+
+        # Update hidden state and compute output
+        hidden = self.tanh(self.i2h(combined))
+        outputs[:, t, :] = self.i2o(combined)
+
+    return outputs.squeeze(1) if seq_length == 1 else outputs, hidden
+
+def training_step(self, batch, batch_idx):
+    x, y = batch
+    outputs, _ = self.forward(x, self.init_hidden(x.size(0)))
+    last_output = outputs[:, -1, :]
+
+    loss = torch.nn.functional.mse_loss(last_output.reshape(-1), y.reshape(-1))
+    self.log("train_loss", loss)
+    return loss
+
+def validation_step(self, batch, batch_idx):
+    with torch.no_grad():
+        x, y = batch
+        outputs, _ = self.forward(x, self.init_hidden(x.size(0)))
+        last_output = outputs[:, -1, :]
+
+        loss = torch.nn.functional.mse_loss(last_output.reshape(-1), y.reshape(-1))
+        self.log("val_loss", loss, on_epoch=True)
+        self.val_losses.append(loss.cpu().item())
+
+def configure_optimizers(self):
+    optimizer = torch.optim.Adam(self.parameters(), lr=1e-2)
+    return optimizer
+
+def init_hidden(self, batch_size: int = 1) -&gt; torch.Tensor:
+    """Initialize hidden state with zeros."""
+    return torch.zeros(batch_size, self.hidden_size, device=self.device)</code></pre>
+<p>model = AutoRegressiveRNN(input_size=1, hidden_size=10, output_size=1)</p>
+<pre><code>
+quarto-executable-code-5450563D
+
+```tip
+PyTorch Lightning is a framework that provides a high-level interface for training and evaluating PyTorch models. It provides a lot of useful functions for training and evaluating the model, such as `train()`, `val()`, `test()`, `fit()`, `predict()`, etc.</code></pre>
+<p>```szguehoyilm ipython :tags: [hide-input]</p>
+<p>trainer = pyl.Trainer( max_epochs=50, # Number of epochs to train the model enable_progress_bar=False, # Whether to show the progress bar enable_model_summary=False # Whether to show the model summary ) trainer.fit(model, train_loader, val_loader)</p>
+<pre><code>
+To see how the model performs, we can plot the validation loss during training.
+
+```{code-cell} ipython
+plt.plot(model.val_losses)
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.title('Loss during training')
+plt.show()</code></pre>
+<p>quarto-executable-code-5450563D</p>
+<pre class="warning"><code>Always label the axes!!!! It is very common that a figure is not self-explanatory due to the lack of labels.</code></pre>
+<p>Now, let us use the trained model to extrapolate the sine wave.</p>
+<p>```szguehoyilm ipython model.eval() pred_seq = sine_wave[-window_size:].view(-1).tolist() for _t in range(len(t_ext)): # Feed the window sequence to the RNN hidden = model.init_hidden(batch_size=1) x_t = torch.tensor(pred_seq[_t : _t + window_size]).reshape( 1, -1, 1 ) # This is a 1D tensor of shape (sequence_length,) output, hidden = model(x_t, hidden) pred_seq.append(output[0, -1, 0].item())</p>
+<p>pred_seq = torch.tensor(pred_seq)[window_size:] plt.plot(t_ext, pred_seq, label=“RNN prediction”) plt.plot(t_ext, sine_wave_ext, label=“Actual”) plt.legend() plt.show()</p>
+<pre><code>
+
+We observed that the RNN is able to predict the sine wave with a reasonable accuracy, with errors increasing over time. This is because, at each time step, the RNN made some errors, which were accumulated over time, resulting in a larger error.
+
+## 🔥 Exercise 🔥
+
+1. Turn off the gradient clipping and see how the model performs.
+
+2. Try to predict the sine wave with a longer sequence
+
+3. Change the sequence length and see how the model performs.
+
+4. Create a new dataset and see how the model performs.</code></pre>
+<p>:::</p>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      <div class="footer-contents">Copyright 2025, Sadamori Kojaku</div>  
+    </div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions"><ul><li><a href="https://github.com/skojaku/applied-soft-comp/edit/main/m03-text/reccurrent-neural-net.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/skojaku/applied-soft-comp/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/skojaku/applied-soft-comp">
+      <i class="bi bi-github" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

@@ -1,0 +1,2100 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Sadamori Kojaku">
+<meta name="dcterms.date" content="2025-10-19">
+
+<title>Applied Soft Computing: Modeling Complex Systems with Deep Learning – Applied Soft Computing</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-0348920b7671f696dc9078d39bff215e.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-fee01c958fd55f7b3b50896185ea610a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "|"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../assets/custom.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../logo.jpg" alt="" class="navbar-logo">
+    </a>
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Applied Soft Computing</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-toolkit--workflow" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Toolkit &amp; Workflow</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-toolkit--workflow">    
+        <li class="dropdown-header">─── Module 1 ───</li>
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/git-github.html">
+ <span class="dropdown-text">Git &amp; GitHub</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/tidy-data.html">
+ <span class="dropdown-text">Tidy Data</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/data-provenance.html">
+ <span class="dropdown-text">Data Provenance</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m01-toolkit/environments.html">
+ <span class="dropdown-text">Environments</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-visualization" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Visualization</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-visualization">    
+        <li class="dropdown-header">─── Module 2 ───</li>
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/principles.html">
+ <span class="dropdown-text">Principles</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/dimensionality-reduction.html">
+ <span class="dropdown-text">High-Dimensional Data</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/networks.html">
+ <span class="dropdown-text">Networks</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m02-visualization/time-series.html">
+ <span class="dropdown-text">Time-Series</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-deep-learning" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Deep Learning</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-deep-learning">    
+        <li class="dropdown-header">─── Module 3: Text ───</li>
+        <li>
+    <a class="dropdown-item" href="../m03-text/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m03-text/word2vec.md">
+ <span class="dropdown-text">Word2Vec</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m03-text/lstm.md">
+ <span class="dropdown-text">RNNs &amp; LSTMs</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 4: Images ───</li>
+        <li>
+    <a class="dropdown-item" href="../m04-images/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m04-images/cnn.md">
+ <span class="dropdown-text">CNNs</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m04-images/resnet.md">
+ <span class="dropdown-text">ResNet</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 5: Graphs ───</li>
+        <li>
+    <a class="dropdown-item" href="../m05-graphs/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m05-graphs/graph-embedding-w-word2vec.html">
+ <span class="dropdown-text">Graph Embeddings</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m05-graphs/graph-convolutional-network.html">
+ <span class="dropdown-text">GNNs</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-advanced-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Advanced Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-advanced-topics">    
+        <li class="dropdown-header">─── Module 6: LLMs ───</li>
+        <li>
+    <a class="dropdown-item" href="../m06-llms/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m06-llms/transformers.html">
+ <span class="dropdown-text">Transformers</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m06-llms/scaling-emergence.html">
+ <span class="dropdown-text">Scaling &amp; Emergence</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 7: Self-Supervised ───</li>
+        <li>
+    <a class="dropdown-item" href="../m07-self-supervised/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m07-self-supervised/contrastive-learning.html">
+ <span class="dropdown-text">Contrastive Learning</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 8: Explainability ───</li>
+        <li>
+    <a class="dropdown-item" href="../m08-explainability/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m08-explainability/fairness.html">
+ <span class="dropdown-text">Fairness &amp; Ethics</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Applied Soft Computing: Modeling Complex Systems with Deep Learning</li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Course Information</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Applied Soft Computing: Modeling Complex Systems with Deep Learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/welcome.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/about.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">About Us</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/why-applied-soft-computing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Applied Soft Computing: Modeling Complex Systems with Deep Learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/discord.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Discord</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Setup</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/minidora-usage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Using Minidora</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/how-to-submit-assignment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to submit assignment</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course/deliverables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Applied Soft Computing: Modeling Complex Systems with Deep Learning</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 1: The Data Scientist’s Toolkit</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/git-github.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Version Control with Git &amp; GitHub</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/tidy-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Tidy Data Philosophy</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/data-provenance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Provenance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m01-toolkit/environments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Reproducible Environments</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 2: Visualizing Complexity</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/principles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Principles of Effective Visualization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/dimensionality-reduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing High-Dimensional Data (t-SNE, UMAP)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m02-visualization/time-series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing Time-Series</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 3: Deep Learning for Text</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/tf-idf.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">TF-IDF: Bag-of-Words Representation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/word2vec.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word Embeddings (Word2Vec)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/word2vec_plus.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Advanced Word2Vec Techniques</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/sem-axis.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Semantic Axes &amp; Historical Bias</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/bias-in-embedding.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bias in Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/doc2vec.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Document Embeddings (Doc2Vec)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/reccurrent-neural-net.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Recurrent Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/lstm.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LSTM Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/elmo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ELMo: Contextual Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/seq2seq.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sequence-to-Sequence Models</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 4: Deep Learning for Images</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/image-processing.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Image Processing Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/cnn.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Convolutional Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/lenet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LeNet Architecture</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/alexnet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">AlexNet: Deep CNN Revolution</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/vgg.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">VGG Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/inception.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Inception &amp; Multi-Scale Features</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/batch-normalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Batch Normalization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/resnet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ResNet &amp; Skip Connections</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 5: Deep Learning for Graphs</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/spectral-embedding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spectral Graph Embedding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/graph-embedding-w-word2vec.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graph Embeddings with Word2Vec</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/spectral-vs-neural-embedding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spectral vs.&nbsp;Neural Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/from-image-to-graph.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Images to Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/graph-convolutional-network.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graph Convolutional Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/popular-gnn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Popular GNN Architectures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m05-graphs/software.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GNN Software &amp; Tools</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 6: Large Language Models &amp; Emergent Behavior</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/transformers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Transformer Architecture</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/bert.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">BERT &amp; Contextual Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/sentence-bert.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sentence-BERT for Semantic Similarity</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/gpt.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GPT &amp; Generative Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/from-language-model-to-instruction-following.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Language Models to Instruction Following</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/prompt-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prompt Engineering &amp; In-Context Learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/scaling-emergence.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Scaling Laws &amp; Emergent Abilities</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-llms/llms-as-complex-systems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LLMs as Complex Systems</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 7: Self-Supervised Learning</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/paradigm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Self-Supervised Paradigm</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/contrastive-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contrastive Learning (SimCLR)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/graphs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Self-Supervised Learning for Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-self-supervised/time-series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Self-Supervised Learning for Time-Series</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 8: Explainability &amp; Ethics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/need.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Need for Explainability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/attention.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Attention Visualization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/lime-shap.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LIME &amp; SHAP</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/fairness.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Algorithmic Fairness &amp; Bias</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m08-explainability/causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Causality vs.&nbsp;Correlation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false">
+ <span class="menu-text">Legacy Materials</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/what-to-learn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word &amp; Document Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m03-text/what-to-learn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Recurrent Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m04-images/what-to-learn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Image Processing (CNNs)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Applied Soft Computing: Modeling Complex Systems with Deep Learning</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Sadamori Kojaku </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 19, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="lenet-and-lenet-5-pioneering-cnn-architectures" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> LeNet and LeNet-5: Pioneering CNN Architectures</h1>
+<p>How can a neural network learn to recognize complex visual patterns—like handwritten digits—without relying on hand-crafted features?</p>
+<p>In the late 1980s and early 1990s, hand-engineered feature extraction dominated machine learning approaches to computer vision. This process was laborious and often inflexible. <strong>LeNet</strong> {footcite}<code>lecun1989backpropagation</code> offered a radical alternative by showing that a network could learn these features directly from raw pixel data.</p>
+<p>The most influential incarnation, <strong>LeNet-5</strong> {footcite}<code>lecun1998gradient</code>, demonstrated impressive performance on handwritten digit recognition, finding real-world application in automated check reading and postal code processing. Although modern networks have grown significantly in depth and complexity, the core ideas from LeNet remain fundamental to today’s convolutional neural networks (CNNs).</p>
+<pre class="{note}"><code>LeNet popularized the key innovations of convolution, pooling, and end-to-end learning—approaches that form the foundation for modern deep learning in computer vision.</code></pre>
+<section id="learning-objectives" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="learning-objectives"><span class="header-section-number">1.1</span> Learning Objectives</h2>
+<ul>
+<li>Understand the historical context and motivation behind the LeNet family of architectures.</li>
+<li>Explore the architectural components (convolution, pooling, and sparse connectivity) that enabled effective pattern learning.</li>
+<li>Implement a simplified version of LeNet-1 in PyTorch to gain hands-on experience.</li>
+<li>Reflect on how LeNet’s innovations paved the way for more advanced CNNs.</li>
+</ul>
+</section>
+<section id="conceptual-foundation" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="conceptual-foundation"><span class="header-section-number">1.2</span> Conceptual Foundation</h2>
+<p>Before LeNet, engineers painstakingly crafted feature extractors for each vision task: edges, corners, specific shapes, etc. This approach was time-consuming, difficult to generalize, and prone to missing subtle features crucial for classification.</p>
+<p>LeNet challenged this paradigm by <strong>automating feature extraction</strong>. It did this through layers that systematically learn local patterns (via convolution) and gradually build more global representations (via subsampling/pooling). This hierarchical approach mimics aspects of human visual perception, where lower-level patterns combine into higher-level objects.</p>
+<pre class="{note}"><code>**Historical Context**:
+Yann LeCun’s work on applying backpropagation to convolutional architectures in the 1980s was met with skepticism. But the success of LeNet on real-world tasks (e.g., check reading at banks) helped spark wider interest in neural network approaches to image recognition.</code></pre>
+</section>
+<section id="architecture" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="architecture"><span class="header-section-number">1.3</span> Architecture</h2>
+<p>LeNet actually refers to several iterative designs. In what follows, we examine two key versions: <strong>LeNet-1</strong> (the earliest demonstration) and <strong>LeNet-5</strong> (the widely known and more powerful network).</p>
+<section id="lenet-1" class="level3">
+<h3 class="anchored" data-anchor-id="lenet-1">LeNet-1</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>```pmixyykr https://miro.medium.com/v2/resize:fit:1400/format:webp/1*ge5OLutAT9_3fxt_sKTBGA.png</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>width: 100%</td>
+</tr>
+<tr class="even">
+<td>name: lenet</td>
+</tr>
+</tbody>
+</table>
+<p>LeNet-1 architecture.</p>
+<pre><code>
+1. **Convolution (C1)**: Takes a $28\times28$ (originally $32\times32$ in some demos) grayscale image and applies 4 filters of size $5\times5$. This step captures basic patterns like edges and corners.
+
+2. **Pooling (S2)**: Applies average pooling (subsampling) with a $2\times2$ window, reducing the spatial dimensions from $24\times24$ to $12\times12$. This coarse-grains the features, allowing the network to focus on more abstract patterns.
+
+3. **Second Convolution (C3)**: Produces more feature maps (12 feature maps). By stacking multiple convolutions, the network builds increasingly complex features.
+
+4. **Second Pooling (S4)**: Another average pooling layer further reduces spatial dimensions to $4\times4$.
+
+5. **Fully Connected Layers**: The network flattens these features and passes them through a fully connected layer to produce a 10-class output (digits 0–9).
+
+```{note}
+This hierarchical processing—convolution followed by subsampling—mimics the structure of the visual cortex, where neurons respond to progressively more complex stimuli in each stage.</code></pre>
+</section>
+<section id="lenet-5" class="level3">
+<h3 class="anchored" data-anchor-id="lenet-5">LeNet-5</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>```pmixyykr https://www.datasciencecentral.com/wp-content/uploads/2021/10/1lvvWF48t7cyRWqct13eU0w.jpeg</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>width: 100%</td>
+</tr>
+<tr class="even">
+<td>name: lenet-5</td>
+</tr>
+</tbody>
+</table>
+<p>LeNet-5 architecture.</p>
+<pre><code>
+LeNet-5 builds on LeNet-1 but **scales up the number of learnable parameters** and introduces a few architectural refinements:
+
+1. **Input Normalization**: Inputs (grayscale images) are normalized to a range of roughly $[-0.1, 1.175]$. This centering speeds up training and stabilizes the gradients.
+
+2. **Convolution + Subsampling Pairs**: Similar to LeNet-1, but with more feature maps and a **mean pooling** mechanism. Each pooling step is followed by a **non-linear activation** (often the sigmoid, though other activations can be used).
+
+3. **Sparse Connectivity (C3)**: Not every feature map in the previous layer connects to every feature map in the next layer. This selective approach reduces parameters and encourages **diverse features** rather than overly correlated ones.
+
+4. **Transition to 1D**: Instead of simply flattening, LeNet-5 includes a convolutional layer (C5) that bridges 2D feature maps to a fully connected layer, preserving more spatial structure.
+
+5. **Final RBF Layer** (in the original paper): An additional radial-basis-function layer was sometimes used to enhance feature representation. Modern implementations often simplify this to a linear or fully connected layer.
+
+```{note}
+**Parameter Efficiency**: One reason LeNet-5 performed well on the limited hardware of the 1990s is its careful use of sparse connections to reduce the number of parameters.</code></pre>
+</section>
+</section>
+<section id="implementation" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="implementation"><span class="header-section-number">1.4</span> Implementation</h2>
+<p>In this section, we will implement a simplified <strong>LeNet-1</strong> in PyTorch. While LeNet-1 was traditionally trained with batch gradient descent and certain custom optimizations, our example will use <strong>modern tooling</strong>—such as <strong>PyTorch Lightning</strong> and the <strong>Adam</strong> optimizer—to streamline the training process.</p>
+<section id="dataset-mnist" class="level3">
+<h3 class="anchored" data-anchor-id="dataset-mnist">Dataset: MNIST</h3>
+<p>We will train our model on the MNIST dataset, a classic benchmark of <span class="math inline">28\times28</span> handwritten digits. MNIST is split into 60,000 training and 10,000 test images.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>```pmixyykr https://production-media.paperswithcode.com/datasets/MNIST-0000000001-2e09631a_09liOmx.jpg</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>width: 100%</td>
+</tr>
+<tr class="even">
+<td>name: mnist</td>
+</tr>
+</tbody>
+</table>
+<p>MNIST dataset (digits 0–9 in handwritten form).</p>
+<pre><code>
+```{tip}
+**Why MNIST?**
+- Small image size (28x28) → Perfect for simple convolutional nets.
+- 10 distinct classes → Easy to measure classification accuracy.
+- Widely used → Many existing examples to compare against.</code></pre>
+</section>
+<section id="data-preparation-with-pytorch-lightning" class="level3">
+<h3 class="anchored" data-anchor-id="data-preparation-with-pytorch-lightning">Data Preparation with PyTorch Lightning</h3>
+<p>```xclqeqwghfy ipython3 import torch import torch.nn as nn import torch.nn.functional as F import pytorch_lightning as pl from torch.utils.data import DataLoader, random_split from torchvision import datasets, transforms from torchmetrics import Accuracy</p>
+<p>class MNISTDataModule(pl.LightningDataModule): ““” PyTorch Lightning data module for MNIST dataset ““” def <strong>init</strong>(self, data_dir: str = ‘./data’, batch_size: int = 32): super().__init__() self.data_dir = data_dir self.batch_size = batch_size</p>
+<pre><code>    # Define transforms
+    self.transform = transforms.Compose([
+        transforms.ToTensor(),           # Convert PIL image to torch.Tensor
+        transforms.Normalize((0,), (1,)) # Normalize to mean=0, std=1
+    ])
+
+def prepare_data(self):
+    """Download data if needed."""
+    datasets.MNIST(self.data_dir, train=True, download=True)
+    datasets.MNIST(self.data_dir, train=False, download=True)
+
+def setup(self, stage=None):
+    """Setup train, val, and test datasets."""
+    if stage == 'fit' or stage is None:
+        mnist_full = datasets.MNIST(self.data_dir, train=True, transform=self.transform)
+        self.mnist_train, self.mnist_val = random_split(
+            mnist_full, [55000, 5000], generator=torch.Generator().manual_seed(42)
+        )
+
+    if stage == 'test' or stage is None:
+        self.mnist_test = datasets.MNIST(self.data_dir, train=False, transform=self.transform)
+
+def train_dataloader(self):
+    return DataLoader(self.mnist_train, batch_size=self.batch_size, shuffle=True, num_workers=1)
+
+def val_dataloader(self):
+    return DataLoader(self.mnist_val, batch_size=self.batch_size, num_workers=1)
+
+def test_dataloader(self):
+    return DataLoader(self.mnist_test, batch_size=self.batch_size, num_workers=1)</code></pre>
+<pre><code>
+```{note}
+**PyTorch Lightning DataModule**:
+- Ensures consistent data splits for training, validation, and testing.
+- Handles shuffling, batching, and transformation pipelines.
+- Makes code cleaner and easier to maintain.</code></pre>
+</section>
+<section id="model-definition" class="level3">
+<h3 class="anchored" data-anchor-id="model-definition">Model Definition</h3>
+<p>```xclqeqwghfy ipython3 class LeNet1(pl.LightningModule): ““” PyTorch Lightning implementation of LeNet-1 ““”</p>
+<pre><code>def __init__(self, learning_rate=1e-3):
+    super(LeNet1, self).__init__()
+    self.save_hyperparameters()
+
+    # Metrics
+    self.train_accuracy = Accuracy(task="multiclass", num_classes=10)
+    self.val_accuracy = Accuracy(task="multiclass", num_classes=10)
+    self.test_accuracy = Accuracy(task="multiclass", num_classes=10)
+
+    # First convolutional layer (Input: 1x28x28 -&gt; Output: 4x24x24)
+    self.conv1 = nn.Conv2d(in_channels=1, out_channels=4, kernel_size=5, stride=1)
+
+    # Average pooling layer (4x24x24 -&gt; 4x12x12)
+    self.pool = nn.AvgPool2d(kernel_size=2, stride=2)
+
+    # Second convolutional layer (4x12x12 -&gt; 12x8x8)
+    self.conv2 = nn.Conv2d(in_channels=4, out_channels=12, kernel_size=5, stride=1)
+
+    # Fully connected layer (12*4*4=192 -&gt; 10)
+    self.fc = nn.Linear(12 * 4 * 4, 10)
+
+    # Initialize weights
+    self._init_weights()
+
+    # Track losses over time (for visualization)
+    self.val_losses = []
+    self.train_losses = []
+
+def _init_weights(self):
+    """Initialize weights with Xavier initialization."""
+    for m in self.modules():
+        if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+            nn.init.xavier_uniform_(m.weight)
+            nn.init.zeros_(m.bias)
+
+def forward(self, x):
+    # First conv block
+    x = self.conv1(x)
+    x = torch.tanh(x)  # Using tanh for nonlinearity
+    x = self.pool(x)
+
+    # Second conv block
+    x = self.conv2(x)
+    x = torch.tanh(x)
+    x = self.pool(x)
+
+    # Flatten and fully connected
+    x = x.view(-1, 12 * 4 * 4)
+    x = self.fc(x)
+    return x
+
+def configure_optimizers(self):
+    """Define optimizer and LR scheduler."""
+    optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, mode="min", factor=0.1, patience=10, verbose=True
+    )
+    return {
+        "optimizer": optimizer,
+        "lr_scheduler": {"scheduler": scheduler, "monitor": "val_loss"}
+    }
+
+def training_step(self, batch, batch_idx):
+    """Train on a single batch."""
+    x, y = batch
+    logits = self(x)
+    loss = F.cross_entropy(logits, y)
+
+    acc = self.train_accuracy(logits, y)
+    self.log("train_loss", loss, prog_bar=True)
+    self.log("train_acc", acc, prog_bar=True)
+
+    self.train_losses.append({"loss": loss.item(), "acc": acc.item()})
+    return loss
+
+def validation_step(self, batch, batch_idx):
+    """Validate on a single batch."""
+    x, y = batch
+    logits = self(x)
+    loss = F.cross_entropy(logits, y)
+
+    acc = self.val_accuracy(logits, y)
+    self.log("val_loss", loss, prog_bar=True)
+    self.log("val_acc", acc, prog_bar=True)
+
+    self.val_losses.append({"loss": loss.item(), "acc": acc.item()})
+
+def test_step(self, batch, batch_idx):
+    """Test on a single batch."""
+    x, y = batch
+    logits = self(x)
+    loss = F.cross_entropy(logits, y)
+
+    acc = self.test_accuracy(logits, y)
+    self.log("test_loss", loss, prog_bar=True)
+    self.log("test_acc", acc, prog_bar=True)</code></pre>
+<pre><code>
+### Training the Model
+
+```{code-cell} ipython3
+# Initialize model and data
+model = LeNet1(learning_rate=1e-3)
+data_module = MNISTDataModule(batch_size=256)
+
+# Initialize trainer
+trainer = pl.Trainer(
+    max_epochs=2,
+    accelerator="auto",  # Use GPU if available
+    devices=1,
+)
+
+# Train
+trainer.fit(model, data_module)</code></pre>
+<pre class="{tip}"><code>**Check GPU usage**:
+- If you have a GPU available, `accelerator="auto"` automatically leverages it.
+- Otherwise, it trains on CPU, which is slower but will still work for a small model like LeNet-1.</code></pre>
+</section>
+<section id="monitoring-validation-loss" class="level3">
+<h3 class="anchored" data-anchor-id="monitoring-validation-loss">Monitoring Validation Loss</h3>
+<p>```xclqeqwghfy ipython3 import seaborn as sns import matplotlib.pyplot as plt import pandas as pd</p>
+<p>df_val = pd.DataFrame(model.val_losses) df_val[“Iteration”] = df_val.index</p>
+<p>fig, ax = plt.subplots(figsize=(10, 6)) sns.lineplot(x=“Iteration”, y=“loss”, data=df_val, label=“Validation Loss”, ax=ax) ax.set_title(“Validation Loss Over Time”) ax.set_xlabel(“Iteration”) ax.set_ylabel(“Loss”) plt.show()</p>
+<pre><code>
+### Testing
+
+```{code-cell} ipython3
+trainer.test(model, data_module)</code></pre>
+<p>Observe the final test loss and test accuracy. Even this simple LeNet-1 inspired model often achieves high accuracy on MNIST—demonstrating how effective early CNN architectures can be.</p>
+</section>
+</section>
+<section id="reflection-and-exercises" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="reflection-and-exercises"><span class="header-section-number">1.5</span> Reflection and Exercises</h2>
+<ol type="1">
+<li><strong>Experiment</strong>:
+<ul>
+<li>Vary the learning rate and batch size to see how training dynamics change.</li>
+<li>Replace <code>tanh</code> activation with <code>ReLU</code> or <code>Sigmoid</code> and compare performance.</li>
+</ul></li>
+<li><strong>Visual Inspection</strong>:
+<ul>
+<li>Hand-draw a digit (e.g., using a graphics tool) and see whether the model correctly classifies it. If it fails, hypothesize why (differences in stroke thickness, image alignment, etc.).</li>
+</ul></li>
+<li><strong>Architectural Tweaks</strong>:
+<ul>
+<li>Try adding an additional convolutional layer or using different pooling strategies (like max pooling) to see if you can improve accuracy.</li>
+</ul></li>
+</ol>
+<pre class="{note}"><code>**Real-world Application**:
+LeNet’s core ideas are still used in modern banking systems to read checks automatically. Its principle of learning features from raw data underpins almost all modern deep-learning-based image classification systems.</code></pre>
+</section>
+<section id="further-reading" class="level2" data-number="1.6">
+<h2 data-number="1.6" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">1.6</span> Further Reading</h2>
+<ul>
+<li><a href="https://www.digitalocean.com/community/tutorials/writing-lenet5-from-scratch-in-python"><strong>Writing LeNet5 from Scratch in PyTorch (DigitalOcean)</strong></a></li>
+<li><a href="https://m.youtube.com/watch?v=fcOW-Zyb5Bo&amp;pp=ygUGI2xlbmV0"><strong>PyTorch LeNet Implementation Video</strong></a></li>
+<li><a href="http://yann.lecun.com/exdb/publis/pdf/lecun-01a.pdf"><strong>Original LeCun Paper</strong></a></li>
+</ul>
+<pre class="{footbibliography}"><code>:style: unsrt
+:filter: docname in docnames</code></pre>
+</section>
+<section id="summary" class="level2" data-number="1.7">
+<h2 data-number="1.7" class="anchored" data-anchor-id="summary"><span class="header-section-number">1.7</span> Summary</h2>
+<p>In summary, <strong>LeNet</strong> {footcite}<code>lecun1989backpropagation</code> and <strong>LeNet-5</strong> {footcite}<code>lecun1998gradient</code> formed the basis for convolutional networks that learn directly from data. By incorporating convolution, subsampling, sparse connectivity, and end-to-end training, LeNet demonstrated how networks can autonomously discover robust representations—laying the groundwork for today’s deep learning revolution.</p>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb14" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="an">jupytext:</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">  formats: md:myst</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">  text_representation:</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">    extension: .md</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">    format_name: myst</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="an">kernelspec:</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">  display_name: Python 3</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">  language: python</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">  name: python3</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="fu"># LeNet and LeNet-5: Pioneering CNN Architectures</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>How can a neural network learn to recognize complex visual patterns—like handwritten digits—without relying on hand-crafted features?</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>In the late 1980s and early 1990s, hand-engineered feature extraction dominated machine learning approaches to computer vision. This process was laborious and often inflexible. **LeNet** {footcite}<span class="in">`lecun1989backpropagation`</span> offered a radical alternative by showing that a network could learn these features directly from raw pixel data.</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>The most influential incarnation, **LeNet-5** {footcite}<span class="in">`lecun1998gradient`</span>, demonstrated impressive performance on handwritten digit recognition, finding real-world application in automated check reading and postal code processing. Although modern networks have grown significantly in depth and complexity, the core ideas from LeNet remain fundamental to today’s convolutional neural networks (CNNs).</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="in">```{note}</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="in">LeNet popularized the key innovations of convolution, pooling, and end-to-end learning—approaches that form the foundation for modern deep learning in computer vision.</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="fu">## Learning Objectives</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Understand the historical context and motivation behind the LeNet family of architectures.</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Explore the architectural components (convolution, pooling, and sparse connectivity) that enabled effective pattern learning.</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Implement a simplified version of LeNet-1 in PyTorch to gain hands-on experience.</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Reflect on how LeNet’s innovations paved the way for more advanced CNNs.</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a><span class="fu">## Conceptual Foundation</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>Before LeNet, engineers painstakingly crafted feature extractors for each vision task: edges, corners, specific shapes, etc. This approach was time-consuming, difficult to generalize, and prone to missing subtle features crucial for classification.</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>LeNet challenged this paradigm by **automating feature extraction**. It did this through layers that systematically learn local patterns (via convolution) and gradually build more global representations (via subsampling/pooling). This hierarchical approach mimics aspects of human visual perception, where lower-level patterns combine into higher-level objects.</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a><span class="in">```{note}</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a><span class="in">**Historical Context**:</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a><span class="in">Yann LeCun’s work on applying backpropagation to convolutional architectures in the 1980s was met with skepticism. But the success of LeNet on real-world tasks (e.g., check reading at banks) helped spark wider interest in neural network approaches to image recognition.</span></span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a><span class="fu">## Architecture</span></span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>LeNet actually refers to several iterative designs. In what follows, we examine two key versions: **LeNet-1** (the earliest demonstration) and **LeNet-5** (the widely known and more powerful network).</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a><span class="fu">### LeNet-1</span></span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a><span class="in">```{figure} https://miro.medium.com/v2/resize:fit:1400/format:webp/1*ge5OLutAT9_3fxt_sKTBGA.png</span></span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a><span class="in">---</span></span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a><span class="in">width: 100%</span></span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a><span class="in">name: lenet</span></span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a><span class="in">---</span></span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a><span class="in">LeNet-1 architecture.</span></span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Convolution (C1)**: Takes a $28\times28$ (originally $32\times32$ in some demos) grayscale image and applies 4 filters of size $5\times5$. This step captures basic patterns like edges and corners.</span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Pooling (S2)**: Applies average pooling (subsampling) with a $2\times2$ window, reducing the spatial dimensions from $24\times24$ to $12\times12$. This coarse-grains the features, allowing the network to focus on more abstract patterns.</span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Second Convolution (C3)**: Produces more feature maps (12 feature maps). By stacking multiple convolutions, the network builds increasingly complex features.</span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>**Second Pooling (S4)**: Another average pooling layer further reduces spatial dimensions to $4\times4$.</span>
+<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>**Fully Connected Layers**: The network flattens these features and passes them through a fully connected layer to produce a 10-class output (digits 0–9).</span>
+<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a><span class="in">```{note}</span></span>
+<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a><span class="in">This hierarchical processing—convolution followed by subsampling—mimics the structure of the visual cortex, where neurons respond to progressively more complex stimuli in each stage.</span></span>
+<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-76"><a href="#cb14-76" aria-hidden="true" tabindex="-1"></a><span class="fu">### LeNet-5</span></span>
+<span id="cb14-77"><a href="#cb14-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-78"><a href="#cb14-78" aria-hidden="true" tabindex="-1"></a><span class="in">```{figure} https://www.datasciencecentral.com/wp-content/uploads/2021/10/1lvvWF48t7cyRWqct13eU0w.jpeg</span></span>
+<span id="cb14-79"><a href="#cb14-79" aria-hidden="true" tabindex="-1"></a><span class="in">---</span></span>
+<span id="cb14-80"><a href="#cb14-80" aria-hidden="true" tabindex="-1"></a><span class="in">width: 100%</span></span>
+<span id="cb14-81"><a href="#cb14-81" aria-hidden="true" tabindex="-1"></a><span class="in">name: lenet-5</span></span>
+<span id="cb14-82"><a href="#cb14-82" aria-hidden="true" tabindex="-1"></a><span class="in">---</span></span>
+<span id="cb14-83"><a href="#cb14-83" aria-hidden="true" tabindex="-1"></a><span class="in">LeNet-5 architecture.</span></span>
+<span id="cb14-84"><a href="#cb14-84" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-85"><a href="#cb14-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-86"><a href="#cb14-86" aria-hidden="true" tabindex="-1"></a>LeNet-5 builds on LeNet-1 but **scales up the number of learnable parameters** and introduces a few architectural refinements:</span>
+<span id="cb14-87"><a href="#cb14-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-88"><a href="#cb14-88" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Input Normalization**: Inputs (grayscale images) are normalized to a range of roughly $<span class="co">[</span><span class="ot">-0.1, 1.175</span><span class="co">]</span>$. This centering speeds up training and stabilizes the gradients.</span>
+<span id="cb14-89"><a href="#cb14-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-90"><a href="#cb14-90" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Convolution + Subsampling Pairs**: Similar to LeNet-1, but with more feature maps and a **mean pooling** mechanism. Each pooling step is followed by a **non-linear activation** (often the sigmoid, though other activations can be used).</span>
+<span id="cb14-91"><a href="#cb14-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-92"><a href="#cb14-92" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Sparse Connectivity (C3)**: Not every feature map in the previous layer connects to every feature map in the next layer. This selective approach reduces parameters and encourages **diverse features** rather than overly correlated ones.</span>
+<span id="cb14-93"><a href="#cb14-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-94"><a href="#cb14-94" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>**Transition to 1D**: Instead of simply flattening, LeNet-5 includes a convolutional layer (C5) that bridges 2D feature maps to a fully connected layer, preserving more spatial structure.</span>
+<span id="cb14-95"><a href="#cb14-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-96"><a href="#cb14-96" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>**Final RBF Layer** (in the original paper): An additional radial-basis-function layer was sometimes used to enhance feature representation. Modern implementations often simplify this to a linear or fully connected layer.</span>
+<span id="cb14-97"><a href="#cb14-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-100"><a href="#cb14-100" aria-hidden="true" tabindex="-1"></a><span class="in">```{note}</span></span>
+<span id="cb14-101"><a href="#cb14-101" aria-hidden="true" tabindex="-1"></a><span class="in">**Parameter Efficiency**: One reason LeNet-5 performed well on the limited hardware of the 1990s is its careful use of sparse connections to reduce the number of parameters.</span></span>
+<span id="cb14-102"><a href="#cb14-102" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-103"><a href="#cb14-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-104"><a href="#cb14-104" aria-hidden="true" tabindex="-1"></a><span class="fu">## Implementation</span></span>
+<span id="cb14-105"><a href="#cb14-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-106"><a href="#cb14-106" aria-hidden="true" tabindex="-1"></a>In this section, we will implement a simplified **LeNet-1** in PyTorch. While LeNet-1 was traditionally trained with batch gradient descent and certain custom optimizations, our example will use **modern tooling**—such as **PyTorch Lightning** and the **Adam** optimizer—to streamline the training process.</span>
+<span id="cb14-107"><a href="#cb14-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-108"><a href="#cb14-108" aria-hidden="true" tabindex="-1"></a><span class="fu">### Dataset: MNIST</span></span>
+<span id="cb14-109"><a href="#cb14-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-110"><a href="#cb14-110" aria-hidden="true" tabindex="-1"></a>We will train our model on the MNIST dataset, a classic benchmark of $28\times28$ handwritten digits. MNIST is split into 60,000 training and 10,000 test images.</span>
+<span id="cb14-111"><a href="#cb14-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-112"><a href="#cb14-112" aria-hidden="true" tabindex="-1"></a><span class="in">```{figure} https://production-media.paperswithcode.com/datasets/MNIST-0000000001-2e09631a_09liOmx.jpg</span></span>
+<span id="cb14-113"><a href="#cb14-113" aria-hidden="true" tabindex="-1"></a><span class="in">---</span></span>
+<span id="cb14-114"><a href="#cb14-114" aria-hidden="true" tabindex="-1"></a><span class="in">width: 100%</span></span>
+<span id="cb14-115"><a href="#cb14-115" aria-hidden="true" tabindex="-1"></a><span class="in">name: mnist</span></span>
+<span id="cb14-116"><a href="#cb14-116" aria-hidden="true" tabindex="-1"></a><span class="in">---</span></span>
+<span id="cb14-117"><a href="#cb14-117" aria-hidden="true" tabindex="-1"></a><span class="in">MNIST dataset (digits 0–9 in handwritten form).</span></span>
+<span id="cb14-118"><a href="#cb14-118" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-119"><a href="#cb14-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-122"><a href="#cb14-122" aria-hidden="true" tabindex="-1"></a><span class="in">```{tip}</span></span>
+<span id="cb14-123"><a href="#cb14-123" aria-hidden="true" tabindex="-1"></a><span class="in">**Why MNIST?**</span></span>
+<span id="cb14-124"><a href="#cb14-124" aria-hidden="true" tabindex="-1"></a><span class="in">- Small image size (28x28) → Perfect for simple convolutional nets.</span></span>
+<span id="cb14-125"><a href="#cb14-125" aria-hidden="true" tabindex="-1"></a><span class="in">- 10 distinct classes → Easy to measure classification accuracy.</span></span>
+<span id="cb14-126"><a href="#cb14-126" aria-hidden="true" tabindex="-1"></a><span class="in">- Widely used → Many existing examples to compare against.</span></span>
+<span id="cb14-127"><a href="#cb14-127" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-128"><a href="#cb14-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-129"><a href="#cb14-129" aria-hidden="true" tabindex="-1"></a><span class="fu">### Data Preparation with PyTorch Lightning</span></span>
+<span id="cb14-130"><a href="#cb14-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-131"><a href="#cb14-131" aria-hidden="true" tabindex="-1"></a><span class="in">```{code-cell} ipython3</span></span>
+<span id="cb14-132"><a href="#cb14-132" aria-hidden="true" tabindex="-1"></a>import torch</span>
+<span id="cb14-133"><a href="#cb14-133" aria-hidden="true" tabindex="-1"></a>import torch<span class="op">.</span>nn as nn</span>
+<span id="cb14-134"><a href="#cb14-134" aria-hidden="true" tabindex="-1"></a>import torch<span class="op">.</span>nn<span class="op">.</span>functional as F</span>
+<span id="cb14-135"><a href="#cb14-135" aria-hidden="true" tabindex="-1"></a>import pytorch_lightning as pl</span>
+<span id="cb14-136"><a href="#cb14-136" aria-hidden="true" tabindex="-1"></a>from torch<span class="op">.</span>utils<span class="op">.</span>data import DataLoader<span class="op">,</span> random_split</span>
+<span id="cb14-137"><a href="#cb14-137" aria-hidden="true" tabindex="-1"></a>from torchvision import datasets<span class="op">,</span> transforms</span>
+<span id="cb14-138"><a href="#cb14-138" aria-hidden="true" tabindex="-1"></a>from torchmetrics import Accuracy</span>
+<span id="cb14-139"><a href="#cb14-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-140"><a href="#cb14-140" aria-hidden="true" tabindex="-1"></a>class MNISTDataModule<span class="op">(</span>pl<span class="op">.</span>LightningDataModule<span class="op">):</span></span>
+<span id="cb14-141"><a href="#cb14-141" aria-hidden="true" tabindex="-1"></a>    <span class="st">"""</span></span>
+<span id="cb14-142"><a href="#cb14-142" aria-hidden="true" tabindex="-1"></a>    PyTorch Lightning data module <span class="cf">for</span> MNIST dataset</span>
+<span id="cb14-143"><a href="#cb14-143" aria-hidden="true" tabindex="-1"></a>    <span class="st">"""</span></span>
+<span id="cb14-144"><a href="#cb14-144" aria-hidden="true" tabindex="-1"></a>    def __init__<span class="op">(</span>self<span class="op">,</span> data_dir<span class="op">:</span> str <span class="op">=</span> <span class="ch">'.</span><span class="er">/data</span><span class="ch">'</span><span class="op">,</span> batch_size<span class="op">:</span> <span class="dt">int</span> <span class="op">=</span> <span class="dv">32</span><span class="op">):</span></span>
+<span id="cb14-145"><a href="#cb14-145" aria-hidden="true" tabindex="-1"></a>        super<span class="op">().</span>__init__<span class="op">()</span></span>
+<span id="cb14-146"><a href="#cb14-146" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>data_dir <span class="op">=</span> data_dir</span>
+<span id="cb14-147"><a href="#cb14-147" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>batch_size <span class="op">=</span> batch_size</span>
+<span id="cb14-148"><a href="#cb14-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-149"><a href="#cb14-149" aria-hidden="true" tabindex="-1"></a>        <span class="pp"># </span><span class="er">Define transforms</span></span>
+<span id="cb14-150"><a href="#cb14-150" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>transform <span class="op">=</span> transforms<span class="op">.</span>Compose<span class="op">([</span></span>
+<span id="cb14-151"><a href="#cb14-151" aria-hidden="true" tabindex="-1"></a>            transforms<span class="op">.</span>ToTensor<span class="op">(),</span>           # Convert PIL image to torch<span class="op">.</span>Tensor</span>
+<span id="cb14-152"><a href="#cb14-152" aria-hidden="true" tabindex="-1"></a>            transforms<span class="op">.</span>Normalize<span class="op">((</span><span class="dv">0</span><span class="op">,),</span> <span class="op">(</span><span class="dv">1</span><span class="op">,))</span> # Normalize to mean<span class="op">=</span><span class="dv">0</span><span class="op">,</span> std<span class="op">=</span><span class="dv">1</span></span>
+<span id="cb14-153"><a href="#cb14-153" aria-hidden="true" tabindex="-1"></a>        <span class="op">])</span></span>
+<span id="cb14-154"><a href="#cb14-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-155"><a href="#cb14-155" aria-hidden="true" tabindex="-1"></a>    def prepare_data<span class="op">(</span>self<span class="op">):</span></span>
+<span id="cb14-156"><a href="#cb14-156" aria-hidden="true" tabindex="-1"></a>        <span class="st">"""Download data if needed."""</span></span>
+<span id="cb14-157"><a href="#cb14-157" aria-hidden="true" tabindex="-1"></a>        datasets<span class="op">.</span>MNIST<span class="op">(</span>self<span class="op">.</span>data_dir<span class="op">,</span> train<span class="op">=</span>True<span class="op">,</span> download<span class="op">=</span>True<span class="op">)</span></span>
+<span id="cb14-158"><a href="#cb14-158" aria-hidden="true" tabindex="-1"></a>        datasets<span class="op">.</span>MNIST<span class="op">(</span>self<span class="op">.</span>data_dir<span class="op">,</span> train<span class="op">=</span>False<span class="op">,</span> download<span class="op">=</span>True<span class="op">)</span></span>
+<span id="cb14-159"><a href="#cb14-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-160"><a href="#cb14-160" aria-hidden="true" tabindex="-1"></a>    def setup<span class="op">(</span>self<span class="op">,</span> stage<span class="op">=</span>None<span class="op">):</span></span>
+<span id="cb14-161"><a href="#cb14-161" aria-hidden="true" tabindex="-1"></a>        <span class="st">"""Setup train, val, and test datasets."""</span></span>
+<span id="cb14-162"><a href="#cb14-162" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> stage <span class="op">==</span> <span class="ch">'f</span><span class="er">it</span><span class="ch">'</span> or stage is None<span class="op">:</span></span>
+<span id="cb14-163"><a href="#cb14-163" aria-hidden="true" tabindex="-1"></a>            mnist_full <span class="op">=</span> datasets<span class="op">.</span>MNIST<span class="op">(</span>self<span class="op">.</span>data_dir<span class="op">,</span> train<span class="op">=</span>True<span class="op">,</span> transform<span class="op">=</span>self<span class="op">.</span>transform<span class="op">)</span></span>
+<span id="cb14-164"><a href="#cb14-164" aria-hidden="true" tabindex="-1"></a>            self<span class="op">.</span>mnist_train<span class="op">,</span> self<span class="op">.</span>mnist_val <span class="op">=</span> random_split<span class="op">(</span></span>
+<span id="cb14-165"><a href="#cb14-165" aria-hidden="true" tabindex="-1"></a>                mnist_full<span class="op">,</span> <span class="op">[</span><span class="dv">55000</span><span class="op">,</span> <span class="dv">5000</span><span class="op">],</span> generator<span class="op">=</span>torch<span class="op">.</span>Generator<span class="op">().</span>manual_seed<span class="op">(</span><span class="dv">42</span><span class="op">)</span></span>
+<span id="cb14-166"><a href="#cb14-166" aria-hidden="true" tabindex="-1"></a>            <span class="op">)</span></span>
+<span id="cb14-167"><a href="#cb14-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-168"><a href="#cb14-168" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> stage <span class="op">==</span> <span class="ch">'t</span><span class="er">est</span><span class="ch">'</span> or stage is None<span class="op">:</span></span>
+<span id="cb14-169"><a href="#cb14-169" aria-hidden="true" tabindex="-1"></a>            self<span class="op">.</span>mnist_test <span class="op">=</span> datasets<span class="op">.</span>MNIST<span class="op">(</span>self<span class="op">.</span>data_dir<span class="op">,</span> train<span class="op">=</span>False<span class="op">,</span> transform<span class="op">=</span>self<span class="op">.</span>transform<span class="op">)</span></span>
+<span id="cb14-170"><a href="#cb14-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-171"><a href="#cb14-171" aria-hidden="true" tabindex="-1"></a>    def train_dataloader<span class="op">(</span>self<span class="op">):</span></span>
+<span id="cb14-172"><a href="#cb14-172" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> DataLoader<span class="op">(</span>self<span class="op">.</span>mnist_train<span class="op">,</span> batch_size<span class="op">=</span>self<span class="op">.</span>batch_size<span class="op">,</span> shuffle<span class="op">=</span>True<span class="op">,</span> num_workers<span class="op">=</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb14-173"><a href="#cb14-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-174"><a href="#cb14-174" aria-hidden="true" tabindex="-1"></a>    def val_dataloader<span class="op">(</span>self<span class="op">):</span></span>
+<span id="cb14-175"><a href="#cb14-175" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> DataLoader<span class="op">(</span>self<span class="op">.</span>mnist_val<span class="op">,</span> batch_size<span class="op">=</span>self<span class="op">.</span>batch_size<span class="op">,</span> num_workers<span class="op">=</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb14-176"><a href="#cb14-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-177"><a href="#cb14-177" aria-hidden="true" tabindex="-1"></a>    def test_dataloader<span class="op">(</span>self<span class="op">):</span></span>
+<span id="cb14-178"><a href="#cb14-178" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> DataLoader<span class="op">(</span>self<span class="op">.</span>mnist_test<span class="op">,</span> batch_size<span class="op">=</span>self<span class="op">.</span>batch_size<span class="op">,</span> num_workers<span class="op">=</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb14-179"><a href="#cb14-179" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-180"><a href="#cb14-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-183"><a href="#cb14-183" aria-hidden="true" tabindex="-1"></a><span class="in">```{note}</span></span>
+<span id="cb14-184"><a href="#cb14-184" aria-hidden="true" tabindex="-1"></a><span class="in">**PyTorch Lightning DataModule**:</span></span>
+<span id="cb14-185"><a href="#cb14-185" aria-hidden="true" tabindex="-1"></a><span class="in">- Ensures consistent data splits for training, validation, and testing.</span></span>
+<span id="cb14-186"><a href="#cb14-186" aria-hidden="true" tabindex="-1"></a><span class="in">- Handles shuffling, batching, and transformation pipelines.</span></span>
+<span id="cb14-187"><a href="#cb14-187" aria-hidden="true" tabindex="-1"></a><span class="in">- Makes code cleaner and easier to maintain.</span></span>
+<span id="cb14-188"><a href="#cb14-188" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-189"><a href="#cb14-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-190"><a href="#cb14-190" aria-hidden="true" tabindex="-1"></a><span class="fu">### Model Definition</span></span>
+<span id="cb14-191"><a href="#cb14-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-192"><a href="#cb14-192" aria-hidden="true" tabindex="-1"></a><span class="in">```{code-cell} ipython3</span></span>
+<span id="cb14-193"><a href="#cb14-193" aria-hidden="true" tabindex="-1"></a>class LeNet1<span class="op">(</span>pl<span class="op">.</span>LightningModule<span class="op">):</span></span>
+<span id="cb14-194"><a href="#cb14-194" aria-hidden="true" tabindex="-1"></a>    <span class="st">"""</span></span>
+<span id="cb14-195"><a href="#cb14-195" aria-hidden="true" tabindex="-1"></a>    PyTorch Lightning implementation of LeNet<span class="op">-</span><span class="dv">1</span></span>
+<span id="cb14-196"><a href="#cb14-196" aria-hidden="true" tabindex="-1"></a>    <span class="st">"""</span></span>
+<span id="cb14-197"><a href="#cb14-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-198"><a href="#cb14-198" aria-hidden="true" tabindex="-1"></a>    def __init__<span class="op">(</span>self<span class="op">,</span> learning_rate<span class="op">=</span><span class="fl">1e-3</span><span class="op">):</span></span>
+<span id="cb14-199"><a href="#cb14-199" aria-hidden="true" tabindex="-1"></a>        super<span class="op">(</span>LeNet1<span class="op">,</span> self<span class="op">).</span>__init__<span class="op">()</span></span>
+<span id="cb14-200"><a href="#cb14-200" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>save_hyperparameters<span class="op">()</span></span>
+<span id="cb14-201"><a href="#cb14-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-202"><a href="#cb14-202" aria-hidden="true" tabindex="-1"></a>        <span class="pp"># </span><span class="er">Metrics</span></span>
+<span id="cb14-203"><a href="#cb14-203" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>train_accuracy <span class="op">=</span> Accuracy<span class="op">(</span>task<span class="op">=</span><span class="st">"multiclass"</span><span class="op">,</span> num_classes<span class="op">=</span><span class="dv">10</span><span class="op">)</span></span>
+<span id="cb14-204"><a href="#cb14-204" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>val_accuracy <span class="op">=</span> Accuracy<span class="op">(</span>task<span class="op">=</span><span class="st">"multiclass"</span><span class="op">,</span> num_classes<span class="op">=</span><span class="dv">10</span><span class="op">)</span></span>
+<span id="cb14-205"><a href="#cb14-205" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>test_accuracy <span class="op">=</span> Accuracy<span class="op">(</span>task<span class="op">=</span><span class="st">"multiclass"</span><span class="op">,</span> num_classes<span class="op">=</span><span class="dv">10</span><span class="op">)</span></span>
+<span id="cb14-206"><a href="#cb14-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-207"><a href="#cb14-207" aria-hidden="true" tabindex="-1"></a>        <span class="pp"># </span><span class="er">First convolutional layer (Input: 1x28x28 -&gt; Output: 4x24x24)</span></span>
+<span id="cb14-208"><a href="#cb14-208" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>conv1 <span class="op">=</span> nn<span class="op">.</span>Conv2d<span class="op">(</span>in_channels<span class="op">=</span><span class="dv">1</span><span class="op">,</span> out_channels<span class="op">=</span><span class="dv">4</span><span class="op">,</span> kernel_size<span class="op">=</span><span class="dv">5</span><span class="op">,</span> stride<span class="op">=</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb14-209"><a href="#cb14-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-210"><a href="#cb14-210" aria-hidden="true" tabindex="-1"></a>        <span class="pp"># </span><span class="er">Average pooling layer (4x24x24 -&gt; 4x12x12)</span></span>
+<span id="cb14-211"><a href="#cb14-211" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>pool <span class="op">=</span> nn<span class="op">.</span>AvgPool2d<span class="op">(</span>kernel_size<span class="op">=</span><span class="dv">2</span><span class="op">,</span> stride<span class="op">=</span><span class="dv">2</span><span class="op">)</span></span>
+<span id="cb14-212"><a href="#cb14-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-213"><a href="#cb14-213" aria-hidden="true" tabindex="-1"></a>        <span class="pp"># </span><span class="er">Second convolutional layer (4x12x12 -&gt; 12x8x8)</span></span>
+<span id="cb14-214"><a href="#cb14-214" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>conv2 <span class="op">=</span> nn<span class="op">.</span>Conv2d<span class="op">(</span>in_channels<span class="op">=</span><span class="dv">4</span><span class="op">,</span> out_channels<span class="op">=</span><span class="dv">12</span><span class="op">,</span> kernel_size<span class="op">=</span><span class="dv">5</span><span class="op">,</span> stride<span class="op">=</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb14-215"><a href="#cb14-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-216"><a href="#cb14-216" aria-hidden="true" tabindex="-1"></a>        <span class="pp"># </span><span class="er">Fully connected layer (12*4*4=192 -&gt; 10)</span></span>
+<span id="cb14-217"><a href="#cb14-217" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>fc <span class="op">=</span> nn<span class="op">.</span>Linear<span class="op">(</span><span class="dv">12</span> <span class="op">*</span> <span class="dv">4</span> <span class="op">*</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">10</span><span class="op">)</span></span>
+<span id="cb14-218"><a href="#cb14-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-219"><a href="#cb14-219" aria-hidden="true" tabindex="-1"></a>        <span class="pp"># </span><span class="er">Initialize weights</span></span>
+<span id="cb14-220"><a href="#cb14-220" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>_init_weights<span class="op">()</span></span>
+<span id="cb14-221"><a href="#cb14-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-222"><a href="#cb14-222" aria-hidden="true" tabindex="-1"></a>        <span class="pp"># </span><span class="er">Track losses over time (for visualization)</span></span>
+<span id="cb14-223"><a href="#cb14-223" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>val_losses <span class="op">=</span> <span class="op">[]</span></span>
+<span id="cb14-224"><a href="#cb14-224" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>train_losses <span class="op">=</span> <span class="op">[]</span></span>
+<span id="cb14-225"><a href="#cb14-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-226"><a href="#cb14-226" aria-hidden="true" tabindex="-1"></a>    def _init_weights<span class="op">(</span>self<span class="op">):</span></span>
+<span id="cb14-227"><a href="#cb14-227" aria-hidden="true" tabindex="-1"></a>        <span class="st">"""Initialize weights with Xavier initialization."""</span></span>
+<span id="cb14-228"><a href="#cb14-228" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> m in self<span class="op">.</span>modules<span class="op">():</span></span>
+<span id="cb14-229"><a href="#cb14-229" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> isinstance<span class="op">(</span>m<span class="op">,</span> nn<span class="op">.</span>Conv2d<span class="op">)</span> or isinstance<span class="op">(</span>m<span class="op">,</span> nn<span class="op">.</span>Linear<span class="op">):</span></span>
+<span id="cb14-230"><a href="#cb14-230" aria-hidden="true" tabindex="-1"></a>                nn<span class="op">.</span>init<span class="op">.</span>xavier_uniform_<span class="op">(</span>m<span class="op">.</span>weight<span class="op">)</span></span>
+<span id="cb14-231"><a href="#cb14-231" aria-hidden="true" tabindex="-1"></a>                nn<span class="op">.</span>init<span class="op">.</span>zeros_<span class="op">(</span>m<span class="op">.</span>bias<span class="op">)</span></span>
+<span id="cb14-232"><a href="#cb14-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-233"><a href="#cb14-233" aria-hidden="true" tabindex="-1"></a>    def forward<span class="op">(</span>self<span class="op">,</span> x<span class="op">):</span></span>
+<span id="cb14-234"><a href="#cb14-234" aria-hidden="true" tabindex="-1"></a>        <span class="pp"># </span><span class="er">First conv block</span></span>
+<span id="cb14-235"><a href="#cb14-235" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> self<span class="op">.</span>conv1<span class="op">(</span>x<span class="op">)</span></span>
+<span id="cb14-236"><a href="#cb14-236" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> torch<span class="op">.</span>tanh<span class="op">(</span>x<span class="op">)</span>  # Using tanh <span class="cf">for</span> nonlinearity</span>
+<span id="cb14-237"><a href="#cb14-237" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> self<span class="op">.</span>pool<span class="op">(</span>x<span class="op">)</span></span>
+<span id="cb14-238"><a href="#cb14-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-239"><a href="#cb14-239" aria-hidden="true" tabindex="-1"></a>        <span class="pp"># </span><span class="er">Second conv block</span></span>
+<span id="cb14-240"><a href="#cb14-240" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> self<span class="op">.</span>conv2<span class="op">(</span>x<span class="op">)</span></span>
+<span id="cb14-241"><a href="#cb14-241" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> torch<span class="op">.</span>tanh<span class="op">(</span>x<span class="op">)</span></span>
+<span id="cb14-242"><a href="#cb14-242" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> self<span class="op">.</span>pool<span class="op">(</span>x<span class="op">)</span></span>
+<span id="cb14-243"><a href="#cb14-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-244"><a href="#cb14-244" aria-hidden="true" tabindex="-1"></a>        <span class="pp"># </span><span class="er">Flatten and fully connected</span></span>
+<span id="cb14-245"><a href="#cb14-245" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x<span class="op">.</span>view<span class="op">(-</span><span class="dv">1</span><span class="op">,</span> <span class="dv">12</span> <span class="op">*</span> <span class="dv">4</span> <span class="op">*</span> <span class="dv">4</span><span class="op">)</span></span>
+<span id="cb14-246"><a href="#cb14-246" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> self<span class="op">.</span>fc<span class="op">(</span>x<span class="op">)</span></span>
+<span id="cb14-247"><a href="#cb14-247" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span>
+<span id="cb14-248"><a href="#cb14-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-249"><a href="#cb14-249" aria-hidden="true" tabindex="-1"></a>    def configure_optimizers<span class="op">(</span>self<span class="op">):</span></span>
+<span id="cb14-250"><a href="#cb14-250" aria-hidden="true" tabindex="-1"></a>        <span class="st">"""Define optimizer and LR scheduler."""</span></span>
+<span id="cb14-251"><a href="#cb14-251" aria-hidden="true" tabindex="-1"></a>        optimizer <span class="op">=</span> torch<span class="op">.</span>optim<span class="op">.</span>Adam<span class="op">(</span>self<span class="op">.</span>parameters<span class="op">(),</span> lr<span class="op">=</span>self<span class="op">.</span>hparams<span class="op">.</span>learning_rate<span class="op">)</span></span>
+<span id="cb14-252"><a href="#cb14-252" aria-hidden="true" tabindex="-1"></a>        scheduler <span class="op">=</span> torch<span class="op">.</span>optim<span class="op">.</span>lr_scheduler<span class="op">.</span>ReduceLROnPlateau<span class="op">(</span></span>
+<span id="cb14-253"><a href="#cb14-253" aria-hidden="true" tabindex="-1"></a>            optimizer<span class="op">,</span> mode<span class="op">=</span><span class="st">"min"</span><span class="op">,</span> factor<span class="op">=</span><span class="fl">0.1</span><span class="op">,</span> patience<span class="op">=</span><span class="dv">10</span><span class="op">,</span> verbose<span class="op">=</span>True</span>
+<span id="cb14-254"><a href="#cb14-254" aria-hidden="true" tabindex="-1"></a>        <span class="op">)</span></span>
+<span id="cb14-255"><a href="#cb14-255" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">{</span></span>
+<span id="cb14-256"><a href="#cb14-256" aria-hidden="true" tabindex="-1"></a>            <span class="st">"optimizer"</span><span class="op">:</span> optimizer<span class="op">,</span></span>
+<span id="cb14-257"><a href="#cb14-257" aria-hidden="true" tabindex="-1"></a>            <span class="st">"lr_scheduler"</span><span class="op">:</span> <span class="op">{</span><span class="st">"scheduler"</span><span class="op">:</span> scheduler<span class="op">,</span> <span class="st">"monitor"</span><span class="op">:</span> <span class="st">"val_loss"</span><span class="op">}</span></span>
+<span id="cb14-258"><a href="#cb14-258" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb14-259"><a href="#cb14-259" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-260"><a href="#cb14-260" aria-hidden="true" tabindex="-1"></a>    def training_step<span class="op">(</span>self<span class="op">,</span> batch<span class="op">,</span> batch_idx<span class="op">):</span></span>
+<span id="cb14-261"><a href="#cb14-261" aria-hidden="true" tabindex="-1"></a>        <span class="st">"""Train on a single batch."""</span></span>
+<span id="cb14-262"><a href="#cb14-262" aria-hidden="true" tabindex="-1"></a>        x<span class="op">,</span> y <span class="op">=</span> batch</span>
+<span id="cb14-263"><a href="#cb14-263" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> self<span class="op">(</span>x<span class="op">)</span></span>
+<span id="cb14-264"><a href="#cb14-264" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> F<span class="op">.</span>cross_entropy<span class="op">(</span>logits<span class="op">,</span> y<span class="op">)</span></span>
+<span id="cb14-265"><a href="#cb14-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-266"><a href="#cb14-266" aria-hidden="true" tabindex="-1"></a>        acc <span class="op">=</span> self<span class="op">.</span>train_accuracy<span class="op">(</span>logits<span class="op">,</span> y<span class="op">)</span></span>
+<span id="cb14-267"><a href="#cb14-267" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>log<span class="op">(</span><span class="st">"train_loss"</span><span class="op">,</span> loss<span class="op">,</span> prog_bar<span class="op">=</span>True<span class="op">)</span></span>
+<span id="cb14-268"><a href="#cb14-268" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>log<span class="op">(</span><span class="st">"train_acc"</span><span class="op">,</span> acc<span class="op">,</span> prog_bar<span class="op">=</span>True<span class="op">)</span></span>
+<span id="cb14-269"><a href="#cb14-269" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-270"><a href="#cb14-270" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>train_losses<span class="op">.</span>append<span class="op">({</span><span class="st">"loss"</span><span class="op">:</span> loss<span class="op">.</span>item<span class="op">(),</span> <span class="st">"acc"</span><span class="op">:</span> acc<span class="op">.</span>item<span class="op">()})</span></span>
+<span id="cb14-271"><a href="#cb14-271" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> loss</span>
+<span id="cb14-272"><a href="#cb14-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-273"><a href="#cb14-273" aria-hidden="true" tabindex="-1"></a>    def validation_step<span class="op">(</span>self<span class="op">,</span> batch<span class="op">,</span> batch_idx<span class="op">):</span></span>
+<span id="cb14-274"><a href="#cb14-274" aria-hidden="true" tabindex="-1"></a>        <span class="st">"""Validate on a single batch."""</span></span>
+<span id="cb14-275"><a href="#cb14-275" aria-hidden="true" tabindex="-1"></a>        x<span class="op">,</span> y <span class="op">=</span> batch</span>
+<span id="cb14-276"><a href="#cb14-276" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> self<span class="op">(</span>x<span class="op">)</span></span>
+<span id="cb14-277"><a href="#cb14-277" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> F<span class="op">.</span>cross_entropy<span class="op">(</span>logits<span class="op">,</span> y<span class="op">)</span></span>
+<span id="cb14-278"><a href="#cb14-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-279"><a href="#cb14-279" aria-hidden="true" tabindex="-1"></a>        acc <span class="op">=</span> self<span class="op">.</span>val_accuracy<span class="op">(</span>logits<span class="op">,</span> y<span class="op">)</span></span>
+<span id="cb14-280"><a href="#cb14-280" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>log<span class="op">(</span><span class="st">"val_loss"</span><span class="op">,</span> loss<span class="op">,</span> prog_bar<span class="op">=</span>True<span class="op">)</span></span>
+<span id="cb14-281"><a href="#cb14-281" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>log<span class="op">(</span><span class="st">"val_acc"</span><span class="op">,</span> acc<span class="op">,</span> prog_bar<span class="op">=</span>True<span class="op">)</span></span>
+<span id="cb14-282"><a href="#cb14-282" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-283"><a href="#cb14-283" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>val_losses<span class="op">.</span>append<span class="op">({</span><span class="st">"loss"</span><span class="op">:</span> loss<span class="op">.</span>item<span class="op">(),</span> <span class="st">"acc"</span><span class="op">:</span> acc<span class="op">.</span>item<span class="op">()})</span></span>
+<span id="cb14-284"><a href="#cb14-284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-285"><a href="#cb14-285" aria-hidden="true" tabindex="-1"></a>    def test_step<span class="op">(</span>self<span class="op">,</span> batch<span class="op">,</span> batch_idx<span class="op">):</span></span>
+<span id="cb14-286"><a href="#cb14-286" aria-hidden="true" tabindex="-1"></a>        <span class="st">"""Test on a single batch."""</span></span>
+<span id="cb14-287"><a href="#cb14-287" aria-hidden="true" tabindex="-1"></a>        x<span class="op">,</span> y <span class="op">=</span> batch</span>
+<span id="cb14-288"><a href="#cb14-288" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> self<span class="op">(</span>x<span class="op">)</span></span>
+<span id="cb14-289"><a href="#cb14-289" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> F<span class="op">.</span>cross_entropy<span class="op">(</span>logits<span class="op">,</span> y<span class="op">)</span></span>
+<span id="cb14-290"><a href="#cb14-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-291"><a href="#cb14-291" aria-hidden="true" tabindex="-1"></a>        acc <span class="op">=</span> self<span class="op">.</span>test_accuracy<span class="op">(</span>logits<span class="op">,</span> y<span class="op">)</span></span>
+<span id="cb14-292"><a href="#cb14-292" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>log<span class="op">(</span><span class="st">"test_loss"</span><span class="op">,</span> loss<span class="op">,</span> prog_bar<span class="op">=</span>True<span class="op">)</span></span>
+<span id="cb14-293"><a href="#cb14-293" aria-hidden="true" tabindex="-1"></a>        self<span class="op">.</span>log<span class="op">(</span><span class="st">"test_acc"</span><span class="op">,</span> acc<span class="op">,</span> prog_bar<span class="op">=</span>True<span class="op">)</span></span>
+<span id="cb14-294"><a href="#cb14-294" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-295"><a href="#cb14-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-296"><a href="#cb14-296" aria-hidden="true" tabindex="-1"></a><span class="fu">### Training the Model</span></span>
+<span id="cb14-297"><a href="#cb14-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-298"><a href="#cb14-298" aria-hidden="true" tabindex="-1"></a><span class="in">```{code-cell} ipython3</span></span>
+<span id="cb14-299"><a href="#cb14-299" aria-hidden="true" tabindex="-1"></a><span class="pp"># </span><span class="er">Initialize model and data</span></span>
+<span id="cb14-300"><a href="#cb14-300" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LeNet1<span class="op">(</span>learning_rate<span class="op">=</span><span class="fl">1e-3</span><span class="op">)</span></span>
+<span id="cb14-301"><a href="#cb14-301" aria-hidden="true" tabindex="-1"></a>data_module <span class="op">=</span> MNISTDataModule<span class="op">(</span>batch_size<span class="op">=</span><span class="dv">256</span><span class="op">)</span></span>
+<span id="cb14-302"><a href="#cb14-302" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-303"><a href="#cb14-303" aria-hidden="true" tabindex="-1"></a><span class="pp"># </span><span class="er">Initialize trainer</span></span>
+<span id="cb14-304"><a href="#cb14-304" aria-hidden="true" tabindex="-1"></a>trainer <span class="op">=</span> pl<span class="op">.</span>Trainer<span class="op">(</span></span>
+<span id="cb14-305"><a href="#cb14-305" aria-hidden="true" tabindex="-1"></a>    max_epochs<span class="op">=</span><span class="dv">2</span><span class="op">,</span></span>
+<span id="cb14-306"><a href="#cb14-306" aria-hidden="true" tabindex="-1"></a>    accelerator<span class="op">=</span><span class="st">"auto"</span><span class="op">,</span>  # Use GPU <span class="cf">if</span> available</span>
+<span id="cb14-307"><a href="#cb14-307" aria-hidden="true" tabindex="-1"></a>    devices<span class="op">=</span><span class="dv">1</span><span class="op">,</span></span>
+<span id="cb14-308"><a href="#cb14-308" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb14-309"><a href="#cb14-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-310"><a href="#cb14-310" aria-hidden="true" tabindex="-1"></a><span class="pp"># </span><span class="er">Train</span></span>
+<span id="cb14-311"><a href="#cb14-311" aria-hidden="true" tabindex="-1"></a>trainer<span class="op">.</span>fit<span class="op">(</span>model<span class="op">,</span> data_module<span class="op">)</span></span>
+<span id="cb14-312"><a href="#cb14-312" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-313"><a href="#cb14-313" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-316"><a href="#cb14-316" aria-hidden="true" tabindex="-1"></a><span class="in">```{tip}</span></span>
+<span id="cb14-317"><a href="#cb14-317" aria-hidden="true" tabindex="-1"></a><span class="in">**Check GPU usage**:</span></span>
+<span id="cb14-318"><a href="#cb14-318" aria-hidden="true" tabindex="-1"></a><span class="in">- If you have a GPU available, `accelerator="auto"` automatically leverages it.</span></span>
+<span id="cb14-319"><a href="#cb14-319" aria-hidden="true" tabindex="-1"></a><span class="in">- Otherwise, it trains on CPU, which is slower but will still work for a small model like LeNet-1.</span></span>
+<span id="cb14-320"><a href="#cb14-320" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-321"><a href="#cb14-321" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-322"><a href="#cb14-322" aria-hidden="true" tabindex="-1"></a><span class="fu">### Monitoring Validation Loss</span></span>
+<span id="cb14-323"><a href="#cb14-323" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-324"><a href="#cb14-324" aria-hidden="true" tabindex="-1"></a><span class="in">```{code-cell} ipython3</span></span>
+<span id="cb14-325"><a href="#cb14-325" aria-hidden="true" tabindex="-1"></a>import seaborn as sns</span>
+<span id="cb14-326"><a href="#cb14-326" aria-hidden="true" tabindex="-1"></a>import matplotlib<span class="op">.</span>pyplot as plt</span>
+<span id="cb14-327"><a href="#cb14-327" aria-hidden="true" tabindex="-1"></a>import pandas as pd</span>
+<span id="cb14-328"><a href="#cb14-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-329"><a href="#cb14-329" aria-hidden="true" tabindex="-1"></a>df_val <span class="op">=</span> pd<span class="op">.</span>DataFrame<span class="op">(</span>model<span class="op">.</span>val_losses<span class="op">)</span></span>
+<span id="cb14-330"><a href="#cb14-330" aria-hidden="true" tabindex="-1"></a>df_val<span class="op">[</span><span class="st">"Iteration"</span><span class="op">]</span> <span class="op">=</span> df_val<span class="op">.</span>index</span>
+<span id="cb14-331"><a href="#cb14-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-332"><a href="#cb14-332" aria-hidden="true" tabindex="-1"></a>fig<span class="op">,</span> ax <span class="op">=</span> plt<span class="op">.</span>subplots<span class="op">(</span>figsize<span class="op">=(</span><span class="dv">10</span><span class="op">,</span> <span class="dv">6</span><span class="op">))</span></span>
+<span id="cb14-333"><a href="#cb14-333" aria-hidden="true" tabindex="-1"></a>sns<span class="op">.</span>lineplot<span class="op">(</span>x<span class="op">=</span><span class="st">"Iteration"</span><span class="op">,</span> y<span class="op">=</span><span class="st">"loss"</span><span class="op">,</span> data<span class="op">=</span>df_val<span class="op">,</span> label<span class="op">=</span><span class="st">"Validation Loss"</span><span class="op">,</span> ax<span class="op">=</span>ax<span class="op">)</span></span>
+<span id="cb14-334"><a href="#cb14-334" aria-hidden="true" tabindex="-1"></a>ax<span class="op">.</span>set_title<span class="op">(</span><span class="st">"Validation Loss Over Time"</span><span class="op">)</span></span>
+<span id="cb14-335"><a href="#cb14-335" aria-hidden="true" tabindex="-1"></a>ax<span class="op">.</span>set_xlabel<span class="op">(</span><span class="st">"Iteration"</span><span class="op">)</span></span>
+<span id="cb14-336"><a href="#cb14-336" aria-hidden="true" tabindex="-1"></a>ax<span class="op">.</span>set_ylabel<span class="op">(</span><span class="st">"Loss"</span><span class="op">)</span></span>
+<span id="cb14-337"><a href="#cb14-337" aria-hidden="true" tabindex="-1"></a>plt<span class="op">.</span>show<span class="op">()</span></span>
+<span id="cb14-338"><a href="#cb14-338" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-339"><a href="#cb14-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-340"><a href="#cb14-340" aria-hidden="true" tabindex="-1"></a><span class="fu">### Testing</span></span>
+<span id="cb14-341"><a href="#cb14-341" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-342"><a href="#cb14-342" aria-hidden="true" tabindex="-1"></a><span class="in">```{code-cell} ipython3</span></span>
+<span id="cb14-343"><a href="#cb14-343" aria-hidden="true" tabindex="-1"></a>trainer<span class="op">.</span>test<span class="op">(</span>model<span class="op">,</span> data_module<span class="op">)</span></span>
+<span id="cb14-344"><a href="#cb14-344" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-345"><a href="#cb14-345" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-346"><a href="#cb14-346" aria-hidden="true" tabindex="-1"></a>Observe the final test loss and test accuracy. Even this simple LeNet-1 inspired model often achieves high accuracy on MNIST—demonstrating how effective early CNN architectures can be.</span>
+<span id="cb14-347"><a href="#cb14-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-348"><a href="#cb14-348" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reflection and Exercises</span></span>
+<span id="cb14-349"><a href="#cb14-349" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-350"><a href="#cb14-350" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Experiment**:</span>
+<span id="cb14-351"><a href="#cb14-351" aria-hidden="true" tabindex="-1"></a><span class="ss">   - </span>Vary the learning rate and batch size to see how training dynamics change.</span>
+<span id="cb14-352"><a href="#cb14-352" aria-hidden="true" tabindex="-1"></a><span class="ss">   - </span>Replace <span class="in">`tanh`</span> activation with <span class="in">`ReLU`</span> or <span class="in">`Sigmoid`</span> and compare performance.</span>
+<span id="cb14-353"><a href="#cb14-353" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-354"><a href="#cb14-354" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Visual Inspection**:</span>
+<span id="cb14-355"><a href="#cb14-355" aria-hidden="true" tabindex="-1"></a><span class="ss">   - </span>Hand-draw a digit (e.g., using a graphics tool) and see whether the model correctly classifies it. If it fails, hypothesize why (differences in stroke thickness, image alignment, etc.).</span>
+<span id="cb14-356"><a href="#cb14-356" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-357"><a href="#cb14-357" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Architectural Tweaks**:</span>
+<span id="cb14-358"><a href="#cb14-358" aria-hidden="true" tabindex="-1"></a><span class="ss">   - </span>Try adding an additional convolutional layer or using different pooling strategies (like max pooling) to see if you can improve accuracy.</span>
+<span id="cb14-359"><a href="#cb14-359" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-360"><a href="#cb14-360" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-363"><a href="#cb14-363" aria-hidden="true" tabindex="-1"></a><span class="in">```{note}</span></span>
+<span id="cb14-364"><a href="#cb14-364" aria-hidden="true" tabindex="-1"></a><span class="in">**Real-world Application**:</span></span>
+<span id="cb14-365"><a href="#cb14-365" aria-hidden="true" tabindex="-1"></a><span class="in">LeNet’s core ideas are still used in modern banking systems to read checks automatically. Its principle of learning features from raw data underpins almost all modern deep-learning-based image classification systems.</span></span>
+<span id="cb14-366"><a href="#cb14-366" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-367"><a href="#cb14-367" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-368"><a href="#cb14-368" aria-hidden="true" tabindex="-1"></a><span class="fu">## Further Reading</span></span>
+<span id="cb14-369"><a href="#cb14-369" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-370"><a href="#cb14-370" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">**Writing LeNet5 from Scratch in PyTorch (DigitalOcean)**</span><span class="co">](https://www.digitalocean.com/community/tutorials/writing-lenet5-from-scratch-in-python)</span></span>
+<span id="cb14-371"><a href="#cb14-371" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">**PyTorch LeNet Implementation Video**</span><span class="co">](https://m.youtube.com/watch?v=fcOW-Zyb5Bo&amp;pp=ygUGI2xlbmV0)</span></span>
+<span id="cb14-372"><a href="#cb14-372" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">**Original LeCun Paper**</span><span class="co">](http://yann.lecun.com/exdb/publis/pdf/lecun-01a.pdf)</span></span>
+<span id="cb14-373"><a href="#cb14-373" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-376"><a href="#cb14-376" aria-hidden="true" tabindex="-1"></a><span class="in">```{footbibliography}</span></span>
+<span id="cb14-377"><a href="#cb14-377" aria-hidden="true" tabindex="-1"></a><span class="in">:style: unsrt</span></span>
+<span id="cb14-378"><a href="#cb14-378" aria-hidden="true" tabindex="-1"></a><span class="in">:filter: docname in docnames</span></span>
+<span id="cb14-379"><a href="#cb14-379" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-380"><a href="#cb14-380" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-381"><a href="#cb14-381" aria-hidden="true" tabindex="-1"></a><span class="fu">## Summary</span></span>
+<span id="cb14-382"><a href="#cb14-382" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-383"><a href="#cb14-383" aria-hidden="true" tabindex="-1"></a>In summary, **LeNet** {footcite}`lecun1989backpropagation` and **LeNet-5** {footcite}<span class="in">`lecun1998gradient`</span> formed the basis for convolutional networks that learn directly from data. By incorporating convolution, subsampling, sparse connectivity, and end-to-end training, LeNet demonstrated how networks can autonomously discover robust representations—laying the groundwork for today’s deep learning revolution.</span>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Copyright 2025, Sadamori Kojaku</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions"><ul><li><a href="https://github.com/skojaku/applied-soft-comp/edit/main/m04-images/lenet.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/skojaku/applied-soft-comp/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/skojaku/applied-soft-comp">
+      <i class="bi bi-github" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
