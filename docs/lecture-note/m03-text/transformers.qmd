@@ -158,82 +158,180 @@ The division by $\sqrt{d}$ (where $d$ is the embedding dimension) is a scaling f
 
 Explore how different Query and Key transformations produce different attention patterns. Adjust the transformation parameters below to see how $W_Q$ and $W_K$ matrices change which words attend to which:
 
-```python {.marimo}
-attention_words = ["bank", "money", "loan", "river", "shore"]
-attention_embeddings = np.array([
-    [0.0, 0.0],  # bank (center)
-    [-0.8, -0.3],  # money
-    [-0.7, -0.6],  # loan
-    [0.7, -0.5],  # river
-    [0.6, -0.7],  # shore
-]) * 2
+```{ojs}
+//| echo: false
 
-# Query controls
-q_scale_x = mo.ui.slider(-2, 2, 0.1, value=1.0, label="Q Scale X")
-q_scale_y = mo.ui.slider(-2, 2, 0.1, value=1.0, label="Q Scale Y")
-q_rotate = mo.ui.slider(-180, 180, 5, value=0, label="Q Rotate (deg)")
+// Query transformation controls
+viewof qScaleX = Inputs.range([-2, 2], {value: 1.0, step: 0.1, label: "Q Scale X"})
+viewof qScaleY = Inputs.range([-2, 2], {value: 1.0, step: 0.1, label: "Q Scale Y"})
+viewof qRotate = Inputs.range([-180, 180], {value: 0, step: 5, label: "Q Rotate (deg)"})
 
-# Key controls
-k_scale_x = mo.ui.slider(-2, 2, 0.1, value=1.0, label="K Scale X")
-k_scale_y = mo.ui.slider(-2, 2, 0.1, value=1.0, label="K Scale Y")
-k_rotate = mo.ui.slider(-180, 180, 5, value=0, label="K Rotate (deg)")
-
-q_controls = mo.vstack([mo.md("**Query Transformation (W_Q)**"), q_scale_x, q_scale_y, q_rotate])
-k_controls = mo.vstack([mo.md("**Key Transformation (W_K)**"), k_scale_x, k_scale_y, k_rotate])
+// Key transformation controls
+viewof kScaleX = Inputs.range([-2, 2], {value: 1.0, step: 0.1, label: "K Scale X"})
+viewof kScaleY = Inputs.range([-2, 2], {value: 1.0, step: 0.1, label: "K Scale Y"})
+viewof kRotate = Inputs.range([-180, 180], {value: 0, step: 5, label: "K Rotate (deg)"})
 ```
 
-```python {.marimo}
-def _transform_embeddings(emb, scale_x, scale_y, rotate_deg):
-    theta = np.radians(rotate_deg)
-    rot_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
-    scale_matrix = np.diag([scale_x, scale_y])
-    W = rot_matrix @ scale_matrix
-    return emb @ W.T
+```{ojs}
+//| echo: false
 
-Q = _transform_embeddings(attention_embeddings, q_scale_x.value, q_scale_y.value, q_rotate.value)
-K = _transform_embeddings(attention_embeddings, k_scale_x.value, k_scale_y.value, k_rotate.value)
+{
+  // Word embeddings in 2D space
+  const attentionWords = ["bank", "money", "loan", "river", "shore"];
+  const attentionEmbeddings = [
+    [0.0, 0.0],    // bank (center)
+    [-0.8, -0.3],  // money
+    [-0.7, -0.6],  // loan
+    [0.7, -0.5],   // river
+    [0.6, -0.7]    // shore
+  ].map(([x, y]) => [x * 2, y * 2]);
 
-# Compute attention scores
-_scores = Q @ K.T
-_exp_scores = np.exp(_scores - np.max(_scores, axis=1, keepdims=True))
-attention_weights = _exp_scores / np.sum(_exp_scores, axis=1, keepdims=True)
+  // Transform embeddings function
+  function transformEmbeddings(embeddings, scaleX, scaleY, rotateDeg) {
+    const theta = (rotateDeg * Math.PI) / 180;
+    const cos = Math.cos(theta);
+    const sin = Math.sin(theta);
 
-# Create visualizations
-_df_q = pd.DataFrame({"word": attention_words, "x": Q[:, 0], "y": Q[:, 1]})
-_df_k = pd.DataFrame({"word": attention_words, "x": K[:, 0], "y": K[:, 1]})
+    return embeddings.map(([x, y]) => {
+      // First scale
+      const scaledX = x * scaleX;
+      const scaledY = y * scaleY;
+      // Then rotate
+      return [
+        scaledX * cos - scaledY * sin,
+        scaledX * sin + scaledY * cos
+      ];
+    });
+  }
 
-_chart_q = alt.Chart(_df_q).mark_circle(size=100).encode(
-    x=alt.X('x:Q', scale=alt.Scale(domain=[-4, 4]), title='Q1'),
-    y=alt.Y('y:Q', scale=alt.Scale(domain=[-4, 4]), title='Q2'),
-    tooltip=['word:N']
-).properties(width=200, height=200, title="Query Space")
-_text_q = _chart_q.mark_text(dy=-12, fontSize=10, fontWeight='bold').encode(text='word:N')
+  // Apply transformations
+  const Q = transformEmbeddings(attentionEmbeddings, qScaleX, qScaleY, qRotate);
+  const K = transformEmbeddings(attentionEmbeddings, kScaleX, kScaleY, kRotate);
 
-_chart_k = alt.Chart(_df_k).mark_circle(size=100).encode(
-    x=alt.X('x:Q', scale=alt.Scale(domain=[-4, 4]), title='K1'),
-    y=alt.Y('y:Q', scale=alt.Scale(domain=[-4, 4]), title='K2'),
-    tooltip=['word:N']
-).properties(width=200, height=200, title="Key Space")
-_text_k = _chart_k.mark_text(dy=-12, fontSize=10, fontWeight='bold').encode(text='word:N')
+  // Compute attention scores (Q @ K^T)
+  const scores = Q.map(q => K.map(k => q[0] * k[0] + q[1] * k[1]));
 
-# Heatmap
-_heatmap_data = []
-for i, word_i in enumerate(attention_words):
-    for j, word_j in enumerate(attention_words):
-        _heatmap_data.append({"Query": word_i, "Key": word_j, "Weight": attention_weights[i, j]})
-_df_heatmap = pd.DataFrame(_heatmap_data)
+  // Apply softmax to each row
+  const attentionWeights = scores.map(row => {
+    const maxScore = Math.max(...row);
+    const expScores = row.map(s => Math.exp(s - maxScore));
+    const sumExp = expScores.reduce((a, b) => a + b, 0);
+    return expScores.map(e => e / sumExp);
+  });
 
-_heatmap = alt.Chart(_df_heatmap).mark_rect().encode(
-    x=alt.X('Key:N', title='Key Word'),
-    y=alt.Y('Query:N', title='Query Word'),
-    color=alt.Color('Weight:Q', scale=alt.Scale(scheme='blues'), title='Attention'),
-    tooltip=['Query:N', 'Key:N', alt.Tooltip('Weight:Q', format='.3f')]
-).properties(width=250, height=250, title="Attention Weights (Softmax)")
+  // Prepare data for Query space
+  const qData = attentionWords.map((word, i) => ({
+    word: word,
+    x: Q[i][0],
+    y: Q[i][1]
+  }));
 
-mo.vstack([
-    mo.hstack([q_controls, k_controls], align="center"),
-    mo.hstack([_chart_q + _text_q, _chart_k + _text_k, _heatmap], align="center")
-])
+  // Prepare data for Key space
+  const kData = attentionWords.map((word, i) => ({
+    word: word,
+    x: K[i][0],
+    y: K[i][1]
+  }));
+
+  // Prepare data for heatmap
+  const heatmapData = [];
+  for (let i = 0; i < attentionWords.length; i++) {
+    for (let j = 0; j < attentionWords.length; j++) {
+      heatmapData.push({
+        Query: attentionWords[i],
+        Key: attentionWords[j],
+        Weight: attentionWeights[i][j]
+      });
+    }
+  }
+
+  // Create Query space visualization
+  const qPlot = Plot.plot({
+    width: 220,
+    height: 220,
+    marginTop: 30,
+    marginBottom: 40,
+    marginLeft: 50,
+    marginRight: 20,
+    x: { domain: [-4, 4], label: "Q1" },
+    y: { domain: [-4, 4], label: "Q2" },
+    marks: [
+      Plot.dot(qData, { x: "x", y: "y", r: 6, fill: "#4682b4" }),
+      Plot.text(qData, { x: "x", y: "y", text: "word", dy: -12, fontSize: 10, fontWeight: "bold" }),
+      Plot.text([{ x: 0, y: 4.5 }], { x: "x", y: "y", text: () => "Query Space", fontSize: 12, fontWeight: "bold" })
+    ]
+  });
+
+  // Create Key space visualization
+  const kPlot = Plot.plot({
+    width: 220,
+    height: 220,
+    marginTop: 30,
+    marginBottom: 40,
+    marginLeft: 50,
+    marginRight: 20,
+    x: { domain: [-4, 4], label: "K1" },
+    y: { domain: [-4, 4], label: "K2" },
+    marks: [
+      Plot.dot(kData, { x: "x", y: "y", r: 6, fill: "#2e8b57" }),
+      Plot.text(kData, { x: "x", y: "y", text: "word", dy: -12, fontSize: 10, fontWeight: "bold" }),
+      Plot.text([{ x: 0, y: 4.5 }], { x: "x", y: "y", text: () => "Key Space", fontSize: 12, fontWeight: "bold" })
+    ]
+  });
+
+  // Create attention heatmap
+  const heatmapPlot = Plot.plot({
+    width: 280,
+    height: 280,
+    marginTop: 50,
+    marginBottom: 50,
+    marginLeft: 70,
+    marginRight: 80,
+    x: { label: "Key Word" },
+    y: { label: "Query Word" },
+    color: {
+      scheme: "Blues",
+      label: "Attention",
+      legend: true
+    },
+    marks: [
+      Plot.cell(heatmapData, {
+        x: "Key",
+        y: "Query",
+        fill: "Weight",
+        tip: true
+      }),
+      Plot.text(heatmapData, {
+        x: "Key",
+        y: "Query",
+        text: d => d.Weight.toFixed(2),
+        fill: "white",
+        fontSize: 9
+      }),
+      Plot.text([{ x: 0, y: 0 }], {
+        x: () => attentionWords.length / 2 - 0.5,
+        y: () => -0.8,
+        text: () => "Attention Weights (Softmax)",
+        fontSize: 12,
+        fontWeight: "bold",
+        frameAnchor: "top"
+      })
+    ]
+  });
+
+  // Return all three plots
+  return html`
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+      <div style="display: flex; gap: 20px; align-items: center;">
+        ${qPlot}
+        ${kPlot}
+      </div>
+      <div>
+        ${heatmapPlot}
+      </div>
+    </div>
+  `;
+}
 ```
 
 Now scale this up. **Every word** in a sentence needs to attend to **every other word**. For "The cat sat on the mat" (six words), we compute a $6 \times 6$ **attention matrix** $A$, where $A_{ij} = \text{softmax}(\vec{q}_i \cdot \vec{k}_j)$. Rows represent words asking for context (Queries); columns represent words providing context (Keys). Each cell $(i,j)$ indicates how much word $i$ attends to word $j$. Each row sums to 1—it's a probability distribution over context words.
@@ -270,41 +368,92 @@ Transformers solved all three problems simultaneously. **Parallel processing** m
 
 Consider a concrete example of how attention captures linguistic structure. Take the sentence "The scientist published her paper." We want to resolve the coreference: what does "her" refer to?
 
-```{python}
-#| code-fold: true
-#| fig-cap: "Attention pattern showing 'her' → 'scientist' (0.60 weight). The model learned coreference **without explicit grammar rules**—purely from prediction tasks."
-#| fig-width: 8
-#| fig-height: 6
+```{ojs}
+//| echo: false
 
-import matplotlib.pyplot as plt
-import seaborn as sns
+{
+  const words = ["The", "scientist", "published", "her", "paper"];
+  const attention = [
+    [0.5, 0.3, 0.1, 0.05, 0.05],   // "The"→"scientist"
+    [0.2, 0.5, 0.2, 0.05, 0.05],   // "scientist"
+    [0.05, 0.3, 0.4, 0.1, 0.15],   // "published"
+    [0.05, 0.6, 0.1, 0.2, 0.05],   // "her"→"scientist" ← KEY!
+    [0.05, 0.2, 0.1, 0.15, 0.5]    // "paper"
+  ];
 
-words = ["The", "scientist", "published", "her", "paper"]
-n = len(words)
+  // Prepare heatmap data
+  const heatmapData = [];
+  for (let i = 0; i < words.length; i++) {
+    for (let j = 0; j < words.length; j++) {
+      heatmapData.push({
+        Word: words[i],
+        AttendsTo: words[j],
+        Weight: attention[i][j],
+        isHighlight: i === 3 && j === 1  // "her" → "scientist"
+      });
+    }
+  }
 
-attention = np.array([
-    [0.5, 0.3, 0.1, 0.05, 0.05],  # "The"→"scientist"
-    [0.2, 0.5, 0.2, 0.05, 0.05],  # "scientist"
-    [0.05, 0.3, 0.4, 0.1, 0.15],  # "published"
-    [0.05, 0.6, 0.1, 0.2, 0.05],  # "her"→"scientist" ← KEY!
-    [0.05, 0.2, 0.1, 0.15, 0.5],  # "paper"
-])
-
-sns.set_style("white")
-fig, ax = plt.subplots(figsize=(8, 6))
-sns.heatmap(attention, annot=True, fmt=".2f",
-            xticklabels=words, yticklabels=words,
-            cmap="Purples", vmin=0, vmax=0.6,
-            cbar_kws={'label': 'Attention Weight'}, ax=ax)
-ax.set_xlabel("Attends To", fontsize=12, fontweight='bold')
-ax.set_ylabel("Word", fontsize=12, fontweight='bold')
-ax.set_title("Coreference via Attention: 'her' → 'scientist'", fontsize=14, fontweight='bold')
-
-from matplotlib.patches import Rectangle
-ax.add_patch(Rectangle((1, 3), 1, 1, fill=False, edgecolor='red', lw=3))
-plt.tight_layout()
-plt.show()
+  return Plot.plot({
+    width: 500,
+    height: 400,
+    marginTop: 60,
+    marginBottom: 60,
+    marginLeft: 90,
+    marginRight: 120,
+    x: {
+      label: "Attends To →",
+      labelAnchor: "center"
+    },
+    y: {
+      label: "↑ Word",
+      labelAnchor: "center"
+    },
+    color: {
+      type: "linear",
+      scheme: "Purples",
+      domain: [0, 0.6],
+      label: "Attention Weight",
+      legend: true
+    },
+    marks: [
+      Plot.cell(heatmapData, {
+        x: "AttendsTo",
+        y: "Word",
+        fill: "Weight",
+        inset: 0.5
+      }),
+      Plot.text(heatmapData, {
+        x: "AttendsTo",
+        y: "Word",
+        text: d => d.Weight.toFixed(2),
+        fill: d => d.Weight > 0.3 ? "white" : "black",
+        fontSize: 11,
+        fontWeight: "bold"
+      }),
+      // Highlight box around "her" → "scientist"
+      Plot.rect([{x: "scientist", y: "her"}], {
+        x: "x",
+        y: "y",
+        fill: "none",
+        stroke: "red",
+        strokeWidth: 3,
+        inset: -2
+      }),
+      Plot.text([{ x: 0, y: 0 }], {
+        x: () => words.length / 2 - 0.5,
+        y: () => -0.9,
+        text: () => "Coreference via Attention: 'her' → 'scientist'",
+        fontSize: 14,
+        fontWeight: "bold",
+        frameAnchor: "top"
+      })
+    ]
+  });
+}
 ```
+
+*Attention pattern showing 'her' → 'scientist' (0.60 weight). The model learned coreference **without explicit grammar rules**—purely from prediction tasks.*
 
 Row 3 corresponds to "her." The pronoun attends most strongly to "scientist" (0.60), correctly identifying the referent. The model **discovered** that pronouns link to earlier nouns through statistical patterns in training data—no one programmed this grammatical rule. This is the profound insight: transformers learn the structure of language as a side effect of optimizing a simple prediction objective.
 
