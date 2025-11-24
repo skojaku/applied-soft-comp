@@ -257,30 +257,66 @@ Explore how different Query and Key transformations produce different attention 
 
 ```{ojs}
 //| echo: false
+function createQKVSlider(min, max, step, width, defaultValue, label) {
+  const slider = d3.sliderBottom()
+    .min(min).max(max).step(step).width(width).default(defaultValue);
+  const svg = d3.create("svg").attr("width", width + 40).attr("height", 50);
+  const g = svg.append("g").attr("transform", "translate(20,15)");
+  g.call(slider);
+  svg.append("text").attr("x", (width + 40) / 2).attr("y", 10)
+     .attr("text-anchor", "middle").style("font-size", "11px").text(label);
+  return { node: svg.node(), slider: slider };
+}
+```
+
+```{ojs}
+//| echo: false
+qScaleXSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "Q Scale X")
+```
+
+```{ojs}
+//| echo: false
+qScaleYSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "Q Scale Y")
+```
+
+```{ojs}
+//| echo: false
+qRotateSlider = createQKVSlider(-180, 180, 5, 150, 0, "Q Rotate (deg)")
+```
+
+```{ojs}
+//| echo: false
+kScaleXSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "K Scale X")
+```
+
+```{ojs}
+//| echo: false
+kScaleYSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "K Scale Y")
+```
+
+```{ojs}
+//| echo: false
+kRotateSlider = createQKVSlider(-180, 180, 5, 150, 0, "K Rotate (deg)")
+```
+
+```{ojs}
+//| echo: false
+vScaleXSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "V Scale X")
+```
+
+```{ojs}
+//| echo: false
+vScaleYSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "V Scale Y")
+```
+
+```{ojs}
+//| echo: false
+vRotateSlider = createQKVSlider(-180, 180, 5, 150, 0, "V Rotate (deg)")
+```
+
+```{ojs}
+//| echo: false
 {
-  // Create slider function
-  function createQKVSlider(min, max, step, width, defaultValue, label) {
-    const slider = d3.sliderBottom()
-      .min(min).max(max).step(step).width(width).default(defaultValue);
-    const svg = d3.create("svg").attr("width", width + 40).attr("height", 50);
-    const g = svg.append("g").attr("transform", "translate(20,15)");
-    g.call(slider);
-    svg.append("text").attr("x", (width + 40) / 2).attr("y", 10)
-       .attr("text-anchor", "middle").style("font-size", "11px").text(label);
-    return { node: svg.node(), slider: slider };
-  }
-
-  // Create sliders for Q, K, V transformations
-  const qScaleXSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "Q Scale X");
-  const qScaleYSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "Q Scale Y");
-  const qRotateSlider = createQKVSlider(-180, 180, 5, 150, 0, "Q Rotate (deg)");
-  const kScaleXSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "K Scale X");
-  const kScaleYSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "K Scale Y");
-  const kRotateSlider = createQKVSlider(-180, 180, 5, 150, 0, "K Rotate (deg)");
-  const vScaleXSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "V Scale X");
-  const vScaleYSlider = createQKVSlider(0.1, 2, 0.1, 150, 1.0, "V Scale Y");
-  const vRotateSlider = createQKVSlider(-180, 180, 5, 150, 0, "V Rotate (deg)");
-
   // Original word vectors (bank, money, river)
   const originalVectors = [
     { name: "bank", vector: [1.5, 0.5] },
