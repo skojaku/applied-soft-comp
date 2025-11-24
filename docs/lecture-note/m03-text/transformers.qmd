@@ -61,9 +61,9 @@ function sliderWithLabel(min, max, step, width, defaultValue, label) {
   }
 
   // Create sliders
-  const bankSliderObj = createWeightSlider(0, 1, 0.01, 200, 1.0, "Bank Weight");
-  const moneySliderObj = createWeightSlider(0, 1, 0.01, 200, 0.0, "Money Weight");
-  const riverSliderObj = createWeightSlider(0, 1, 0.01, 200, 0.0, "River Weight");
+  const bankSliderObj = createWeightSlider(0, 1, 0.01, 200, 1.0, "Bank weight");
+  const moneySliderObj = createWeightSlider(0, 1, 0.01, 200, 0.0, "Money weight");
+  const riverSliderObj = createWeightSlider(0, 1, 0.01, 200, 0.0, "River weight");
 
   // Word embeddings in 2D space
   const contextWords = ["bank", "money", "river"];
@@ -170,10 +170,10 @@ function sliderWithLabel(min, max, step, width, defaultValue, label) {
           fill: "black"
         }),
         // Custom legend at top center
-        Plot.dot([{x: -0.8, y: 2.7}, {x: 0.8, y: 2.7}], {
+        Plot.dot([{x: -0.8, y: 2.7, color: "#dadada"}, {x: 0.8, y: 2.7, color: "#ff7f0e"}], {
           x: "x",
           y: "y",
-          fill: () => ["#dadada", "#ff7f0e"],
+          fill: "color",
           r: 6
         }),
         Plot.text([{x: -0.5, y: 2.7, label: "Original"}, {x: 1.1, y: 2.7, label: "Contextualized"}], {
@@ -212,9 +212,7 @@ function sliderWithLabel(min, max, step, width, defaultValue, label) {
 ```
 
 By changing the weights, we can see that the vector for "bank" can lean more towards the financial terms or the geographical terms. So how can we determine the weights?
-
-The **null hypothesis** suggests setting all weights uniformly: $w_i = 1/N$, producing a simple bag-of-words average. This should, in theory, create context-aware representations.
-But real sentences aren't fair: not all words matter equally. In "I deposited money at the bank," the crucial clues are "deposited" and "money"—while words like "I," "at," and "the" add almost nothing to the meaning. If we just averaged every word together, we'd treat them all as equally important, which blurs the message. Instead, we need a way to pay extra attention to the words that really matter, and tune down the ones that don’t.
+The simplest idea is to give each word an equal weight: $w_i = 1/N$. This creates a basic "bag-of-words" average. But sentences aren’t actually this fair—some words are much more important than others. For example, in "I deposited money at the bank," the words "deposited" and "money" are key, while "I," "at," and "the" add little meaning. If we treat all words the same, we lose the details that matter. We need a way to highlight the important words and downplay the rest.
 
 ## The Hidden Mechanism: Query-Key Matching as Information Retrieval
 
