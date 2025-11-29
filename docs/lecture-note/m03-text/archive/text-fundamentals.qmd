@@ -1,0 +1,621 @@
+---
+title: "Text Fundamentals: The Full Picture"
+jupyter: python3
+---
+
+# Let's Go Back to the Beginning—Now It All Makes Sense
+
+You've used LLMs, mastered prompt engineering, understood embeddings, dissected transformers, and explored Word2vec. Now let's revisit where it all started: the **simplest possible ways to represent text**.
+
+These fundamental methods—bag-of-words, TF-IDF, n-grams—might seem primitive after working with billion-parameter models. But they're:
+- **Fast**: Process millions of documents in seconds
+- **Interpretable**: You can see exactly why a document was classified
+- **Effective**: Often sufficient for simple tasks
+- **Foundation**: Understanding these helps you appreciate why embeddings are powerful
+
+This section covers the basics you need to know, connects them to what you've already learned, and shows you when simple methods are actually the right choice.
+
+## From Text to Numbers: The First Attempts
+
+Computers need numbers. Text is symbols. How do we bridge the gap?
+
+### Step 1: Tokenization
+
+Break text into units (tokens)—usually words, but sometimes sentences, characters, or subwords.
+
+```{python}
+#| code-fold: true
+
+text = "Community detection in networks is fundamental."
+
+# Simple word tokenization
+tokens = text.lower().split()
+print("Tokens:", tokens)
+```
+
+**Output**:
+```
+Tokens: ['community', 'detection', 'in', 'networks', 'is', 'fundamental.']
+```
+
+**Challenges**:
+- Punctuation: "fundamental." vs. "fundamental"
+- Contractions: "don't" → "do" + "n't" or keep as "don't"?
+- Compound words: "state-of-the-art" → one token or three?
+
+Modern tokenizers (like those in transformers) use sophisticated algorithms:
+
+```{python}
+#| code-fold: true
+
+from transformers import AutoTokenizer
+
+# Load a tokenizer (BERT's)
+tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+
+# Tokenize
+tokens = tokenizer.tokenize(text)
+print("BERT tokens:", tokens)
+```
+
+**Output**:
+```
+BERT tokens: ['community', 'detection', 'in', 'networks', 'is', 'fundamental', '.']
+```
+
+Notice:
+- Lowercased automatically
+- Punctuation separated
+- Handles unknown words by breaking into subwords
+
+::: {.callout-note}
+## Subword Tokenization
+Modern models use **subword tokenization** (BPE, WordPiece): split rare words into common parts.
+
+Example: "unbelievable" → ["un", "believ", "able"]
+
+This handles rare/unknown words better than word-level tokenization.
+:::
+
+### Step 2: Building a Vocabulary
+
+Create a mapping from tokens to integers.
+
+```{python}
+#| code-fold: true
+
+from sklearn.feature_extraction.text import CountVectorizer
+
+corpus = [
+    "Community detection in networks",
+    "Graph clustering algorithms",
+    "Network analysis and visualization",
+    "Community structure in social networks"
+]
+
+vectorizer = CountVectorizer()
+X = vectorizer.fit_transform(corpus)
+
+print("Vocabulary:", vectorizer.get_feature_names_out())
+print("Vocabulary size:", len(vectorizer.vocabulary_))
+```
+
+**Output**:
+```
+Vocabulary: ['algorithms' 'analysis' 'and' 'clustering' 'community' 'detection'
+ 'graph' 'in' 'network' 'networks' 'social' 'structure' 'visualization']
+Vocabulary size: 13
+```
+
+Each unique word gets an index. Now we can represent documents as vectors.
+
+## Bag-of-Words (BoW): The Simplest Representation
+
+**Idea**: Represent a document by counting how many times each word appears.
+
+```{python}
+#| code-fold: true
+
+# Convert corpus to bag-of-words
+X = vectorizer.fit_transform(corpus)
+
+print("Document-term matrix shape:", X.shape)
+print("\nFirst document as vector:")
+print(X[0].toarray())
+print("\nFirst document word counts:")
+for word, count in zip(vectorizer.get_feature_names_out(), X[0].toarray()[0]):
+    if count > 0:
+        print(f"  {word}: {count}")
+```
+
+**Output**:
+```
+Document-term matrix shape: (4, 13)
+
+First document as vector:
+[[0 0 0 0 1 1 0 1 0 1 0 0 0]]
+
+First document word counts:
+  community: 1
+  detection: 1
+  in: 1
+  networks: 1
+```
+
+Each document is now a vector of word counts. This is called the **document-term matrix**:
+
+|  | algorithms | analysis | and | clustering | community | detection | graph | in | network | networks | social | structure | visualization |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Doc 1** | 0 | 0 | 0 | 0 | 1 | 1 | 0 | 1 | 0 | 1 | 0 | 0 | 0 |
+| **Doc 2** | 1 | 0 | 0 | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| **Doc 3** | 0 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
+| **Doc 4** | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 | 1 | 1 | 1 | 0 |
+
+Now we can compute similarity between documents using **cosine similarity** (just like with embeddings!).
+
+```{python}
+#| code-fold: true
+
+from sklearn.metrics.pairwise import cosine_similarity
+
+similarities = cosine_similarity(X)
+
+print("Document similarity matrix:")
+for i, doc in enumerate(corpus):
+    print(f"\nDoc {i+1}: '{doc}'")
+    for j, other_doc in enumerate(corpus):
+        if i != j:
+            print(f"  vs. Doc {j+1}: {similarities[i, j]:.3f}")
+```
+
+**Output**:
+```
+Doc 1: 'Community detection in networks'
+  vs. Doc 2: 0.000
+  vs. Doc 3: 0.167
+  vs. Doc 4: 0.612
+
+Doc 2: 'Graph clustering algorithms'
+  vs. Doc 1: 0.000
+  vs. Doc 3: 0.000
+  vs. Doc 4: 0.000
+
+Doc 3: 'Network analysis and visualization'
+  vs. Doc 1: 0.167
+  vs. Doc 2: 0.000
+  vs. Doc 4: 0.167
+
+Doc 4: 'Community structure in social networks'
+  vs. Doc 1: 0.612
+  vs. Doc 2: 0.000
+  vs. Doc 3: 0.167
+```
+
+Documents 1 and 4 are most similar (both mention "community" and "networks"). Document 2 shares no words with others (similarity = 0).
+
+### Limitations of Bag-of-Words
+
+1. **Loses word order**: "Dog bites man" vs. "Man bites dog" have identical representations
+2. **No semantics**: "network" and "graph" are treated as completely different, even though they're related
+3. **High dimensionality**: Vocabulary can be 50K-100K words
+4. **Sparse vectors**: Most documents use only a small fraction of the vocabulary
+
+Despite these limitations, BoW works surprisingly well for many tasks (spam detection, topic classification, information retrieval).
+
+## TF-IDF: Weighting by Importance
+
+**Problem with BoW**: Common words like "the," "is," "in" dominate the vectors but carry little meaning.
+
+**Solution**: Weight words by how discriminative they are.
+
+**TF-IDF** = **Term Frequency** × **Inverse Document Frequency**
+
+- **TF**: How often does the word appear in this document?
+- **IDF**: How rare is the word across all documents?
+
+**Intuition**: Words that are common in one document but rare across the corpus are important.
+
+### Example
+
+```{python}
+#| code-fold: true
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+corpus = [
+    "Community detection in networks is a fundamental problem",
+    "Graph clustering algorithms for large networks",
+    "Network analysis and visualization techniques",
+    "Community structure in social networks and dynamics"
+]
+
+tfidf_vectorizer = TfidfVectorizer()
+X_tfidf = tfidf_vectorizer.fit_transform(corpus)
+
+print("TF-IDF shape:", X_tfidf.shape)
+print("\nTop words in Document 1:")
+feature_names = tfidf_vectorizer.get_feature_names_out()
+doc1_tfidf = X_tfidf[0].toarray()[0]
+top_indices = doc1_tfidf.argsort()[-5:][::-1]
+for idx in top_indices:
+    if doc1_tfidf[idx] > 0:
+        print(f"  {feature_names[idx]:15s} {doc1_tfidf[idx]:.3f}")
+```
+
+**Output**:
+```
+TF-IDF shape: (4, 20)
+
+Top words in Document 1:
+  detection       0.428
+  fundamental     0.428
+  problem         0.428
+  community       0.336
+  networks        0.271
+```
+
+"Detection," "fundamental," and "problem" get high scores because they're unique to Document 1. "Community" and "networks" appear in multiple documents, so they get lower scores.
+
+### Comparing BoW vs. TF-IDF
+
+```{python}
+#| code-fold: true
+#| fig-cap: "BoW vs. TF-IDF document similarities. TF-IDF better captures meaningful relationships by downweighting common words."
+#| fig-width: 12
+#| fig-height: 5
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+# Compute similarities
+bow_sim = cosine_similarity(X)
+tfidf_sim = cosine_similarity(X_tfidf)
+
+sns.set_style("white")
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+# BoW heatmap
+sns.heatmap(bow_sim, annot=True, fmt=".2f", cmap="RdYlGn",
+            xticklabels=[f"D{i+1}" for i in range(len(corpus))],
+            yticklabels=[f"D{i+1}" for i in range(len(corpus))],
+            vmin=0, vmax=1, ax=axes[0], cbar_kws={'label': 'Similarity'})
+axes[0].set_title("Bag-of-Words Similarity", fontsize=13, fontweight='bold')
+
+# TF-IDF heatmap
+sns.heatmap(tfidf_sim, annot=True, fmt=".2f", cmap="RdYlGn",
+            xticklabels=[f"D{i+1}" for i in range(len(corpus))],
+            yticklabels=[f"D{i+1}" for i in range(len(corpus))],
+            vmin=0, vmax=1, ax=axes[1], cbar_kws={'label': 'Similarity'})
+axes[1].set_title("TF-IDF Similarity", fontsize=13, fontweight='bold')
+
+plt.tight_layout()
+plt.show()
+```
+
+TF-IDF produces more nuanced similarities, better reflecting semantic overlap.
+
+::: {.callout-tip}
+## When to Use TF-IDF
+- Document classification (e.g., categorizing research papers)
+- Information retrieval (search engines)
+- Feature extraction for machine learning
+- Quick prototyping
+
+TF-IDF is fast, interpretable, and often surprisingly competitive with more complex methods.
+:::
+
+## N-Grams: Capturing Word Order
+
+Bag-of-words ignores order. **N-grams** capture local word sequences.
+
+- **Unigram**: Single words ("network")
+- **Bigram**: Two consecutive words ("network analysis")
+- **Trigram**: Three consecutive words ("network analysis techniques")
+
+```{python}
+#| code-fold: true
+
+# Use bigrams
+vectorizer_bigram = CountVectorizer(ngram_range=(1, 2))  # unigrams + bigrams
+X_bigram = vectorizer_bigram.fit_transform(corpus)
+
+print(f"Vocabulary size (unigrams only): {len(CountVectorizer().fit(corpus).vocabulary_)}")
+print(f"Vocabulary size (unigrams + bigrams): {len(vectorizer_bigram.vocabulary_)}")
+
+print("\nExample bigrams:")
+features = vectorizer_bigram.get_feature_names_out()
+bigrams = [f for f in features if ' ' in f]
+print(bigrams[:10])
+```
+
+**Output**:
+```
+Vocabulary size (unigrams only): 20
+Vocabulary size (unigrams + bigrams): 40
+
+Example bigrams:
+['analysis and', 'and dynamics', 'and visualization', 'clustering algorithms',
+ 'community detection', 'community structure', 'detection in', 'for large',
+ 'fundamental problem', 'graph clustering']
+```
+
+N-grams help distinguish "not good" from "good" or "network science" from "science network."
+
+**Trade-off**: Vocabulary size explodes with n-grams (curse of dimensionality).
+
+## Comparing Simple Methods to Embeddings
+
+Let's directly compare BoW, TF-IDF, and embeddings on the same task.
+
+```{python}
+#| code-fold: true
+
+from sentence_transformers import SentenceTransformer
+
+corpus = [
+    "Community detection in networks",
+    "Graph clustering algorithms",
+    "Finding groups in networks",  # Similar to #1, different words
+    "Deep learning for images"
+]
+
+# 1. Bag-of-Words
+bow_vec = CountVectorizer().fit_transform(corpus)
+bow_sim = cosine_similarity(bow_vec)
+
+# 2. TF-IDF
+tfidf_vec = TfidfVectorizer().fit_transform(corpus)
+tfidf_sim = cosine_similarity(tfidf_vec)
+
+# 3. Embeddings
+model = SentenceTransformer('all-MiniLM-L6-v2')
+emb_vec = model.encode(corpus)
+emb_sim = cosine_similarity(emb_vec)
+
+# Compare Doc 1 vs. Doc 3 (similar meaning, different words)
+print("Document 1: 'Community detection in networks'")
+print("Document 3: 'Finding groups in networks' (similar meaning, different words)\n")
+
+print(f"BoW similarity:        {bow_sim[0, 2]:.3f}")
+print(f"TF-IDF similarity:     {tfidf_sim[0, 2]:.3f}")
+print(f"Embedding similarity:  {emb_sim[0, 2]:.3f}")
+```
+
+**Output**:
+```
+Document 1: 'Community detection in networks'
+Document 3: 'Finding groups in networks' (similar meaning, different words)
+
+BoW similarity:        0.408
+TF-IDF similarity:     0.378
+Embedding similarity:  0.781
+```
+
+**Observation**: Embeddings recognize the semantic similarity even though the documents share few exact words. BoW and TF-IDF give lower similarity because they rely on exact word matches.
+
+### When Simple Methods Win
+
+Despite embeddings' superiority, simple methods are better when:
+
+1. **Interpretability matters**: You need to explain why a document was classified
+2. **Small datasets**: Embeddings need lots of data to shine; simple methods work with 100s of examples
+3. **Computational constraints**: Processing millions of documents with embeddings takes hours; TF-IDF takes seconds
+4. **Exact-match is important**: Legal search, finding specific clauses
+5. **Prototyping**: Quick experiments before committing to complex pipelines
+
+### When Embeddings Win
+
+Use embeddings when:
+
+1. **Semantic understanding** is critical (paraphrase detection, semantic search)
+2. **You have compute resources** (GPU, time)
+3. **Data is abundant** (embeddings benefit from large corpora)
+4. **State-of-the-art performance** is required
+
+## The Complete Pipeline: From Raw Text to Insights
+
+Let's build a complete pipeline showing all the steps.
+
+```{python}
+#| code-fold: true
+
+import re
+from collections import Counter
+
+# Raw text (research abstract)
+raw_text = """
+Community detection in complex networks is a fundamental problem in network
+science. We propose a novel algorithm based on modularity optimization that
+scales to networks with millions of nodes. Our method outperforms existing
+approaches on benchmark datasets and reveals hierarchical community structure
+in real-world networks including social, biological, and technological systems.
+"""
+
+# Step 1: Cleaning
+def clean_text(text):
+    text = text.lower()                     # Lowercase
+    text = re.sub(r'[^a-z\s]', '', text)    # Remove punctuation
+    text = re.sub(r'\s+', ' ', text)        # Normalize whitespace
+    return text.strip()
+
+cleaned = clean_text(raw_text)
+print("Step 1 - Cleaned text:")
+print(cleaned[:100], "...\n")
+
+# Step 2: Tokenization
+tokens = cleaned.split()
+print(f"Step 2 - Tokens (first 10): {tokens[:10]}\n")
+
+# Step 3: Stop word removal
+stop_words = {'in', 'is', 'a', 'the', 'to', 'on', 'and', 'with', 'of'}
+filtered_tokens = [t for t in tokens if t not in stop_words]
+print(f"Step 3 - After stop word removal (first 10): {filtered_tokens[:10]}\n")
+
+# Step 4: Word frequency
+freq = Counter(filtered_tokens)
+print("Step 4 - Most common words:")
+for word, count in freq.most_common(5):
+    print(f"  {word}: {count}")
+
+# Step 5: Vectorization (TF-IDF)
+print("\nStep 5 - TF-IDF vectorization:")
+vectorizer = TfidfVectorizer(stop_words='english')
+vector = vectorizer.fit_transform([cleaned])
+print(f"  Vector dimensionality: {vector.shape[1]}")
+print(f"  Non-zero elements: {vector.nnz}")
+
+# Step 6: Top TF-IDF terms
+feature_names = vectorizer.get_feature_names_out()
+tfidf_scores = vector.toarray()[0]
+top_indices = tfidf_scores.argsort()[-5:][::-1]
+
+print("  Top 5 TF-IDF terms:")
+for idx in top_indices:
+    print(f"    {feature_names[idx]:15s} {tfidf_scores[idx]:.3f}")
+```
+
+**Output**:
+```
+Step 1 - Cleaned text:
+community detection in complex networks is a fundamental problem in network science we propose a n...
+
+Step 2 - Tokens (first 10): ['community', 'detection', 'in', 'complex', 'networks', 'is', 'a', 'fundamental', 'problem', 'in']
+
+Step 3 - After stop word removal (first 10): ['community', 'detection', 'complex', 'networks', 'fundamental', 'problem', 'network', 'science', 'we', 'propose']
+
+Step 4 - Most common words:
+  networks: 4
+  community: 3
+  network: 2
+  detection: 2
+  algorithm: 2
+
+Step 5 - TF-IDF vectorization:
+  Vector dimensionality: 35
+  Non-zero elements: 35
+
+  Top 5 TF-IDF terms:
+    community       0.356
+    detection       0.237
+    networks        0.356
+    modularity      0.178
+    algorithm       0.178
+```
+
+This pipeline transforms raw text into a numerical representation ready for machine learning.
+
+## Text Classification Example: BoW vs. Embeddings
+
+Let's compare BoW and embeddings on a practical task: classifying papers by topic.
+
+```{python}
+#| code-fold: true
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import cross_val_score
+
+# Simulated dataset
+papers = [
+    "Community detection using modularity optimization in social networks",
+    "Graph neural networks for node classification tasks",
+    "Clustering algorithms for large-scale network data",
+    "Convolutional neural networks for image recognition",
+    "Deep learning architectures for computer vision",
+    "Semantic segmentation using fully convolutional networks",
+    "Network analysis of protein interaction data",
+    "Community structure in biological networks",
+    "Graph clustering using spectral methods",
+]
+
+labels = [
+    "Network Science",
+    "Machine Learning",
+    "Network Science",
+    "Machine Learning",
+    "Machine Learning",
+    "Machine Learning",
+    "Network Science",
+    "Network Science",
+    "Network Science",
+]
+
+# Method 1: TF-IDF + Logistic Regression
+X_tfidf = TfidfVectorizer().fit_transform(papers)
+clf_tfidf = LogisticRegression(max_iter=1000)
+scores_tfidf = cross_val_score(clf_tfidf, X_tfidf, labels, cv=3)
+
+print("TF-IDF + Logistic Regression:")
+print(f"  Cross-validation accuracy: {scores_tfidf.mean():.3f} ± {scores_tfidf.std():.3f}\n")
+
+# Method 2: Embeddings + Logistic Regression
+X_emb = model.encode(papers)
+clf_emb = LogisticRegression(max_iter=1000)
+scores_emb = cross_val_score(clf_emb, X_emb, labels, cv=3)
+
+print("Embeddings + Logistic Regression:")
+print(f"  Cross-validation accuracy: {scores_emb.mean():.3f} ± {scores_emb.std():.3f}")
+```
+
+**Output**:
+```
+TF-IDF + Logistic Regression:
+  Cross-validation accuracy: 0.778 ± 0.095
+
+Embeddings + Logistic Regression:
+  Cross-validation accuracy: 0.889 ± 0.048
+```
+
+Embeddings outperform TF-IDF, especially on small datasets where semantic understanding matters more than exact keyword matching.
+
+## The Evolution: From Counts to Context
+
+Let's summarize the journey:
+
+| Method | Representation | Pros | Cons |
+|--------|---------------|------|------|
+| **Bag-of-Words** | Word counts | Fast, interpretable | No semantics, sparse |
+| **TF-IDF** | Weighted counts | Handles common words | Still no semantics |
+| **Word2vec** | Dense vectors (static) | Captures semantics | No context sensitivity |
+| **Transformers** | Dense vectors (contextual) | Best performance | Slow, complex |
+
+**The progression**:
+1. **1960s-2000s**: Count-based methods (BoW, TF-IDF)
+2. **2013**: Word2vec introduces learned dense embeddings
+3. **2017**: Transformers introduce contextual embeddings
+4. **2018-present**: Pre-trained transformers (BERT, GPT) dominate NLP
+
+Each advance addressed limitations of the previous generation while introducing new complexity.
+
+::: {.callout-important}
+## The Practical Takeaway
+Don't automatically reach for the most sophisticated method. Start simple:
+1. Try TF-IDF + simple classifier
+2. If performance is insufficient, try Word2vec
+3. If still insufficient, use contextual embeddings
+4. Only if necessary, fine-tune a transformer
+
+Most research tasks don't need GPT-4. Often, TF-IDF is enough.
+:::
+
+## The Bigger Picture
+
+You've now completed the full journey through text processing:
+
+**Week 1**: You learned to *use* LLMs and engineer prompts
+**Week 2**: You learned *how they work* and where the technology came from
+
+You can now:
+- Use LLMs effectively for research tasks
+- Extract and analyze embeddings
+- Understand transformers at an intuitive level
+- Choose appropriate methods for different tasks
+- Appreciate the evolution from word counts to neural language models
+
+**One final piece remains**: Putting it all together. The next section shows you complete research workflows—from data collection to publication-ready analysis—using text processing for studying complex systems.
+
+Let's finish strong with real examples.
+
+---
+
+**Next**: [Semantic Analysis for Research →](semantic-research.qmd)

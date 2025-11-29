@@ -31,7 +31,7 @@ The model has no internal representation of what you "really want." It only know
 
 ## The Strategic Application
 
-![](https://learnprompting.org/docs/assets/basics/formal_prompt.svg){width="25%" fig-align="center"}
+![](../figs/prompt-tuning-manga.png){width=70% fig-align=center}
 
 Effective prompts activate desired patterns by combining structural components that mirror patterns in training data. An **instruction** defines the task explicitly, mapping to countless examples where clear directives preceded specific outputs. **Data** provides the input to process. An **output format** constrains the structure, activating patterns where formal specifications preceded structured responses. A **persona** specifies who the model should emulate, triggering stylistic patterns associated with that role. **Context** provides background information—why the task matters, who the response serves, relevant constraints—that helps the model select appropriate patterns from ambiguous alternatives.
 
@@ -260,11 +260,28 @@ Few-shot prompting improves consistency because the examples demonstrate specifi
 
 Be aware that few-shot examples can introduce biases:
 
-- **Recency bias**: Models may favor the most recent examples. The order of examples matters!
-- **Majority label bias**: If most examples have the same label/answer, the model may favor that label even when it's not appropriate.
+- **Recency bias**: Models may favor the most recent examples. The order of examples matters! [@lu2022fantastically]
+- **Majority label bias**: If most examples have the same label/answer, the model may favor that label even when it's not appropriate. [@gupta2023how]
 
 To mitigate: Vary the order of examples when testing, ensure examples are diverse and representative, and don't overload examples with one particular pattern.
 :::
+
+What happens when a prompt presents information that contradicts a language model's prior knowledge? For example, let's ask a model what the capital of France is, but provide contradictory information:
+
+```{python}
+contradictory_prompt = """
+France recently moved its capital from Paris to Lyon. Definitely, the capital of France is Lyon.
+
+What is the capital of France?
+"""
+
+response_contradictory = ollama.generate(prompt=contradictory_prompt, **params_llm)
+print("RESPONSE TO CONTRADICTORY INFORMATION:")
+print(response_contradictory.response)
+```
+
+The response depends on the model. Some models prioterize their own prior knowledge, while others may be more influenced by the contradictory information in the context.
+A study by Du et al. [@du2024context] found that a model is **more likely to be persuaded by context** when an entity appears **less frequently** in its training data. Additionally, **assertive contexts** (e.g., "Definitely, the capital of France is Lyon.") further increase the likelihood of persuasi
 
 ## Forcing Intermediate Steps
 
@@ -497,69 +514,12 @@ Self-consistency works because correct reasoning patterns converge toward the sa
 ::: {.callout-note}
 ## Alternative: Tree of Thought
 
-For even more sophisticated exploration, you can use "Tree of Thought" prompting, where the model explicitly explores multiple reasoning paths, evaluates them, and selects the best one. This is more complex to implement but can yield better results for very difficult problems.
+![](https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2FTOT.3b13bc5e.png&w=3840&q=75)
+
+For even more sophisticated exploration, you can use "Tree of Thought" [@yao2023tree] prompting, where the model explicitly explores multiple reasoning paths, evaluates them, and selects the best one. This is more complex to implement but can yield better results for very difficult problems.
+
+
 :::
-
-## Practical Workflow: Building a Paper Classifier
-
-Let's combine techniques to build a complete workflow:
-
-```{python}
-# Use low temperature for consistency
-params_classifier = {"model": "gemma3n:latest", "options": {"temperature": 0}}
-
-def classify_paper(abstract):
-    """Classify a paper's methodology type."""
-    prompt = """Classify research papers by methodology type.
-
-Categories:
-- Experimental: Lab/field experiments, data collection
-- Theoretical: Mathematical models, proofs, frameworks
-- Computational: Simulations, algorithms, data analysis
-- Review: Literature reviews, meta-analyses, surveys
-
-Examples:
-
-Abstract: We prove a lower bound on the complexity of community detection algorithms.
-Classification: Theoretical
-Reasoning: Focuses on mathematical proof.
-
-Abstract: We conduct surveys with 500 participants to study social network formation.
-Classification: Experimental
-Reasoning: Original data collection through experiments.
-
-Abstract: We review 150 papers on graph neural networks and identify future directions.
-Classification: Review
-Reasoning: Surveys existing literature.
-
-Now classify:
-
-Abstract: {abstract}
-
-Think step by step:
-1. What is the primary activity? (proving, measuring, simulating, surveying?)
-2. Which category fits best?
-
-Classification: ...
-Reasoning: ...
-"""
-    response = ollama.generate(prompt=prompt.format(abstract=abstract), **params_classifier)
-    return response.response
-
-# Test with different paper types
-test_abstracts = [
-    "We develop a graph neural network that predicts protein folding with 85% accuracy.",
-    "We mathematically prove that scale-free networks are robust to random failures.",
-    "We survey 200 papers on community detection and identify 5 major approaches.",
-]
-
-for abstract in test_abstracts:
-    print(f"Abstract: {abstract}")
-    print(classify_paper(abstract))
-    print("-" * 80)
-```
-
-This workflow uses: **Few-shot learning** (examples), **Chain-of-thought** (step-by-step reasoning), **Constrained format** (Classification + Reasoning), and **Low temperature** (consistency).
 
 ## The Takeaway
 

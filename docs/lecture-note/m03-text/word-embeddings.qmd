@@ -1,158 +1,35 @@
 ---
 title: "Word Embeddings"
-jupyter: python3
+jupyter: applsoftcomp
+execute:
+    enabled: true
+    cache: true
 ---
 
-```{ojs}
-//| echo: false
-d3 = require("d3@7", "d3-simple-slider@1")
-```
 
-**Spoiler:** Meaning isn't stored in words. It's stored in the pattern of relationships between them. A "dog" isn't defined by what it *is*, but by what it does (barks, chases), what it's near (leash, kennel), and what it's *not* (cat, unlike). Word2vec doesn't teach a machine what "dog" means—it teaches the machine to find "dog's" position in the structure of language.
 
-## Structural Linguistics: The Foundation
+### The Spoiler
+Meaning isn't stored in words; it's stored in the geometric relationship between them.
 
-In 1916, Ferdinand de Saussure's students published his lectures as *Cours de linguistique générale*, a work that fundamentally changed how we think about meaning. Saussure broke from historical linguistics—tracing how words evolve over time—and instead examined language as a **synchronic system**, a structure functioning at a single moment. He argued that language is a system of **signs**, each composed of a **signifier** (the sound-image: spoken or written form) and a **signified** (the mental concept it evokes).
+### Words are not containers for meaning
 
-The radical insight was that the connection between signifier and signified is **arbitrary**. There's no natural link between the sound "dog" and the four-legged canine it represents. French uses *chien*, German *Hund*, Japanese *inu*. If the relationship were intrinsic, all languages would use the same word. The arbitrariness proves that meaning doesn't reside in words themselves.
+We intuitively assume words are containers for meaning—that "dog" holds the concept of a canine. This is incorrect. Structural linguistics reveals that a sign is defined solely by its relationships: "dog" means "dog" only because it is not "cat," "wolf," or "log." Meaning is differential, not intrinsic.
 
-Where, then, does meaning come from? From **difference**. A sign is defined by what it is *not*. The word "dog" gains meaning through contrast: it differs from "cat" (another animal), "log" (similar sound, different concept), "bog" (phonetic neighbor), "puppy" (related but distinct). Remove these contrasts, and "dog" becomes meaningless. Saussure's conclusion: **meaning is structural**. Language is a system of relationships where each element derives its value from its position within the network of differences.
 
-This was theory. For 60 years, it remained an abstract framework—philosophers and linguists debated it, but no one had a method to *measure* these structural relationships at scale. Then, in 1957, British linguist J.R. Firth operationalized Saussure's insight with a single sentence: *"You shall know a word by the company it keeps."* This is the **distributional hypothesis**—the idea that if two words appear in similar contexts, they must occupy similar positions in the semantic structure.
+::: {#fig-structuralism}
 
-## The Mechanism
+![](../figs/word2vec-manga-1.jpg)
 
-What does "dog" mean? You might say: a four-legged mammal, domesticated, often kept as a pet. But notice what you just did. You didn't describe "dog" in isolation. You described it through relationships—*contrast* (mammal, not reptile), *attribute* (four-legged), *function* (pet), *behavior* (domesticated). You defined "dog" by its differences and associations, exactly as Saussure predicted. Consider how "dog" and "cat" appear in language:
+Green is the color that is not non-green (not red, not blue, not yellow, ...).
 
-- "The **dog** barked at the mailman."
-- "The **dog** chased the squirrel."
-- "The **cat** hissed at the mailman."
-- "The **cat** chased the mouse."
+:::
 
-Both appear with action verbs (barked, chased), both interact with targets (mailman, squirrel). Their meanings overlap because their contexts overlap. This is Firth's distributional hypothesis in action: contextual similarity reveals semantic similarity. Language has **structure**—a topology where similar meanings cluster and relationships form consistent patterns.
 
-If meaning is structure, then understanding language requires mapping this structure. Traditional computational approaches failed because they ignored Saussure's insight. They treated words as atomic symbols—discrete IDs in a database. In **one-hot encoding**, "King" (ID: 452) and "Queen" (ID: 991) are orthogonal vectors, mathematically perpendicular. The distance between "King" and "Queen" equals the distance between "King" and "Cabbage." This encoding captures no structure, no difference, no relationship. It's a flat list masquerading as a semantic space.
+**Word2vec**---the very foundational model that grounds modern NLP---learns to map the statistical topology of language. Think of it like mapping a city based purely on traffic data. You don't know what a "school" is, but you see that "buses" and "children" congregate there at 8 AM. By placing these entities close together on a map, you reconstruct the city's functional structure. Word2vec does this for language, turning semantic proximity into geometric distance.
 
-**Word2vec**, introduced by Tomas Mikolov at Google in 2013, learns structure by shrinking the problem. Instead of analyzing entire documents, it examines tiny windows—just 5-10 words at a time. In the sentence "The cat chases mice in the garden," with window size 2, the context for "chases" is ["The", "cat", "mice", "in"]. This local window captures where syntax meets semantics. Words that share these micro-contexts must occupy similar positions in meaning-space.
+## Word2vec
 
-Word2vec plays a prediction game with two variants. **Skip-gram** takes a center word like "cat" and predicts the surrounding context: which words likely appear nearby? The model outputs a probability distribution over vocabulary—high probability for {chases, sat, meowed}, low for {theorem, electron}. **CBOW** (Continuous Bag of Words) reverses the task: given context words, predict the missing center word. It's a fill-in-the-blank test. Both tasks force the model to encode positional information. Since "dog" and "cat" share contexts, they must receive similar encodings. Words become coordinates. Similarity becomes distance. Saussure's "system of differences" becomes navigable geometry.
-
-This is the compression trick: by learning to predict contexts, the model accidentally learns meaning.
-
-### The Architecture: A Three-Layer Position Finder
-
-Word2vec is a neural network with elegant symmetry. The **input layer** has $N$ neurons (one per vocabulary word) and acts as a lookup mechanism. When you input "cat," its neuron fires and all others stay silent—a one-hot vector. The **hidden layer** is much smaller (typically 100-300 neurons). Its activation pattern *is* the word embedding, the learned coordinates for "cat" in meaning-space. The **output layer** also has $N$ neurons, but multiple activate simultaneously, representing the probability distribution over possible context words.
-
-For Skip-gram, given center word $w_c$ and potential context word $w_o$, the model computes:
-
-$$ P(w_o|w_c) = \frac{\exp(\mathbf{v}_{w_o}^\top \mathbf{v}_{w_c})}{\sum_{w \in V} \exp(\mathbf{v}_w^\top \mathbf{v}_{w_c})} $$
-
-where $\mathbf{v}_{w_c}$ is the center word's embedding vector and $\mathbf{v}_{w_o}$ is the context word's embedding. The dot product $\mathbf{v}_{w_o}^\top \mathbf{v}_{w_c}$ measures alignment—how often these words share contexts. High alignment means high co-occurrence. The **softmax** in the denominator normalizes this into a probability, but at a cost: for a 100,000-word vocabulary, computing the denominator requires 100,000 exponentials per prediction. This is intractable.
-
-Word2vec sidesteps this through **hierarchical softmax**, organizing words into a binary tree (typically a Huffman tree, with frequent words near the root). Instead of comparing against all words simultaneously, the model makes sequential binary decisions: "Is the target word in the left subtree or the right?" This is path navigation, not exhaustive search. Computation drops from $O(|V|)$ to $O(\log |V|)$—the difference between checking every person in a city versus playing 20 questions.
-
-### The Hidden Truth: Matrix Factorization
-
-Word2vec appears to be a neural network predicting contexts. But Levy and Goldberg proved in 2014 that it's secretly factorizing a matrix—the **pointwise mutual information** (PMI) matrix:
-
-$$ M_{ij} = \log \frac{P(w_i, w_j)}{P(w_i)P(w_j)} $$
-
-where $P(w_i, w_j)$ is the probability words $w_i$ and $w_j$ co-occur in the same context window, and $P(w_i), P(w_j)$ are their individual probabilities. PMI measures association: it's zero when words appear independently, positive when they co-occur more than chance, negative when they avoid each other. The logarithm compresses the scale.
-
-Word2vec learns embeddings such that:
-
-$$ \mathbf{v}_{w_i}^\top \mathbf{v}_{w_j} \approx M_{ij} $$
-
-The dot product of embeddings approximates PMI. Words with high PMI (frequent co-occurrence) end up geometrically close. This reveals the mechanism: Word2vec is finding low-dimensional coordinates that preserve the co-occurrence structure of language. The neural network is just the implementation. The real operation is structural compression—taking the vast, sparse matrix of word relationships and squeezing it into 300 dimensions while preserving distances. It's Saussure's "system of differences," made computable.
-
-The softmax complicates this, transforming the problem into a Boltzmann machine. It gives proper probabilities but introduces computational barriers. Hierarchical softmax is the workaround, making training feasible without abandoning the probabilistic framework.
-
-## The Application
-
-Once words have coordinates, we can measure their relationships. We use **cosine similarity**—the cosine of the angle between vectors. If two word vectors point in the same direction, similarity is 1. If perpendicular (like the old one-hot encoding), similarity is 0. If opposite, similarity is -1.
-
-```{ojs}
-//| echo: false
-{
-  const width = 600;
-  const height = 300;
-  const svg = d3.create("svg").attr("width", width).attr("height", height);
-
-  const centerX = width / 2;
-  const centerY = height / 2;
-  const radius = 100;
-
-  const slider1 = d3.sliderBottom().min(0).max(360).step(1).width(200).default(45).ticks(0).handle(d3.symbol().type(d3.symbolCircle).size(200)());
-  const slider2 = d3.sliderBottom().min(0).max(360).step(1).width(200).default(135).ticks(0).handle(d3.symbol().type(d3.symbolCircle).size(200)());
-
-  const g1 = svg.append("g").attr("transform", "translate(50, 50)");
-  const g2 = svg.append("g").attr("transform", "translate(50, 120)");
-
-  const viz = svg.append("g").attr("transform", `translate(${centerX}, ${centerY})`);
-
-  viz.append("circle")
-    .attr("r", radius)
-    .attr("fill", "none")
-    .attr("stroke", "#ddd")
-    .attr("stroke-dasharray", "4,4");
-
-  const vec1 = viz.append("line").attr("stroke", "#3498db").attr("stroke-width", 4).attr("marker-end", "url(#arrowhead-blue)");
-  const vec2 = viz.append("line").attr("stroke", "#e74c3c").attr("stroke-width", 4).attr("marker-end", "url(#arrowhead-red)");
-
-  const textSim = viz.append("text").attr("y", -radius - 20).attr("text-anchor", "middle").attr("font-family", "monospace").attr("font-size", "16px").attr("font-weight", "bold");
-  const label1 = viz.append("text").attr("fill", "#3498db").attr("font-weight", "bold");
-  const label2 = viz.append("text").attr("fill", "#e74c3c").attr("font-weight", "bold");
-
-  svg.append("defs").append("marker")
-    .attr("id", "arrowhead-blue")
-    .attr("viewBox", "0 -5 10 10")
-    .attr("refX", 8).attr("refY", 0)
-    .attr("markerWidth", 6).attr("markerHeight", 6)
-    .attr("orient", "auto")
-    .append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#3498db");
-
-  svg.append("defs").append("marker")
-    .attr("id", "arrowhead-red")
-    .attr("viewBox", "0 -5 10 10")
-    .attr("refX", 8).attr("refY", 0)
-    .attr("markerWidth", 6).attr("markerHeight", 6)
-    .attr("orient", "auto")
-    .append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#e74c3c");
-
-  function update() {
-    const angle1 = slider1.value() * (Math.PI / 180);
-    const angle2 = slider2.value() * (Math.PI / 180);
-
-    const x1 = Math.cos(angle1) * radius;
-    const y1 = -Math.sin(angle1) * radius;
-    const x2 = Math.cos(angle2) * radius;
-    const y2 = -Math.sin(angle2) * radius;
-
-    vec1.attr("x1", 0).attr("y1", 0).attr("x2", x1).attr("y2", y1);
-    vec2.attr("x1", 0).attr("y1", 0).attr("x2", x2).attr("y2", y2);
-
-    label1.attr("x", x1 * 1.2).attr("y", y1 * 1.2).text("Word A").attr("text-anchor", "middle");
-    label2.attr("x", x2 * 1.2).attr("y", y2 * 1.2).text("Word B").attr("text-anchor", "middle");
-
-    const cosSim = Math.cos(angle1 - angle2);
-    textSim.text(`Cosine Similarity: ${cosSim.toFixed(3)}`);
-  }
-
-  slider1.on("onchange", update);
-  slider2.on("onchange", update);
-
-  g1.call(slider1);
-  g2.call(slider2);
-
-  svg.append("text").attr("x", 50).attr("y", 40).text("Angle Word A").attr("font-size", "12px").attr("fill", "#3498db");
-  svg.append("text").attr("x", 50).attr("y", 110).text("Angle Word B").attr("font-size", "12px").attr("fill", "#e74c3c");
-
-  update();
-  return svg.node();
-}
-```
-
-Let's verify this structural discovery using pre-trained embeddings from Google News (100 billion words). We'll use `gensim` to load the Word2vec model.
+Let's first learn the power of Word2Vec and then understand how it works. We will use a pre-trained model. We aren't teaching it anything; we are simply inspecting the map it created from 100 billion words of Google News.
 
 ```{python}
 import gensim.downloader as api
@@ -161,12 +38,10 @@ import numpy as np
 # Load pre-trained Word2vec embeddings
 print("Loading Word2vec model...")
 model = api.load("word2vec-google-news-300")
-print(f"Loaded embeddings for {len(model):,} words, each with {model.vector_size} dimensions")
+print(f"Loaded embeddings for {len(model):,} words.")
 ```
 
-### Test 1: Discovering Semantic Neighbors
-
-If structure is real, then "dog" should naturally cluster near words that share its context—animals that bark, chase, and live with humans. These are the words that define "dog" through difference and association.
+If the map is accurate, "dog" should be surrounded by its semantic kin. We query the nearest neighbors in the vector space.
 
 ```{python}
 similar_to_dog = model.most_similar("dog", topn=10)
@@ -176,63 +51,38 @@ for word, similarity in similar_to_dog:
     print(f"  {word:20s} {similarity:.3f}")
 ```
 
-The model was never told what a "dog" is. It discovered these relationships by observing that "dog," "dogs," "puppy," and "pooch" appear in nearly identical contexts. Structure emerged from statistics. Saussure's system of differences became measurable.
 
-### Test 2: The Geometry of Analogy
+The model groups "dog" with "dogs," "puppy," and "pooch" **not because it knows biology**, but because they are statistically interchangeable in sentences.
 
-Because meaning is now spatial, relationships become vectors. Consider the relationship between "king" and "man"—a royalty-to-person mapping. If we apply this same relationship to "woman," we should land near "queen." Mathematically:
+Since words are vectors, we can perform arithmetic on meaning. The relationship between "King" and "Man" is a vector. If we add that vector to "Woman," we should arrive at "Queen."
 
 $$ \vec{\text{King}} - \vec{\text{Man}} + \vec{\text{Woman}} \approx \vec{\text{Queen}} $$
 
-This is vector arithmetic on meaning. We're not manipulating symbols; we're navigating structure.
-
 ```{python}
-result = model.most_similar(positive=['king', 'woman'], negative=['man'], topn=5)
+result = model.most_similar(
+  positive=['king', 'woman'],
+   negative=['man'], topn=5
+)
 
 print("king - man + woman =")
 for word, similarity in result:
     print(f"  {word:15s} {similarity:.3f}")
 ```
 
-Why does this work? Because "king" and "man" share a gender dimension in the learned space, while "king" and "queen" share a royalty dimension. Vector subtraction isolates dimensions. Addition recombines them. The model never saw "king = man + royalty" as an equation—it discovered this structure by compression. It found that "king" differs from "man" in the same way "queen" differs from "woman."
 
-Let's test geographic structure. **Paris** is to **France** as **Berlin** is to **?**
-
-$$ \vec{\text{Paris}} - \vec{\text{France}} + \vec{\text{Germany}} \approx \vec{\text{Berlin}} $$
+We cannot see in 300 dimensions, but we can project the space down to 2D using PCA. This reveals the consistent structures—like the "capital city" relationship—that the model has learned.
 
 ```{python}
-result = model.most_similar(positive=['Paris', 'Germany'], negative=['France'], topn=3)
-print("\nParis - France + Germany =")
-for word, similarity in result:
-    print(f"  {word:15s} {similarity:.3f}")
-```
-
-The model learned that capital-country relationships form consistent directional patterns. This isn't reasoning—it's pattern compression. The structure was always there in the text. Word2vec just made it explicit.
-
-Even grammatical structure emerges. The morphological rule "add -er for comparative adjectives" becomes a geometric transformation:
-
-```{python}
-result = model.most_similar(positive=['bigger', 'cold'], negative=['big'], topn=3)
-print("\nbigger - big + cold =")
-for word, similarity in result:
-    print(f"  {word:15s} {similarity:.3f}")
-```
-
-### Visualizing the Structure
-
-We can't perceive 300 dimensions, but we can compress them to 2 using **PCA** and see if structure persists. Let's examine countries and their capitals:
-
-```{python}
-#| fig-cap: "Country-capital relationships preserved in 2D projection. The parallel arrows reveal consistent directional structure—the 'capital of' relationship occupies a stable region of semantic space."
+#| fig-cap: "The 'Capital Of' relationship appears as a consistent direction in vector space."
 #| fig-width: 12
 #| fig-height: 10
-
+#| code-fold: true
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import pandas as pd
 
-countries = ['Germany', 'France', 'Italy', 'Spain', 'Portugal', 'Greece']
-capitals = ['Berlin', 'Paris', 'Rome', 'Madrid', 'Lisbon', 'Athens']
+countries = ["Germany", "France", "Italy", "Spain", "Portugal", "Greece"]
+capitals = ["Berlin", "Paris", "Rome", "Madrid", "Lisbon", "Athens"]
 
 # Get embeddings
 country_embeddings = np.array([model[country] for country in countries])
@@ -244,134 +94,141 @@ embeddings = np.vstack([country_embeddings, capital_embeddings])
 embeddings_pca = pca.fit_transform(embeddings)
 
 # Create DataFrame
-df = pd.DataFrame(embeddings_pca, columns=['PC1', 'PC2'])
-df['Label'] = countries + capitals
-df['Type'] = ['Country'] * len(countries) + ['Capital'] * len(capitals)
+df = pd.DataFrame(embeddings_pca, columns=["PC1", "PC2"])
+df["Label"] = countries + capitals
+df["Type"] = ["Country"] * len(countries) + ["Capital"] * len(capitals)
 
 # Plot
 fig, ax = plt.subplots(figsize=(12, 10))
 
-# Plot countries and capitals
 for idx, row in df.iterrows():
-    color = '#e74c3c' if row['Type'] == 'Country' else '#3498db'
-    marker = 'o' if row['Type'] == 'Country' else 's'
-    ax.scatter(row['PC1'], row['PC2'], c=color, marker=marker, s=200,
-               edgecolors='black', linewidth=1.5, alpha=0.7, zorder=3)
-    ax.text(row['PC1'], row['PC2'] + 0.15, row['Label'], fontsize=12,
-            ha='center', va='bottom', fontweight='bold',
-            bbox=dict(facecolor='white', edgecolor='none', alpha=0.8))
+    color = "#e74c3c" if row["Type"] == "Country" else "#3498db"
+    marker = "o" if row["Type"] == "Country" else "s"
+    ax.scatter(
+        row["PC1"],
+        row["PC2"],
+        c=color,
+        marker=marker,
+        s=200,
+        edgecolors="black",
+        linewidth=1.5,
+        alpha=0.7,
+        zorder=3,
+    )
+    ax.text(
+        row["PC1"],
+        row["PC2"] + 0.15,
+        row["Label"],
+        fontsize=12,
+        ha="center",
+        va="bottom",
+        fontweight="bold",
+        bbox=dict(facecolor="white", edgecolor="none", alpha=0.8),
+    )
 
-# Draw arrows showing the "capital of" relationship
+# Draw arrows
 for i in range(len(countries)):
-    country_pos = df.iloc[i][['PC1', 'PC2']].values
-    capital_pos = df.iloc[i + len(countries)][['PC1', 'PC2']].values
-    ax.arrow(country_pos[0], country_pos[1],
-             capital_pos[0] - country_pos[0],
-             capital_pos[1] - country_pos[1],
-             color='gray', alpha=0.6, linewidth=2,
-             head_width=0.15, head_length=0.1, zorder=2)
+    country_pos = df.iloc[i][["PC1", "PC2"]].values
+    capital_pos = df.iloc[i + len(countries)][["PC1", "PC2"]].values
+    ax.arrow(
+        country_pos[0],
+        country_pos[1],
+        capital_pos[0] - country_pos[0],
+        capital_pos[1] - country_pos[1],
+        color="gray",
+        alpha=0.6,
+        linewidth=2,
+        head_width=0.15,
+        head_length=0.1,
+        zorder=2,
+    )
 
-ax.set_title('The "Capital Of" Relationship as Parallel Transport', fontsize=16, fontweight='bold', pad=20)
-ax.set_xlabel('Principal Component 1', fontsize=14)
-ax.set_ylabel('Principal Component 2', fontsize=14)
-ax.grid(alpha=0.3, linestyle='--')
-ax.legend(handles=[
-    plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='#e74c3c',
-               markersize=10, label='Country', markeredgecolor='black'),
-    plt.Line2D([0], [0], marker='s', color='w', markerfacecolor='#3498db',
-               markersize=10, label='Capital', markeredgecolor='black')
-], fontsize=12, loc='best')
+ax.set_title(
+    'The "Capital Of" Relationship as Parallel Transport',
+    fontsize=16,
+    fontweight="bold",
+    pad=20,
+)
+ax.grid(alpha=0.3, linestyle="--")
 plt.tight_layout()
 plt.show()
 ```
 
-The arrows from Germany→Berlin, France→Paris, Italy→Rome point in roughly the same direction. This is structural consistency. The "capital of" relationship occupies a stable region of semantic space. Even after crushing 300 dimensions into 2, the pattern survives.
 
-Let's examine clustering structure using scientific vocabulary:
 
-```{python}
-#| fig-cap: "Scientific terms cluster by discipline. Structure isn't imposed—it's discovered from co-occurrence patterns. Biology words share contexts with other biology words, forming a semantic island separate from physics or mathematics."
-#| fig-width: 10
-#| fig-height: 8
+## Let's unbox Word2Vec.
 
-from sklearn.manifold import TSNE
-import seaborn as sns
+We intuitively treat words as containers that hold meaning—that the word "Green" contains the visual concept of a specific color. This is incorrect. Nature presents us with a messy, continuous spectrum without hard borders; language is simply the set of arbitrary cuts we make in that continuum to create order.
 
-# Scientific vocabulary across disciplines
-words = [
-    # Network science
-    "network", "graph", "node", "edge", "community", "clustering",
-    # Biology
-    "protein", "gene", "cell", "DNA", "molecule", "organism",
-    # Physics
-    "quantum", "particle", "energy", "force", "electron", "photon",
-    # Mathematics
-    "theorem", "proof", "equation", "algebra", "calculus", "geometry",
-    # Computing
-    "algorithm", "computer", "software", "data", "program", "code"
-]
+**Word2Vec** operationalizes this by treating meaning as a game of contrast. It functions as a pair of "Linguistic Scissors." It does not learn what a word is by looking up a definition; it learns what a word is *like* by pulling it close to neighbors, and more importantly, it learns what a word is *not* by pushing it away from random noise. The meaning of "Green" is simply the geometric region that remains after we have pushed away "Red," "Purple," and "Banana."
 
-# Get embeddings
-word_vectors = np.array([model[word] for word in words if word in model])
-valid_words = [word for word in words if word in model]
+::: {#fig-contrastive}
 
-# Reduce to 2D with t-SNE
-tsne = TSNE(n_components=2, random_state=42, perplexity=8)
-word_2d = tsne.fit_transform(word_vectors)
+![](../figs/word2vec-manga-2.jpg)
 
-# Plot
-sns.set_style("white")
-fig, ax = plt.subplots(figsize=(10, 8))
 
-categories = {
-    'Network Science': ['network', 'graph', 'node', 'edge', 'community', 'clustering'],
-    'Biology': ['protein', 'gene', 'cell', 'DNA', 'molecule', 'organism'],
-    'Physics': ['quantum', 'particle', 'energy', 'force', 'electron', 'photon'],
-    'Mathematics': ['theorem', 'proof', 'equation', 'algebra', 'calculus', 'geometry'],
-    'Computing': ['algorithm', 'computer', 'software', 'data', 'program', 'code']
-}
+Starting from initially random vectors, word2vec learns iteratively to push away the words that are not related, and pull the words that are related. The resulting vector space is a map of the relationships between words.
 
-colors = {'Network Science': '#e74c3c', 'Biology': '#2ecc71', 'Physics': '#f39c12',
-          'Mathematics': '#9b59b6', 'Computing': '#3498db'}
+:::
 
-for category, category_words in categories.items():
-    indices = [valid_words.index(w) for w in category_words if w in valid_words]
-    if indices:
-        ax.scatter(word_2d[indices, 0], word_2d[indices, 1],
-                  c=colors[category], label=category, s=200, alpha=0.7,
-                  edgecolors='black', linewidth=1.5)
+This process of carving structure out of noise relies on a technique called **Contrastive Learning**. We cannot teach the model the exact meaning of each word but we can let it to learn the relationship between words through a binary classification problem: are these two words neighbors, or are they strangers?
 
-        for idx in indices:
-            ax.annotate(valid_words[idx], (word_2d[idx, 0], word_2d[idx, 1]),
-                       fontsize=9, ha='center', va='center', fontweight='bold')
+The training loop provides a **positive pair** from the text, instructing the model to maximize the similarity between their vectors. Simultaneously, it grabs random **negative samples**--imposters from the vocabulary--and demands the model minimize their similarity. This push-and-pull mechanic creates the vector space; the "Green" cluster forms not because the model understands color, but because those words are statistically interchangeable when opposed to "Red."
 
-ax.set_xlabel("Dimension 1", fontsize=12)
-ax.set_ylabel("Dimension 2", fontsize=12)
-ax.set_title("Discipline Clustering in Semantic Space", fontsize=14, fontweight='bold')
-ax.legend(loc='best', fontsize=10)
-ax.grid(alpha=0.3, linestyle='--')
-sns.despine()
-plt.tight_layout()
-plt.show()
-```
+To generate these pairs without human labeling, we employ a **sliding window technique**. This moves over the raw text corpus, converting a sequence of words into a system of geometric queries.
 
-Biology terms cluster together. Physics terms form a separate island. The model never read a taxonomy of science—it inferred disciplinary structure from observing that "protein" and "gene" appear near each other far more often than "protein" and "theorem." Each discipline defines its terms through internal contrasts and associations, exactly as Saussure predicted.
+::: {#fig-sliding-window}
 
-## The Limitation: Static Structure
+![](../figs/word2vec-manga-3.jpg)
 
-Word2vec assigns one vector per word, which creates a fundamental problem: **polysemy**. Consider "bank":
+Without human labeling, word2vec assumes that the words in the same context are related. The context is defined as the words that are within a window of an predefined size. For example, in the sentence "The quick brown fox jumps over the lazy dog", the context of the word "fox" is the words "brown", "jumps", "over", and "lazy".
 
-- "I deposited money at the **bank**."
-- "I sat on the river **bank**."
+:::
 
-Word2vec gives both instances the same vector—an average of financial and geographical contexts. This muddy compromise represents neither meaning accurately. The model learned that "bank" has structural relationships with both {money, account, loan} and {river, shore, water}, so it places "bank" somewhere between these clusters. But language doesn't work through averages. Context determines meaning, and Word2vec ignores context at inference time.
 
-This is the flaw that Transformers later fix. They don't assign a fixed position to "bank." They compute a position for "bank given 'river'" or "bank given 'money'." Context becomes part of the coordinate system. Structure becomes dynamic.
+::: {.column-margin}
+Word2Vec is a simple neural network with one-hidden layer. The input is one-hot encoded vector of a word, which triggers the neurons in the hidden layer to fire.
+The neural connection strength from the neuron representing the word to the neurons in the hidden layer (marked by red arrows) represents the query vector, $u$.
+The hidden layer neurons then trigger the firing of the output layer neurons, which represents the probability of word $w$ appearing in the context of the word $w_i$.
+The connection strength from an output word neuron to the hidden layer neurons represents the key vector, $v$.
+
+![](../figs/word2vec.jpg)
+:::
+
+The word in the center of the window acts as the Query vector ($u$), broadcasting its position to the surrounding Context words, which act as Keys ($v$). The neural network adjusts its weights to maximize the dot product $u \cdot v$ for these specific context pairs while suppressing the dot product for the negative samples. The probability of a word appearing in context is thus a function of their vector alignment.
+
+$$
+P(j \vert i) = \frac{P(j) \exp(u_i \cdot v_j)}{\sum_{k=1}^{V} P(k) \exp(u_i \cdot v_k)}
+$$
+
+where $P(j)$ is the probability of word $j$ appearing in the vocabulary.
+
+::: {.callout-note  collapse="true"}
+
+## Original Formulation of Word2Vec is different from the one we use here
+
+The original paper of word2vec puts the following formula for the probability:
+
+$$
+P(j \vert i) = \frac{\exp(u_i \cdot v_j)}{\sum_{k=1}^{V} \exp(u_i \cdot v_k)}.
+$$
+
+Notice that $P(j)$---the marginal probability of word $j$---is omitted in this formulation [@mikolov2013distributed]. This original formulation is correct conceptually but not practically. In practice, we train word2vec with an efficient but biased training algorithm (i.e., negative sampling). Term $P(j)$ enters the $P(j \vert i)$ when taking into account the bias [@kojaku2021residual], which is why we include it in the formula above.
+:::
+
+This closes the loop between high-level linguistic philosophy and low-level matrix operations. The machine proves the structuralist hypothesis: that meaning is relational. By mechanically slicing the continuum of language and applying the pressure of negative sampling, the model reconstructs a functional map of human concepts. We have successfully turned a philosophy of meaning into a runnable algorithm.
+
+::: {#fig-structuralism-loop}
+
+![](../figs/word2vec-manga-4.jpg)
+
+:::
+
+
+## Other references
+
+There is a nice blog post that walks through the inner workings of Word2Vec by Chris McCormick. See [here](https://mccormickml.com/2016/04/19/word2vec-tutorial-the-skip-gram-model/). Strongly encourage you to read it.
 
 ## The Takeaway
 
-Word2vec revealed that meaning is structural, not definitional. We don't understand "dog" by memorizing a description—we understand it through its position in a vast web of relationships. Saussure argued this theoretically in 1916. Firth operationalized it in 1957. Mikolov made it computable in 2013. The algorithm's insight was to make structure explicit through geometry. By compressing co-occurrence patterns into coordinates, it transformed the fuzzy notion of "semantic similarity" into literal distance. Once words have positions, language has topology. And once language has topology, you can navigate meaning through vector arithmetic.
-
----
-
-**Next**: [Text Fundamentals: The Full Picture →](text-fundamentals.qmd)
+You don't need to know what a thing *is* to understand it; you only need to know where it stands relative to everything it isn't.
