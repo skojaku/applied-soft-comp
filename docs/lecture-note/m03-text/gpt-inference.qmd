@@ -1,8 +1,7 @@
 ---
 title: "GPT Inference: Sampling Strategies"
-jupyter: python3
 execute:
-  eval: false
+  enabled: true
 ---
 
 ## The Spoiler
@@ -11,6 +10,8 @@ execute:
 
 ## The Mechanism (Why It Works)
 
+![](../figs/gpt-inference-sampling-manga.png)
+
 When GPT predicts the next token, it doesn't output a single word. It outputs a probability distribution over its entire vocabulary—millions of possible tokens, each with a likelihood. The naive approach is to always pick the highest probability token (**greedy sampling**), but this creates a deterministic trap: the model falls into repetitive loops because it always makes the same choice. The distribution is high-dimensional, making sampling computationally expensive, but also rich with alternative paths.
 
 The solution is controlled randomness. By sampling from the distribution rather than deterministically selecting the peak, we introduce diversity. But blind random sampling produces incoherent text. The challenge is finding the middle ground: sample broadly enough to avoid repetition, but narrowly enough to maintain coherence.
@@ -18,6 +19,12 @@ The solution is controlled randomness. By sampling from the distribution rather 
 Think of it like improvisational jazz. A musician playing the same note repeatedly (greedy sampling) is boring. Playing random notes (uniform sampling) is noise. The art is in sampling from the most promising notes while occasionally taking creative risks.
 
 ## The Application (How We Use It)
+
+Here is an interactive demo of GPT inference.
+
+https://static.marimo.app/static/gpt-ar61
+
+You can try different sampling strategies and see the results.
 
 GPT generates text one token at a time, repeatedly sampling from the probability distribution. Let's examine the strategies for sampling that balance quality and diversity.
 
@@ -30,6 +37,30 @@ GPT generates text one token at a time, repeatedly sampling from the probability
 
 GPT greedy search.
 :::
+
+Let's see greedy sampling in action using Gemma 3 (270M):
+
+```{python}
+from transformers import pipeline
+
+# Load GPT-2 model
+generator = pipeline(
+    "text-generation",
+    model="google/gemma-3-270m",
+    device="mps",  # use "cuda" for GPU, "mps" for Apple Silicon. Use "cpu" for CPU.
+)
+
+# Greedy sampling: do_sample=False means deterministic
+greedy_output = generator(
+    "Hi there! ",
+    do_sample=False,
+    max_new_tokens=20,
+    pad_token_id=generator.tokenizer.eos_token_id,
+)
+print(greedy_output[0]["generated_text"])
+```
+
+The output is often repetitive because greedy sampling always selects the most probable token at each step, leading to predictable and repetitive patterns.
 
 **Beam search** alleviates this problem by taking into account the high-order dependencies between tokens. For example, in generating "The cat ran across the ___", beam search might preserve a path containing "mat" even if "floor" or "room" have higher individual probabilities at that position. This is because the complete sequence like "mat quickly" could be more probable when considering the token next after "mat". "The cat ran across the mat quickly" is a more natural phrase than "The cat ran across the floor quickly" when considering the full flow and common linguistic patterns.
 
@@ -49,11 +80,43 @@ This process continues until reaching the end, finally selecting the sequence wi
 
 While beam search often produces high-quality outputs since it considers longer-term coherence, it can still suffer from the problem of repetitive or trapped text.
 
+Here's beam search with 10 beams:
+
+```{python}
+beam_output = generator(
+    "Hi there! ",
+    do_sample=False,
+    max_new_tokens=20,
+    pad_token_id=generator.tokenizer.eos_token_id,
+    num_beams=10,  # number of beams to explore
+    num_return_sequences=5,  # return top 5 sequences
+)
+
+# Print the top 5 sequences
+for i, output in enumerate(beam_output):
+    print(f"Sequence {i+1}: {output['generated_text']}")
+```
+
+Beam search explores multiple paths and returns the most probable sequences. Notice how the outputs are still relatively similar because they optimize for likelihood.
+
 ### From Deterministic to Stochastic Sampling
 
 Both greedy and beam search are deterministic. They pick the most likely token at each step. However, this creates a loop where the model always predicts the same tokens repeatedly. A simple way to alleviate this problem is to sample a token from the distribution.
 
 **Top-k Sampling** relaxes the deterministic nature of greedy sampling by selecting randomly from the $k$ most likely next tokens at each generation step. While this introduces some diversity compared to greedy sampling, choosing a fixed $k$ can be problematic. Value of $k$ might be too large for some distribution tails (including many poor options) or too small for others (excluding reasonable options).
+
+```{python}
+top_k_output = generator(
+    "Hi there! ",
+    do_sample=True,  # enable stochastic sampling
+    max_new_tokens=20,
+    pad_token_id=generator.tokenizer.eos_token_id,
+    top_k=10,  # restrict to top 10 tokens
+)
+print(top_k_output[0]["generated_text"])
+```
+
+Try running this multiple times—you'll get different outputs each time because the model samples randomly from the top-k tokens.
 
 **Nucleus Sampling** [@holtzman2019curious] addresses this limitation by dynamically selecting tokens based on cumulative probability. It samples from the smallest set of tokens whose cumulative probability exceeds a threshold $p$ (e.g. 0.9). This adapts naturally to different probability distributions, i.e., selecting few tokens when the distribution is concentrated and more when it's spread out. This approach often provides a good balance between quality and diversity.
 
@@ -62,6 +125,19 @@ Both greedy and beam search are deterministic. They pick the most likely token a
 
 Nucleus sampling. The image is taken from [this blog](https://zenn.dev/hellorusk/articles/1c0bef15057b1d).
 :::
+
+```{python}
+top_p_output = generator(
+    "Hi there! ",
+    do_sample=True,
+    max_new_tokens=20,
+    pad_token_id=generator.tokenizer.eos_token_id,
+    top_p=0.95,  # sample from tokens with cumulative probability >= 0.95
+)
+print(top_p_output[0]["generated_text"])
+```
+
+Nucleus sampling dynamically adjusts the number of candidate tokens based on the probability distribution, making it more adaptive than fixed top-k.
 
 **Temperature Control**
 
@@ -78,6 +154,44 @@ where $z_i$ are the logits and $\tau$ is the temperature parameter. Lower temper
 
 Temperature controls the concentration of the probability distribution. Lower temperature makes the distribution more peaked, while higher temperature makes the distribution more flat.
 :::
+
+Let's see how temperature affects generation:
+
+```{python}
+for tau in [0.1, 0.5, 1.0, 2.0, 5.0]:
+    output = generator(
+        "Hi there! ",
+        do_sample=True,
+        max_new_tokens=20,
+        pad_token_id=generator.tokenizer.eos_token_id,
+        temperature=tau,
+    )
+    print(f"τ = {tau}: {output[0]['generated_text']}")
+```
+
+Notice how:
+- Low temperature ($\tau = 0.1$): Conservative, focused output
+- Medium temperature ($\tau = 1.0$): Balanced diversity
+- High temperature ($\tau = 5.0$): Creative but potentially incoherent
+
+**Combining All Strategies**
+
+You can combine top-k, top-p, and temperature for fine-grained control:
+
+```{python}
+combined_output = generator(
+    "Hi there! ",
+    do_sample=True,
+    max_new_tokens=20,
+    pad_token_id=generator.tokenizer.eos_token_id,
+    temperature=0.7,  # moderate randomness
+    top_k=10,         # restrict to top 10 tokens
+    top_p=0.95,       # within top-k, use nucleus sampling
+)
+print(combined_output[0]["generated_text"])
+```
+
+This combination restricts candidates to top-k tokens, then applies nucleus sampling, and finally uses temperature to control randomness—giving you maximum control over the generation process.
 
 ### Practical Recommendations
 

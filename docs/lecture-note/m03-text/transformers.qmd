@@ -1,14 +1,14 @@
 ---
 title: "Transformers"
 execute:
-    enabled: true
-filters:
-  - marimo-team/marimo
+    enabled: false
 ---
 
 **The Spoiler:** The entire transformer revolution boils down to this—static embeddings assign one vector per word, ignoring that "bank" near "river" is mathematically different from "bank" near "money." Transformers solve this by computing context-aware representations through weighted mixing, and the weights themselves emerge from learned comparisons (Query × Key) between words. The result: machines finally understand that meaning isn't in the word; it's in the *distribution* of words around it.
 
 ## One word, one vector is not enough
+
+![](../figs/attention-manga-problem.png){width=70% fig-align=center}
 
 For many years, natural language processing treated words as having fixed meanings. We represented each word—like "bank"—as a single vector of numbers, called **static embeddings**.
 
@@ -213,6 +213,8 @@ By changing the weights, we can see that the vector for "bank" can lean more tow
 The simplest idea is to give each word an equal weight: $w_i = 1/N$. This creates a basic "bag-of-words" average. But sentences aren’t actually this fair—some words are much more important than others. For example, in "I deposited money at the bank," the words "deposited" and "money" are key, while "I," "at," and "the" add little meaning. If we treat all words the same, we lose the details that matter. We need a way to highlight the important words and downplay the rest.
 
 ## Attention mechanism
+
+![](../figs/attention-manga.png){width=70% fig-align=center}
 
 Let's walk through how transformers identify the surrounding words that are relevant to a focal word to be contextualized, which is called the **attention mechanism**. Before we dive into the attention mechanism, let's first prepare some terminology.
 
@@ -689,144 +691,275 @@ attentionHeatmap = {
 }
 ```
 
-Now scale this up. **Every word** in a sentence needs to attend to **every other word**. For "The cat sat on the mat" (six words), we compute a $6 \times 6$ **attention matrix** $A$, where $A_{ij} = \text{softmax}(\vec{q}_i \cdot \vec{k}_j)$. Rows represent words asking for context (Queries); columns represent words providing context (Keys). Each cell $(i,j)$ indicates how much word $i$ attends to word $j$. Each row sums to 1—it's a probability distribution over context words.
+Rows represent words asking for context (Queries); columns represent words providing context (Keys). Each cell $(i,j)$ indicates how much word $i$ attends to word $j$. Each row sums to 1—it's a probability distribution over context words.
 
-But here's the final complication: **one attention matrix captures one type of relationship**. Language is multidimensional. There are syntactic relationships (subject-verb-object), semantic relationships (conceptual similarity between "cat" and "mat" as physical objects), positional relationships (local word order), and pragmatic relationships (coreference, where "her" links to "scientist"). A single attention mechanism can't capture all of these simultaneously.
+## Multi-head attention
 
-![](../figs/transformer-multihead-attention.jpg)
+![](../figs/multihead-attention-manga.png){width=70% fig-align=center}
 
-The solution is **multi-head attention**: run multiple attention mechanisms in parallel, each with its own $W_Q$, $W_K$, $W_V$ matrices. Mathematically, $\text{MultiHead}(X) = \text{Concat}(\text{head}_1, \text{head}_2, \ldots, \text{head}_h) W^O$. Each head learns a different attention pattern. Modern transformers use 8-16 heads per layer: BERT uses 12, GPT-3 uses 96. It's like having twelve different experts analyze the sentence simultaneously—one focusing on syntax, one on semantics, one on coreference—and then combining their insights through a learned linear transformation.
+Putting all together (query-key-value transformation, attention matrix, and softmax normalization), this forms one *attention head* of the transformer.
+We can have multiple attention heads in parallel, each with its own query-key-value transformation, attention matrix, and softmax normalization.
+The output of the attention heads are concatenated and then passed through a linear transformation to produce the final output.
 
-## The Complete Architecture: Engineering for Scale
+$$
+\text{Output} = \text{Linear}(\text{Concat}(\text{head}_1, \text{head}_2, \ldots, \text{head}_h))
+$$
 
-You've now discovered the core innovation: **self-attention via Query-Key-Value**. But a working transformer needs additional engineering to make this mechanism trainable at scale.
 
-**Positional encoding** solves the problem that attention is permutation-invariant. Without extra information, "cat sat" equals "sat cat" because the dot products don't encode order. The solution is to add position-dependent vectors to embeddings: $\text{input}_i = \text{embedding}_i + \text{position}_i$. Transformers use sinusoidal functions of varying frequencies: $\text{PE}(pos, 2i) = \sin(pos / 10000^{2i/d})$ and $\text{PE}(pos, 2i+1) = \cos(pos / 10000^{2i/d})$. This gives the model access to both absolute position and relative distances between words.
+This is one *attention block* of the transformer. Having parallel attention heads is a powerful technique to capture different aspects of the input data, i.e., the model can learn multiple relationships between the words in the input data.
 
-**Residual connections** create highways for gradient flow. Deep networks suffer from vanishing gradients—signals decay exponentially as they backpropagate through layers. The solution is skip connections: $\text{output} = \text{LayerNorm}(x + \text{Attention}(x))$. This allows gradients to flow backward through 12-24 layers without vanishing.
 
-**Feed-forward networks** add processing power beyond attention. After the attention sublayer, each word's representation passes through a small multi-layer perceptron independently: $\text{FFN}(x) = \text{ReLU}(x W_1 + b_1) W_2 + b_2$. This introduces non-linearity and gives the model capacity to learn complex transformations.
+## Transformer architecture
 
-**Layer normalization** keeps activations in a stable numerical range during training, preventing exploding or vanishing values that would make gradient descent unstable.
+Let's step back and look at the transformer architecture in a high level. We will base our discussion on the original Transformer paper, "Attention Is All You Need". And note that the transformer architecture has evolved since then, and there are many variants of the transformer architecture.
 
-The complete transformer block, repeated 12 or more times, looks like this: Input → Multi-Head Self-Attention → Add & LayerNorm (residual) → Feed-Forward Network → Add & LayerNorm (residual) → Output passed to next block.
+### Encoder module
 
-Here's what matters: residual connections, layer normalization, and feed-forward networks all existed before 2017. The transformer's innovation is self-attention. That single mechanism replaced recurrent neural networks (RNNs), long short-term memory networks (LSTMs), and convolutional approaches for natural language processing. The original paper's title—*"Attention Is All You Need"*—was provocative but accurate.
+![](https://miro.medium.com/v2/resize:fit:876/format:webp/1*7sjcgd_nyODdLbZSxyxz_g.png){width=50% fig-align=center}
 
-The attention mechanism gets deployed differently depending on the task. **Encoder-only architectures** like BERT use bidirectional attention where word $i$ can attend to all words, past and future. These models excel at understanding text for classification, embeddings, and extraction tasks. You feed in "Is this paper about networks or biology?" and get back a classification. **Decoder-only architectures** like GPT and Gemma use causal attention (masked) where word $i$ can only attend to words at positions $\leq i$. This prevents "looking into the future" during autoregressive generation. When generating text word-by-word, you can't use words you haven't generated yet. These models excel at completion and chat. **Encoder-decoder architectures** like the original transformer use bidirectional attention in the encoder to process input, causal attention in the decoder for output generation, plus **cross-attention** where the decoder's Query vectors attend to the encoder's Key and Value vectors. These models excel at sequence-to-sequence tasks like translation: "Hello world" → "Bonjour monde."
 
-## Why This Changed Everything
+The encoder module consists of *position embedding*, *multi-head attention*, *residual connection*, and *layer normalization*, along with feed-forward networks. Let us go through each component in detail.
 
-Before transformers, natural language processing used **sequential processing** via recurrent neural networks. The computational graph looked like: Word 1 → Hidden State 1 → Word 2 → Hidden State 2 → and so on. This architecture had three fatal flaws. First, sequential computation is inherently slow—you can't parallelize across words because each hidden state depends on the previous one. Second, information decays over long distances due to vanishing gradients; dependencies 100+ words apart become nearly impossible to learn. Third, the fixed-size hidden state creates an information bottleneck for long sequences.
+#### Position embedding
 
-Transformers solved all three problems simultaneously. **Parallel processing** means all words are processed simultaneously, yielding 100× faster training on modern GPUs. **Arbitrary long-range dependencies** become tractable because "bank" in position 50 can directly attend to "money" in position 2 through a single matrix multiplication—no gradients need to flow through 48 intermediate steps. **Scalability** emerged as a predictable phenomenon: performance scales logarithmically with parameters. This revealed a stunning empirical fact—bigger models aren't just incrementally better; they unlock **qualitatively new capabilities** like in-context learning and multi-step reasoning. This is why GPT-4 dramatically exceeds GPT-3, which dramatically exceeds GPT-2, despite using essentially the same architecture.
+![](../figs/transformer-position-encoding-manga.png){width=70% fig-align=center}
 
-Consider a concrete example of how attention captures linguistic structure. Take the sentence "The scientist published her paper." We want to resolve the coreference: what does "her" refer to?
+In the encoder module, we start from the positional ecoding, which fixes the issue of the attention modules, i.e., the attention modules are *permutation invariant*. That is, the attention modules produce the same output even if we shuffle the words in the sentence.
+But the position of the words is a key information in language understanding and generation. Position encoding fixes this issue.
 
-```{ojs}
-//| echo: false
+To understand how the position encoding works, let us approach from a naive approach.
+Suppose that we have a sequence of $T$ token embeddings, denoted by $x_1, x_2, ..., x_T$, each of which is a $d$-dimensional vector.
+A simple way to encode the position information is to add a position index to each token embedding, i.e.,
 
-{
-  const words = ["The", "scientist", "published", "her", "paper"];
-  const attention = [
-    [0.5, 0.3, 0.1, 0.05, 0.05],   // "The"→"scientist"
-    [0.2, 0.5, 0.2, 0.05, 0.05],   // "scientist"
-    [0.05, 0.3, 0.4, 0.1, 0.15],   // "published"
-    [0.05, 0.6, 0.1, 0.2, 0.05],   // "her"→"scientist" ← KEY!
-    [0.05, 0.2, 0.1, 0.15, 0.5]    // "paper"
-  ];
+$$
+x_t := x_t + \beta t,
+$$
 
-  // Prepare heatmap data
-  const heatmapData = [];
-  for (let i = 0; i < words.length; i++) {
-    for (let j = 0; j < words.length; j++) {
-      heatmapData.push({
-        Word: words[i],
-        AttendsTo: words[j],
-        Weight: attention[i][j],
-        isHighlight: i === 3 && j === 1  // "her" → "scientist"
-      });
-    }
-  }
+where $t = 1, 2, ..., T$ is the position index of the token in the sequence, and $\beta$ is the step size. This appears to be simple but has a critical problem.
 
-  return Plot.plot({
-    width: 500,
-    height: 400,
-    marginTop: 60,
-    marginBottom: 60,
-    marginLeft: 90,
-    marginRight: 120,
-    style: {
-      background: "white",
-      color: "black"
-    },
-    x: {
-      label: "Attends To →",
-      labelAnchor: "center"
-    },
-    y: {
-      label: "↑ Word",
-      labelAnchor: "center"
-    },
-    color: {
-      type: "linear",
-      scheme: "Purples",
-      domain: [0, 0.6],
-      label: "Attention Weight",
-      legend: true
-    },
-    marks: [
-      Plot.cell(heatmapData, {
-        x: "AttendsTo",
-        y: "Word",
-        fill: "Weight",
-        inset: 0.5
-      }),
-      Plot.text(heatmapData, {
-        x: "AttendsTo",
-        y: "Word",
-        text: d => d.Weight.toFixed(2),
-        fill: d => d.Weight > 0.3 ? "white" : "black",
-        fontSize: 11,
-        fontWeight: "bold"
-      }),
-      // Highlight box around "her" → "scientist"
-      Plot.rect([{x: "scientist", y: "her"}], {
-        x: "x",
-        y: "y",
-        fill: "none",
-        stroke: "red",
-        strokeWidth: 3,
-        inset: -2
-      }),
-      Plot.text([{ x: 0, y: 0 }], {
-        x: () => words.length / 2 - 0.5,
-        y: () => -0.9,
-        text: () => "Coreference via Attention: 'her' → 'scientist'",
-        fontSize: 14,
-        fontWeight: "bold",
-        frameAnchor: "top",
-        fill: "black"
-      })
-    ]
-  });
-}
-```
+1. **Unbounded**: The position index can be arbitrarily large. When the models see a sequence longer than those in training data, it may suffer since the model will be exposed to a new position index that the model has never seen before.
+2. **Discrete**: The position index is discrete, which means that the model cannot capture the position information in a smooth manner.
 
-*Attention pattern showing 'her' → 'scientist' (0.60 weight). The model learned coreference **without explicit grammar rules**—purely from prediction tasks.*
+Because this naive approach has the problems, let us consider another approach. Let us represent the position index using a binary vector of length $d$. For example, in case of $d=4$, we have the following binary vectors:
 
-Row 3 corresponds to "her." The pronoun attends most strongly to "scientist" (0.60), correctly identifying the referent. The model **discovered** that pronouns link to earlier nouns through statistical patterns in training data—no one programmed this grammatical rule. This is the profound insight: transformers learn the structure of language as a side effect of optimizing a simple prediction objective.
+$$
+\begin{align*}
+  0: \ \ \ \ \color{orange}{\texttt{0}} \ \ \color{green}{\texttt{0}} \ \ \color{blue}{\texttt{0}} \ \ \color{red}{\texttt{0}} & &
+  8: \ \ \ \ \color{orange}{\texttt{1}} \ \ \color{green}{\texttt{0}} \ \ \color{blue}{\texttt{0}} \ \ \color{red}{\texttt{0}} \\
+  1: \ \ \ \ \color{orange}{\texttt{0}} \ \ \color{green}{\texttt{0}} \ \ \color{blue}{\texttt{0}} \ \ \color{red}{\texttt{1}} & &
+  9: \ \ \ \ \color{orange}{\texttt{1}} \ \ \color{green}{\texttt{0}} \ \ \color{blue}{\texttt{0}} \ \ \color{red}{\texttt{1}} \\
+  2: \ \ \ \ \color{orange}{\texttt{0}} \ \ \color{green}{\texttt{0}} \ \ \color{blue}{\texttt{1}} \ \ \color{red}{\texttt{0}} & &
+  10: \ \ \ \ \color{orange}{\texttt{1}} \ \ \color{green}{\texttt{0}} \ \ \color{blue}{\texttt{1}} \ \ \color{red}{\texttt{0}} \\
+  3: \ \ \ \ \color{orange}{\texttt{0}} \ \ \color{green}{\texttt{0}} \ \ \color{blue}{\texttt{1}} \ \ \color{red}{\texttt{1}} & &
+  11: \ \ \ \ \color{orange}{\texttt{1}} \ \ \color{green}{\texttt{0}} \ \ \color{blue}{\texttt{1}} \ \ \color{red}{\texttt{1}} \\
+  4: \ \ \ \ \color{orange}{\texttt{0}} \ \ \color{green}{\texttt{1}} \ \ \color{blue}{\texttt{0}} \ \ \color{red}{\texttt{0}} & &
+  12: \ \ \ \ \color{orange}{\texttt{1}} \ \ \color{green}{\texttt{1}} \ \ \color{blue}{\texttt{0}} \ \ \color{red}{\texttt{0}} \\
+  5: \ \ \ \ \color{orange}{\texttt{0}} \ \ \color{green}{\texttt{1}} \ \ \color{blue}{\texttt{0}} \ \ \color{red}{\texttt{1}} & &
+  13: \ \ \ \ \color{orange}{\texttt{1}} \ \ \color{green}{\texttt{1}} \ \ \color{blue}{\texttt{0}} \ \ \color{red}{\texttt{1}} \\
+  6: \ \ \ \ \color{orange}{\texttt{0}} \ \ \color{green}{\texttt{1}} \ \ \color{blue}{\texttt{1}} \ \ \color{red}{\texttt{0}} & &
+  14: \ \ \ \ \color{orange}{\texttt{1}} \ \ \color{green}{\texttt{1}} \ \ \color{blue}{\texttt{1}} \ \ \color{red}{\texttt{0}} \\
+  7: \ \ \ \ \color{orange}{\texttt{0}} \ \ \color{green}{\texttt{1}} \ \ \color{blue}{\texttt{1}} \ \ \color{red}{\texttt{1}} & &
+  15: \ \ \ \ \color{orange}{\texttt{1}} \ \ \color{green}{\texttt{1}} \ \ \color{blue}{\texttt{1}} \ \ \color{red}{\texttt{1}} \\
+\end{align*}
+$$
+
+Then, one may use the binary vector as the position embedding as follows:
+
+$$
+x_{t,i} := x_{t,i} + \text{Pos}(t, i),
+$$
+
+where $\text{Pos}(t, i)$ is the position embedding vector of the position index $t$ and the dimension index $i$.
+This representation is good in the sense that it is bounded, i.e., between 0 and 1. Yet, it is still discrete.
+
+An elegant position embedding, which is used in transformers, is the *sinusoidal position embedding*. It appears to be complicated but stay with me for a moment.
+
+$$
+\text{Pos}(t, i) =
+\begin{cases}
+\sin\left(\dfrac{t}{10000^{2i/d}}\right), & \text{if } i \text{ is even} \\
+\cos\left(\dfrac{t}{10000^{2i/d}}\right), & \text{if } i \text{ is odd}
+\end{cases},
+$$
+
+where $i$ is the dimension index of the position embedding vector. This position embedding is added to the input token embedding as:
+
+$$
+x_{t,i} := x_{t,i} + \text{Pos}(t, i),
+$$
+
+It appears to be complicated but it can be seen as a continuous version of the binary position embedding above. To see this, let us plot the position embedding for the first 100 positions.
+
+::: {#fig-transformer-position-embedding}
+![](https://kazemnejad.com/img/transformer_architecture_positional_encoding/positional_encoding.png){width=70% fig-align=center}
+
+The position embedding. The image is taken from https://kazemnejad.com/blog/transformer_architecture_positional_encoding/
+:::
+
+
+We note that, just like the binary position embedding, the sinusoidal position embedding also exhibits the alternating pattern (vertically) with frequency increasing as the dimension index increases (horizontal axis). Additionally, the sinusoidal position embedding is continuous, which means that the model can capture the position information in a smooth manner.
+
+Another key property of the sinusoidal position embedding is that the dot similarity between the two position embedding vectors represent the similarity between the two positions, regardless of the position index.
+
+::: {#fig-transformer-position-embedding-similarity}
+
+![](https://kazemnejad.com/img/transformer_architecture_positional_encoding/time-steps_dot_product.png){width=70% fig-align=center}
+
+The dot similarity between the two position embedding vectors represent the distance between the two positions, regardless of the position index. The image is taken from https://kazemnejad.com/blog/transformer_architecture_positional_encoding/
+:::
+
+
+::: {.callout-note title="Why additive position embedding?" collapse=true}
+
+The sinusoidal position embedding is additive, which alter the token embedding. Alternatively, one may concatenate, instead of adding, the position embedding to the token embedding, i.e., $x_{t,i} := [x_{t,i}; \text{Pos}(t, i)]$. This makes it easier for a model to distinguish the position information from the token information. So why not use the concatenation?
+
+One reason is that the concatenation requires a larger embedding dimension, which increases the number of parameters in the model.
+Instead, adding the position embedding creates an interesting effect in the attention mechanism.
+Interested readers can check out [this Reddit post](https://www.reddit.com/r/MachineLearning/comments/cttefo/comment/exs7d08/?utm_source=reddit&utm_medium=web2x&context=3).
+:::
+
+::: {.callout-note title="Absolute vs Relative Position Embedding" collapse=true}
+
+Absolute position embedding is the one we discussed above, where each position is represented by a unique vector.
+On the other hand, relative position embedding represents the position difference between two positions, rather than the absolute position [@shaw2018self].
+The relative position embedding can be implemented by adding a learnable scalar to the unnormalized attention scores before softmax operation [@raffel2020exploring], i.e.,
+
+$$
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T + B}{\sqrt{d_k}}\right)V
+$$
+
+where $B$ is a learnable offset matrix that is added to the unnormalized attention scores. The matrix $B$ is a function of the position difference between the query and key, i.e., $B = f(i-j)$, where $i$ and $j$ are the position indices of the query and key, respectively. Such a formulation is useful when the model needs to capture the relative position between two tokens.
+:::
+
+
+#### Residual Connection
+
+
+![](../figs/transformer-residual-connection-manga.png){width=70% fig-align=center}
+
+Another important component is the *residual connection*.
+The input is first passed through multi-head attention, followed by layer normalization. Notice that there is a parallel path from the input to the output of the attention module. This is so-called *residual connection*.
+
+A residual connection, also known as a *skip connection*, is a technique used to stabilize the training of deep neural networks. More specifically, let us denote by $f$ the neural network that we want to train, which is the multi-head attention or feed-forward networks in the transformer block. The residual connection is defined as:
+
+$$
+\underbrace{x_{\text{out}}}_{\text{output}} = \underbrace{x_{\text{in}}}_{\text{input}} + \underbrace{f(x_{\text{in}})}_{\text{component}}.
+$$
+
+Note that rather than learning the complete mapping from input to output, the network $f$ learns to model the residual (difference) between them. This is particularly advantageous when the desired transformation approximates an identity mapping, as the network can simply learn to output values near zero.
+
+Residual connections help prevent the vanishing gradient problem.
+Deep learning models like LLMs consist of many layers, which are trained to minimize the loss function ${\cal L}_{\text{loss}}$ with respect to the parameters $\theta$.
+To this end, the gradient of the loss function is computed using the chain rule as
+
+$$
+\frac{\partial {\cal L}_{\text{loss}}}{\partial \theta} = \frac{\partial {\cal L}_{\text{loss}}}{\partial f_L} \cdot \frac{\partial f_L}{\partial f_{L-1}} \cdot \frac{\partial f_{L-1}}{\partial f_{L-2}} \cdot ... \cdot \frac{\partial f_{l+1}}{\partial f_l} \cdot \frac{\partial f_l}{\partial \theta}
+$$
+
+where $f_i$ is the output of the $i$-th layer. The gradient vanishing problem occurs when the individual terms $\frac{\partial f_{i+1}}{\partial f_i}$ are less than 1. As a result, the gradient becomes smaller and smaller as the gradient flows backward through earlier layers.
+By adding the residual connection, the gradient for the individual term becomes:
+
+$$
+\frac{\partial x_{i+1}}{\partial x_i} = 1 + \frac{\partial f_i(x_i)}{\partial x_i}
+$$
+
+Notice the "+1" term, which is the direct path from the input to the output. The chain rule is thus modified as:
+
+$$\left(1 + \frac{\partial f_{L-1}}{\partial x_{L-1}}\right)\left(1 + \frac{\partial f_{L-2}}{\partial x_{L-2}}\right)\left(1 + \frac{\partial f_{L-3}}{\partial x_{L-3}}\right)...$$
+
+When we expand this, we can group terms by their order (how many $\partial f_i$ terms are multiplied together):
+We can write this more concisely using $O_n$ to represent terms of nth order:
+
+$$1 + O_1 + O_2 + O_3 + ...$$
+
+where:
+
+- $O_1 = \frac{\partial f_{L-1}}{\partial x_{L-1}} + \frac{\partial f_{L-2}}{\partial x_{L-2}} + \frac{\partial f_{L-3}}{\partial x_{L-3}} + ...$
+- $O_2 = \frac{\partial f_{L-1}}{\partial x_{L-1}}\frac{\partial f_{L-2}}{\partial x_{L-2}} + \frac{\partial f_{L-2}}{\partial x_{L-2}}\frac{\partial f_{L-3}}{\partial x_{L-3}} + \frac{\partial f_{L-1}}{\partial x_{L-1}}\frac{\partial f_{L-3}}{\partial x_{L-3}} + ...$
+- $O_3 = \frac{\partial f_{L-1}}{\partial x_{L-1}}\frac{\partial f_{L-2}}{\partial x_{L-2}}\frac{\partial f_{L-3}}{\partial x_{L-3}} + ...$
+
+Without the residual connection, we only have the $O_L$ terms for the network with $L$ layers, which is subject to the gradient vanishing problem. Whereas with the residual connection, we have the lower-order terms like $O_1, O_2, O_3, ...$ for the network with $L$ layers, which is less susceptible to the gradient vanishing problem.
+
+::: {.callout-note title="Residual Connection" collapse=true}
+
+Residual connections are a architectural innovation that allows neural networks to be much deeper without degrading performance. It was proposed by He et al. [@he2015deep] for image processing from Microsoft Research.
+:::
+
+
+::: {.callout-note title="Residual connection mitigates gradient explosion" collapse=true}
+
+Residual connections also help prevent gradient explosion, even though this may not be obvious from the chain rule perspective. As shown in [@philipp2017exploding], the residual connection provides an alternative path for gradients to flow through. By distributing gradients between the residual path and the learning component path, the gradient is less likely to explode.
+:::
+
+#### Layer Normalization
+
+![](../figs/transformer-layer-normalization-manga.png){width=70% fig-align=center}
+
+In transformer models, you can find multiple *layer normalization* steps.
+*Layer normalization* is a technique used to stabilize the training of deep neural networks. It mitigates the problem of too large or too small input values, which can cause the network to become unstable. This normalization shifts and scales the input values to prevent this issue. More specifically, the layer normalization is computed as:
+
+
+$$
+\text{LayerNorm}(x) = \gamma \frac{x - \mu}{\sigma} + \beta,
+$$
+
+where $\mu$ and $\sigma$ are the mean and standard deviation of the input, $\gamma$ is the scaling factor, and $\beta$ is the shifting factor. The variables $\gamma$ and $\beta$ are learnable parameters that are initialized to 1 and 0, respectively, and are updated during training.
+
+Note that the layer normalization is applied to individual tokens. That is, the normalization is token-wise, rather than feature-wise, and the mean and standard deviation are calculated for each token across all feature dimensions. This is different from the feature-wise normalization, where the mean and standard deviation are calculated for each feature across all tokens. In the layer normalization, the mean and standard deviation are calculated for each token across all feature dimensions.
+
+
+## Decoder module
+
+![](https://res.cloudinary.com/edlitera/image/upload/c_fill,f_auto/v1680629118/blog/gz5ccspg3yvq4eo6xhrr){width=50% fig-align=center}
+
+
+### Causal Attention
+
+![](../figs/transformer-causal-attention-manga.png){width=70% fig-align=center}
+
+One of the key advantages of transformers is their ability to generate the contextualized vectors *in parallel*.
+Recurrent neural networks (RNNs) read the input sequence sequentially, which limits the parallelism.
+On ther other hands, transformer models can compute the attention scores as well as the weighted average of the value vectors in parallel and generate the contextualized vectors at once. This speeds up the training.
+
+In the decoder module, a vector is contextualized by attending to the previous vectors in the sequence. Note that it should not see the future token vectors, as it is what the model is tasked to predict. We can prevent this to happen by setting the attention scores to zero for the future tokens.
+
+Another benefit of the causal attention is that the model does not suffer from the error accumulation problem, where the prediction error from one step is carried over to the next step.
+
+To implement the masking, we set the attention scores to negative infinity for future tokens before the softmax operation, effectively zeroing out their contribution:
+
+$$
+\text{Mask}(Q, K, V) = \text{softmax}\left(\frac{QK^T + M}{\sqrt{d_k}}\right)V
+$$
+
+where $M$ is a matrix with $-\infty$ for positions corresponding to future tokens. The result is the attention scores, where the tokens attend only to the previous tokens.
+
+### Cross-Attention
+
+![](../figs/transformer-cross-attention-manga.png){width=70% fig-align=center}
+
+*Cross-attention* occurs when the Query comes from one sequence (like a sentence being generated) and the Keys/Values come from another sequence (like the input sentence you want to translate). Here, the model learns to align information from input to output—a sort of bilingual dictionary lookup, but learned and fuzzy.
+
+The mechanism works by using queries (Q) from the decoder's previous layer and keys (K) and values (V) from the encoder's output. This enables each position in the decoder to attend to the full encoder sequence without any masking, since encoding is already complete.
+
+For instance, in translating "I love you" to "Je t'aime", cross-attention helps each French word focus on relevant English words - "Je" attending to "I", and "t'aime" to "love". This maintains semantic relationships between input and output.
+
+The cross-attention formula is:
+
+$$
+\text{CrossAttention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
+$$
+
+where Q comes from the decoder and K,V come from the encoder. This effectively bridges the encoding and decoding processes.
+
+
+## Putting It All Together
+
+Let's overview the transformer architecture and see how the components we discussed so far fit into the overall architecture.
+
+![](https://machinelearningmastery.com/wp-content/uploads/2025/05/Full_Transformer.png){width=70% fig-align=center}
+
+We hope that you now have a better understanding of the transformer architecture and how the components we discussed so far fit into the overall architecture!
 
 ## The Existential Conclusion
 
-When you use `sentence-transformers` to generate embeddings for your research, you're using encoder transformers (BERT-based) with bidirectional attention. When you interact with ChatGPT or run Gemma locally, you're using decoder transformers with causal attention. When you see attention visualizations in papers, you now understand they represent **learned relevance weights** computed from Query-Key comparisons. The models don't understand language the way humans do—they perform **pattern matching at scale**—but the patterns they discover are often the same syntactic and semantic structures that linguists have documented for decades.
-
-The limitations are worth remembering. Attention has **quadratic complexity**: computing $O(N^2)$ pairwise scores becomes prohibitively expensive for very long texts, which is why context windows typically cap at 2K-32K tokens. Transformers have **no true memory** beyond the current window—they can't learn facts across documents without retraining. They produce fluent text through statistical pattern matching but lack grounded understanding, leading to **hallucinations** when they confidently generate plausible-sounding nonsense. Training costs are astronomical: GPT-3 required roughly \$5 million in compute. But you don't need to train your own models; you can use pre-trained ones and fine-tune them for specific tasks with orders of magnitude less data and compute.
-
-Return to where we started: the "bank" problem. Static embeddings treated "bank" as one point in space, averaging across all contexts. Transformers compute a **distribution** of representations, conditioned on the surrounding words. The revolution wasn't in the complexity—it was in recognizing that **meaning is relational, not absolute**. Words are like atoms in a molecule: their properties depend on what they're bonded to. Transformers formalized this intuition mathematically through a simple mechanism: weighted mixing based on learned relevance.
-
-This entire architecture emerged from asking a single question: *What's the simplest mechanism that lets representations adapt to context?* The answer was weighted mixing where the weights come from comparing what each word needs (Query) against what other words offer (Key). Everything else—multi-head attention, layer normalization, feed-forward networks—is engineering to make that core idea scale to 175 billion parameters and beyond.
-
-**Next**: [Word Embeddings: Where It Started](word-embeddings.qmd)
-
-<script src="https://cdn.jsdelivr.net/npm/@marimo-team/marimo-snippets@1"></script>
+Every time you use GPT (ChatGPT, Claude, Gemini, etc.), you're seeing transformers in action. Transformers don’t “think”—they do **statistical pattern matching at scale**.
