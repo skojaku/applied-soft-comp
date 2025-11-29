@@ -5,25 +5,153 @@ execute:
   eval: false
 ---
 
-### The Spoiler
+## The Spoiler
 
 **The difference between BERT and GPT isn't just architecture; it's the difference between studying a completed map and exploring a new territory one step at a time.**
 
-### The Mechanism (Why It Works)
+## Two siblings, BERT and GPT
 
-We instinctively think of "Transformers" as a single unified model, but this is wrong. The original Transformer paper proposed an **Encoder-Decoder** architecture—a two-part machine. Modern models split this architecture in half, creating two distinct lineages with fundamentally different information flows. BERT uses the encoder stack and sees everything at once, like reading a completed sentence. GPT uses the decoder stack and processes text causally, like improvising a story where you can only react to what's already been said. This architectural choice isn't cosmetic—it determines what the model can learn and what tasks it excels at.
+![](https://miro.medium.com/v2/resize:fit:1400/format:webp/0*376uJu_fc_uR8H3X.png)
+
+We instinctively think of "Transformers" as a single unified model, but this is wrong. The original Transformer paper proposed an **Encoder-Decoder** architecture—a two-part machine. Modern models split this architecture in half, creating two distinct lineages with fundamentally different information flows. **BERT** (Bidirectional Encoder Representations from Transformers) [@devlin2019bert] uses the encoder stack and sees everything at once, like reading a completed sentence. **GPT** (Generative Pre-trained Transformer) [@radford2018language, @brown2020language] uses the decoder stack and processes text causally, like improvising a story where you can only react to what's already been said. This architectural choice isn't cosmetic—it determines what the model can learn and what tasks it excels at.
 
 Think of it like two different reading strategies. BERT is the student who reads the entire paragraph, then goes back to understand each word in context. GPT is the actor performing a cold read, processing each line sequentially without peeking ahead at the script. The first strategy gives you deeper understanding; the second gives you the ability to continue the story.
 
-The mathematical difference is simple but decisive: BERT's self-attention is **bidirectional**—every token at position $t$ can attend to positions $1...N$. GPT's self-attention is **masked**—a token at position $t$ can only attend to positions $1...t$. This masking creates the causal constraint. Sentence-BERT then takes BERT's output and collapses it into a single vector using a **Siamese Network**, turning the messy matrix of token representations into a clean coordinate for semantic search.
+## Architecture
 
-### The Application (How We Use It)
+![](../figs/bidirectional-vs-unidirectional-attention.png)
 
-Let's see these models in action. We'll start by visualizing what BERT actually "sees," then use sentence transformers for semantic search, and finally examine where these systems break down.
+Perhaps the most important difference between BERT and GPT is the attention mechanism. BERT uses **bidirectional** attention, meaning that every token at position $t$ can attend to positions every other token.
+This allows BERT to understand the context of a word by looking at all the words in the sentence, not just the ones before it, helping it to capture the full context of a token.
+
+GPT uses **masked** (or causal) attention, meaning that a token at position $t$ can only attend to previous tokens. This masking imposes a causal constraint, making it ideal for tasks like language generation where the model must predict future tokens based only on past context. Although GPT's attention is not bidirectional, and thus less globally context-aware than BERT's, this causal processing allows it to generate remarkably fluent and coherent text sequentially.
+
+
+::: {.callout-note collapse="true"}
+
+## More on BERT
+
+### Special tokens
+
+BERT uses several special tokens to represent the input sentence.
+
+- [CLS] is used to represent the start of the sentence.
+- [SEP] is used to represent the end of the sentence.
+- [MASK] is used to represent the masked words.
+- [UNK] is used to represent the unknown words.
+
+For example, the sentence "The cat sat on the mat. It then went to sleep." is represented as "[CLS] The cat sat on the mat [SEP] It then went to sleep [SEP]".
+
+In BERT, [CLS] token is used to classify the input sentences, as we will see later. As a result, the model learns to encode a summary of the input sentence into the [CLS] token, which is particularly useful when we want the embedding of the whole input text, instead of the token level embeddings. [@reimers2019sentence].
+
+
+### Position and Segment embeddings
+
+BERT uses *position* and *segment* embeddings to provide the model with information about the position of the tokens in the sequence.
+
+- Position embeddings are used to provide the model with information about the position of the tokens in the sequence. Unlike the sinusoidal position embedding used in the original transformer paper {footcite}`vaswani2017attention`, BERT uses learnable position embeddings.
+
+- The segment embeddings are used to distinguish the sentences in the input. For example, for the sentence "The cat sat on the mat. It then went to sleep.", the tokens in the first sentence are added with segment embedding 0, and the tokens in the second sentence are added with segment embedding 1. These segmend embeddings are also learned during the pre-training process.
+
+### Variants
+
+**RoBERTa (Robustly Optimized BERT Approach)* [@liu2019roberta] improved upon BERT through several optimizations: removing the Next Sentence Prediction task, using dynamic masking that changes the mask patterns across training epochs, training with larger batches, and using a larger dataset. These changes led to significant performance improvements while maintaining BERT's core architecture.
+
+**DistilBERT** [@sanh2019distilbert] focused on making BERT more efficient through knowledge distillation, where a smaller student model learns from the larger BERT teacher model. It achieves 95% of BERT's performance while being 40% smaller and 60% faster, making it more suitable for resource-constrained environments and real-world applications.
+
+**ALBERT** [@lan2019albert] introduced parameter reduction techniques to address BERT's memory limitations. It uses factorized embedding parameterization and cross-layer parameter sharing to dramatically reduce parameters while maintaining performance. ALBERT also replaced Next Sentence Prediction with Sentence Order Prediction, where the model must determine if two consecutive sentences are in the correct order.
+
+Domain-specific BERT models have been trained on specialized corpora to better handle specific fields. Examples include **BioBERT** [@lee2020biobert] for biomedical text, **SciBERT** [@reimers2019sentence] for scientific papers, and **FinBERT** [@araci2019finbert] for financial documents. These models demonstrate superior performance in their respective domains compared to the general-purpose BERT.
+
+**Multilingual BERT (mBERT)** [@liu2019roberta] was trained on Wikipedia data from 104 languages, using a shared vocabulary across all languages. Despite not having explicit cross-lingual objectives during training, mBERT shows remarkable zero-shot cross-lingual transfer abilities, allowing it to perform tasks in languages it wasn't explicitly aligned on. This has made it a valuable resource for low-resource languages and cross-lingual applications.
+
+:::
+
+
+## Training
+
+![](../figs/bert-gpt-training-manga.png){width=70% fig-align="center"}
+
+### BERT
+
+The fundamental difference in their architectures naturally leads to distinct training objectives. BERT, with its encoder-only design, is trained using two primary unsupervised tasks: **Masked Language Modeling (MLM)** and **Next Sentence Prediction (NSP)**.
+
+![]( https://raw.githubusercontent.com/UKPLab/sentence-transformers/master/docs/img/MLM.png){width=70% fig-align="center"}
+
+In MLM, a percentage of input tokens are randomly masked, and the model is tasked with predicting the original masked tokens based on the full, bidirectional context of the sentence. For example, given the sentence "The quick brown fox jumps over the lazy dog," BERT might see "The quick brown [MASK] jumps over the lazy dog" and predict "fox."
+
+![](https://amitness.com/posts/images/bert-nsp.png)
+
+NSP involves presenting the model with two sentences and asking it to predict whether the second sentence logically follows the first. For instance, given Sentence A: "The cat sat on the mat." and Sentence B: "It was a sunny day.", BERT would predict 'IsNextSentence = No', whereas for Sentence A: "The cat sat on the mat." and Sentence B: "It was purring softly.", BERT would predict 'IsNextSentence = Yes'. These tasks enable BERT to learn deep contextual representations useful for understanding existing text.
+
+
+::: {.callout-note collapse="true"}
+
+## Receipe for MLM
+
+To generate training data for MLM, BERT randomly masks 15% of the tokens in each sequence. However, the masking process is not as straightforward as simply replacing words with [MASK] tokens. For the 15% of tokens chosen for masking:
+
+- 80% of the time, replace the word with the [MASK] token
+  - Example: "the cat sat on the mat" → "the cat [MASK] on the mat"
+
+- 10% of the time, replace the word with a random word
+  - Example: "the cat sat on the mat" → "the cat dog on the mat"
+
+- 10% of the time, keep the word unchanged
+  - Example: "the cat sat on the mat" → "the cat sat on the mat"
+
+The model must predict the original token for all selected positions, regardless of whether they were masked, replaced, or left unchanged. This helps prevent the model from simply learning to detect replaced tokens.
+
+During training, the model processes the modified input sequence through its transformer layers and predicts the original token at each masked position using the contextual representations.
+
+While replacing words with random tokens or leaving them unchanged may seem counterintuitive, research has shown this approach is effective [@raffel2020exploring]. It has become an essential component of BERT's pre-training process.
+
+:::
+
+::: {.callout-note collapse="true"}
+
+## Receipe for NSP
+
+
+Next Sentence Prediction (NSP) trains BERT to understand relationships between sentences. The model learns to predict whether two sentences naturally follow each other in text. During training, half of the sentence pairs are consecutive sentences from documents (labeled as IsNext), while the other half are random sentence pairs (labeled as NotNext).
+
+The input format uses special tokens to structure the sentence pairs: a [CLS] token at the start, the first sentence, a [SEP] token, the second sentence, and a final [SEP] token. For instance:
+
+$$
+\text{``[CLS] }\underbrace{\text{I went to the store}}_{\text{Sentence 1}}\text{ [SEP] }\underbrace{\text{They were out of milk}}_{\text{Sentence 2}}\text{ [SEP]}".
+$$
+
+BERT uses the final hidden state of the [CLS] token to classify whether the sentences are consecutive or not. This helps the model develop a broader understanding of language context and relationships between sentences.
+
+These two objectives help BERT learn the structure of language, such as the relationship between words and sentences.
+:::
+
+
+### GPT
+
+GPT, on the other hand, uses its decoder-only architecture for **Causal Language Modeling (CLM)**.
+Causal (autoregressive) language modeling is the pre-training objective of GPT, where the model learns to predict the next token given all previous tokens in the sequence. More formally, given a sequence of tokens $(x_1, x_2, ..., x_n)$, the model is trained to maximize the likelihood:
+
+$$
+P(x_1, ..., x_n) = \prod_{i=1}^n P(x_i|x_1, ..., x_{i-1})
+$$
+
+For example, given the partial sentence "The cat sat on", the model learns to predict the next word by calculating probability distributions over its entire vocabulary. During training, it might learn that "mat" has a high probability in this context, while "laptop" has a lower probability.
+
+This autoregressive nature means GPT always processes text from left to right, learning to generate coherent and grammatically correct continuations. This objective directly aligns with its strength in text generation.
+
+## Sentence Transformers
+
+BERT produces a vector for every token, which is messy when we just want to compare whole sentences. **Sentence-BERT** (SBERT) solves this by training a **Siamese Network**—the same BERT model processes two sentences, and we train their representations to be close if the sentences are semantically similar, distant if they're unrelated.
+
+![Siamese Network](https://raw.githubusercontent.com/UKPLab/sentence-transformers/master/docs/img/SBERT_Siamese_Network.png)
+
+The result is a single vector per sentence, enabling efficient semantic search.
 
 **Visualizing Attention: What Is BERT Looking At?**
 
 BERT produces attention weights—a matrix showing which tokens influence each other. We can extract these weights and visualize them to understand how the model disambiguates meaning.
+
 
 ```{python}
 import torch
@@ -59,41 +187,9 @@ plt.show()
 
 In this heatmap, a bright spot at row "bank" and column "river" reveals that BERT is using "river" to understand "bank"—disambiguating it from a financial institution. This bidirectional flow is why BERT excels at tasks requiring deep contextual understanding like question answering and named entity recognition.
 
-**BERT's Training: Forced Reconstruction**
+**Semantic Search with Sentence-BERT**
 
-BERT isn't trained to generate text. It's trained to *reconstruct* it using **Masked Language Modeling (MLM)**. We hide 15% of the tokens (replacing them with `[MASK]`) and force the model to predict the original word based on bidirectional context.
-
-```
-Input:  The [MASK] sat on the mat.
-Target: cat
-```
-
-This creates a model that understands context but cannot generate fluent text, because it was never trained to maintain causal coherence across a sequence. BERT also uses **Next Sentence Prediction (NSP)**, where it learns to distinguish whether two sentences actually follow each other in a document. The special **[CLS]** token prepended to every input acts as a summary vector representing the entire sequence—this is what we use for classification tasks.
-
-![BERT Architecture](https://www.researchgate.net/publication/372906672/figure/fig2/AS:11431281179224913@1691164535766/BERT-model-architecture.ppm)
-
-**GPT's Training: Causal Prediction**
-
-GPT uses a single objective: **Causal Language Modeling (CLM)**. Given tokens $w_{1:t-1}$, predict $w_t$.
-
-```
-Input:  The cat sat on the
-Output: mat (probability: 0.42)
-        floor (probability: 0.31)
-        ...
-```
-
-This trains the model to learn the probability distribution $P(w_t | w_{1:t-1})$. The attention mask prevents "cheating"—the model cannot look ahead. This constraint makes GPT an expert at generation but weaker at tasks requiring full-sequence analysis, because it processes text like a one-way street.
-
-![GPT Causal Attention](https://substackcdn.com/image/fetch/f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F7536a59a-5326-4a8b-ab12-cebe49acde31_1438x936.png)
-
-**Sentence-BERT: Collapsing Meaning into Coordinates**
-
-BERT produces a vector for every token, which is messy when we just want to compare whole sentences. **Sentence-BERT** (SBERT) solves this by training a **Siamese Network**—the same BERT model processes two sentences, and we train their representations to be close if the sentences are semantically similar, distant if they're unrelated.
-
-![Siamese Network](https://raw.githubusercontent.com/UKPLab/sentence-transformers/master/docs/img/SBERT_Siamese_Network.png)
-
-The result is a single vector per sentence, enabling efficient semantic search. Here's how we use it to find similar sentences:
+Here's how we use Sentence-BERT to find similar sentences:
 
 ```{python}
 from sentence_transformers import SentenceTransformer, util
@@ -138,24 +234,6 @@ A man is riding a horse. (Score: 0.2235)
 
 The model correctly identifies that "eating pasta" is semantically closest to "eating food" and "eating bread," even though the exact words don't match. This is semantic search—matching by meaning, not keywords.
 
-**Practical Workflow: When to Use Each Model**
-
-Use **BERT** when you need deep understanding of existing text: classification, named entity recognition, question answering. The bidirectional context gives you the richest representations, but BERT cannot generate text fluently.
-
-Use **GPT** when you need to generate text: autocomplete, chatbots, creative writing. The causal constraint makes it a natural generator, but it processes text linearly and cannot "look back" to revise its understanding.
-
-Use **Sentence-BERT** when you need to organize or retrieve text by meaning: semantic search, document clustering, duplicate detection. The collapsed vector representation enables efficient similarity comparisons, but you lose fine-grained token-level information.
-
-**Where These Systems Break**
-
-These models are probabilistic engines, not reasoning systems. Their limitations are mathematical, not fixable by better training.
-
-The **context window** creates a hard boundary. BERT is typically limited to 512 tokens. GPT-4 extends this to 128k, but performance degrades over long distances—information is mathematically evicted as it falls out of the attention window. Attention scales quadratically with sequence length $O(N^2)$, meaning doubling the input length quadruples the memory and compute required.
-
-**Static embeddings** compress meaning into a fixed vector. Sentence-BERT creates a *single* representation for an entire sentence, which means subtle differences can be lost. "The dog bit the man" and "The man bit the dog" share the same words and might end up dangerously close in vector space if the model relies too heavily on lexical overlap.
-
-**Hallucination** is inevitable in GPT-style models. They do not know facts; they know likelihoods. If a falsehood is statistically probable (e.g., a common misconception repeated across training data), the model will generate it with confidence. The model is predicting $P(w_t | w_{1:t-1})$, not evaluating truth.
-
-### The Takeaway
+## The Takeaway
 
 BERT reads to understand, GPT writes to create, and SBERT organizes the library. Choose the architecture that matches your information flow: bidirectional for analysis, causal for generation, and vector-collapsed for retrieval.
