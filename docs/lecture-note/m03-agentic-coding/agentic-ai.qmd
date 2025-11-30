@@ -152,59 +152,39 @@ class GenerateRandomTool(Tool):
     name = "generate_random"
     description = "Generates random numbers from a Gaussian distribution"
     inputs = {
-        "mean": {"type": "number", "description": "Mean of the distribution", "nullable": True},
-        "std": {"type": "number", "description": "Standard deviation of the distribution", "nullable": True},
-        "size": {"type": "integer", "description": "Number of samples to generate", "nullable": True}
+        "mean": {"type": "number", "nullable": True},
+        "std": {"type": "number", "nullable": True},
+        "size": {"type": "integer", "nullable": True}
     }
     output_type = "string"
 
     def forward(self, mean: float = 0, std: float = 1, size: int = 100) -> str:
         samples = np.random.normal(loc=mean, scale=std, size=size)
-        result = {
-            "distribution": "gaussian",
-            "mean": float(np.mean(samples)),
-            "std": float(np.std(samples)),
-            "size": len(samples),
-            "samples": samples.tolist()[:5]
-        }
-        return json.dumps(result)
+        return f"Generated {size} samples: mean={np.mean(samples):.2f}, std={np.std(samples):.2f}"
 
 class CalculateStatsTool(Tool):
     name = "calculate_statistics"
-    description = "Calculates statistics (mean, std, median, min, max) from a list of numbers"
+    description = "Calculates statistics from a list of numbers"
     inputs = {
-        "data": {"type": "string", "description": "JSON array of numbers"}
+        "data": {"type": "string"}
     }
     output_type = "string"
 
     def forward(self, data: str) -> str:
         arr = np.array(json.loads(data))
-        result = {
-            "mean": float(np.mean(arr)),
-            "std": float(np.std(arr)),
-            "median": float(np.median(arr)),
-            "min": float(np.min(arr)),
-            "max": float(np.max(arr))
-        }
-        return json.dumps(result)
+        return f"mean={np.mean(arr):.2f}, std={np.std(arr):.2f}, median={np.median(arr):.2f}"
 
 class FitDistributionTool(Tool):
     name = "fit_distribution"
     description = "Fits a Gaussian distribution to observed data"
     inputs = {
-        "data": {"type": "string", "description": "JSON array of numbers"}
+        "data": {"type": "string"}
     }
     output_type = "string"
 
     def forward(self, data: str) -> str:
         arr = np.array(json.loads(data))
-        mu = float(np.mean(arr))
-        sigma = float(np.std(arr))
-        result = {
-            "distribution": "gaussian",
-            "parameters": {"mean": mu, "std": sigma}
-        }
-        return json.dumps(result)
+        return f"Fitted Gaussian: mean={np.mean(arr):.2f}, std={np.std(arr):.2f}"
 ```
 
 Create the agent with our tools:
