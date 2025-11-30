@@ -130,13 +130,18 @@ The **ReAct Pattern** formalizes this loop. The agent alternates between **reaso
 
 Rather than building our own agent framework from scratch, we can use **`smolagents`** from Hugging Face—a lightweight library that implements the ReAct pattern with support for multiple LLM backends including local models via ollama.
 
-First, install smolagents:
+
+::: {.column-margin}
+
+Install smolagents:
 
 ```bash
 pip install smolagents
 ```
 
-Now let's define our tools as proper `smolagents` Tool objects:
+:::
+
+Let's define our tools as proper `smolagents` Tool objects:
 
 ```{python}
 from smolagents import Tool, CodeAgent, LiteLLMModel
@@ -147,9 +152,9 @@ class GenerateRandomTool(Tool):
     name = "generate_random"
     description = "Generates random numbers from a Gaussian distribution"
     inputs = {
-        "mean": {"type": "number", "description": "Mean of the distribution"},
-        "std": {"type": "number", "description": "Standard deviation of the distribution"},
-        "size": {"type": "integer", "description": "Number of samples to generate"}
+        "mean": {"type": "number", "description": "Mean of the distribution", "nullable": True},
+        "std": {"type": "number", "description": "Standard deviation of the distribution", "nullable": True},
+        "size": {"type": "integer", "description": "Number of samples to generate", "nullable": True}
     }
     output_type = "string"
 
