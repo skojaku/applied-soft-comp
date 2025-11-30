@@ -62,14 +62,20 @@ Early systems used regex to parse the model's output. This failed constantly. Th
 }
 ```
 
-So, how can we let LLMs to speak in JSON? The most basic approach is to prompt the model to return JSON. Let's demonstrate with ollama and gemma3:
+So, how can we let LLMs to speak in JSON? The most basic approach is to prompt the model to return JSON. Let's demonstrate with ollama and gpt-oss 120b:
+
+::: {.column-margin}
+
+We will use `gpt-oss:120b-cloud` as the LLM. This is a 120B parameter model that is hosted by Ollama. See [Ollama Cloud](https://ollama.com/cloud) for more details.
+
+:::
 
 ```{python}
 #| echo: false
 import ollama
 import json
 
-params_llm = {"model": "gemma3n:latest", "options": {"temperature": 0.3}}
+params_llm = {"model": "gpt-oss:120b-cloud", "options": {"temperature": 0.3}}
 ```
 
 ```{python}
@@ -147,6 +153,11 @@ Let's define our tools as proper `smolagents` Tool objects:
 **Tool**: A Python class that wraps a function the agent can call. It defines the function's name, description, input schema, and execution logic.
 :::
 
+
+::: {.column-margin}
+**forward()**: The method name is a convention from PyTorch. When the agent calls the tool, it invokes this method with the LLM-generated parameters.
+:::
+
 ```{python}
 from smolagents import Tool, CodeAgent, LiteLLMModel
 import numpy as np
@@ -156,9 +167,9 @@ class GenerateRandomTool(Tool):  # Inherit from Tool base class
     name = "generate_random"  # Agent uses this to identify the tool
     description = "Generates random numbers from a Gaussian distribution"  # LLM reads this to decide when to call
     inputs = {  # JSON schema: defines expected parameters
-        "mean": {"type": "number", "nullable": True},
-        "std": {"type": "number", "nullable": True},
-        "size": {"type": "integer", "nullable": True}
+        "mean": {"type": "number", "description": "Mean of the distribution", "nullable": True},
+        "std": {"type": "number", "description": "Standard deviation", "nullable": True},
+        "size": {"type": "integer", "description": "Number of samples", "nullable": True}
     }
     output_type = "string"  # What the tool returns
 
@@ -166,15 +177,11 @@ class GenerateRandomTool(Tool):  # Inherit from Tool base class
         samples = np.random.normal(loc=mean, scale=std, size=size)
         return f"Generated {size} samples: mean={np.mean(samples):.2f}, std={np.std(samples):.2f}"
 
-::: {.column-margin}
-**forward()**: The method name is a convention from PyTorch. When the agent calls the tool, it invokes this method with the LLM-generated parameters.
-:::
-
 class CalculateStatsTool(Tool):
     name = "calculate_statistics"
     description = "Calculates statistics from a list of numbers"
     inputs = {
-        "data": {"type": "string"}
+        "data": {"type": "string", "description": "JSON array of numbers"}
     }
     output_type = "string"
 
@@ -186,7 +193,7 @@ class FitDistributionTool(Tool):
     name = "fit_distribution"
     description = "Fits a Gaussian distribution to observed data"
     inputs = {
-        "data": {"type": "string"}
+        "data": {"type": "string", "description": "JSON array of observed values"}
     }
     output_type = "string"
 
@@ -203,12 +210,14 @@ Create the agent with our tools:
 **max_steps**: Maximum ReAct iterations before terminating. Prevents infinite loops.
 :::
 
+
 ```{python}
 # Initialize the agent with ollama backend
 from smolagents import LiteLLMModel
 
 # Use ollama through LiteLLM
-model = LiteLLMModel(model_id="ollama/gemma3n:latest", api_base="http://localhost:11434")
+model_name = "gpt-oss:120b-cloud" #or "ollama/gemma3n:latest" if you want to run locally
+model = LiteLLMModel(model_id=model_name, api_base="http://localhost:11434")
 
 # Create the agent with our tools
 agent = CodeAgent(
