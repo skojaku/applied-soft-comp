@@ -143,24 +143,32 @@ pip install smolagents
 
 Let's define our tools as proper `smolagents` Tool objects:
 
+::: {.column-margin}
+**Tool**: A Python class that wraps a function the agent can call. It defines the function's name, description, input schema, and execution logic.
+:::
+
 ```{python}
 from smolagents import Tool, CodeAgent, LiteLLMModel
 import numpy as np
 import json
 
-class GenerateRandomTool(Tool):
-    name = "generate_random"
-    description = "Generates random numbers from a Gaussian distribution"
-    inputs = {
+class GenerateRandomTool(Tool):  # Inherit from Tool base class
+    name = "generate_random"  # Agent uses this to identify the tool
+    description = "Generates random numbers from a Gaussian distribution"  # LLM reads this to decide when to call
+    inputs = {  # JSON schema: defines expected parameters
         "mean": {"type": "number", "nullable": True},
         "std": {"type": "number", "nullable": True},
         "size": {"type": "integer", "nullable": True}
     }
-    output_type = "string"
+    output_type = "string"  # What the tool returns
 
-    def forward(self, mean: float = 0, std: float = 1, size: int = 100) -> str:
+    def forward(self, mean: float = 0, std: float = 1, size: int = 100) -> str:  # Actual execution logic
         samples = np.random.normal(loc=mean, scale=std, size=size)
         return f"Generated {size} samples: mean={np.mean(samples):.2f}, std={np.std(samples):.2f}"
+
+::: {.column-margin}
+**forward()**: The method name is a convention from PyTorch. When the agent calls the tool, it invokes this method with the LLM-generated parameters.
+:::
 
 class CalculateStatsTool(Tool):
     name = "calculate_statistics"
@@ -188,6 +196,12 @@ class FitDistributionTool(Tool):
 ```
 
 Create the agent with our tools:
+
+::: {.column-margin}
+**CodeAgent**: The agent orchestrator that implements the ReAct loop. It takes tools, an LLM, and a step limit.
+
+**max_steps**: Maximum ReAct iterations before terminating. Prevents infinite loops.
+:::
 
 ```{python}
 # Initialize the agent with ollama backend
