@@ -188,6 +188,7 @@ The structure is fixed. Every tool must define:
 Now define two more tools using the same pattern:
 
 ```{python}
+#| code-fold: true
 class CalculateStatsTool(Tool):
     name = "calculate_statistics"
     description = "Calculates statistics from a list of numbers"
@@ -256,17 +257,19 @@ for i, query in enumerate(queries, 1):
     print(f"\nAgent Response: {result}")
 ```
 
-Watch the agent's reasoning trace:
+Watch the agent's reasoning trace by enabling verbose logging:
 
 ```{python}
-# Run with verbose output to see the ReAct loop
+# Enable verbose logging to see the ReAct loop
+agent.logger.set_level(0)  # Set to most verbose level
+
 query = "Generate 100 samples with mean 0, std 1, then calculate statistics on those samples"
 
 print("=" * 60)
 print("REACT TRACE: Multi-Step Task")
 print("=" * 60)
 
-result = agent.run(query, verbose=True)
+result = agent.run(query)
 
 print(f"\nFinal Answer: {result}")
 ```
