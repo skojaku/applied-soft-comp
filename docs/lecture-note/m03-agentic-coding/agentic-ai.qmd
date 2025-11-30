@@ -1,5 +1,7 @@
 ---
 title: "From ChatBot to Agentic AI"
+execute:
+    enabled: true
 ---
 
 ::: {.callout-note appearance="simple"}
@@ -8,7 +10,7 @@ title: "From ChatBot to Agentic AI"
 
 # The Mechanism (Why It Works)
 
-The naive view is that agents are "smarter" chatbots. They aren't. They're dumber chatbots wrapped in a control loop. A chatbot generates text and stops. An agent generates text, parses it for actionable commands, executes those commands in the real world, observes the results, and feeds those results back into the next prompt. The intelligence doesn't come from the model—it comes from the **feedback loop**.
+The naive view is that agents are "smarter" chatbots. They aren't. They're dumber chatbots wrapped in a control loop. A chatbot generates text and stops. An agent generates text, parses it for actionable commands, executes those commands in the real world, observes the results, and feeds those results back into the next prompt. The intelligence doesn't come from the model---it comes from the **feedback loop**.
 
 This is the **ReAct Pattern** (Reason + Act). A standard chatbot is a pure function: $\text{Output} = \text{Model}(\text{Input})$. An agent is a state machine:
 
@@ -41,9 +43,12 @@ Early systems used regex to parse the model's output. This failed constantly. Th
 
 ## Structured Output with JSON Schema
 
-The most basic approach is to prompt the model to return JSON:
+The most basic approach is to prompt the model to return JSON. Let's demonstrate with ollama and gemma3:
 
-```python
+```{python}
+import ollama
+import json
+
 prompt = """
 You are a function-calling assistant. Given a user query, return a JSON object with:
 - "action": the name of the function to call
@@ -51,36 +56,45 @@ You are a function-calling assistant. Given a user query, return a JSON object w
 
 User query: "What's the weather in Tokyo?"
 
-Response:
+Return ONLY valid JSON, no explanation.
 """
+
+params_llm = {"model": "gemma3n:latest", "options": {"temperature": 0}}
+response = ollama.generate(prompt=prompt, **params_llm)
+
+print("Raw LLM Response:")
+print(response.response)
 ```
 
-The model might respond:
-```json
-{"action": "get_weather", "parameters": {"location": "Tokyo"}}
-```
+The model might return valid JSON, but this is fragile. It might hallucinate extra fields, misspell keys, add conversational text, or return malformed JSON. We need **schema enforcement**.
 
-But this is fragile. The model might hallucinate extra fields, misspell keys, or return malformed JSON. We need **schema enforcement**.
+Modern LLM APIs (including ollama) support **JSON Schema** constraints. You define the shape of the output, and the model is forced to conform:
 
-Modern APIs (OpenAI, Anthropic, Google) support **JSON Schema** constraints. You define the shape of the output, and the model is forced to conform:
+```{python}
+from pydantic import BaseModel
 
-```python
-schema = {
-    "type": "object",
-    "properties": {
-        "action": {"type": "string", "enum": ["get_weather", "set_reminder"]},
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "location": {"type": "string"}
-            },
-            "required": ["location"]
-        }
-    },
-    "required": ["action", "parameters"]
-}
+# Define the schema using Pydantic
+class ToolCall(BaseModel):
+    action: str
+    parameters: dict
 
-response = client.generate(prompt, response_format={"type": "json_schema", "schema": schema})
+# Convert to JSON schema
+json_schema = ToolCall.model_json_schema()
+
+# Now constrain the model's output
+response = ollama.generate(
+    prompt="User query: What's the weather in Tokyo?",
+    format=json_schema,  # Schema constraint
+    **params_llm
+)
+
+print("\nSchema-Constrained Response:")
+print(response.response)
+
+# Validate the output
+tool_call = ToolCall.model_validate_json(response.response)
+print(f"\nValidated action: {tool_call.action}")
+print(f"Validated parameters: {tool_call.parameters}")
 ```
 
 Now the model cannot hallucinate. It must return valid JSON that matches the schema. If it tries to return `{"acton": ...}` (typo), the generation fails and retries internally.
@@ -89,7 +103,7 @@ Now the model cannot hallucinate. It must return valid JSON that matches the sch
 
 Writing raw JSON schemas is verbose and error-prone. **Pydantic** solves this by letting you define schemas as Python classes with type annotations:
 
-```python
+```{python}
 from pydantic import BaseModel
 
 class WeatherRequest(BaseModel):
@@ -99,32 +113,43 @@ class WeatherRequest(BaseModel):
 
 # Validation happens automatically
 request = WeatherRequest(action="get_weather", location="Tokyo")
+print("Valid request:")
 print(request.model_dump_json())
-# Output: {"action": "get_weather", "location": "Tokyo", "units": "celsius"}
+print()
 
 # Invalid data raises an error
-invalid = WeatherRequest(action="get_weather")  # Missing 'location'
-# ValidationError: 1 validation error for WeatherRequest
-#   location
-#     Field required [type=missing, input_value={'action': 'get_weather'}, input_type=dict]
+try:
+    invalid = WeatherRequest(action="get_weather")  # Missing 'location'
+except Exception as e:
+    print("Validation error:")
+    print(f"  {type(e).__name__}: {str(e)[:80]}...")
 ```
 
-Pydantic integrates directly with modern LLM APIs. You pass the Pydantic model, and the API generates the JSON schema automatically:
+Pydantic integrates directly with ollama. You pass the Pydantic model's JSON schema, and ollama generates constrained output:
 
-```python
-from openai import OpenAI
+```{python}
+# Define a more specific schema for weather queries
+class WeatherQuery(BaseModel):
+    location: str
+    units: str = "celsius"
 
-client = OpenAI()
+# Get the JSON schema
+weather_schema = WeatherQuery.model_json_schema()
 
-response = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[{"role": "user", "content": "What's the weather in Tokyo?"}],
-    response_format=WeatherRequest  # Pydantic model
+# Use it to constrain ollama's output
+response = ollama.generate(
+    prompt="Extract the location from: What's the weather in Tokyo?",
+    format=weather_schema,
+    **params_llm
 )
 
-# Parse the response directly into a validated object
-request = WeatherRequest.model_validate_json(response.choices[0].message.content)
-print(request.location)  # "Tokyo"
+print("LLM Response:")
+print(response.response)
+
+# Parse and validate
+query = WeatherQuery.model_validate_json(response.response)
+print(f"\nExtracted location: {query.location}")
+print(f"Units: {query.units}")
 ```
 
 This is the foundation of reliable agents: **type-safe communication between the LLM and your code**.
@@ -133,71 +158,89 @@ This is the foundation of reliable agents: **type-safe communication between the
 
 Structured output tells us what the agent wants to do. **Tool calling** is the mechanism that lets it actually do it.
 
-A **tool** is a function that the agent can invoke. You define the tool's name, description, and parameter schema. The agent decides when to call it based on the user's request.
+A **tool** is a function that the agent can invoke. First, define the actual tool function and its schema:
 
-```python
-tools = [
-    {
-        "type": "function",
-        "function": {
-            "name": "get_weather",
-            "description": "Fetches the current weather for a location",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "location": {"type": "string", "description": "City name"},
-                    "units": {"type": "string", "enum": ["celsius", "fahrenheit"]}
-                },
-                "required": ["location"]
-            }
-        }
+```{python}
+# Define the actual tool function
+def get_weather(location: str, units: str = "celsius") -> dict:
+    """Simulated weather API"""
+    mock_data = {
+        "Berlin": {"temperature": 15, "condition": "cloudy"},
+        "Tokyo": {"temperature": 22, "condition": "rainy"},
+        "Paris": {"temperature": 18, "condition": "sunny"}
     }
-]
+    return mock_data.get(location, {"temperature": None, "condition": "unknown"})
 
-response = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[{"role": "user", "content": "What's the weather in Berlin?"}],
-    tools=tools
+# Define the tool call schema
+class WeatherToolCall(BaseModel):
+    tool: str
+    location: str
+    units: str = "celsius"
+
+tool_schema = WeatherToolCall.model_json_schema()
+```
+
+Now use ollama to generate tool calls based on user queries:
+
+```{python}
+# System prompt that defines the tool
+system_prompt = """You are a weather assistant. When asked about weather, respond with a tool call.
+
+Available tool:
+- get_weather(location: str, units: str = "celsius") -> dict
+
+Return JSON: {"tool": "get_weather", "location": "<city>", "units": "celsius"}"""
+
+user_query = "What's the weather in Berlin?"
+
+# Generate the tool call
+response = ollama.chat(
+    model=params_llm["model"],
+    messages=[
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_query}
+    ],
+    format=tool_schema
 )
 
-# The model returns a tool call request
-tool_call = response.choices[0].message.tool_calls[0]
-print(tool_call.function.name)       # "get_weather"
-print(tool_call.function.arguments)  # '{"location": "Berlin", "units": "celsius"}'
+print("LLM Tool Call:")
+print(response.message.content)
+
+# Parse and validate
+tool_call = WeatherToolCall.model_validate_json(response.message.content)
+print(f"\nTool: {tool_call.tool}")
+print(f"Location: {tool_call.location}")
+print(f"Units: {tool_call.units}")
 ```
 
 The agent doesn't execute the tool—it requests that you execute it. You run the function, capture the result, and feed it back:
 
-```python
-import json
-
-def get_weather(location, units="celsius"):
-    # Simulated API call
-    return {"temperature": 15, "condition": "cloudy", "units": units}
-
+```{python}
 # Execute the tool
-args = json.loads(tool_call.function.arguments)
-result = get_weather(**args)
+result = get_weather(location=tool_call.location, units=tool_call.units)
+print(f"\nTool Execution Result:")
+print(result)
 
-# Feed the result back to the model
+# Feed the result back to get a natural language response
 messages = [
-    {"role": "user", "content": "What's the weather in Berlin?"},
-    {"role": "assistant", "tool_calls": [tool_call]},
-    {"role": "tool", "tool_call_id": tool_call.id, "content": json.dumps(result)}
+    {"role": "system", "content": "You are a weather assistant."},
+    {"role": "user", "content": user_query},
+    {"role": "assistant", "content": f"Tool call: {tool_call.model_dump_json()}"},
+    {"role": "user", "content": f"Tool result: {json.dumps(result)}. Provide a natural language answer."}
 ]
 
-final_response = client.chat.completions.create(
-    model="gpt-4o",
+final_response = ollama.chat(
+    model=params_llm["model"],
     messages=messages
 )
 
-print(final_response.choices[0].message.content)
-# "It's currently 15°C and cloudy in Berlin."
+print(f"\nFinal Natural Language Response:")
+print(final_response.message.content)
 ```
 
 This is the ReAct loop in action:
 1. **Thought**: "I need to call get_weather"
-2. **Action**: Tool call request
+2. **Action**: Tool call request (structured JSON)
 3. **Observation**: Tool result (15°C, cloudy)
 4. **Response**: Natural language answer
 
@@ -205,56 +248,66 @@ This is the ReAct loop in action:
 
 The **ReAct Pattern** formalizes this loop. The agent alternates between **reasoning** (generating thoughts) and **acting** (calling tools or terminating).
 
-Here's a minimal ReAct implementation:
+Here's a minimal ReAct implementation using ollama:
 
-```python
-def react_agent(user_query, tools, max_iterations=10):
-    messages = [{"role": "user", "content": user_query}]
+```{python}
+def react_agent_ollama(user_query: str, max_iterations: int = 5) -> str:
+    """Simple ReAct agent using ollama and gemma3"""
 
-    for i in range(max_iterations):
+    system_prompt = """You are a weather assistant.
+
+When the user asks about weather, respond with a tool call:
+{"tool": "get_weather", "location": "<city>", "units": "celsius"}
+
+When you receive tool results, synthesize them into a natural language answer.
+If the user asks about multiple locations, call the tool multiple times."""
+
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_query}
+    ]
+
+    for iteration in range(max_iterations):
         # Generate response
-        response = client.chat.completions.create(
-            model="gpt-4o",
+        response = ollama.chat(
+            model=params_llm["model"],
             messages=messages,
-            tools=tools
+            format=tool_schema
         )
 
-        message = response.choices[0].message
-        messages.append(message)
+        content = response.message.content
+        print(f"\n--- Iteration {iteration + 1} ---")
+        print(f"LLM Output: {content}")
 
-        # Check if the agent wants to call a tool
-        if message.tool_calls:
-            for tool_call in message.tool_calls:
-                # Execute the tool
-                result = execute_tool(tool_call.function.name, tool_call.function.arguments)
+        # Try to parse as tool call
+        try:
+            tool_call = WeatherToolCall.model_validate_json(content)
 
-                # Add the result to the conversation
-                messages.append({
-                    "role": "tool",
-                    "tool_call_id": tool_call.id,
-                    "content": json.dumps(result)
-                })
-        else:
-            # No more tool calls - agent has finished
-            return message.content
+            # Execute the tool
+            result = get_weather(location=tool_call.location, units=tool_call.units)
+            print(f"Tool Executed: get_weather(location='{tool_call.location}')")
+            print(f"Tool Result: {result}")
+
+            # Add tool call and result to conversation
+            messages.append({"role": "assistant", "content": content})
+            messages.append({
+                "role": "user",
+                "content": f"Tool result: {json.dumps(result)}. Continue or provide final answer."
+            })
+
+        except Exception as e:
+            # Not a valid tool call - treat as final answer
+            print(f"Final Answer: {content}")
+            return content
 
     return "Max iterations reached"
 
-def execute_tool(name, arguments):
-    args = json.loads(arguments)
-    if name == "get_weather":
-        return get_weather(**args)
-    elif name == "set_reminder":
-        return set_reminder(**args)
-    else:
-        return {"error": "Unknown tool"}
-```
+# Test the agent with multiple locations
+print("=" * 60)
+print("REACT AGENT TEST: Multiple Locations")
+print("=" * 60)
 
-Run it:
-```python
-response = react_agent("What's the weather in Paris and Tokyo?", tools)
-print(response)
-# "In Paris, it's 18°C and sunny. In Tokyo, it's 22°C and rainy."
+final_response = react_agent_ollama("What's the weather in Paris and Tokyo?")
 ```
 
 The agent will:
