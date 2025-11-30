@@ -128,15 +128,15 @@ This is the foundation of reliable agents: **type-safe communication between the
 
 Structured output tells us what the agent wants to do. **Tool calling** is the mechanism that lets it actually do it.
 
-
 Conceptually, the framework operates as follows:
 
 1.  **Registration**: You provide the agent with a registry of available tools, including their names, descriptions, and parameter schemas.
 2.  **Selection**: Based on the user's query and its own internal reasoning ("thoughts"), the agent determines which tool is most appropriate to use.
 3.  **Execution**: The agent generates a structured call (arguments), the system runs the actual function, and the return value is fed back to the agent as an observation.
 
+### Demonstration
 
-A **tool** is a function that the agent can invoke. First, define the actual tool function:
+Let us see how this works in practice. First, define the actual tool functions:
 
 ```{python}
 import numpy as np
@@ -169,14 +169,13 @@ def calculate_statistics(data: list[float]) -> dict:
 def fit_distribution(data: list[float], distribution: str = "gaussian") -> dict:
     """Fit a distribution to observed data"""
     arr = np.array(data)
-    if distribution == "gaussian":
-        mu = float(np.mean(arr))
-        sigma = float(np.std(arr))
-        return {
-            "tool": "fit_distribution",
-            "distribution": distribution,
-            "parameters": {"mean": mu, "std": sigma}
-        }
+    mu = float(np.mean(arr))
+    sigma = float(np.std(arr))
+    return {
+        "tool": "fit_distribution",
+        "distribution": distribution,
+        "parameters": {"mean": mu, "std": sigma}
+    }
 ```
 
 Define schemas for each tool:
@@ -317,83 +316,141 @@ This is the ReAct loop in action:
 3. **Observation**: Tool result (200 samples, mean≈10, std≈2)
 4. **Response**: Natural language answer
 
-## The ReAct Framework: Reason + Act
+## The ReAct Framework with `smolagents`
 
 The **ReAct Pattern** formalizes this loop. The agent alternates between **reasoning** (generating thoughts) and **acting** (calling tools or terminating).
 
-Here's a minimal ReAct implementation using ollama:
+Rather than building our own agent framework from scratch, we can use **`smolagents`** from Hugging Face—a lightweight library that implements the ReAct pattern with support for multiple LLM backends including local models via ollama.
+
+First, install smolagents:
+
+```bash
+pip install smolagents
+```
+
+Now let's define our tools as proper `smolagents` Tool objects:
 
 ```{python}
-def react_agent_ollama(user_query: str, max_iterations: int = 5) -> str:
-    """Simple ReAct agent using ollama and gemma3"""
+from smolagents import Tool, CodeAgent, HfApiModel
+import numpy as np
 
-    system_prompt = """You are a random number generation assistant.
+class GenerateRandomTool(Tool):
+    name = "generate_random"
+    description = "Generates random numbers from a Gaussian distribution"
+    inputs = {
+        "mean": {"type": "float", "description": "Mean of the distribution"},
+        "std": {"type": "float", "description": "Standard deviation of the distribution"},
+        "size": {"type": "integer", "description": "Number of samples to generate"}
+    }
+    output_type = "string"
 
-When the user asks to generate random numbers, respond with a tool call:
-{"tool": "generate_random", "distribution": "gaussian", "mean": <value>, "std": <value>, "size": <value>}
+    def forward(self, mean: float = 0, std: float = 1, size: int = 100) -> str:
+        samples = np.random.normal(loc=mean, scale=std, size=size)
+        result = {
+            "distribution": "gaussian",
+            "mean": float(np.mean(samples)),
+            "std": float(np.std(samples)),
+            "size": len(samples),
+            "samples": samples.tolist()[:5]
+        }
+        return json.dumps(result)
 
-When you receive tool results, synthesize them into a natural language answer.
-If the user asks for multiple distributions or samples, call the tool multiple times."""
+class CalculateStatsTool(Tool):
+    name = "calculate_statistics"
+    description = "Calculates statistics (mean, std, median, min, max) from a list of numbers"
+    inputs = {
+        "data": {"type": "string", "description": "JSON array of numbers"}
+    }
+    output_type = "string"
 
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_query}
-    ]
+    def forward(self, data: str) -> str:
+        arr = np.array(json.loads(data))
+        result = {
+            "mean": float(np.mean(arr)),
+            "std": float(np.std(arr)),
+            "median": float(np.median(arr)),
+            "min": float(np.min(arr)),
+            "max": float(np.max(arr))
+        }
+        return json.dumps(result)
 
-    for iteration in range(max_iterations):
-        # Generate response
-        response = ollama.chat(
-            model=params_llm["model"],
-            messages=messages,
-            format=tool_schema
-        )
+class FitDistributionTool(Tool):
+    name = "fit_distribution"
+    description = "Fits a Gaussian distribution to observed data"
+    inputs = {
+        "data": {"type": "string", "description": "JSON array of numbers"}
+    }
+    output_type = "string"
 
-        content = response.message.content
-        print(f"\n--- Iteration {iteration + 1} ---")
-        print(f"LLM Output: {content}")
+    def forward(self, data: str) -> str:
+        arr = np.array(json.loads(data))
+        mu = float(np.mean(arr))
+        sigma = float(np.std(arr))
+        result = {
+            "distribution": "gaussian",
+            "parameters": {"mean": mu, "std": sigma}
+        }
+        return json.dumps(result)
+```
 
-        # Try to parse as tool call
-        try:
-            tool_call = RandomToolCall.model_validate_json(content)
+Create the agent with our tools:
 
-            # Execute the tool
-            result = generate_random(
-                distribution=tool_call.distribution,
-                mean=tool_call.mean,
-                std=tool_call.std,
-                size=tool_call.size
-            )
-            print(f"Tool Executed: generate_random(dist='{tool_call.distribution}', mean={tool_call.mean}, std={tool_call.std}, size={tool_call.size})")
-            print(f"Tool Result: {result['size']} samples, mean={result['mean']:.2f}, std={result['std']:.2f}")
+```{python}
+# Initialize the agent with ollama backend
+from smolagents import LiteLLMModel
 
-            # Add tool call and result to conversation
-            messages.append({"role": "assistant", "content": content})
-            messages.append({
-                "role": "user",
-                "content": f"Tool result: {json.dumps(result)}. Continue or provide final answer."
-            })
+# Use ollama through LiteLLM
+model = LiteLLMModel(model_id="ollama/gemma3n:latest", api_base="http://localhost:11434")
 
-        except Exception as e:
-            # Not a valid tool call - treat as final answer
-            print(f"Final Answer: {content}")
-            return content
+# Create the agent with our tools
+agent = CodeAgent(
+    tools=[GenerateRandomTool(), CalculateStatsTool(), FitDistributionTool()],
+    model=model,
+    max_steps=5
+)
+```
 
-    return "Max iterations reached"
+Run the agent on different queries and watch it choose the right tool:
 
-# Test the agent with multiple requests
+```{python}
+queries = [
+    "Generate 30 random numbers from a Gaussian distribution with mean 10 and std 2",
+    "I have this data: [1.5, 2.3, 1.8, 2.1, 1.9]. Calculate statistics for it.",
+    "I measured these values: [5.2, 5.1, 4.9, 5.3, 5.0]. Fit a Gaussian distribution to this data."
+]
+
+for i, query in enumerate(queries, 1):
+    print(f"\n{'='*60}")
+    print(f"QUERY {i}: {query}")
+    print('='*60)
+
+    result = agent.run(query)
+    print(f"\nAgent Response: {result}")
+```
+
+Watch the agent's reasoning trace:
+
+```{python}
+# Run with verbose output to see the ReAct loop
+query = "Generate 100 samples with mean 0, std 1, then calculate statistics on those samples"
+
 print("=" * 60)
-print("REACT AGENT TEST: Multiple Random Samples")
+print("REACT TRACE: Multi-Step Task")
 print("=" * 60)
 
-final_response = react_agent_ollama("Generate 30 samples with mean 0, std 1, and another 50 samples with mean 10, std 5")
+result = agent.run(query, verbose=True)
+
+print(f"\nFinal Answer: {result}")
 ```
 
 The agent will:
-1. Call `generate_random(distribution="gaussian", mean=0, std=1, size=100)`
-2. Receive the result
-3. Call `generate_random(distribution="gaussian", mean=10, std=5, size=50)`
-4. Receive the result
-5. Synthesize the final answer
+1. **Thought**: "I need to generate random numbers first"
+2. **Action**: Call `generate_random(mean=0, std=1, size=100)`
+3. **Observation**: Receive the generated samples
+4. **Thought**: "Now I need to calculate statistics on these samples"
+5. **Action**: Call `calculate_statistics(data=[...])`
+6. **Observation**: Receive the statistics
+7. **Response**: Synthesize natural language answer
 
 This is the entire architecture of Google Antigravity, Claude Code, and Cursor—just scaled with better tools (file editing, terminal commands, web browsing) and better orchestration (parallel agents, verification artifacts).
 
