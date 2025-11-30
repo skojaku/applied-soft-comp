@@ -47,22 +47,21 @@ This cycle repeats until the task is solved.
 
 Before we can build this loop, we must solve a fundamental engineering problem: **How do we extract executable actions from natural language?**
 
-Think about it: When you ask an LLM "Generate random numbers from a Gaussian distribution", it might respond:
+Think about it: When you ask an LLM "What is the correlation between Weight and Length1?", it might respond:
 
-> "I'll generate random numbers for you using a normal distribution."
+> "I'll calculate the correlation for you using pandas."
 
-Early systems used regex to parse the model's output. This failed constantly. The model would say "I'll create random nums" instead of providing structured parameters, and the parser would break. The solution is **Structured Output**---we force the model to return data in a machine-readable format, the most common being **JSON**. For example,
+Early systems used regex to parse the model's output. This failed constantly. The model would say "I'll calc the corr" instead of providing structured tool calls, and the parser would break. The solution is **Structured Output**---we force the model to return data in a machine-readable format, the most common being **JSON**. For example,
 
 ```json
 {
-    "action": "generate_random",
-    "distribution": "gaussian",
-    "parameters": {"mean": 0, "std": 1, "size": 100},
-    "values": [...]
+    "tool_name": "find_correlation",
+    "parameters": {"column1": "Weight", "column2": "Length1"},
+    "reasoning": "User wants correlation between two columns"
 }
 ```
 
-So, how can we let LLMs to speak in JSON? The most basic approach is to prompt the model to return JSON. Let's demonstrate with ollama and gpt-oss 120b:
+So, how can we let LLMs to speak in JSON? The most basic approach is to prompt the model to return JSON. Let's demonstrate with ollama using a data analysis task:
 
 ::: {.column-margin}
 
@@ -82,12 +81,13 @@ params_llm = {"model": "gpt-oss:120b-cloud", "options": {"temperature": 0.3}}
 ```{python}
 
 prompt = """
-You are a function-calling assistant. Given a user query, return a JSON object with:
-- "action": the name of the function to call
+You are a data analysis assistant. Given a user query about a fish dataset,
+return a JSON object describing what tool to use:
+- "tool_name": the name of the tool to call
 - "parameters": a dictionary of arguments
-- "values": the result of the function call
+- "reasoning": why you chose this tool
 
-User query: "Generate 10 random numbers from a Gaussian distribution with mean 0 and standard deviation 1"
+User query: "What is the correlation between Weight and Length1 in the fish dataset?"
 
 Return ONLY valid JSON, no explanation.
 """
@@ -106,9 +106,9 @@ from pydantic import BaseModel
 
 # Define the schema using Pydantic
 class ToolCall(BaseModel):
-    action: str
+    tool_name: str
     parameters: dict
-    values: list[float]
+    reasoning: str
 ```
 
 Once you define the schema, you can use it to constrain the model's output:
@@ -118,7 +118,7 @@ json_schema = ToolCall.model_json_schema()
 
 # Now constrain the model's output
 response = ollama.generate(
-    prompt="User query: Generate 10 random numbers from a Gaussian with mean 5 and std 2",
+    prompt="User query: What is the correlation between Weight and Length1?",
     format=json_schema,  # Schema constraint
     **params_llm
 )
@@ -131,7 +131,7 @@ print("Response:")
 print(response.response)
 ```
 
-Now the model cannot hallucinate. It must return valid JSON that matches the schema. If it tries to return `{"acton": ...}` (typo), the generation fails and retries internally.
+Now the model cannot hallucinate. It must return valid JSON that matches the schema. If it tries to return `{"tool_nam": ...}` (typo), the generation fails and retries internally.
 This is the foundation of reliable agents: **type-safe communication between the LLM and your code**.
 
 ## The ReAct Framework with `smolagents`
@@ -172,27 +172,39 @@ Now we'll create a tool that lets the agent query this data. A tool is a Python 
 :::
 
 ```{python}
+import io
 from smolagents import Tool
 from pandasql import sqldf
 
 class InspectDataTool(Tool):
     name = "inspect_data"
     description = (
-        "Get information about the dataset structure including "
-        "column names, types, and sample values"
+        "Get a concise summary of the dataset's structure, "
+        "including column names, non-null values, and data types."
     )
     inputs = {}
     output_type = "string"
 
     def forward(self) -> str:
-        info = f"Dataset shape: {df.shape[0]} rows, {df.shape[1]} columns\n\n"
-        info += "Columns:\n"
-        for col in df.columns:
-            dtype = df[col].dtype
-            sample = df[col].iloc[0] if len(df) > 0 else "N/A"
-            info += f"  - {col} ({dtype}): e.g., {sample}\n"
-        return info
+        buffer = io.StringIO()
+        df.info(buf=buffer)
+        return buffer.getvalue()
+```
 
+The structure is fixed. Every tool must define:
+
+1. **`name`**: Identifier the agent uses to call this tool (must be unique)
+2. **`description`**: What the LLM reads to decide when to use this tool
+3. **`inputs`**: JSON schema with `type`, `description`, and optionally `nullable` for each parameter
+4. **`output_type`**: Return type (usually `"string"`)
+5. **`forward()`**: The actual execution logic that runs when the agent calls the tool
+
+We created two tools here. The first, `InspectDataTool`, takes no inputs (notice the empty `inputs = {}`) and returns the dataset schema—column names, types, and sample values. This lets the agent discover the data structure autonomously. The second, `QueryDataTool`, executes SQL queries. Notice how its description hints to "Use inspect_data first"—this guides the agent to check the schema before writing SQL.
+
+Let's add two more tools to give the agent more analytical capabilities:
+
+```{python}
+#| code-fold: true
 class QueryDataTool(Tool):
     name = "query_data"
     description = (
@@ -210,22 +222,6 @@ class QueryDataTool(Tool):
     def forward(self, sql_query: str) -> str:
         result = sqldf(sql_query, globals())
         return result.to_string()
-```
-
-The structure is fixed. Every tool must define:
-
-1. **`name`**: Identifier the agent uses to call this tool (must be unique)
-2. **`description`**: What the LLM reads to decide when to use this tool
-3. **`inputs`**: JSON schema with `type`, `description`, and optionally `nullable` for each parameter
-4. **`output_type`**: Return type (usually `"string"`)
-5. **`forward()`**: The actual execution logic that runs when the agent calls the tool
-
-We created two tools here. The first, `InspectDataTool`, takes no inputs (notice the empty `inputs = {}`) and returns the dataset schema—column names, types, and sample values. This lets the agent discover the data structure autonomously. The second, `QueryDataTool`, executes SQL queries. Notice how its description hints to "Use inspect_data first"—this guides the agent to check the schema before writing SQL.
-
-Let's add two more tools to give the agent more analytical capabilities:
-
-```{python}
-#| code-fold: true
 class FindCorrelationTool(Tool):
     name = "find_correlation"
     description = (
@@ -295,7 +291,7 @@ from smolagents import LiteLLMModel, ToolCallingAgent
 
 # Configure the language model (using Ollama's gpt-oss 120B)
 model = LiteLLMModel(
-    model_id="ollama/gpt-oss:120b-cloud",  # LiteLLM requires "ollama/" prefix
+    model_id="ollama/glm-4.6:cloud",  # LiteLLM requires "ollama/" prefix
     api_base="http://localhost:11434"
 )
 
@@ -308,7 +304,8 @@ agent = ToolCallingAgent(
         GetStatsTool()
     ],
     model=model,
-    max_steps=5  # Limit iterations to prevent runaway loops
+    max_steps=5,  # Limit iterations to prevent runaway loops
+    verbosity_level=1  # Suppress verbose logging (step duration, token counts)
 )
 ```
 
