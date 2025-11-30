@@ -1,0 +1,273 @@
+---
+title: "Prompt Tuning"
+execute:
+    enabled: true
+---
+
+::: {.callout-note appearance="simple"}
+**Spoiler**: If you treat an agent like a chatbot, you get a chatbot. If you treat it like a senior engineer, you get software. The difference is in the prompt.
+:::
+
+# The Mechanism (Why It Works)
+
+Standard LLM prompting is about **information retrieval**—you ask a question, you get an answer. Agentic prompting is about **state transformation**—you provide a starting state (current code) and a desired end state (refactored code), and the agent must navigate the path between them. This shift fundamentally changes what makes a prompt effective.
+
+Before we can build effective agent prompts, we must understand how LLMs process language. The naive view: if a machine can understand questions, it should respond consistently regardless of phrasing. Ask "Summarize this code" and get a concise summary. Ask "What does this code do?" and get the same information. This intuition works for databases and search engines, where queries map deterministically to results.
+
+LLMs shatter this expectation. They don't retrieve information; they **sample from probability distributions conditioned on your exact phrasing**. Every word in your prompt shifts the distribution. Change "Summarize" to "What does this do?" and you activate different statistical patterns from the training data—patterns that correlate with different response lengths, structures, and styles. When you submit a prompt, the model converts it into tokens, embeds them in high-dimensional space, and samples the next token from a probability distribution. **Your exact phrasing determines which region of probability space the model occupies when it begins sampling.**
+
+For agents, this has profound implications. A chatbot that gives you a slightly wrong answer is annoying. An agent that executes the slightly wrong command is catastrophic. When an LLM controls tools—editing files, running terminal commands, calling APIs—prompt engineering stops being about output quality and starts being about **action correctness**. The difference between "delete the test file" and "delete the file" is the difference between removing `test.py` and wiping your entire directory.
+
+## Vibe Coding
+
+This leads to the concept of **"Vibe Coding"**. Since the agent handles the syntax, your job is to describe the *qualities* of the software.
+*   **Intuitive View**: "I need to tell the AI exactly which CSS classes to use."
+*   **Reality**: The AI knows CSS better than you. You need to tell it to "Make it look like a 90s hacker terminal." The model maps this high-level semantic description ("vibe") to the low-level implementation details (green text, black background, monospace font) more effectively than you can manually specify.
+
+# The Application (How We Use It)
+
+## Understanding Structured Output for Actions
+
+When a user says "What's the weather in Tokyo?", a chatbot can respond with natural language. An agent must respond with a **tool call**—a structured object that specifies which function to invoke and with what parameters. Let's see how this works with `ollama`.
+
+First, define a simple tool:
+
+```{python}
+import ollama
+import json
+
+def get_weather(location: str, units: str = "celsius") -> dict:
+    """Simulated weather API"""
+    mock_data = {
+        "Tokyo": {"temperature": 22, "condition": "rainy"},
+        "Paris": {"temperature": 18, "condition": "sunny"}
+    }
+    return mock_data.get(location, {"temperature": None, "condition": "unknown"})
+```
+
+Now create a system prompt that tells the LLM to return structured tool calls:
+
+```{python}
+system_prompt = """You are a weather assistant agent. When the user asks about weather,
+you must call the get_weather function.
+
+Available tools:
+- get_weather(location: str, units: str = "celsius") -> dict
+
+Return ONLY valid JSON with this structure:
+{
+  "tool": "get_weather",
+  "parameters": {
+    "location": "<extracted location>",
+    "units": "celsius"
+  }
+}
+
+Do not include explanations. Only return JSON."""
+
+user_query = "What's the weather like in Tokyo?"
+
+params_llm = {"model": "gemma3n:latest", "options": {"temperature": 0}}
+
+response = ollama.chat(
+    model=params_llm["model"],
+    messages=[
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_query}
+    ]
+)
+
+print("LLM Response:")
+print(response.message.content)
+```
+
+The system prompt activates patterns where "return ONLY valid JSON" preceded JSON-formatted outputs. But this is fragile—if the LLM adds conversational text, parsing fails. For production agents, we need **JSON schema constraints** that enforce structure at the token level.
+
+```{python}
+from pydantic import BaseModel
+
+class ToolCall(BaseModel):
+    tool: str
+    parameters: dict
+
+# Convert to JSON schema
+json_schema = ToolCall.model_json_schema()
+
+# Now the LLM cannot generate invalid JSON
+response = ollama.chat(
+    model=params_llm["model"],
+    messages=[
+        {"role": "system", "content": "You are a weather assistant."},
+        {"role": "user", "content": "What's the weather in Paris?"}
+    ],
+    format=json_schema  # Schema constraint
+)
+
+print("\nSchema-Constrained Response:")
+print(response.message.content)
+
+# Parse and validate
+tool_call = ToolCall.model_validate_json(response.message.content)
+print(f"\nParsed Tool: {tool_call.tool}")
+print(f"Parameters: {tool_call.parameters}")
+```
+
+This is the foundation of reliable agents: **type-safe communication from LLM to execution layer**. The schema ensures the response is valid JSON with the correct structure.
+
+## The Bad Prompt vs. The Good Prompt
+
+**Bad (Chatbot Style)**:
+> "Write a python function that takes a list and sorts it."
+
+*Why it fails*: It produces a snippet in isolation. It doesn't know where to put it, how to name it, or what style to use. The agent samples from a broad distribution of "sorting function" patterns without constraints.
+
+**Good (Agentic Style)**:
+> "Add a sorting utility to `utils.py`. It should handle our custom `User` objects, sorting by `last_login`. Ensure it's type-hinted and includes a unit test in `tests/test_utils.py`."
+
+*Why it works*: It defines **Location** (utils.py), **Context** (User objects, last_login), **Constraints** (type hints), and **Verification** (unit test). This narrows the probability distribution to patterns where file paths, type hints, and test requirements preceded structured implementations.
+
+## Defining Constraints with System Prompts
+
+You shouldn't have to repeat "Use type hints" in every prompt. Use a `.cursorrules` or `.antigravity/rules` file to set global constraints.
+
+```markdown
+# .cursorrules
+
+- Always use Python 3.12+ syntax.
+- Use `pydantic` for data validation.
+- Docstrings must follow the Google Style Guide.
+- Never leave "TODO" comments; implement the full logic.
+- If a file is too long (>200 lines), propose a refactor before adding code.
+```
+
+## Prompt Components for Agents
+
+Effective agent prompts combine specific components that activate different behavioral patterns:
+
+**1. Role Definition**: Who is the agent?
+```
+You are a code editing assistant with access to file operations.
+```
+
+**2. Available Tools**: What can the agent do?
+```
+Available tools:
+- read_file(path: str) -> str
+- write_file(path: str, content: str)
+- run_command(cmd: str) -> str
+```
+
+**3. Decision Protocol**: How should the agent choose actions?
+```
+Decision process:
+1. If the user asks to modify a file, call read_file first
+2. Never write to a file without reading it first
+3. If uncertain, ask for clarification
+```
+
+**4. Safety Constraints**: What should the agent never do?
+```
+CRITICAL RULES:
+- Never delete files without explicit confirmation
+- Always validate file paths are within project directory
+```
+
+Each component activates different patterns. Role definitions activate task-specific behaviors. Tool definitions activate function-calling patterns. Decision protocols activate conditional reasoning. Safety constraints activate refusal patterns for dangerous operations.
+
+## Handling "Lazy" Agents
+
+Agents optimize for efficiency, which sometimes manifests as laziness—returning `// ... rest of code` instead of full implementations. This happens because the training data contains many examples where code snippets were abbreviated with ellipses. The LLM samples from these patterns.
+
+**The Fix**:
+
+1. **Be Explicit**: "Output the full file content. Do not use placeholders or ellipses."
+
+2. **Reject the Plan**: If the plan says "Update the function," ask "How exactly? Show me the complete logic first."
+
+3. **Chain-of-Thought Triggering**: "Think step-by-step about edge cases before writing code."
+
+Let's demonstrate with a practical example:
+
+```{python}
+# Bad prompt that encourages laziness
+lazy_prompt = """Add error handling to this function:
+
+def process_data(data):
+    result = data.split(',')
+    return result[0]
+"""
+
+# Good prompt that forces completeness
+complete_prompt = """Add comprehensive error handling to this function.
+Think step-by-step:
+1. What errors could occur? (empty data, no comma, multiple values)
+2. How should each be handled?
+3. What should the return type be?
+
+Output the COMPLETE function with all error handling logic. Do not use placeholders.
+
+def process_data(data):
+    result = data.split(',')
+    return result[0]
+"""
+
+params = {"model": "gemma3n:latest", "options": {"temperature": 0}}
+
+response_lazy = ollama.chat(
+    model=params["model"],
+    messages=[{"role": "user", "content": lazy_prompt}]
+)
+
+response_complete = ollama.chat(
+    model=params["model"],
+    messages=[{"role": "user", "content": complete_prompt}]
+)
+
+print("LAZY PROMPT RESPONSE:")
+print(response_lazy.message.content[:200], "...\n")
+
+print("COMPLETE PROMPT RESPONSE:")
+print(response_complete.message.content)
+```
+
+The complete prompt activates patterns where "think step-by-step" and "do not use placeholders" preceded full implementations. The chain-of-thought component forces decomposition before synthesis.
+
+## Temperature and Agent Reliability
+
+For agents that execute real-world actions, **temperature settings** are critical. Temperature controls randomness in token sampling:
+
+- **Temperature = 0**: Deterministic, always picks highest-probability token
+- **Temperature = 0.7**: Moderate randomness, balances creativity and consistency
+- **Temperature = 1.0+**: High randomness, unpredictable
+
+For agents, use **temperature ≈ 0** to maximize consistency. You want the agent to always call `read_file(path="utils.py")` for the same request, not occasionally hallucinate `read_fil(pth="utls.py")` due to sampling variance.
+
+```{python}
+# Compare different temperatures for tool calling
+temperatures = [0, 0.5, 1.0]
+prompt = "What's the weather in Berlin?"
+
+for temp in temperatures:
+    response = ollama.chat(
+        model="gemma3n:latest",
+        messages=[
+            {"role": "system", "content": "You are a weather assistant."},
+            {"role": "user", "content": prompt}
+        ],
+        format=json_schema,
+        options={"temperature": temp}
+    )
+
+    print(f"\nTemperature {temp}:")
+    print(response.message.content)
+```
+
+Higher temperatures introduce variability—sometimes useful for creative writing, but dangerous for agents that need to map the same input to the same action reliably.
+
+# The Takeaway
+
+**Prompting is the new syntax.** A vague prompt is a syntax error in the age of agents. It doesn't stop the code from running, but it ensures the wrong code runs.
+
+Agent prompts are not instructions—they're probability maps. Your system prompt activates patterns that shape action distributions across every scenario the agent encounters. Structured output constraints prevent hallucination. Temperature settings control consistency. Decision protocols activate conditional reasoning. Safety constraints activate refusal patterns.
+
+The model doesn't understand your intent; it samples from patterns where similar prompts preceded similar behaviors in training data. For agents, where those behaviors translate to real-world actions—file edits, terminal commands, API calls—this statistical foundation becomes the difference between a useful tool and a catastrophic automation failure.
