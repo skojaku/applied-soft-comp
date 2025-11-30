@@ -147,15 +147,14 @@ pip install smolagents
 
 :::
 
-Let's define our tools as proper `smolagents` Tool objects:
+### Creating a Tool
+
+A tool is a Python class that wraps a function the agent can call. Let's create `GenerateRandomTool` to understand the anatomy:
 
 ::: {.column-margin}
-**Tool**: A Python class that wraps a function the agent can call. It defines the function's name, description, input schema, and execution logic.
-:::
+**Tool**: Base class from smolagents. All custom tools inherit from this.
 
-
-::: {.column-margin}
-**forward()**: The method name is a convention from PyTorch. When the agent calls the tool, it invokes this method with the LLM-generated parameters.
+**forward()**: The execution method. Named after PyTorch convention—the agent calls this with LLM-generated parameters.
 :::
 
 ```{python}
@@ -163,20 +162,32 @@ from smolagents import Tool, CodeAgent, LiteLLMModel
 import numpy as np
 import json
 
-class GenerateRandomTool(Tool):  # Inherit from Tool base class
-    name = "generate_random"  # Agent uses this to identify the tool
-    description = "Generates random numbers from a Gaussian distribution"  # LLM reads this to decide when to call
-    inputs = {  # JSON schema: defines expected parameters
+class GenerateRandomTool(Tool):
+    name = "generate_random"
+    description = "Generates random numbers from a Gaussian distribution"
+    inputs = {
         "mean": {"type": "number", "description": "Mean of the distribution", "nullable": True},
         "std": {"type": "number", "description": "Standard deviation", "nullable": True},
         "size": {"type": "integer", "description": "Number of samples", "nullable": True}
     }
-    output_type = "string"  # What the tool returns
+    output_type = "string"
 
-    def forward(self, mean: float = 0, std: float = 1, size: int = 100) -> str:  # Actual execution logic
+    def forward(self, mean: float = 0, std: float = 1, size: int = 100) -> str:
         samples = np.random.normal(loc=mean, scale=std, size=size)
         return f"Generated {size} samples: mean={np.mean(samples):.2f}, std={np.std(samples):.2f}"
+```
 
+The structure is fixed. Every tool must define:
+
+1. **`name`**: Identifier the agent uses to call this tool (must be unique)
+2. **`description`**: What the LLM reads to decide when to use this tool
+3. **`inputs`**: JSON schema with `type`, `description`, and optionally `nullable` for each parameter
+4. **`output_type`**: Return type (usually `"string"`)
+5. **`forward()`**: The actual execution logic that runs when the agent calls the tool
+
+Now define two more tools using the same pattern:
+
+```{python}
 class CalculateStatsTool(Tool):
     name = "calculate_statistics"
     description = "Calculates statistics from a list of numbers"
