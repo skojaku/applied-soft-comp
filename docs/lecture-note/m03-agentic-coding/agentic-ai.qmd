@@ -289,13 +289,11 @@ Now create the agent. An agent needs two things: a language model to reason with
 ```{python}
 from smolagents import LiteLLMModel, ToolCallingAgent
 
-# Configure the language model (using Ollama's gpt-oss 120B)
 model = LiteLLMModel(
-    model_id="ollama/glm-4.6:cloud",  # LiteLLM requires "ollama/" prefix
+    model_id="ollama/glm-4.6:cloud",
     api_base="http://localhost:11434"
 )
 
-# Create the agent with our four tools
 agent = ToolCallingAgent(
     tools=[
         InspectDataTool(),
@@ -305,7 +303,7 @@ agent = ToolCallingAgent(
     ],
     model=model,
     max_steps=5,  # Limit iterations to prevent runaway loops
-    verbosity_level=1  # Suppress verbose logging (step duration, token counts)
+    verbosity_level=1,  # Suppress verbose logging (step duration, token counts),
 )
 ```
 
@@ -319,24 +317,17 @@ print(result)
 
 The agent executes a ReAct loop. It reads the question "Which fish species has the highest average weight?" and realizes it needs to use SQL to group by species and calculate averages. Watch how it autonomously:
 
-1. **Thought**: "I need to find the species with the highest average weight"
-2. **Action**: First calls `inspect_data` to learn the schema, then chooses `query_data` with SQL: `SELECT Species, AVG(Weight) as avg_weight FROM df GROUP BY Species ORDER BY avg_weight DESC LIMIT 1`
-3. **Observation**: Receives the query result showing the species and its average weight
-4. **Final Answer**: Returns "Pike has the highest average weight at 718.7g"
-
-The critical insight is the agent chose the right tool without explicit instructions. It read the tool descriptions, understood the task, and selected `query_data` over the other tools because the description mentioned SQL querying capabilities.
-
-Let's try a simpler multi-step query:
+Let's try another query that requires multiple steps:
 
 ```{python}
-query = "What is the correlation between Weight and Length1?"
+query = "What is the average weight of Pike species?"
 result = agent.run(query)
 print(result)
 ```
 
 For this query, the agent must:
-1. First call `inspect_data` to discover that Weight and Length1 exist
-2. Then use `find_correlation` to calculate the correlation between them
+1. Call `inspect_data` to discover the Species and Weight columns exist
+2. Use `get_stats` with `column="Weight"` and `species="Pike"` to get the statistics
 
 This demonstrates the power of the ReAct loop—the agent chains multiple observations together, building a solution step-by-step rather than attempting everything in one shot.
 
