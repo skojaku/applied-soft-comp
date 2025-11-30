@@ -163,7 +163,7 @@ df = pl.read_csv("hf://datasets/scikit-learn/Fish/Fish.csv")
 print(df.head())
 ```
 
-Now we'll create three tools that make our agent a **data detective**:
+Now we'll create a tool that lets the agent query this data. A tool is a Python class that wraps a function the agent can call.
 
 ::: {.column-margin}
 **Tool**: Base class from smolagents. All custom tools inherit from this.
@@ -172,7 +172,7 @@ Now we'll create three tools that make our agent a **data detective**:
 :::
 
 ```{python}
-from smolagents import Tool, ToolCallingAgent, LiteLLMModel
+from smolagents import Tool
 import json
 
 class QueryDataTool(Tool):
@@ -189,7 +189,22 @@ class QueryDataTool(Tool):
             return result.to_pandas().to_string()
         except Exception as e:
             return f"Query error: {str(e)}"
+```
 
+The structure is fixed. Every tool must define:
+
+1. **`name`**: Identifier the agent uses to call this tool (must be unique)
+2. **`description`**: What the LLM reads to decide when to use this tool
+3. **`inputs`**: JSON schema with `type`, `description`, and optionally `nullable` for each parameter
+4. **`output_type`**: Return type (usually `"string"`)
+5. **`forward()`**: The actual execution logic that runs when the agent calls the tool
+
+Notice the **description** field. This is the agent's only way to understand when to use the tool. The description tells the agent that this tool accepts SQL queries and lists the available columns. Without this context, the agent would never know when to call this tool.
+
+Let's add two more tools to give the agent more analytical capabilities:
+
+```{python}
+#| code-fold: true
 class FindCorrelationTool(Tool):
     name = "find_correlation"
     description = "Calculate correlation between two numeric columns in the fish dataset"
@@ -228,40 +243,32 @@ class GetStatsTool(Tool):
             return f"Error: {str(e)}"
 ```
 
-The structure is fixed. Every tool must define:
+The second tool calculates correlations between columns. The third computes statistics for a specific column, optionally filtered by species. Each tool description precisely communicates its purpose to the agent.
 
-1. **`name`**: Identifier the agent uses to call this tool (must be unique)
-2. **`description`**: What the LLM reads to decide when to use this tool
-3. **`inputs`**: JSON schema with `type`, `description`, and optionally `nullable` for each parameter
-4. **`output_type`**: Return type (usually `"string"`)
-5. **`forward()`**: The actual execution logic that runs when the agent calls the tool
-
-Notice how the **description** field is critical—it's the agent's only way to understand when to use each tool. A vague description like "analyzes data" will confuse the agent. A precise description like "Calculate correlation between two numeric columns" tells the agent exactly when this tool is appropriate.
-
-Create the agent with our tools:
+Now create the agent. An agent needs two things: a language model to reason with, and a list of tools it can use.
 
 ::: {.column-margin}
+**LiteLLMModel**: Wrapper that lets smolagents talk to any LLM backend (OpenAI, Anthropic, Ollama, etc.)
+
 **ToolCallingAgent**: Agent that uses the model's native tool-calling API. More reliable than CodeAgent for structured tool calls.
 
 **max_steps**: Maximum ReAct iterations before terminating. Prevents infinite loops.
 :::
 
-
 ```{python}
-# Initialize the agent with ollama backend
-from smolagents import LiteLLMModel
+from smolagents import LiteLLMModel, ToolCallingAgent
 
-# Use ollama through LiteLLM
-model_name = "ollama/gpt-oss:120b-cloud"  # LiteLLM requires "ollama/" prefix
-model = LiteLLMModel(model_id=model_name, api_base="http://localhost:11434")
+# Configure the language model (using Ollama's gpt-oss 120B)
+model = LiteLLMModel(
+    model_id="ollama/gpt-oss:120b-cloud",  # LiteLLM requires "ollama/" prefix
+    api_base="http://localhost:11434"
+)
 
-# Create the agent with our data analysis tools
-from smolagents import ToolCallingAgent
-
+# Create the agent with our three tools
 agent = ToolCallingAgent(
     tools=[QueryDataTool(), FindCorrelationTool(), GetStatsTool()],
     model=model,
-    max_steps=5
+    max_steps=5  # Limit iterations to prevent runaway loops
 )
 ```
 
