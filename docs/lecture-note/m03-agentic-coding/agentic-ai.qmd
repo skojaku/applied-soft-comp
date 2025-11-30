@@ -266,41 +266,9 @@ agent = ToolCallingAgent(
 Run the agent and watch it autonomously choose which tools to use:
 
 ```{python}
-# Ask a question that requires reasoning about which tool to use
 query = "Which fish species has the highest average weight?"
-
-# Capture the verbose output to print a clean trace instead
-import sys
-from io import StringIO
-
-old_stdout = sys.stdout
-sys.stdout = mystdout = StringIO()
-
-try:
-    result = agent.run(query)
-finally:
-    sys.stdout = old_stdout
-
-# Print a clean, formatted trace from the agent's memory
-print(f"Query: {query}\n")
-
-for step in agent.memory.steps:
-    # Handle potential missing attributes by checking or using defaults
-    thought = getattr(step, "model_output", None)
-    if thought:
-        print(f"**Thought:** {thought.strip()}")
-
-    tool_calls = getattr(step, "tool_calls", None)
-    if tool_calls:
-        for call in tool_calls:
-            print(f"**Action:** `{call.name}` with arguments `{call.arguments}`")
-
-    observations = getattr(step, "observations", None)
-    if observations:
-        print(f"**Observation:** {observations.strip()}")
-    print("-" * 40)
-
-print(f"\n**Final Answer:** {result}")
+result = agent.run(query)
+print(result)
 ```
 
 The agent executes a ReAct loop. It reads the question "Which fish species has the highest average weight?" and realizes it needs to use SQL to group by species and calculate averages. Watch how it autonomously:
@@ -315,20 +283,9 @@ The critical insight is the agent chose the right tool without explicit instruct
 Let's try a more complex multi-step query:
 
 ```{python}
-# This requires chaining multiple tool calls
 query = "Is there a relationship between Weight and Length1? What species has the strongest correlation?"
-
-# Run without printing intermediate steps
-old_stdout = sys.stdout
-sys.stdout = mystdout = StringIO()
-
-try:
-    result = agent.run(query)
-finally:
-    sys.stdout = old_stdout
-
-print(f"Query: {query}\n")
-print(f"Final Answer: {result}")
+result = agent.run(query)
+print(result)
 ```
 
 For this query, the agent must:
