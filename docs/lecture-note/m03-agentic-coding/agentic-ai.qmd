@@ -239,51 +239,27 @@ agent = CodeAgent(
 )
 ```
 
-Run the agent on different queries and watch it choose the right tool:
+Run the agent and watch it choose the right tool:
 
 ```{python}
-queries = [
-    "Generate 30 random numbers from a Gaussian distribution with mean 10 and std 2",
-    "I have this data: [1.5, 2.3, 1.8, 2.1, 1.9]. Calculate statistics for it.",
-    "I measured these values: [5.2, 5.1, 4.9, 5.3, 5.0]. Fit a Gaussian distribution to this data."
-]
+# Simple single-step task
+query = "Generate 30 random numbers from a Gaussian distribution with mean 10 and std 2"
 
-for i, query in enumerate(queries, 1):
-    print(f"\n{'='*60}")
-    print(f"QUERY {i}: {query}")
-    print('='*60)
-
-    result = agent.run(query)
-    print(f"\nAgent Response: {result}")
-```
-
-Watch the agent's reasoning trace by enabling verbose logging:
-
-```{python}
-# Enable verbose logging to see the ReAct loop
-from smolagents import LogLevel
-
-agent.logger.level = LogLevel.DEBUG  # Enable detailed trace output
-
-query = "Generate 100 samples with mean 0, std 1, then calculate statistics on those samples"
-
-print("=" * 60)
-print("REACT TRACE: Multi-Step Task")
+print(f"Query: {query}")
 print("=" * 60)
 
 result = agent.run(query)
-
-print(f"\nFinal Answer: {result}")
+print(f"\nAgent Response: {result}")
 ```
 
-The agent will:
-1. **Thought**: "I need to generate random numbers first"
-2. **Action**: Call `generate_random(mean=0, std=1, size=100)`
-3. **Observation**: Receive the generated samples
-4. **Thought**: "Now I need to calculate statistics on these samples"
-5. **Action**: Call `calculate_statistics(data=[...])`
-6. **Observation**: Receive the statistics
-7. **Response**: Synthesize natural language answer
+The agent executes a ReAct loop:
+
+1. **Thought**: "The user wants random numbers from a Gaussian distribution"
+2. **Action**: Chooses `generate_random` tool and calls it with `mean=10, std=2, size=30`
+3. **Observation**: Receives output: "Generated 30 samples: mean=10.02, std=1.98"
+4. **Final Answer**: Returns the result to the user
+
+This is the core ReAct pattern. For more complex multi-step tasks, the agent chains multiple tool calls together, using the observation from one step to inform the next action.
 
 This is the entire architecture of Google Antigravity, Claude Code, and Cursor—just scaled with better tools (file editing, terminal commands, web browsing) and better orchestration (parallel agents, verification artifacts).
 
