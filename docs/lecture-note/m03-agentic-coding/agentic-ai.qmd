@@ -1,0 +1,299 @@
+---
+title: "From ChatBot to Agentic AI"
+---
+
+::: {.callout-note appearance="simple"}
+**Spoiler**: Agents don't "think" in the human sense. They loop. They are state machines that use an LLM to decide the next transition.
+:::
+
+# The Mechanism (Why It Works)
+
+The naive view is that agents are "smarter" chatbots. They aren't. They're dumber chatbots wrapped in a control loop. A chatbot generates text and stops. An agent generates text, parses it for actionable commands, executes those commands in the real world, observes the results, and feeds those results back into the next prompt. The intelligence doesn't come from the model—it comes from the **feedback loop**.
+
+This is the **ReAct Pattern** (Reason + Act). A standard chatbot is a pure function: $\text{Output} = \text{Model}(\text{Input})$. An agent is a state machine:
+
+```python
+while not task_complete:
+    observation = get_environment_state()
+    thought = model(observation)
+    action = parse_action(thought)
+    result = execute(action)
+    observation = result  # Feedback loop
+```
+
+The critical insight is the feedback loop. If the agent tries to import a missing library (Action) and receives `ModuleNotFoundError` (Observation), the next iteration's Thought will be "I need to install this library," rather than hallucinating success. The model corrects itself not through introspection, but through collision with reality.
+
+## The Structured Output Problem
+
+Before we can build this loop, we must solve a fundamental engineering problem: **How do we extract executable actions from natural language?**
+
+When you ask an LLM "What's the weather?", it might respond:
+> "Let me check the weather for you. I'll use the weather API."
+
+This is useless. We need:
+```json
+{"action": "call_api", "api_name": "weather", "parameters": {"location": "New York"}}
+```
+
+Early systems used regex to parse the model's output. This failed constantly. The model would say "I'll check the weather in NYC" instead of "New York," and the parser would break. The solution is **Structured Output**—we force the model to return data in a machine-readable format.
+
+# The Application (How We Use It)
+
+## Structured Output with JSON Schema
+
+The most basic approach is to prompt the model to return JSON:
+
+```python
+prompt = """
+You are a function-calling assistant. Given a user query, return a JSON object with:
+- "action": the name of the function to call
+- "parameters": a dictionary of arguments
+
+User query: "What's the weather in Tokyo?"
+
+Response:
+"""
+```
+
+The model might respond:
+```json
+{"action": "get_weather", "parameters": {"location": "Tokyo"}}
+```
+
+But this is fragile. The model might hallucinate extra fields, misspell keys, or return malformed JSON. We need **schema enforcement**.
+
+Modern APIs (OpenAI, Anthropic, Google) support **JSON Schema** constraints. You define the shape of the output, and the model is forced to conform:
+
+```python
+schema = {
+    "type": "object",
+    "properties": {
+        "action": {"type": "string", "enum": ["get_weather", "set_reminder"]},
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "location": {"type": "string"}
+            },
+            "required": ["location"]
+        }
+    },
+    "required": ["action", "parameters"]
+}
+
+response = client.generate(prompt, response_format={"type": "json_schema", "schema": schema})
+```
+
+Now the model cannot hallucinate. It must return valid JSON that matches the schema. If it tries to return `{"acton": ...}` (typo), the generation fails and retries internally.
+
+## Pydantic: Python's Type System for Data
+
+Writing raw JSON schemas is verbose and error-prone. **Pydantic** solves this by letting you define schemas as Python classes with type annotations:
+
+```python
+from pydantic import BaseModel
+
+class WeatherRequest(BaseModel):
+    action: str
+    location: str
+    units: str = "celsius"  # Default value
+
+# Validation happens automatically
+request = WeatherRequest(action="get_weather", location="Tokyo")
+print(request.model_dump_json())
+# Output: {"action": "get_weather", "location": "Tokyo", "units": "celsius"}
+
+# Invalid data raises an error
+invalid = WeatherRequest(action="get_weather")  # Missing 'location'
+# ValidationError: 1 validation error for WeatherRequest
+#   location
+#     Field required [type=missing, input_value={'action': 'get_weather'}, input_type=dict]
+```
+
+Pydantic integrates directly with modern LLM APIs. You pass the Pydantic model, and the API generates the JSON schema automatically:
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "What's the weather in Tokyo?"}],
+    response_format=WeatherRequest  # Pydantic model
+)
+
+# Parse the response directly into a validated object
+request = WeatherRequest.model_validate_json(response.choices[0].message.content)
+print(request.location)  # "Tokyo"
+```
+
+This is the foundation of reliable agents: **type-safe communication between the LLM and your code**.
+
+## Tool Calling: The Agent's Hands
+
+Structured output tells us what the agent wants to do. **Tool calling** is the mechanism that lets it actually do it.
+
+A **tool** is a function that the agent can invoke. You define the tool's name, description, and parameter schema. The agent decides when to call it based on the user's request.
+
+```python
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "Fetches the current weather for a location",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "location": {"type": "string", "description": "City name"},
+                    "units": {"type": "string", "enum": ["celsius", "fahrenheit"]}
+                },
+                "required": ["location"]
+            }
+        }
+    }
+]
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "What's the weather in Berlin?"}],
+    tools=tools
+)
+
+# The model returns a tool call request
+tool_call = response.choices[0].message.tool_calls[0]
+print(tool_call.function.name)       # "get_weather"
+print(tool_call.function.arguments)  # '{"location": "Berlin", "units": "celsius"}'
+```
+
+The agent doesn't execute the tool—it requests that you execute it. You run the function, capture the result, and feed it back:
+
+```python
+import json
+
+def get_weather(location, units="celsius"):
+    # Simulated API call
+    return {"temperature": 15, "condition": "cloudy", "units": units}
+
+# Execute the tool
+args = json.loads(tool_call.function.arguments)
+result = get_weather(**args)
+
+# Feed the result back to the model
+messages = [
+    {"role": "user", "content": "What's the weather in Berlin?"},
+    {"role": "assistant", "tool_calls": [tool_call]},
+    {"role": "tool", "tool_call_id": tool_call.id, "content": json.dumps(result)}
+]
+
+final_response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=messages
+)
+
+print(final_response.choices[0].message.content)
+# "It's currently 15°C and cloudy in Berlin."
+```
+
+This is the ReAct loop in action:
+1. **Thought**: "I need to call get_weather"
+2. **Action**: Tool call request
+3. **Observation**: Tool result (15°C, cloudy)
+4. **Response**: Natural language answer
+
+## The ReAct Framework: Reason + Act
+
+The **ReAct Pattern** formalizes this loop. The agent alternates between **reasoning** (generating thoughts) and **acting** (calling tools or terminating).
+
+Here's a minimal ReAct implementation:
+
+```python
+def react_agent(user_query, tools, max_iterations=10):
+    messages = [{"role": "user", "content": user_query}]
+
+    for i in range(max_iterations):
+        # Generate response
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=messages,
+            tools=tools
+        )
+
+        message = response.choices[0].message
+        messages.append(message)
+
+        # Check if the agent wants to call a tool
+        if message.tool_calls:
+            for tool_call in message.tool_calls:
+                # Execute the tool
+                result = execute_tool(tool_call.function.name, tool_call.function.arguments)
+
+                # Add the result to the conversation
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": json.dumps(result)
+                })
+        else:
+            # No more tool calls - agent has finished
+            return message.content
+
+    return "Max iterations reached"
+
+def execute_tool(name, arguments):
+    args = json.loads(arguments)
+    if name == "get_weather":
+        return get_weather(**args)
+    elif name == "set_reminder":
+        return set_reminder(**args)
+    else:
+        return {"error": "Unknown tool"}
+```
+
+Run it:
+```python
+response = react_agent("What's the weather in Paris and Tokyo?", tools)
+print(response)
+# "In Paris, it's 18°C and sunny. In Tokyo, it's 22°C and rainy."
+```
+
+The agent will:
+1. Call `get_weather(location="Paris")`
+2. Receive the result
+3. Call `get_weather(location="Tokyo")`
+4. Receive the result
+5. Synthesize the final answer
+
+This is the entire architecture of Google Antigravity, Claude Code, and Cursor—just scaled with better tools (file editing, terminal commands, web browsing) and better orchestration (parallel agents, verification artifacts).
+
+## Tracing the Agent's Mind
+
+Let's look at a real trace of Gemini 3 solving a problem: "Find the largest file in the current directory."
+
+**Step 1: Thought**
+> "I need to list all files and their sizes to determine the largest one. I should use the `ls` command with the `-lh` flag, or better yet, `find` to handle subdirectories."
+
+**Step 2: Action**
+> `run_command("find . -type f -exec du -h {} + | sort -rh | head -n 1")`
+
+**Step 3: Observation**
+> `105M ./data/large_dataset.csv`
+
+**Step 4: Thought**
+> "I have found the file. It is `large_dataset.csv` with a size of 105M. I can now answer the user."
+
+**Step 5: Final Answer**
+> "The largest file is `./data/large_dataset.csv` (105MB)."
+
+## The Token Economy
+
+This autonomy comes at a cost.
+*   **Latency**: Each step in the loop requires a round-trip to the model. A complex task might take 30 seconds to plan and execute.
+*   **Cost**: A simple question might consume 500 tokens. An agentic loop might consume 50,000 tokens as it reads files, gets error messages, and re-reads context.
+
+**Asynchronous Context**
+Because of this latency, Antigravity is designed for **Asynchrony**. You don't stare at the cursor waiting for it to move. You assign the task, switch to another file, and wait for the notification. It is a "fire-and-forget" workflow.
+
+# The Takeaway
+
+**Latency is the price of autonomy.** We accept slower individual interactions in exchange for the completion of entire units of work. You trade seconds of waiting for hours of coding.
