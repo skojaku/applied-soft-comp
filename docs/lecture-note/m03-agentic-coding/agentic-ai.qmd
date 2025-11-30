@@ -43,7 +43,7 @@ This cycle repeats until the task is solved.
 
 ## The Structured Output Problem
 
-![](../figs/structured-output-manga.png)
+![](../figs/structured-output-manga.png){width="70%" fig-align="center"}
 
 Before we can build this loop, we must solve a fundamental engineering problem: **How do we extract executable actions from natural language?**
 
@@ -124,198 +124,6 @@ print(response.response)
 Now the model cannot hallucinate. It must return valid JSON that matches the schema. If it tries to return `{"acton": ...}` (typo), the generation fails and retries internally.
 This is the foundation of reliable agents: **type-safe communication between the LLM and your code**.
 
-## Tool Calling
-
-Structured output tells us what the agent wants to do. **Tool calling** is the mechanism that lets it actually do it.
-
-Conceptually, the framework operates as follows:
-
-1.  **Registration**: You provide the agent with a registry of available tools, including their names, descriptions, and parameter schemas.
-2.  **Selection**: Based on the user's query and its own internal reasoning ("thoughts"), the agent determines which tool is most appropriate to use.
-3.  **Execution**: The agent generates a structured call (arguments), the system runs the actual function, and the return value is fed back to the agent as an observation.
-
-### Demonstration
-
-Let us see how this works in practice. First, define the actual tool functions:
-
-```{python}
-import numpy as np
-
-# Define multiple tools - the agent must choose the right one
-def generate_random(distribution: str, mean: float = 0, std: float = 1, size: int = 100) -> dict:
-    """Generate random numbers from specified distribution"""
-    samples = np.random.normal(loc=mean, scale=std, size=size)
-    return {
-        "tool": "generate_random",
-        "distribution": "gaussian",
-        "mean": float(np.mean(samples)),
-        "std": float(np.std(samples)),
-        "size": len(samples),
-        "samples": samples.tolist()[:5]
-    }
-
-def calculate_statistics(data: list[float]) -> dict:
-    """Calculate statistics from a list of numbers"""
-    arr = np.array(data)
-    return {
-        "tool": "calculate_statistics",
-        "mean": float(np.mean(arr)),
-        "std": float(np.std(arr)),
-        "median": float(np.median(arr)),
-        "min": float(np.min(arr)),
-        "max": float(np.max(arr))
-    }
-
-def fit_distribution(data: list[float], distribution: str = "gaussian") -> dict:
-    """Fit a distribution to observed data"""
-    arr = np.array(data)
-    mu = float(np.mean(arr))
-    sigma = float(np.std(arr))
-    return {
-        "tool": "fit_distribution",
-        "distribution": distribution,
-        "parameters": {"mean": mu, "std": sigma}
-    }
-```
-
-Define schemas for each tool:
-
-```{python}
-# Schema for generating random numbers
-class GenerateRandomCall(BaseModel):
-    tool: str  # Must be "generate_random"
-    distribution: str
-    mean: float = 0
-    std: float = 1
-    size: int = 100
-
-# Schema for calculating statistics
-class CalculateStatsCall(BaseModel):
-    tool: str  # Must be "calculate_statistics"
-    data: list[float]
-
-# Schema for fitting distributions
-class FitDistributionCall(BaseModel):
-    tool: str  # Must be "fit_distribution"
-    data: list[float]
-    distribution: str = "gaussian"
-
-# Combined schema that accepts any of the three tools
-class ToolCall(BaseModel):
-    tool: str
-    # Union of all possible parameters
-    distribution: str | None = None
-    mean: float | None = None
-    std: float | None = None
-    size: int | None = None
-    data: list[float] | None = None
-
-tool_schema = ToolCall.model_json_schema()
-```
-
-Now create a system prompt that defines ALL available tools - the LLM must choose which one to call:
-
-```{python}
-# System prompt that defines multiple tools
-system_prompt = """You are a statistical analysis assistant. Based on the user's request, choose the appropriate tool.
-
-Available tools:
-- generate_random(distribution: str, mean: float, std: float, size: int) -> generates random numbers
-- calculate_statistics(data: list[float]) -> computes mean, std, median, min, max from data
-- fit_distribution(data: list[float], distribution: str) -> fits a distribution to observed data
-
-Return JSON with the tool name and appropriate parameters:
-{"tool": "<tool_name>", <parameters>}"""
-
-# Test different queries - watch the LLM choose the right tool
-queries = [
-    "Generate 30 random numbers from a Gaussian distribution with mean 10 and standard deviation 2",
-    "I have this data: [1.5, 2.3, 1.8, 2.1, 1.9]. Calculate statistics for it.",
-    "I measured these values: [5.2, 5.1, 4.9, 5.3, 5.0]. What distribution fits this data?"
-]
-
-for i, query in enumerate(queries, 1):
-    print(f"\n{'='*60}")
-    print(f"QUERY {i}: {query}")
-    print('='*60)
-
-    response = ollama.chat(
-        model=params_llm["model"],
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": query}
-        ],
-        format=tool_schema
-    )
-
-    print(f"\nLLM Tool Call:")
-    print(response.message.content)
-
-    # Parse the tool call
-    tool_call = ToolCall.model_validate_json(response.message.content)
-    print(f"\n=> Chosen Tool: {tool_call.tool}")
-```
-
-Notice how the LLM **chooses different tools** based on what the user is asking for:
-- "Generate random numbers" → calls `generate_random`
-- "Calculate statistics" → calls `calculate_statistics`
-- "What distribution fits" → calls `fit_distribution`
-
-Now let's execute one of these tool calls:
-
-```{python}
-# Execute the first tool call (generate_random)
-query = queries[0]
-response = ollama.chat(
-    model=params_llm["model"],
-    messages=[
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": query}
-    ],
-    format=tool_schema
-)
-
-tool_call = ToolCall.model_validate_json(response.message.content)
-
-# Execute the appropriate function based on tool name
-if tool_call.tool == "generate_random":
-    result = generate_random(
-        distribution=tool_call.distribution,
-        mean=tool_call.mean,
-        std=tool_call.std,
-        size=tool_call.size
-    )
-elif tool_call.tool == "calculate_statistics":
-    result = calculate_statistics(data=tool_call.data)
-elif tool_call.tool == "fit_distribution":
-    result = fit_distribution(data=tool_call.data, distribution=tool_call.distribution)
-
-print(f"\nTool Execution Result:")
-print(json.dumps(result, indent=2))
-
-# Feed the result back to get a natural language response
-messages = [
-    {"role": "system", "content": "You are a statistical analysis assistant."},
-    {"role": "user", "content": query},
-    {"role": "assistant", "content": f"Tool call: {tool_call.model_dump_json()}"},
-    {"role": "user", "content": f"Tool result: {json.dumps(result)}. Provide a natural language summary."}
-]
-
-final_response = ollama.chat(
-    model=params_llm["model"],
-    messages=messages
-)
-
-print(f"\nFinal Natural Language Response:")
-print(final_response.message.content)
-```
-
-This is the ReAct loop in action:
-1. **Thought**: "I need to call generate_random"
-2. **Action**: Tool call request (structured JSON)
-3. **Observation**: Tool result (200 samples, mean≈10, std≈2)
-4. **Response**: Natural language answer
-
 ## The ReAct Framework with `smolagents`
 
 The **ReAct Pattern** formalizes this loop. The agent alternates between **reasoning** (generating thoughts) and **acting** (calling tools or terminating).
@@ -331,8 +139,9 @@ pip install smolagents
 Now let's define our tools as proper `smolagents` Tool objects:
 
 ```{python}
-from smolagents import Tool, CodeAgent, HfApiModel
+from smolagents import Tool, CodeAgent, LiteLLMModel
 import numpy as np
+import json
 
 class GenerateRandomTool(Tool):
     name = "generate_random"
