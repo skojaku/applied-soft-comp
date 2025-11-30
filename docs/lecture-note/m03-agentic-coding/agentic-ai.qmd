@@ -208,7 +208,7 @@ class QueryDataTool(Tool):
     output_type = "string"
 
     def forward(self, sql_query: str) -> str:
-        result = sqldf(sql_query, locals())
+        result = sqldf(sql_query, globals())
         return result.to_string()
 ```
 
@@ -346,33 +346,6 @@ This demonstrates the power of the ReAct loop—the agent chains multiple observ
 
 This is the entire architecture of Google Antigravity, Claude Code, and Cursor—just scaled with better tools (file editing, terminal commands, web browsing) and better orchestration (parallel agents, verification artifacts).
 
-## Tracing the Agent's Mind
-
-Let's look at a real trace of Gemini 3 solving a problem: "Find the largest file in the current directory."
-
-**Step 1: Thought**
-> "I need to list all files and their sizes to determine the largest one. I should use the `ls` command with the `-lh` flag, or better yet, `find` to handle subdirectories."
-
-**Step 2: Action**
-> `run_command("find . -type f -exec du -h {} + | sort -rh | head -n 1")`
-
-**Step 3: Observation**
-> `105M ./data/large_dataset.csv`
-
-**Step 4: Thought**
-> "I have found the file. It is `large_dataset.csv` with a size of 105M. I can now answer the user."
-
-**Step 5: Final Answer**
-> "The largest file is `./data/large_dataset.csv` (105MB)."
-
-## The Token Economy
-
-This autonomy comes at a cost.
-*   **Latency**: Each step in the loop requires a round-trip to the model. A complex task might take 10 seconds to plan and execute.
-*   **Cost**: A simple question might consume 500 tokens. An agentic loop might consume 50,000 tokens as it reads files, gets error messages, and re-reads context.
-
-**Asynchronous Context**
-Because of this latency, Antigravity is designed for **Asynchrony**. You don't stare at the cursor waiting for it to move. You assign the task, switch to another file, and wait for the notification. It is a "fire-and-forget" workflow.
 
 # The Takeaway
 
