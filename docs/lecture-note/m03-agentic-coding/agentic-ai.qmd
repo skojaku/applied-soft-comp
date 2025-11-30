@@ -329,20 +329,31 @@ The agent executes a ReAct loop. It reads the question "Which fish species has t
 
 The critical insight is the agent chose the right tool without explicit instructions. It read the tool descriptions, understood the task, and selected `query_data` over the other tools because the description mentioned SQL querying capabilities.
 
-Let's try a more complex multi-step query:
+Let's try a simpler multi-step query:
 
 ```{python}
-query = "Is there a relationship between Weight and Length1? What species has the strongest correlation?"
+query = "What is the correlation between Weight and Length1?"
 result = agent.run(query)
 print(result)
 ```
 
 For this query, the agent must:
-1. First check the overall correlation between Weight and Length1
-2. Then query for distinct species
-3. Finally calculate correlation for each species separately
+1. First call `inspect_data` to discover that Weight and Length1 exist
+2. Then use `find_correlation` to calculate the correlation between them
 
 This demonstrates the power of the ReAct loop—the agent chains multiple observations together, building a solution step-by-step rather than attempting everything in one shot.
+
+::: {.callout-note collapse="true"}
+## Why not more complex queries?
+
+You might notice we're using simpler queries than you'd expect. This is intentional. Real-world agentic systems face reliability challenges:
+
+- **JSON parsing errors**: Models sometimes generate malformed JSON or multiple JSON objects in one response
+- **SQL limitations**: pandasql uses SQLite, which lacks advanced functions like `CORR()` for per-group correlations
+- **Max steps**: Complex queries can hit iteration limits before completing
+
+Production systems like Claude Code and Cursor handle these issues through better error recovery, more sophisticated prompting, and custom tool implementations. For learning purposes, we focus on simple queries that reliably demonstrate the ReAct pattern.
+:::
 
 This is the entire architecture of Google Antigravity, Claude Code, and Cursor—just scaled with better tools (file editing, terminal commands, web browsing) and better orchestration (parallel agents, verification artifacts).
 
