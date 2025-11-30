@@ -1,0 +1,93 @@
+---
+title: "Hands-on"
+---
+
+::: {.callout-note appearance="simple"}
+**Spoiler**: In this session, we will build a fully functional game and refactor a codebase without writing a single line of Python ourselves. We will only write English.
+:::
+
+# Setup: Google Antigravity
+
+**The Platform**: Google Antigravity is not an upgraded text editor—it's an agent orchestration platform that happens to include a code editor. Where traditional IDEs treat AI as autocomplete on steroids, Antigravity inverts the relationship. You describe tasks; agents plan, execute, and verify them across your editor, terminal, and browser simultaneously. The interface splits into two distinct workspaces: the **Editor** (a familiar VS Code fork for hands-on coding) and the **Manager Surface** (a control panel where you spawn and monitor autonomous agents working asynchronously). This architectural shift moves you from code-writer to task-dispatcher.
+
+**Installation**: Download from [antigravity.google/download](https://antigravity.google/download). Available for macOS, Windows, and Linux at no cost during public preview. Log in using your Google Cloud credentials. The platform provides generous rate limits on **Gemini 3 Pro** and supports **Anthropic Claude Sonnet 4.5** and **OpenAI GPT-4o**. Model choice is yours; the architecture is model-agnostic.
+
+**Configuration**: Before beginning, set your **Autonomy Level**—this defines how much human review you require:
+- **Review-Driven**: Agents propose plans and wait for your approval before execution. You remain in the loop for critical decisions. Use this when learning the system or working on high-stakes code.
+- **Agent-Assisted**: Agents execute autonomously but surface artifacts (screenshots, browser recordings, test results) for verification. You validate outcomes, not steps. Use this for maintenance tasks and bug fixes.
+
+This setting determines whether you operate as a foreman reviewing blueprints or a manager reviewing deliverables. Start with Review-Driven until you trust the agent's planning capabilities.
+
+**Artifact-Based Verification**: Unlike traditional tools that dump logs, Antigravity agents generate tangible deliverables—screenshots of UI changes, browser recordings of workflows, test output summaries. This shifts debugging from "read the stack trace" to "does this screenshot match what I wanted?" The cognitive load moves from interpretation to validation.
+
+**Knowledge Persistence**: The platform treats learning as a core primitive. Agents store useful context and code snippets from previous tasks, improving performance over time. This means your second bug fix will be faster than your first. The system builds institutional memory.
+
+# The Mechanism (Why It Works)
+
+To effectively use an Agentic IDE, you must master the **Mission Control Loop**. This is different from the "Edit-Run-Debug" loop you are used to.
+
+1.  **Define**: You state the goal in natural language.
+2.  **Plan**: The agent proposes a strategy.
+3.  **Approve**: You validate the strategy.
+4.  **Execute**: The agent implements the code.
+5.  **Verify**: You test the outcome.
+
+The critical step is **Plan**. If the plan is flawed, the code will be flawed. A "Review-Driven" autonomy level forces this pause, ensuring you don't waste tokens on a hallucinated path.
+
+# The Application (How We Use It)
+
+## Exercise 1: The "Mission Control" Workflow
+
+**Goal**: Create a Snake game in Python using `pygame`.
+
+**Step 1: The Prompt**
+Open the Agent Manager (Cmd+K) and type:
+> "Create a robust Snake game using pygame. It should have a scoring system, a 'Game Over' screen with a restart button, and use a dark, modern color palette. Ensure the code is modular."
+
+**Step 2: The Plan Review**
+The agent will generate a **Plan Artifact**.
+*   *Check*: Does it mention installing `pygame`?
+*   *Check*: Does it separate the game logic from the UI?
+*   *Action*: Click **Approve**.
+
+**Step 3: Execution & Verification**
+The agent will create `snake_game.py` and `requirements.txt`. It will likely run `pip install -r requirements.txt` automatically.
+*   *Action*: Once finished, run the game. If it crashes, do not fix the code. Proceed to Exercise 3.
+
+## Exercise 2: Multi-Agent Orchestration
+
+Real-world development is parallel. We can simulate a team of developers.
+
+**Step 1: Assign Agent A (The Writer)**
+> "Read `snake_game.py` and write a comprehensive `README.md`. Explain how to run the game and list the controls."
+
+**Step 2: Assign Agent B (The Architect)**
+> "Refactor `snake_game.py` to use a `Game` class and a `Snake` class if it doesn't already. Add type hints to all functions."
+
+**Step 3: The Merge**
+Watch as both agents work simultaneously. You will receive two separate **Diff Views**. Review and merge them. Note how Antigravity handles the git merge conflict if they touch the same lines (it usually avoids this by context awareness, but be vigilant).
+
+## Exercise 3: The "Fix It" Loop
+
+Agents are excellent debuggers because they can read stack traces faster than you can.
+
+**Step 1: Sabotage**
+Open `snake_game.py` and delete a critical import (e.g., `import random`).
+
+**Step 2: The Error**
+Run the game. It will crash in the terminal.
+
+**Step 3: The Fix**
+Highlight the error in the terminal and press **Cmd+L** (Send to Agent).
+> "Fix this."
+
+**Step 4: Observation**
+The agent will:
+1.  Read the error (`NameError: name 'random' is not defined`).
+2.  Search the file for usages of `random`.
+3.  Re-add the import.
+4.  Run the game to verify the fix.
+
+# The Takeaway
+
+**Trust, but verify.** The agent is a tireless worker, but it lacks your intuition. Your new primary skill is **Code Review**. If you blindly approve every plan, you will build a mess faster than ever before.
