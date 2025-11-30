@@ -73,9 +73,6 @@ We will use `gpt-oss:120b-cloud` as the LLM. This is a 120B parameter model that
 ```{python}
 #| echo: false
 import os
-# Disable ANSI colors in smolagents output for better readability
-os.environ["NO_COLOR"] = "1"
-
 import ollama
 import json
 
@@ -102,7 +99,7 @@ print(response.response)
 
 The model might return valid JSON, but this is fragile. It might hallucinate extra fields, misspell keys, add conversational text, or return malformed JSON. We need **schema enforcement**.
 
-Modern LLM APIs (including ollama) support **JSON Schema** constraints. You define the shape of the output, and the model is forced to conform:
+Modern LLM APIs (including ollama) support **JSON Schema** constraints. You define the shape of the output, and the model is forced to conform. A popular library for this is **Pydantic**. With Pydantic, you define the schema using a class, and the model is forced to conform to the schema.
 
 ```{python}
 from pydantic import BaseModel
@@ -112,7 +109,10 @@ class ToolCall(BaseModel):
     action: str
     parameters: dict
     values: list[float]
+```
 
+Once you define the schema, you can use it to constrain the model's output:
+```{python}
 # Convert to JSON schema
 json_schema = ToolCall.model_json_schema()
 
@@ -295,7 +295,7 @@ for step in agent.memory.steps:
     tool_calls = getattr(step, "tool_calls", None)
     if tool_calls:
         for call in tool_calls:
-            print(f"**Action:** `{call.tool_name}` with arguments `{call.arguments}`")
+            print(f"**Action:** `{call.name}` with arguments `{call.arguments}`")
 
     observations = getattr(step, "observations", None)
     if observations:
