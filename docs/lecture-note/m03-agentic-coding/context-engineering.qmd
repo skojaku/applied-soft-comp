@@ -8,96 +8,169 @@ title: "Context Engineering"
 
 **The Mechanism (Why It Works)**
 
-LLMs are brilliant but bounded. Every model has a context window—the set of tokens available during inference. Think of it as working memory. Just as your brain can only hold 7±2 items in short-term memory, an LLM has an **attention budget** that depletes as the context grows. This isn't just a hard limit; it's a performance gradient. As the number of tokens increases, the model's ability to accurately use that context degrades. This phenomenon is called **context rot**.
+LLMs are brilliant but bounded. Every model has a context window—the set of tokens available during inference. Think of it as working memory. Just as your brain can only hold a few items in short-term memory, an LLM has an **attention budget** that degrades as the context grows. As the number of tokens increases, the model's ability to accurately use that context degrades. This phenomenon is called **context rot**.
 
-The reason is architectural. LLMs use the transformer architecture, where every token attends to every other token. For $n$ tokens, this creates $n^2$ pairwise relationships. As context length increases, the model's attention gets stretched thin across these relationships. Models are also trained predominantly on shorter sequences, meaning they have less specialized capacity for long-range dependencies. Position encoding tricks allow models to handle longer contexts, but performance still decays. You don't hit a cliff—you slide down a gradient.
+![](../figs/context-engineering-context-rot-manga.png){width="70%" fig-align="center"}
 
-This decay manifests in four failure modes. **Context poisoning** occurs when a hallucination or error enters the context and influences future outputs. **Context distraction** happens when the volume of context overwhelms the model's training distribution, causing it to lose focus. **Context confusion** arises when superfluous information nudges the model toward irrelevant responses. **Context clash** occurs when parts of the context contradict each other, forcing the model to arbitrate between conflicting signals.
+
+The reason is architectural. LLMs use the transformer architecture, where every token attends to every other token. For $n$ tokens, this creates $n^2$ pairwise relationships. As context length increases, the model's attention gets stretched thin across these relationships. Models are also trained predominantly on shorter sequences, meaning they have less specialized capacity for long-range dependencies. Position encoding tricks allow models to handle longer contexts, but performance still decays.
+
+This decay manifests in four failure modes.
+
+-   **Context poisoning** occurs when a hallucination or error enters the context and influences future outputs.
+-   **Context distraction** happens when the volume of context overwhelms the model's training distribution, causing it to lose focus.
+-   **Context confusion** arises when superfluous information nudges the model toward irrelevant responses.
+-   **Context clash** occurs when parts of the context contradict each other, forcing the model to arbitrate between conflicting signals.
 
 The naive view treats context engineering as "write a better prompt." The reality is broader. Context engineering is the discipline of managing the entire context lifecycle: what tokens go into the window, what stays, what gets compressed, and what gets isolated elsewhere. As Andrej Karpathy puts it, the LLM is like a CPU, the context window is like RAM, and context engineering is the operating system that curates what fits. It's the delicate art and science of filling the context window with just the right information at each step of an agent's trajectory.
 
-**The Application (How We Use It)**
 
-Context engineering breaks into four strategies: **write**, **select**, **compress**, and **isolate**. Each addresses a different phase of the context lifecycle. Let's walk through them.
+::: {.column-margin}
 
-**Writing Context (Scratchpads & Memories)**
+Andrej Karpathy's Keynote & Winner Pitches at UC Berkeley AI Hackathon 2024 Awards Ceremony
 
-Agents need to remember things. When humans solve complex tasks, we take notes. Agents do the same through **scratchpads**—persistent storage outside the context window. The agent writes information to the scratchpad during execution and reads it back when needed.
+<iframe width="280" height="157" src="https://www.youtube.com/embed/tsTeEkzO9xc?si=965zNtEkjXgLrVE0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
-Claude Code uses this pattern. When you give it a multi-step task, it creates a todo list and saves it to memory. The list persists across turns, even after the context window resets. The agent can mark items complete, add new tasks, and maintain coherence across long sessions. Here's how you might implement a scratchpad in code:
+:::
 
-```python
-from typing import TypedDict
+## Context Engineering
 
-class AgentState(TypedDict):
-    messages: list[dict]
-    scratchpad: str  # Persistent notes outside main context
+::: {#fig-context-engineering-overview}
 
-def agent_step(state: AgentState, user_input: str) -> AgentState:
-    # Agent writes to scratchpad
-    state["scratchpad"] += "\n- Explored database schema. Found 'users' table."
+![](https://rlancemartin.github.io/assets/context_eng_overview.png)
 
-    # Only messages go to LLM, scratchpad is read selectively
-    response = llm(state["messages"] + [{"role": "user", "content": user_input}])
+The image is taken from [Context Engineering for Agents by Lance's Blog](https://rlancemartin.github.io/2025/06/23/context_engineering/).
 
-    return state
+:::
+
+Context engineering breaks into four strategies: **write**, **select**, **compress**, and **isolate**. Each addresses a different phase of the context lifecycle. Let's walk through them in modern agentic AI tools to understand how they work.
+
+### Writing Context
+
+Agents use **scratchpads** to offload working memory. Instead of keeping every intermediate step in the context window, an agent writes state—like a todo list or summary—to an external file or variable. Many agentic tools like Claude Code, Gemini CLI, Antigravity, and Cursor uses this pattern to track multi-step tasks across context resets, maintaining coherence without bloating the prompt.
+
+For **long-term memory**, agents rely on persistent rules files like `AGENTS.md`, `CLAUDE.md` or `.cursorrules` (Cursor). These act as procedural memory, storing project-specific instructions that are injected into the context at the start of a session or retrieved when relevant. For example, the following is a sample `AGENTS.md` file:
+
+```{markdown}
+## Project: `AgenticFlow` - Context Engineering Demo
+
+###  Project Goal
+Demonstrate advanced context engineering for LLM agents: writing, selecting, compressing, isolating context to optimize performance and ensure robust multi-step workflows.
+
+### Agent Persona & Principles
+-   **Role**: Senior AI Engineer/Architect.
+-   **Objective**: Develop efficient, reliable, maintainable agentic workflows.
+-   **Style**: Clear, concise, technical, solution-oriented. Justify decisions.
+-   **Principles**: Context Efficiency, Modularity, Transparency, Robustness, Iteration.
+
+### Technical Guidelines
+-   **Language**: Python 3.9+.
+-   **Libraries**: `pydantic`, `pytest`, `black`. `langchain`/`llamaindex` for orchestration (use sparingly).
+-   **Dev Practices**: Git (conventional commits), Markdown/docstring documentation, comprehensive error handling, explicit tool use.
+
+...(continue)
+
 ```
 
-The scratchpad can also be a tool call. The agent invokes `write_note(content="...")` and the note persists in a file. Later, it calls `read_notes()` to retrieve them. Either way, the principle is the same: **write what you need to remember outside the context window**.
+::: {.callout-note}
+## Write AGENTS.md when you start a new project
 
-Scratchpads support short-term tasks, but agents also benefit from **long-term memories**. These are facts, instructions, or examples that persist across sessions. Claude Code uses `CLAUDE.md` files as procedural memories—instructions about how to behave in a specific project. Cursor and Windsurf have similar "rules files." These memories are either naively loaded into context at the start or retrieved on-demand when relevant.
+[`AGENTS.md`](https://agents.md/) is an industry standard file name for agentic AI workflows.
+It serves as the agent's procedural memory, storing project-specific instructions, guidelines, and foundational context.
+This content is automatically injected into the agent's context window at the start of a session or retrieved on demand, ensuring consistent behavior, reducing redundant prompting, and maintaining coherence across complex, multi-step agentic workflows.
 
-**Selecting Context (The Just-In-Time Approach)**
+:::
+
+
+## Selecting Context
 
 Selecting context means pulling it into the context window at runtime. The key insight is **progressive disclosure**: the agent doesn't need all the data upfront. It explores incrementally, using lightweight identifiers (file paths, URLs, database queries) to fetch data only when needed.
 
-**MCP (Model Context Protocol)** is the standard mechanism for this. Instead of copy-pasting data into the prompt, MCP gives the agent tools to pull data on demand. Suppose you have a local SQLite database called `users.db`. Without MCP, you query the database manually, export to CSV, and paste into the prompt. With MCP, the agent does this itself.
+For example, suppose that you want to update a file `A.py` which depends on file `B.py`. A bad way is to load the entire content of `B.py` into the context window. A better way is to give the agent the file path (e.g., `src/B.py`) and let it fetch the content on demand.
 
-First, configure the MCP server:
+**MCP (Model Context Protocol)** is the standard mechanism for this. Instead of copy-pasting data into the prompt, MCP gives the agent tools to pull data on demand.
+
+A good example of MCP is [context7](https://context7.com/). Context7 is an MCP server that fetches documentation for a library to ground the agents on the latest library documentation.
+For example, an agent trained in 2024 may not be aware of the latest features of a library, and context7 can help with that. It offers two tools: `resolve-library-id` and `get-library-docs`, and these tool names along with the descriptions are injected into the context window. When the agent calls `resolve-library-id`, it returns the library ID, and the agent can call `get-library-docs` to fetch the documentation as needed. This way, we can prevent overflow of the context window, and let the agents to focus on the task at hand.
+
+### Hands-On: Installing Context7 in Google Antigravity
+
+**The Setup**: Google Antigravity connects to external MCP servers through a configuration file. The server exposes tools that the agent can call on demand. We'll wire Context7 into Antigravity so the agent can fetch up-to-date library docs without polluting the context window.
+
+**Step 1: Access the MCP Configuration**
+
+Open Google Antigravity and navigate to the MCP Store. Click **Manage MCP Servers** at the top, then click **View raw config** in the main tab. This opens `mcp_config.json`, which controls all external tools available to your agent.
+
+**Step 2: Add the Context7 Server**
+
+You have two options: remote HTTP connection (recommended) or local installation.
+
+**Option A: Remote Connection** (No installation required)
+
+Add this block to your `mcp_config.json`:
 
 ```json
 {
   "mcpServers": {
-    "sqlite": {
-      "command": "uvx",
-      "args": ["mcp-server-sqlite", "--db-path", "./users.db"]
+    "context7": {
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "YOUR_API_KEY_HERE"
+      }
     }
   }
 }
 ```
 
-This launches a lightweight process that exposes your database as a set of tools. Now you can give the agent a natural language instruction:
+The API key is optional but recommended for higher rate limits. Get one at [context7.com/dashboard](https://context7.com/dashboard). Without it, you're limited to the free tier.
 
-> "Query the `sqlite` database for users inactive for more than 30 days. Then plot their distribution by region."
+**Option B: Local Installation**
 
-The agent discovers the `sqlite.query` tool, constructs the SQL, calls the tool via MCP, receives JSON results, and generates Python code to visualize them. The data never enters your manual workflow. The agent retrieves it just-in-time.
-
-The power multiplies when you connect multiple sources. Add a Jira MCP server:
+If you prefer running the server locally:
 
 ```json
 {
   "mcpServers": {
-    "sqlite": {
-      "command": "uvx",
-      "args": ["mcp-server-sqlite", "--db-path", "./users.db"]
-    },
-    "jira": {
+    "context7": {
       "command": "npx",
-      "args": ["mcp-server-jira", "--token", "$JIRA_API_TOKEN"]
+      "args": ["-y", "@upstash/context7-mcp", "--api-key", "YOUR_API_KEY_HERE"]
     }
   }
 }
 ```
 
-Now the agent can cross-reference systems:
+This spawns the MCP server as a subprocess. The `npx` command fetches the latest version automatically.
 
-> "Query the SQLite database for users inactive > 30 days. For each user, fetch their open Jira tickets. Generate a report showing which inactive users have unresolved issues."
+**Step 3: Verify the Installation**
 
-The agent orchestrates both tools autonomously. MCP isn't about one database—it's about composing multiple sources into a coherent workflow. This is how Claude Code operates: it uses `glob` and `grep` tools to navigate codebases, retrieving files just-in-time rather than indexing everything upfront.
+Save the config and refresh the MCP servers panel in Antigravity. You should see two new tools appear:
 
-Progressive disclosure also relies on metadata. To an agent navigating a file system, the name `test_utils.py` in a `tests/` folder signals different intent than the same name in `src/core_logic/`. Folder hierarchies, timestamps, and naming conventions provide signals that help agents decide what to retrieve. This mirrors human cognition—we don't memorize entire corpuses. We build indexing systems (file systems, bookmarks) and retrieve on demand.
+-   `resolve-library-id`: Maps a library name (e.g., "langchain") to its unique identifier.
+-   `get-library-docs`: Fetches documentation for a resolved library ID.
 
-When agents have many tools, **retrieval-augmented generation (RAG)** can help. Instead of passing all tool descriptions to the model (which bloats context), use embeddings to fetch only the most relevant tools for the task. Research shows this improves tool selection accuracy by 3×.
+**Step 4: Test the Integration**
+
+Prompt the agent with:
+
+```
+Use context7 to get the latest documentation for pandas 2.0 DataFrame.plot() method.
+```
+
+Behind the scenes, the agent will:
+
+1.  Call `resolve-library-id` with `"pandas"` → returns library ID `pandas-2.0`.
+2.  Call `get-library-docs` with that ID and query `"DataFrame.plot"` → returns current API docs.
+3.  Use those docs to generate accurate code.
+
+The documentation never enters your prompt. The agent retrieves it on-demand, uses it, and discards it. Your context window remains clean.
+
+**Why This Works**
+
+Without context7, the agent hallucinates method signatures or relies on training data from 2023. With context7, the agent fetches the exact API surface for the version you specify. The MCP protocol isolates the retrieval mechanism from the reasoning loop. The agent doesn't "know" pandas—it knows how to ask for pandas docs when needed. This is **progressive disclosure** in action: load information just-in-time, not just-in-case.
+
+**Critical Constraint: Tool Budget**
+
+Antigravity enforces a tool limit. If you exceed ~50 active tools across all MCP servers, performance degrades. If you hit 80+, Antigravity may refuse to load. When adding context7, audit your existing MCP servers. Disable unused tools. The ideal configuration exposes 20-30 tools total: enough flexibility, not enough to overwhelm the model's function-calling budget.
 
 The trade-off is speed. Runtime exploration is slower than pre-computed retrieval. The optimal strategy is often **hybrid**: load critical context upfront (like `CLAUDE.md`), then let the agent explore autonomously for the rest. As models improve, the balance shifts toward more autonomy and less curation.
 
