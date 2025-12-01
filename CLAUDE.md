@@ -13,7 +13,7 @@
 * **No Definition Lists:** Integrate definitions into full sentences within paragraphs.
 * **Minimal Bolding:** Bold **only** the first instance of a critical technical term. Never bold full sentences.
 * **LaTeX:** Use LaTeX for variables ($P(x|y)$) to signal precision.
-* **Intro-to-Action Ratio:** The introductory theory sections must constitute **no more than 20%** of the total content. Get to the first code block or practical example quickly.
+* **Intro-to-Action Ratio:** The introductory theory sections must constitute **no more than 35%** of the total content. Get to the first code block or practical example quickly.
 
 ## Universal Structural Template
 *Apply this 3-part arc. Prioritize speed to application.*

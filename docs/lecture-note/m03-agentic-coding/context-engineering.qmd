@@ -84,6 +84,8 @@ This content is automatically injected into the agent's context window at the st
 
 ## Selecting Context
 
+![](../figs/context-engineering-chibi-mcp.png){width="70%" fig-align="center"}
+
 Selecting context means pulling it into the context window at runtime. The key insight is **progressive disclosure**: the agent doesn't need all the data upfront. It explores incrementally, using lightweight identifiers (file paths, URLs, database queries) to fetch data only when needed.
 
 For example, suppose that you want to update a file `A.py` which depends on file `B.py`. A bad way is to load the entire content of `B.py` into the context window. A better way is to give the agent the file path (e.g., `src/B.py`) and let it fetch the content on demand.
@@ -95,17 +97,15 @@ For example, an agent trained in 2024 may not be aware of the latest features of
 
 ### Hands-On: Installing Context7 in Google Antigravity
 
-**The Setup**: Google Antigravity connects to external MCP servers through a configuration file. The server exposes tools that the agent can call on demand. We'll wire Context7 into Antigravity so the agent can fetch up-to-date library docs without polluting the context window.
+Google Antigravity connects to external MCP servers through a configuration file. The server exposes tools that the agent can call on demand. We'll wire Context7 into Antigravity so the agent can fetch up-to-date library docs without polluting the context window.
 
 **Step 1: Access the MCP Configuration**
 
 Open Google Antigravity and navigate to the MCP Store. Click **Manage MCP Servers** at the top, then click **View raw config** in the main tab. This opens `mcp_config.json`, which controls all external tools available to your agent.
 
-**Step 2: Add the Context7 Server**
+![](../figs/screenshot_2025-12-01_digital_garden_mcp.png){width="70%" fig-align="center"}
 
-You have two options: remote HTTP connection (recommended) or local installation.
-
-**Option A: Remote Connection** (No installation required)
+![](../figs/screenshot_2025-12-01_manage_mcp_servers.png){width="70%" fig-align="center"}
 
 Add this block to your `mcp_config.json`:
 
@@ -124,31 +124,10 @@ Add this block to your `mcp_config.json`:
 
 The API key is optional but recommended for higher rate limits. Get one at [context7.com/dashboard](https://context7.com/dashboard). Without it, you're limited to the free tier.
 
-**Option B: Local Installation**
-
-If you prefer running the server locally:
-
-```json
-{
-  "mcpServers": {
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp", "--api-key", "YOUR_API_KEY_HERE"]
-    }
-  }
-}
-```
-
-This spawns the MCP server as a subprocess. The `npx` command fetches the latest version automatically.
-
-**Step 3: Verify the Installation**
-
 Save the config and refresh the MCP servers panel in Antigravity. You should see two new tools appear:
 
 -   `resolve-library-id`: Maps a library name (e.g., "langchain") to its unique identifier.
 -   `get-library-docs`: Fetches documentation for a resolved library ID.
-
-**Step 4: Test the Integration**
 
 Prompt the agent with:
 
@@ -164,51 +143,37 @@ Behind the scenes, the agent will:
 
 The documentation never enters your prompt. The agent retrieves it on-demand, uses it, and discards it. Your context window remains clean.
 
-**Why This Works**
+## Compressing Context
 
-Without context7, the agent hallucinates method signatures or relies on training data from 2023. With context7, the agent fetches the exact API surface for the version you specify. The MCP protocol isolates the retrieval mechanism from the reasoning loop. The agent doesn't "know" pandas—it knows how to ask for pandas docs when needed. This is **progressive disclosure** in action: load information just-in-time, not just-in-case.
 
-**Critical Constraint: Tool Budget**
+::: {#fig-compression}
 
-Antigravity enforces a tool limit. If you exceed ~50 active tools across all MCP servers, performance degrades. If you hit 80+, Antigravity may refuse to load. When adding context7, audit your existing MCP servers. Disable unused tools. The ideal configuration exposes 20-30 tools total: enough flexibility, not enough to overwhelm the model's function-calling budget.
+![](https://rlancemartin.github.io/assets/context_curation.png)
 
-The trade-off is speed. Runtime exploration is slower than pre-computed retrieval. The optimal strategy is often **hybrid**: load critical context upfront (like `CLAUDE.md`), then let the agent explore autonomously for the rest. As models improve, the balance shifts toward more autonomy and less curation.
+The image is taken from [Context Engineering for Agents by Lance's Blog](https://rlancemartin.github.io/2025/06/23/context_engineering/).
 
-**Compressing Context (Survival at Scale)**
+:::
 
 Long-running tasks generate more context than the window can hold. When you approach the limit, you have two choices: **summarize** or **trim**.
 
 **Compaction** (summarization) is the practice of distilling a conversation into its essential elements. Claude Code does this automatically. When you exceed 95% of the context window, it triggers "auto-compact": the message history is passed to the model to summarize architectural decisions, unresolved bugs, and implementation details while discarding redundant tool outputs. The agent continues with the compressed context plus the five most recently accessed files.
 
-Here's a simplified version of a compaction prompt:
-
-```python
-compaction_prompt = """
-You are reviewing a long agent trajectory. Summarize the following:
-- Key architectural decisions made
-- Unresolved bugs or issues
-- Implementation details that must be preserved
-- Critical tool outputs (ignore routine file reads)
-
-Discard:
-- Redundant tool calls
-- Successfully resolved issues
-- Verbose logs
-
-Provide a concise summary (max 2000 tokens) that allows the agent to continue coherently.
-"""
-
-summary = llm(compaction_prompt + message_history)
-new_context = summary + recent_files
-```
-
 The art of compaction is deciding what to keep versus discard. Overly aggressive compaction loses subtle details whose importance only becomes apparent later. Start by maximizing recall (capture everything relevant), then iterate to improve precision (eliminate fluff).
 
 A lightweight form of compaction is **tool result clearing**. Once a tool has been called and its result used, the raw output can be removed from the message history. The decision or action taken from that result is what matters, not the 10,000 tokens of JSON it returned.
 
-**Trimming** is a simpler strategy. It uses heuristics to prune context without LLM involvement. For example, remove messages older than $N$ turns, or keep only the system prompt and the last $K$ user-agent exchanges. This is fast but dumb—it can't distinguish between critical and trivial information.
+**Trimming** is a simpler strategy. It uses heuristics to prune context without LLM involvement. For example, remove messages older than $N$ turns, or keep only the system prompt and the last $K$ user-agent exchanges.
 
-**Isolating Context (Multi-Agent & State)**
+## Isolating Context
+
+
+::: {#fig-multi-agent}
+
+![](https://rlancemartin.github.io/assets/multi_agent.png)
+
+This image is taken from [Context Engineering for Agents by Lance's Blog](https://rlancemartin.github.io/2025/06/23/context_engineering/).
+
+:::
 
 Isolation means splitting context across boundaries so the model doesn't drown in a single, monolithic window. The most common pattern is **multi-agent architectures**. Instead of one agent maintaining state across an entire project, specialized sub-agents handle focused sub-tasks with clean context windows.
 
@@ -216,18 +181,6 @@ Anthropic's multi-agent researcher demonstrates this. A lead agent coordinates w
 
 This approach achieves separation of concerns. Each sub-agent has a narrow scope, reducing context confusion and clash. The cost is coordination complexity—spawning agents, managing handoffs, and aggregating results. Anthropic reports that multi-agent systems can use up to 15× more tokens than single-agent, but the performance gain on complex tasks justifies it.
 
-Another isolation strategy is **state objects**. Instead of dumping everything into the context window, you design a runtime state with explicit fields:
-
-```python
-class AgentState(TypedDict):
-    messages: list[dict]          # Exposed to LLM
-    scratchpad: str               # Selectively read
-    large_dataframes: dict        # Isolated; never serialized to context
-    file_metadata: list[dict]     # Lightweight identifiers
-```
-
-Only `messages` are passed to the LLM each turn. The agent can write to `large_dataframes` to persist token-heavy objects, but these never pollute the context. This is how code agents like HuggingFace's Deep Researcher work. The agent outputs code that runs in a sandbox. Variables assigned in the sandbox (images, audio, large arrays) remain isolated. Only selected outputs—return values, summaries—are passed back to the LLM.
-
-**The Takeaway**
+## The Takeaway
 
 Context is a finite resource. The bottleneck in agentic systems is rarely the model's reasoning—it's the poverty or pollution of its inputs. Context engineering is the discipline of managing this resource across its lifecycle. **Write** what you need to remember. **Select** what you need now. **Compress** what you need later. **Isolate** what you don't need yet. The most powerful agent isn't the one with the highest IQ (parameters); it's the one with the most disciplined context management.
