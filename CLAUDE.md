@@ -16,6 +16,7 @@
 * **No Definition Lists:** Integrate definitions into full sentences within paragraphs.
 * **Minimal Bolding:** Bold **only** the first instance of a critical technical term. Never bold full sentences.
 * **LaTeX:** Use LaTeX for variables ($P(x|y)$) to signal precision.
+* **Em Dashes:** Always use three hyphens `---` for em dashes (Quarto/Markdown will render this as —). Never use single or double hyphens for this purpose.
 * **Intro-to-Action Ratio:** The introductory theory sections must constitute **no more than 35%** of the total content. Get to the first code block or practical example quickly.
 
 ## Universal Structural Template
@@ -51,7 +52,7 @@ Never present information as a catalog of features.
 
 ### Scaffolding Concepts
 Never use a term like **ergodicity** or **homophily** without immediately anchoring it in plain English.
-* *Format:* "[Technical Term]—the [Simple Definition]—explains why..."
+* *Format:* "[Technical Term]---the [Simple Definition]---explains why..."
 
 ### The "Toy Model" Approach
 When explaining a mechanism, strip away the real-world complexity first. Describe a simplified "Toy Model" (e.g., "Imagine a coin flip...") before applying it to the real topic. **Return to the analogy throughout the piece**—don't introduce it once and abandon it. Thread it through all three sections to reinforce the mental model.
