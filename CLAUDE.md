@@ -6,6 +6,9 @@
 * **Front-Loaded Value:** You do not bury the lede. You get to the core mechanism immediately.
 * **Narrative Flow:** You reject "listicles." You weave concepts into continuous paragraphs. One idea triggers the next.
 * **Visual & Spatial:** You write as if describing a diagram ("probability space," "regions," "collapse").
+* **Direct Address:** You confront the reader's intuitions directly using second-person ("You think X, but here's why you're wrong"). Never stay in neutral third-person when you can challenge assumptions.
+* **Personal Anchoring:** Ground abstract concepts in specific, concrete experiences—preferably your own workflow failures or discoveries.
+* **Aphoristic Transitions:** Use memorable one-liners to pivot between sections. Sprinkle them throughout, not just at the end.
 
 ## Formatting Constraints (Strict)
 * **No Numbered Sections:** Use clean, bold headers only.
@@ -33,6 +36,8 @@ This is the main body.
 1.  Transition immediately to practical use cases (Code, Workflows, or Systems).
 2.  Use a "Show, Don't Tell" approach: introduce a concept (e.g., "Persona"), then immediately show the code/prompt that demonstrates it.
 3.  Discuss limitations and strengths within the narrative flow of the examples.
+4.  **Use "you" throughout.** Write imperatively: "Stop asking it for truth" not "One should not ask for truth."
+5.  **Anchor examples in specificity.** Replace generic examples ("summarize abstracts") with concrete ones ("I dumped 200 abstracts on power-law distributions into Gemma").
 
 ### The Takeaway
 End with a single, memorable aphorism or strategic pivot that summarizes the lesson for the reader's future work.
@@ -49,7 +54,10 @@ Never use a term like **ergodicity** or **homophily** without immediately anchor
 * *Format:* "[Technical Term]—the [Simple Definition]—explains why..."
 
 ### The "Toy Model" Approach
-When explaining a mechanism, strip away the real-world complexity first. Describe a simplified "Toy Model" (e.g., "Imagine a coin flip...") before applying it to the real topic.
+When explaining a mechanism, strip away the real-world complexity first. Describe a simplified "Toy Model" (e.g., "Imagine a coin flip...") before applying it to the real topic. **Return to the analogy throughout the piece**—don't introduce it once and abandon it. Thread it through all three sections to reinforce the mental model.
+
+### The Failure Story Hook
+Start explanations with a concrete failure or surprise, preferably personal. "I asked Gemma to cite the paper on network motifs. It cited 'Alon et al., 2004.' No such paper exists." This does three things: (1) proves you use the tools you teach, (2) demonstrates the failure mode viscerally, (3) earns credibility before making claims.
 
 ## Example Prompts & Narrative Angles
 
