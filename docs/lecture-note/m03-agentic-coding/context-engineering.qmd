@@ -3,32 +3,57 @@ title: "Context Engineering"
 ---
 
 ::: {.callout-note appearance="simple"}
-**Spoiler**: Your agent is only as smart as its access. If it can't read the database, it can't write the query. The Model Context Protocol (MCP) is the "USB-C" that solves this.
+**Spoiler**: The LLM's context window is like RAM—limited, precious, and subject to pollution. Context engineering is the operating system that manages it. The art isn't filling the context window; it's curating it.
 :::
 
 **The Mechanism (Why It Works)**
 
-LLMs are brilliant but blind. They live in a text box, operating on whatever tokens you feed them. They cannot see your local SQLite database, your Jira tickets, or your private internal documentation. This is the **Silo Problem**—the agent's intelligence is bottlenecked by the narrow pipe of manual data transfer.
+LLMs are brilliant but bounded. Every model has a context window—the set of tokens available during inference. Think of it as working memory. Just as your brain can only hold 7±2 items in short-term memory, an LLM has an **attention budget** that depletes as the context grows. This isn't just a hard limit; it's a performance gradient. As the number of tokens increases, the model's ability to accurately use that context degrades. This phenomenon is called **context rot**.
 
-Historically, we solved this by copy-pasting. You run the SQL query, export to CSV, paste into the prompt. This works for toy examples, but it's manual, error-prone, and fundamentally limited by the context window. You're acting as the human API between the model and your data. The naive view assumes this is just how it has to be—that the model is a stateless function you call with text.
+The reason is architectural. LLMs use the transformer architecture, where every token attends to every other token. For $n$ tokens, this creates $n^2$ pairwise relationships. As context length increases, the model's attention gets stretched thin across these relationships. Models are also trained predominantly on shorter sequences, meaning they have less specialized capacity for long-range dependencies. Position encoding tricks allow models to handle longer contexts, but performance still decays. You don't hit a cliff—you slide down a gradient.
 
-The reality is different. The agent doesn't need the data pushed into its prompt. It needs a **mechanism to pull** the data when it needs it. **MCP (Model Context Protocol)** inverts the relationship. Instead of you being the middleman, MCP gives the agent a standardized way to request resources. Think of it like this: you're not handing someone a printed map—you're giving them GPS coordinates and a satellite connection. The data stays where it lives. The agent queries it on demand. MCP is the protocol that makes this possible, defining a common language between the IDE (the host), the LLM (the client), and lightweight servers that expose your data as tools or resources.
+This decay manifests in four failure modes. **Context poisoning** occurs when a hallucination or error enters the context and influences future outputs. **Context distraction** happens when the volume of context overwhelms the model's training distribution, causing it to lose focus. **Context confusion** arises when superfluous information nudges the model toward irrelevant responses. **Context clash** occurs when parts of the context contradict each other, forcing the model to arbitrate between conflicting signals.
+
+The naive view treats context engineering as "write a better prompt." The reality is broader. Context engineering is the discipline of managing the entire context lifecycle: what tokens go into the window, what stays, what gets compressed, and what gets isolated elsewhere. As Andrej Karpathy puts it, the LLM is like a CPU, the context window is like RAM, and context engineering is the operating system that curates what fits. It's the delicate art and science of filling the context window with just the right information at each step of an agent's trajectory.
 
 **The Application (How We Use It)**
 
-The shift from theory to practice is immediate. Let's walk through a concrete scenario where MCP transforms an agent from a code generator into an autonomous data analyst.
+Context engineering breaks into four strategies: **write**, **select**, **compress**, and **isolate**. Each addresses a different phase of the context lifecycle. Let's walk through them.
 
-**Scenario: Querying a Local Database**
+**Writing Context (Scratchpads & Memories)**
 
-You have a local SQLite database called `users.db` containing user login records. Your task: "Find users who haven't logged in for 30 days and generate a report visualizing their distribution by region."
+Agents need to remember things. When humans solve complex tasks, we take notes. Agents do the same through **scratchpads**—persistent storage outside the context window. The agent writes information to the scratchpad during execution and reads it back when needed.
 
-Without MCP, the workflow is tedious. You open a SQL client, run the query, export the results to CSV, then paste the data into the agent's prompt. If the query is wrong, you repeat the cycle. If the dataset is large, you hit context limits. You are the bottleneck.
+Claude Code uses this pattern. When you give it a multi-step task, it creates a todo list and saves it to memory. The list persists across turns, even after the context window resets. The agent can mark items complete, add new tasks, and maintain coherence across long sessions. Here's how you might implement a scratchpad in code:
 
-With MCP, the agent does this itself. Here's how.
+```python
+from typing import TypedDict
 
-**Step 1: Configure the MCP Server**
+class AgentState(TypedDict):
+    messages: list[dict]
+    scratchpad: str  # Persistent notes outside main context
 
-Add the SQLite server to your IDE configuration file (e.g., `antigravity.json`):
+def agent_step(state: AgentState, user_input: str) -> AgentState:
+    # Agent writes to scratchpad
+    state["scratchpad"] += "\n- Explored database schema. Found 'users' table."
+
+    # Only messages go to LLM, scratchpad is read selectively
+    response = llm(state["messages"] + [{"role": "user", "content": user_input}])
+
+    return state
+```
+
+The scratchpad can also be a tool call. The agent invokes `write_note(content="...")` and the note persists in a file. Later, it calls `read_notes()` to retrieve them. Either way, the principle is the same: **write what you need to remember outside the context window**.
+
+Scratchpads support short-term tasks, but agents also benefit from **long-term memories**. These are facts, instructions, or examples that persist across sessions. Claude Code uses `CLAUDE.md` files as procedural memories—instructions about how to behave in a specific project. Cursor and Windsurf have similar "rules files." These memories are either naively loaded into context at the start or retrieved on-demand when relevant.
+
+**Selecting Context (The Just-In-Time Approach)**
+
+Selecting context means pulling it into the context window at runtime. The key insight is **progressive disclosure**: the agent doesn't need all the data upfront. It explores incrementally, using lightweight identifiers (file paths, URLs, database queries) to fetch data only when needed.
+
+**MCP (Model Context Protocol)** is the standard mechanism for this. Instead of copy-pasting data into the prompt, MCP gives the agent tools to pull data on demand. Suppose you have a local SQLite database called `users.db`. Without MCP, you query the database manually, export to CSV, and paste into the prompt. With MCP, the agent does this itself.
+
+First, configure the MCP server:
 
 ```json
 {
@@ -41,30 +66,13 @@ Add the SQLite server to your IDE configuration file (e.g., `antigravity.json`):
 }
 ```
 
-This tells the IDE to launch a lightweight process (`mcp-server-sqlite`) that exposes your database as a set of tools. The server runs locally, maintains access to `users.db`, and waits for tool calls.
+This launches a lightweight process that exposes your database as a set of tools. Now you can give the agent a natural language instruction:
 
-**Step 2: Write the Prompt**
+> "Query the `sqlite` database for users inactive for more than 30 days. Then plot their distribution by region."
 
-You give the agent a natural language instruction:
+The agent discovers the `sqlite.query` tool, constructs the SQL, calls the tool via MCP, receives JSON results, and generates Python code to visualize them. The data never enters your manual workflow. The agent retrieves it just-in-time.
 
-> "Query the `sqlite` database for users inactive for more than 30 days. Then use Python to plot their distribution by region."
-
-Notice you don't provide the SQL. You don't provide the data. You just point to the resource.
-
-**Step 3: The Agent Executes (Under the Hood)**
-
-The agent sees the prompt and recognizes it needs data from `users.db`. It discovers a tool called `sqlite.query` exposed by the MCP server. It constructs the SQL:
-
-```sql
-SELECT * FROM users
-WHERE last_login < date('now', '-30 days')
-```
-
-It calls the tool via MCP. The server executes the query locally and returns the results as JSON. The agent receives the data, writes Python code to parse it, and generates a matplotlib visualization. All of this happens autonomously. You never touch the terminal.
-
-**Scenario: Multi-Source Context**
-
-The power multiplies when you connect multiple servers. Suppose you want to cross-reference inactive users with their support tickets. You add a second MCP server for Jira:
+The power multiplies when you connect multiple sources. Add a Jira MCP server:
 
 ```json
 {
@@ -81,18 +89,72 @@ The power multiplies when you connect multiple servers. Suppose you want to cros
 }
 ```
 
-Now your prompt can span systems:
+Now the agent can cross-reference systems:
 
 > "Query the SQLite database for users inactive > 30 days. For each user, fetch their open Jira tickets. Generate a report showing which inactive users have unresolved issues."
 
-The agent orchestrates both tools. It queries the database, extracts user IDs, calls the Jira API for each ID, and aggregates the results. It becomes a **data integration layer**. MCP isn't just about one database—it's about composing multiple sources into a coherent workflow.
+The agent orchestrates both tools autonomously. MCP isn't about one database—it's about composing multiple sources into a coherent workflow. This is how Claude Code operates: it uses `glob` and `grep` tools to navigate codebases, retrieving files just-in-time rather than indexing everything upfront.
 
-**Why This Matters**
+Progressive disclosure also relies on metadata. To an agent navigating a file system, the name `test_utils.py` in a `tests/` folder signals different intent than the same name in `src/core_logic/`. Folder hierarchies, timestamps, and naming conventions provide signals that help agents decide what to retrieve. This mirrors human cognition—we don't memorize entire corpuses. We build indexing systems (file systems, bookmarks) and retrieve on demand.
 
-This architecture transforms the agent from a passive assistant into an active participant in your data pipeline. It can explore databases, validate hypotheses, and generate insights without requiring you to manually ferry data back and forth. The agent's "context" is no longer limited to the text you paste. It's limited only by the MCP servers you configure.
+When agents have many tools, **retrieval-augmented generation (RAG)** can help. Instead of passing all tool descriptions to the model (which bloats context), use embeddings to fetch only the most relevant tools for the task. Research shows this improves tool selection accuracy by 3×.
 
-Moreover, MCP is **standardized**. Once you understand the protocol, you can connect to any data source that has a server—PostgreSQL, Google Drive, Slack, GitHub, proprietary internal APIs. The learning curve is front-loaded. After that, adding new sources is trivial.
+The trade-off is speed. Runtime exploration is slower than pre-computed retrieval. The optimal strategy is often **hybrid**: load critical context upfront (like `CLAUDE.md`), then let the agent explore autonomously for the rest. As models improve, the balance shifts toward more autonomy and less curation.
+
+**Compressing Context (Survival at Scale)**
+
+Long-running tasks generate more context than the window can hold. When you approach the limit, you have two choices: **summarize** or **trim**.
+
+**Compaction** (summarization) is the practice of distilling a conversation into its essential elements. Claude Code does this automatically. When you exceed 95% of the context window, it triggers "auto-compact": the message history is passed to the model to summarize architectural decisions, unresolved bugs, and implementation details while discarding redundant tool outputs. The agent continues with the compressed context plus the five most recently accessed files.
+
+Here's a simplified version of a compaction prompt:
+
+```python
+compaction_prompt = """
+You are reviewing a long agent trajectory. Summarize the following:
+- Key architectural decisions made
+- Unresolved bugs or issues
+- Implementation details that must be preserved
+- Critical tool outputs (ignore routine file reads)
+
+Discard:
+- Redundant tool calls
+- Successfully resolved issues
+- Verbose logs
+
+Provide a concise summary (max 2000 tokens) that allows the agent to continue coherently.
+"""
+
+summary = llm(compaction_prompt + message_history)
+new_context = summary + recent_files
+```
+
+The art of compaction is deciding what to keep versus discard. Overly aggressive compaction loses subtle details whose importance only becomes apparent later. Start by maximizing recall (capture everything relevant), then iterate to improve precision (eliminate fluff).
+
+A lightweight form of compaction is **tool result clearing**. Once a tool has been called and its result used, the raw output can be removed from the message history. The decision or action taken from that result is what matters, not the 10,000 tokens of JSON it returned.
+
+**Trimming** is a simpler strategy. It uses heuristics to prune context without LLM involvement. For example, remove messages older than $N$ turns, or keep only the system prompt and the last $K$ user-agent exchanges. This is fast but dumb—it can't distinguish between critical and trivial information.
+
+**Isolating Context (Multi-Agent & State)**
+
+Isolation means splitting context across boundaries so the model doesn't drown in a single, monolithic window. The most common pattern is **multi-agent architectures**. Instead of one agent maintaining state across an entire project, specialized sub-agents handle focused sub-tasks with clean context windows.
+
+Anthropic's multi-agent researcher demonstrates this. A lead agent coordinates with a high-level plan. It spawns sub-agents that explore different aspects of a question in parallel, each with its own context window. A sub-agent might use 10,000+ tokens to explore a research thread, but it returns only a 1,000-2,000 token summary to the lead agent. The detailed search context remains isolated. The lead agent synthesizes the compressed results without ever seeing the full exploration.
+
+This approach achieves separation of concerns. Each sub-agent has a narrow scope, reducing context confusion and clash. The cost is coordination complexity—spawning agents, managing handoffs, and aggregating results. Anthropic reports that multi-agent systems can use up to 15× more tokens than single-agent, but the performance gain on complex tasks justifies it.
+
+Another isolation strategy is **state objects**. Instead of dumping everything into the context window, you design a runtime state with explicit fields:
+
+```python
+class AgentState(TypedDict):
+    messages: list[dict]          # Exposed to LLM
+    scratchpad: str               # Selectively read
+    large_dataframes: dict        # Isolated; never serialized to context
+    file_metadata: list[dict]     # Lightweight identifiers
+```
+
+Only `messages` are passed to the LLM each turn. The agent can write to `large_dataframes` to persist token-heavy objects, but these never pollute the context. This is how code agents like HuggingFace's Deep Researcher work. The agent outputs code that runs in a sandbox. Variables assigned in the sandbox (images, audio, large arrays) remain isolated. Only selected outputs—return values, summaries—are passed back to the LLM.
 
 **The Takeaway**
 
-**Context is king.** The most powerful agent isn't the one with the highest IQ (parameters); it's the one with the most access (MCP). Build bridges to your data, and the agent will cross them. The bottleneck in agentic systems is rarely the model's reasoning—it's the poverty of its inputs. MCP solves this by making context programmable.
+Context is a finite resource. The bottleneck in agentic systems is rarely the model's reasoning—it's the poverty or pollution of its inputs. Context engineering is the discipline of managing this resource across its lifecycle. **Write** what you need to remember. **Select** what you need now. **Compress** what you need later. **Isolate** what you don't need yet. The most powerful agent isn't the one with the highest IQ (parameters); it's the one with the most disciplined context management.
