@@ -8,7 +8,7 @@ execute:
 **Spoiler**: Agents don't "think" in the human sense. They loop. They are state machines that use an LLM to decide the next transition.
 :::
 
-# The Mechanism
+## The Mechanism
 
 ![ReAct Loop](../figs/react.png){width="70%" fig-align="center"}
 
@@ -27,8 +27,7 @@ while not task_complete:
 
 The critical insight is the feedback loop. If the agent tries to import a missing library (Action) and receives `ModuleNotFoundError` (Observation), the next iteration's Thought will be "I need to install this library," rather than hallucinating success. The model corrects itself not through introspection, but through collision with reality.
 
-ReAct framework is proposed by [Yao et al. (2022)](https://arxiv.org/abs/2210.03629).
-The core idea is to prompt the LLM to generate both reasoning traces and task-specific actions in an interleaved manner. Specifically, the prompt structure follows a sequence: `Thought` $\rightarrow$ `Action` $\rightarrow$ `Observation`.
+ReAct framework is proposed by [@yao2022react]. The core idea is to prompt the LLM to generate both reasoning traces and task-specific actions in an interleaved manner. Specifically, the prompt structure follows a sequence: `Thought` $\rightarrow$ `Action` $\rightarrow$ `Observation`.
 
 1.  **Thought**: The model reasons about the current state and what needs to be done.
 2.  **Action**: The model outputs a specific command to interact with an external environment (e.g., `Search[Apple]`).
@@ -90,7 +89,6 @@ The structure is minimal. LangGraph infers everything from the function:
 2. **Description**: Extracted from the docstring
 3. **Parameters**: Inferred from type hints and docstring Args section
 4. **Return type**: Inferred from return type hint
-5. **Execution**: The function itself—no separate `forward()` method
 
 This tool takes no inputs and returns the dataset schema. The agent calls it to discover column names and types before writing queries.
 
@@ -100,7 +98,7 @@ Let's add three more tools to give the agent more analytical capabilities:
 #| code-fold: true
 @tool
 def query_data(sql_query: str) -> str:
-    """Query the fish dataset using SQL. The table is called 'df'. Use inspect_data first to see available columns.
+    """Query the fish dataset using SQL. The table is called 'df'. Use inspect_data first to see available columns. Use find_correlations to find correlations between columns.
 
     Args:
         sql_query: SQL query to execute (use 'df' as table name)
@@ -109,15 +107,15 @@ def query_data(sql_query: str) -> str:
     return result.to_string()
 
 @tool
-def find_correlation(column1: str, column2: str) -> str:
-    """Calculate correlation between two numeric columns in the fish dataset.
+def find_correlations(columns: list[str]) -> str:
+    """Calculate the correlation matrix for a list of numeric columns in the fish dataset.
 
     Args:
-        column1: First column name
-        column2: Second column name
+        columns: A list of column names to calculate correlations for.
     """
-    corr = df[[column1, column2]].corr().iloc[0, 1]
-    return f"Correlation between {column1} and {column2}: {corr:.3f}"
+    numeric_df = df[columns].select_dtypes(include=['number'])
+    corr_matrix = numeric_df.corr()
+    return corr_matrix.to_string()
 
 @tool
 def get_stats(column: str, species: str = None) -> str:
@@ -138,9 +136,7 @@ def get_stats(column: str, species: str = None) -> str:
     return f"{prefix}:\n{stats.to_string()}"
 ```
 
-Notice how much cleaner the syntax is. No manual JSON schema definitions, no separate `forward()` methods. The `@tool` decorator extracts everything from the function signature. The second tool executes SQL queries. The third calculates correlations. The fourth computes statistics with optional filtering. Each docstring precisely tells the agent when to use the tool.
-
-Now create the agent. LangGraph doesn't have a simple `Agent()` constructor. Instead, you build a **state graph**—a directed graph where nodes are functions and edges define transitions. This gives you explicit control over the ReAct loop.
+Now create the agent. LangGraph is centered on a **state graph**—a directed graph where nodes are functions and edges define transitions. This gives you explicit control over the ReAct loop.
 
 ::: {.column-margin}
 **ChatOllama**: LangChain's Ollama integration. Supports tool calling via the model's native API.
@@ -159,7 +155,12 @@ model = ChatOllama(
     base_url="http://localhost:11434"
 )
 
-tools = [inspect_data, query_data, find_correlation, get_stats]
+tools = [
+    inspect_data,
+    query_data,
+    find_correlations,
+    get_stats
+]
 
 agent = create_react_agent(model, tools)
 ```
@@ -170,14 +171,13 @@ Run the agent and watch it autonomously choose which tools to use.
 query = "Which fish species has the highest average weight?"
 inputs = {"messages": [("user", query)]}
 
-for event in agent.stream(inputs, {"recursion_limit": 10}):
-    for node, values in event.items():
-        if "messages" in values:
-            values["messages"][-1].pretty_print()
+result = agent.invoke(inputs)
+```
 
-# Extract final answer
-final_message = values["messages"][-1]
-print(f"\nFinal Answer: {final_message.content}")
+```{python}
+#| code-fold: true
+for message in result["messages"]:
+    print(message.content)
 ```
 
 The agent executes a ReAct loop. It reads the question "Which fish species has the highest average weight?" and realizes it needs to use SQL to group by species and calculate averages. LangGraph streams each step—you see the LLM's reasoning, the tool calls, and the observations in real time.
@@ -185,21 +185,17 @@ The agent executes a ReAct loop. It reads the question "Which fish species has t
 Let's try another query that requires multiple steps:
 
 ```{python}
-query = "What is the average weight of Pike species?"
+query = "What distinctive physical characteristics stand out to identify Pike?"
 inputs = {"messages": [("user", query)]}
 
-for event in agent.stream(inputs, {"recursion_limit": 10}):
-    for node, values in event.items():
-        if "messages" in values:
-            values["messages"][-1].pretty_print()
-
-final_message = values["messages"][-1]
-print(f"\nFinal Answer: {final_message.content}")
+result = agent.invoke(inputs)
 ```
 
-For this query, the agent must:
-1. Call `inspect_data` to discover the Species and Weight columns exist
-2. Use `get_stats` with `column="Weight"` and `species="Pike"` to get the statistics
+```{python}
+#| code-fold: true
+for message in result["messages"]:
+    print(message.content)
+```
 
 This demonstrates the power of the ReAct loop—the agent chains multiple observations together, building a solution step-by-step rather than attempting everything in one shot. Unlike smolagents' opaque loop, LangGraph exposes every state transition, making debugging straightforward.
 

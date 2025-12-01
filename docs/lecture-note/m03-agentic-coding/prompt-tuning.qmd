@@ -4,278 +4,529 @@ execute:
     enabled: true
 ---
 
-::: {.callout-note appearance="simple"}
-**Spoiler**: If you treat an agent like a chatbot, you get a chatbot. If you treat it like a senior engineer, you get software. The difference is in the prompt.
+![](../figs/top-prompt-engineering.png)
+
+::: {.callout-note appearance="minimal"}
+## Spoiler
+LLMs are stateless pattern matchers that sample from probability distributions—the same question phrased differently activates different statistical patterns, producing dramatically different outputs.
 :::
 
-# The Mechanism (Why It Works)
+## The Naive Model vs. The Reality
 
-Standard LLM prompting is about **information retrieval**—you ask a question, you get an answer. Agentic prompting is about **state transformation**—you provide a starting state (current code) and a desired end state (refactored code), and the agent must navigate the path between them. This shift fundamentally changes what makes a prompt effective.
+If a machine can answer questions, it should respond consistently regardless of phrasing. You're asking for the same information; the answer shouldn't change. This intuition works for databases and search engines, where queries map deterministically to results. We expect robustness to variation.
 
-Before we can build effective agent prompts, we must understand how LLMs process language. The naive view: if a machine can understand questions, it should respond consistently regardless of phrasing. Ask "Summarize this code" and get a concise summary. Ask "What does this code do?" and get the same information. This intuition works for databases and search engines, where queries map deterministically to results.
+LLMs shatter this expectation. Ask "Summarize this abstract" and get a concise two-sentence summary. Ask "What's this abstract about?" and get three rambling paragraphs. Same content, different phrasing, completely different outputs. This isn't a bug—it's fundamental to how LLMs work. They don't retrieve information; they **sample from probability distributions conditioned on your exact phrasing.** Every word in your prompt shifts the distribution. Change "Summarize" to "What's this about?" and you activate different statistical patterns from the training data, patterns that correlate with different response lengths, structures, and styles.
 
-LLMs shatter this expectation. They don't retrieve information; they **sample from probability distributions conditioned on your exact phrasing**. Every word in your prompt shifts the distribution. Change "Summarize" to "What does this do?" and you activate different statistical patterns from the training data—patterns that correlate with different response lengths, structures, and styles. When you submit a prompt, the model converts it into tokens, embeds them in high-dimensional space, and samples the next token from a probability distribution. **Your exact phrasing determines which region of probability space the model occupies when it begins sampling.**
+The paradox: LLMs are simultaneously powerful and brittle. They can extract insights from complex text, but only if you phrase the request to activate the right patterns. Prompt engineering is the discipline of designing inputs that reliably activate desired patterns across varied tasks.
 
-For agents, this has profound implications. A chatbot that gives you a slightly wrong answer is annoying. An agent that executes the slightly wrong command is catastrophic. When an LLM controls tools—editing files, running terminal commands, calling APIs—prompt engineering stops being about output quality and starts being about **action correctness**. The difference between "delete the test file" and "delete the file" is the difference between removing `test.py` and wiping your entire directory.
+## The Hidden Mechanism
 
-## Vibe Coding
+Imagine you're playing a word association game. Someone says "capital," and you must say the next word. If the previous sentence was "The capital of France is," you say "Paris." If it was "We need more capital to," you say "fund" or "invest." The word "capital" doesn't have one meaning—it activates different patterns depending on context. LLMs work identically, but at massive scale.
 
-This leads to the concept of **"Vibe Coding"**. Since the agent handles the syntax, your job is to describe the *qualities* of the software.
-*   **Intuitive View**: "I need to tell the AI exactly which CSS classes to use."
-*   **Reality**: The AI knows CSS better than you. You need to tell it to "Make it look like a 90s hacker terminal." The model maps this high-level semantic description ("vibe") to the low-level implementation details (green text, black background, monospace font) more effectively than you can manually specify.
+When you submit a prompt, the model converts it into tokens and embeds those tokens in high-dimensional space. Each token's position in that space depends on surrounding tokens—context shapes meaning. The model then samples the next token from a probability distribution over its vocabulary, conditioned on all previous tokens. It repeats this process until it generates a complete response. Critically, **your exact phrasing determines which region of probability space the model occupies when it begins sampling.** Slightly different prompts place the model in different regions, where different tokens have high probability.
 
-# The Application (How We Use It)
+This creates extreme sensitivity to phrasing. Adding "Think step by step" at the end of a prompt shifts the probability distribution toward reasoning patterns that include intermediate steps, because the training data contains many examples where "think step by step" preceded structured reasoning. Adding "You are an expert researcher" shifts the distribution toward formal, technical language patterns. Specifying "Output format: Domain: ..., Methods: ..." shifts toward structured extraction patterns. Each modification activates different statistical regularities compressed during training.
 
-## Understanding Structured Output for Actions
+The model has no internal representation of what you "really want." It only knows which tokens tend to follow which other tokens in which contexts. Prompt engineering exploits this by deliberately activating patterns that produce desired outputs.
 
-When a user says "Generate random numbers from a Gaussian distribution", a chatbot can respond with natural language. An agent must respond with a **tool call**—a structured object that specifies which function to invoke and with what parameters. Let's see how this works with `ollama`.
+## The Strategic Application
 
-First, define a simple tool:
+![](../figs/prompt-tuning-manga.png){width=70% fig-align=center}
+
+Effective prompts activate desired patterns by combining structural components that mirror patterns in training data. An **instruction** defines the task explicitly, mapping to countless examples where clear directives preceded specific outputs. **Data** provides the input to process. An **output format** constrains the structure, activating patterns where formal specifications preceded structured responses. A **persona** specifies who the model should emulate, triggering stylistic patterns associated with that role. **Context** provides background information—why the task matters, who the response serves, relevant constraints—that helps the model select appropriate patterns from ambiguous alternatives.
+
+Not every component is necessary. Simple extraction tasks need only instruction, data, and format. Style-sensitive tasks benefit from persona. Complex scenarios with ambiguity require context to disambiguate. The strategy is to provide exactly enough structure to activate the desired pattern without overloading the prompt with irrelevant information that dilutes the signal.
+
+We'll build a prompt progressively, adding components one at a time to observe how each shifts the output distribution.
+
+
+### Building from Instruction and Data
+
+The most basic prompt consists of an instruction that defines the task and data that provides the input to process:
 
 ```{python}
+instruction = "Summarize this abstract"
+data = """
+We develop a graph neural network for predicting protein-protein interactions
+from sequence data. Our model uses attention mechanisms to identify functionally
+important amino acid subsequences. We achieve 89% accuracy on benchmark datasets,
+outperforming previous methods by 7%. The model also provides interpretable
+attention weights showing which protein regions drive predictions.
+"""
+
+prompt = f"{instruction}. {data}"
+```
+
+```{python}
+#| code-fold: true
+
 import ollama
-import json
-import numpy as np
 
-def generate_random(distribution: str, mean: float = 0, std: float = 1, size: int = 100) -> dict:
-    """Generate random numbers from specified distribution"""
-    if distribution == "gaussian" or distribution == "normal":
-        samples = np.random.normal(loc=mean, scale=std, size=size)
-        return {
-            "distribution": "gaussian",
-            "mean": float(np.mean(samples)),
-            "std": float(np.std(samples)),
-            "size": len(samples)
-        }
-    else:
-        return {"error": f"Unknown distribution: {distribution}"}
+params_llm = {"model": "gemma3:270m", "options": {"temperature": 0.3}}
+
+response = ollama.generate(prompt=prompt, **params_llm)
+print(response.response)
 ```
 
-Now create a system prompt that tells the LLM to return structured tool calls:
+This basic prompt works, but output varies—the model might produce a long summary, a short one, or change format across runs. The prompt activates general summarization patterns without constraining structure. Adding an output format specification narrows the distribution:
 
 ```{python}
-system_prompt = """You are a random number generation assistant. When the user asks to generate random numbers,
-you must call the generate_random function.
+output_format = """Provide the summary in exactly 2 sentences:
+- First sentence: What problem and method
+- Second sentence: Key result with numbers"""
 
-Available tools:
-- generate_random(distribution: str, mean: float = 0, std: float = 1, size: int = 100) -> dict
-
-Return ONLY valid JSON with this structure:
-{
-  "tool": "generate_random",
-  "parameters": {
-    "distribution": "<distribution name>",
-    "mean": <number>,
-    "std": <number>,
-    "size": <number>
-  }
-}
-
-Do not include explanations. Only return JSON."""
-
-user_query = "Generate 200 random numbers from a Gaussian with mean 5 and std 2"
-
-params_llm = {"model": "gemma3n:latest", "options": {"temperature": 0}}
-
-response = ollama.chat(
-    model=params_llm["model"],
-    messages=[
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_query}
-    ]
-)
-
-print("LLM Response:")
-print(response.message.content)
+prompt_with_format = f"""{instruction}. {data}. {output_format}"""
 ```
 
-The system prompt activates patterns where "return ONLY valid JSON" preceded JSON-formatted outputs. But this is fragile—if the LLM adds conversational text, parsing fails. For production agents, we need **JSON schema constraints** that enforce structure at the token level.
+The output format constraint produces structured, consistent output by activating patterns where format specifications preceded conforming responses. This becomes critical when processing hundreds of papers—you need programmatically parseable structure, not freeform text.
+
+### Adding Persona to Control Style
+
+A persona tells the LLM who it should emulate, activating stylistic patterns associated with that role in training data. Consider a customer support scenario where tone matters:
+
+```{python}
+# New example for persona demonstration
+instruction = "Help the customer reconnect to the service by providing troubleshooting instructions."
+data = "Customer: I cannot see any webpage. Need help ASAP!"
+output_format = "Keep the response concise and polite. Provide a clear resolution in 2-3 sentences."
+
+formal_persona = "You are a professional customer support agent who responds formally and ensures clarity and professionalism."
+
+prompt_with_persona = f"""{formal_persona}. {instruction}. {data}. {output_format}"""
+```
+
+```{python}
+#| code-fold: true
+print("BASE (no persona):")
+print(ollama.generate(prompt=instruction + ". " + data + ". " + output_format, **params_llm).response)
+print("\n" + "="*60 + "\n")
+print("WITH PERSONA:")
+print(ollama.generate(prompt=prompt_with_persona, **params_llm).response)
+```
+
+The persona shifts tone and style. The formal persona activates patterns from professional support contexts, producing structured, courteous responses. Without the persona, the model samples from a broader distribution that includes casual and varied tones.
+
+### Adding Context to Disambiguate
+
+Context provides additional information that helps the model select appropriate patterns when multiple valid interpretations exist. Context can include background information explaining why the task matters, audience information specifying who the response serves, and constraints defining special circumstances. Consider adding background urgency:
+
+```{python}
+context_background = """The customer is extremely frustrated because their internet has been down for three days, and they need it for an important online job interview. They emphasize that 'This is a life-or-death situation for my career!'"""
+
+prompt_with_context = f"""{formal_persona}. {instruction}. {data}. {output_format}. Context: {context_background}"""
+```
+
+```{python}
+#| code-fold: true
+print("WITH PERSONA:")
+print(ollama.generate(prompt=prompt_with_persona, **params_llm).response)
+print("\n" + "="*60 + "\n")
+print("WITH PERSONA + CONTEXT (background):")
+print(ollama.generate(prompt=prompt_with_context, **params_llm).response)
+```
+
+Background context adds urgency and emotional weight, activating patterns where high-stakes situations preceded empathetic, prioritized responses. The model doesn't understand emotion, but it has seen urgency markers correlate with specific response patterns.
+
+Audience information creates even more dramatic shifts. Compare responses for non-technical versus technical users:
+
+```{python}
+# Context with audience information for non-technical user
+context_with_audience_nontech = f"""{context_background} The customer does not know any technical terms like modem, router, networks, etc."""
+
+context_with_audience_tech = f"""{context_background} The customer is Head of IT Infrastructure of our company."""
+
+prompt_with_context_nontech = f"""{formal_persona}. {instruction}. {data}. {output_format}. Context: {context_with_audience_nontech}"""
+prompt_with_context_tech = f"""{formal_persona}. {instruction}. {data}. {output_format}. Context: {context_with_audience_tech}"""
+```
+
+```{python}
+#| code-fold: true
+print("WITH PERSONA + CONTEXT (background only):")
+print(ollama.generate(prompt=prompt_with_context, **params_llm).response)
+print("\n" + "="*60 + "\n")
+print("WITH PERSONA + CONTEXT (background + non-tech audience):")
+print(ollama.generate(prompt=prompt_with_context_nontech, **params_llm).response)
+print("\n" + "="*60 + "\n")
+print("WITH PERSONA + CONTEXT (background + tech audience):")
+print(ollama.generate(prompt=prompt_with_context_tech, **params_llm).response)
+```
+
+Audience information dramatically shifts technical level and terminology. For non-technical users, the response avoids jargon because the training data contains many examples where "does not know technical terms" preceded simplified explanations. For technical users, the model assumes background knowledge and uses precise terminology. Same underlying mechanism—pattern matching—but different patterns activated.
+
+The complete template combines all components, but not every prompt needs every component. Simple extraction tasks need only instruction, data, and output format. Style-sensitive tasks benefit from persona. Complex scenarios with ambiguity require context:
+
+```{python}
+prompt_template = """
+{persona}
+
+{instruction}
+
+{data}
+
+Context: {context}
+
+{output_format}
+"""
+```
+
+::: {.callout-note}
+## When Personas Help (and When They Don't)
+
+Research shows that adding personas can improve tone and style, but **does not necessarily improve performance on factual tasks**. In some cases, personas may even degrade performance or introduce biases.
+
+**Use personas when:** You need specific tone/style, responses tailored to an audience, or a particular perspective.
+
+**Avoid personas when:** You need maximum factual accuracy, the task is purely extraction/classification, or you're concerned about bias introduction.
+
+Additionally, when prompted to adopt specific socio-demographic personas, LLMs may produce responses that reflect societal stereotypes. Be careful when designing persona prompts to avoid reinforcing harmful biases.
+
+**References:**
+- [When "A Helpful Assistant" Is Not Really Helpful](https://arxiv.org/abs/2311.10054)
+- [Bias Runs Deep: Implicit Reasoning Biases in Persona-Assigned LLMs](https://arxiv.org/abs/2311.04892)
+:::
+
+::: {.callout-tip}
+## Context and Emotion Prompting
+
+Context can include:
+- **Background information**: Why the task is important, what led to this request
+- **Audience information**: Who the response is for (technical level, expertise, role)
+- **Emotional cues**: Research shows that including emotional cues (e.g., "This is very important to my career") can enhance response quality
+- **Constraints**: Special circumstances, deadlines, limitations
+
+However, avoid overloading with unnecessary information that distracts from the main task.
+
+**Reference:** [Same Task, More Tokens: the Impact of Input Length on the Reasoning Performance of Large Language Models](https://arxiv.org/abs/2402.14848)
+:::
+
+## Showing Rather Than Telling
+
+Instead of describing what you want in words, show the model examples. This technique—called **few-shot learning** or in-context learning—exploits how LLMs compress patterns. When you provide examples, you're not teaching the model new information; you're activating pre-existing patterns by demonstrating the exact structure you want.
+
+The spectrum ranges from zero-shot (no examples, relying solely on the model's prior knowledge) to few-shot (typically two to five examples, the sweet spot for most tasks) to many-shot (ten or more examples, where diminishing returns and context limits become problematic). Consider a zero-shot prompt first:
+
+```{python}
+zero_shot_prompt = """Extract the domain and methods from this abstract:
+
+Abstract: We apply reinforcement learning to optimize traffic flow in urban networks.
+Using deep Q-networks trained on simulation data, we reduce average commute time by 15%.
+
+Output format:
+Domain: ...
+Methods: ...
+"""
+```
+
+Now add examples to activate more specific patterns:
+
+```{python}
+few_shot_prompt = """Extract the domain and methods from abstracts. Here are examples:
+
+Example 1:
+Abstract: We use CRISPR to edit genes in cancer cells, achieving 40% tumor reduction in mice.
+Domain: Cancer Biology
+Methods: CRISPR gene editing, mouse models
+
+Example 2:
+Abstract: We develop a transformer model for predicting solar flares from magnetogram images.
+Domain: Solar Physics, Machine Learning
+Methods: Transformer neural networks, image analysis
+
+Now extract from this abstract:
+
+Abstract: We apply reinforcement learning to optimize traffic flow in urban networks.
+Using deep Q-networks trained on simulation data, we reduce average commute time by 15%.
+
+Domain: ...
+Methods: ...
+"""
+```
+
+```{python}
+#| code-fold: true
+response_zero = ollama.generate(prompt=zero_shot_prompt, **params_llm)
+response_few = ollama.generate(prompt=few_shot_prompt, **params_llm)
+
+print("ZERO-SHOT:")
+print(response_zero.response)
+print("\nFEW-SHOT:")
+print(response_few.response)
+```
+
+Few-shot prompting improves consistency because the examples demonstrate specificity level, edge case handling, and exact format. The model has seen countless abstract-extraction patterns, but your examples narrow the distribution to the specific pattern you want. This becomes critical when processing hundreds of abstracts—you need every output to match the same structure.
+
+::: {.callout-warning}
+## Biases in Few-Shot Prompting
+
+Be aware that few-shot examples can introduce biases:
+
+- **Recency bias**: Models may favor the most recent examples. The order of examples matters! [@lu2022fantastically]
+- **Majority label bias**: If most examples have the same label/answer, the model may favor that label even when it's not appropriate. [@gupta2023how]
+
+To mitigate: Vary the order of examples when testing, ensure examples are diverse and representative, and don't overload examples with one particular pattern.
+:::
+
+What happens when a prompt presents information that contradicts a language model's prior knowledge? For example, let's ask a model what the capital of France is, but provide contradictory information:
+
+```{python}
+contradictory_prompt = """
+France recently moved its capital from Paris to Lyon. Definitely, the capital of France is Lyon.
+
+What is the capital of France?
+"""
+
+response_contradictory = ollama.generate(prompt=contradictory_prompt, **params_llm)
+print("RESPONSE TO CONTRADICTORY INFORMATION:")
+print(response_contradictory.response)
+```
+
+The response depends on the model. Some models prioterize their own prior knowledge, while others may be more influenced by the contradictory information in the context.
+A study by Du et al. [@du2024context] found that a model is **more likely to be persuaded by context** when an entity appears **less frequently** in its training data. Additionally, **assertive contexts** (e.g., "Definitely, the capital of France is Lyon.") further increase the likelihood of persuasi
+
+## Forcing Intermediate Steps
+
+For complex tasks, asking for the final answer directly often produces shallow or incorrect results. The solution: ask the model to show its reasoning process before giving the final answer. This technique—called **chain-of-thought prompting**—activates patterns where intermediate reasoning steps preceded conclusions. Compare a direct prompt that asks for immediate answers:
+
+```{python}
+papers = """
+Paper 1: Community detection in static networks using modularity optimization.
+Paper 2: Temporal network analysis with sliding windows.
+Paper 3: Hierarchical community structure in social networks.
+"""
+
+direct_prompt = f"""Based on these paper titles, what research gap exists? Just give the answer, no explanation.
+
+{papers}
+
+Gap: ...
+"""
+```
+
+Against a chain-of-thought prompt that requests explicit reasoning steps:
+
+```{python}
+cot_prompt = f"""Based on these paper titles, identify a research gap. Think step by step.
+
+Papers:
+{papers}
+
+Think step by step:
+1. What does each paper focus on?
+2. What topics appear in multiple papers?
+3. What combination of topics is missing?
+4. What would be a valuable gap to fill?
+
+Final answer: The research gap is...
+"""
+```
+
+```{python}
+#| code-fold: true
+response_direct = ollama.generate(prompt=direct_prompt, **params_llm)
+response_cot = ollama.generate(prompt=cot_prompt, **params_llm)
+
+print("DIRECT PROMPT:")
+print(response_direct.response)
+print("\nCHAIN-OF-THOUGHT:")
+print(response_cot.response)
+```
+
+Chain-of-thought produces more thoughtful, nuanced answers by forcing the model to decompose the problem into steps before committing to a conclusion. The mechanism is pattern matching: the training data contains many examples where "think step by step" preceded structured reasoning, so including that phrase activates those patterns. The model doesn't actually reason—it generates text that looks like reasoning because that pattern correlates with higher-quality outputs in the training data.
+
+Use chain-of-thought when comparing multiple papers or concepts, identifying patterns, making recommendations, or analyzing arguments. Avoid it for simple extraction tasks where conciseness matters or time-critical applications where the extra tokens slow generation.
+
+::: {.callout-warning}
+## Can We Trust Chain-of-Thought Reasoning?
+
+Research indicates that chain-of-thought reasoning can be **unfaithful**—the explanations don't always accurately reflect the model's true decision-making process. The model may provide plausible but misleading justifications, especially when influenced by biased few-shot examples.
+
+Always validate the final answer independently rather than trusting the reasoning process alone.
+:::
+
+## Constraining Format for Structured Extraction
+
+![](../figs/structured-output-manga.png){width="70%" fig-align="center"}
+
+LLMs often violate structured data necessary for parsing programmatically, not freeform text. The solution: constrain output format explicitly. Consider a prompt that requests JSON output:
+
+```{python}
+import json
+from pydantic import BaseModel
+
+abstract = """
+We analyze 10,000 scientific collaborations using network analysis and machine
+learning. Our random forest classifier predicts collaboration success with 76%
+accuracy. Key factors include prior co-authorship and institutional proximity.
+"""
+
+prompt_json = f"""Extract information from this abstract and return ONLY valid JSON:
+
+Abstract: {abstract}
+
+Return this exact structure:
+{{
+  "n_samples": <number or null>,
+  "methods": [<list of methods>],
+  "accuracy": <number or null>,
+  "domain": "<research field>"
+}}
+
+JSON:"""
+```
+
+```{python}
+#| code-fold: true
+# Use lower temperature for structured output
+params_structured = {"model": "gemma3n:latest", "options": {"temperature": 0}}
+response = ollama.generate(prompt=prompt_json, **params_structured)
+
+try:
+    data = json.loads(response.response)
+    print("Extracted data:")
+    print(json.dumps(data, indent=2))
+except json.JSONDecodeError:
+    print("Failed to parse JSON. Raw output:")
+    print(response.response)
+```
+
+This works by activating patterns where "return ONLY valid JSON" preceded JSON-formatted outputs. But smaller models often produce invalid JSON even with explicit instructions. For more reliability, use JSON schema constraints that enforce format during token generation—the model literally cannot generate tokens that violate the schema. Define the schema using Pydantic:
 
 ```{python}
 from pydantic import BaseModel
 
-class ToolCall(BaseModel):
-    tool: str
-    parameters: dict
+class PaperMetadata(BaseModel):
+    domain: str
+    methods: list[str]
+    n_samples: int | None
+    accuracy: float | None
 
-# Convert to JSON schema
-json_schema = ToolCall.model_json_schema()
-
-# Now the LLM cannot generate invalid JSON
-response = ollama.chat(
-    model=params_llm["model"],
-    messages=[
-        {"role": "system", "content": "You are a random number generation assistant."},
-        {"role": "user", "content": "Generate 100 samples from Gaussian with mean 10, std 3"}
-    ],
-    format=json_schema  # Schema constraint
-)
-
-print("\nSchema-Constrained Response:")
-print(response.message.content)
-
-# Parse and validate
-tool_call = ToolCall.model_validate_json(response.message.content)
-print(f"\nParsed Tool: {tool_call.tool}")
-print(f"Parameters: {tool_call.parameters}")
+json_schema = PaperMetadata.model_json_schema()
 ```
 
-This is the foundation of reliable agents: **type-safe communication from LLM to execution layer**. The schema ensures the response is valid JSON with the correct structure.
-
-## The Bad Prompt vs. The Good Prompt
-
-**Bad (Chatbot Style)**:
-> "Write a python function that takes a list and sorts it."
-
-*Why it fails*: It produces a snippet in isolation. It doesn't know where to put it, how to name it, or what style to use. The agent samples from a broad distribution of "sorting function" patterns without constraints.
-
-**Good (Agentic Style)**:
-> "Add a sorting utility to `utils.py`. It should handle our custom `User` objects, sorting by `last_login`. Ensure it's type-hinted and includes a unit test in `tests/test_utils.py`."
-
-*Why it works*: It defines **Location** (utils.py), **Context** (User objects, last_login), **Constraints** (type hints), and **Verification** (unit test). This narrows the probability distribution to patterns where file paths, type hints, and test requirements preceded structured implementations.
-
-## Defining Constraints with System Prompts
-
-You shouldn't have to repeat "Use type hints" in every prompt. Use a `.cursorrules` or `.antigravity/rules` file to set global constraints.
-
-```markdown
-# .cursorrules
-
-- Always use Python 3.12+ syntax.
-- Use `pydantic` for data validation.
-- Docstrings must follow the Google Style Guide.
-- Never leave "TODO" comments; implement the full logic.
-- If a file is too long (>200 lines), propose a refactor before adding code.
-```
-
-## Prompt Components for Agents
-
-Effective agent prompts combine specific components that activate different behavioral patterns:
-
-**1. Role Definition**: Who is the agent?
-```
-You are a code editing assistant with access to file operations.
-```
-
-**2. Available Tools**: What can the agent do?
-```
-Available tools:
-- read_file(path: str) -> str
-- write_file(path: str, content: str)
-- run_command(cmd: str) -> str
-```
-
-**3. Decision Protocol**: How should the agent choose actions?
-```
-Decision process:
-1. If the user asks to modify a file, call read_file first
-2. Never write to a file without reading it first
-3. If uncertain, ask for clarification
-```
-
-**4. Safety Constraints**: What should the agent never do?
-```
-CRITICAL RULES:
-- Never delete files without explicit confirmation
-- Always validate file paths are within project directory
-```
-
-Each component activates different patterns. Role definitions activate task-specific behaviors. Tool definitions activate function-calling patterns. Decision protocols activate conditional reasoning. Safety constraints activate refusal patterns for dangerous operations.
-
-## Handling "Lazy" Agents
-
-Agents optimize for efficiency, which sometimes manifests as laziness—returning `// ... rest of code` instead of full implementations. This happens because the training data contains many examples where code snippets were abbreviated with ellipses. The LLM samples from these patterns.
-
-**The Fix**:
-
-1. **Be Explicit**: "Output the full file content. Do not use placeholders or ellipses."
-
-2. **Reject the Plan**: If the plan says "Update the function," ask "How exactly? Show me the complete logic first."
-
-3. **Chain-of-Thought Triggering**: "Think step-by-step about edge cases before writing code."
-
-Let's demonstrate with a practical example:
+Then pass the schema directly to the API, which constrains token generation:
 
 ```{python}
-# Bad prompt that encourages laziness
-lazy_prompt = """Add error handling to this function:
+prompt_schema = f"""Extract information from this abstract:
 
-def process_data(data):
-    result = data.split(',')
-    return result[0]
-"""
-
-# Good prompt that forces completeness
-complete_prompt = """Add comprehensive error handling to this function.
-Think step-by-step:
-1. What errors could occur? (empty data, no comma, multiple values)
-2. How should each be handled?
-3. What should the return type be?
-
-Output the COMPLETE function with all error handling logic. Do not use placeholders.
-
-def process_data(data):
-    result = data.split(',')
-    return result[0]
-"""
-
-params = {"model": "gemma3n:latest", "options": {"temperature": 0}}
-
-response_lazy = ollama.chat(
-    model=params["model"],
-    messages=[{"role": "user", "content": lazy_prompt}]
-)
-
-response_complete = ollama.chat(
-    model=params["model"],
-    messages=[{"role": "user", "content": complete_prompt}]
-)
-
-print("LAZY PROMPT RESPONSE:")
-print(response_lazy.message.content[:200], "...\n")
-
-print("COMPLETE PROMPT RESPONSE:")
-print(response_complete.message.content)
+Abstract: {abstract}"""
 ```
-
-The complete prompt activates patterns where "think step-by-step" and "do not use placeholders" preceded full implementations. The chain-of-thought component forces decomposition before synthesis.
-
-## Temperature and Agent Reliability
-
-For agents that execute real-world actions, **temperature settings** are critical. Temperature controls randomness in token sampling:
-
-- **Temperature = 0**: Deterministic, always picks highest-probability token
-- **Temperature = 0.7**: Moderate randomness, balances creativity and consistency
-- **Temperature = 1.0+**: High randomness, unpredictable
-
-For agents, use **temperature ≈ 0** to maximize consistency. You want the agent to always extract the same parameters from the same request, not occasionally hallucinate different values due to sampling variance.
 
 ```{python}
-# Compare different temperatures for tool calling
-temperatures = [0, 0.5, 1.0]
-prompt = "Generate 100 random numbers with mean 5 and std 2"
+#| code-fold: true
+response = ollama.generate(prompt=prompt_schema, format=json_schema, **params_structured)
 
-for temp in temperatures:
-    response = ollama.chat(
-        model="gemma3n:latest",
-        messages=[
-            {"role": "system", "content": "You are a random number generation assistant."},
-            {"role": "user", "content": prompt}
-        ],
-        format=json_schema,
-        options={"temperature": temp}
-    )
-
-    print(f"\nTemperature {temp}:")
-    print(response.message.content)
+try:
+    data = json.loads(response.response)
+    metadata = PaperMetadata(**data)
+    print("Extracted and validated data:")
+    print(json.dumps(data, indent=2))
+except (json.JSONDecodeError, ValueError) as e:
+    print(f"Error: {e}")
+    print("Raw output:", response.response)
 ```
 
-Higher temperatures introduce variability—sometimes useful for creative writing, but dangerous for agents that need to map the same input to the same action reliably.
+JSON schema constraints are more reliable than prompt-based requests because they operate at the token level—the model cannot sample tokens that would create invalid JSON. The prompt activates extraction patterns; the schema enforces structure.
 
-# The Takeaway
+::: {.callout-warning}
+## JSON Parsing Reliability
 
-**Prompting is the new syntax.** A vague prompt is a syntax error in the age of agents. It doesn't stop the code from running, but it ensures the wrong code runs.
+Smaller models (like Gemma 3N) sometimes produce invalid JSON even with schema constraints. Always wrap parsing in try-except blocks and validate outputs. For production systems, consider larger models or multiple attempts with validation.
+:::
 
-Agent prompts are not instructions—they're probability maps. Your system prompt activates patterns that shape action distributions across every scenario the agent encounters. Structured output constraints prevent hallucination. Temperature settings control consistency. Decision protocols activate conditional reasoning. Safety constraints activate refusal patterns.
+## Allowing Uncertainty to Reduce Hallucination
 
-The model doesn't understand your intent; it samples from patterns where similar prompts preceded similar behaviors in training data. For agents, where those behaviors translate to real-world actions—file edits, terminal commands, API calls—this statistical foundation becomes the difference between a useful tool and a catastrophic automation failure.
+LLMs confidently fabricate facts when they don't know the answer because they optimize for fluency, not truth. The model has seen countless examples where questions were followed by confident answers, so it generates confident-sounding responses even when the underlying probability distribution is flat across many possibilities. The solution: explicitly give the model permission to admit ignorance. Compare a prompt that implicitly demands an answer:
+
+```{python}
+bad_prompt = """Summarize the main findings from the 2023 paper by Johnson et al.
+on quantum community detection in biological networks."""
+```
+
+Against a prompt that explicitly allows uncertainty:
+
+```{python}
+good_prompt = """I'm looking for a 2023 paper by Johnson et al. on quantum
+community detection in biological networks.
+
+If you know this paper, summarize its main findings.
+If you're not certain this paper exists, say "I cannot verify this paper exists"
+and do NOT make up details.
+
+Response:"""
+```
+
+```{python}
+#| code-fold: true
+response_bad = ollama.generate(prompt=bad_prompt, **params_llm)
+response_good = ollama.generate(prompt=good_prompt, **params_llm)
+
+print("BAD PROMPT (encourages hallucination):")
+print(response_bad.response)
+print("\nGOOD PROMPT (allows uncertainty):")
+print(response_good.response)
+```
+
+The good prompt activates patterns where explicit permission to admit ignorance preceded honest uncertainty statements. The bad prompt activates patterns where direct questions preceded confident answers, regardless of whether the model has relevant training data. Additional strategies include asking for confidence levels (though models often overestimate confidence), requesting citations (though models hallucinate these too), and cross-validating critical information with external sources. The fundamental issue remains: LLMs have no internal representation of what they "know" versus what they're fabricating.
+
+::: {.callout-tip}
+## Be a Good "Boss" to Your LLM
+
+**Let LLMs admit ignorance**: LLMs closely follow your instructions—even when they shouldn't. They often attempt to answer beyond their actual capabilities. Explicitly tell your model: "If you don't know the answer, just say so," or "If you need more information, please ask."
+
+**Encourage critical feedback**: LLMs are trained to be agreeable, which can hinder productive brainstorming or honest critique. Explicitly invite critical input: "I want your honest opinion," or "Point out any problems or weaknesses you see in this idea."
+:::
+
+
+### Sampling Multiple Times for Consistency
+
+For tasks requiring reasoning, generating multiple responses and selecting the most common answer often improves accuracy. The technique—called **self-consistency**—exploits the fact that correct reasoning tends to converge on the same answer, while hallucinations vary randomly across samples. Define the prompt:
+
+```{python}
+from collections import Counter
+
+prompt_consistency = """Three papers study network robustness:
+- Paper A: Targeted attacks are most damaging
+- Paper B: Random failures rarely cause collapse
+- Paper C: Hub nodes are critical for robustness
+
+What is the research consensus on network robustness? Give a one-sentence answer.
+"""
+```
+
+Generate multiple responses with higher temperature to increase diversity, then identify the most common answer:
+
+```{python}
+#| code-fold: true
+# Use higher temperature for diversity
+params_creative = {"model": "gemma3n:latest", "options": {"temperature": 0.7}}
+
+# Generate 5 responses
+responses = []
+for i in range(5):
+    response = ollama.generate(prompt=prompt_consistency, **params_creative)
+    responses.append(response.response.strip())
+    print(f"Response {i+1}: {responses[-1]}\n")
+
+# In practice, you'd programmatically identify the most common theme
+print("The most consistent theme across responses would be selected.")
+```
+
+Self-consistency works because correct reasoning patterns converge toward the same conclusion when sampled multiple times, while fabricated details vary randomly. The tradeoff: generating five responses means five times the API calls, five times the cost, five times the latency. Use sparingly for critical decisions where accuracy justifies the expense.
+
+::: {.callout-note}
+## Alternative: Tree of Thought
+
+![](https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2FTOT.3b13bc5e.png&w=3840&q=75)
+
+For even more sophisticated exploration, you can use "Tree of Thought" [@yao2023tree] prompting, where the model explicitly explores multiple reasoning paths, evaluates them, and selects the best one. This is more complex to implement but can yield better results for very difficult problems.
+
+
+:::
+
+## The Takeaway
+
+Prompt engineering is not magic—it's deliberate activation of statistical patterns compressed during training. Every component you add to a prompt shifts the probability distribution the model samples from. Instructions activate task-specific patterns. Output formats activate structured-response patterns. Personas activate stylistic patterns. Context disambiguates when multiple patterns compete. Examples demonstrate exact structure. Chain-of-thought activates reasoning-like patterns. Format constraints enforce structure at the token level. Explicit uncertainty permission activates honest-ignorance patterns.
+
+None of this requires the model to understand what you want. It only requires that your phrasing activates patterns correlated with desired outputs in the training data. You're not communicating intent; you're manipulating probability distributions. Master this, and you can reliably extract value from LLMs for research workflows—summarization, structured extraction, hypothesis generation, literature analysis.
+
+But a question remains: how do these models represent text internally? When you send a prompt, the model doesn't see English words—it sees numbers. Millions of numbers arranged in high-dimensional space. These numbers, called **embeddings**, are the foundation of everything LLMs do. Let's unbox the first layer and see how meaning becomes mathematics.
