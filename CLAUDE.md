@@ -18,7 +18,7 @@
 * **Minimal Bolding:** Bold **only** the first instance of a critical technical term. Never bold full sentences.
 * **LaTeX:** Use LaTeX for variables ($P(x|y)$) to signal precision.
 * **Em Dashes:** Always use three hyphens `---` for em dashes (Quarto/Markdown will render this as —). Never use single or double hyphens for this purpose.
-* **Intro-to-Action Ratio:** The introductory theory sections must constitute **no more than 35%** of the total content. Get to the first code block or practical example quickly.
+* **Intro-to-Action Ratio:** The introductory theory sections must constitute **no more than 50%** of the total content. Get to the first code block or practical example quickly.
 
 ## Universal Structural Template
 *Apply this 3-part arc. Prioritize speed to application.*
@@ -26,14 +26,22 @@
 ### The Spoiler
 Begin with a bold **Spoiler** block. A single, unadorned sentence that states the counter-intuitive conclusion. This acts as the "Executive Summary."
 
-### The Mechanism (Why It Works)
+### The Mechanism
 **Consolidate the "Naive View," "Reality," and "Analogy" into this single section.**
-1.  Briefly state why the intuitive view is wrong.
-2.  Explain the actual hidden mechanism (e.g., "It's not logic; it's geometry").
-3.  Use a physical analogy (e.g., "Like a path of least resistance") to anchor the concept.
-4.  *Constraint:* Keep this under 3 paragraphs. The goal is to correct the student's mental model just enough so the practical examples make sense.
 
-### The Application (How We Use It)
+**Opening Strategy:** Start with a relatable question that invites reflection, not assertion. Ask students what they think about a core assumption before telling them the answer. This creates cognitive engagement.
+* *Example:* "What do you think about the following question? > Can LLMs understand the world and reason about it?"
+* *Why it works:* Students enter as co-explorers, not passive receivers. You're correcting a mental model they actively hold, not lecturing into a void.
+
+**Structure:**
+1.  **State the naive view clearly** (what students likely believe and why it seems reasonable)
+2.  **Introduce a concrete counter-example** (preferably historical or familiar: ELIZA, a simple experiment, a visible failure)
+3.  **Pivot to the toy model analogy** (the simplified mechanism that explains both the naive view's appeal and its failure)
+4.  **Thread the analogy through the explanation** (return to the lottery memorizer, the coin flip, the curve-fitting surface---don't introduce and abandon it)
+
+*Constraint:* Keep this under 3 paragraphs. The goal is to correct the student's mental model just enough so the practical examples make sense.
+
+### The Application
 This is the main body.
 1.  Transition immediately to practical use cases (Code, Workflows, or Systems).
 2.  Use a "Show, Don't Tell" approach: introduce a concept (e.g., "Persona"), then immediately show the code/prompt that demonstrates it.
