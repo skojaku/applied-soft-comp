@@ -28,7 +28,18 @@ https://static.marimo.app/static/gpt-ar61
 
 You can try different sampling strategies and see the results. GPT generates text one token at a time, repeatedly sampling from the probability distribution. Let's examine the strategies for sampling that balance quality and diversity.
 
-**Greedy and Beam Search**
+First, let's set up our connection to Ollama:
+
+```{python}
+import ollama
+
+# Make sure you have Ollama running and a model pulled
+# Run: ollama pull mapler/gpt2
+MODEL = "mapler/gpt2"
+PROMPT = "Hi there! "
+```
+
+**Greedy Sampling**
 
 Greedy sampling always picks the highest probability token, which is deterministic but can lead to repetitive or trapped text. For example, if the model predicts "the" with high probability, it will always predict "the" again. This is the jazz musician stuck on a single note.
 
@@ -38,31 +49,25 @@ Greedy sampling always picks the highest probability token, which is determinist
 GPT greedy search.
 :::
 
-Let's see greedy sampling in action using Gemma 3 (270M):
+Let's see greedy sampling in action. We set temperature to 0 to make the sampling deterministic (always picking the highest probability token):
 
 ```{python}
-from transformers import pipeline
-
-# Load GPT-2 model
-generator = pipeline(
-    "text-generation",
-    model="google/gemma-3-270m",
-    device="mps",  # use "cuda" for GPU, "mps" for Apple Silicon. Use "cpu" for CPU.
+greedy_response = ollama.generate(
+    model=MODEL,
+    prompt=PROMPT,
+    options={
+        "temperature": 0,  # greedy sampling
+        "num_predict": 20,  # max tokens to generate
+    }
 )
-
-# Greedy sampling: do_sample=False means deterministic
-greedy_output = generator(
-    "Hi there! ",
-    do_sample=False,
-    max_new_tokens=20,
-    pad_token_id=generator.tokenizer.eos_token_id,
-)
-print(greedy_output[0]["generated_text"])
+print(greedy_response['response'])
 ```
 
-The output is often repetitive because greedy sampling always selects the most probable token at each step, leading to predictable and repetitive patterns.
+The output is often repetitive because greedy sampling always selects the most probable token at each step, leading to predictable and repetitive patterns. Try running it multiple times---you'll get the exact same output each time.
 
-Beam search alleviates this problem by taking into account the high-order dependencies between tokens. For example, in generating "The cat ran across the ___", beam search might preserve a path containing "mat" even if "floor" or "room" have higher individual probabilities at that position. This is because the complete sequence like "mat quickly" could be more probable when considering the token next after "mat". "The cat ran across the mat quickly" is a more natural phrase than "The cat ran across the floor quickly" when considering the full flow and common linguistic patterns.
+**Beam Search**
+
+Beam search alleviates the repetition problem by taking into account the high-order dependencies between tokens. For example, in generating "The cat ran across the ___", beam search might preserve a path containing "mat" even if "floor" or "room" have higher individual probabilities at that position. This is because the complete sequence like "mat quickly" could be more probable when considering the token next after "mat". "The cat ran across the mat quickly" is a more natural phrase than "The cat ran across the floor quickly" when considering the full flow and common linguistic patterns.
 
 ::: {#fig-gpt-beam-search}
 ![](https://huggingface.co/blog/assets/02_how-to-generate/beam_search.png){width=50% fig-align="center"}
@@ -80,24 +85,7 @@ This process continues until reaching the end, finally selecting the sequence wi
 
 While beam search often produces high-quality outputs since it considers longer-term coherence, it can still suffer from the problem of repetitive or trapped text. It's the jazz ensemble playing in perfect harmony---technically excellent but predictable.
 
-Here's beam search with 10 beams:
-
-```{python}
-beam_output = generator(
-    "Hi there! ",
-    do_sample=False,
-    max_new_tokens=20,
-    pad_token_id=generator.tokenizer.eos_token_id,
-    num_beams=10,  # number of beams to explore
-    num_return_sequences=5,  # return top 5 sequences
-)
-
-# Print the top 5 sequences
-for i, output in enumerate(beam_output):
-    print(f"Sequence {i+1}: {output['generated_text']}")
-```
-
-Beam search explores multiple paths and returns the most probable sequences. Notice how the outputs are still relatively similar because they optimize for likelihood.
+*Note: Ollama doesn't natively support beam search through its API. Beam search requires access to the model's internal scoring mechanism, which is typically implemented at a lower level (e.g., using HuggingFace Transformers or direct PyTorch/TensorFlow implementations). For production beam search, you would use libraries like transformers or vLLM.*
 
 **From Deterministic to Stochastic Sampling**
 
@@ -106,14 +94,16 @@ Both greedy and beam search are deterministic. They pick the most likely token a
 Top-k sampling relaxes the deterministic nature of greedy sampling by selecting randomly from the $k$ most likely next tokens at each generation step. While this introduces some diversity compared to greedy sampling, choosing a fixed $k$ can be problematic. Value of $k$ might be too large for some distribution tails (including many poor options) or too small for others (excluding reasonable options). In our jazz analogy, this is like saying "you can only improvise using these five specific notes"---sometimes that's perfect, sometimes it's too limiting.
 
 ```{python}
-top_k_output = generator(
-    "Hi there! ",
-    do_sample=True,  # enable stochastic sampling
-    max_new_tokens=20,
-    pad_token_id=generator.tokenizer.eos_token_id,
-    top_k=10,  # restrict to top 10 tokens
+top_k_response = ollama.generate(
+    model=MODEL,
+    prompt=PROMPT,
+    options={
+        "temperature": 1.0,  # enable stochastic sampling
+        "top_k": 10,  # restrict to top 10 tokens
+        "num_predict": 20,
+    }
 )
-print(top_k_output[0]["generated_text"])
+print(top_k_response['response'])
 ```
 
 Try running this multiple times---you'll get different outputs each time because the model samples randomly from the top-k tokens.
@@ -127,14 +117,16 @@ Nucleus sampling. The image is taken from [this blog](https://zenn.dev/hellorusk
 :::
 
 ```{python}
-top_p_output = generator(
-    "Hi there! ",
-    do_sample=True,
-    max_new_tokens=20,
-    pad_token_id=generator.tokenizer.eos_token_id,
-    top_p=0.95,  # sample from tokens with cumulative probability >= 0.95
+top_p_response = ollama.generate(
+    model=MODEL,
+    prompt=PROMPT,
+    options={
+        "temperature": 1.0,
+        "top_p": 0.95,  # sample from tokens with cumulative probability >= 0.95
+        "num_predict": 20,
+    }
 )
-print(top_p_output[0]["generated_text"])
+print(top_p_response['response'])
 ```
 
 Nucleus sampling dynamically adjusts the number of candidate tokens based on the probability distribution, making it more adaptive than fixed top-k.
@@ -161,14 +153,15 @@ Let's see how temperature affects generation:
 
 ```{python}
 for tau in [0.1, 0.5, 1.0, 2.0, 5.0]:
-    output = generator(
-        "Hi there! ",
-        do_sample=True,
-        max_new_tokens=20,
-        pad_token_id=generator.tokenizer.eos_token_id,
-        temperature=tau,
+    response = ollama.generate(
+        model=MODEL,
+        prompt=PROMPT,
+        options={
+            "temperature": tau,
+            "num_predict": 20,
+        }
     )
-    print(f"τ = {tau}: {output[0]['generated_text']}")
+    print(f"τ = {tau}: {response['response']}")
 ```
 
 Notice how:
@@ -181,16 +174,17 @@ Notice how:
 You can combine top-k, top-p, and temperature for fine-grained control:
 
 ```{python}
-combined_output = generator(
-    "Hi there! ",
-    do_sample=True,
-    max_new_tokens=20,
-    pad_token_id=generator.tokenizer.eos_token_id,
-    temperature=0.7,  # moderate randomness
-    top_k=10,         # restrict to top 10 tokens
-    top_p=0.95,       # within top-k, use nucleus sampling
+combined_response = ollama.generate(
+    model=MODEL,
+    prompt=PROMPT,
+    options={
+        "temperature": 0.7,  # moderate randomness
+        "top_k": 10,         # restrict to top 10 tokens
+        "top_p": 0.95,       # within top-k, use nucleus sampling
+        "num_predict": 20,
+    }
 )
-print(combined_output[0]["generated_text"])
+print(combined_response['response'])
 ```
 
 This combination restricts candidates to top-k tokens, then applies nucleus sampling, and finally uses temperature to control randomness---giving you maximum control over the generation process. The jazz musician now has a framework: work within these chords (top-k), adapt to the moment (nucleus), and choose your creative intensity (temperature).
