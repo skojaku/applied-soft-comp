@@ -8,34 +8,26 @@ execute:
 
 ::: {.callout-note appearance="minimal"}
 ## Spoiler
-Large language models don't understand language—they compress statistical regularities from billions of text samples into probability distributions that generate fluent outputs correlated with truth but not guaranteed to be true.
+Large language models don't understand language---they compress statistical regularities from billions of text samples into probability distributions that generate fluent outputs correlated with truth but not guaranteed to be true.
 :::
 
-## The Naive Model vs. The Reality
+## The Mechanism
 
-You've used ChatGPT. It writes like a graduate student---coherent paragraphs, technical nuance, the occasional insight. So it must *understand* language the way you do, right? Wrong.
+You've used ChatGPT. It writes like a graduate student---coherent paragraphs, technical nuance, the occasional insight. So it must *understand* language the way you do, right? Wrong. This intuition traces to Turing's 1950 test: if you can't tell it's a machine, treat it as intelligent. Fluency implies comprehension. But ELIZA, a 1960s chatbot, shattered this assumption. It convinced users it was a therapist using only keyword substitution and reflection---no comprehension, just pattern matching. Large language models are ELIZA scaled by thirteen orders of magnitude.
 
-This intuition traces to Turing's 1950 test: if you can't tell it's a machine, treat it as intelligent. Fluency implies comprehension. But ELIZA, a 1960s chatbot, shattered this assumption. It convinced users it was a therapist using only keyword substitution and reflection---no comprehension, just pattern matching. Large language models are ELIZA scaled by thirteen orders of magnitude. They predict which word comes next in a sequence, nothing more. Yet this simple objective forces them to encode grammar, facts, logic, and context---not because they understand, but because **prediction requires compression of statistical regularities.** The model that best predicts "The capital of France is ___" must have compressed the statistical pattern linking countries to capitals, whether or not it "knows" what a capital is.
+Here's the reality: LLMs don't reason. They compress. Imagine you want to predict lottery numbers but can't compute true probabilities. You memorize millions of historical draws. When asked "What comes next?", you recall similar past sequences and output the most common continuation. You're not computing probabilities; you're pattern matching against compressed memory. This is the toy model for how LLMs work.
 
-Here's the paradox: optimizing for prediction creates representations that look like understanding. But probe the extremes---ask about events after the training cutoff, request precise citations, demand genuine reasoning---and the illusion breaks. The model follows fluency where truth is sparse. I asked Gemma 3N to cite the seminal paper on network motifs. It responded: "Alon et al., 2004, *Science*." I checked. No such paper exists. The format was perfect. The citation was fiction.
-
-## The Hidden Mechanism
-
-Imagine you want to predict lottery numbers but can't compute true probabilities. You memorize millions of historical draws. When asked "What comes next?", you recall similar past sequences and output the most common continuation. You're not computing probabilities; you're pattern matching against compressed memory. This is the toy model for how LLMs work.
-
-LLMs function like lossy compression algorithms. To predict "The capital of France is ___," the model must compress not just the fact (Paris) but the **statistical regularities** governing how facts appear in text—that capitals follow "The capital of," that France is a country, that countries have capitals. This compression is probabilistic, not factual. The model stores $P(\text{word}_{n+1} \mid \text{word}_1, \ldots, \text{word}_n)$, which words tend to follow which other words in which contexts.
+LLMs function like lossy compression algorithms. To predict "The capital of France is ___," the model must compress not just the fact (Paris) but the **statistical regularities** governing how facts appear in text---that capitals follow "The capital of," that France is a country, that countries have capitals. This compression is probabilistic, not factual. The model stores $P(\text{word}_{n+1} \mid \text{word}_1, \ldots, \text{word}_n)$, which words tend to follow which other words in which contexts.
 
 ![](../figs/llm-next-word.gif){width=50% fig-alt="A GIF showing how LLMs predict the next word by estimating probability distributions over the vocabulary." fig-align="center"}
 
 Training feeds the model billions of sentences. For each sentence, the model predicts the next word, compares its prediction to the actual next word, and adjusts its parameters to increase the probability of the correct word. Repeat trillions of times. The result: a compressed representation of how language behaves statistically. The model doesn't learn "Paris is the capital of France" as a fact; it learns that in contexts matching the pattern `[The capital of France is]`, the token "Paris" appears with high probability.
 
-This optimization creates **hallucination**---fluent but false outputs. The model optimizes for probability, not truth. If it has seen 1,000 sentences about quantum networks and 10 about quantum community detection, it fabricates plausible results for a non-existent "Smith et al. paper" because that pattern fits academic writing. Remember the lottery memorizer: when you ask about a draw that never happened, it invents one that looks like the draws it *has* seen. The hallucination isn't a bug. It's what happens when you ask a compression algorithm for facts.
+This optimization creates **hallucination**---fluent but false outputs. The model optimizes for probability, not truth. If it has seen 1,000 sentences about quantum networks and 10 about quantum community detection, it fabricates plausible results for a non-existent "Smith et al. paper" because that pattern fits academic writing. Remember the lottery memorizer: when you ask about a draw that never happened, it invents one that looks like the draws it *has* seen. The hallucination isn't a bug. It's what happens when you ask a compression algorithm for facts. I asked Gemma 3N to cite the seminal paper on network motifs. It responded: "Alon et al., 2004, *Science*." I checked. No such paper exists. The format was perfect. The citation was fiction.
 
-Truth and fluency correlate in the training data, so the model is mostly truthful. But in the tails---obscure topics, recent events, precise recall---fluency diverges from truth, and the model follows fluency.
+Truth and fluency correlate in the training data, so the model is mostly truthful. But in the tails---obscure topics, recent events, precise recall---fluency diverges from truth, and the model follows fluency. Two constraints compound this. First, **context limits**: models see only 2,000–8,000 tokens at once. Paste 100 abstracts and early ones are mathematically evicted from working memory. They're not "forgotten"---they're *gone*. Second, **stochasticity**: the model samples from probability distributions. Same prompt, different output. Fluency is deterministic. Specifics are random.
 
-Two constraints compound this. First, **context limits**: models see only 2,000---8,000 tokens at once. Paste 100 abstracts and early ones are mathematically evicted from working memory. They're not "forgotten"---they're *gone*. Second, **stochasticity**: the model samples from probability distributions. Same prompt, different output. Fluency is deterministic. Specifics are random.
-
-## The Strategic Application
+## The Application
 
 Stop asking LLMs for truth. You're not querying a database; you're sampling from a probability distribution. Use them to scale pattern recognition, not judgment. They excel where speed trumps precision: summarizing 50 abstracts to identify the 10 worth reading, extracting structured data from unstructured text, reformulating technical concepts, brainstorming research directions. They fail where precision is paramount---verifying citations, making ethical decisions, performing statistical analysis.
 
@@ -72,7 +64,7 @@ response = ollama.generate(
 print(response.response)
 ```
 
-Run this code twice. You'll get different outputs. Why? Because LLMs sample from probability distributions. The **temperature** parameter controls this randomness---lower values (0.1) make outputs more deterministic; higher values (1.0) increase diversity. You're controlling how far into the tail of the probability distribution the model samples. Low temperature: the model picks the most likely next word. High temperature: it ventures into less probable territory. Sometimes that produces creativity. Sometimes it produces nonsense.
+Run this code twice. You'll get different outputs. Why? Because LLMs sample from probability distributions. The **temperature** parameter controls this randomness—lower values (0.1) make outputs more deterministic; higher values (1.0) increase diversity. You're controlling how far into the tail of the probability distribution the model samples. Low temperature: the model picks the most likely next word. High temperature: it ventures into less probable territory. Sometimes that produces creativity. Sometimes it produces nonsense.
 
 ## Research Applications
 
@@ -104,7 +96,7 @@ for i, abstract in enumerate(["Abstract 1...", "Abstract 2..."], 1):
     print(f"{i}. {response.response}")
 ```
 
-Local models are slow (2---5 seconds per abstract). For thousands of papers, switch to cloud APIs. But the workflow scales: **delegate skimming to the model, retain judgment for yourself.** I ran this on 200 abstracts about power-law distributions. Gemma flagged the 15 that used preferential attachment models. Saved me 4 hours. I still read all 15 myself.
+Local models are slow (2–5 seconds per abstract). For thousands of papers, switch to cloud APIs. But the workflow scales: **delegate skimming to the model, retain judgment for yourself.** I ran this on 200 abstracts about power-law distributions. Gemma flagged the 15 that used preferential attachment models. Saved me 4 hours. I still read all 15 myself.
 
 **Structured extraction.** Turn unstructured text into structured data automatically:
 
@@ -134,22 +126,22 @@ response = ollama.generate(prompt=prompt, **params_llm)
 print(response.response)
 ```
 
-Treat the model as a thought partner, not an oracle. It helps structure thinking but doesn't possess domain expertise. The suggestions reflect patterns in how research questions are framed in papers it's seen, not deep knowledge of your field. Use it to break through mental blocks. Verify everything it suggests.
+Treat the model as a thought partner, not an oracle. It helps structure thinking but doesn't possess domain expertise. The suggestions reflect patterns in how research questions are framed, not deep knowledge of your field.
 
 ## Failure Modes and Boundaries
 
-The failure modes follow directly from the mechanism. LLMs fabricate plausibly because they optimize for fluency, not truth. Ask about a non-existent "Smith et al. quantum paper" and you'll receive fluent academic prose describing results that never happened. **Always verify citations.** The model has seen thousands of papers cited in the format "Smith et al. (2023) demonstrated that..." and generates outputs matching that pattern whether the citation is real or fictional.
+The failure modes follow directly from the mechanism. LLMs fabricate plausibly because they optimize for fluency, not truth. Ask about a non-existent "Smith et al. quantum paper" and receive fluent academic prose describing results that never happened. Always verify citations. The model has seen thousands of papers cited in the format "Smith et al. (2023) demonstrated that..." and generates outputs matching that pattern even when the citation is fictional.
 
-**Context limits are architectural.** Models see only 2,000---8,000 tokens at once. Paste 100 abstracts and early ones are mathematically evicted from working memory. The model doesn't "remember" them; they're gone. Knowledge cutoffs are temporal. Gemma 3N's training ended early 2024. Ask about recent events and you'll receive outdated information or plausible fabrications constructed from pre-cutoff patterns.
+Context limits are architectural. Models see only 2,000–8,000 tokens at once. Paste 100 abstracts and early ones are mathematically evicted from working memory. The model doesn't "remember" them; they're gone. Knowledge cutoffs are temporal. Gemma 3N's training ended early 2024. Ask about recent events and receive outdated information or plausible fabrications constructed from pre-cutoff patterns.
 
-**Reasoning is absent.** LLMs pattern-match; they don't reason. Ask "How many r's in 'Strawberry'?" and the model might answer correctly via pattern matching against similar questions in training data, not by counting letters. Sometimes right. Often wrong. The model has no internal representation of what counting means. It's matching the *form* of counting questions, not performing the *operation* of counting.
+Reasoning is absent. LLMs pattern-match, they don't reason. Ask "How many r's in 'Strawberry'?" and the model might answer correctly via pattern matching against similar questions in training data, not by counting letters. Sometimes right. Often wrong. The model has no internal representation of what counting means.
 
-These aren't bugs to be fixed. They're intrinsic to the architecture. **Use LLMs to accelerate work, not replace judgment.** They excel at summarizing text, extracting structure, reformulating concepts, brainstorming, generating synthetic examples, and translation. They fail at literature reviews without verification, factual claims without sources, statistical analysis, and ethical decisions. Harvest the center of the distribution where fluency and truth correlate. Defend against the tails where they diverge.
+These aren't bugs to be fixed. They're intrinsic to the architecture. Use LLMs to accelerate work, not replace judgment. They excel at summarizing text, extracting structure, reformulating concepts, brainstorming, generating synthetic examples, and translation. They fail at literature reviews without verification, factual claims without sources, statistical analysis, and ethical decisions. Harvest the center of the distribution where fluency and truth correlate. Defend against the tails where they diverge.
 
 ## Next
 
-You've seen LLMs in practice—setup, summarization, extraction, limitations. You know *what* they do. But how do they actually work? What happens inside when you send a prompt?
+You've seen LLMs in practice---setup, summarization, extraction, limitations. But how do they actually work? What happens inside when you send a prompt?
 
-The rest of this module unboxes the technology: **prompt engineering** (how to communicate with probability distributions), **embeddings** (representing meaning as numbers), **transformers** (the architecture enabling modern NLP), **fundamentals** (from word counts to neural representations).
+The rest of this module unboxes the technology: **prompt engineering** (communicating with LLMs), **embeddings** (representing meaning as numbers), **transformers** (the architecture enabling modern NLP), **fundamentals** (from word counts to neural representations).
 
 First, let's master talking to machines.
