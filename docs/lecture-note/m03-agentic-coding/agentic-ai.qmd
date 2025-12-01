@@ -10,6 +10,8 @@ execute:
 
 # The Mechanism
 
+![ReAct Loop](../figs/react.png){width="70%" fig-align="center"}
+
 The naive view is that agents are "smarter" chatbots. They aren't. They're a core component wrapped in a control loop. A chatbot generates text and stops. An agent generates text, parses it for actionable commands, executes those commands in the real world, observes the results, and feeds those results back into the next prompt. The intelligence doesn't come from the model---it comes from the **feedback loop**.
 
 This is the **ReAct Pattern** (Reason + Act). A standard chatbot is a pure function: $\text{Output} = \text{Model}(\text{Input})$. An agent is a state machine:
@@ -25,11 +27,6 @@ while not task_complete:
 
 The critical insight is the feedback loop. If the agent tries to import a missing library (Action) and receives `ModuleNotFoundError` (Observation), the next iteration's Thought will be "I need to install this library," rather than hallucinating success. The model corrects itself not through introspection, but through collision with reality.
 
-
-::: {.callout-note collapse="true"}
-
-## How ReAct is implemented
-
 ReAct framework is proposed by [Yao et al. (2022)](https://arxiv.org/abs/2210.03629).
 The core idea is to prompt the LLM to generate both reasoning traces and task-specific actions in an interleaved manner. Specifically, the prompt structure follows a sequence: `Thought` $\rightarrow$ `Action` $\rightarrow$ `Observation`.
 
@@ -39,114 +36,17 @@ The core idea is to prompt the LLM to generate both reasoning traces and task-sp
 
 This cycle repeats until the task is solved.
 
-:::
+## The ReAct Framework with `langgraph`
 
-## The Structured Output Problem
-
-![](../figs/structured-output-manga.png){width="70%" fig-align="center"}
-
-Before we can build this loop, we must solve a fundamental engineering problem: **How do we extract executable actions from natural language?**
-
-Think about it: When you ask an LLM "What is the correlation between Weight and Length1?", it might respond:
-
-> "I'll calculate the correlation for you using pandas."
-
-Early systems used regex to parse the model's output. This failed constantly. The model would say "I'll calc the corr" instead of providing structured tool calls, and the parser would break. The solution is **Structured Output**---we force the model to return data in a machine-readable format, the most common being **JSON**. For example,
-
-```json
-{
-    "tool_name": "find_correlation",
-    "parameters": {"column1": "Weight", "column2": "Length1"},
-    "reasoning": "User wants correlation between two columns"
-}
-```
-
-So, how can we let LLMs to speak in JSON? The most basic approach is to prompt the model to return JSON. Let's demonstrate with ollama using a data analysis task:
-
-::: {.column-margin}
-
-We will use `gpt-oss:120b-cloud` as the LLM. This is a 120B parameter model that is hosted by Ollama. See [Ollama Cloud](https://ollama.com/cloud) for more details.
-
-:::
-
-```{python}
-#| echo: false
-import os
-import ollama
-import json
-
-params_llm = {"model": "gpt-oss:120b-cloud", "options": {"temperature": 0.3}}
-```
-
-```{python}
-
-prompt = """
-You are a data analysis assistant. Given a user query about a fish dataset,
-return a JSON object describing what tool to use:
-- "tool_name": the name of the tool to call
-- "parameters": a dictionary of arguments
-- "reasoning": why you chose this tool
-
-User query: "What is the correlation between Weight and Length1 in the fish dataset?"
-
-Return ONLY valid JSON, no explanation.
-"""
-
-response = ollama.generate(prompt=prompt, **params_llm)
-
-print(response.response)
-```
-
-The model might return valid JSON, but this is fragile. It might hallucinate extra fields, misspell keys, add conversational text, or return malformed JSON. We need **schema enforcement**.
-
-Modern LLM APIs (including ollama) support **JSON Schema** constraints. You define the shape of the output, and the model is forced to conform. A popular library for this is **Pydantic**. With Pydantic, you define the schema using a class, and the model is forced to conform to the schema.
-
-```{python}
-from pydantic import BaseModel
-
-# Define the schema using Pydantic
-class ToolCall(BaseModel):
-    tool_name: str
-    parameters: dict
-    reasoning: str
-```
-
-Once you define the schema, you can use it to constrain the model's output:
-```{python}
-# Convert to JSON schema
-json_schema = ToolCall.model_json_schema()
-
-# Now constrain the model's output
-response = ollama.generate(
-    prompt="User query: What is the correlation between Weight and Length1?",
-    format=json_schema,  # Schema constraint
-    **params_llm
-)
-```
-
-
-```{python}
-#| code-fold: true
-print("Response:")
-print(response.response)
-```
-
-Now the model cannot hallucinate. It must return valid JSON that matches the schema. If it tries to return `{"tool_nam": ...}` (typo), the generation fails and retries internally.
-This is the foundation of reliable agents: **type-safe communication between the LLM and your code**.
-
-## The ReAct Framework with `smolagents`
-
-The **ReAct Pattern** formalizes this loop. The agent alternates between **reasoning** (generating thoughts) and **acting** (calling tools or terminating).
-
-Rather than building our own agent framework from scratch, we can use **`smolagents`** from Hugging Face—a lightweight library that implements the ReAct pattern with support for multiple LLM backends including local models via ollama.
+Let's build an agent that can explore and analyze a real dataset. We'll use **LangGraph**—a framework from LangChain that models agents as state machines. Unlike simple loops, LangGraph lets you define explicit control flow: decision nodes, parallel execution, conditional branching, and state persistence.
 
 
 ::: {.column-margin}
 
-Install smolagents:
+Install LangGraph and LangChain:
 
 ```bash
-pip install smolagents
+pip install langgraph langchain langchain-ollama
 ```
 
 :::
@@ -163,173 +63,145 @@ df = pd.read_csv("hf://datasets/scikit-learn/Fish/Fish.csv")
 df.head()
 ```
 
-Now we'll create a tool that lets the agent query this data. A tool is a Python class that wraps a function the agent can call.
+Now we'll create tools that let the agent query this data. In LangGraph, tools are standard Python functions decorated with `@tool`. The function signature and docstring tell the LLM everything it needs.
 
 ::: {.column-margin}
-**Tool**: Base class from smolagents. All custom tools inherit from this.
+**@tool**: Decorator that converts a function into a LangChain tool. The docstring becomes the tool description; parameter names and type hints define the schema.
 
-**forward()**: The execution method. Named after PyTorch convention—the agent calls this with LLM-generated parameters.
+**Args section**: Must be explicitly documented for each parameter. LangGraph parses this to generate the JSON schema the LLM sees.
 :::
 
 ```{python}
 import io
-from smolagents import Tool
+from langchain_core.tools import tool
 from pandasql import sqldf
 
-class InspectDataTool(Tool):
-    name = "inspect_data"
-    description = (
-        "Get a concise summary of the dataset's structure, "
-        "including column names, non-null values, and data types."
-    )
-    inputs = {}
-    output_type = "string"
-
-    def forward(self) -> str:
-        buffer = io.StringIO()
-        df.info(buf=buffer)
-        return buffer.getvalue()
+@tool
+def inspect_data() -> str:
+    """Get a concise summary of the dataset's structure, including column names, non-null values, and data types."""
+    buffer = io.StringIO()
+    df.info(buf=buffer)
+    return buffer.getvalue()
 ```
 
-The structure is fixed. Every tool must define:
+The structure is minimal. LangGraph infers everything from the function:
 
-1. **`name`**: Identifier the agent uses to call this tool (must be unique)
-2. **`description`**: What the LLM reads to decide when to use this tool
-3. **`inputs`**: JSON schema with `type`, `description`, and optionally `nullable` for each parameter
-4. **`output_type`**: Return type (usually `"string"`)
-5. **`forward()`**: The actual execution logic that runs when the agent calls the tool
+1. **Name**: Derived from function name (`inspect_data`)
+2. **Description**: Extracted from the docstring
+3. **Parameters**: Inferred from type hints and docstring Args section
+4. **Return type**: Inferred from return type hint
+5. **Execution**: The function itself—no separate `forward()` method
 
-We created two tools here. The first, `InspectDataTool`, takes no inputs (notice the empty `inputs = {}`) and returns the dataset schema—column names, types, and sample values. This lets the agent discover the data structure autonomously. The second, `QueryDataTool`, executes SQL queries. Notice how its description hints to "Use inspect_data first"—this guides the agent to check the schema before writing SQL.
+This tool takes no inputs and returns the dataset schema. The agent calls it to discover column names and types before writing queries.
 
-Let's add two more tools to give the agent more analytical capabilities:
+Let's add three more tools to give the agent more analytical capabilities:
 
 ```{python}
 #| code-fold: true
-class QueryDataTool(Tool):
-    name = "query_data"
-    description = (
-        "Query the fish dataset using SQL. The table is called 'df'. "
-        "Use inspect_data first to see available columns."
-    )
-    inputs = {
-        "sql_query": {
-            "type": "string",
-            "description": "SQL query to execute (use 'df' as table name)"
-        }
-    }
-    output_type = "string"
+@tool
+def query_data(sql_query: str) -> str:
+    """Query the fish dataset using SQL. The table is called 'df'. Use inspect_data first to see available columns.
 
-    def forward(self, sql_query: str) -> str:
-        result = sqldf(sql_query, globals())
-        return result.to_string()
-class FindCorrelationTool(Tool):
-    name = "find_correlation"
-    description = (
-        "Calculate correlation between two numeric columns in the fish dataset"
-    )
-    inputs = {
-        "column1": {
-            "type": "string",
-            "description": "First column name"
-        },
-        "column2": {
-            "type": "string",
-            "description": "Second column name"
-        }
-    }
-    output_type = "string"
+    Args:
+        sql_query: SQL query to execute (use 'df' as table name)
+    """
+    result = sqldf(sql_query, globals())
+    return result.to_string()
 
-    def forward(self, column1: str, column2: str) -> str:
-        corr = df[[column1, column2]].corr().iloc[0, 1]
-        return f"Correlation between {column1} and {column2}: {corr:.3f}"
+@tool
+def find_correlation(column1: str, column2: str) -> str:
+    """Calculate correlation between two numeric columns in the fish dataset.
 
-class GetStatsTool(Tool):
-    name = "get_stats"
-    description = (
-        "Get statistical summary (count, mean, std, min, max) for a specific "
-        "column and optionally filter by species"
-    )
-    inputs = {
-        "column": {
-            "type": "string",
-            "description": "Column name to analyze"
-        },
-        "species": {
-            "type": "string",
-            "description": "Species to filter by (optional)",
-            "nullable": True
-        }
-    }
-    output_type = "string"
+    Args:
+        column1: First column name
+        column2: Second column name
+    """
+    corr = df[[column1, column2]].corr().iloc[0, 1]
+    return f"Correlation between {column1} and {column2}: {corr:.3f}"
 
-    def forward(self, column: str, species: str = None) -> str:
-        data = df
-        if species:
-            data = df[df["Species"] == species]
+@tool
+def get_stats(column: str, species: str = None) -> str:
+    """Get statistical summary (count, mean, std, min, max) for a specific column and optionally filter by species.
 
-        stats = data[column].describe()
-        prefix = f"Stats for {column}"
-        if species:
-            prefix += f" (Species: {species})"
-        return f"{prefix}:\n{stats.to_string()}"
+    Args:
+        column: Column name to analyze
+        species: Species to filter by (optional)
+    """
+    data = df
+    if species:
+        data = df[df["Species"] == species]
+
+    stats = data[column].describe()
+    prefix = f"Stats for {column}"
+    if species:
+        prefix += f" (Species: {species})"
+    return f"{prefix}:\n{stats.to_string()}"
 ```
 
-The second tool calculates correlations between columns. The third computes statistics for a specific column, optionally filtered by species. Each tool description precisely communicates its purpose to the agent.
+Notice how much cleaner the syntax is. No manual JSON schema definitions, no separate `forward()` methods. The `@tool` decorator extracts everything from the function signature. The second tool executes SQL queries. The third calculates correlations. The fourth computes statistics with optional filtering. Each docstring precisely tells the agent when to use the tool.
 
-Now create the agent. An agent needs two things: a language model to reason with, and a list of tools it can use.
+Now create the agent. LangGraph doesn't have a simple `Agent()` constructor. Instead, you build a **state graph**—a directed graph where nodes are functions and edges define transitions. This gives you explicit control over the ReAct loop.
 
 ::: {.column-margin}
-**LiteLLMModel**: Wrapper that lets smolagents talk to any LLM backend (OpenAI, Anthropic, Ollama, etc.)
+**ChatOllama**: LangChain's Ollama integration. Supports tool calling via the model's native API.
 
-**ToolCallingAgent**: Agent that uses the model's native tool-calling API. More reliable than CodeAgent for structured tool calls.
+**create_react_agent**: Factory function that builds a standard ReAct graph. It defines three nodes: (1) call the LLM, (2) execute tools, (3) check if done.
 
-**max_steps**: Maximum ReAct iterations before terminating. Prevents infinite loops.
+**recursion_limit**: Maximum graph iterations. Equivalent to `max_steps` in smolagents.
 :::
 
 ```{python}
-from smolagents import LiteLLMModel, ToolCallingAgent
+from langchain_ollama import ChatOllama
+from langgraph.prebuilt import create_react_agent
 
-model = LiteLLMModel(
-    model_id="ollama/glm-4.6:cloud",
-    api_base="http://localhost:11434"
+model = ChatOllama(
+    model="glm-4.6:cloud",
+    base_url="http://localhost:11434"
 )
 
-agent = ToolCallingAgent(
-    tools=[
-        InspectDataTool(),
-        QueryDataTool(),
-        FindCorrelationTool(),
-        GetStatsTool()
-    ],
-    model=model,
-    max_steps=5,  # Limit iterations to prevent runaway loops
-    verbosity_level=1,  # Suppress verbose logging (step duration, token counts),
-)
+tools = [inspect_data, query_data, find_correlation, get_stats]
+
+agent = create_react_agent(model, tools)
 ```
 
-Run the agent and watch it autonomously choose which tools to use:
+Run the agent and watch it autonomously choose which tools to use.
 
 ```{python}
 query = "Which fish species has the highest average weight?"
-result = agent.run(query)
-print(result)
+inputs = {"messages": [("user", query)]}
+
+for event in agent.stream(inputs, {"recursion_limit": 10}):
+    for node, values in event.items():
+        if "messages" in values:
+            values["messages"][-1].pretty_print()
+
+# Extract final answer
+final_message = values["messages"][-1]
+print(f"\nFinal Answer: {final_message.content}")
 ```
 
-The agent executes a ReAct loop. It reads the question "Which fish species has the highest average weight?" and realizes it needs to use SQL to group by species and calculate averages. Watch how it autonomously:
+The agent executes a ReAct loop. It reads the question "Which fish species has the highest average weight?" and realizes it needs to use SQL to group by species and calculate averages. LangGraph streams each step—you see the LLM's reasoning, the tool calls, and the observations in real time.
 
 Let's try another query that requires multiple steps:
 
 ```{python}
 query = "What is the average weight of Pike species?"
-result = agent.run(query)
-print(result)
+inputs = {"messages": [("user", query)]}
+
+for event in agent.stream(inputs, {"recursion_limit": 10}):
+    for node, values in event.items():
+        if "messages" in values:
+            values["messages"][-1].pretty_print()
+
+final_message = values["messages"][-1]
+print(f"\nFinal Answer: {final_message.content}")
 ```
 
 For this query, the agent must:
 1. Call `inspect_data` to discover the Species and Weight columns exist
 2. Use `get_stats` with `column="Weight"` and `species="Pike"` to get the statistics
 
-This demonstrates the power of the ReAct loop—the agent chains multiple observations together, building a solution step-by-step rather than attempting everything in one shot.
+This demonstrates the power of the ReAct loop—the agent chains multiple observations together, building a solution step-by-step rather than attempting everything in one shot. Unlike smolagents' opaque loop, LangGraph exposes every state transition, making debugging straightforward.
 
 ::: {.callout-note collapse="true"}
 ## Why not more complex queries?
@@ -343,9 +215,6 @@ You might notice we're using simpler queries than you'd expect. This is intentio
 Production systems like Claude Code and Cursor handle these issues through better error recovery, more sophisticated prompting, and custom tool implementations. For learning purposes, we focus on simple queries that reliably demonstrate the ReAct pattern.
 :::
 
-This is the entire architecture of Google Antigravity, Claude Code, and Cursor—just scaled with better tools (file editing, terminal commands, web browsing) and better orchestration (parallel agents, verification artifacts).
-
-
 # The Takeaway
 
-**Latency is the price of autonomy.** We accept slower individual interactions in exchange for the completion of entire units of work. You trade seconds of waiting for hours of coding.
+This is the entire architecture of Google Antigravity, Claude Code, and Cursor—just scaled with better tools (file editing, terminal commands, web browsing) and better orchestration (parallel agents, verification artifacts).
