@@ -1,0 +1,98 @@
+---
+title: "Context Engineering"
+---
+
+::: {.callout-note appearance="simple"}
+**Spoiler**: Your agent is only as smart as its access. If it can't read the database, it can't write the query. The Model Context Protocol (MCP) is the "USB-C" that solves this.
+:::
+
+**The Mechanism (Why It Works)**
+
+LLMs are brilliant but blind. They live in a text box, operating on whatever tokens you feed them. They cannot see your local SQLite database, your Jira tickets, or your private internal documentation. This is the **Silo Problem**—the agent's intelligence is bottlenecked by the narrow pipe of manual data transfer.
+
+Historically, we solved this by copy-pasting. You run the SQL query, export to CSV, paste into the prompt. This works for toy examples, but it's manual, error-prone, and fundamentally limited by the context window. You're acting as the human API between the model and your data. The naive view assumes this is just how it has to be—that the model is a stateless function you call with text.
+
+The reality is different. The agent doesn't need the data pushed into its prompt. It needs a **mechanism to pull** the data when it needs it. **MCP (Model Context Protocol)** inverts the relationship. Instead of you being the middleman, MCP gives the agent a standardized way to request resources. Think of it like this: you're not handing someone a printed map—you're giving them GPS coordinates and a satellite connection. The data stays where it lives. The agent queries it on demand. MCP is the protocol that makes this possible, defining a common language between the IDE (the host), the LLM (the client), and lightweight servers that expose your data as tools or resources.
+
+**The Application (How We Use It)**
+
+The shift from theory to practice is immediate. Let's walk through a concrete scenario where MCP transforms an agent from a code generator into an autonomous data analyst.
+
+**Scenario: Querying a Local Database**
+
+You have a local SQLite database called `users.db` containing user login records. Your task: "Find users who haven't logged in for 30 days and generate a report visualizing their distribution by region."
+
+Without MCP, the workflow is tedious. You open a SQL client, run the query, export the results to CSV, then paste the data into the agent's prompt. If the query is wrong, you repeat the cycle. If the dataset is large, you hit context limits. You are the bottleneck.
+
+With MCP, the agent does this itself. Here's how.
+
+**Step 1: Configure the MCP Server**
+
+Add the SQLite server to your IDE configuration file (e.g., `antigravity.json`):
+
+```json
+{
+  "mcpServers": {
+    "sqlite": {
+      "command": "uvx",
+      "args": ["mcp-server-sqlite", "--db-path", "./users.db"]
+    }
+  }
+}
+```
+
+This tells the IDE to launch a lightweight process (`mcp-server-sqlite`) that exposes your database as a set of tools. The server runs locally, maintains access to `users.db`, and waits for tool calls.
+
+**Step 2: Write the Prompt**
+
+You give the agent a natural language instruction:
+
+> "Query the `sqlite` database for users inactive for more than 30 days. Then use Python to plot their distribution by region."
+
+Notice you don't provide the SQL. You don't provide the data. You just point to the resource.
+
+**Step 3: The Agent Executes (Under the Hood)**
+
+The agent sees the prompt and recognizes it needs data from `users.db`. It discovers a tool called `sqlite.query` exposed by the MCP server. It constructs the SQL:
+
+```sql
+SELECT * FROM users
+WHERE last_login < date('now', '-30 days')
+```
+
+It calls the tool via MCP. The server executes the query locally and returns the results as JSON. The agent receives the data, writes Python code to parse it, and generates a matplotlib visualization. All of this happens autonomously. You never touch the terminal.
+
+**Scenario: Multi-Source Context**
+
+The power multiplies when you connect multiple servers. Suppose you want to cross-reference inactive users with their support tickets. You add a second MCP server for Jira:
+
+```json
+{
+  "mcpServers": {
+    "sqlite": {
+      "command": "uvx",
+      "args": ["mcp-server-sqlite", "--db-path", "./users.db"]
+    },
+    "jira": {
+      "command": "npx",
+      "args": ["mcp-server-jira", "--token", "$JIRA_API_TOKEN"]
+    }
+  }
+}
+```
+
+Now your prompt can span systems:
+
+> "Query the SQLite database for users inactive > 30 days. For each user, fetch their open Jira tickets. Generate a report showing which inactive users have unresolved issues."
+
+The agent orchestrates both tools. It queries the database, extracts user IDs, calls the Jira API for each ID, and aggregates the results. It becomes a **data integration layer**. MCP isn't just about one database—it's about composing multiple sources into a coherent workflow.
+
+**Why This Matters**
+
+This architecture transforms the agent from a passive assistant into an active participant in your data pipeline. It can explore databases, validate hypotheses, and generate insights without requiring you to manually ferry data back and forth. The agent's "context" is no longer limited to the text you paste. It's limited only by the MCP servers you configure.
+
+Moreover, MCP is **standardized**. Once you understand the protocol, you can connect to any data source that has a server—PostgreSQL, Google Drive, Slack, GitHub, proprietary internal APIs. The learning curve is front-loaded. After that, adding new sources is trivial.
+
+**The Takeaway**
+
+**Context is king.** The most powerful agent isn't the one with the highest IQ (parameters); it's the one with the most access (MCP). Build bridges to your data, and the agent will cross them. The bottleneck in agentic systems is rarely the model's reasoning—it's the poverty of its inputs. MCP solves this by making context programmable.
