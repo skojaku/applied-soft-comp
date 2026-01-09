@@ -1,0 +1,229 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"SemAxis: Meaning as Direction\"\n",
+        "execute:\n",
+        "    enabled: true\n",
+        "---\n",
+        "\n",
+        "## Semaxis\n",
+        "\n",
+        "\n",
+        "![Semaxis](../figs/semaxis-1.png)\n",
+        "\n",
+        "We intuitively treat word embeddings as static maps where \"king\" is simply near \"queen.\" We assume the meaning is inherent to the coordinate itself, much like a city has a fixed latitude and longitude. This is a convenient fiction. In embedding, meaning emerges entirely from *contrast*, which is the key concept of **Semaxis**.\n",
+        "\n",
+        "**Semaxis** [@an2018semaxis,kwak2020semaxis] is a way to define a semantic axis by subtracting the vector of an antonym from a word (e.g., $v_{good} - v_{bad}$). This isolates a semantic dimension---an \"axis\"---that ignores all other information.\n",
+        "\n",
+        "Formally, given two pole words $w_+$ and $w_-$, the axis is defined as:\n",
+        "\n",
+        "$$\n",
+        "v_{\\text{axis}} = \\frac{v_{w_+} - v_{w_-}}{||v_{w_+} - v_{w_-}\\||_2}\n",
+        "$$\n",
+        "\n",
+        "where the denominator is the $L_2$ norm of the difference vector that ensures that axis vector $v_{axis}$ is a unit vector.\n",
+        "\n",
+        "Using this \"ruler\", we project the words into this axis. Operationally, the position of a word $w$ is given by the cosine similarity between $v_{w}$ and $v_{axis}$.\n",
+        "\n",
+        "$$\n",
+        "\\text{Position of w on axis $v_{\\text{axis}}$} = \\cos(v_{\\text{axis}},v_{w})\n",
+        "$$\n",
+        "\n",
+        "We will build a \"Sentiment Compass\" to measure the emotional charge of words that aren't explicitly emotional.\n",
+        "\n",
+        "First, we load the standard GloVe embeddings."
+      ],
+      "id": "da04d3eb"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import numpy as np\n",
+        "import matplotlib.pyplot as plt\n",
+        "import gensim.downloader as api\n",
+        "\n",
+        "# Download and load pre-trained GloVe embeddings\n",
+        "model = api.load(\"glove-wiki-gigaword-100\")"
+      ],
+      "id": "9c210b45",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Defining the Axis\n",
+        "\n",
+        "We define the axis not as a point, but as the difference vector between two poles. This vector points from \"bad\" to \"good.\""
+      ],
+      "id": "220c4cb5"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "def create_axis(pos_word, neg_word, model):\n",
+        "    return model[pos_word] - model[neg_word]\n",
+        "\n",
+        "\n",
+        "# The \"Sentiment\" Axis\n",
+        "sentiment_axis = create_axis(\"good\", \"bad\", model)"
+      ],
+      "id": "9018756a",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Measuring Alignment\n",
+        "\n",
+        "To see where a word falls on this axis, we project it. Mathematically, this is the dot product (normalized). If the vector points in the same direction, the score is positive; if it points away, it is negative."
+      ],
+      "id": "c6311576"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "def get_score(word, axis, model):\n",
+        "    v_word = model[word]\n",
+        "    # Cosine similarity is just a normalized dot product\n",
+        "    return np.dot(v_word, axis) / (np.linalg.norm(v_word) * np.linalg.norm(axis))\n",
+        "\n",
+        "\n",
+        "words = [\"excellent\", \"terrible\", \"mediocre\", \"stone\", \"flower\"]\n",
+        "for w in words:\n",
+        "    print(f\"{w}: {get_score(w, sentiment_axis, model):.3f}\")"
+      ],
+      "id": "098397af",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Robustness via Centroids\n",
+        "\n",
+        "![Semaxis](../figs/semaxis-2.png)\n",
+        "\n",
+        "Single words are noisy. \"Bad\" might carry connotations of \"naughty\" or \"poor quality.\" To fix this, we don't use single words; we use the *centroid* of a cluster of synonyms. This averages out the noise and leaves only the pure semantic signal."
+      ],
+      "id": "be7326a9"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "def create_robust_axis(pos_word, neg_word, model, k=5):\n",
+        "    # Get k nearest neighbors for both poles\n",
+        "    pos_group = [pos_word]\n",
+        "    pos_words = model.most_similar(pos_word, topn=k)\n",
+        "    for word, _ in pos_words:\n",
+        "        pos_group.append(word)\n",
+        "\n",
+        "    neg_group = [neg_word]\n",
+        "    neg_words = model.most_similar(neg_word, topn=k)\n",
+        "    for word, _ in neg_words:\n",
+        "        neg_group.append(word)\n",
+        "\n",
+        "    # Average them to find the centroid\n",
+        "    pos_vec = np.mean([model[w] for w in pos_group], axis=0)\n",
+        "    neg_vec = np.mean([model[w] for w in neg_group], axis=0)\n",
+        "\n",
+        "    return pos_vec - neg_vec\n",
+        "\n",
+        "\n",
+        "robust_axis = create_robust_axis(\"good\", \"bad\", model)"
+      ],
+      "id": "1cba0df4",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### The 2D Semantic Space\n",
+        "\n",
+        "The real power comes when we cross two axes. By plotting words against \"Sentiment\" and \"Intensity\" (Strong vs. Weak), we reveal relationships that a single list hides."
+      ],
+      "id": "8620c351"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "#| fig-cap: \"2D Semantic Space\"\n",
+        "#| fig-align: \"center\"\n",
+        "def plot_2d(words, axis_x, axis_y, model):\n",
+        "    x_scores = [get_score(w, axis_x, model) for w in words]\n",
+        "    y_scores = [get_score(w, axis_y, model) for w in words]\n",
+        "\n",
+        "    plt.figure(figsize=(5, 5))\n",
+        "    plt.scatter(x_scores, y_scores)\n",
+        "\n",
+        "    for i, w in enumerate(words):\n",
+        "        plt.annotate(\n",
+        "            w,\n",
+        "            (x_scores[i], y_scores[i]),\n",
+        "            xytext=(5, 5),\n",
+        "            textcoords=\"offset points\",\n",
+        "            fontsize=16,\n",
+        "        )\n",
+        "\n",
+        "    plt.axhline(0, color=\"k\", alpha=0.3)\n",
+        "    plt.axvline(0, color=\"k\", alpha=0.3)\n",
+        "    plt.xlabel(\"Sentiment (Bad -> Good)\")\n",
+        "    plt.ylabel(\"Intensity (Weak -> Strong)\")\n",
+        "    plt.show()\n",
+        "\n",
+        "\n",
+        "intensity_axis = create_axis(\"strong\", \"weak\", model)\n",
+        "test_words = [\n",
+        "    \"excellent\",\n",
+        "    \"terrible\",\n",
+        "    \"mediocre\",\n",
+        "    \"mild\",\n",
+        "    \"extreme\",\n",
+        "    \"murder\",\n",
+        "    \"charity\",\n",
+        "]\n",
+        "\n",
+        "plot_2d(test_words, sentiment_axis, intensity_axis, model)"
+      ],
+      "id": "eddd7541",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## The Takeaway\n",
+        "\n",
+        "To define a concept, you must first define its opposite."
+      ],
+      "id": "e251af1c"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "/Users/skojaku-admin/Documents/projects/applied-soft-comp/.venv/share/jupyter/kernels/python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

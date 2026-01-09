@@ -26,56 +26,141 @@ header#title-block-header .description {
   display: none;
 }
 
-/* Minimal sidebar styling */
+/* Minimal sidebar styling - no border */
 #quarto-sidebar {
   background: white;
-  border-right: 1px solid var(--code-border);
-  padding: 1em 0;
-  font-size: 0.85em;
+  border-right: none;
+  padding: 1.5em 0 1em 1em;
+  font-size: 0.65em;
+  display: block !important;
 }
 
-/* Clean sidebar navigation */
+/* Clean sidebar navigation with tree structure */
 .sidebar-navigation {
   padding: 0;
+  display: block !important;
+}
+
+/* Hide sub-items (lectures) but keep sections visible */
+.sidebar-item:not(.sidebar-section) {
+  display: none !important;
 }
 
 .sidebar-item {
   margin: 0;
   padding: 0;
+  position: relative;
+}
+
+/* Vertical connecting line */
+.sidebar-item::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #ddd;
+}
+
+/* Last item in a section shouldn't have line extending down */
+.sidebar-item:last-child::before {
+  bottom: 50%;
 }
 
 .sidebar-item a {
   display: block;
-  padding: 0.35em 1em;
+  padding: 0.35em 0.5em 0.35em 1.8em;
   color: var(--code-text);
   text-decoration: none;
-  border-left: 2px solid transparent;
+  position: relative;
+}
+
+/* Circle bullet */
+.sidebar-item a::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid #ddd;
+  background: white;
+  z-index: 1;
 }
 
 .sidebar-item a:hover {
-  background: var(--code-bg);
-  border-left-color: var(--code-text);
+  color: #0066cc;
+}
+
+.sidebar-item a:hover::before {
+  border-color: #0066cc;
+  background: #0066cc;
 }
 
 .sidebar-item.active a,
 .sidebar-item a.active {
-  border-left-color: var(--code-text);
   font-weight: 600;
+  color: var(--code-text);
+}
+
+.sidebar-item.active a::before,
+.sidebar-item a.active::before {
+  border-color: var(--code-text);
+  background: var(--code-text);
 }
 
 /* Module section headers in sidebar */
-.sidebar-section {
+.sidebar-section,
+.sidebar-item.sidebar-section {
+  display: block !important; /* Show sections */
   font-weight: 600;
-  font-size: 0.8em;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #999;
-  padding: 1em 1em 0.5em 1em;
-  margin-top: 1em;
+  font-size: 1em;
+  color: #666;
+  padding: 0.8em 0.5em 0.3em 0.5em;
+  margin-top: 0.5em;
+  position: relative;
 }
 
-.sidebar-section:first-child {
+.sidebar-section:first-child,
+.sidebar-item.sidebar-section:first-child {
   margin-top: 0;
+  padding-top: 0;
+}
+
+/* Circle for section headers - larger */
+.sidebar-section::before {
+  content: '';
+  position: absolute;
+  left: 2.5px;
+  top: 1.1em;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid #999;
+  background: white;
+  z-index: 1;
+}
+
+.sidebar-section:first-child::before {
+  top: 0.25em;
+}
+
+/* Vertical line connecting sections */
+.sidebar-section::after {
+  content: '';
+  position: absolute;
+  left: 6.5px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #ddd;
+}
+
+.sidebar-section:first-child::after {
+  top: 9px;
 }
 
 /* Hide sidebar title */
