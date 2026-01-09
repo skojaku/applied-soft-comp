@@ -1,0 +1,19 @@
+// Add Table of Contents link to breadcrumb navigation
+document.addEventListener('DOMContentLoaded', function() {
+  const breadcrumbs = document.querySelectorAll('.quarto-page-breadcrumbs ol.breadcrumb');
+
+  breadcrumbs.forEach(function(breadcrumb) {
+    // Create the TOC link as the first breadcrumb item
+    const tocItem = document.createElement('li');
+    tocItem.className = 'breadcrumb-item';
+
+    const tocLink = document.createElement('a');
+    tocLink.href = '../toc.html';
+    tocLink.textContent = 'Table of Contents';
+
+    tocItem.appendChild(tocLink);
+
+    // Insert at the beginning
+    breadcrumb.insertBefore(tocItem, breadcrumb.firstChild);
+  });
+});

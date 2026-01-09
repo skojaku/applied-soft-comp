@@ -1,0 +1,297 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Tokenization: Unboxing How LLMs Read Text\"\n",
+        "jupyter: applsoftcomp\n",
+        "execute:\n",
+        "    enabled: true\n",
+        "    cache: true\n",
+        "---\n",
+        "\n",
+        "![](https://curator-production.s3.us.cloud-object-storage.appdomain.cloud/uploads/course-v1:IBMSkillsNetwork+GPXX0A7BEN+v1.jpg)\n",
+        "\n",
+        "**Spoiler:** LLMs don't read words—they read compressed fragments optimized for a probability engine.\n",
+        "\n",
+        "## The Mechanism (Why Subwords, Not Words)\n",
+        "\n",
+        "You might assume that an LLM reads text the way you do: word by word, with each word treated as an atomic unit. This is wrong. The model operates on **tokens**—subword chunks that could be full words (\"the\"), word parts (\"ingham\"), or single characters (\"B\"). This choice is not arbitrary; it's a geometric compression strategy.\n",
+        "\n",
+        "If we used whole words, the vocabulary would balloon to millions of entries. Each entry requires a row in the embedding matrix, meaning memory scales linearly with vocabulary size. A 1-million-word vocabulary with 2048-dimensional embeddings would require over 8GB just for the lookup table. Subword tokenization collapses this problem by focusing on frequently occurring fragments. With roughly 50,000 subwords, the model can reconstruct both common words (stored as single tokens) and rare words (assembled from parts). The system trades a small increase in sequence length for a massive reduction in memory and computational overhead.\n",
+        "\n",
+        "This also explains why LLMs sometimes fail on seemingly trivial tasks like counting letters. The word \"strawberry\" might tokenize as `[\"straw\", \"berry\"]`, meaning the model never sees the individual \"r\" characters as separate units. It's not stupidity—it's compression artifacts.\n",
+        "\n",
+        "## The Application (How Tokenization Works in Practice)\n",
+        "\n",
+        "Let's unbox an actual tokenizer from Hugging Face and trace the pipeline from raw text to embeddings. We'll use **Phi-1.5**, a compact model from Microsoft. For tokenization experiments, we only need the tokenizer—no need to load the full multi-gigabyte model."
+      ],
+      "id": "b7df0c6a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "from transformers import AutoTokenizer\n",
+        "import os\n",
+        "\n",
+        "model_name = \"microsoft/phi-1.5\"\n",
+        "tokenizer = AutoTokenizer.from_pretrained(model_name)"
+      ],
+      "id": "52dea293",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Let's inspect the tokenizer's constraints."
+      ],
+      "id": "ce69bb43"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "print(f\"Vocabulary size: {tokenizer.vocab_size:,} tokens\")\n",
+        "print(f\"Max sequence length: {tokenizer.model_max_length} tokens\")"
+      ],
+      "id": "2e5fd3cd",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "This tokenizer knows 50,257 unique tokens and enforces a maximum sequence length of 2048 tokens. If your input exceeds this limit, the model will truncate or reject it. This is a hard boundary imposed by the positional encoding system, not a soft guideline.\n",
+        "\n",
+        "### Text to Tokens\n",
+        "\n",
+        "Tokenization splits text into the subword fragments the model actually processes. Watch what happens when we tokenize a university name."
+      ],
+      "id": "3e4a7b4c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "text = \"Binghamton University.\"\n",
+        "\n",
+        "tokens = tokenizer.tokenize(text)"
+      ],
+      "id": "c0507f93",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "print(f\"Tokens: {tokens}\")"
+      ],
+      "id": "a9ddeb46",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The rare word \"Binghamton\" fractures into `['B', 'ingham', 'ton']`. The common word \"University\" survives intact (with a leading space marker). The tokenizer learned these splits from frequency statistics during training. High-frequency words get dedicated tokens; rare words get decomposed into reusable parts.\n",
+        "\n",
+        "::: {.column-margin}\n",
+        "The `Ġ` character (U+0120) is a GPT-style tokenizer convention for encoding spaces. When you see `ĠUniversity`, it means \"University\" preceded by a space. This preserves word boundaries while allowing subword splits.\n",
+        ":::\n",
+        "\n",
+        "Let's test a few more examples to see the pattern."
+      ],
+      "id": "d34e983e"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "\n",
+        "texts = [\n",
+        "    \"Bearcats\",\n",
+        "    \"New York\",\n",
+        "]\n",
+        "\n",
+        "print(\"Word tokenization examples:\\n\")\n",
+        "for text in texts:\n",
+        "    tokens = tokenizer.tokenize(text)\n",
+        "    print(f\"{text:10s} → {tokens}\")"
+      ],
+      "id": "738a4f1e",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "\"Bearcats\" splits because it's domain-specific jargon. \"New York\" remains whole because it's common. The tokenizer's behavior is a direct reflection of its training corpus.\n",
+        "\n",
+        "::: {.column-margin}\n",
+        "Check out [OpenAI's tokenizer](https://platform.openai.com/tokenizer) to see how different models slice the same text differently.\n",
+        ":::\n",
+        "\n",
+        "### Tokens to Token IDs\n",
+        "\n",
+        "Tokens are still strings. The model needs integers. Each token maps to a unique ID in the vocabulary dictionary."
+      ],
+      "id": "039401d7"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "\n",
+        "text = \"Binghamton University\"\n",
+        "\n",
+        "# Get token IDs\n",
+        "token_ids = tokenizer.encode(text, add_special_tokens=False)\n",
+        "tokens = tokenizer.tokenize(text)\n",
+        "\n",
+        "print(\"Token → Token ID mapping:\\n\")\n",
+        "for token, token_id in zip(tokens, token_ids):\n",
+        "    print(f\"{token:10s} → {token_id:6d}\")"
+      ],
+      "id": "3d0c30bc",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Each token receives a unique integer ID. The vocabulary is a dictionary: `{token_string: integer_id}`. Let's peek inside."
+      ],
+      "id": "8b9a00fc"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Get the full vocabulary\n",
+        "vocab = tokenizer.get_vocab()\n",
+        "\n",
+        "# Sample some tokens\n",
+        "sample_tokens = list(vocab.items())[:5]\n",
+        "for token, id in sample_tokens:\n",
+        "    print(f\"  {id:6d}: '{token}'\")"
+      ],
+      "id": "db79d8a3",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Most LLMs reserve special tokens for sequence boundaries or control signals. Phi-1.5 uses `<|endoftext|>` as a separator during training. Let's verify."
+      ],
+      "id": "1b187de9"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "token_id = [50256]\n",
+        "token = tokenizer.convert_ids_to_tokens(token_id)[0]\n",
+        "print(f\"Token ID: {token_id} → Token: {token}\")"
+      ],
+      "id": "035b1d99",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Token ID 50256 is Phi-specific. Other models use different conventions (e.g., BERT uses `[SEP]` and `[CLS]`). Always check your tokenizer's special tokens before preprocessing data.\n",
+        "\n",
+        "### Token IDs to Embeddings\n",
+        "\n",
+        "![](https://res.cloudinary.com/lesswrong-2-0/image/upload/v1676309872/mirroredImages/pHPmMGEMYefk9jLeh/wegwbgiqyhig42gidlsg.png)\n",
+        "\n",
+        "Now we need the full model to access the embedding layer—the matrix that converts token IDs into dense vectors."
+      ],
+      "id": "f213306d"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "from transformers import AutoModelForCausalLM\n",
+        "import torch\n",
+        "\n",
+        "# Load the model\n",
+        "model = AutoModelForCausalLM.from_pretrained(model_name)\n",
+        "\n",
+        "# Retrieve the embedding layer\n",
+        "embedding_layer = model.model.embed_tokens"
+      ],
+      "id": "62777859",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The embedding layer is a simple lookup table: a 51,200 × 2,048 matrix where each row is the embedding for a token in the vocabulary. Let's examine the first few entries."
+      ],
+      "id": "26bf0eab"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "print(embedding_layer.weight[:5, :10])"
+      ],
+      "id": "51977f21",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "These numbers are learned parameters, optimized during training to capture semantic relationships. Token IDs are discrete symbols; embeddings are continuous coordinates in a 2048-dimensional space. This is what the transformer layers operate on.\n",
+        "\n",
+        "## The Bigger Picture\n",
+        "\n",
+        "You've now traced the full pipeline: raw text fractures into subword tokens, tokens map to integer IDs, and IDs retrieve vector embeddings from a learned matrix. This tokenization step is foundational—without it, the model cannot begin processing language. The transformer layers come next, using attention mechanisms to extract patterns from these embeddings.\n",
+        "\n",
+        "Remember three constraints. First, LLMs operate on subwords, not words, because vocabulary size is a memory bottleneck. Second, tokenization is learned from data, not hand-designed, meaning different models will split text differently. Third, compression has side effects—tasks like character counting fail because the model never sees individual characters as atomic units.\n",
+        "\n",
+        "With this machinery exposed, we're ready to examine the transformer itself—the architecture that processes these embeddings and enables LLMs to predict the next token.\n",
+        "\n",
+        "---\n",
+        "\n",
+        "**Next**: [Transformers: The Architecture Behind the Magic →](transformers.qmd)"
+      ],
+      "id": "224e7f8a"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "applsoftcomp",
+      "language": "python",
+      "display_name": "Python (applsoftcomp)",
+      "path": "/Users/skojaku-admin/Library/Jupyter/kernels/applsoftcomp"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

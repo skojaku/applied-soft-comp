@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Sadamori Kojaku">
+<meta name="dcterms.date" content="2025-10-19">
+
+<title>Applied Soft Computing: Modeling Complex Systems with Deep Learning – Applied Soft Computing</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-626254e6f25d1c064b097183404b5529.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "|"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../assets/custom.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../../logo.jpg" alt="" class="navbar-logo">
+    </a>
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Applied Soft Computing</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-toolkit--workflow" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Toolkit &amp; Workflow</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-toolkit--workflow">    
+        <li class="dropdown-header">─── Module 1 ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m01-toolkit/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m01-toolkit/git-github.html">
+ <span class="dropdown-text">Git &amp; GitHub</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m01-toolkit/tidy-data.html">
+ <span class="dropdown-text">Tidy Data</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m01-toolkit/data-provenance.html">
+ <span class="dropdown-text">Data Provenance</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m01-toolkit/environments.qmd">
+ <span class="dropdown-text">Environments</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 3: Agentic Coding ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m03-agentic-coding/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m03-agentic-coding/hands-on.html">
+ <span class="dropdown-text">Hands-on</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-visualization" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Visualization</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-visualization">    
+        <li class="dropdown-header">─── Module 2 ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m02-visualization/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m02-visualization/principles.html">
+ <span class="dropdown-text">Principles</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m02-visualization/dimensionality-reduction.html">
+ <span class="dropdown-text">High-Dimensional Data</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m02-visualization/networks.html">
+ <span class="dropdown-text">Networks</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m02-visualization/time-series.html">
+ <span class="dropdown-text">Time-Series</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-deep-learning" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Deep Learning</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-deep-learning">    
+        <li class="dropdown-header">─── Module 4: Text ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m04-text/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m04-text/word2vec.md">
+ <span class="dropdown-text">Word2Vec</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m04-text/lstm.md">
+ <span class="dropdown-text">RNNs &amp; LSTMs</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 4: Images ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m04-images/overview.qmd">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m04-images/cnn.md">
+ <span class="dropdown-text">CNNs</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m04-images/resnet.md">
+ <span class="dropdown-text">ResNet</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 5: Graphs ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m05-graphs/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m05-graphs/graph-embedding-w-word2vec.html">
+ <span class="dropdown-text">Graph Embeddings</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m05-graphs/graph-convolutional-network.html">
+ <span class="dropdown-text">GNNs</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-advanced-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Advanced Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-advanced-topics">    
+        <li class="dropdown-header">─── Module 6: LLMs ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m06-llms/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m06-llms/transformers.md">
+ <span class="dropdown-text">Transformers</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m06-llms/scaling-emergence.html">
+ <span class="dropdown-text">Scaling &amp; Emergence</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 7: Self-Supervised ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m07-self-supervised/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m07-self-supervised/contrastive-learning.html">
+ <span class="dropdown-text">Contrastive Learning</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 8: Explainability ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m08-explainability/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m08-explainability/fairness.html">
+ <span class="dropdown-text">Fairness &amp; Ethics</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Applied Soft Computing: Modeling Complex Systems with Deep Learning</li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Course Information</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Home</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../course/welcome.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../course/about.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">About Us</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../course/why-applied-soft-computing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Why applied soft computing?</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../course/discord.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Discord</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../course/setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Setup</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../course/minidora-usage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Using Minidora</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../course/how-to-submit-assignment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to submit assignment</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../course/deliverables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deliverables</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module 1: The Data Scientist’s Toolkit</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m01-toolkit/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m01-toolkit/git-github.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Version Control with Git &amp; GitHub</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m01-toolkit/tidy-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Tidy Data Philosophy</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m01-toolkit/data-provenance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Provenance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m01-toolkit/reproduceability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Reproducibility</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module 2: Visualizing Complexity</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m02-visualization/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m02-visualization/principles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Principles of Effective Visualization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m02-visualization/1d-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing 1D Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m02-visualization/2d-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing 2D Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m02-visualization/highd-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing High-Dimensional Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m02-visualization/networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m02-visualization/time-series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing Time-Series</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module 3: Agentic Coding</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m03-agentic-coding/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m03-agentic-coding/hands-on.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hands-on</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m03-agentic-coding/prompt-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prompt Tuning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m03-agentic-coding/agentic-ai.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Agentic AI</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m03-agentic-coding/context-engineering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Context Engineering</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module 4: Deep Learning for Text</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/llm-intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Large Language Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/gpt-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GPT Inference: Sampling Strategies</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/tokenization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tokenization: Unboxing How LLMs Read Text</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/transformers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Transformers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/bert-gpt.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">BERT &amp; GPT</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/sentence-transformers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sentence Transformers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/word-embeddings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/semaxis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Semaxis</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/word-bias.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word Bias</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module 5: Deep Learning for Images</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/image-processing.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Image Processing Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/cnn.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Convolutional Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/lenet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LeNet Architecture</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/alexnet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">AlexNet: Deep CNN Revolution</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/vgg.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">VGG Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/inception.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Inception &amp; Multi-Scale Features</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/batch-normalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Batch Normalization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/resnet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ResNet &amp; Skip Connections</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module 6: Deep Learning for Graphs</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-graphs/overview.qmd" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-graphs/spectral-embedding.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spectral Graph Embedding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-graphs/graph-embedding-w-word2vec.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graph Embeddings with Word2Vec</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-graphs/spectral-vs-neural-embedding.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spectral vs.&nbsp;Neural Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-graphs/from-image-to-graph.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Images to Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-graphs/graph-convolutional-network.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graph Convolutional Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-graphs/popular-gnn.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Popular GNN Architectures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-graphs/software.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GNN Software &amp; Tools</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module 6: Large Language Models &amp; Emergent Behavior</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/transformers.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Transformer Architecture</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/bert.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">BERT &amp; Contextual Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/sentence-bert.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sentence-BERT for Semantic Similarity</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/gpt.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GPT &amp; Generative Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/from-language-model-to-instruction-following.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Language Models to Instruction Following</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/prompt-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prompt Engineering &amp; In-Context Learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/scaling-emergence.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Scaling Laws &amp; Emergent Abilities</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/llms-as-complex-systems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LLMs as Complex Systems</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module 7: Self-Supervised Learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m07-self-supervised/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m07-self-supervised/paradigm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Self-Supervised Paradigm</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m07-self-supervised/contrastive-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contrastive Learning (SimCLR)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m07-self-supervised/graphs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Self-Supervised Learning for Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m07-self-supervised/time-series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Self-Supervised Learning for Time-Series</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module 8: Explainability &amp; Ethics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m08-explainability/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m08-explainability/need.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Need for Explainability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m08-explainability/attention.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Attention Visualization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m08-explainability/lime-shap.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LIME &amp; SHAP</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m08-explainability/fairness.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Algorithmic Fairness &amp; Bias</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m08-explainability/causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Causality vs.&nbsp;Correlation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="true">
+ <span class="menu-text">Legacy Materials</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m03-text/what-to-learn.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word &amp; Document Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m03-text/what-to-learn.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Recurrent Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-images/what-to-learn.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Image Processing (CNNs)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Applied Soft Computing: Modeling Complex Systems with Deep Learning</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Sadamori Kojaku </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 19, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="word2vec-a-small-model-with-a-big-idea" class="level1">
+<h1>word2vec: a small model with a big idea</h1>
+<section id="from-documents-to-windows" class="level2">
+<h2 class="anchored" data-anchor-id="from-documents-to-windows">From Documents to Windows</h2>
+<p>While TF-IDF gave us our first glimpse into distributed word representations, it had a fundamental limitation: it only considered document-level context. But language has rich structure at much finer scales. Word2Vec, introduced by Mikolov et al.&nbsp;in 2013 {footcite}<code>mikolov2013distributed</code>, revolutionized word embeddings by focusing on local context windows.</p>
+<p>Instead of looking at entire documents, Word2Vec looks at small windows of text, typically 5-10 words wide. For example, in the sentence “The cat chases mice in the garden”, with a window size of 2, the context for “chases” would be [“The”, “cat”, “mice”, “in”].</p>
+<pre class="{note}"><code>This shift from document-level to window-level context was revolutionary. It allowed the model to capture more nuanced relationships between words, as words that appear in similar immediate contexts often have similar grammatical roles or semantic meanings.</code></pre>
+</section>
+<section id="learning-from-co-occurrence" class="level2">
+<h2 class="anchored" data-anchor-id="learning-from-co-occurrence">Learning from Co-occurrence</h2>
+<p>Like TF-IDF, Word2Vec is fundamentally about learning from patterns of word co-occurrence. However, instead of creating a large sparse matrix of word-document counts, Word2Vec learns dense vector representations directly through a prediction task.</p>
+<p>There are two main variants: - <strong>CBOW (Continuous Bag of Words)</strong> works like that fill-in-the-blank test. For example: <code>The _____ chases mice in the garden</code> This is similar to how we learn language - by understanding which words make sense in a given context. CBOW takes the surrounding context words and uses them to predict the center word that would make sense in that context. - <strong>Skip-gram</strong> is a much more challenging task. It tries to predict the surrounding context words given a center word. For example: <code>_____ cat _____ _____ _____ _____</code>. Note that the order of the context words does not matter, i.e., Skip-gram predicts the set of context words, so “{garden, in, the, mice, chases, The}” is equally correct as “{cat, in, the, mice, chases, The}”.</p>
+</section>
+<section id="neural-network-representation" class="level2">
+<h2 class="anchored" data-anchor-id="neural-network-representation">Neural network representation</h2>
+<p>word2vec can be represented as a neural network with a single hidden layer as follows.</p>
+<ul>
+<li><p><strong>Input layer</strong>: The input layer consists of <span class="math inline">N</span> neurons, where <span class="math inline">N</span> is the size of the vocabulary (i.e., the number of unique words in the corpus). Each neuron corresponds to a unique word in the vocabulary. When a word is inputted, its corresponding neuron is activated and the other neurons are inhibited. Thus, the input layer is essentially a lookup mechanism that transforms the input word into a corresponding one-hot vector.</p></li>
+<li><p><strong>Output layer</strong>: The output layer also consists of <span class="math inline">N</span> neurons, each corresponding to a unique word in the vocabulary. Unlike the input layer, multiple neurons can be activated for a single input. The strength of the activation of each neuron (with a normalization by the softmax function) represents the probability of the corresponding word being the input word’s context.</p></li>
+<li><p><strong>Hidden layer</strong>: The hidden layer is much smaller than the input and output layers. Multiple neurons in the hidden layer can be activated for a single input, and this activation pattern represents the word’s <em>embedding</em>.</p></li>
+</ul>
+<p><img src="../figs/word2vec.jpg" class="img-fluid"></p>
+<section id="skip-gram-model" class="level3">
+<h3 class="anchored" data-anchor-id="skip-gram-model">Skip-gram Model</h3>
+<p>In the Skip-gram model, given a word, we try to predict the probability of seeing each possible context word. Specifically, for a center word <span class="math inline">w_c</span> and a context word <span class="math inline">w_o</span>, we want:</p>
+<p><span class="math inline">P(w_o|w_c) = \dfrac{\exp(v_{w_o}^T v_{w_c})}{\sum_{w \in V} \exp(v_w^T v_{w_c})}</span></p>
+<p>where: - <span class="math inline">v_{w_c}</span> is the vector representation of the center word - <span class="math inline">v_{w_o}</span> is the vector representation of the output word - <span class="math inline">V</span> is the vocabulary</p>
+<pre class="{note}"><code>Notice the softmax function in the equation. This transforms the raw dot product scores into proper probabilities that sum to 1. However, this normalization over the entire vocabulary becomes computationally expensive for large vocabularies.</code></pre>
+</section>
+<section id="cbow-model" class="level3">
+<h3 class="anchored" data-anchor-id="cbow-model">CBOW Model</h3>
+<p>CBOW works in the opposite direction, predicting the center word from the context. For context words <span class="math inline">w_{1}, ..., w_{C}</span>, we have:</p>
+<p><span class="math display">
+P(w_c|w_1,...,w_C) = \dfrac{\exp(v_{w_c}^T \bar{v})}{\sum_{w \in V} \exp(v_w^T \bar{v})},
+</span></p>
+<p>where <span class="math inline">\bar{v} = \dfrac{1}{C}\sum_{i=1}^C v_{w_i}</span> is the average of the context word vectors.</p>
+</section>
+</section>
+<section id="the-matrix-factorization-connection" class="level2">
+<h2 class="anchored" data-anchor-id="the-matrix-factorization-connection">The Matrix Factorization Connection</h2>
+<p>word2vec can be represented as a neural network with a single hidden layer as follows. So it appears to be different from the word embedding we constructed using tf-idf matrix factorization. However, word2vec implicitly factorizes a matrix {footcite}<code>levy2014neural</code> as follows.</p>
+<p><span class="math display">
+M = (M_{ij}), \quad M_{ij} = \log \dfrac{P(w_i,  w_j)}{P(w_j)P(w_j)}
+</span></p>
+<p>where <span class="math inline">M</span> is the matrix that word2vec implicitly factorizes. <span class="math inline">M_{ij}</span> is called the <em>pointwise mutual information</em> between words <span class="math inline">w_i</span> and <span class="math inline">w_j</span>. <span class="math inline">M_{ij}</span> is the smallest when <span class="math inline">w_i</span> and <span class="math inline">w_j</span> appear independently, and the largest when <span class="math inline">w_i</span> and <span class="math inline">w_j</span> always appear together. Likewise tf-idf, it normalizes the mere co-occurrence counts (<span class="math inline">P(w_i, w_j)</span>) by the probabilities of the words (<span class="math inline">P(w_i)</span> and <span class="math inline">P(w_j)</span>), creating a similar effect as tf-idf.</p>
+<p>Word embeddings learned by word2vec are essentially constructed by factorizing the pointwise mutual information matrix, and the similarity between words approximately preserves the PMI values.</p>
+<p><span class="math display">
+v_{w_i} ^\top v_{w_j} \approx M_{ij}
+</span></p>
+<p>This means that words that frequently co-appear in the same context tend to be similar to each other (a high PMI value), and vice versa.</p>
+<pre class="{tip}"><code>This connection to matrix factorization helps explain why Word2Vec works: it's finding a low-dimensional representation that captures the essential patterns in word co-occurrence statistics, just like how PCA finds low-dimensional representations that capture variance in data.</code></pre>
+</section>
+<section id="the-softmax-challenge" class="level2">
+<h2 class="anchored" data-anchor-id="the-softmax-challenge">The Softmax Challenge</h2>
+<p>The above approximation is only valid when the embedding dimension is sufficiently large. Adding softmax transforms the problem from simple matrix factorization into a Boltzmann machine. While this gives us proper probabilities, it introduces a major computational challenge: computing the normalization constant requires summing over the entire vocabulary. For a vocabulary of 100,000 words, this means computing 100,000 exponentials for every prediction!</p>
+<section id="hierarchical-softmax-a-clever-solution" class="level3">
+<h3 class="anchored" data-anchor-id="hierarchical-softmax-a-clever-solution">Hierarchical Softmax: A Clever Solution</h3>
+<p>To make training feasible, Word2Vec uses hierarchical softmax. Instead of computing probabilities over the entire vocabulary at once, it:</p>
+<ol type="1">
+<li>Arranges words in a binary tree (usually a Huffman tree)</li>
+<li>Transforms the prediction problem into a sequence of binary decisions</li>
+<li>Reduces computation from O(|V|) to O(log|V|)</li>
+</ol>
+<pre class="{note}"><code>This is similar to how you might play "20 questions" to guess a word. Each question splits the possible answers in half, making the process much more efficient than checking each possibility one by one.</code></pre>
+</section>
+</section>
+<section id="impact-and-legacy" class="level2">
+<h2 class="anchored" data-anchor-id="impact-and-legacy">Impact and Legacy</h2>
+<p>Word2Vec demonstrated that meaningful word representations could be learned from local context alone, without requiring expensive annotation or linguistic expertise. Its success inspired many subsequent developments in NLP, including:</p>
+<ul>
+<li>GloVe: Combining the benefits of matrix factorization and local context</li>
+<li>FastText: Adding subword information to handle out-of-vocabulary words</li>
+<li>Contextual embeddings like BERT: Learning dynamic representations that change based on context</li>
+</ul>
+<pre class="{tip}"><code>The principles behind Word2Vec - learning from context and using clever approximations to handle scale - continue to influence modern NLP architectures. Even large language models like GPT can be seen as sophisticated extensions of these basic ideas.</code></pre>
+</section>
+<section id="hands-on-with-word2vec" class="level2">
+<h2 class="anchored" data-anchor-id="hands-on-with-word2vec">Hands-on with word2vec</h2>
+<p>With word2vec, words are represented as dense vectors, enabling us to explore their relationships using simple linear algebra. This is in contrast to traditional natural language processing (NLP) methods, such as bag-of-words and topic modeling, which represent words as discrete units or high-dimensional vectors.</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:678/1*5F4TXdFYwqi-BWTToQPIfg.jpeg" class="img-fluid"></p>
+<p>To showcase the effectiveness of word2vec, let’s walk through an example using the <code>gensim</code> library.</p>
+<p>```jtsuzzfodyv ipython3 import gensim import gensim.downloader from gensim.models import Word2Vec</p>
+</section>
+</section>
+<section id="load-pre-trained-word2vec-model-from-google-news" class="level1">
+<h1>Load pre-trained word2vec model from Google News</h1>
+<p>model = gensim.downloader.load(‘word2vec-google-news-300’)</p>
+<pre><code>
+Our first example is to find the words most similar to *king*.
+
+```{code-cell} ipython3
+# Example usage
+word = "king"
+similar_words = model.most_similar(word)
+print(f"Words most similar to '{word}':")
+for similar_word, similarity in similar_words:
+    print(f"{similar_word}: {similarity:.4f}")</code></pre>
+<p>A cool (yet controversial) application of word embeddings is analogy solving. Let us consider the following puzzle:</p>
+<blockquote class="blockquote">
+<p><em>man</em> is to <em>woman</em> as <em>king</em> is to ___ ?</p>
+</blockquote>
+<p>We can use word embeddings to solve this puzzle.</p>
+<p>```jtsuzzfodyv ipython3</p>
+</section>
+<section id="we-solve-the-puzzle-by" class="level1">
+<h1>We solve the puzzle by</h1>
+</section>
+<section id="section" class="level1">
+<h1></h1>
+</section>
+<section id="vecking---vecman-vecwoman" class="level1">
+<h1>vec(king) - vec(man) + vec(woman)</h1>
+</section>
+<section id="section-1" class="level1">
+<h1></h1>
+</section>
+<section id="to-solve-this-we-use-the-model.most_similar-function-with-positive-words-being-king-and-woman-additive-and-negative-words-being-man-subtractive." class="level1">
+<h1>To solve this, we use the model.most_similar function, with positive words being “king” and “woman” (additive), and negative words being “man” (subtractive).</h1>
+</section>
+<section id="section-2" class="level1">
+<h1></h1>
+<p>model.most_similar(positive=[‘woman’, “king”], negative=[‘man’], topn=5)</p>
+<pre><code>
+The last example is to visualize the word embeddings.
+
+```{code-cell} ipython3
+:tags: [hide-input]
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+import pandas as pd
+from sklearn.decomposition import PCA
+
+countries = ['Germany', 'France', 'Italy', 'Spain', 'Portugal', 'Greece']
+capital_words = ['Berlin', 'Paris', 'Rome', 'Madrid', 'Lisbon', 'Athens']
+
+# Get the word embeddings for the countries and capitals
+country_embeddings = np.array([model[country] for country in countries])
+capital_embeddings = np.array([model[capital] for capital in capital_words])
+
+# Compute the PCA
+pca = PCA(n_components=2)
+embeddings = np.vstack([country_embeddings, capital_embeddings])
+embeddings_pca = pca.fit_transform(embeddings)
+
+# Create a DataFrame for seaborn
+df = pd.DataFrame(embeddings_pca, columns=['PC1', 'PC2'])
+df['Label'] = countries + capital_words
+df['Type'] = ['Country'] * len(countries) + ['Capital'] * len(capital_words)
+
+# Plot the data
+plt.figure(figsize=(12, 10))
+
+# Create a scatter plot with seaborn
+scatter_plot = sns.scatterplot(data=df, x='PC1', y='PC2', hue='Type', style='Type', s=200, palette='deep', markers=['o', 's'])
+
+# Annotate the points
+for i in range(len(df)):
+    plt.text(df['PC1'][i], df['PC2'][i] + 0.08, df['Label'][i], fontsize=12, ha='center', va='bottom',
+             bbox=dict(facecolor='white', edgecolor='none', alpha=0.8))
+
+# Draw arrows between countries and capitals
+for i in range(len(countries)):
+    plt.arrow(df['PC1'][i], df['PC2'][i], df['PC1'][i + len(countries)] - df['PC1'][i], df['PC2'][i + len(countries)] - df['PC2'][i],
+              color='gray', alpha=0.6, linewidth=1.5, head_width=0.02, head_length=0.03)
+
+plt.legend(title='Type', title_fontsize='13', fontsize='11')
+plt.title('PCA of Country and Capital Word Embeddings', fontsize=16)
+plt.xlabel('Principal Component 1', fontsize=14)
+plt.ylabel('Principal Component 2', fontsize=14)
+ax = plt.gca()
+ax.set_axis_off()</code></pre>
+<p>We can see that word2vec places the words representing countries close to each other and so do the words representing their capitals. The country-capital relationship is also roughly preserved, e.g., <em>Germany</em>-<em>Berlin</em> vector is roughly parallel to <em>France</em>-<em>Paris</em> vector.</p>
+<section id="exercise" class="level2">
+<h2 class="anchored" data-anchor-id="exercise">🔥🔥 Exercise 🔥🔥</h2>
+<ol type="1">
+<li><p>Using the word2vec model, find the 5 most similar words to “computer” and “science”. What do you observe about the semantic relationships between these words?</p></li>
+<li><p>Perform the following word analogy tasks using word2vec and explain your findings:</p>
+<ul>
+<li>man : woman :: king : ?</li>
+<li>Paris : France :: Tokyo : ?</li>
+<li>car : cars :: child : ?</li>
+</ul></li>
+<li><p>Create a visualization similar to the country-capital example above but using:</p>
+<ul>
+<li>Different professions and their typical workplaces (e.g., doctor-hospital, teacher-school)</li>
+<li>Different languages and their countries (e.g., Spanish-Spain, French-France)</li>
+</ul>
+<p>Compare the patterns you observe with the country-capital relationships.</p></li>
+<li><p>Advanced: Investigate the concept of “gender bias” in word embeddings:</p>
+<ul>
+<li>Find the vector difference between pairs like “he-she”, “man-woman”, “king-queen”</li>
+<li>Project profession words (e.g., “doctor”, “nurse”, “engineer”, “teacher”) onto these gender directions</li>
+<li>What does this tell us about potential biases in the training data?</li>
+</ul></li>
+</ol>
+<pre class="{footbibliography}"><code></code></pre>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Copyright 2025, Sadamori Kojaku</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions"><ul><li><a href="https://github.com/skojaku/applied-soft-comp/edit/main/m04-text/archive/word2vec.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/skojaku/applied-soft-comp/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/skojaku/applied-soft-comp">
+      <i class="bi bi-github" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+<script src="../assets/breadcrumb-toc.js"></script>
+
+
+
+
+</body></html>

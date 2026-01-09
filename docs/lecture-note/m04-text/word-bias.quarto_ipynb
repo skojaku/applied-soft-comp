@@ -1,0 +1,320 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Prompt Engineering\"\n",
+        "execute:\n",
+        "    enabled: true\n",
+        "---\n",
+        "\n",
+        "## Bias in Word Embeddings\n",
+        "\n",
+        "Word embeddings can capture and reinforce societal biases from their training data through the geometric relationships between word vectors. These relationships often reflect stereotypes about gender, race, age and other social factors. We'll examine how semantic axes help analyze gender bias in job-related terms, showing both the benefits and risks of word embeddings capturing these real-world associations @bolukbasi2016debiasing.\n",
+        "\n",
+        "SemAxis is a powerful tool to analyze gender bias in word embeddings by measuring word alignments along semantic axes @kwak2021frameaxis. Using antonym pairs like \"she-he\" as poles, it quantifies gender associations in words on a scale from -1 to 1, where positive values indicate feminine associations and negative values indicate masculine as ones.\n",
+        "\n",
+        "Let's start with a simple example of analyzing gender bias in occupations."
+      ],
+      "id": "6b674427"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import gensim.downloader as api\n",
+        "import numpy as np\n",
+        "\n",
+        "# Load pre-trained Word2vec embeddings\n",
+        "model = api.load(\"word2vec-google-news-300\")"
+      ],
+      "id": "a0ac62b2",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "def compute_bias(word, microframe, model):\n",
+        "    word_vector = model[word]\n",
+        "    numerator = np.dot(word_vector, microframe)\n",
+        "    denominator = np.linalg.norm(word_vector) * np.linalg.norm(microframe)\n",
+        "    return numerator / denominator\n",
+        "\n",
+        "\n",
+        "def analyze(word, pos_word, neg_word, model):\n",
+        "    if word not in model:\n",
+        "        return 0.0\n",
+        "    microframe = model[pos_word] - model[neg_word]\n",
+        "    bias = compute_bias(word, microframe, model)\n",
+        "    return bias"
+      ],
+      "id": "c7f79bc5",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "::: {.column-margin}\n",
+        "The `compute_bias` function calculates the cosine similarity between a word vector and a semantic axis (microframe).\n",
+        "\n",
+        "- **Numerator**: Dot product projects the word onto the axis.\n",
+        "- **Denominator**: Normalizes by vector lengths to get a score between -1 and 1.\n",
+        ":::\n",
+        "\n",
+        "We will use the following occupations:"
+      ],
+      "id": "5945a433"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Occupations from the paper\n",
+        "she_occupations = [\n",
+        "    \"homemaker\",\n",
+        "    \"nurse\",\n",
+        "    \"receptionist\",\n",
+        "    \"librarian\",\n",
+        "    \"socialite\",\n",
+        "    \"hairdresser\",\n",
+        "    \"nanny\",\n",
+        "    \"bookkeeper\",\n",
+        "    \"stylist\",\n",
+        "    \"housekeeper\",\n",
+        "]\n",
+        "\n",
+        "he_occupations = [\n",
+        "    \"maestro\",\n",
+        "    \"skipper\",\n",
+        "    \"protege\",\n",
+        "    \"philosopher\",\n",
+        "    \"captain\",\n",
+        "    \"architect\",\n",
+        "    \"financier\",\n",
+        "    \"warrior\",\n",
+        "    \"broadcaster\",\n",
+        "    \"magician\",\n",
+        "    \"boss\",\n",
+        "]"
+      ],
+      "id": "5aa73dd5",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "We measure the gender bias in these occupations by measuring how they align with the \"she-he\" axis."
+      ],
+      "id": "ac93fdab"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "print(\"Gender Bias in Occupations (she-he axis):\")\n",
+        "print(\"\\nShe-associated occupations:\")\n",
+        "for occupation in she_occupations:\n",
+        "    bias = analyze(occupation, \"she\", \"he\", model)\n",
+        "    print(f\"{occupation}: {bias:.3f}\")\n",
+        "\n",
+        "print(\"\\nHe-associated occupations:\")\n",
+        "for occupation in he_occupations:\n",
+        "    bias = analyze(occupation, \"she\", \"he\", model)\n",
+        "    print(f\"{occupation}: {bias:.3f}\")"
+      ],
+      "id": "3140c011",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "::: {.column-margin}\n",
+        "**Interpreting the Scores:**\n",
+        "\n",
+        "- **Positive scores (> 0)**: Closer to \"she\" (e.g., *nurse*, *librarian*).\n",
+        "- **Negative scores (< 0)**: Closer to \"he\" (e.g., *architect*, *captain*).\n",
+        "- **Magnitude**: A larger absolute value indicates a stronger gender association.\n",
+        ":::\n",
+        "\n",
+        "Notice how occupations historically associated with women (like *nurse* and *librarian*) have strong positive scores, while those associated with men (like *captain* and *architect*) have negative scores. This confirms that the model has learned these gender stereotypes from the text data.\n",
+        "\n",
+        "### Stereotype Analogies\n",
+        "\n",
+        "Since word embeddings capture semantic relationships learned from large text corpora, they inevitably encode societal biases and stereotypes present in that training data. We can leverage this property to identify pairs of words that exhibit stereotypical gender associations. By measuring how different words align with the gender axis (she-he), we can find pairs where one word shows a strong feminine bias while its counterpart shows a masculine bias, revealing ingrained stereotypes in language use.\n"
+      ],
+      "id": "499e6e9a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Stereotype analogies from the paper\n",
+        "stereotype_pairs = [\n",
+        "    (\"sewing\", \"carpentry\"),\n",
+        "    (\"nurse\", \"surgeon\"),\n",
+        "    (\"softball\", \"baseball\"),\n",
+        "    (\"cosmetics\", \"pharmaceuticals\"),\n",
+        "    (\"vocalist\", \"guitarist\"),\n",
+        "]"
+      ],
+      "id": "3975985f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "print(\"\\nAnalyzing Gender Stereotype Pairs:\")\n",
+        "for word1, word2 in stereotype_pairs:\n",
+        "    bias1 = analyze(word1, \"she\", \"he\", model)\n",
+        "    bias2 = analyze(word2, \"she\", \"he\", model)\n",
+        "    print(f\"\\n{word1} vs {word2}\")\n",
+        "    print(f\"{word1}: {bias1:.3f}\")\n",
+        "    print(f\"{word2}: {bias2:.3f}\")"
+      ],
+      "id": "eed4cc52",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The results show clear stereotypical alignments. *Sewing* and *nurse* align with \"she\", while *carpentry* and *surgeon* align with \"he\". This mirrors the \"man is to computer programmer as woman is to homemaker\" analogy found in early word embedding research.\n",
+        "\n",
+        "### Indirect Bias Analysis\n",
+        "\n",
+        "Indirect bias occurs when seemingly neutral words or concepts become associated with gender through their relationships with other words. For example, while \"softball\" and \"football\" are not inherently gendered terms, they may show gender associations in word embeddings due to how they're used in language and society.\n",
+        "\n",
+        "We can detect indirect bias by:\n",
+        "1. Identifying word pairs that form a semantic axis (e.g., softball-football)\n",
+        "2. Measuring how other words align with this axis\n",
+        "3. Examining if alignment with this axis correlates with gender bias\n",
+        "\n",
+        "This reveals how gender stereotypes can be encoded indirectly through word associations, even when the words themselves don't explicitly reference gender.\n",
+        "\n",
+        "Let's see how this works in practice. We first measure the gender bias of the following words:"
+      ],
+      "id": "ba7b71bb"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Words associated with softball-football axis\n",
+        "softball_associations = [\n",
+        "    \"pitcher\",\n",
+        "    \"bookkeeper\",\n",
+        "    \"receptionist\",\n",
+        "    \"nurse\",\n",
+        "    \"waitress\"\n",
+        "]\n",
+        "\n",
+        "football_associations = [\n",
+        "    \"footballer\",\n",
+        "    \"businessman\",\n",
+        "    \"pundit\",\n",
+        "    \"maestro\",\n",
+        "    \"cleric\"\n",
+        "]\n",
+        "\n",
+        "# Calculate biases for all words\n",
+        "gender_biases = []\n",
+        "sports_biases = []\n",
+        "words = softball_associations + football_associations\n",
+        "\n",
+        "for word in words:\n",
+        "    gender_bias = analyze(word, \"she\", \"he\", model)\n",
+        "    sports_bias = analyze(word, \"softball\", \"football\", model)\n",
+        "    gender_biases.append(gender_bias)\n",
+        "    sports_biases.append(sports_bias)"
+      ],
+      "id": "ca97e967",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Let's plot the results:"
+      ],
+      "id": "f730e20f"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "# Analyze bias along both gender and sports axes\n",
+        "import matplotlib.pyplot as plt\n",
+        "import seaborn as sns\n",
+        "from adjustText import adjust_text\n",
+        "\n",
+        "# Create scatter plot\n",
+        "fig, ax = plt.subplots(figsize=(6, 6))\n",
+        "sns.scatterplot(x=gender_biases, y=sports_biases, ax=ax)\n",
+        "ax.set_xlabel(\"Gender Bias (she-he)\")\n",
+        "ax.set_ylabel(\"Sports Bias (softball-football)\")\n",
+        "ax.set_title(\"Indirect Bias Analysis: Gender vs Sports\")\n",
+        "\n",
+        "# Add labels for each point\n",
+        "texts = []\n",
+        "for i, word in enumerate(words):\n",
+        "    texts.append(ax.text(gender_biases[i], sports_biases[i], word, fontsize=12))\n",
+        "\n",
+        "adjust_text(texts, arrowprops=dict(arrowstyle='-', color='gray', lw=0.5))\n",
+        "\n",
+        "ax.grid(True, alpha=0.3)\n",
+        "plt.show()\n",
+        "sns.despine()"
+      ],
+      "id": "5dbc5139",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "::: {.column-margin}\n",
+        "**Indirect Bias:**\n",
+        "\n",
+        "The plot reveals a correlation: words associated with \"softball\" (y-axis > 0) also tend to be associated with \"she\" (x-axis > 0). Conversely, \"football\" terms align with \"he\".\n",
+        "\n",
+        "This suggests that even if we remove explicit gender words, the *structure* of the space still encodes gender through these proxy dimensions.\n",
+        ":::\n",
+        "\n",
+        "\n",
+        "## Take away\n",
+        "\n",
+        "\n",
+        "Word embeddings, while powerful, inevitably capture and reflect societal biases present in the large text corpora they are trained on. We observed both **direct bias**, where occupations or attributes align strongly with specific gender pronouns, and **indirect bias**, where seemingly neutral concepts become gendered through their associations with other words. This analysis highlights the importance of understanding and mitigating these biases to prevent the perpetuation of stereotypes in AI systems and ensure fairness in applications like search, recommendation, and hiring."
+      ],
+      "id": "870d98cf"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "/Users/skojaku-admin/Documents/projects/applied-soft-comp/.venv/share/jupyter/kernels/python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

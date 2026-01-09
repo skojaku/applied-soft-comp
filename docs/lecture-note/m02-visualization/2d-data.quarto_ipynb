@@ -1,0 +1,752 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"2D Data Visualization\"\n",
+        "jupyter: advnetsci\n",
+        "execute:\n",
+        "    enabled: true\n",
+        "---\n",
+        "\n",
+        "You've probably heard that \"correlation doesn't equal causation.\" But here's an even more fundamental problem: **a correlation coefficient doesn't tell you what your data actually looks like.**\n",
+        "\n",
+        "In 1973, statistician Francis Anscombe created four datasets that became legendary in data visualization. Each dataset has 11 (x, y) pairs. Each has the same mean for x and y, the same variance, and\u0014most remarkably---the same correlation coefficient (r = 0.816) and the same linear regression line.\n",
+        "\n",
+        "But when you plot them, they tell completely different stories."
+      ],
+      "id": "5bbf2457"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "fig-width": 12,
+        "fig-height": 10
+      },
+      "source": [
+        "#| fig-cap: 'Anscombe''s Quartet: Four datasets with identical summary statistics but completely different relationships'\n",
+        "#| code-fold: true\n",
+        "import seaborn as sns\n",
+        "import matplotlib.pyplot as plt\n",
+        "import numpy as np\n",
+        "import pandas as pd\n",
+        "\n",
+        "# Load Anscombe's quartet\n",
+        "anscombe = sns.load_dataset(\"anscombe\")\n",
+        "\n",
+        "# Create the plot\n",
+        "sns.set_style(\"white\")\n",
+        "g = sns.FacetGrid(anscombe, col=\"dataset\", col_wrap=2, height=4, aspect=1.2)\n",
+        "g.map_dataframe(sns.scatterplot, x=\"x\", y=\"y\", s=100)\n",
+        "g.map_dataframe(sns.regplot, x=\"x\", y=\"y\", scatter=False, color=\"red\")\n",
+        "g.set_axis_labels(\"X\", \"Y\")\n",
+        "g.set_titles(\"Dataset {col_name}\")\n",
+        "\n",
+        "# Add correlation to each subplot\n",
+        "for ax, dataset in zip(g.axes.flat, [\"I\", \"II\", \"III\", \"IV\"]):\n",
+        "    data_subset = anscombe[anscombe[\"dataset\"] == dataset]\n",
+        "    r = np.corrcoef(data_subset[\"x\"], data_subset[\"y\"])[0, 1]\n",
+        "    ax.text(0.05, 0.95, f'r = {r:.3f}', transform=ax.transAxes,\n",
+        "            verticalalignment='top', fontsize=12, bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))\n",
+        "\n",
+        "sns.despine()\n",
+        "plt.tight_layout()"
+      ],
+      "id": "c27cef60",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Dataset I shows a nice linear relationship. Dataset II is clearly non-linear---a parabola that a linear model completely misses. Dataset III has a perfect linear relationship except for one outlier that changes everything. Dataset IV shows no relationship except for a single influential point that creates the illusion of correlation.\n",
+        "\n",
+        "The same correlation coefficient. The same regression line. Completely different data.\n",
+        "\n",
+        "This is why we visualize relationships:\n",
+        "\n",
+        "**Always plot your bivariate data. Summary statistics conceal structure.**\n",
+        "\n",
+        "# Showing All Points: Scatter Plots\n",
+        "\n",
+        "The most direct way to show a relationship between two variables is to plot every point. A **scatter plot** does exactly this: each observation becomes a point in 2D space."
+      ],
+      "id": "fcba2452"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "fig-width": 10,
+        "fig-height": 6
+      },
+      "source": [
+        "#| fig-cap: Basic scatter plot showing relationship between two variables\n",
+        "#| code-fold: true\n",
+        "# Generate sample data with clear relationship\n",
+        "np.random.seed(42)\n",
+        "n_points = 200\n",
+        "x = np.random.normal(50, 15, n_points)\n",
+        "y = 1.5 * x + np.random.normal(0, 10, n_points)\n",
+        "\n",
+        "fig, ax = plt.subplots(figsize=(10, 6))\n",
+        "ax.scatter(x, y, alpha=0.6, s=50, edgecolors='white', linewidth=0.5)\n",
+        "ax.set_xlabel('X Variable')\n",
+        "ax.set_ylabel('Y Variable')\n",
+        "ax.set_title('Scatter Plot: Every Point Visible')\n",
+        "sns.despine()"
+      ],
+      "id": "481d77e1",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "For small to moderate datasets (up to ~1,000 points), scatter plots are perfect. You can see:\n",
+        "- The strength and direction of the relationship\n",
+        "- The spread around the trend\n",
+        "- Individual outliers\n",
+        "- Non-linear patterns\n",
+        "- Clusters or subgroups\n",
+        "\n",
+        "When points overlap heavily, use **transparency (alpha)**. This creates natural density shading---areas with many overlapping points appear darker."
+      ],
+      "id": "10598e63"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "fig-width": 14,
+        "fig-height": 5
+      },
+      "source": [
+        "#| fig-cap: Scatter plots with different alpha values showing how transparency reveals density\n",
+        "#| code-fold: true\n",
+        "# Generate data with heavy overlap\n",
+        "np.random.seed(123)\n",
+        "n_points = 1000\n",
+        "x_overlap = np.random.normal(50, 10, n_points)\n",
+        "y_overlap = 0.8 * x_overlap + np.random.normal(0, 8, n_points)\n",
+        "\n",
+        "fig, axes = plt.subplots(1, 3, figsize=(14, 5))\n",
+        "alphas = [1.0, 0.5, 0.1]\n",
+        "\n",
+        "for ax, alpha in zip(axes, alphas):\n",
+        "    ax.scatter(x_overlap, y_overlap, alpha=alpha, s=30)\n",
+        "    ax.set_xlabel('X Variable')\n",
+        "    ax.set_ylabel('Y Variable')\n",
+        "    ax.set_title(f'Alpha = {alpha}')\n",
+        "    sns.despine(ax=ax)\n",
+        "\n",
+        "plt.tight_layout()"
+      ],
+      "id": "47235081",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "With alpha = 1.0 (opaque), the center is a solid blob---you can't tell if there are 10 points or 100. With alpha = 0.1, the density gradient becomes visible. Dark regions have many points; light regions have few.\n",
+        "\n",
+        "::: {.column-margin}\n",
+        "\n",
+        "![](https://www.science.org/cms/10.1126/science.aan8627/asset/d92c8e9c-6bad-48ad-a006-f9e76c62b72a/assets/graphic/358_1042_f3.jpeg)\n",
+        "\n",
+        "A figure from [Metaanalysis of faculty's teaching effectiveness](https://www.science.org/doi/10.1126/science.aan8627) showing the relationship between student evaluation of teaching and actual learning. Each bubble represents a course section, with size proportional to the number of students. Notice how transparency reveals the density of observations.\n",
+        "\n",
+        ":::\n",
+        "\n",
+        "For extremely dense data where even transparency doesn't help, **jittering** can separate overlapping points by adding small random noise to their positions."
+      ],
+      "id": "0899c44f"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "fig-width": 14,
+        "fig-height": 5
+      },
+      "source": [
+        "#| fig-cap: Jittering helps separate discrete or overlapping points\n",
+        "#| code-fold: true\n",
+        "# Generate data with discrete values (common in survey data)\n",
+        "np.random.seed(456)\n",
+        "n_points = 500\n",
+        "x_discrete = np.random.choice([1, 2, 3, 4, 5], n_points)\n",
+        "y_discrete = x_discrete + np.random.choice([-1, 0, 1], n_points) + np.random.normal(0, 0.3, n_points)\n",
+        "\n",
+        "fig, axes = plt.subplots(1, 2, figsize=(14, 5))\n",
+        "\n",
+        "# Without jitter\n",
+        "axes[0].scatter(x_discrete, y_discrete, alpha=0.5, s=50)\n",
+        "axes[0].set_xlabel('X Variable (Discrete)')\n",
+        "axes[0].set_ylabel('Y Variable')\n",
+        "axes[0].set_title('Without Jittering')\n",
+        "sns.despine(ax=axes[0])\n",
+        "\n",
+        "# With jitter\n",
+        "jitter_x = x_discrete + np.random.normal(0, 0.1, n_points)\n",
+        "jitter_y = y_discrete + np.random.normal(0, 0.1, n_points)\n",
+        "axes[1].scatter(jitter_x, jitter_y, alpha=0.5, s=50)\n",
+        "axes[1].set_xlabel('X Variable (Discrete)')\n",
+        "axes[1].set_ylabel('Y Variable')\n",
+        "axes[1].set_title('With Jittering')\n",
+        "sns.despine(ax=axes[1])\n",
+        "\n",
+        "plt.tight_layout()"
+      ],
+      "id": "bb13c7aa",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Without jittering, many points stack on top of each other---you might think there are only 25 data points (5 � 5) when there are actually 500. Jittering reveals the true sample size and density at each location.\n",
+        "\n",
+        "# When Points Overlap: Binning Methods\n",
+        "\n",
+        "When you have tens of thousands of points, even transparency and jittering don't fully reveal the density structure. Individual points become less meaningful than the overall pattern. This is when we need to **bin** the data\u0014divide the 2D space into regions and count observations in each.\n",
+        "\n",
+        "## 2D Histograms (Heatmaps)\n",
+        "\n",
+        "A **2D histogram** extends the 1D histogram concept to two dimensions. The plane is divided into rectangular bins, and each bin's color represents the number of points it contains."
+      ],
+      "id": "c19a8f27"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "fig-width": 10,
+        "fig-height": 7
+      },
+      "source": [
+        "#| fig-cap: 2D histogram showing density through rectangular bins\n",
+        "#| code-fold: true\n",
+        "# Generate large dataset\n",
+        "np.random.seed(789)\n",
+        "n_large = 10000\n",
+        "x_large = np.random.normal(50, 15, n_large)\n",
+        "y_large = 0.8 * x_large + np.random.normal(0, 12, n_large)\n",
+        "\n",
+        "fig, ax = plt.subplots(figsize=(10, 7))\n",
+        "hb = ax.hexbin(x_large, y_large, gridsize=30, cmap='YlOrRd', mincnt=1)\n",
+        "ax.set_xlabel('X Variable')\n",
+        "ax.set_ylabel('Y Variable')\n",
+        "ax.set_title('2D Histogram: Density Through Binning')\n",
+        "cb = plt.colorbar(hb, ax=ax)\n",
+        "cb.set_label('Count')\n",
+        "sns.despine()"
+      ],
+      "id": "23b75c9b",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The key parameter is **bin size** (or `gridsize`). Too few bins and you lose detail; too many bins and the plot becomes noisy. Like 1D histograms, this requires experimentation."
+      ],
+      "id": "cfc17f3f"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "fig-width": 14,
+        "fig-height": 5
+      },
+      "source": [
+        "#| fig-cap: Effect of bin size on 2D histograms\n",
+        "#| code-fold: true\n",
+        "fig, axes = plt.subplots(1, 3, figsize=(14, 5))\n",
+        "gridsizes = [10, 30, 60]\n",
+        "\n",
+        "for ax, gridsize in zip(axes, gridsizes):\n",
+        "    hb = ax.hexbin(x_large, y_large, gridsize=gridsize, cmap='YlOrRd', mincnt=1)\n",
+        "    ax.set_xlabel('X Variable')\n",
+        "    ax.set_ylabel('Y Variable')\n",
+        "    ax.set_title(f'Gridsize = {gridsize}')\n",
+        "    plt.colorbar(hb, ax=ax)\n",
+        "    sns.despine(ax=ax)\n",
+        "\n",
+        "plt.tight_layout()"
+      ],
+      "id": "c30c0885",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "With gridsize = 10, we see only coarse structure. With gridsize = 60, the plot is noisy\u0014some bins have few points by chance. Gridsize = 30 provides a good balance.\n",
+        "\n",
+        "## Hexbin Plots\n",
+        "\n",
+        "**Hexagonal binning** uses hexagons instead of rectangles. Hexagons are better for 2D binning because they're closer to circles\u0014every edge is equidistant from the center, reducing bias in how we perceive density."
+      ],
+      "id": "041ba769"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "fig-width": 14,
+        "fig-height": 5
+      },
+      "source": [
+        "#| fig-cap: Hexbin plot provides more perceptually uniform density representation\n",
+        "#| code-fold: true\n",
+        "# Generate data with interesting structure\n",
+        "np.random.seed(101)\n",
+        "n = 8000\n",
+        "\n",
+        "# Create two clusters\n",
+        "cluster1_x = np.random.normal(30, 8, n // 2)\n",
+        "cluster1_y = np.random.normal(40, 8, n // 2)\n",
+        "cluster2_x = np.random.normal(60, 10, n // 2)\n",
+        "cluster2_y = np.random.normal(70, 10, n // 2)\n",
+        "\n",
+        "x_clusters = np.concatenate([cluster1_x, cluster2_x])\n",
+        "y_clusters = np.concatenate([cluster1_y, cluster2_y])\n",
+        "\n",
+        "fig, axes = plt.subplots(1, 2, figsize=(14, 5))\n",
+        "\n",
+        "# Scatter plot (for reference)\n",
+        "axes[0].scatter(x_clusters, y_clusters, alpha=0.1, s=10)\n",
+        "axes[0].set_xlabel('X Variable')\n",
+        "axes[0].set_ylabel('Y Variable')\n",
+        "axes[0].set_title('Scatter Plot (alpha = 0.1)')\n",
+        "sns.despine(ax=axes[0])\n",
+        "\n",
+        "# Hexbin plot\n",
+        "hb = axes[1].hexbin(x_clusters, y_clusters, gridsize=25, cmap='viridis', mincnt=1)\n",
+        "axes[1].set_xlabel('X Variable')\n",
+        "axes[1].set_ylabel('Y Variable')\n",
+        "axes[1].set_title('Hexbin Plot')\n",
+        "plt.colorbar(hb, ax=axes[1], label='Count')\n",
+        "sns.despine(ax=axes[1])\n",
+        "\n",
+        "plt.tight_layout()"
+      ],
+      "id": "30b266d2",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The hexbin plot clearly reveals the two clusters and their relative densities\u0014something that's harder to see in the scatter plot even with low alpha.\n",
+        "\n",
+        "Hexbin plots are particularly powerful for **very large datasets** (100,000+ points) where scatter plots become computationally expensive and visually overwhelming.\n",
+        "\n",
+        "::: {.callout-note}\n",
+        "## Choosing colors for density plots\n",
+        "\n",
+        "When showing density or counts, use **sequential colormaps** that vary in lightness: light = low density, dark = high density. Good choices include:\n",
+        "- `'YlOrRd'` (yellow-orange-red)\n",
+        "- `'viridis'` (purple-blue-green-yellow, perceptually uniform)\n",
+        "- `'Blues'` or `'Reds'` (single hue)\n",
+        "\n",
+        "Avoid rainbow colormaps like `'jet'`\u0014they create artificial boundaries where none exist and are not perceptually uniform.\n",
+        ":::\n",
+        "\n",
+        "# Smooth Density Estimation: 2D KDE\n",
+        "\n",
+        "Just as 1D kernel density estimation (KDE) provides a smooth alternative to histograms, **2D KDE** smooths 2D histograms by placing a kernel at each data point and summing them."
+      ],
+      "id": "5ea0fee7"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "fig-width": 10,
+        "fig-height": 7
+      },
+      "source": [
+        "#| fig-cap: 2D kernel density estimation provides smooth density surface\n",
+        "#| code-fold: true\n",
+        "# Use the clustered data\n",
+        "fig, ax = plt.subplots(figsize=(10, 7))\n",
+        "sns.kdeplot(x=x_clusters, y=y_clusters, cmap='viridis', fill=True, thresh=0.05, levels=20, ax=ax)\n",
+        "ax.set_xlabel('X Variable')\n",
+        "ax.set_ylabel('Y Variable')\n",
+        "ax.set_title('2D Kernel Density Estimation')\n",
+        "sns.despine()"
+      ],
+      "id": "d9046983",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "KDE reveals smooth density gradients without arbitrary binning decisions. The key parameter is **bandwidth**\u0014how wide each kernel is. Small bandwidth gives high detail but can be noisy; large bandwidth is smooth but may blur important features."
+      ],
+      "id": "4bbda6de"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "fig-width": 14,
+        "fig-height": 5
+      },
+      "source": [
+        "#| fig-cap: Effect of bandwidth on 2D KDE smoothness\n",
+        "#| code-fold: true\n",
+        "fig, axes = plt.subplots(1, 3, figsize=(14, 5))\n",
+        "bandwidths = [0.5, 1.5, 3.0]\n",
+        "\n",
+        "for ax, bw in zip(axes, bandwidths):\n",
+        "    sns.kdeplot(x=x_clusters, y=y_clusters, cmap='viridis', fill=True,\n",
+        "                bw_adjust=bw, thresh=0.05, levels=15, ax=ax)\n",
+        "    ax.set_xlabel('X Variable')\n",
+        "    ax.set_ylabel('Y Variable')\n",
+        "    ax.set_title(f'Bandwidth adjustment = {bw}')\n",
+        "    sns.despine(ax=ax)\n",
+        "\n",
+        "plt.tight_layout()"
+      ],
+      "id": "3f9baeb6",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "With `bw_adjust=0.5` (narrow bandwidth), we see fine detail but some noise. With `bw_adjust=3.0` (wide bandwidth), the plot is very smooth but the two clusters nearly merge. The default `bw_adjust=1.0` (or around 1.5 here) balances detail and smoothness.\n",
+        "\n",
+        "## Contour Plots\n",
+        "\n",
+        "A **contour plot** represents the density surface as lines of equal density\u0014like a topographic map where each contour line represents an \"elevation\" of density."
+      ],
+      "id": "4b9b89c0"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "fig-width": 14,
+        "fig-height": 6
+      },
+      "source": [
+        "#| fig-cap: Contour plot shows density as topographic lines\n",
+        "#| code-fold: true\n",
+        "fig, axes = plt.subplots(1, 2, figsize=(14, 6))\n",
+        "\n",
+        "# Filled contours\n",
+        "sns.kdeplot(x=x_clusters, y=y_clusters, cmap='viridis', fill=True,\n",
+        "            thresh=0.05, levels=10, ax=axes[0])\n",
+        "axes[0].set_xlabel('X Variable')\n",
+        "axes[0].set_ylabel('Y Variable')\n",
+        "axes[0].set_title('Filled Contour Plot')\n",
+        "sns.despine(ax=axes[0])\n",
+        "\n",
+        "# Line contours with scatter\n",
+        "axes[1].scatter(x_clusters, y_clusters, alpha=0.1, s=5, c='gray')\n",
+        "sns.kdeplot(x=x_clusters, y=y_clusters, levels=8, color='red', linewidths=2, ax=axes[1])\n",
+        "axes[1].set_xlabel('X Variable')\n",
+        "axes[1].set_ylabel('Y Variable')\n",
+        "axes[1].set_title('Contour Lines Over Scatter Plot')\n",
+        "sns.despine(ax=axes[1])\n",
+        "\n",
+        "plt.tight_layout()"
+      ],
+      "id": "fdb56066",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Contour plots are excellent for:\n",
+        "- Overlaying density information on scatter plots\n",
+        "- Comparing multiple groups (different colored contours)\n",
+        "- Showing the \"shape\" of the relationship clearly\n",
+        "\n",
+        "# Joint Distributions: Combining 2D and 1D\n",
+        "\n",
+        "A powerful approach is to show both the **joint (2D) distribution** and the **marginal (1D) distributions** of each variable. This connects 2D visualization back to the 1D methods we learned earlier.\n",
+        "\n",
+        "A **joint plot** combines a central 2D plot with 1D histograms or density plots along the margins."
+      ],
+      "id": "97ed1976"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "fig-width": 10,
+        "fig-height": 10
+      },
+      "source": [
+        "#| fig-cap: Joint plot combining 2D scatter with marginal 1D distributions\n",
+        "#| code-fold: true\n",
+        "# Generate data with interesting marginals\n",
+        "np.random.seed(202)\n",
+        "n = 1000\n",
+        "x_joint = np.concatenate([np.random.normal(30, 10, n//2), np.random.normal(70, 8, n//2)])\n",
+        "y_joint = np.concatenate([np.random.normal(40, 12, n//2), np.random.normal(60, 10, n//2)])\n",
+        "\n",
+        "# Create joint plot\n",
+        "g = sns.jointplot(x=x_joint, y=y_joint, kind='scatter', alpha=0.5, height=10)\n",
+        "g.set_axis_labels('X Variable', 'Y Variable')\n",
+        "g.fig.suptitle('Joint Distribution with Marginal Histograms', y=1.01)"
+      ],
+      "id": "70a2c774",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The marginal distributions (top and right) show that both X and Y are bimodal\u0014there are two peaks. But the scatter plot reveals that the peaks are *correlated*: when X is low, Y tends to be low; when X is high, Y tends to be high. This relationship is invisible in the marginals alone.\n",
+        "\n",
+        "Joint plots can use different visualizations in the center:"
+      ],
+      "id": "cd251164"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "fig-width": 10,
+        "fig-height": 10
+      },
+      "source": [
+        "#| fig-cap: Joint plot with hexbin center and KDE margins\n",
+        "#| code-fold: true\n",
+        "# Create joint plot with hexbin and KDE\n",
+        "g = sns.jointplot(x=x_large, y=y_large, kind='hex', height=10,\n",
+        "                  marginal_kws=dict(bins=30, fill=True))\n",
+        "g.set_axis_labels('X Variable', 'Y Variable')\n",
+        "g.fig.suptitle('Joint Plot: Hexbin Center with KDE Margins', y=1.01)"
+      ],
+      "id": "ff210d92",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Or with KDE everywhere:"
+      ],
+      "id": "d0027c40"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "fig-width": 10,
+        "fig-height": 10
+      },
+      "source": [
+        "#| fig-cap: Joint plot with 2D KDE center and 1D KDE margins\n",
+        "#| code-fold: true\n",
+        "g = sns.jointplot(x=x_clusters, y=y_clusters, kind='kde', height=10,\n",
+        "                  fill=True, cmap='viridis', thresh=0.05)\n",
+        "g.set_axis_labels('X Variable', 'Y Variable')\n",
+        "g.fig.suptitle('Joint Plot: All KDE', y=1.01)"
+      ],
+      "id": "c84f4993",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Joint plots are particularly useful for:\n",
+        "- Understanding if marginal distributions are misleading about the relationship\n",
+        "- Seeing if there's correlation between variables with interesting univariate structure\n",
+        "- Presenting a complete picture of a bivariate relationship\n",
+        "\n",
+        "::: {.column-margin}\n",
+        "\n",
+        "**Pro tip**: When presenting data, start with marginal distributions to establish what each variable looks like, then show the joint distribution to reveal the relationship. This guides your audience from the familiar (1D) to the complex (2D).\n",
+        "\n",
+        ":::\n",
+        "\n",
+        "# Visualizing Relationships Across Groups\n",
+        "\n",
+        "Often we want to compare relationships across multiple groups or categories. There are several effective approaches.\n",
+        "\n",
+        "## Color coding by group\n",
+        "\n",
+        "The simplest approach is to use different colors for different groups:"
+      ],
+      "id": "a0165d1e"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "fig-width": 10,
+        "fig-height": 6
+      },
+      "source": [
+        "#| fig-cap: Scatter plot with color-coded groups\n",
+        "#| code-fold: true\n",
+        "# Generate multi-group data\n",
+        "np.random.seed(303)\n",
+        "n_per_group = 150\n",
+        "\n",
+        "group_a_x = np.random.normal(40, 12, n_per_group)\n",
+        "group_a_y = 0.7 * group_a_x + np.random.normal(0, 8, n_per_group)\n",
+        "\n",
+        "group_b_x = np.random.normal(55, 10, n_per_group)\n",
+        "group_b_y = 1.2 * group_b_x + np.random.normal(-20, 10, n_per_group)\n",
+        "\n",
+        "group_c_x = np.random.normal(60, 15, n_per_group)\n",
+        "group_c_y = 0.3 * group_c_x + np.random.normal(30, 12, n_per_group)\n",
+        "\n",
+        "df_groups = pd.DataFrame({\n",
+        "    'x': np.concatenate([group_a_x, group_b_x, group_c_x]),\n",
+        "    'y': np.concatenate([group_a_y, group_b_y, group_c_y]),\n",
+        "    'group': ['A'] * n_per_group + ['B'] * n_per_group + ['C'] * n_per_group\n",
+        "})\n",
+        "\n",
+        "fig, ax = plt.subplots(figsize=(10, 6))\n",
+        "for group, color in zip(['A', 'B', 'C'], sns.color_palette('muted', 3)):\n",
+        "    subset = df_groups[df_groups['group'] == group]\n",
+        "    ax.scatter(subset['x'], subset['y'], label=f'Group {group}',\n",
+        "               alpha=0.6, s=50, color=color, edgecolors='white', linewidth=0.5)\n",
+        "\n",
+        "ax.set_xlabel('X Variable')\n",
+        "ax.set_ylabel('Y Variable')\n",
+        "ax.set_title('Relationships Across Groups')\n",
+        "ax.legend()\n",
+        "sns.despine()"
+      ],
+      "id": "b8b695b6",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "This reveals that the three groups have different relationships: Group A has a positive moderate slope, Group B has a steeper positive relationship, and Group C has almost no relationship.\n",
+        "\n",
+        "::: {.callout-warning}\n",
+        "## Simpson's Paradox\n",
+        "\n",
+        "Be careful! Sometimes the overall trend (pooling all groups) can be opposite to the trend within each group. This is called **Simpson's Paradox**. Always visualize groups separately to check if pooling is appropriate.\n",
+        ":::\n",
+        "\n",
+        "## Small multiples (faceting)\n",
+        "\n",
+        "When groups overlap heavily or there are many groups, **small multiples**\u0014separate plots for each group\u0014work better than color coding:"
+      ],
+      "id": "245ffb71"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "fig-width": 14,
+        "fig-height": 4
+      },
+      "source": [
+        "#| fig-cap: Small multiples showing relationship for each group separately\n",
+        "#| code-fold: true\n",
+        "g = sns.FacetGrid(df_groups, col='group', height=4, aspect=1.3)\n",
+        "g.map_dataframe(sns.scatterplot, x='x', y='y', alpha=0.6, s=50)\n",
+        "g.map_dataframe(sns.regplot, x='x', y='y', scatter=False, color='red')\n",
+        "g.set_axis_labels('X Variable', 'Y Variable')\n",
+        "g.set_titles('Group {col_name}')\n",
+        "sns.despine()\n",
+        "plt.tight_layout()"
+      ],
+      "id": "77c59745",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Small multiples make it easy to compare the strength and direction of relationships across groups without visual clutter.\n",
+        "\n",
+        "## Contour overlays\n",
+        "\n",
+        "For large datasets, overlaying density contours for each group can be very effective:"
+      ],
+      "id": "f7604441"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "fig-width": 10,
+        "fig-height": 7
+      },
+      "source": [
+        "#| fig-cap: Overlaid density contours reveal different relationship shapes\n",
+        "#| code-fold: true\n",
+        "fig, ax = plt.subplots(figsize=(10, 7))\n",
+        "\n",
+        "colors = sns.color_palette('muted', 3)\n",
+        "for group, color in zip(['A', 'B', 'C'], colors):\n",
+        "    subset = df_groups[df_groups['group'] == group]\n",
+        "    sns.kdeplot(x=subset['x'], y=subset['y'], levels=5,\n",
+        "                color=color, linewidths=2, label=f'Group {group}', ax=ax)\n",
+        "\n",
+        "ax.set_xlabel('X Variable')\n",
+        "ax.set_ylabel('Y Variable')\n",
+        "ax.set_title('Density Contours by Group')\n",
+        "ax.legend()\n",
+        "sns.despine()"
+      ],
+      "id": "eb7b914d",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "This clearly shows that Groups A and B have elongated, correlated distributions (indicating strong relationships), while Group C is more circular (indicating weak correlation).\n",
+        "\n",
+        "# The Bigger Picture\n",
+        "\n",
+        "Visualizing bivariate relationships isn't just about making pretty pictures\u0014it's about **seeing patterns that summary statistics conceal**.\n",
+        "\n",
+        "When you reduce a relationship to a single number (a correlation coefficient, a slope, a p-value), you lose crucial information:\n",
+        "- Is the relationship linear or curved?\n",
+        "- Are there outliers driving the result?\n",
+        "- Are there subgroups with different patterns?\n",
+        "- Is the relationship consistent across the range of your data?\n",
+        "\n",
+        "Anscombe's Quartet taught us this lesson half a century ago, yet papers still report correlations without showing scatter plots. Don't make this mistake.\n",
+        "\n",
+        "The choice of visualization method matters:\n",
+        "- **Scatter plots** for small to moderate datasets where individual points matter\n",
+        "- **Hexbin or heatmaps** for large datasets where density matters more than individuals\n",
+        "- **2D KDE and contours** for smooth, assumption-light density estimation\n",
+        "- **Joint plots** for connecting bivariate relationships to univariate distributions\n",
+        "\n",
+        "But the most important choice is the simplest: **always plot your data**. Let your audience see what you see. Trust them to interpret patterns, not just summary statistics.\n",
+        "\n",
+        "As statistician John Tukey wrote: \"The greatest value of a picture is when it forces us to notice what we never expected to see.\""
+      ],
+      "id": "19b459b0"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "advnetsci",
+      "language": "python",
+      "display_name": "Python (advnetsci)",
+      "path": "/Users/skojaku-admin/Library/Jupyter/kernels/advnetsci"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
