@@ -31,7 +31,7 @@ header#title-block-header .description {
   background: white;
   border-right: none;
   padding: 1.5em 0 1em 1em;
-  font-size: 0.75em;
+  font-size: 0.7em;
 }
 
 /* Clean sidebar navigation with tree structure */
@@ -43,6 +43,14 @@ header#title-block-header .description {
   margin: 0;
   padding: 0;
   position: relative;
+  display: none; /* Hide all items by default */
+}
+
+/* Show only direct children of sections */
+.sidebar > .sidebar-item,
+.sidebar-menu > .sidebar-item,
+.sidebar-navigation > .sidebar-item {
+  display: none;
 }
 
 /* Vertical connecting line */
@@ -63,7 +71,7 @@ header#title-block-header .description {
 
 .sidebar-item a {
   display: block;
-  padding: 0.4em 0.5em 0.4em 1.8em;
+  padding: 0.35em 0.5em 0.35em 1.8em;
   color: var(--code-text);
   text-decoration: none;
   position: relative;
@@ -76,8 +84,8 @@ header#title-block-header .description {
   left: 2px;
   top: 50%;
   transform: translateY(-50%);
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   border: 1.5px solid #ddd;
   background: white;
@@ -106,16 +114,19 @@ header#title-block-header .description {
 }
 
 /* Module section headers in sidebar */
-.sidebar-section {
+.sidebar-section,
+.sidebar-item.sidebar-section {
+  display: block !important; /* Show sections */
   font-weight: 600;
-  font-size: 0.9em;
+  font-size: 1em;
   color: #666;
-  padding: 1.2em 0.5em 0.4em 0.5em;
+  padding: 0.8em 0.5em 0.3em 0.5em;
   margin-top: 0.5em;
   position: relative;
 }
 
-.sidebar-section:first-child {
+.sidebar-section:first-child,
+.sidebar-item.sidebar-section:first-child {
   margin-top: 0;
   padding-top: 0;
 }
@@ -124,10 +135,10 @@ header#title-block-header .description {
 .sidebar-section::before {
   content: '';
   position: absolute;
-  left: 3px;
-  top: 1.5em;
-  width: 10px;
-  height: 10px;
+  left: 2.5px;
+  top: 1.1em;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   border: 2px solid #999;
   background: white;
@@ -135,7 +146,7 @@ header#title-block-header .description {
 }
 
 .sidebar-section:first-child::before {
-  top: 0.3em;
+  top: 0.25em;
 }
 
 /* Vertical line connecting sections */
@@ -150,7 +161,7 @@ header#title-block-header .description {
 }
 
 .sidebar-section:first-child::after {
-  top: 10px;
+  top: 9px;
 }
 
 /* Hide sidebar title */
