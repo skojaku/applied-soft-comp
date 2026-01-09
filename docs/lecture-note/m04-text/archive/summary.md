@@ -1,0 +1,5 @@
+# Summary
+
+We began our exploration of sequential text processing with Recurrent Neural Networks (RNNs), the fundamental building blocks that handle sequences through a hidden state acting as working memory. When we encountered RNNs' limitations with long-term dependencies due to vanishing gradients, we studied Long Short-Term Memory (LSTM) networks, which introduced controlled memory cells with forget, input, and output gates to maintain information over longer sequences. We then examined Embeddings from Language Models (ELMo), which combines character-level CNNs with bidirectional LSTMs to generate context-aware word representations.
+
+We continued with Sequence-to-Sequence (Seq2Seq) models, consisting of encoder and decoder components that transform input sequences into output sequences. We discovered a key innovation in Seq2Seq models, *the attention mechanism*, which enables the model to focus on relevant parts of the input sequence during decoding, rather than relying on a fixed-size context vector. The attention mechanism laid crucial groundwork for the transformer architecture, which we will explore in the next section.
