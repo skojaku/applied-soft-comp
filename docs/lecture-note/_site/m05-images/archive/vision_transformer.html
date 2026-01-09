@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Sadamori Kojaku">
+<meta name="dcterms.date" content="2025-10-19">
+
+<title>Vision Transformers – Applied Soft Computing</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-0348920b7671f696dc9078d39bff215e.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-f600f77f736f6eeb051ae40bed1ab2b6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "|"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../assets/custom.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../../logo.jpg" alt="" class="navbar-logo">
+    </a>
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Applied Soft Computing</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-toolkit--workflow" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Toolkit &amp; Workflow</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-toolkit--workflow">    
+        <li class="dropdown-header">─── Module 1 ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m01-toolkit/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m01-toolkit/git-github.html">
+ <span class="dropdown-text">Git &amp; GitHub</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m01-toolkit/tidy-data.html">
+ <span class="dropdown-text">Tidy Data</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m01-toolkit/data-provenance.html">
+ <span class="dropdown-text">Data Provenance</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m01-toolkit/environments.qmd">
+ <span class="dropdown-text">Environments</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 3: Agentic Coding ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m03-agentic-coding/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m03-agentic-coding/hands-on.html">
+ <span class="dropdown-text">Hands-on</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-visualization" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Visualization</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-visualization">    
+        <li class="dropdown-header">─── Module 2 ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m02-visualization/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m02-visualization/principles.html">
+ <span class="dropdown-text">Principles</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m02-visualization/dimensionality-reduction.html">
+ <span class="dropdown-text">High-Dimensional Data</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m02-visualization/networks.html">
+ <span class="dropdown-text">Networks</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m02-visualization/time-series.html">
+ <span class="dropdown-text">Time-Series</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-deep-learning" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Deep Learning</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-deep-learning">    
+        <li class="dropdown-header">─── Module 4: Text ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m04-text/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m04-text/word2vec.md">
+ <span class="dropdown-text">Word2Vec</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m04-text/lstm.md">
+ <span class="dropdown-text">RNNs &amp; LSTMs</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 4: Images ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m04-images/overview.qmd">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m04-images/cnn.md">
+ <span class="dropdown-text">CNNs</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m04-images/resnet.md">
+ <span class="dropdown-text">ResNet</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 5: Graphs ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m05-graphs/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m05-graphs/graph-embedding-w-word2vec.html">
+ <span class="dropdown-text">Graph Embeddings</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m05-graphs/graph-convolutional-network.html">
+ <span class="dropdown-text">GNNs</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-advanced-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Advanced Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-advanced-topics">    
+        <li class="dropdown-header">─── Module 6: LLMs ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m06-llms/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m06-llms/transformers.md">
+ <span class="dropdown-text">Transformers</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m06-llms/scaling-emergence.html">
+ <span class="dropdown-text">Scaling &amp; Emergence</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 7: Self-Supervised ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m07-self-supervised/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m07-self-supervised/contrastive-learning.html">
+ <span class="dropdown-text">Contrastive Learning</span></a>
+  </li>  
+        <li class="dropdown-header">─── Module 8: Explainability ───</li>
+        <li>
+    <a class="dropdown-item" href="../../m08-explainability/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../m08-explainability/fairness.html">
+ <span class="dropdown-text">Fairness &amp; Ethics</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Vision Transformers</li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Course Information</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Home</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../course/welcome.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../course/about.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">About Us</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../course/why-applied-soft-computing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Why applied soft computing?</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../course/discord.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Discord</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../course/setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Setup</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../course/minidora-usage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Using Minidora</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../course/how-to-submit-assignment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to submit assignment</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../course/deliverables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deliverables</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 1: The Data Scientist’s Toolkit</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m01-toolkit/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m01-toolkit/git-github.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Version Control with Git &amp; GitHub</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m01-toolkit/tidy-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Tidy Data Philosophy</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m01-toolkit/data-provenance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Provenance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m01-toolkit/reproduceability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Reproducibility</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 2: Visualizing Complexity</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m02-visualization/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m02-visualization/principles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Principles of Effective Visualization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m02-visualization/1d-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing 1D Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m02-visualization/2d-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing 2D Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m02-visualization/highd-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing High-Dimensional Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m02-visualization/networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m02-visualization/time-series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Visualizing Time-Series</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 3: Agentic Coding</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m03-agentic-coding/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m03-agentic-coding/hands-on.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hands-on</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m03-agentic-coding/prompt-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prompt Tuning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m03-agentic-coding/agentic-ai.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Agentic AI</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m03-agentic-coding/context-engineering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Context Engineering</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 4: Deep Learning for Text</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/llm-intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Large Language Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/gpt-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GPT Inference: Sampling Strategies</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/tokenization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tokenization: Unboxing How LLMs Read Text</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/transformers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Transformers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/bert-gpt.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">BERT &amp; GPT</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/sentence-transformers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sentence Transformers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/word-embeddings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/semaxis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Semaxis</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-text/word-bias.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word Bias</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 5: Deep Learning for Images</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/image-processing.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Image Processing Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/cnn.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Convolutional Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/lenet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LeNet Architecture</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/alexnet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">AlexNet: Deep CNN Revolution</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/vgg.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">VGG Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/inception.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Inception &amp; Multi-Scale Features</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/batch-normalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Batch Normalization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m05-images/resnet.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ResNet &amp; Skip Connections</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 6: Deep Learning for Graphs</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-graphs/overview.qmd" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-graphs/spectral-embedding.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spectral Graph Embedding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-graphs/graph-embedding-w-word2vec.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graph Embeddings with Word2Vec</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-graphs/spectral-vs-neural-embedding.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spectral vs.&nbsp;Neural Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-graphs/from-image-to-graph.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Images to Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-graphs/graph-convolutional-network.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graph Convolutional Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-graphs/popular-gnn.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Popular GNN Architectures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-graphs/software.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GNN Software &amp; Tools</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 6: Large Language Models &amp; Emergent Behavior</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/transformers.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Transformer Architecture</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/bert.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">BERT &amp; Contextual Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/sentence-bert.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sentence-BERT for Semantic Similarity</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/gpt.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GPT &amp; Generative Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/from-language-model-to-instruction-following.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Language Models to Instruction Following</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/prompt-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prompt Engineering &amp; In-Context Learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/scaling-emergence.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Scaling Laws &amp; Emergent Abilities</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m06-llms/llms-as-complex-systems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LLMs as Complex Systems</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 7: Self-Supervised Learning</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m07-self-supervised/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m07-self-supervised/paradigm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Self-Supervised Paradigm</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m07-self-supervised/contrastive-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contrastive Learning (SimCLR)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m07-self-supervised/graphs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Self-Supervised Learning for Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m07-self-supervised/time-series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Self-Supervised Learning for Time-Series</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false">
+ <span class="menu-text">Module 8: Explainability &amp; Ethics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m08-explainability/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m08-explainability/need.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Need for Explainability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m08-explainability/attention.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Attention Visualization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m08-explainability/lime-shap.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LIME &amp; SHAP</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m08-explainability/fairness.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Algorithmic Fairness &amp; Bias</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m08-explainability/causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Causality vs.&nbsp;Correlation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false">
+ <span class="menu-text">Legacy Materials</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m03-text/what-to-learn.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word &amp; Document Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m03-text/what-to-learn.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Recurrent Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../m04-images/what-to-learn.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Image Processing (CNNs)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Vision Transformers</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Sadamori Kojaku </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 19, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="https://miro.medium.com/v2/resize:fit:700/0*Rtb7Jt6378xfe6Z1.png" class="img-fluid"></p>
+<p>What if we could capture not just the local features in images (like corners, edges, or textures) but the entire global context all at once? Could that help a model better understand complex scenes and relationships between objects? Vision Transformers (ViT) attempt exactly that by leveraging <strong>self-attention</strong>, a mechanism originally popularized in Natural Language Processing.</p>
+<section id="the-genesis-of-vision-transformers" class="level2" data-number="0.1">
+<h2 data-number="0.1" class="anchored" data-anchor-id="the-genesis-of-vision-transformers"><span class="header-section-number">0.1</span> The Genesis of Vision Transformers</h2>
+<section id="conceptual-foundation" class="level3">
+<h3 class="anchored" data-anchor-id="conceptual-foundation">Conceptual Foundation</h3>
+<p><em>Why were Vision Transformers developed, given that Convolutional Neural Networks (CNNs) already excel in computer vision tasks?</em></p>
+<p>CNNs have been the cornerstone of computer vision for years, particularly good at capturing local patterns through convolutional filters. However, they can struggle to efficiently capture <strong>global context</strong> and <strong>long-range dependencies</strong>. In scenarios where relationships between objects spread across an entire image become crucial (e.g., understanding crowd scenes or satellite imagery), this limitation can be significant.</p>
+<p>Meanwhile, the <strong>Transformer architecture</strong> (from the paper “Attention Is All You Need”) revolutionized NLP by modeling long-range dependencies in sequential data. This success inspired researchers to ask: <em>Could the same self-attention mechanism help models ‘see’ the entire image at once, instead of focusing on small, local regions?</em></p>
+<p>```lbbmeiin https://www.researchgate.net/publication/361733806/figure/fig3/AS%3A1173979050057729%401656909825527/Operation-of-CNN-and-ViT.ppm :name: fig-cnn-vit :width: 500px :align: center</p>
+<p>Comparison of the receptive field of CNNs and Vision Transformers. CNN has a local receptive field constrained by the convolutional filters, while ViT has a global receptive field, allowing it to capture long-range dependencies between different parts of the image.</p>
+<pre><code>
+```{note}
+**Historical Context**
+
+- **CNN Dominance (2010s)**: CNNs (e.g., AlexNet, VGG, ResNet) drove huge leaps in image classification and object detection.
+- **Transformer Breakthrough (2017)**: In NLP, Transformers replaced recurrent architectures (LSTMs, GRUs) for tasks like machine translation.
+- **ViT Emerges (2020)**: Google researchers introduced the idea of applying pure Transformers to image patches, showing excellent results on large-scale image datasets.</code></pre>
+</section>
+</section>
+<section id="the-vision-transformer-vit-architecture" class="level2" data-number="0.2">
+<h2 data-number="0.2" class="anchored" data-anchor-id="the-vision-transformer-vit-architecture"><span class="header-section-number">0.2</span> The Vision Transformer (ViT) Architecture</h2>
+<p><em>How do we adapt an NLP-centric Transformer to handle 2D image data?</em></p>
+<p>In <strong>Vision Transformers</strong>, an image is first split into a grid of small, equally sized patches—commonly <span class="math inline">16 \times 16</span> pixels each. Each patch is <strong>flattened</strong> and fed into a linear layer that creates a higher-dimensional embedding. You can think of each patch embedding as analogous to a “word embedding” in NLP.</p>
+<p>```lbbmeiin https://www.pinecone.io/_next/image/?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fvr8gru94%2Fproduction%2F7a096efc8f3cc40849ee17a546dc0e685da2dc73-4237x1515.png&amp;w=3840&amp;q=75 :name: fig-vit-patch :width: 500px :align: center</p>
+<p>The process of splitting an image into patches and feeding them into a Vision Transformer. Image taken from <a href="https://www.pinecone.io/learn/series/image-search/vision-transformers/">Pinecone</a>.</p>
+<pre><code>
+
+```{note}
+**Why Patches Instead of Pixels?**
+
+- Handling each pixel independently would create a massive sequence (e.g., a 224x224 image has 50176 pixels!).
+- Using patches reduces sequence length substantially and preserves local spatial structure.</code></pre>
+<section id="positional-encodings" class="level3">
+<h3 class="anchored" data-anchor-id="positional-encodings">2.2 Positional Encodings</h3>
+<p>Because Transformers are order-agnostic, we add <strong>positional encodings</strong> to each patch embedding. These encodings help the model understand the position of each patch in the original image grid.</p>
+</section>
+<section id="transformer-encoder" class="level3">
+<h3 class="anchored" data-anchor-id="transformer-encoder">2.3 Transformer Encoder</h3>
+<p>The sequence of patch embeddings (plus positional encodings) goes through a <strong>Transformer encoder</strong>, consisting of: - <strong>Multi-Head Self-Attention</strong>: Allows each patch to attend to others, learning both local and global image features. - <strong>Feed-Forward Layers (MLP blocks)</strong>: Expands and contracts the hidden dimension to add non-linear transformations.</p>
+</section>
+<section id="classification-head" class="level3">
+<h3 class="anchored" data-anchor-id="classification-head">2.4 Classification Head</h3>
+<p>Typically, the <strong>[CLS] token</strong> (a special token prepended to the sequence) serves as the global representation. After passing through all encoder layers, it goes to a lightweight classification head (a small MLP) to predict the output class.</p>
+<pre class="{note}"><code>**Mathematical Foundation (Simplified)**
+
+Self-attention for a single head can be described as:
+$$
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}\right) V
+$$
+
+- $Q, K, V$ are linear projections of the input (patch embeddings).
+- $d_k$ is the dimension of $K$.
+- Multi-head attention runs this process in parallel with different learnable projections.</code></pre>
+<hr>
+</section>
+</section>
+<section id="types-of-attention-mechanisms" class="level2" data-number="0.3">
+<h2 data-number="0.3" class="anchored" data-anchor-id="types-of-attention-mechanisms"><span class="header-section-number">0.3</span> 3. Types of Attention Mechanisms</h2>
+<p>Even though Vision Transformers generally use <strong>multi-head self-attention</strong>, research has explored variations:</p>
+<ol type="1">
+<li><strong>Stochastic “Hard” Attention</strong>: Focuses on a subset of patches while ignoring others.</li>
+<li><strong>Deterministic “Soft” Attention</strong>: Assigns weights to all patches.</li>
+<li><strong>Multi-Head Attention</strong>: Employs multiple attention heads to learn different aspects (textures, edges, shapes) simultaneously.</li>
+</ol>
+<pre class="{note}"><code>**Implementation Insight**
+
+You can vary the attention mechanism to strike different balances between computational cost and representational capacity. Hard attention can be more efficient but trickier to train.</code></pre>
+<hr>
+</section>
+<section id="implementation-example" class="level2" data-number="0.4">
+<h2 data-number="0.4" class="anchored" data-anchor-id="implementation-example"><span class="header-section-number">0.4</span> 4. Implementation Example</h2>
+<p>Let’s walk through a simplified code snippet using <strong>Hugging Face Transformers</strong> to classify images with a Vision Transformer. This gives a concrete look at how to build upon these theoretical concepts in practice.</p>
+<p>```ekmfxfvigaj ipython3 # A minimal ViT classification example with Hugging Face</p>
+<p>!pip install transformers !pip install torch !pip install torchvision</p>
+<p>import torch from transformers import ViTForImageClassification, ViTImageProcessor from PIL import Image import requests</p>
+</section>
+<section id="load-a-pre-trained-vision-transformer-model" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Load a pre-trained Vision Transformer model</h1>
+<p>model_name = “google/vit-base-patch16-224” model = ViTForImageClassification.from_pretrained(model_name) processor = ViTImageProcessor.from_pretrained(model_name)</p>
+</section>
+<section id="load-an-example-image" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Load an example image</h1>
+<p>url = “https://images.unsplash.com/photo-1524820353064-7141fab1f5b6” image = Image.open(requests.get(url, stream=True).raw)</p>
+</section>
+<section id="prepare-the-image" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Prepare the image</h1>
+<p>inputs = processor(images=image, return_tensors=“pt”)</p>
+</section>
+<section id="inference" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Inference</h1>
+<p>with torch.no_grad(): outputs = model(**inputs) logits = outputs.logits predicted_class_idx = logits.argmax(-1).item()</p>
+</section>
+<section id="print-the-predicted-label" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Print the predicted label</h1>
+<p>print(“Predicted class:”, model.config.id2label[predicted_class_idx])</p>
+<pre><code>
+```{tip}
+- **Data Augmentation**: When training from scratch on smaller datasets, apply heavy data augmentation (random crops, flips, color jitter) to avoid overfitting.
+- **Transfer Learning**: Leverage pre-trained weights from large datasets and then fine-tune on your target task for improved performance.
+- **Batch Size**: ViTs can be memory-heavy; consider smaller batch sizes and gradient accumulation if GPU memory is limited.</code></pre>
+<p><img src="https://via.placeholder.com/600x300.png" class="img-fluid"> [Figure: A schematic visualization of patches being extracted from an image and fed into a Vision Transformer pipeline.]</p>
+<hr>
+<section id="advancements-in-vision-transformer-architectures" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="advancements-in-vision-transformer-architectures"><span class="header-section-number">5.1</span> 5. Advancements in Vision Transformer Architectures</h2>
+<p>Could we make ViTs more data-efficient, faster, or better at capturing hierarchical features?</p>
+<section id="improved-training-and-architectures" class="level3">
+<h3 class="anchored" data-anchor-id="improved-training-and-architectures">5.1 Improved Training and Architectures</h3>
+<ul>
+<li><strong>DeiT (Data-efficient Image Transformers)</strong>: Introduces a distillation step to improve data efficiency, making ViTs competitive with CNNs on smaller datasets.</li>
+<li><strong>Model Soups</strong>: Averages predictions from multiple ViT models to harness their individual strengths for higher accuracy.</li>
+</ul>
+</section>
+<section id="hierarchical-and-hybrid-approaches" class="level3">
+<h3 class="anchored" data-anchor-id="hierarchical-and-hybrid-approaches">5.2 Hierarchical and Hybrid Approaches</h3>
+<ul>
+<li><strong>Swin Transformer</strong>: Processes images in a hierarchical manner using non-overlapping patches at different resolutions, improving scalability to arbitrary image sizes.</li>
+<li><strong>CaiT (Cross-Attention Image Transformer)</strong>: Uses cross-attention between different patch groups to capture more complex relationships.</li>
+<li><strong>CSWin Transformer</strong>: Adopts a cross-shaped window self-attention pattern to optimize the balance between spatial coverage and computational cost.</li>
+<li><strong>FDViT</strong>: Employs flexible downsampling layers for smoother feature map reductions, improving efficiency and classification accuracy.</li>
+</ul>
+<pre class="{note}"><code>**Common Misconception**
+
+It’s tempting to think ViTs automatically solve all the limitations of CNNs. However, they still require careful tuning, large datasets (or pre-training), and thoughtful architecture decisions to perform at their best.</code></pre>
+<hr>
+</section>
+</section>
+<section id="strengths-and-weaknesses" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="strengths-and-weaknesses"><span class="header-section-number">5.2</span> 6. Strengths and Weaknesses</h2>
+<p>When do Vision Transformers shine, and where do they falter?</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 37%">
+<col style="width: 43%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Feature</th>
+<th>Convolutional Neural Networks (CNNs)</th>
+<th>Vision Transformers (ViTs)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Architecture</strong></td>
+<td>Convolutional + pooling + MLP</td>
+<td>Pure Transformer with self-attention</td>
+</tr>
+<tr class="even">
+<td><strong>Input Processing</strong></td>
+<td>Processes entire image as is</td>
+<td>Splits image into patches (tokens)</td>
+</tr>
+<tr class="odd">
+<td><strong>Global Context</strong></td>
+<td>Emerges in deeper layers</td>
+<td>Captured from the start across all patches</td>
+</tr>
+<tr class="even">
+<td><strong>Data Requirements</strong></td>
+<td>Perform well with moderate data</td>
+<td>Often require very large datasets or pre-training</td>
+</tr>
+<tr class="odd">
+<td><strong>Compute Cost</strong></td>
+<td>Usually lower, localized ops</td>
+<td>Higher due to self-attention on all patches</td>
+</tr>
+<tr class="even">
+<td><strong>Performance</strong></td>
+<td>Excellent with well-tuned architectures</td>
+<td>Excels on large-scale data, state-of-the-art SOTA</td>
+</tr>
+</tbody>
+</table>
+<section id="key-advantages" class="level3">
+<h3 class="anchored" data-anchor-id="key-advantages">Key Advantages</h3>
+<ul>
+<li><strong>Global Context</strong>: The self-attention mechanism can integrate information from all patches simultaneously.</li>
+<li><strong>Scalability</strong>: ViTs shine on large datasets, often surpassing CNNs.</li>
+<li><strong>Reduced Inductive Bias</strong>: They learn more general representations since they are not hard-coded to look for local spatial features like CNNs.</li>
+</ul>
+</section>
+<section id="main-limitations" class="level3">
+<h3 class="anchored" data-anchor-id="main-limitations">Main Limitations</h3>
+<ul>
+<li><strong>Data-Hungry</strong>: Tend to overfit on small datasets; methods like DeiT and heavy augmentation help.</li>
+<li><strong>High Computational Cost</strong>: Each patch attends to all others, which can be expensive for high-resolution images.</li>
+<li><strong>Interpretability</strong>: Visualizing attention maps is possible, but can still be less intuitive than CNN feature maps.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="real-world-applications" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="real-world-applications"><span class="header-section-number">5.3</span> 7. Real-World Applications</h2>
+<p>How are Vision Transformers being used beyond simple image classification?</p>
+<ul>
+<li><strong>Object Detection &amp; Image Segmentation</strong>: Self-attention helps capture relationships among objects scattered across the scene.</li>
+<li><strong>Medical Imaging</strong>: Identifying tumors in X-rays or segmenting organ boundaries in MRI scans.</li>
+<li><strong>Remote Sensing</strong>: Analyzing satellite imagery for deforestation tracking or disaster management.</li>
+<li><strong>Action Recognition in Videos</strong>: Extended to video frames, ViTs can learn complex spatiotemporal patterns.</li>
+<li><strong>Multi-Modal Tasks</strong>: Works well with textual data (e.g., image captioning, visual question answering).</li>
+<li><strong>Autonomous Driving</strong>: Understanding global context on the road is critical for safe navigation.</li>
+<li><strong>Anomaly Detection</strong>: Identifying unusual patterns or defects in manufacturing lines.</li>
+</ul>
+<pre class="{note}"><code>**Real-World Use Case**
+
+In **medical imaging**, ViTs can better spot anomalies by focusing on subtle global context differences in scans. This can help radiologists detect diseases in early stages and potentially save lives.</code></pre>
+<hr>
+</section>
+<section id="future-directions" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="future-directions"><span class="header-section-number">5.4</span> 8. Future Directions</h2>
+<ul>
+<li><strong>Enhanced Efficiency</strong>: Model compression, pruning, and improved patch strategies aim to reduce computational overhead.</li>
+<li><strong>Smaller Dataset Training</strong>: More advanced self-supervision, distillation, and data-augmentation techniques are being developed to tackle data limitations.</li>
+<li><strong>Interpretability</strong>: Research on attention visualization tools and explanations is growing, aiming to make ViTs more transparent.</li>
+<li><strong>New Domains</strong>: From multi-modal reasoning to video analysis, ViTs are expanding across countless tasks in AI.</li>
+</ul>
+<pre class="{note}"><code>**Performance Optimization**
+
+- Distillation from large teacher ViTs or even CNNs can help small ViTs converge faster with less data.
+- Layer-wise learning rate decay and progressive resizing of patches are common training tricks.</code></pre>
+<hr>
+</section>
+<section id="reflection-and-exercises" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="reflection-and-exercises"><span class="header-section-number">5.5</span> 9. Reflection and Exercises</h2>
+<ol type="1">
+<li><strong>Reflection</strong>: Why do you think ViTs require large datasets to perform optimally, and how might transfer learning mitigate this requirement?</li>
+<li><strong>Exercise</strong>: Implement a fine-tuning script for a ViT on a smaller dataset (e.g., CIFAR-10). Try various data augmentation strategies. Compare results with a CNN baseline.</li>
+<li><strong>Advanced Exploration</strong>: Experiment with Swin Transformer or CSWin Transformer. Observe how hierarchical patching or specialized window attention changes performance and training speed.</li>
+</ol>
+<hr>
+</section>
+<section id="references" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="references"><span class="header-section-number">5.6</span> References</h2>
+<ol type="1">
+<li>Vision Transformers - The Future of Computer Vision! [ResearchGate]</li>
+<li>Introduction to Vision Transformers | Original ViT Paper Explained [aipapersacademy.com]</li>
+<li>Deploying Attention-Based Vision Transformers to Apple Neural Engine [machinelearning.apple.com]</li>
+<li>Vision Transformers (ViT) in Image Recognition: Full Guide [viso.ai]</li>
+<li>Vision Transformers, Explained. A Full Walk-Through of Vision… [Towards Data Science]</li>
+<li>From Transformers to Vision Transformers (ViT): Applying NLP Models to Computer Vision [Medium]</li>
+<li>A Comprehensive Study of Vision Transformers in Image Classification Tasks [arXiv]</li>
+<li>Introductory guide to Vision Transformers [Encord]</li>
+<li>Efficient Training of Visual Transformers with Small Datasets [NeurIPS Proceedings]</li>
+<li>FDViT: Improve the Hierarchical Architecture of Vision Transformer [ICCV 2023]</li>
+<li>Vision Transformers vs.&nbsp;Convolutional Neural Networks (CNNs) [GeeksforGeeks]</li>
+<li>Vision Transformers vs CNNs at the Edge [Edge AI Vision]</li>
+<li>What is a Vision Transformer (ViT)? Real-World Applications [SJ Innovation]</li>
+<li>Vision Transformer: An Introduction [Built In]</li>
+<li>Mastering Vision Transformers with Hugging Face [Rapid Innovation]</li>
+<li>Vision Transformer (ViT) - Hugging Face [huggingface.co]</li>
+<li>Top 10 Open Source Computer Vision Repositories [Encord]</li>
+<li>yhlleo/VTs-Drloc: Efficient Training of Visual Transformers [GitHub]</li>
+<li>Vision Transformers for Image Classification: A Comparative Survey [MDPI]</li>
+<li>BMVC 2022: How to Train Vision Transformer on Small-scale Datasets? [GitHub]</li>
+<li>Vision Transformer: What It Is &amp; How It Works [V7 Labs]</li>
+</ol>
+<hr>
+<pre class="{note}"><code>**Key Takeaway**
+
+Vision Transformers offer a fresh approach to image understanding by modeling global relationships among patches from the get-go. As architectures and training strategies evolve, they stand poised to become foundational building blocks in next-generation computer vision systems.</code></pre>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb10" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Vision Transformers</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="al">![](https://miro.medium.com/v2/resize:fit:700/0*Rtb7Jt6378xfe6Z1.png)</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>What if we could capture not just the local features in images (like corners, edges, or textures) but the entire global context all at once? Could that help a model better understand complex scenes and relationships between objects? Vision Transformers (ViT) attempt exactly that by leveraging **self-attention**, a mechanism originally popularized in Natural Language Processing.</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Genesis of Vision Transformers</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="fu">### Conceptual Foundation</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>*Why were Vision Transformers developed, given that Convolutional Neural Networks (CNNs) already excel in computer vision tasks?*</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>CNNs have been the cornerstone of computer vision for years, particularly good at capturing local patterns through convolutional filters. However, they can struggle to efficiently capture **global context** and **long-range dependencies**. In scenarios where relationships between objects spread across an entire image become crucial (e.g., understanding crowd scenes or satellite imagery), this limitation can be significant.</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>Meanwhile, the **Transformer architecture** (from the paper "Attention Is All You Need") revolutionized NLP by modeling long-range dependencies in sequential data. This success inspired researchers to ask: *Could the same self-attention mechanism help models 'see' the entire image at once, instead of focusing on small, local regions?*</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="in">```{figure} https://www.researchgate.net/publication/361733806/figure/fig3/AS%3A1173979050057729%401656909825527/Operation-of-CNN-and-ViT.ppm</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="in">:name: fig-cnn-vit</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="in">:width: 500px</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="in">:align: center</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="in">Comparison of the receptive field of CNNs and Vision Transformers. CNN has a local receptive field constrained by the convolutional filters, while ViT has a global receptive field, allowing it to capture long-range dependencies between different parts of the image.</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a><span class="in">```{note}</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a><span class="in">**Historical Context**</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a><span class="in">- **CNN Dominance (2010s)**: CNNs (e.g., AlexNet, VGG, ResNet) drove huge leaps in image classification and object detection.</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a><span class="in">- **Transformer Breakthrough (2017)**: In NLP, Transformers replaced recurrent architectures (LSTMs, GRUs) for tasks like machine translation.</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="in">- **ViT Emerges (2020)**: Google researchers introduced the idea of applying pure Transformers to image patches, showing excellent results on large-scale image datasets.</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Vision Transformer (ViT) Architecture</span></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>*How do we adapt an NLP-centric Transformer to handle 2D image data?*</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>In **Vision Transformers**, an image is first split into a grid of small, equally sized patches—commonly $16 \times 16$ pixels each. Each patch is **flattened** and fed into a linear layer that creates a higher-dimensional embedding. You can think of each patch embedding as analogous to a "word embedding" in NLP.</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a><span class="in">```{figure} https://www.pinecone.io/_next/image/?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fvr8gru94%2Fproduction%2F7a096efc8f3cc40849ee17a546dc0e685da2dc73-4237x1515.png&amp;w=3840&amp;q=75</span></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a><span class="in">:name: fig-vit-patch</span></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a><span class="in">:width: 500px</span></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a><span class="in">:align: center</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a><span class="in">The process of splitting an image into patches and feeding them into a Vision Transformer. Image taken from [Pinecone](https://www.pinecone.io/learn/series/image-search/vision-transformers/).</span></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a><span class="in">```{note}</span></span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a><span class="in">**Why Patches Instead of Pixels?**</span></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a><span class="in">- Handling each pixel independently would create a massive sequence (e.g., a 224x224 image has 50176 pixels!).</span></span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a><span class="in">- Using patches reduces sequence length substantially and preserves local spatial structure.</span></span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a><span class="fu">### 2.2 Positional Encodings</span></span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>Because Transformers are order-agnostic, we add **positional encodings** to each patch embedding. These encodings help the model understand the position of each patch in the original image grid.</span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a><span class="fu">### 2.3 Transformer Encoder</span></span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>The sequence of patch embeddings (plus positional encodings) goes through a **Transformer encoder**, consisting of:</span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Multi-Head Self-Attention**: Allows each patch to attend to others, learning both local and global image features.</span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Feed-Forward Layers (MLP blocks)**: Expands and contracts the hidden dimension to add non-linear transformations.</span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a><span class="fu">### 2.4 Classification Head</span></span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>Typically, the **[CLS] token** (a special token prepended to the sequence) serves as the global representation. After passing through all encoder layers, it goes to a lightweight classification head (a small MLP) to predict the output class.</span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a><span class="in">```{note}</span></span>
+<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a><span class="in">**Mathematical Foundation (Simplified)**</span></span>
+<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a><span class="in">Self-attention for a single head can be described as:</span></span>
+<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a><span class="in">$$</span></span>
+<span id="cb10-81"><a href="#cb10-81" aria-hidden="true" tabindex="-1"></a><span class="in">\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}\right) V</span></span>
+<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a><span class="in">$$</span></span>
+<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a><span class="in">- $Q, K, V$ are linear projections of the input (patch embeddings).</span></span>
+<span id="cb10-85"><a href="#cb10-85" aria-hidden="true" tabindex="-1"></a><span class="in">- $d_k$ is the dimension of $K$.</span></span>
+<span id="cb10-86"><a href="#cb10-86" aria-hidden="true" tabindex="-1"></a><span class="in">- Multi-head attention runs this process in parallel with different learnable projections.</span></span>
+<span id="cb10-87"><a href="#cb10-87" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-88"><a href="#cb10-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-89"><a href="#cb10-89" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb10-90"><a href="#cb10-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-91"><a href="#cb10-91" aria-hidden="true" tabindex="-1"></a><span class="fu">## 3. Types of Attention Mechanisms</span></span>
+<span id="cb10-92"><a href="#cb10-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-93"><a href="#cb10-93" aria-hidden="true" tabindex="-1"></a>Even though Vision Transformers generally use **multi-head self-attention**, research has explored variations:</span>
+<span id="cb10-94"><a href="#cb10-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-95"><a href="#cb10-95" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Stochastic “Hard” Attention**: Focuses on a subset of patches while ignoring others.</span>
+<span id="cb10-96"><a href="#cb10-96" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Deterministic “Soft” Attention**: Assigns weights to all patches.</span>
+<span id="cb10-97"><a href="#cb10-97" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Multi-Head Attention**: Employs multiple attention heads to learn different aspects (textures, edges, shapes) simultaneously.</span>
+<span id="cb10-98"><a href="#cb10-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-101"><a href="#cb10-101" aria-hidden="true" tabindex="-1"></a><span class="in">```{note}</span></span>
+<span id="cb10-102"><a href="#cb10-102" aria-hidden="true" tabindex="-1"></a><span class="in">**Implementation Insight**</span></span>
+<span id="cb10-103"><a href="#cb10-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-104"><a href="#cb10-104" aria-hidden="true" tabindex="-1"></a><span class="in">You can vary the attention mechanism to strike different balances between computational cost and representational capacity. Hard attention can be more efficient but trickier to train.</span></span>
+<span id="cb10-105"><a href="#cb10-105" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-106"><a href="#cb10-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-107"><a href="#cb10-107" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb10-108"><a href="#cb10-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-109"><a href="#cb10-109" aria-hidden="true" tabindex="-1"></a><span class="fu">## 4. Implementation Example</span></span>
+<span id="cb10-110"><a href="#cb10-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-111"><a href="#cb10-111" aria-hidden="true" tabindex="-1"></a>Let’s walk through a simplified code snippet using **Hugging Face Transformers** to classify images with a Vision Transformer. This gives a concrete look at how to build upon these theoretical concepts in practice.</span>
+<span id="cb10-112"><a href="#cb10-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-113"><a href="#cb10-113" aria-hidden="true" tabindex="-1"></a><span class="in">```{code-cell} ipython3</span></span>
+<span id="cb10-114"><a href="#cb10-114" aria-hidden="true" tabindex="-1"></a><span class="pp"># </span><span class="er">A minimal ViT classification example with Hugging Face</span></span>
+<span id="cb10-115"><a href="#cb10-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-116"><a href="#cb10-116" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>pip install transformers</span>
+<span id="cb10-117"><a href="#cb10-117" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>pip install torch</span>
+<span id="cb10-118"><a href="#cb10-118" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>pip install torchvision</span>
+<span id="cb10-119"><a href="#cb10-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-120"><a href="#cb10-120" aria-hidden="true" tabindex="-1"></a>import torch</span>
+<span id="cb10-121"><a href="#cb10-121" aria-hidden="true" tabindex="-1"></a>from transformers import ViTForImageClassification<span class="op">,</span> ViTImageProcessor</span>
+<span id="cb10-122"><a href="#cb10-122" aria-hidden="true" tabindex="-1"></a>from PIL import Image</span>
+<span id="cb10-123"><a href="#cb10-123" aria-hidden="true" tabindex="-1"></a>import requests</span>
+<span id="cb10-124"><a href="#cb10-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-125"><a href="#cb10-125" aria-hidden="true" tabindex="-1"></a><span class="pp"># </span><span class="er">Load a pre-trained Vision Transformer model</span></span>
+<span id="cb10-126"><a href="#cb10-126" aria-hidden="true" tabindex="-1"></a>model_name <span class="op">=</span> <span class="st">"google/vit-base-patch16-224"</span></span>
+<span id="cb10-127"><a href="#cb10-127" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ViTForImageClassification<span class="op">.</span>from_pretrained<span class="op">(</span>model_name<span class="op">)</span></span>
+<span id="cb10-128"><a href="#cb10-128" aria-hidden="true" tabindex="-1"></a>processor <span class="op">=</span> ViTImageProcessor<span class="op">.</span>from_pretrained<span class="op">(</span>model_name<span class="op">)</span></span>
+<span id="cb10-129"><a href="#cb10-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-130"><a href="#cb10-130" aria-hidden="true" tabindex="-1"></a><span class="pp"># </span><span class="er">Load an example image</span></span>
+<span id="cb10-131"><a href="#cb10-131" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://images.unsplash.com/photo-1524820353064-7141fab1f5b6"</span></span>
+<span id="cb10-132"><a href="#cb10-132" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> Image<span class="op">.</span>open<span class="op">(</span>requests<span class="op">.</span>get<span class="op">(</span>url<span class="op">,</span> stream<span class="op">=</span>True<span class="op">).</span>raw<span class="op">)</span></span>
+<span id="cb10-133"><a href="#cb10-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-134"><a href="#cb10-134" aria-hidden="true" tabindex="-1"></a><span class="pp"># </span><span class="er">Prepare the image</span></span>
+<span id="cb10-135"><a href="#cb10-135" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> processor<span class="op">(</span>images<span class="op">=</span>image<span class="op">,</span> return_tensors<span class="op">=</span><span class="st">"pt"</span><span class="op">)</span></span>
+<span id="cb10-136"><a href="#cb10-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-137"><a href="#cb10-137" aria-hidden="true" tabindex="-1"></a><span class="pp"># </span><span class="er">Inference</span></span>
+<span id="cb10-138"><a href="#cb10-138" aria-hidden="true" tabindex="-1"></a>with torch<span class="op">.</span>no_grad<span class="op">():</span></span>
+<span id="cb10-139"><a href="#cb10-139" aria-hidden="true" tabindex="-1"></a>    outputs <span class="op">=</span> model<span class="op">(**</span>inputs<span class="op">)</span></span>
+<span id="cb10-140"><a href="#cb10-140" aria-hidden="true" tabindex="-1"></a>    logits <span class="op">=</span> outputs<span class="op">.</span>logits</span>
+<span id="cb10-141"><a href="#cb10-141" aria-hidden="true" tabindex="-1"></a>predicted_class_idx <span class="op">=</span> logits<span class="op">.</span>argmax<span class="op">(-</span><span class="dv">1</span><span class="op">).</span>item<span class="op">()</span></span>
+<span id="cb10-142"><a href="#cb10-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-143"><a href="#cb10-143" aria-hidden="true" tabindex="-1"></a><span class="pp"># </span><span class="er">Print the predicted label</span></span>
+<span id="cb10-144"><a href="#cb10-144" aria-hidden="true" tabindex="-1"></a>print<span class="op">(</span><span class="st">"Predicted class:"</span><span class="op">,</span> model<span class="op">.</span>config<span class="op">.</span>id2label<span class="op">[</span>predicted_class_idx<span class="op">])</span></span>
+<span id="cb10-145"><a href="#cb10-145" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-146"><a href="#cb10-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-149"><a href="#cb10-149" aria-hidden="true" tabindex="-1"></a><span class="in">```{tip}</span></span>
+<span id="cb10-150"><a href="#cb10-150" aria-hidden="true" tabindex="-1"></a><span class="in">- **Data Augmentation**: When training from scratch on smaller datasets, apply heavy data augmentation (random crops, flips, color jitter) to avoid overfitting.</span></span>
+<span id="cb10-151"><a href="#cb10-151" aria-hidden="true" tabindex="-1"></a><span class="in">- **Transfer Learning**: Leverage pre-trained weights from large datasets and then fine-tune on your target task for improved performance.</span></span>
+<span id="cb10-152"><a href="#cb10-152" aria-hidden="true" tabindex="-1"></a><span class="in">- **Batch Size**: ViTs can be memory-heavy; consider smaller batch sizes and gradient accumulation if GPU memory is limited.</span></span>
+<span id="cb10-153"><a href="#cb10-153" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-154"><a href="#cb10-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-155"><a href="#cb10-155" aria-hidden="true" tabindex="-1"></a><span class="al">![](https://via.placeholder.com/600x300)</span></span>
+<span id="cb10-156"><a href="#cb10-156" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Figure: A schematic visualization of patches being extracted from an image and fed into a Vision Transformer pipeline.</span><span class="co">]</span></span>
+<span id="cb10-157"><a href="#cb10-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-158"><a href="#cb10-158" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb10-159"><a href="#cb10-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-160"><a href="#cb10-160" aria-hidden="true" tabindex="-1"></a><span class="fu">## 5. Advancements in Vision Transformer Architectures</span></span>
+<span id="cb10-161"><a href="#cb10-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-162"><a href="#cb10-162" aria-hidden="true" tabindex="-1"></a>Could we make ViTs more data-efficient, faster, or better at capturing hierarchical features?</span>
+<span id="cb10-163"><a href="#cb10-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-164"><a href="#cb10-164" aria-hidden="true" tabindex="-1"></a><span class="fu">### 5.1 Improved Training and Architectures</span></span>
+<span id="cb10-165"><a href="#cb10-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-166"><a href="#cb10-166" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**DeiT (Data-efficient Image Transformers)**: Introduces a distillation step to improve data efficiency, making ViTs competitive with CNNs on smaller datasets.</span>
+<span id="cb10-167"><a href="#cb10-167" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Model Soups**: Averages predictions from multiple ViT models to harness their individual strengths for higher accuracy.</span>
+<span id="cb10-168"><a href="#cb10-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-169"><a href="#cb10-169" aria-hidden="true" tabindex="-1"></a><span class="fu">### 5.2 Hierarchical and Hybrid Approaches</span></span>
+<span id="cb10-170"><a href="#cb10-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-171"><a href="#cb10-171" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Swin Transformer**: Processes images in a hierarchical manner using non-overlapping patches at different resolutions, improving scalability to arbitrary image sizes.</span>
+<span id="cb10-172"><a href="#cb10-172" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**CaiT (Cross-Attention Image Transformer)**: Uses cross-attention between different patch groups to capture more complex relationships.</span>
+<span id="cb10-173"><a href="#cb10-173" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**CSWin Transformer**: Adopts a cross-shaped window self-attention pattern to optimize the balance between spatial coverage and computational cost.</span>
+<span id="cb10-174"><a href="#cb10-174" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**FDViT**: Employs flexible downsampling layers for smoother feature map reductions, improving efficiency and classification accuracy.</span>
+<span id="cb10-175"><a href="#cb10-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-178"><a href="#cb10-178" aria-hidden="true" tabindex="-1"></a><span class="in">```{note}</span></span>
+<span id="cb10-179"><a href="#cb10-179" aria-hidden="true" tabindex="-1"></a><span class="in">**Common Misconception**</span></span>
+<span id="cb10-180"><a href="#cb10-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-181"><a href="#cb10-181" aria-hidden="true" tabindex="-1"></a><span class="in">It’s tempting to think ViTs automatically solve all the limitations of CNNs. However, they still require careful tuning, large datasets (or pre-training), and thoughtful architecture decisions to perform at their best.</span></span>
+<span id="cb10-182"><a href="#cb10-182" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-183"><a href="#cb10-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-184"><a href="#cb10-184" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb10-185"><a href="#cb10-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-186"><a href="#cb10-186" aria-hidden="true" tabindex="-1"></a><span class="fu">## 6. Strengths and Weaknesses</span></span>
+<span id="cb10-187"><a href="#cb10-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-188"><a href="#cb10-188" aria-hidden="true" tabindex="-1"></a>When do Vision Transformers shine, and where do they falter?</span>
+<span id="cb10-189"><a href="#cb10-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-190"><a href="#cb10-190" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Feature             <span class="pp">|</span> Convolutional Neural Networks (CNNs)      <span class="pp">|</span> Vision Transformers (ViTs)                       <span class="pp">|</span></span>
+<span id="cb10-191"><a href="#cb10-191" aria-hidden="true" tabindex="-1"></a><span class="pp">|---------------------|-------------------------------------------|--------------------------------------------------|</span></span>
+<span id="cb10-192"><a href="#cb10-192" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Architecture**    <span class="pp">|</span> Convolutional + pooling + MLP             <span class="pp">|</span> Pure Transformer with self-attention             <span class="pp">|</span></span>
+<span id="cb10-193"><a href="#cb10-193" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Input Processing**<span class="pp">|</span> Processes entire image as is              <span class="pp">|</span> Splits image into patches (tokens)               <span class="pp">|</span></span>
+<span id="cb10-194"><a href="#cb10-194" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Global Context**  <span class="pp">|</span> Emerges in deeper layers                  <span class="pp">|</span> Captured from the start across all patches       <span class="pp">|</span></span>
+<span id="cb10-195"><a href="#cb10-195" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Data Requirements**<span class="pp">|</span> Perform well with moderate data          <span class="pp">|</span> Often require very large datasets or pre-training<span class="pp">|</span></span>
+<span id="cb10-196"><a href="#cb10-196" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Compute Cost**    <span class="pp">|</span> Usually lower, localized ops              <span class="pp">|</span> Higher due to self-attention on all patches      <span class="pp">|</span></span>
+<span id="cb10-197"><a href="#cb10-197" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Performance**     <span class="pp">|</span> Excellent with well-tuned architectures   <span class="pp">|</span> Excels on large-scale data, state-of-the-art SOTA<span class="pp">|</span></span>
+<span id="cb10-198"><a href="#cb10-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-199"><a href="#cb10-199" aria-hidden="true" tabindex="-1"></a><span class="fu">### Key Advantages</span></span>
+<span id="cb10-200"><a href="#cb10-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-201"><a href="#cb10-201" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Global Context**: The self-attention mechanism can integrate information from all patches simultaneously.</span>
+<span id="cb10-202"><a href="#cb10-202" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Scalability**: ViTs shine on large datasets, often surpassing CNNs.</span>
+<span id="cb10-203"><a href="#cb10-203" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reduced Inductive Bias**: They learn more general representations since they are not hard-coded to look for local spatial features like CNNs.</span>
+<span id="cb10-204"><a href="#cb10-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-205"><a href="#cb10-205" aria-hidden="true" tabindex="-1"></a><span class="fu">### Main Limitations</span></span>
+<span id="cb10-206"><a href="#cb10-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-207"><a href="#cb10-207" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Data-Hungry**: Tend to overfit on small datasets; methods like DeiT and heavy augmentation help.</span>
+<span id="cb10-208"><a href="#cb10-208" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**High Computational Cost**: Each patch attends to all others, which can be expensive for high-resolution images.</span>
+<span id="cb10-209"><a href="#cb10-209" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Interpretability**: Visualizing attention maps is possible, but can still be less intuitive than CNN feature maps.</span>
+<span id="cb10-210"><a href="#cb10-210" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-211"><a href="#cb10-211" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb10-212"><a href="#cb10-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-213"><a href="#cb10-213" aria-hidden="true" tabindex="-1"></a><span class="fu">## 7. Real-World Applications</span></span>
+<span id="cb10-214"><a href="#cb10-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-215"><a href="#cb10-215" aria-hidden="true" tabindex="-1"></a>How are Vision Transformers being used beyond simple image classification?</span>
+<span id="cb10-216"><a href="#cb10-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-217"><a href="#cb10-217" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Object Detection &amp; Image Segmentation**: Self-attention helps capture relationships among objects scattered across the scene.</span>
+<span id="cb10-218"><a href="#cb10-218" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Medical Imaging**: Identifying tumors in X-rays or segmenting organ boundaries in MRI scans.</span>
+<span id="cb10-219"><a href="#cb10-219" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Remote Sensing**: Analyzing satellite imagery for deforestation tracking or disaster management.</span>
+<span id="cb10-220"><a href="#cb10-220" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Action Recognition in Videos**: Extended to video frames, ViTs can learn complex spatiotemporal patterns.</span>
+<span id="cb10-221"><a href="#cb10-221" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Multi-Modal Tasks**: Works well with textual data (e.g., image captioning, visual question answering).</span>
+<span id="cb10-222"><a href="#cb10-222" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Autonomous Driving**: Understanding global context on the road is critical for safe navigation.</span>
+<span id="cb10-223"><a href="#cb10-223" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Anomaly Detection**: Identifying unusual patterns or defects in manufacturing lines.</span>
+<span id="cb10-224"><a href="#cb10-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-227"><a href="#cb10-227" aria-hidden="true" tabindex="-1"></a><span class="in">```{note}</span></span>
+<span id="cb10-228"><a href="#cb10-228" aria-hidden="true" tabindex="-1"></a><span class="in">**Real-World Use Case**</span></span>
+<span id="cb10-229"><a href="#cb10-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-230"><a href="#cb10-230" aria-hidden="true" tabindex="-1"></a><span class="in">In **medical imaging**, ViTs can better spot anomalies by focusing on subtle global context differences in scans. This can help radiologists detect diseases in early stages and potentially save lives.</span></span>
+<span id="cb10-231"><a href="#cb10-231" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-232"><a href="#cb10-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-233"><a href="#cb10-233" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb10-234"><a href="#cb10-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-235"><a href="#cb10-235" aria-hidden="true" tabindex="-1"></a><span class="fu">## 8. Future Directions</span></span>
+<span id="cb10-236"><a href="#cb10-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-237"><a href="#cb10-237" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Enhanced Efficiency**: Model compression, pruning, and improved patch strategies aim to reduce computational overhead.</span>
+<span id="cb10-238"><a href="#cb10-238" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Smaller Dataset Training**: More advanced self-supervision, distillation, and data-augmentation techniques are being developed to tackle data limitations.</span>
+<span id="cb10-239"><a href="#cb10-239" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Interpretability**: Research on attention visualization tools and explanations is growing, aiming to make ViTs more transparent.</span>
+<span id="cb10-240"><a href="#cb10-240" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**New Domains**: From multi-modal reasoning to video analysis, ViTs are expanding across countless tasks in AI.</span>
+<span id="cb10-241"><a href="#cb10-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-244"><a href="#cb10-244" aria-hidden="true" tabindex="-1"></a><span class="in">```{note}</span></span>
+<span id="cb10-245"><a href="#cb10-245" aria-hidden="true" tabindex="-1"></a><span class="in">**Performance Optimization**</span></span>
+<span id="cb10-246"><a href="#cb10-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-247"><a href="#cb10-247" aria-hidden="true" tabindex="-1"></a><span class="in">- Distillation from large teacher ViTs or even CNNs can help small ViTs converge faster with less data.</span></span>
+<span id="cb10-248"><a href="#cb10-248" aria-hidden="true" tabindex="-1"></a><span class="in">- Layer-wise learning rate decay and progressive resizing of patches are common training tricks.</span></span>
+<span id="cb10-249"><a href="#cb10-249" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-250"><a href="#cb10-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-251"><a href="#cb10-251" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb10-252"><a href="#cb10-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-253"><a href="#cb10-253" aria-hidden="true" tabindex="-1"></a><span class="fu">## 9. Reflection and Exercises</span></span>
+<span id="cb10-254"><a href="#cb10-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-255"><a href="#cb10-255" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Reflection**: Why do you think ViTs require large datasets to perform optimally, and how might transfer learning mitigate this requirement?</span>
+<span id="cb10-256"><a href="#cb10-256" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Exercise**: Implement a fine-tuning script for a ViT on a smaller dataset (e.g., CIFAR-10). Try various data augmentation strategies. Compare results with a CNN baseline.</span>
+<span id="cb10-257"><a href="#cb10-257" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Advanced Exploration**: Experiment with Swin Transformer or CSWin Transformer. Observe how hierarchical patching or specialized window attention changes performance and training speed.</span>
+<span id="cb10-258"><a href="#cb10-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-259"><a href="#cb10-259" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb10-260"><a href="#cb10-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-261"><a href="#cb10-261" aria-hidden="true" tabindex="-1"></a><span class="fu">## References</span></span>
+<span id="cb10-262"><a href="#cb10-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-263"><a href="#cb10-263" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Vision Transformers - The Future of Computer Vision! <span class="co">[</span><span class="ot">ResearchGate</span><span class="co">]</span></span>
+<span id="cb10-264"><a href="#cb10-264" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Introduction to Vision Transformers | Original ViT Paper Explained <span class="co">[</span><span class="ot">aipapersacademy.com</span><span class="co">]</span></span>
+<span id="cb10-265"><a href="#cb10-265" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Deploying Attention-Based Vision Transformers to Apple Neural Engine <span class="co">[</span><span class="ot">machinelearning.apple.com</span><span class="co">]</span></span>
+<span id="cb10-266"><a href="#cb10-266" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Vision Transformers (ViT) in Image Recognition: Full Guide <span class="co">[</span><span class="ot">viso.ai</span><span class="co">]</span></span>
+<span id="cb10-267"><a href="#cb10-267" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Vision Transformers, Explained. A Full Walk-Through of Vision… <span class="co">[</span><span class="ot">Towards Data Science</span><span class="co">]</span></span>
+<span id="cb10-268"><a href="#cb10-268" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>From Transformers to Vision Transformers (ViT): Applying NLP Models to Computer Vision <span class="co">[</span><span class="ot">Medium</span><span class="co">]</span></span>
+<span id="cb10-269"><a href="#cb10-269" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>A Comprehensive Study of Vision Transformers in Image Classification Tasks <span class="co">[</span><span class="ot">arXiv</span><span class="co">]</span></span>
+<span id="cb10-270"><a href="#cb10-270" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>Introductory guide to Vision Transformers <span class="co">[</span><span class="ot">Encord</span><span class="co">]</span></span>
+<span id="cb10-271"><a href="#cb10-271" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>Efficient Training of Visual Transformers with Small Datasets <span class="co">[</span><span class="ot">NeurIPS Proceedings</span><span class="co">]</span></span>
+<span id="cb10-272"><a href="#cb10-272" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>FDViT: Improve the Hierarchical Architecture of Vision Transformer <span class="co">[</span><span class="ot">ICCV 2023</span><span class="co">]</span></span>
+<span id="cb10-273"><a href="#cb10-273" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span>Vision Transformers vs. Convolutional Neural Networks (CNNs) <span class="co">[</span><span class="ot">GeeksforGeeks</span><span class="co">]</span></span>
+<span id="cb10-274"><a href="#cb10-274" aria-hidden="true" tabindex="-1"></a><span class="ss">12. </span>Vision Transformers vs CNNs at the Edge <span class="co">[</span><span class="ot">Edge AI Vision</span><span class="co">]</span></span>
+<span id="cb10-275"><a href="#cb10-275" aria-hidden="true" tabindex="-1"></a><span class="ss">13. </span>What is a Vision Transformer (ViT)? Real-World Applications <span class="co">[</span><span class="ot">SJ Innovation</span><span class="co">]</span></span>
+<span id="cb10-276"><a href="#cb10-276" aria-hidden="true" tabindex="-1"></a><span class="ss">14. </span>Vision Transformer: An Introduction <span class="co">[</span><span class="ot">Built In</span><span class="co">]</span></span>
+<span id="cb10-277"><a href="#cb10-277" aria-hidden="true" tabindex="-1"></a><span class="ss">15. </span>Mastering Vision Transformers with Hugging Face <span class="co">[</span><span class="ot">Rapid Innovation</span><span class="co">]</span></span>
+<span id="cb10-278"><a href="#cb10-278" aria-hidden="true" tabindex="-1"></a><span class="ss">16. </span>Vision Transformer (ViT) - Hugging Face <span class="co">[</span><span class="ot">huggingface.co</span><span class="co">]</span></span>
+<span id="cb10-279"><a href="#cb10-279" aria-hidden="true" tabindex="-1"></a><span class="ss">17. </span>Top 10 Open Source Computer Vision Repositories <span class="co">[</span><span class="ot">Encord</span><span class="co">]</span></span>
+<span id="cb10-280"><a href="#cb10-280" aria-hidden="true" tabindex="-1"></a><span class="ss">18. </span>yhlleo/VTs-Drloc: Efficient Training of Visual Transformers <span class="co">[</span><span class="ot">GitHub</span><span class="co">]</span></span>
+<span id="cb10-281"><a href="#cb10-281" aria-hidden="true" tabindex="-1"></a><span class="ss">19. </span>Vision Transformers for Image Classification: A Comparative Survey <span class="co">[</span><span class="ot">MDPI</span><span class="co">]</span></span>
+<span id="cb10-282"><a href="#cb10-282" aria-hidden="true" tabindex="-1"></a><span class="ss">20. </span>BMVC 2022: How to Train Vision Transformer on Small-scale Datasets? <span class="co">[</span><span class="ot">GitHub</span><span class="co">]</span></span>
+<span id="cb10-283"><a href="#cb10-283" aria-hidden="true" tabindex="-1"></a><span class="ss">21. </span>Vision Transformer: What It Is &amp; How It Works <span class="co">[</span><span class="ot">V7 Labs</span><span class="co">]</span></span>
+<span id="cb10-284"><a href="#cb10-284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-285"><a href="#cb10-285" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb10-286"><a href="#cb10-286" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-289"><a href="#cb10-289" aria-hidden="true" tabindex="-1"></a><span class="in">```{note}</span></span>
+<span id="cb10-290"><a href="#cb10-290" aria-hidden="true" tabindex="-1"></a><span class="in">**Key Takeaway**</span></span>
+<span id="cb10-291"><a href="#cb10-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-292"><a href="#cb10-292" aria-hidden="true" tabindex="-1"></a><span class="in">Vision Transformers offer a fresh approach to image understanding by modeling global relationships among patches from the get-go. As architectures and training strategies evolve, they stand poised to become foundational building blocks in next-generation computer vision systems.</span></span>
+<span id="cb10-293"><a href="#cb10-293" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Copyright 2025, Sadamori Kojaku</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions"><ul><li><a href="https://github.com/skojaku/applied-soft-comp/edit/main/m05-images/archive/vision_transformer.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/skojaku/applied-soft-comp/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/skojaku/applied-soft-comp">
+      <i class="bi bi-github" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
