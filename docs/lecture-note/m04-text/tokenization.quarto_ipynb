@@ -28,7 +28,7 @@
         "\n",
         "Let's unbox an actual tokenizer from Hugging Face and trace the pipeline from raw text to embeddings. We'll use **Phi-1.5**, a compact model from Microsoft. For tokenization experiments, we only need the tokenizer—no need to load the full multi-gigabyte model."
       ],
-      "id": "b7df0c6a"
+      "id": "600b3115"
     },
     {
       "cell_type": "code",
@@ -40,7 +40,7 @@
         "model_name = \"microsoft/phi-1.5\"\n",
         "tokenizer = AutoTokenizer.from_pretrained(model_name)"
       ],
-      "id": "52dea293",
+      "id": "d7a982c8",
       "execution_count": null,
       "outputs": []
     },
@@ -50,7 +50,7 @@
       "source": [
         "Let's inspect the tokenizer's constraints."
       ],
-      "id": "ce69bb43"
+      "id": "160830d6"
     },
     {
       "cell_type": "code",
@@ -60,7 +60,7 @@
         "print(f\"Vocabulary size: {tokenizer.vocab_size:,} tokens\")\n",
         "print(f\"Max sequence length: {tokenizer.model_max_length} tokens\")"
       ],
-      "id": "2e5fd3cd",
+      "id": "2009a50f",
       "execution_count": null,
       "outputs": []
     },
@@ -74,7 +74,7 @@
         "\n",
         "Tokenization splits text into the subword fragments the model actually processes. Watch what happens when we tokenize a university name."
       ],
-      "id": "3e4a7b4c"
+      "id": "9154310d"
     },
     {
       "cell_type": "code",
@@ -84,7 +84,7 @@
         "\n",
         "tokens = tokenizer.tokenize(text)"
       ],
-      "id": "c0507f93",
+      "id": "dc1bfbfc",
       "execution_count": null,
       "outputs": []
     },
@@ -95,7 +95,7 @@
         "#| code-fold: true\n",
         "print(f\"Tokens: {tokens}\")"
       ],
-      "id": "a9ddeb46",
+      "id": "ffa099f8",
       "execution_count": null,
       "outputs": []
     },
@@ -111,7 +111,7 @@
         "\n",
         "Let's test a few more examples to see the pattern."
       ],
-      "id": "d34e983e"
+      "id": "fcb9aea5"
     },
     {
       "cell_type": "code",
@@ -129,7 +129,7 @@
         "    tokens = tokenizer.tokenize(text)\n",
         "    print(f\"{text:10s} → {tokens}\")"
       ],
-      "id": "738a4f1e",
+      "id": "d2252800",
       "execution_count": null,
       "outputs": []
     },
@@ -147,7 +147,7 @@
         "\n",
         "Tokens are still strings. The model needs integers. Each token maps to a unique ID in the vocabulary dictionary."
       ],
-      "id": "039401d7"
+      "id": "5f00de11"
     },
     {
       "cell_type": "code",
@@ -165,7 +165,7 @@
         "for token, token_id in zip(tokens, token_ids):\n",
         "    print(f\"{token:10s} → {token_id:6d}\")"
       ],
-      "id": "3d0c30bc",
+      "id": "0bd07b20",
       "execution_count": null,
       "outputs": []
     },
@@ -175,7 +175,7 @@
       "source": [
         "Each token receives a unique integer ID. The vocabulary is a dictionary: `{token_string: integer_id}`. Let's peek inside."
       ],
-      "id": "8b9a00fc"
+      "id": "ba021a08"
     },
     {
       "cell_type": "code",
@@ -189,7 +189,7 @@
         "for token, id in sample_tokens:\n",
         "    print(f\"  {id:6d}: '{token}'\")"
       ],
-      "id": "db79d8a3",
+      "id": "57351c0d",
       "execution_count": null,
       "outputs": []
     },
@@ -199,7 +199,7 @@
       "source": [
         "Most LLMs reserve special tokens for sequence boundaries or control signals. Phi-1.5 uses `<|endoftext|>` as a separator during training. Let's verify."
       ],
-      "id": "1b187de9"
+      "id": "d018cfde"
     },
     {
       "cell_type": "code",
@@ -209,7 +209,7 @@
         "token = tokenizer.convert_ids_to_tokens(token_id)[0]\n",
         "print(f\"Token ID: {token_id} → Token: {token}\")"
       ],
-      "id": "035b1d99",
+      "id": "aa4914db",
       "execution_count": null,
       "outputs": []
     },
@@ -225,7 +225,7 @@
         "\n",
         "Now we need the full model to access the embedding layer—the matrix that converts token IDs into dense vectors."
       ],
-      "id": "f213306d"
+      "id": "1d8a72c6"
     },
     {
       "cell_type": "code",
@@ -240,7 +240,7 @@
         "# Retrieve the embedding layer\n",
         "embedding_layer = model.model.embed_tokens"
       ],
-      "id": "62777859",
+      "id": "8264a9f4",
       "execution_count": null,
       "outputs": []
     },
@@ -250,7 +250,7 @@
       "source": [
         "The embedding layer is a simple lookup table: a 51,200 × 2,048 matrix where each row is the embedding for a token in the vocabulary. Let's examine the first few entries."
       ],
-      "id": "26bf0eab"
+      "id": "819553d4"
     },
     {
       "cell_type": "code",
@@ -259,7 +259,7 @@
         "#| code-fold: true\n",
         "print(embedding_layer.weight[:5, :10])"
       ],
-      "id": "51977f21",
+      "id": "cb6b928b",
       "execution_count": null,
       "outputs": []
     },
@@ -281,7 +281,7 @@
         "\n",
         "**Next**: [Transformers: The Architecture Behind the Magic →](transformers.qmd)"
       ],
-      "id": "224e7f8a"
+      "id": "87f634a9"
     }
   ],
   "metadata": {

@@ -40,7 +40,7 @@ This cycle repeats until the task is solved.
 Let's build an agent that can explore and analyze a real dataset. We'll use **LangGraph**—a framework from LangChain that models agents as state machines. Unlike simple loops, LangGraph lets you define explicit control flow: decision nodes, parallel execution, conditional branching, and state persistence.
 
 
-::: {.column-margin}
+::: {.callout-note}
 
 Install LangGraph and LangChain:
 
@@ -64,7 +64,7 @@ df.head()
 
 Now we'll create tools that let the agent query this data. In LangGraph, tools are standard Python functions decorated with `@tool`. The function signature and docstring tell the LLM everything it needs.
 
-::: {.column-margin}
+::: {.callout-note}
 **@tool**: Decorator that converts a function into a LangChain tool. The docstring becomes the tool description; parameter names and type hints define the schema.
 
 **Args section**: Must be explicitly documented for each parameter. LangGraph parses this to generate the JSON schema the LLM sees.
@@ -138,7 +138,7 @@ def get_stats(column: str, species: str = None) -> str:
 
 Now create the agent. LangGraph is centered on a **state graph**—a directed graph where nodes are functions and edges define transitions. This gives you explicit control over the ReAct loop.
 
-::: {.column-margin}
+::: {.callout-note}
 **ChatOllama**: LangChain's Ollama integration. Supports tool calling via the model's native API.
 
 **create_react_agent**: Factory function that builds a standard ReAct graph. It defines three nodes: (1) call the LLM, (2) execute tools, (3) check if done.
