@@ -28,7 +28,7 @@
         "\n",
         "Even stranger: in high dimensions, **all distances become similar**. The nearest and farthest neighbors become roughly equidistant. This makes many of our intuitions about \"closeness\" break down."
       ],
-      "id": "28cb38c8"
+      "id": "e682103b"
     },
     {
       "cell_type": "code",
@@ -87,7 +87,7 @@
         "ax.legend(frameon=False)\n",
         "sns.despine()"
       ],
-      "id": "1b5d06c9",
+      "id": "83a1496c",
       "execution_count": null,
       "outputs": []
     },
@@ -101,7 +101,7 @@
         "\n",
         "When you have a **moderate number of dimensions** (roughly 3-10), you can visualize all pairwise relationships using a **scatter plot matrix** (also called a pairs plot or SPLOM)."
       ],
-      "id": "c2098785"
+      "id": "016f74d8"
     },
     {
       "cell_type": "code",
@@ -129,7 +129,7 @@
         "                 diag_kws={'alpha': 0.7, 'linewidth': 2})\n",
         "g.fig.suptitle('Iris Dataset: All Pairwise Relationships', y=1.01)"
       ],
-      "id": "8003f73e",
+      "id": "7631970b",
       "execution_count": null,
       "outputs": []
     },
@@ -151,7 +151,7 @@
         "\n",
         "Mathematically, PCA finds the eigenvectors of the covariance matrix. But conceptually, it's rotating your coordinate system to align with the the highest variance directions of your data."
       ],
-      "id": "6fa085b4"
+      "id": "f7df7ecb"
     },
     {
       "cell_type": "code",
@@ -195,7 +195,7 @@
         "ax.axis('equal')\n",
         "sns.despine()"
       ],
-      "id": "ba4dca71",
+      "id": "7121d609",
       "execution_count": null,
       "outputs": []
     },
@@ -211,7 +211,7 @@
         "\n",
         "Let's apply PCA to the 4-dimensional Iris dataset:"
       ],
-      "id": "d641e71e"
+      "id": "907c919d"
     },
     {
       "cell_type": "code",
@@ -267,7 +267,7 @@
         "\n",
         "plt.tight_layout()"
       ],
-      "id": "9b69c812",
+      "id": "b0afb0b0",
       "execution_count": null,
       "outputs": []
     },
@@ -277,7 +277,7 @@
       "source": [
         "PC1 and PC2 together explain over 95% of the variance in the 4D dataset. The 2D projection preserves the main structure: setosa is well-separated, while versicolor and virginica have some overlap.\n",
         "\n",
-        "::: {.column-margin}\n",
+        "::: {.callout-note}\n",
         "\n",
         "**Always standardize before PCA!** If features have different units or scales, PCA will be dominated by high-variance features. Standardization (zero mean, unit variance) ensures all features contribute fairly.\n",
         "\n",
@@ -293,7 +293,7 @@
         "\n",
         "Mathematically, MDS minimizes **stress**: the difference between high-dimensional distances and low-dimensional distances. Classical MDS has a closed-form solution (like PCA), but more flexible variants use iterative optimization."
       ],
-      "id": "fa3b719a"
+      "id": "1a77b169"
     },
     {
       "cell_type": "code",
@@ -342,7 +342,7 @@
         "\n",
         "plt.tight_layout()"
       ],
-      "id": "83dfdbc1",
+      "id": "24ab2bed",
       "execution_count": null,
       "outputs": []
     },
@@ -352,7 +352,7 @@
       "source": [
         "For the Iris dataset, PCA and MDS look very similar. This is because Iris data is fairly linear---the relationships between features don't involve complex curves or non-linear structures.\n",
         "\n",
-        "::: {.column-margin}\n",
+        "::: {.callout-note}\n",
         "\n",
         "**Why MDS isn't perfect here:** The S-curve has points that are close in Euclidean distance (across the bend) but far apart along the curved surface. MDS tries to preserve both types of distances, creating a compromise that partially straightens the curve but doesn't fully recover the underlying smooth 1D gradient.\n",
         "\n",
@@ -370,7 +370,7 @@
         "\n",
         "Think of it like this: MDS measures distance \"as the crow flies,\" while Isomap measures distance \"as you walk along the surface.\""
       ],
-      "id": "3605ae0f"
+      "id": "7abca54b"
     },
     {
       "cell_type": "code",
@@ -417,7 +417,7 @@
         "\n",
         "plt.tight_layout()"
       ],
-      "id": "61c427b4",
+      "id": "5d2aec56",
       "execution_count": null,
       "outputs": []
     },
@@ -458,7 +458,7 @@
         "\n",
         "The t-distribution's heavy tails are clever: they let well-separated clusters spread out in 2D without overlapping, while keeping local neighborhoods tight."
       ],
-      "id": "5bc3b392"
+      "id": "7d4b1575"
     },
     {
       "cell_type": "code",
@@ -504,7 +504,7 @@
         "\n",
         "plt.tight_layout()"
       ],
-      "id": "a9951ae7",
+      "id": "31e609eb",
       "execution_count": null,
       "outputs": []
     },
@@ -551,7 +551,7 @@
         "\n",
         "Let's apply t-SNE to a more realistic high-dimensional dataset---the MNIST digits dataset, which has 784 dimensions (28�28 pixel images):"
       ],
-      "id": "59596e38"
+      "id": "938e3e91"
     },
     {
       "cell_type": "code",
@@ -590,7 +590,7 @@
         "cbar.set_label('Digit Class')\n",
         "sns.despine()"
       ],
-      "id": "ca8ac492",
+      "id": "83eb4e3a",
       "execution_count": null,
       "outputs": []
     },
@@ -602,7 +602,7 @@
         "\n",
         "This demonstrates t-SNE's power: from 64 dimensions with no explicit information about what makes digits similar, t-SNE discovers the perceptual structure of handwritten digits.\n",
         "\n",
-        "::: {.column-margin}\n",
+        "::: {.callout-note}\n",
         "\n",
         "**t-SNE is stochastic**: Different runs produce different layouts (though cluster structure remains consistent). Always check multiple runs with different random seeds, especially for important scientific conclusions.\n",
         "\n",
@@ -625,7 +625,7 @@
         "- More hyperparameters to tune (though defaults work well)\n",
         "- Can produce similar-looking results to t-SNE, so choice often comes down to speed"
       ],
-      "id": "64616ed8"
+      "id": "d438d86d"
     },
     {
       "cell_type": "code",
@@ -665,7 +665,7 @@
         "\n",
         "plt.tight_layout()"
       ],
-      "id": "74f04bef",
+      "id": "95d68ae0",
       "execution_count": null,
       "outputs": []
     },
@@ -732,7 +732,7 @@
         "\n",
         "As data scientist Jake VanderPlas wrote: \"Dimensionality reduction is a form of lossy compression. The question is not whether you lose information---you always do---but whether you lose the information you care about.\""
       ],
-      "id": "66d559b9"
+      "id": "bab22451"
     }
   ],
   "metadata": {

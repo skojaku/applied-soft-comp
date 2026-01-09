@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2025-12-01">
+<meta name="dcterms.date" content="2026-01-09">
 
 <title>From ChatBot to Agentic AI – Applied Soft Computing</title>
 <style>
@@ -98,7 +98,7 @@ div.csl-indent {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-626254e6f25d1c064b097183404b5529.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-a032929455e4d93731be0fa9bc28887b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -981,7 +981,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">December 1, 2025</p>
+      <p class="date">January 9, 2026</p>
     </div>
   </div>
   
@@ -1038,13 +1038,13 @@ window.Quarto = {
 </div></div><section id="creating-a-tool-a-fish-market-dataset" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="creating-a-tool-a-fish-market-dataset">Creating a Tool: A Fish Market Dataset</h3>
 <p>Let’s build an agent that can explore and analyze a real dataset. We’ll use the Fish Market dataset from Hugging Face—a collection of measurements from different fish species. First, load the data:</p>
-<div id="07224e16" class="cell" data-execution_count="1">
+<div id="368fb4eb" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the Fish dataset</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">"hf://datasets/scikit-learn/Fish/Fish.csv"</span>)</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="69">
+<div class="cell-output cell-output-display" data-execution_count="1">
 <div>
 
 
@@ -1123,7 +1123,7 @@ window.Quarto = {
 <div class="no-row-height column-margin column-container"><div class="">
 <p><strong><span class="citation" data-cites="tool">(<a href="#ref-tool" role="doc-biblioref"><strong>tool?</strong></a>)</span></strong>: Decorator that converts a function into a LangChain tool. The docstring becomes the tool description; parameter names and type hints define the schema.</p>
 <p><strong>Args section</strong>: Must be explicitly documented for each parameter. LangGraph parses this to generate the JSON schema the LLM sees.</p>
-</div></div><div id="95ecf74d" class="cell" data-execution_count="2">
+</div></div><div id="2cc46adc" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> io</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_core.tools <span class="im">import</span> tool</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pandasql <span class="im">import</span> sqldf</span>
@@ -1144,7 +1144,7 @@ window.Quarto = {
 </ol>
 <p>This tool takes no inputs and returns the dataset schema. The agent calls it to discover column names and types before writing queries.</p>
 <p>Let’s add three more tools to give the agent more analytical capabilities:</p>
-<div id="b664fa2d" class="cell" data-execution_count="3">
+<div id="2f11ba2b" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="at">@tool</span></span>
@@ -1193,7 +1193,7 @@ window.Quarto = {
 <p><strong>ChatOllama</strong>: LangChain’s Ollama integration. Supports tool calling via the model’s native API.</p>
 <p><strong>create_react_agent</strong>: Factory function that builds a standard ReAct graph. It defines three nodes: (1) call the LLM, (2) execute tools, (3) check if done.</p>
 <p><strong>recursion_limit</strong>: Maximum graph iterations. Equivalent to <code>max_steps</code> in smolagents.</p>
-</div></div><div id="517eb415" class="cell" data-execution_count="4">
+</div></div><div id="c89e59b0" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_ollama <span class="im">import</span> ChatOllama</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langgraph.prebuilt <span class="im">import</span> create_react_agent</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1211,18 +1211,18 @@ window.Quarto = {
 <span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>agent <span class="op">=</span> create_react_agent(model, tools)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/var/folders/j7/9dgqq5g53vnbsbmvh2yqtckr0000gr/T/ipykernel_73965/1185369839.py:16: LangGraphDeprecatedSinceV10: create_react_agent has been moved to `langchain.agents`. Please update your import to `from langchain.agents import create_agent`. Deprecated in LangGraph V1.0 to be removed in V2.0.
+<pre><code>/var/folders/j7/9dgqq5g53vnbsbmvh2yqtckr0000gr/T/ipykernel_89772/1185369839.py:16: LangGraphDeprecatedSinceV10: create_react_agent has been moved to `langchain.agents`. Please update your import to `from langchain.agents import create_agent`. Deprecated in LangGraph V1.0 to be removed in V2.0.
   agent = create_react_agent(model, tools)</code></pre>
 </div>
 </div>
 <p>Run the agent and watch it autonomously choose which tools to use.</p>
-<div id="82bb1d21" class="cell" data-execution_count="5">
+<div id="95e78119" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> <span class="st">"Which fish species has the highest average weight?"</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> {<span class="st">"messages"</span>: [(<span class="st">"user"</span>, query)]}</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> agent.invoke(inputs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="007d3c76" class="cell" data-execution_count="6">
+<div id="e0d21c2c" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> message <span class="kw">in</span> result[<span class="st">"messages"</span>]:</span>
@@ -1230,7 +1230,7 @@ window.Quarto = {
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Which fish species has the highest average weight?
-I'll help you find which fish species has the highest average weight. Let me first examine the dataset structure to understand what columns are available.
+I'll help you find which fish species has the highest average weight. Let me first examine the dataset structure to see what columns are available.
 &lt;class 'pandas.core.frame.DataFrame'&gt;
 RangeIndex: 159 entries, 0 to 158
 Data columns (total 7 columns):
@@ -1247,15 +1247,6 @@ dtypes: float64(6), object(1)
 memory usage: 8.8+ KB
 
 
-     Species
-0      Bream
-1      Roach
-2  Whitefish
-3     Parkki
-4      Perch
-5       Pike
-6      Smelt
-
      Species   AvgWeight
 0       Pike  718.705882
 1      Bream  617.828571
@@ -1264,30 +1255,27 @@ memory usage: 8.8+ KB
 4     Parkki  154.818182
 5      Roach  152.050000
 6      Smelt   11.178571
-Based on the data analysis, **Pike** has the highest average weight at **718.71**. 
+The fish species with the highest average weight is **Pike**, with an average weight of approximately 718.71 grams.
 
-Here are the average weights for all fish species, ranked from highest to lowest:
-
-1. **Pike**: 718.71
-2. Bream: 617.83
-3. Whitefish: 531.00
-4. Perch: 382.24
-5. Parkki: 154.82
-6. Roach: 152.05
-7. Smelt: 11.18
-
-Pike clearly dominates in terms of average weight, weighing significantly more than the other species in the dataset.</code></pre>
+Here are all the species ranked by average weight from highest to lowest:
+1. Pike: 718.71 grams
+2. Bream: 617.83 grams
+3. Whitefish: 531.00 grams
+4. Perch: 382.24 grams
+5. Parkki: 154.82 grams
+6. Roach: 152.05 grams
+7. Smelt: 11.18 grams</code></pre>
 </div>
 </div>
 <p>The agent executes a ReAct loop. It reads the question “Which fish species has the highest average weight?” and realizes it needs to use SQL to group by species and calculate averages. LangGraph streams each step—you see the LLM’s reasoning, the tool calls, and the observations in real time.</p>
 <p>Let’s try another query that requires multiple steps:</p>
-<div id="9523f097" class="cell" data-execution_count="7">
+<div id="bba65ee9" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> <span class="st">"What distinctive physical characteristics stand out to identify Pike?"</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> {<span class="st">"messages"</span>: [(<span class="st">"user"</span>, query)]}</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> agent.invoke(inputs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="8a403d72" class="cell" data-execution_count="8">
+<div id="c46d762e" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> message <span class="kw">in</span> result[<span class="st">"messages"</span>]:</span>
@@ -1295,7 +1283,7 @@ Pike clearly dominates in terms of average weight, weighing significantly more t
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>What distinctive physical characteristics stand out to identify Pike?
-I'll help you identify the distinctive physical characteristics of Pike. Let me first examine the dataset structure to see what information is available.
+I'll help you identify the distinctive physical characteristics of Pike from the dataset. Let me first explore the dataset structure to understand what information is available.
 &lt;class 'pandas.core.frame.DataFrame'&gt;
 RangeIndex: 159 entries, 0 to 158
 Data columns (total 7 columns):
@@ -1331,15 +1319,14 @@ memory usage: 8.8+ KB
 15    Pike  1550.0     56.0     60.0     64.0   9.6000  6.1440
 16    Pike  1650.0     59.0     63.4     68.0  10.8120  7.4800
 
-Stats for Weight:
-count     159.000000
-mean      398.326415
-std       357.978317
-min         0.000000
-25%       120.000000
-50%       273.000000
-75%       650.000000
-max      1650.000000
+     Species
+0      Bream
+1      Roach
+2  Whitefish
+3     Parkki
+4      Perch
+5       Pike
+6      Smelt
 
 Stats for Weight (Species: Pike):
 count      17.000000
@@ -1350,16 +1337,6 @@ min       200.000000
 50%       510.000000
 75%       950.000000
 max      1650.000000
-
-Stats for Length3 (Species: Pike):
-count    17.000000
-mean     48.717647
-std      10.167426
-min      34.800000
-25%      40.500000
-50%      45.800000
-75%      55.100000
-max      68.000000
 
 Stats for Height (Species: Pike):
 count    17.000000
@@ -1381,35 +1358,72 @@ min       3.375600
 75%       6.144000
 max       7.480000
 
-     Species  Avg_Weight  Avg_Length  Avg_Height  Avg_Width
-0       Pike  718.705882   48.717647    7.713771   5.086382
-1      Bream  617.828571   38.354286   15.183211   5.427614
-2  Whitefish  531.000000   34.316667   10.027167   5.473050
-3      Perch  382.239286   29.571429    7.861870   4.745723
-4     Parkki  154.818182   22.790909    8.962427   3.220736
-5      Roach  152.050000   24.970000    6.694795   3.657850
-6      Smelt   11.178571   13.035714    2.209371   1.340093
-Based on the fish dataset analysis, here are the distinctive physical characteristics that stand out for Pike:
+Stats for Length1 (Species: Pike):
+count    17.000000
+mean     42.476471
+std       9.029087
+min      30.000000
+25%      35.500000
+50%      40.100000
+75%      48.300000
+max      59.000000
 
-## **Pike's Distinctive Physical Characteristics**
+Stats for Height:
+count    159.000000
+mean       8.970994
+std        4.286208
+min        1.728400
+25%        5.944800
+50%        7.786000
+75%       12.365900
+max       18.957000
 
-### **Size and Weight**
-- **Heaviest species on average**: Pike have the highest average weight at 718.7g, significantly above other species
-- **Weight range**: 200g to 1650g (the heaviest individual fish in the dataset)
-- **Longest species**: Average length of 48.7cm, reaching up to 68cm
+     Species  AvgHeight  AvgWidth  AvgLength1  Count
+0      Bream  15.183211  5.427614   30.305714     35
+1  Whitefish  10.027167  5.473050   28.800000      6
+2     Parkki   8.962427  3.220736   18.727273     11
+3      Perch   7.861870  4.745723   25.735714     56
+4       Pike   7.713771  5.086382   42.476471     17
+5      Roach   6.694795  3.657850   20.645000     20
+6      Smelt   2.209371  1.340093   11.257143     14
 
-### **Body Dimensions**
-- **Tallest among slender fish**: Height averages 7.7cm, but notably slimmer relative to length compared to other species
-- **Moderate width**: Average width of 5.1cm, relatively narrow for their size
-- **Body proportions**: Pike have a more elongated, streamlined shape
+     Species  AvgWidth
+0  Whitefish  5.473050
+1      Bream  5.427614
+2       Pike  5.086382
+3      Perch  4.745723
+4      Roach  3.657850
+5     Parkki  3.220736
+6      Smelt  1.340093
+Based on the fish dataset analysis, I can identify several distinctive physical characteristics that stand out for Pike compared to other species:
 
-### **Comparative Physical Profile**
-When compared to other species in the dataset, Pike are characterized by:
-- **Largest overall size** (by weight and length)
-- **Relatively slender build** for their massive size
-- **Streamlined, torpedo-like proportions** suggesting they are fast-swimming predators
+## Key Distinguishing Characteristics of Pike:
 
-The combination of being the **largest and longest** species while maintaining a relatively **slender profile** makes Pike easily distinguishable from other fish species in this dataset. Their physical dimensions suggest they are built for speed and predatory efficiency - long, powerful, and streamlined for swift movement through water.</code></pre>
+**1. Length: Pike are significantly longer than most other species**
+- Average Length1: 42.48 cm (highest among all species)
+- Range: 30-59 cm
+- This makes them the longest fish in the dataset
+
+**2. Weight-to-Length Ratio: Pike are relatively lightweight for their length**
+- Despite being the longest, their average weight (718.7g) is lower than Bream's average (626g) 
+- This suggests a more slender, streamlined body shape
+
+**3. Height: Moderately tall body**
+- Average Height: 7.71 cm (middle range among species)
+- Less height than Bream (15.18 cm) and Whitefish (10.03 cm)
+- More height than Perch (7.86 cm) and smaller species
+
+**4. Width: Relatively wide body for their size**
+- Average Width: 5.09 cm (3rd highest after Whitefish and Bream)
+- This, combined with their great length, gives them a distinctive elongated but robust body shape
+
+## Summary of Pike's Distinctive Profile:
+- **Very elongated body** (longest species)
+- **Streamlined but substantial** (good width relative to other species)
+- **Moderately tall** (not as flat as some species, not as deep-bodied as others)
+- **Light for their length** (suggests a slender, predatory body shape)
+
+The most distinctive characteristics that would help identify Pike are their exceptional length combined with substantial width, creating a long, powerful-looking predator fish - which aligns well with real Pike characteristics as elongated predatory fish.</code></pre>
 </div>
 </div>
 <p>This demonstrates the power of the ReAct loop—the agent chains multiple observations together, building a solution step-by-step rather than attempting everything in one shot. Unlike smolagents’ opaque loop, LangGraph exposes every state transition, making debugging straightforward.</p>

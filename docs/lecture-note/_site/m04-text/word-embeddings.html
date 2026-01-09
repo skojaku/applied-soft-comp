@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2025-11-28">
+<meta name="dcterms.date" content="2026-01-09">
 
 <title>Word Embeddings – Applied Soft Computing</title>
 <style>
@@ -98,7 +98,7 @@ div.csl-indent {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-626254e6f25d1c064b097183404b5529.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-a032929455e4d93731be0fa9bc28887b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -978,7 +978,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 28, 2025</p>
+      <p class="date">January 9, 2026</p>
     </div>
   </div>
   
@@ -1012,7 +1012,7 @@ Figure&nbsp;1: Green is the color that is not non-green (not red, not blue, not 
 <section id="word2vec" class="level2">
 <h2 class="anchored" data-anchor-id="word2vec">Word2vec</h2>
 <p>Let’s first learn the power of Word2Vec and then understand how it works. We will use a pre-trained model. We aren’t teaching it anything; we are simply inspecting the map it created from 100 billion words of Google News.</p>
-<div id="3d4dfc1f" class="cell" data-execution_count="1">
+<div id="3d4dfc1f" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> gensim.downloader <span class="im">as</span> api</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1026,7 +1026,7 @@ Loaded embeddings for 3,000,000 words.</code></pre>
 </div>
 </div>
 <p>If the map is accurate, “dog” should be surrounded by its semantic kin. We query the nearest neighbors in the vector space.</p>
-<div id="2778ad50" class="cell" data-execution_count="2">
+<div id="2778ad50" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>similar_to_dog <span class="op">=</span> model.most_similar(<span class="st">"dog"</span>, topn<span class="op">=</span><span class="dv">10</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Words most similar to 'dog':"</span>)</span>
@@ -1049,7 +1049,7 @@ Loaded embeddings for 3,000,000 words.</code></pre>
 <p>The model groups “dog” with “dogs,” “puppy,” and “pooch” <strong>not because it knows biology</strong>, but because they are statistically interchangeable in sentences.</p>
 <p>Since words are vectors, we can perform arithmetic on meaning. The relationship between “King” and “Man” is a vector. If we add that vector to “Woman,” we should arrive at “Queen.”</p>
 <p><span class="math display"> \vec{\text{King}} - \vec{\text{Man}} + \vec{\text{Woman}} \approx \vec{\text{Queen}} </span></p>
-<div id="fc2baead" class="cell" data-execution_count="3">
+<div id="fc2baead" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> model.most_similar(</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  positive<span class="op">=</span>[<span class="st">'king'</span>, <span class="st">'woman'</span>],</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>   negative<span class="op">=</span>[<span class="st">'man'</span>], topn<span class="op">=</span><span class="dv">5</span></span>
@@ -1068,7 +1068,7 @@ Loaded embeddings for 3,000,000 words.</code></pre>
 </div>
 </div>
 <p>We cannot see in 300 dimensions, but we can project the space down to 2D using PCA. This reveals the consistent structures—like the “capital city” relationship—that the model has learned.</p>
-<div id="34d1843c" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="4">
+<div id="34d1843c" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
@@ -1242,27 +1242,6 @@ Figure&nbsp;4
 Mikolov, Tomas, Ilya Sutskever, Kai Chen, Greg S Corrado, and Jeff Dean. 2013. <span>“Distributed Representations of Words and Phrases and Their Compositionality.”</span> <em>Advances in Neural Information Processing Systems</em> 26.
 </div>
 </div></section></div></main> <!-- /main -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Find all breadcrumb containers
-  const breadcrumbs = document.querySelectorAll('.quarto-page-breadcrumbs ol.breadcrumb');
-
-  breadcrumbs.forEach(function(breadcrumb) {
-    // Create the TOC link as the first breadcrumb item
-    const tocItem = document.createElement('li');
-    tocItem.className = 'breadcrumb-item';
-
-    const tocLink = document.createElement('a');
-    tocLink.href = '../toc.html';
-    tocLink.textContent = 'Table of Contents';
-
-    tocItem.appendChild(tocLink);
-
-    // Insert at the beginning
-    breadcrumb.insertBefore(tocItem, breadcrumb.firstChild);
-  });
-});
-</script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
@@ -1695,6 +1674,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 </footer>
+<script src="../assets/breadcrumb-toc.js"></script>
 
 
 
