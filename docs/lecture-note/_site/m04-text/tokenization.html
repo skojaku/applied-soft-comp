@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2025-11-23">
+<meta name="dcterms.date" content="2026-01-09">
 
 <title>Tokenization: Unboxing How LLMs Read Text – Applied Soft Computing</title>
 <style>
@@ -78,7 +78,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-626254e6f25d1c064b097183404b5529.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-a032929455e4d93731be0fa9bc28887b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -915,7 +915,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 23, 2025</p>
+      <p class="date">January 9, 2026</p>
     </div>
   </div>
   
@@ -938,7 +938,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="the-application-how-tokenization-works-in-practice" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="the-application-how-tokenization-works-in-practice">The Application (How Tokenization Works in Practice)</h2>
 <p>Let’s unbox an actual tokenizer from Hugging Face and trace the pipeline from raw text to embeddings. We’ll use <strong>Phi-1.5</strong>, a compact model from Microsoft. For tokenization experiments, we only need the tokenizer—no need to load the full multi-gigabyte model.</p>
-<div id="d05620a6" class="cell" data-execution_count="1">
+<div id="d05620a6" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -946,7 +946,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(model_name)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s inspect the tokenizer’s constraints.</p>
-<div id="960457e9" class="cell" data-execution_count="2">
+<div id="960457e9" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Vocabulary size: </span><span class="sc">{</span>tokenizer<span class="sc">.</span>vocab_size<span class="sc">:,}</span><span class="ss"> tokens"</span>)</span>
@@ -961,12 +961,12 @@ Max sequence length: 2048 tokens</code></pre>
 <section id="text-to-tokens" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="text-to-tokens">Text to Tokens</h3>
 <p>Tokenization splits text into the subword fragments the model actually processes. Watch what happens when we tokenize a university name.</p>
-<div id="5ae9c93b" class="cell" data-execution_count="3">
+<div id="5ae9c93b" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">"Binghamton University."</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>tokens <span class="op">=</span> tokenizer.tokenize(text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="1148a6ef" class="cell" data-execution_count="4">
+<div id="1148a6ef" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Tokens: </span><span class="sc">{</span>tokens<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -980,7 +980,7 @@ Max sequence length: 2048 tokens</code></pre>
 <div class="no-row-height column-margin column-container"><div class="">
 <p>The <code>Ġ</code> character (U+0120) is a GPT-style tokenizer convention for encoding spaces. When you see <code>ĠUniversity</code>, it means “University” preceded by a space. This preserves word boundaries while allowing subword splits.</p>
 </div></div><p>Let’s test a few more examples to see the pattern.</p>
-<div id="e0988600" class="cell" data-execution_count="5">
+<div id="e0988600" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>texts <span class="op">=</span> [</span>
@@ -1008,7 +1008,7 @@ New York   → ['New', 'ĠYork']</code></pre>
 <section id="tokens-to-token-ids" class="level3">
 <h3 class="anchored" data-anchor-id="tokens-to-token-ids">Tokens to Token IDs</h3>
 <p>Tokens are still strings. The model needs integers. Each token maps to a unique ID in the vocabulary dictionary.</p>
-<div id="a1ba2d9f" class="cell" data-execution_count="6">
+<div id="a1ba2d9f" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">"Binghamton University"</span></span>
@@ -1031,7 +1031,7 @@ ton        →   1122
 </div>
 </div>
 <p>Each token receives a unique integer ID. The vocabulary is a dictionary: <code>{token_string: integer_id}</code>. Let’s peek inside.</p>
-<div id="6101b5e9" class="cell" data-execution_count="7">
+<div id="6101b5e9" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the full vocabulary</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>vocab <span class="op">=</span> tokenizer.get_vocab()</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1048,7 +1048,7 @@ ton        →   1122
 </div>
 </div>
 <p>Most LLMs reserve special tokens for sequence boundaries or control signals. Phi-1.5 uses <code>&lt;|endoftext|&gt;</code> as a separator during training. Let’s verify.</p>
-<div id="649866e6" class="cell" data-execution_count="8">
+<div id="649866e6" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>token_id <span class="op">=</span> [<span class="dv">50256</span>]</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>token <span class="op">=</span> tokenizer.convert_ids_to_tokens(token_id)[<span class="dv">0</span>]</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Token ID: </span><span class="sc">{</span>token_id<span class="sc">}</span><span class="ss"> → Token: </span><span class="sc">{</span>token<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1062,7 +1062,7 @@ ton        →   1122
 <h3 class="anchored" data-anchor-id="token-ids-to-embeddings">Token IDs to Embeddings</h3>
 <p><img src="https://res.cloudinary.com/lesswrong-2-0/image/upload/v1676309872/mirroredImages/pHPmMGEMYefk9jLeh/wegwbgiqyhig42gidlsg.png" class="img-fluid"></p>
 <p>Now we need the full model to access the embedding layer—the matrix that converts token IDs into dense vectors.</p>
-<div id="bf344b64" class="cell" data-execution_count="9">
+<div id="bf344b64" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForCausalLM</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1073,7 +1073,7 @@ ton        →   1122
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>embedding_layer <span class="op">=</span> model.model.embed_tokens</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The embedding layer is a simple lookup table: a 51,200 × 2,048 matrix where each row is the embedding for a token in the vocabulary. Let’s examine the first few entries.</p>
-<div id="1e0e61a9" class="cell" data-execution_count="10">
+<div id="1e0e61a9" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(embedding_layer.weight[:<span class="dv">5</span>, :<span class="dv">10</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1106,27 +1106,6 @@ ton        →   1122
 </section>
 
 </main> <!-- /main -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Find all breadcrumb containers
-  const breadcrumbs = document.querySelectorAll('.quarto-page-breadcrumbs ol.breadcrumb');
-
-  breadcrumbs.forEach(function(breadcrumb) {
-    // Create the TOC link as the first breadcrumb item
-    const tocItem = document.createElement('li');
-    tocItem.className = 'breadcrumb-item';
-
-    const tocLink = document.createElement('a');
-    tocLink.href = '../toc.html';
-    tocLink.textContent = 'Table of Contents';
-
-    tocItem.appendChild(tocLink);
-
-    // Insert at the beginning
-    breadcrumb.insertBefore(tocItem, breadcrumb.firstChild);
-  });
-});
-</script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
@@ -1559,6 +1538,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 </footer>
+<script src="../assets/breadcrumb-toc.js"></script>
 
 
 

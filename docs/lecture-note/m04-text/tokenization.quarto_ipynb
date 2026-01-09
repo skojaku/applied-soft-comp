@@ -28,7 +28,7 @@
         "\n",
         "Let's unbox an actual tokenizer from Hugging Face and trace the pipeline from raw text to embeddings. We'll use **Phi-1.5**, a compact model from Microsoft. For tokenization experiments, we only need the tokenizer—no need to load the full multi-gigabyte model."
       ],
-      "id": "600b3115"
+      "id": "9e9cb4d9"
     },
     {
       "cell_type": "code",
@@ -40,7 +40,7 @@
         "model_name = \"microsoft/phi-1.5\"\n",
         "tokenizer = AutoTokenizer.from_pretrained(model_name)"
       ],
-      "id": "d7a982c8",
+      "id": "1b164089",
       "execution_count": null,
       "outputs": []
     },
@@ -50,7 +50,7 @@
       "source": [
         "Let's inspect the tokenizer's constraints."
       ],
-      "id": "160830d6"
+      "id": "7e29f7f4"
     },
     {
       "cell_type": "code",
@@ -60,7 +60,7 @@
         "print(f\"Vocabulary size: {tokenizer.vocab_size:,} tokens\")\n",
         "print(f\"Max sequence length: {tokenizer.model_max_length} tokens\")"
       ],
-      "id": "2009a50f",
+      "id": "7d18110a",
       "execution_count": null,
       "outputs": []
     },
@@ -74,7 +74,7 @@
         "\n",
         "Tokenization splits text into the subword fragments the model actually processes. Watch what happens when we tokenize a university name."
       ],
-      "id": "9154310d"
+      "id": "94da96dc"
     },
     {
       "cell_type": "code",
@@ -84,7 +84,7 @@
         "\n",
         "tokens = tokenizer.tokenize(text)"
       ],
-      "id": "dc1bfbfc",
+      "id": "e0ccc34e",
       "execution_count": null,
       "outputs": []
     },
@@ -95,7 +95,7 @@
         "#| code-fold: true\n",
         "print(f\"Tokens: {tokens}\")"
       ],
-      "id": "ffa099f8",
+      "id": "9ee0533b",
       "execution_count": null,
       "outputs": []
     },
@@ -105,13 +105,13 @@
       "source": [
         "The rare word \"Binghamton\" fractures into `['B', 'ingham', 'ton']`. The common word \"University\" survives intact (with a leading space marker). The tokenizer learned these splits from frequency statistics during training. High-frequency words get dedicated tokens; rare words get decomposed into reusable parts.\n",
         "\n",
-        "::: {.column-margin}\n",
+        "::: {.callout-note}\n",
         "The `Ġ` character (U+0120) is a GPT-style tokenizer convention for encoding spaces. When you see `ĠUniversity`, it means \"University\" preceded by a space. This preserves word boundaries while allowing subword splits.\n",
         ":::\n",
         "\n",
         "Let's test a few more examples to see the pattern."
       ],
-      "id": "fcb9aea5"
+      "id": "a84a3e2a"
     },
     {
       "cell_type": "code",
@@ -129,7 +129,7 @@
         "    tokens = tokenizer.tokenize(text)\n",
         "    print(f\"{text:10s} → {tokens}\")"
       ],
-      "id": "d2252800",
+      "id": "c562cd6c",
       "execution_count": null,
       "outputs": []
     },
@@ -139,7 +139,7 @@
       "source": [
         "\"Bearcats\" splits because it's domain-specific jargon. \"New York\" remains whole because it's common. The tokenizer's behavior is a direct reflection of its training corpus.\n",
         "\n",
-        "::: {.column-margin}\n",
+        "::: {.callout-note}\n",
         "Check out [OpenAI's tokenizer](https://platform.openai.com/tokenizer) to see how different models slice the same text differently.\n",
         ":::\n",
         "\n",
@@ -147,7 +147,7 @@
         "\n",
         "Tokens are still strings. The model needs integers. Each token maps to a unique ID in the vocabulary dictionary."
       ],
-      "id": "5f00de11"
+      "id": "22efd607"
     },
     {
       "cell_type": "code",
@@ -165,7 +165,7 @@
         "for token, token_id in zip(tokens, token_ids):\n",
         "    print(f\"{token:10s} → {token_id:6d}\")"
       ],
-      "id": "0bd07b20",
+      "id": "78c035d3",
       "execution_count": null,
       "outputs": []
     },
@@ -175,7 +175,7 @@
       "source": [
         "Each token receives a unique integer ID. The vocabulary is a dictionary: `{token_string: integer_id}`. Let's peek inside."
       ],
-      "id": "ba021a08"
+      "id": "d5275031"
     },
     {
       "cell_type": "code",
@@ -189,7 +189,7 @@
         "for token, id in sample_tokens:\n",
         "    print(f\"  {id:6d}: '{token}'\")"
       ],
-      "id": "57351c0d",
+      "id": "2eed646c",
       "execution_count": null,
       "outputs": []
     },
@@ -199,7 +199,7 @@
       "source": [
         "Most LLMs reserve special tokens for sequence boundaries or control signals. Phi-1.5 uses `<|endoftext|>` as a separator during training. Let's verify."
       ],
-      "id": "d018cfde"
+      "id": "3fda2c85"
     },
     {
       "cell_type": "code",
@@ -209,7 +209,7 @@
         "token = tokenizer.convert_ids_to_tokens(token_id)[0]\n",
         "print(f\"Token ID: {token_id} → Token: {token}\")"
       ],
-      "id": "aa4914db",
+      "id": "a8adfa0f",
       "execution_count": null,
       "outputs": []
     },
@@ -225,7 +225,7 @@
         "\n",
         "Now we need the full model to access the embedding layer—the matrix that converts token IDs into dense vectors."
       ],
-      "id": "1d8a72c6"
+      "id": "6ed7fdd4"
     },
     {
       "cell_type": "code",
@@ -240,7 +240,7 @@
         "# Retrieve the embedding layer\n",
         "embedding_layer = model.model.embed_tokens"
       ],
-      "id": "8264a9f4",
+      "id": "882d3b45",
       "execution_count": null,
       "outputs": []
     },
@@ -250,7 +250,7 @@
       "source": [
         "The embedding layer is a simple lookup table: a 51,200 × 2,048 matrix where each row is the embedding for a token in the vocabulary. Let's examine the first few entries."
       ],
-      "id": "819553d4"
+      "id": "a4bab68e"
     },
     {
       "cell_type": "code",
@@ -259,7 +259,7 @@
         "#| code-fold: true\n",
         "print(embedding_layer.weight[:5, :10])"
       ],
-      "id": "cb6b928b",
+      "id": "758bd9b7",
       "execution_count": null,
       "outputs": []
     },
@@ -281,7 +281,7 @@
         "\n",
         "**Next**: [Transformers: The Architecture Behind the Magic →](transformers.qmd)"
       ],
-      "id": "87f634a9"
+      "id": "b4c989ad"
     }
   ],
   "metadata": {

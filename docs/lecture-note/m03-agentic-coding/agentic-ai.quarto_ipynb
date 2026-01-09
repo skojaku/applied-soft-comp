@@ -46,7 +46,7 @@
         "Let's build an agent that can explore and analyze a real dataset. We'll use **LangGraph**—a framework from LangChain that models agents as state machines. Unlike simple loops, LangGraph lets you define explicit control flow: decision nodes, parallel execution, conditional branching, and state persistence.\n",
         "\n",
         "\n",
-        "::: {.column-margin}\n",
+        "::: {.callout-note}\n",
         "\n",
         "Install LangGraph and LangChain:\n",
         "\n",
@@ -60,7 +60,7 @@
         "\n",
         "Let's build an agent that can explore and analyze a real dataset. We'll use the Fish Market dataset from Hugging Face—a collection of measurements from different fish species. First, load the data:"
       ],
-      "id": "97d69170"
+      "id": "235bfc55"
     },
     {
       "cell_type": "code",
@@ -72,7 +72,7 @@
         "df = pd.read_csv(\"hf://datasets/scikit-learn/Fish/Fish.csv\")\n",
         "df.head()"
       ],
-      "id": "368fb4eb",
+      "id": "11033cf6",
       "execution_count": null,
       "outputs": []
     },
@@ -82,13 +82,13 @@
       "source": [
         "Now we'll create tools that let the agent query this data. In LangGraph, tools are standard Python functions decorated with `@tool`. The function signature and docstring tell the LLM everything it needs.\n",
         "\n",
-        "::: {.column-margin}\n",
+        "::: {.callout-note}\n",
         "**@tool**: Decorator that converts a function into a LangChain tool. The docstring becomes the tool description; parameter names and type hints define the schema.\n",
         "\n",
         "**Args section**: Must be explicitly documented for each parameter. LangGraph parses this to generate the JSON schema the LLM sees.\n",
         ":::"
       ],
-      "id": "9f6b6dba"
+      "id": "2d7bfdd4"
     },
     {
       "cell_type": "code",
@@ -105,7 +105,7 @@
         "    df.info(buf=buffer)\n",
         "    return buffer.getvalue()"
       ],
-      "id": "2cc46adc",
+      "id": "8cf81d0b",
       "execution_count": null,
       "outputs": []
     },
@@ -124,7 +124,7 @@
         "\n",
         "Let's add three more tools to give the agent more analytical capabilities:"
       ],
-      "id": "faa4e357"
+      "id": "c52ae1f6"
     },
     {
       "cell_type": "code",
@@ -170,7 +170,7 @@
         "        prefix += f\" (Species: {species})\"\n",
         "    return f\"{prefix}:\\n{stats.to_string()}\""
       ],
-      "id": "2f11ba2b",
+      "id": "787a6fd7",
       "execution_count": null,
       "outputs": []
     },
@@ -180,7 +180,7 @@
       "source": [
         "Now create the agent. LangGraph is centered on a **state graph**—a directed graph where nodes are functions and edges define transitions. This gives you explicit control over the ReAct loop.\n",
         "\n",
-        "::: {.column-margin}\n",
+        "::: {.callout-note}\n",
         "**ChatOllama**: LangChain's Ollama integration. Supports tool calling via the model's native API.\n",
         "\n",
         "**create_react_agent**: Factory function that builds a standard ReAct graph. It defines three nodes: (1) call the LLM, (2) execute tools, (3) check if done.\n",
@@ -188,7 +188,7 @@
         "**recursion_limit**: Maximum graph iterations. Equivalent to `max_steps` in smolagents.\n",
         ":::"
       ],
-      "id": "e5b9f4e1"
+      "id": "a6386b41"
     },
     {
       "cell_type": "code",
@@ -211,7 +211,7 @@
         "\n",
         "agent = create_react_agent(model, tools)"
       ],
-      "id": "c89e59b0",
+      "id": "0682a08c",
       "execution_count": null,
       "outputs": []
     },
@@ -221,7 +221,7 @@
       "source": [
         "Run the agent and watch it autonomously choose which tools to use."
       ],
-      "id": "0a7fbca9"
+      "id": "85f452b4"
     },
     {
       "cell_type": "code",
@@ -232,7 +232,7 @@
         "\n",
         "result = agent.invoke(inputs)"
       ],
-      "id": "95e78119",
+      "id": "012a25fe",
       "execution_count": null,
       "outputs": []
     },
@@ -244,7 +244,7 @@
         "for message in result[\"messages\"]:\n",
         "    print(message.content)"
       ],
-      "id": "e0d21c2c",
+      "id": "38264168",
       "execution_count": null,
       "outputs": []
     },
@@ -256,7 +256,7 @@
         "\n",
         "Let's try another query that requires multiple steps:"
       ],
-      "id": "d71902a2"
+      "id": "ce59c240"
     },
     {
       "cell_type": "code",
@@ -267,7 +267,7 @@
         "\n",
         "result = agent.invoke(inputs)"
       ],
-      "id": "bba65ee9",
+      "id": "fb22dddc",
       "execution_count": null,
       "outputs": []
     },
@@ -279,7 +279,7 @@
         "for message in result[\"messages\"]:\n",
         "    print(message.content)"
       ],
-      "id": "c46d762e",
+      "id": "8a783bc8",
       "execution_count": null,
       "outputs": []
     },
@@ -305,7 +305,7 @@
         "\n",
         "This is the entire architecture of Google Antigravity, Claude Code, and Cursor—just scaled with better tools (file editing, terminal commands, web browsing) and better orchestration (parallel agents, verification artifacts)."
       ],
-      "id": "1cc95530"
+      "id": "d1a5faf0"
     }
   ],
   "metadata": {

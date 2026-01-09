@@ -1,0 +1,230 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Large Language Models in Practice\"\n",
+        "jupyter: applsoftcomp\n",
+        "execute:\n",
+        "    enabled: true\n",
+        "    cache: true\n",
+        "---\n",
+        "\n",
+        "::: {.callout-note appearance=\"minimal\"}\n",
+        "## Spoiler\n",
+        "Large language models don't understand language---they compress statistical regularities from billions of text samples into probability distributions that generate fluent outputs correlated with truth but not guaranteed to be true.\n",
+        ":::\n",
+        "\n",
+        "## The Mechanism\n",
+        "\n",
+        "What do you think about the following question?\n",
+        "\n",
+        "> Can LLMs understand the world and reason about it?\n",
+        "\n",
+        "One may argue that \"fluency\" demonstrates understanding. This is the intuition behind Turing's 1950 test: if you can't tell it's a machine, treat it as intelligent. Fluency implies comprehension.\n",
+        "\n",
+        "But let's see some counter arguments about this claim, starting with ELIZA.\n",
+        "\n",
+        "ELIZA, developed by Joseph Weizenbaum in the mid-1960s, is widely considered one of the first chatbots. It simulated a Rogerian psychotherapist by using simple pattern matching and keyword substitution to generate responses. Despite its lack of true understanding, ELIZA famously convinced many users that they were conversing with an intelligent entity, highlighting the human tendency to anthropomorphize technology and the limitations of the Turing Test.\n",
+        "\n",
+        "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/8jGpkdPO-1Y?si=MRGPj2SRvEL-ROW_\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>\n",
+        "\n",
+        "Another argument against fluency is the Chinese Room argument, proposed by philosopher John Searle. Imagine a person in a room who receives Chinese characters, and using an English rulebook, manipulates these symbols to produce new Chinese characters. To an outside observer, it appears the room understands Chinese. However, the person inside merely follows instructions to manipulate symbols without understanding their meaning. Searle argues that this is analogous to how computers, including LLMs, operate: they process symbols based on rules without genuine comprehension, raising questions about whether they can truly \"understand\" language or the world.\n",
+        "\n",
+        "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/TryOC83PH1g?si=XGuLMklRle-quAia\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>\n",
+        "\n",
+        "So, do LLMs understand the world? Probably not, in the same way as we do. LLMs is a lossy compression algorithm, compressing the data into their parameters to generate fluent outputs. To predict \"The capital of France is ___,\" the model must compress not just the fact (Paris) but the **statistical regularities** governing how facts appear in text---that capitals follow \"The capital of,\" that France is a country, that countries have capitals. This compression is probabilistic, not factual. The model stores $P(\\text{word}_{n+1} \\mid \\text{word}_1, \\ldots, \\text{word}_n)$---which words tend to follow which other words in which contexts. Just as the lottery memorizer stores patterns of number sequences, the LLM stores patterns of word sequences.\n",
+        "\n",
+        "![](../figs/llm-next-word.gif){width=50% fig-alt=\"A GIF showing how LLMs predict the next word by estimating probability distributions over the vocabulary.\" fig-align=\"center\"}\n",
+        "\n",
+        "Training feeds the model billions of sentences. For each sentence, the model predicts the next word, compares its prediction to the actual next word, and adjusts its parameters to increase the probability of the correct word. Repeat trillions of times. The result: a compressed representation of how language behaves statistically. The model doesn't learn \"Paris is the capital of France\" as a fact; it learns that in contexts matching the pattern `[The capital of France is]`, the token \"Paris\" appears with high probability. The lottery memorizer doesn't understand what draws mean; it just knows what patterns appear most often. This is why LLMs creates **hallucination**---fluent but false outputs. Truth and fluency correlate in the training data, so the model is mostly truthful. But in the tails---obscure topics, recent events, precise recall---fluency diverges from truth, and the model follows fluency.\n",
+        "\n",
+        "Keep this limitation in mind and use LLMs as a tool to scale pattern recognition, not judgment. Let's learn how to utilize them.\n",
+        "\n",
+        "## Setting Up Ollama\n",
+        "\n",
+        "For this course, we use Ollama, a tool for running LLMs locally, with Gemma 3N, a 4-billion parameter open-source model. Free, private, capable enough for research tasks. Visit [ollama.ai](https://ollama.ai), download the installer, and verify installation:\n",
+        "\n",
+        "```bash\n",
+        "ollama --version\n",
+        "ollama pull gemma3n:latest\n",
+        "ollama run gemma3n:latest \"What is a complex system?\"\n",
+        "```\n",
+        "\n",
+        "If you receive a coherent response, install the Python client and send your first prompt:\n",
+        "\n",
+        "```bash\n",
+        "pip install ollama\n",
+        "```"
+      ],
+      "id": "8a757eff"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import ollama\n",
+        "\n",
+        "params_llm = {\"model\": \"gemma3n:latest\", \"options\": {\"temperature\": 0.3}}\n",
+        "\n",
+        "response = ollama.generate(\n",
+        "    prompt=\"Explain emergence in two sentences.\",\n",
+        "    **params_llm\n",
+        ")\n",
+        "\n",
+        "print(response.response)"
+      ],
+      "id": "794f9ce4",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Run this code twice. You'll get different outputs. Why? Because LLMs sample from probability distributions. The **temperature** parameter controls this randomness---lower values (0.1) make outputs more deterministic; higher values (1.0) increase diversity. You're controlling how far into the tail of the probability distribution the model samples. Low temperature: the model picks the most likely next word. High temperature: it ventures into less probable territory. Sometimes that produces creativity. Sometimes it produces nonsense.\n",
+        "\n",
+        "## Research Applications\n",
+        "\n",
+        "The strategy is simple: use LLMs for tasks where speed trumps precision, then verify the outputs that matter. Three workflows demonstrate this pattern.\n",
+        "\n",
+        "**Abstract summarization.** You collected 50 papers on network science. Which deserve detailed reading? You don't have time to read all 50 abstracts carefully. An LLM scans them in seconds:"
+      ],
+      "id": "64ded473"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "abstract = \"\"\"\n",
+        "Community detection in networks is a fundamental problem in complex systems.\n",
+        "While many algorithms exist, most assume static networks. We propose a dynamic\n",
+        "community detection algorithm that tracks evolving communities over time using\n",
+        "a temporal smoothness constraint. We evaluate our method on synthetic and real\n",
+        "temporal networks, showing it outperforms static methods applied to temporal\n",
+        "snapshots. Our approach reveals how communities merge, split, and persist in\n",
+        "social networks, biological systems, and transportation networks.\n",
+        "\"\"\"\n",
+        "\n",
+        "prompt = f\"Summarize this abstract in one sentence:\\n\\n{abstract}\"\n",
+        "response = ollama.generate(prompt=prompt, **params_llm)\n",
+        "print(response.response)"
+      ],
+      "id": "84f90331",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The model captures the pattern: propose method, evaluate, outperform baselines. It doesn't understand the paper; it has seen enough academic abstracts to recognize the structure. For multiple abstracts, loop through them:"
+      ],
+      "id": "6cf13c62"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "for i, abstract in enumerate([\"Abstract 1...\", \"Abstract 2...\"], 1):\n",
+        "    response = ollama.generate(prompt=f\"Summarize:\\n\\n{abstract}\", **params_llm)\n",
+        "    print(f\"{i}. {response.response}\")"
+      ],
+      "id": "5b26966b",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Local models are slow (2–5 seconds per abstract). For thousands of papers, switch to cloud APIs. But the workflow scales: **delegate skimming to the model, retain judgment for yourself.** I ran this on 200 abstracts about power-law distributions. Gemma flagged the 15 that used preferential attachment models. Saved me 4 hours. I still read all 15 myself.\n",
+        "\n",
+        "**Structured extraction.** Turn unstructured text into structured data automatically:"
+      ],
+      "id": "eaa5fa55"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "abstract = \"\"\"\n",
+        "We analyze scientific collaboration networks using 5 million papers from\n",
+        "2000-2020. Using graph neural networks and community detection, we identify\n",
+        "disciplinary boundaries and interdisciplinary bridges. Interdisciplinarity\n",
+        "increased 25%, with physics and CS showing strongest cross-connections.\n",
+        "\"\"\"\n",
+        "\n",
+        "prompt = f\"\"\"Extract: Domain, Methods, Key Finding\\n\\n{abstract}\\n\\nFormat:\\nDomain:...\\nMethods:...\\nKey Finding:...\"\"\"\n",
+        "response = ollama.generate(prompt=prompt, **params_llm)\n",
+        "print(response.response)"
+      ],
+      "id": "f2bceb4c",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Scale this to hundreds of papers for meta-analysis. Always verify---LLMs misinterpret obscure terminology and fabricate plausible-sounding technical details when uncertain. Remember: the model is pattern-matching against academic writing it's seen, not reasoning about your domain.\n",
+        "\n",
+        "**Hypothesis generation.** LLMs pattern-match against research questions they've encountered in training data:"
+      ],
+      "id": "1d765942"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "context = \"\"\"I study concept spread in citation networks. Highly cited papers\n",
+        "combine existing concepts novelty. What should I study next?\"\"\"\n",
+        "\n",
+        "prompt = f\"\"\"Suggest three follow-up research questions:\\n\\n{context}\"\"\"\n",
+        "response = ollama.generate(prompt=prompt, **params_llm)\n",
+        "print(response.response)"
+      ],
+      "id": "74db7af7",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Treat the model as a thought partner, not an oracle. It helps structure thinking but doesn't possess domain expertise. The suggestions reflect patterns in how research questions are framed, not deep knowledge of your field.\n",
+        "\n",
+        "## Failure Modes and Boundaries\n",
+        "\n",
+        "The failure modes follow directly from the mechanism. LLMs fabricate plausibly because they optimize for fluency, not truth. Ask about a non-existent \"Smith et al. quantum paper\" and receive fluent academic prose describing results that never happened. Always verify citations. The model has seen thousands of papers cited in the format \"Smith et al. (2023) demonstrated that...\" and generates outputs matching that pattern even when the citation is fictional.\n",
+        "\n",
+        "Context limits are architectural. Models see only 2,000–8,000 tokens at once. Paste 100 abstracts and early ones are mathematically evicted from working memory. The model doesn't \"remember\" them; they're gone. Knowledge cutoffs are temporal. Gemma 3N's training ended early 2024. Ask about recent events and receive outdated information or plausible fabrications constructed from pre-cutoff patterns.\n",
+        "\n",
+        "Reasoning is absent. LLMs pattern-match, they don't reason. Ask \"How many r's in 'Strawberry'?\" and the model might answer correctly via pattern matching against similar questions in training data, not by counting letters. Sometimes right. Often wrong. The model has no internal representation of what counting means.\n",
+        "\n",
+        "These aren't bugs to be fixed. They're intrinsic to the architecture. Use LLMs to accelerate work, not replace judgment. They excel at summarizing text, extracting structure, reformulating concepts, brainstorming, generating synthetic examples, and translation. They fail at literature reviews without verification, factual claims without sources, statistical analysis, and ethical decisions. Harvest the center of the distribution where fluency and truth correlate. Defend against the tails where they diverge.\n",
+        "\n",
+        "## Next\n",
+        "\n",
+        "You've seen LLMs in practice---setup, summarization, extraction, limitations. But how do they actually work? What happens inside when you send a prompt?\n",
+        "\n",
+        "The rest of this module unboxes the technology: **prompt engineering** (communicating with LLMs), **embeddings** (representing meaning as numbers), **transformers** (the architecture enabling modern NLP), **fundamentals** (from word counts to neural representations).\n",
+        "\n",
+        "First, let's master talking to machines."
+      ],
+      "id": "4971b4f0"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "applsoftcomp",
+      "language": "python",
+      "display_name": "Python (applsoftcomp)",
+      "path": "/Users/skojaku-admin/Library/Jupyter/kernels/applsoftcomp"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

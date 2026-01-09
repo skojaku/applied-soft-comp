@@ -18,7 +18,7 @@
         "\n",
         "Let's start with a simple example of analyzing gender bias in occupations."
       ],
-      "id": "7ceb50db"
+      "id": "72d20b88"
     },
     {
       "cell_type": "code",
@@ -30,7 +30,7 @@
         "# Load pre-trained Word2vec embeddings\n",
         "model = api.load(\"word2vec-google-news-300\")"
       ],
-      "id": "7fb06c81",
+      "id": "e657c595",
       "execution_count": null,
       "outputs": []
     },
@@ -52,7 +52,7 @@
         "    bias = compute_bias(word, microframe, model)\n",
         "    return bias"
       ],
-      "id": "b9d2c516",
+      "id": "b281939f",
       "execution_count": null,
       "outputs": []
     },
@@ -60,7 +60,7 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
-        "::: {.column-margin}\n",
+        "::: {.callout-note}\n",
         "The `compute_bias` function calculates the cosine similarity between a word vector and a semantic axis (microframe).\n",
         "\n",
         "- **Numerator**: Dot product projects the word onto the axis.\n",
@@ -69,7 +69,7 @@
         "\n",
         "We will use the following occupations:"
       ],
-      "id": "0d5aa457"
+      "id": "650a47b1"
     },
     {
       "cell_type": "code",
@@ -103,7 +103,7 @@
         "    \"boss\",\n",
         "]"
       ],
-      "id": "462c6c50",
+      "id": "ca863af4",
       "execution_count": null,
       "outputs": []
     },
@@ -113,7 +113,7 @@
       "source": [
         "We measure the gender bias in these occupations by measuring how they align with the \"she-he\" axis."
       ],
-      "id": "3f1d8270"
+      "id": "a80744e7"
     },
     {
       "cell_type": "code",
@@ -131,7 +131,7 @@
         "    bias = analyze(occupation, \"she\", \"he\", model)\n",
         "    print(f\"{occupation}: {bias:.3f}\")"
       ],
-      "id": "d0f037fc",
+      "id": "d0e34843",
       "execution_count": null,
       "outputs": []
     },
@@ -139,7 +139,7 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
-        "::: {.column-margin}\n",
+        "::: {.callout-note}\n",
         "**Interpreting the Scores:**\n",
         "\n",
         "- **Positive scores (> 0)**: Closer to \"she\" (e.g., *nurse*, *librarian*).\n",
@@ -153,7 +153,7 @@
         "\n",
         "Since word embeddings capture semantic relationships learned from large text corpora, they inevitably encode societal biases and stereotypes present in that training data. We can leverage this property to identify pairs of words that exhibit stereotypical gender associations. By measuring how different words align with the gender axis (she-he), we can find pairs where one word shows a strong feminine bias while its counterpart shows a masculine bias, revealing ingrained stereotypes in language use.\n"
       ],
-      "id": "25116fee"
+      "id": "e48676da"
     },
     {
       "cell_type": "code",
@@ -168,7 +168,7 @@
         "    (\"vocalist\", \"guitarist\"),\n",
         "]"
       ],
-      "id": "eda779cc",
+      "id": "3a62fd3e",
       "execution_count": null,
       "outputs": []
     },
@@ -185,7 +185,7 @@
         "    print(f\"{word1}: {bias1:.3f}\")\n",
         "    print(f\"{word2}: {bias2:.3f}\")"
       ],
-      "id": "06159fc6",
+      "id": "ce65c1cd",
       "execution_count": null,
       "outputs": []
     },
@@ -208,7 +208,7 @@
         "\n",
         "Let's see how this works in practice. We first measure the gender bias of the following words:"
       ],
-      "id": "b95a5938"
+      "id": "e0114d02"
     },
     {
       "cell_type": "code",
@@ -242,7 +242,7 @@
         "    gender_biases.append(gender_bias)\n",
         "    sports_biases.append(sports_bias)"
       ],
-      "id": "72b64778",
+      "id": "dd78d03b",
       "execution_count": null,
       "outputs": []
     },
@@ -252,7 +252,7 @@
       "source": [
         "Let's plot the results:"
       ],
-      "id": "02811acd"
+      "id": "5bce6ec0"
     },
     {
       "cell_type": "code",
@@ -282,7 +282,7 @@
         "plt.show()\n",
         "sns.despine()"
       ],
-      "id": "3baeda1d",
+      "id": "78916f84",
       "execution_count": null,
       "outputs": []
     },
@@ -290,7 +290,7 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
-        "::: {.column-margin}\n",
+        "::: {.callout-note}\n",
         "**Indirect Bias:**\n",
         "\n",
         "The plot reveals a correlation: words associated with \"softball\" (y-axis > 0) also tend to be associated with \"she\" (x-axis > 0). Conversely, \"football\" terms align with \"he\".\n",
@@ -304,7 +304,7 @@
         "\n",
         "Word embeddings, while powerful, inevitably capture and reflect societal biases present in the large text corpora they are trained on. We observed both **direct bias**, where occupations or attributes align strongly with specific gender pronouns, and **indirect bias**, where seemingly neutral concepts become gendered through their associations with other words. This analysis highlights the importance of understanding and mitigating these biases to prevent the perpetuation of stereotypes in AI systems and ensure fairness in applications like search, recommendation, and hiring."
       ],
-      "id": "db5e252e"
+      "id": "d75eec52"
     }
   ],
   "metadata": {

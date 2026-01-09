@@ -1,0 +1,293 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"GPT Inference: Sampling Strategies\"\n",
+        "execute:\n",
+        "  enabled: true\n",
+        "---\n",
+        "\n",
+        "## The Spoiler\n",
+        "\n",
+        "**GPT doesn't generate text by picking the \"right\" word---it samples from a probability distribution, and how you sample determines whether you get coherent prose or repetitive nonsense.**\n",
+        "\n",
+        "## The Mechanism\n",
+        "\n",
+        "![](../figs/gpt-inference-sampling-manga.png)\n",
+        "\n",
+        "What do you think happens when GPT generates the next word in a sentence? Does it pick the \"best\" word, or something else?\n",
+        "\n",
+        "Here's the reality: GPT doesn't output a single word. It outputs a probability distribution over its entire vocabulary---millions of possible tokens, each with a likelihood. The naive approach is to always pick the highest probability token (greedy sampling), but this creates a deterministic trap. The model falls into repetitive loops because it always makes the same choice. The distribution is high-dimensional, making sampling computationally expensive, but also rich with alternative paths.\n",
+        "\n",
+        "The solution is controlled randomness. By sampling from the distribution rather than deterministically selecting the peak, we introduce diversity. But blind random sampling produces incoherent text. The challenge is finding the middle ground: sample broadly enough to avoid repetition, but narrowly enough to maintain coherence.\n",
+        "\n",
+        "Think of it like improvisational jazz. A musician playing the same note repeatedly (greedy sampling) is boring. Playing random notes (uniform sampling) is noise. The art is in sampling from the most promising notes while occasionally taking creative risks. This jazz analogy---the balance between predictability and surprise---explains every sampling strategy we'll explore.\n",
+        "\n",
+        "## The Application\n",
+        "\n",
+        "Here is an interactive demo of GPT inference:\n",
+        "\n",
+        "https://static.marimo.app/static/gpt-ar61\n",
+        "\n",
+        "You can try different sampling strategies and see the results. GPT generates text one token at a time, repeatedly sampling from the probability distribution. Let's examine the strategies for sampling that balance quality and diversity.\n",
+        "\n",
+        "First, let's set up our connection to Ollama:"
+      ],
+      "id": "72278c9a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import ollama\n",
+        "\n",
+        "# Make sure you have Ollama running and a model pulled\n",
+        "# Run: ollama pull mapler/gpt2\n",
+        "MODEL = \"mapler/gpt2\"\n",
+        "PROMPT = \"Hi there! \""
+      ],
+      "id": "96e0cc79",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "**Greedy Sampling**\n",
+        "\n",
+        "Greedy sampling always picks the highest probability token, which is deterministic but can lead to repetitive or trapped text. For example, if the model predicts \"the\" with high probability, it will always predict \"the\" again. This is the jazz musician stuck on a single note.\n",
+        "\n",
+        "::: {#fig-gpt-greedy-search}\n",
+        "![](https://huggingface.co/blog/assets/02_how-to-generate/greedy_search.png){width=50% fig-align=\"center\"}\n",
+        "\n",
+        "GPT greedy search.\n",
+        ":::\n",
+        "\n",
+        "Let's see greedy sampling in action. We set temperature to 0 to make the sampling deterministic (always picking the highest probability token):"
+      ],
+      "id": "97e73f83"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "greedy_response = ollama.generate(\n",
+        "    model=MODEL,\n",
+        "    prompt=PROMPT,\n",
+        "    options={\n",
+        "        \"temperature\": 0,  # greedy sampling\n",
+        "        \"num_predict\": 20,  # max tokens to generate\n",
+        "    }\n",
+        ")\n",
+        "print(greedy_response['response'])"
+      ],
+      "id": "ca631a2d",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The output is often repetitive because greedy sampling always selects the most probable token at each step, leading to predictable and repetitive patterns. Try running it multiple times---you'll get the exact same output each time.\n",
+        "\n",
+        "**Beam Search**\n",
+        "\n",
+        "Beam search alleviates the repetition problem by taking into account the high-order dependencies between tokens. For example, in generating \"The cat ran across the ___\", beam search might preserve a path containing \"mat\" even if \"floor\" or \"room\" have higher individual probabilities at that position. This is because the complete sequence like \"mat quickly\" could be more probable when considering the token next after \"mat\". \"The cat ran across the mat quickly\" is a more natural phrase than \"The cat ran across the floor quickly\" when considering the full flow and common linguistic patterns.\n",
+        "\n",
+        "::: {#fig-gpt-beam-search}\n",
+        "![](https://huggingface.co/blog/assets/02_how-to-generate/beam_search.png){width=50% fig-align=\"center\"}\n",
+        "\n",
+        "GPT beam search.\n",
+        ":::\n",
+        "\n",
+        "Beam search maintains multiple possible sequences (beams) in parallel, exploring different paths simultaneously. At each step, it expands all current beams, scores the resulting sequences, and keeps only the top-k highest scoring ones. For instance, with a beam width of 3:\n",
+        "\n",
+        "- First beams might be: [\"The cat ran\", \"The cat walked\", \"The cat jumped\"]\n",
+        "- Next step: [\"The cat ran across\", \"The cat ran through\", \"The cat walked across\"]\n",
+        "- And so on, keeping the 3 most promising complete sequences at each step\n",
+        "\n",
+        "This process continues until reaching the end, finally selecting the sequence with highest overall probability. The beam search can be combined with top-k sampling or nucleus sampling. For example, one can sample a token based on the top-k sampling or nucleus sampling to form the next beam.\n",
+        "\n",
+        "While beam search often produces high-quality outputs since it considers longer-term coherence, it can still suffer from the problem of repetitive or trapped text. It's the jazz ensemble playing in perfect harmony---technically excellent but predictable.\n",
+        "\n",
+        "*Note: Ollama doesn't natively support beam search through its API. Beam search requires access to the model's internal scoring mechanism, which is typically implemented at a lower level (e.g., using HuggingFace Transformers or direct PyTorch/TensorFlow implementations). For production beam search, you would use libraries like transformers or vLLM.*\n",
+        "\n",
+        "**From Deterministic to Stochastic Sampling**\n",
+        "\n",
+        "Both greedy and beam search are deterministic. They pick the most likely token at each step. However, this creates a loop where the model always predicts the same tokens repeatedly. A simple way to alleviate this problem is to sample a token from the distribution.\n",
+        "\n",
+        "Top-k sampling relaxes the deterministic nature of greedy sampling by selecting randomly from the $k$ most likely next tokens at each generation step. While this introduces some diversity compared to greedy sampling, choosing a fixed $k$ can be problematic. Value of $k$ might be too large for some distribution tails (including many poor options) or too small for others (excluding reasonable options). In our jazz analogy, this is like saying \"you can only improvise using these five specific notes\"---sometimes that's perfect, sometimes it's too limiting."
+      ],
+      "id": "a12ab96e"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "top_k_response = ollama.generate(\n",
+        "    model=MODEL,\n",
+        "    prompt=PROMPT,\n",
+        "    options={\n",
+        "        \"temperature\": 1.0,  # enable stochastic sampling\n",
+        "        \"top_k\": 10,  # restrict to top 10 tokens\n",
+        "        \"num_predict\": 20,\n",
+        "    }\n",
+        ")\n",
+        "print(top_k_response['response'])"
+      ],
+      "id": "607e12c4",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Try running this multiple times---you'll get different outputs each time because the model samples randomly from the top-k tokens.\n",
+        "\n",
+        "Nucleus sampling [@holtzman2019curious] addresses this limitation by dynamically selecting tokens based on cumulative probability. It samples from the smallest set of tokens whose cumulative probability exceeds a threshold $p$ (e.g. 0.9). This adapts naturally to different probability distributions, i.e., selecting few tokens when the distribution is concentrated and more when it's spread out. This approach often provides a good balance between quality and diversity. The jazz musician now has flexibility---when the melody is clear, stick to a few notes; when it's time to explore, draw from a wider palette.\n",
+        "\n",
+        "::: {#fig-gpt-top-k-top-p}\n",
+        "![](https://storage.googleapis.com/zenn-user-upload/8p2r9urhtn5nztdg6mnia3toibhl){width=80% fig-align=\"center\"}\n",
+        "\n",
+        "Nucleus sampling. The image is taken from [this blog](https://zenn.dev/hellorusk/articles/1c0bef15057b1d).\n",
+        ":::"
+      ],
+      "id": "9e03144a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "top_p_response = ollama.generate(\n",
+        "    model=MODEL,\n",
+        "    prompt=PROMPT,\n",
+        "    options={\n",
+        "        \"temperature\": 1.0,\n",
+        "        \"top_p\": 0.95,  # sample from tokens with cumulative probability >= 0.95\n",
+        "        \"num_predict\": 20,\n",
+        "    }\n",
+        ")\n",
+        "print(top_p_response['response'])"
+      ],
+      "id": "99193a6e",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Nucleus sampling dynamically adjusts the number of candidate tokens based on the probability distribution, making it more adaptive than fixed top-k.\n",
+        "\n",
+        "**Temperature Control**\n",
+        "\n",
+        "Temperature ($\\tau$) modifies how \"concentrated\" the probability distribution is for sampling by scaling the logits before applying softmax:\n",
+        "\n",
+        "$$\n",
+        "p_i = \\frac{\\exp(z_i/\\tau)}{\\sum_j \\exp(z_j/\\tau)}\n",
+        "$$\n",
+        "\n",
+        "where $z_i$ are the logits and $\\tau$ is the temperature parameter. Lower temperatures ($\\tau < 1.0$) make the distribution more peaked, making high probability tokens even more likely to be chosen, leading to more focused and conservative outputs. Higher temperatures ($\\tau > 1.0$) flatten the distribution by making the logits more similar, increasing the chances of selecting lower probability tokens and producing more diverse but potentially less coherent text. As $\\tau \\to 0$, the distribution approaches a one-hot vector (equivalent to greedy search), while as $\\tau \\to \\infty$, it approaches a uniform distribution.\n",
+        "\n",
+        "In jazz terms, temperature controls the musician's mood. Low temperature is playing it safe (sticking to the melody). High temperature is experimental improvisation (sometimes brilliant, sometimes cacophonous).\n",
+        "\n",
+        "::: {#fig-gpt-temperature}\n",
+        "![](https://cdn.prod.website-files.com/618399cd49d125734c8dec95/6639e35ce91c16b3b9564b2f_mxaIPcROZcBFYta1I0nzWjlGTgs-LxzUOE3p6Kbvf9qPpZzBh5AAZG7ciRtgVquhLTtrM8ToJdNd-ubXvuz8tRfrqBwSozWHCj457pm378buxz2-XrMfWzfSv3b793QP61kLxRKT299WP1gbas_E118.png){width=80% fig-align=\"center\"}\n",
+        "\n",
+        "Temperature controls the concentration of the probability distribution. Lower temperature makes the distribution more peaked, while higher temperature makes the distribution more flat.\n",
+        ":::\n",
+        "\n",
+        "Let's see how temperature affects generation:"
+      ],
+      "id": "8344622a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "for tau in [0.1, 0.5, 1.0, 2.0, 5.0]:\n",
+        "    response = ollama.generate(\n",
+        "        model=MODEL,\n",
+        "        prompt=PROMPT,\n",
+        "        options={\n",
+        "            \"temperature\": tau,\n",
+        "            \"num_predict\": 20,\n",
+        "        }\n",
+        "    )\n",
+        "    print(f\"τ = {tau}: {response['response']}\")"
+      ],
+      "id": "e973da72",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Notice how:\n",
+        "- Low temperature ($\\tau = 0.1$): Conservative, focused output\n",
+        "- Medium temperature ($\\tau = 1.0$): Balanced diversity\n",
+        "- High temperature ($\\tau = 5.0$): Creative but potentially incoherent\n",
+        "\n",
+        "**Combining All Strategies**\n",
+        "\n",
+        "You can combine top-k, top-p, and temperature for fine-grained control:"
+      ],
+      "id": "b8ea143d"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "combined_response = ollama.generate(\n",
+        "    model=MODEL,\n",
+        "    prompt=PROMPT,\n",
+        "    options={\n",
+        "        \"temperature\": 0.7,  # moderate randomness\n",
+        "        \"top_k\": 10,         # restrict to top 10 tokens\n",
+        "        \"top_p\": 0.95,       # within top-k, use nucleus sampling\n",
+        "        \"num_predict\": 20,\n",
+        "    }\n",
+        ")\n",
+        "print(combined_response['response'])"
+      ],
+      "id": "77061bfd",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "This combination restricts candidates to top-k tokens, then applies nucleus sampling, and finally uses temperature to control randomness---giving you maximum control over the generation process. The jazz musician now has a framework: work within these chords (top-k), adapt to the moment (nucleus), and choose your creative intensity (temperature).\n",
+        "\n",
+        "**Practical Recommendations**\n",
+        "\n",
+        "For most applications, use nucleus sampling with $p = 0.9$ and temperature $\\tau = 0.7$. This combination provides a good balance between coherence and creativity. For tasks requiring high factual accuracy (e.g., technical documentation), lower the temperature to $\\tau = 0.3$ to make the model more conservative. For creative writing, increase the temperature to $\\tau = 1.0$ or higher to encourage exploration.\n",
+        "\n",
+        "Beam search is useful when you need the single most probable sequence (e.g., machine translation), but it sacrifices diversity. Use it when correctness matters more than variety.\n",
+        "\n",
+        "## The Takeaway\n",
+        "\n",
+        "Generation is sampling. Greedy picks the peak, beam search explores multiple peaks, and stochastic sampling adds controlled randomness. Temperature flattens or sharpens the distribution; nucleus sampling adapts to its shape. The right strategy depends on whether you're optimizing for accuracy or creativity."
+      ],
+      "id": "1683d90c"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "/Users/skojaku-admin/Documents/projects/applied-soft-comp/.venv/share/jupyter/kernels/python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
