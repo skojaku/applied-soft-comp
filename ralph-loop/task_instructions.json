@@ -129,6 +129,102 @@
     ],
     "learningGoalsTemplate": "::: {.callout-note title=\"What you'll learn in this module\"}\nThis module introduces [core concept].\n\nYou'll learn:\n\n- What **[concept A]** means and how to [apply it].\n- How to **[skill B]** so [benefit].\n- The [counterintuitive insight C] and the notion of **[related concept]**.\n- Practical consequences for [application area].\n:::"
   },
+  "codeBlockRefactoring": {
+    "description": "Task for improving code block readability and pedagogy",
+    "goal": "Make code blocks more student-friendly by showing only core concepts and hiding distractors",
+    "principles": [
+      "One concept per visible block - each block teaches ONE thing",
+      "Hide setup and boilerplate - use #| echo: false for imports, helpers, downloads",
+      "Collapse complex but non-essential code - use #| code-fold: true for training loops, long pipelines",
+      "Keep visualizations - matplotlib code stays visible when short (< 5 lines) or fold when longer",
+      "Progressive disclosure - students see the essence first, can expand details if curious"
+    ],
+    "steps": [
+      "1. Identify multi-purpose blocks that mix setup + core logic + visualization",
+      "2. Split into focused blocks: hidden setup → visible core concept → folded visualization",
+      "3. Hide helper functions and imports with #| echo: false and #| output: false",
+      "4. Collapse lengthy boilerplate (training loops, augmentation, complex visualizations) with #| code-fold: true",
+      "5. Add descriptive #| code-summary labels for collapsed blocks",
+      "6. Test by rendering: quarto render <module-directory>/",
+      "7. Verify in rendered HTML: setup is hidden, core concepts visible, fold buttons work",
+      "8. Git add, commit with descriptive message, and push"
+    ],
+    "codeBlockAttributes": {
+      "hideCode": "#| echo: false",
+      "hideOutput": "#| output: false",
+      "collapseCode": "#| code-fold: true",
+      "collapseSummary": "#| code-summary: \"Descriptive label\"",
+      "noExecute": "#| eval: false"
+    },
+    "transformationExample": {
+      "before": "```{python}\n# Load image\nurl = \"...\"\nimg = load_image_from_url(url)\n\n# Apply kernel\nfrom scipy.signal import convolve2d\nK = np.array([[...]])\nresult = convolve2d(img, K)\n\n# Visualize\nfig, axes = plt.subplots(1, 2)\naxes[0].imshow(img)\naxes[1].imshow(result)\nplt.show()\n```",
+      "after": {
+        "block1": "```{python}\n#| echo: false\n#| output: false\n\n# Load image\nurl = \"...\"\nimg = load_image_from_url(url)\nfrom scipy.signal import convolve2d\n```",
+        "block2": "```{python}\n# Define the kernel (core concept)\nK = np.array([[...]])\n\n# Apply convolution\nresult = convolve2d(img, K)\n```",
+        "block3": "```{python}\n#| code-fold: true\n#| code-summary: \"Show visualization code\"\n\nfig, axes = plt.subplots(1, 2)\naxes[0].imshow(img)\naxes[1].imshow(result)\nplt.show()\n```"
+      },
+      "result": "Students see only kernel definition and convolution. Setup and visualization are hidden/collapsible."
+    },
+    "commonPatterns": [
+      {
+        "pattern": "Import statements",
+        "action": "Hide with #| echo: false at start of file or in setup block"
+      },
+      {
+        "pattern": "Helper function definitions",
+        "action": "Hide with #| echo: false and #| output: false"
+      },
+      {
+        "pattern": "Data loading from URLs/files",
+        "action": "Hide with #| echo: false"
+      },
+      {
+        "pattern": "Training loops with standard structure",
+        "action": "Collapse with #| code-fold: true and summary=\"Show training loop\""
+      },
+      {
+        "pattern": "Long transform/augmentation pipelines",
+        "action": "Collapse with #| code-fold: true and descriptive summary"
+      },
+      {
+        "pattern": "Complex visualization setup (>10 lines)",
+        "action": "Collapse with #| code-fold: true and summary=\"Show visualization code\""
+      },
+      {
+        "pattern": "Model architecture class definitions",
+        "action": "Collapse with #| code-fold: true and summary=\"Show implementation\""
+      },
+      {
+        "pattern": "Core concept demonstrations",
+        "action": "Keep visible - this is what students should see!"
+      }
+    ],
+    "whatStudentsShouldSee": [
+      "The main concept being taught (e.g., kernel definition, model forward pass)",
+      "Key operations and transformations",
+      "Results and outputs (print statements, simple plots)",
+      "Code that directly answers 'how does X work?'"
+    ],
+    "whatToHideOrCollapse": [
+      "All import statements",
+      "Helper function definitions",
+      "URL fetching and data loading",
+      "Network downloads (CIFAR-10, ImageNet labels)",
+      "Matplotlib boilerplate (fig setup, axis styling, tight_layout)",
+      "Training loop boilerplate",
+      "Long configuration (transforms, augmentation pipelines)",
+      "Advanced hooks and introspection code"
+    ],
+    "verificationChecklist": [
+      "Render succeeds without errors",
+      "Hidden blocks don't appear in rendered HTML",
+      "Folded blocks show summary label and expand on click",
+      "Core concept code is immediately visible",
+      "Student perspective: Can I understand the key concept without expanding?",
+      "All outputs (images, prints) still render correctly",
+      "No broken variable references (hidden code defines what visible code uses)"
+    ]
+  },
   "files": [
     {"path": "docs/lecture-note/m05-images/overview.qmd", "category": "m05-images", "priority": 39},
     {"path": "docs/lecture-note/m05-images/01-what-is-an-image.qmd", "category": "m05-images", "priority": 40},
