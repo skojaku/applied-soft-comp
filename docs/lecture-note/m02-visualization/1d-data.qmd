@@ -2,6 +2,10 @@
 title: "Visualizing One-Dimensional Data: Show Me the Data!"
 ---
 
+::: {.callout-note title="What you'll learn in this module"}
+This module teaches you how to visualize one-dimensional data honestly and clearly. You'll discover why hiding raw data behind summary statistics is misleading, learn practical tools like swarm plots and kernel density estimation, and understand how to choose the right visualization for your dataset's size and characteristics.
+:::
+
 ## The Case of the Missing Data Points
 
 Imagine you're reading a research paper that claims "Treatment A is significantly better than Treatment B." The paper shows a bar chart with two bars and error bars. The difference looks impressive. But here's the question: what does the actual data look like? Are there 5 data points per group? 500? Are they normally distributed, or are there outliers? Are most points clustered together, or spread out?
@@ -50,11 +54,7 @@ plt.title('Swarm Plot: Every Point Visible')
 plt.show()
 ```
 
-Swarm plots are perfect for small to moderate datasets (roughly up to 100-200 points per group). They let you see:
-- The actual sample size
-- The distribution shape
-- Individual outliers
-- The spread of the data
+Swarm plots are perfect for small to moderate datasets (roughly up to 100-200 points per group). They let you see the actual sample size, so you know how much data went into each group. You can immediately perceive the distribution shape, spotting whether your data is symmetric, skewed, or bimodal. Individual outliers jump out visually, rather than being hidden in summary statistics. And you can see the overall spread of the data with a single glance.
 
 ### The Limits of Swarm Plots
 
@@ -73,9 +73,7 @@ plt.title('Strip Plot with Jittering')
 plt.show()
 ```
 
-The key parameters:
-- `alpha`: Controls transparency (0 = invisible, 1 = opaque). Values around 0.3-0.7 work well.
-- `jitter`: Amount of random horizontal displacement. Too much jitter and groups overlap; too little and points stack vertically.
+Two key parameters control the appearance. The `alpha` parameter controls transparency (0 = invisible, 1 = opaque), and values around 0.3-0.7 work well to see overlapping points. The `jitter` parameter controls the amount of random horizontal displacement. Too much jitter and your groups start to overlap and become confusing, while too little and points stack vertically in dense columns.
 
 ### Barcode Plots (Rug Plots)
 
@@ -115,9 +113,7 @@ plt.show()
 
 ### The Art of Choosing Bins
 
-The number of bins dramatically affects how your histogram looks:
-- **Too few bins**: You lose detail and might miss important features like bimodality
-- **Too many bins**: The histogram becomes noisy and hard to interpret
+The number of bins dramatically affects how your histogram looks. With too few bins, you lose detail and might miss important features like bimodality. With too many bins, the histogram becomes noisy and hard to interpret.
 
 A good starting point is the **Sturges' rule**: number of bins H $\log_2(n) + 1$, where $n$ is the sample size. But always experiment! Try different bin numbers and see what reveals the most about your data's structure.
 
@@ -170,20 +166,13 @@ plt.grid(True, alpha=0.3)
 plt.show()
 ```
 
-The CDF has several advantages:
-- **No binning decisions**: Every data point is shown
-- **Easy to read percentiles**: The median is where CDF = 0.5
-- **Great for comparisons**: Differences between groups are easy to spot
+The CDF has several advantages. First, there are no binning decisions to make, so every data point is effectively shown. Second, percentiles are easy to read: the median is where CDF = 0.5, and any other percentile is easy to find. Third, it's great for comparisons because differences between groups are easy to spot visually.
 
 ### Complementary Cumulative Distribution Function (CCDF)
 
 For heavy-tailed distributions, the **complementary cumulative distribution function (CCDF)** is even more useful. The CCDF shows the proportion of data points *greater than* each value: CCDF(x) = 1 - CDF(x).
 
-The magic of the CCDF is that when plotted on a log-log scale, power-law distributions appear as straight lines. This makes it the go-to tool for studying phenomena like:
-- Income and wealth distributions
-- City size distributions
-- Social network degree distributions
-- Earthquake magnitudes
+The magic of the CCDF is that when plotted on a log-log scale, power-law distributions appear as straight lines. This makes it the go-to tool for studying phenomena with power-law behavior. Think income and wealth distributions, city size distributions, social network degree distributions, and earthquake magnitudes. All of these follow power-law patterns where the tail is as important as the bulk of the distribution.
 
 ```python
 # CCDF on log-log scale
