@@ -54,14 +54,10 @@
 ## Module 5: Deep Learning for Images
 
 - [Overview](m05-images/overview.html)
-- [Image Processing Fundamentals](m05-images/image-processing.html)
-- [Convolutional Neural Networks](m05-images/cnn.html)
-- [LeNet Architecture](m05-images/lenet.html)
-- [AlexNet: Deep CNN Revolution](m05-images/alexnet.html)
-- [VGG Networks](m05-images/vgg.html)
-- [Inception & Multi-Scale Features](m05-images/inception.html)
-- [Batch Normalization](m05-images/batch-normalization.html)
-- [ResNet & Skip Connections](m05-images/resnet.html)
+- [Part 1: What is an Image?](m05-images/01-what-is-an-image.html)
+- [Part 2: The Deep Learning Revolution](m05-images/02-the-deep-learning-revolution.html)
+- [Part 3: Using CNN Models](m05-images/03-using-cnn-models.html)
+- [Part 4: CNN Innovations](m05-images/04-cnn-innovations.html)
 
 ## Module 6: Deep Learning for Graphs
 
