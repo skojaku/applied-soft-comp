@@ -11,16 +11,20 @@ This module introduces the tidy data philosophy. You'll learn what makes data "t
 
 ## The 80% Problem
 
-It is often said that 80% of data analysis is spent cleaning and preparing data. This isn't an exaggeration. Getting your data into the right shape makes everything else easier. The good news is that once you understand the tidy data philosophy, you can apply it consistently across projects.
+Have you ever spent hours wrestling with a dataset before you could even start analyzing it? It is often said that 80% of data analysis is spent cleaning and preparing data. This isn't an exaggeration.
 
-If you want to dive deeper, read [Tidy Data by Hadley Wickham](https://vita.had.co.nz/papers/tidy-data.pdf).
+Getting your data into the right shape makes everything else easier. The good news is that once you understand the tidy data philosophy, you can apply it consistently across projects. If you want to dive deeper, read [Tidy Data by Hadley Wickham](https://vita.had.co.nz/papers/tidy-data.pdf).
 
 
 ## What is Tidy Data?
 
 At its core, tidy data is a standard way of mapping the meaning of a dataset to its structure. Whether your data is messy or tidy depends entirely on how rows, columns, and tables match up with observations, variables, and types.
 
-Let's talk about the three core principles. First, each variable forms its own column. A variable measures the same underlying attribute (like height, temperature, or duration) across different units. Second, each observation forms a row. An observation captures all measurements on the same unit (like a person, a day, or a race) across different attributes. Third, each type of observational unit gets its own table. In a study of allergy medication, you'd have separate tables for demographic data, daily medical data, and meteorological data, not one giant table mixing everything together.
+Let's talk about the three core principles. First, each variable forms its own column. A variable measures the same underlying attribute (like height, temperature, or duration) across different units.
+
+Second, each observation forms a row. An observation captures all measurements on the same unit (like a person, a day, or a race) across different attributes.
+
+Third, each type of observational unit gets its own table. In a study of allergy medication, you'd have separate tables for demographic data, daily medical data, and meteorological data, not one giant table mixing everything together.
 
 Why does this matter? Tidy datasets are dramatically easier to manipulate, model, and visualize. They make exploration faster and analysis clearer. Most importantly, they standardize data organization, making your code reusable and reliable.
 
@@ -28,11 +32,11 @@ Why does this matter? Tidy datasets are dramatically easier to manipulate, model
 
 Now let's flip the perspective and look at the most common mistakes. When you first encounter messy data, it usually falls into one of five patterns.
 
-The first problem is that column headers often contain values instead of variable names. Imagine a table where months ("Jan", "Feb", "Mar") are the column headers, rather than having a single "Month" column with those values. This makes it hard to analyze across months.
+The first problem is that column headers often contain values instead of variable names. Imagine a table where months ("Jan", "Feb", "Mar") are the column headers, rather than having a single "Month" column with those values.
 
-The second problem is multiple variables stored in one column. You might find a column like "height_weight" containing values like "5.5_130" instead of splitting those into separate "height" and "weight" columns. This breaks apart information that belongs together.
+The second problem is multiple variables stored in one column. You might find a column like "height_weight" containing values like "5.5_130" instead of splitting those into separate "height" and "weight" columns.
 
-The third problem is variables scattered across both rows and columns. A piece of information like gender might be encoded in a specific column and also hidden within the values of another column, creating redundancy and confusion during analysis.
+The third problem is variables scattered across both rows and columns. A piece of information like gender might be encoded in a specific column and also hidden within the values of another column.
 
 The fourth problem is mixing different types of observational units in one table. For example, a single table containing both patient demographic information and medical test results mashes two fundamentally different kinds of data together.
 
@@ -40,7 +44,7 @@ The fifth and final problem is splitting a single observational unit across mult
 
 ## Tidy Tools
 
-Now let's learn practical tools to reshape your messy data into tidy form. The examples here are adapted from [Python for Data Science](https://aeturrell.github.io/python4DS/data-tidy.html).
+How do we fix messy data? Let's learn practical tools to reshape your messy data into tidy form. The examples here are adapted from [Python for Data Science](https://aeturrell.github.io/python4DS/data-tidy.html).
 
 ### Melt: From Wide to Long
 
@@ -56,9 +60,11 @@ df = pd.DataFrame({'first': ['John', 'Mary'],
 df
 ```
 
-Notice how "height" and "weight" sit in separate columns. This wide format breaks tidy principles and makes comparisons awkward when you want to plot or analyze these measurements together.
+Notice how "height" and "weight" sit in separate columns. This wide format breaks tidy principles. It makes comparisons awkward when you want to plot or analyze these measurements together.
 
-The `pandas.DataFrame.melt()` method solves this by transforming data from wide to long format. After melting, instead of separate columns for "height" and "weight", you get one column for the variable type and another for the value. Let's see it in action:
+The `pandas.DataFrame.melt()` method solves this by transforming data from wide to long format. After melting, instead of separate columns for "height" and "weight", you get one column for the variable type and another for the value.
+
+Let's see it in action:
 
 ```{python}
 import pandas as pd
@@ -70,11 +76,15 @@ df_melted = df.melt(
 df_melted
 ```
 
-Now each row represents a single measurement for an individual. If you want to compare height and weight, they're in the same column format, making analysis natural. This is the essence of tidy data.
+Now each row represents a single measurement for an individual. If you want to compare height and weight, they're in the same column format, making analysis natural.
+
+This is the essence of tidy data.
 
 ### Pivot: From Long to Wide
 
-Sometimes the opposite problem arises. Your data starts in "long" format, with a separate row for each measurement type (like "cases" or "population") for each country and year. This scatters information about a single observation across multiple rows, making it hard to see all statistics for country A in 2020 at once.
+What if you need to go the other direction? Sometimes the opposite problem arises. Your data starts in "long" format, with a separate row for each measurement type (like "cases" or "population") for each country and year.
+
+This scatters information about a single observation across multiple rows, making it hard to see all statistics for country A in 2020 at once.
 
 ```{python}
 #| code-fold: true
@@ -90,11 +100,15 @@ df = pd.DataFrame({
 df
 ```
 
-The `pivot()` function reshapes the data so that each observation (a country-year combination) has its measurements spread across columns. This transforms long data back to a wider, more readable format. Now each row shows all measurements for a single country and year, making analysis straightforward.
+The `pivot()` function reshapes the data so that each observation (a country-year combination) has its measurements spread across columns. This transforms long data back to a wider, more readable format.
+
+Now each row shows all measurements for a single country and year, making analysis straightforward.
 
 ### Stack and Unstack
 
-A trickier situation emerges when your data has multi-level column headers, with variables split across two or more header rows. Imagine measurements for different people and types, with test results for multiple groups all shown as columns. This nested structure makes it hard to access and visualize data cleanly.
+What about more complex cases? A trickier situation emerges when your data has multi-level column headers, with variables split across two or more header rows. Imagine measurements for different people and types, with test results for multiple groups all shown as columns.
+
+This nested structure makes it hard to access and visualize data cleanly.
 
 ```{python}
 #| code-fold: true
@@ -105,9 +119,9 @@ df = pd.DataFrame(np.random.rand(4, 4),
 df
 ```
 
-The `stack()` method solves this by converting one level of column headers into a row index, transforming wide data to long. Now each row represents a single measurement, and all values of the same variable sit together in one column. The `unstack()` method does the reverse, spreading data back out from the index into columns.
+The `stack()` method solves this by converting one level of column headers into a row index, transforming wide data to long. Now each row represents a single measurement, and all values of the same variable sit together in one column.
 
-Let's see both methods in action:
+The `unstack()` method does the reverse, spreading data back out from the index into columns. Let's see both methods in action:
 
 ```{python}
 df.stack(future_stack=True)
