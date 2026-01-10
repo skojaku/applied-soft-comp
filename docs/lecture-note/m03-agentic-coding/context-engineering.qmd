@@ -2,54 +2,31 @@
 title: "Context Engineering"
 ---
 
-::: {.callout-note appearance="simple"}
-**Spoiler**: The LLM's context window is like RAM—limited, precious, and subject to pollution. Context engineering is the operating system that manages it. The art isn't filling the context window; it's curating it.
+::: {.callout-note title="What you'll learn in this module"}
+The LLM's context window is like RAM: limited, precious, and subject to pollution. Context engineering is the operating system that manages it. The challenge is not filling the context window with everything, but curating it with only what matters right now. This module teaches you to manage context across its lifecycle: write what you need to remember, select what you need now, compress what you'll need later, and isolate what you don't need yet.
 :::
 
-**The Mechanism (Why It Works)**
+## The Problem: Context Decay
 
-LLMs are brilliant but bounded. Every model has a context window—the set of tokens available during inference. Think of it as working memory. Just as your brain can only hold a few items in short-term memory, an LLM has an **attention budget** that degrades as the context grows. As the number of tokens increases, the model's ability to accurately use that context degrades. This phenomenon is called **context rot**.
+LLMs are brilliant but bounded. Every model has a context window, the set of tokens available during inference. Think of it as working memory. An LLM has an attention budget that degrades as context grows. As token count increases, the model's ability to accurately use that context degrades. This phenomenon is called context rot.
 
 ![](../figs/context-engineering-context-rot-manga.png){width="70%" fig-align="center"}
 
+The root cause is architectural. LLMs use the transformer architecture where every token attends to every other token. For $n$ tokens, this creates $n^2$ pairwise relationships. As context length increases, attention gets stretched thin across these relationships. Models are trained predominantly on shorter sequences, so they have less specialized capacity for long-range dependencies. Position encoding tricks help, but performance still decays.
 
-The reason is architectural. LLMs use the transformer architecture, where every token attends to every other token. For $n$ tokens, this creates $n^2$ pairwise relationships. As context length increases, the model's attention gets stretched thin across these relationships. Models are also trained predominantly on shorter sequences, meaning they have less specialized capacity for long-range dependencies. Position encoding tricks allow models to handle longer contexts, but performance still decays.
+This decay manifests in four failure modes. Context poisoning occurs when a hallucination or error enters the context and influences future outputs. Context distraction happens when the volume of context overwhelms the model's training distribution, causing it to lose focus. Context confusion arises when superfluous information nudges the model toward irrelevant responses. Context clash occurs when parts of the context contradict each other, forcing the model to arbitrate between conflicting signals.
 
-This decay manifests in four failure modes.
+The naive view treats context engineering as simply writing a better prompt. The reality is much broader. Context engineering is the discipline of managing the entire context lifecycle: what tokens go in, what stays, what gets compressed, and what gets isolated elsewhere. The LLM is like a CPU. The context window is like RAM. Context engineering is the operating system that curates what fits.
 
--   **Context poisoning** occurs when a hallucination or error enters the context and influences future outputs.
--   **Context distraction** happens when the volume of context overwhelms the model's training distribution, causing it to lose focus.
--   **Context confusion** arises when superfluous information nudges the model toward irrelevant responses.
--   **Context clash** occurs when parts of the context contradict each other, forcing the model to arbitrate between conflicting signals.
+## The Four Strategies
 
-The naive view treats context engineering as "write a better prompt." The reality is broader. Context engineering is the discipline of managing the entire context lifecycle: what tokens go into the window, what stays, what gets compressed, and what gets isolated elsewhere. As Andrej Karpathy puts it, the LLM is like a CPU, the context window is like RAM, and context engineering is the operating system that curates what fits. It's the delicate art and science of filling the context window with just the right information at each step of an agent's trajectory.
+Context engineering breaks into four strategies: write, select, compress, and isolate. Each addresses a different phase of the context lifecycle. Let's walk through them in modern agentic AI tools.
 
+## Writing Context
 
-::: {.callout-note}
+Agents use scratchpads to offload working memory. Instead of keeping every intermediate step in the context window, an agent writes state like a todo list or summary to an external file or variable. Tools like Claude Code, Gemini CLI, Antigravity, and Cursor use this pattern to track multi-step tasks across context resets, maintaining coherence without bloating the prompt.
 
-Andrej Karpathy's Keynote & Winner Pitches at UC Berkeley AI Hackathon 2024 Awards Ceremony
-
-<iframe width="280" height="157" src="https://www.youtube.com/embed/tsTeEkzO9xc?si=965zNtEkjXgLrVE0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-
-:::
-
-## Context Engineering
-
-::: {#fig-context-engineering-overview}
-
-![](https://rlancemartin.github.io/assets/context_eng_overview.png)
-
-The image is taken from [Context Engineering for Agents by Lance's Blog](https://rlancemartin.github.io/2025/06/23/context_engineering/).
-
-:::
-
-Context engineering breaks into four strategies: **write**, **select**, **compress**, and **isolate**. Each addresses a different phase of the context lifecycle. Let's walk through them in modern agentic AI tools to understand how they work.
-
-### Writing Context
-
-Agents use **scratchpads** to offload working memory. Instead of keeping every intermediate step in the context window, an agent writes state—like a todo list or summary—to an external file or variable. Many agentic tools like Claude Code, Gemini CLI, Antigravity, and Cursor uses this pattern to track multi-step tasks across context resets, maintaining coherence without bloating the prompt.
-
-For **long-term memory**, agents rely on persistent rules files like `AGENTS.md`, `CLAUDE.md` or `.cursorrules` (Cursor). These act as procedural memory, storing project-specific instructions that are injected into the context at the start of a session or retrieved when relevant. For example, the following is a sample `AGENTS.md` file:
+For long-term memory, agents rely on persistent rules files like `AGENTS.md`, `CLAUDE.md`, or `.cursorrules`. These act as procedural memory, storing project-specific instructions that are injected into the context at the start of a session or retrieved when relevant. Here is a sample `AGENTS.md` file:
 
 ```{markdown}
 ## Project: `AgenticFlow` - Context Engineering Demo
@@ -72,36 +49,23 @@ Demonstrate advanced context engineering for LLM agents: writing, selecting, com
 
 ```
 
-::: {.callout-note}
-## Write AGENTS.md when you start a new project
-
-[`AGENTS.md`](https://agents.md/) is an industry standard file name for agentic AI workflows.
-It serves as the agent's procedural memory, storing project-specific instructions, guidelines, and foundational context.
-This content is automatically injected into the agent's context window at the start of a session or retrieved on demand, ensuring consistent behavior, reducing redundant prompting, and maintaining coherence across complex, multi-step agentic workflows.
-
-:::
-
+The `AGENTS.md` file is an industry standard for agentic AI workflows. It serves as the agent's procedural memory, storing project-specific instructions, guidelines, and foundational context. This content is automatically injected into the context window at the start of a session or retrieved on demand. The result is consistent behavior, reduced redundant prompting, and coherence across complex, multi-step workflows. Create an `AGENTS.md` when you start any new project.
 
 ## Selecting Context
 
 ![](../figs/context-engineering-chibi-mcp.png){width="70%" fig-align="center"}
 
-Selecting context means pulling it into the context window at runtime. The key insight is **progressive disclosure**: the agent doesn't need all the data upfront. It explores incrementally, using lightweight identifiers (file paths, URLs, database queries) to fetch data only when needed.
+Selecting context means pulling it into the context window at runtime. The key insight is progressive disclosure: the agent does not need all the data upfront. It explores incrementally, using lightweight identifiers like file paths, URLs, or database queries to fetch data only when needed.
 
-For example, suppose that you want to update a file `A.py` which depends on file `B.py`. A bad way is to load the entire content of `B.py` into the context window. A better way is to give the agent the file path (e.g., `src/B.py`) and let it fetch the content on demand.
+Imagine you want to update a file `A.py` that depends on `B.py`. A bad approach loads the entire content of `B.py` into the context window. A better approach gives the agent the file path and lets it fetch content on demand.
 
-**MCP (Model Context Protocol)** is the standard mechanism for this. Instead of copy-pasting data into the prompt, MCP gives the agent tools to pull data on demand.
+The Model Context Protocol (MCP) is the standard mechanism for this. Instead of copy-pasting data into the prompt, MCP gives the agent tools to pull data on demand. Context7 is a good example. It is an MCP server that fetches documentation for a library to ground agents on the latest features. An agent trained in 2024 may not know about 2025 features, but context7 solves this. It offers two tools: `resolve-library-id` and `get-library-docs`. These tool names are injected into the context window. When the agent calls them, it retrieves documentation on demand without polluting the context window, allowing the agent to focus on the task.
 
-A good example of MCP is [context7](https://context7.com/). Context7 is an MCP server that fetches documentation for a library to ground the agents on the latest library documentation.
-For example, an agent trained in 2024 may not be aware of the latest features of a library, and context7 can help with that. It offers two tools: `resolve-library-id` and `get-library-docs`, and these tool names along with the descriptions are injected into the context window. When the agent calls `resolve-library-id`, it returns the library ID, and the agent can call `get-library-docs` to fetch the documentation as needed. This way, we can prevent overflow of the context window, and let the agents to focus on the task at hand.
+## Installing Context7 in Google Antigravity
 
-### Hands-On: Installing Context7 in Google Antigravity
+Google Antigravity connects to external MCP servers through a configuration file. The server exposes tools that the agent calls on demand. Let's wire Context7 into Antigravity so the agent can fetch up-to-date library docs without polluting the context window.
 
-Google Antigravity connects to external MCP servers through a configuration file. The server exposes tools that the agent can call on demand. We'll wire Context7 into Antigravity so the agent can fetch up-to-date library docs without polluting the context window.
-
-**Step 1: Access the MCP Configuration**
-
-Open Google Antigravity and navigate to the MCP Store. Click **Manage MCP Servers** at the top, then click **View raw config** in the main tab. This opens `mcp_config.json`, which controls all external tools available to your agent.
+First, open Google Antigravity and navigate to the MCP Store. Click Manage MCP Servers at the top, then click View raw config in the main tab. This opens `mcp_config.json`, which controls all external tools available to your agent.
 
 ![](../figs/screenshot_2025-12-01_digital_garden_mcp.png){width="70%" fig-align="center"}
 
@@ -122,65 +86,38 @@ Add this block to your `mcp_config.json`:
 }
 ```
 
-The API key is optional but recommended for higher rate limits. Get one at [context7.com/dashboard](https://context7.com/dashboard). Without it, you're limited to the free tier.
+The API key is optional but recommended for higher rate limits. Get one at [context7.com/dashboard](https://context7.com/dashboard). Without it, you have access to the free tier.
 
-Save the config and refresh the MCP servers panel in Antigravity. You should see two new tools appear:
+Save the config and refresh the MCP servers panel in Antigravity. Two new tools should appear: `resolve-library-id` to map a library name to its identifier, and `get-library-docs` to fetch documentation for a resolved library ID.
 
--   `resolve-library-id`: Maps a library name (e.g., "langchain") to its unique identifier.
--   `get-library-docs`: Fetches documentation for a resolved library ID.
-
-Prompt the agent with:
+Now prompt the agent with:
 
 ```
 Use context7 to get the latest documentation for pandas 2.0 DataFrame.plot() method.
 ```
 
-Behind the scenes, the agent will:
-
-1.  Call `resolve-library-id` with `"pandas"` → returns library ID `pandas-2.0`.
-2.  Call `get-library-docs` with that ID and query `"DataFrame.plot"` → returns current API docs.
-3.  Use those docs to generate accurate code.
-
-The documentation never enters your prompt. The agent retrieves it on-demand, uses it, and discards it. Your context window remains clean.
+Behind the scenes, the agent calls `resolve-library-id` with "pandas" to get the library ID. Then it calls `get-library-docs` with that ID and your query to retrieve current API docs. Finally, it uses those docs to generate accurate code. The documentation never enters your prompt. The agent retrieves it on demand, uses it, and discards it. Your context window remains clean.
 
 ## Compressing Context
 
+Long-running tasks generate more context than the window can hold. When you approach the limit, you have two choices: summarize or trim.
 
-::: {#fig-compression}
+Compaction through summarization distills a conversation into its essential elements. Claude Code does this automatically. When you exceed 95% of the context window, it triggers auto-compact: the message history is passed to the model to summarize architectural decisions, unresolved bugs, and implementation details while discarding redundant tool outputs. The agent continues with the compressed context plus the five most recently accessed files.
 
-![](https://rlancemartin.github.io/assets/context_curation.png)
+The art of compaction is deciding what to keep versus discard. Overly aggressive compaction loses subtle details whose importance only becomes apparent later. Start by maximizing recall, capturing everything relevant, then iterate to improve precision by eliminating fluff.
 
-The image is taken from [Context Engineering for Agents by Lance's Blog](https://rlancemartin.github.io/2025/06/23/context_engineering/).
+A lighter form of compaction is tool result clearing. Once a tool has been called and its result used, the raw output can be removed from the message history. The decision or action taken from that result matters. The ten thousand tokens of JSON it returned does not.
 
-:::
-
-Long-running tasks generate more context than the window can hold. When you approach the limit, you have two choices: **summarize** or **trim**.
-
-**Compaction** (summarization) is the practice of distilling a conversation into its essential elements. Claude Code does this automatically. When you exceed 95% of the context window, it triggers "auto-compact": the message history is passed to the model to summarize architectural decisions, unresolved bugs, and implementation details while discarding redundant tool outputs. The agent continues with the compressed context plus the five most recently accessed files.
-
-The art of compaction is deciding what to keep versus discard. Overly aggressive compaction loses subtle details whose importance only becomes apparent later. Start by maximizing recall (capture everything relevant), then iterate to improve precision (eliminate fluff).
-
-A lightweight form of compaction is **tool result clearing**. Once a tool has been called and its result used, the raw output can be removed from the message history. The decision or action taken from that result is what matters, not the 10,000 tokens of JSON it returned.
-
-**Trimming** is a simpler strategy. It uses heuristics to prune context without LLM involvement. For example, remove messages older than $N$ turns, or keep only the system prompt and the last $K$ user-agent exchanges.
+Trimming is a simpler strategy. It uses heuristics to prune context without LLM involvement. Remove messages older than N turns, or keep only the system prompt and the last K user-agent exchanges. This approach requires no model computation but loses more information than summarization.
 
 ## Isolating Context
 
+Isolation means splitting context across boundaries so the model doesn't drown in a single monolithic window. The most common pattern is multi-agent architectures. Instead of one agent maintaining state across an entire project, specialized sub-agents handle focused sub-tasks with clean context windows.
 
-::: {#fig-multi-agent}
+Anthropic's multi-agent researcher demonstrates this well. A lead agent coordinates with a high-level plan and spawns sub-agents that explore different aspects of a question in parallel, each with its own context window. A sub-agent might use ten thousand or more tokens to explore a research thread, but it returns only a one thousand to two thousand token summary to the lead agent. The detailed search context remains isolated. The lead agent synthesizes the compressed results without ever seeing the full exploration.
 
-![](https://rlancemartin.github.io/assets/multi_agent.png)
-
-This image is taken from [Context Engineering for Agents by Lance's Blog](https://rlancemartin.github.io/2025/06/23/context_engineering/).
-
-:::
-
-Isolation means splitting context across boundaries so the model doesn't drown in a single, monolithic window. The most common pattern is **multi-agent architectures**. Instead of one agent maintaining state across an entire project, specialized sub-agents handle focused sub-tasks with clean context windows.
-
-Anthropic's multi-agent researcher demonstrates this. A lead agent coordinates with a high-level plan. It spawns sub-agents that explore different aspects of a question in parallel, each with its own context window. A sub-agent might use 10,000+ tokens to explore a research thread, but it returns only a 1,000-2,000 token summary to the lead agent. The detailed search context remains isolated. The lead agent synthesizes the compressed results without ever seeing the full exploration.
-
-This approach achieves separation of concerns. Each sub-agent has a narrow scope, reducing context confusion and clash. The cost is coordination complexity—spawning agents, managing handoffs, and aggregating results. Anthropic reports that multi-agent systems can use up to 15× more tokens than single-agent, but the performance gain on complex tasks justifies it.
+This approach achieves separation of concerns. Each sub-agent has a narrow scope, reducing context confusion and clash. The cost is coordination complexity. Spawning agents, managing handoffs, and aggregating results all add overhead. Anthropic reports that multi-agent systems can use up to fifteen times more tokens than single-agent systems. The performance gain on complex tasks justifies it.
 
 ## The Takeaway
 
-Context is a finite resource. The bottleneck in agentic systems is rarely the model's reasoning—it's the poverty or pollution of its inputs. Context engineering is the discipline of managing this resource across its lifecycle. **Write** what you need to remember. **Select** what you need now. **Compress** what you need later. **Isolate** what you don't need yet. The most powerful agent isn't the one with the highest IQ (parameters); it's the one with the most disciplined context management.
+Context is a finite resource. The bottleneck in agentic systems is rarely the model's reasoning. It is the poverty or pollution of its inputs. Context engineering is the discipline of managing this resource across its lifecycle. Write what you need to remember. Select what you need now. Compress what you need later. Isolate what you don't need yet. The most powerful agent is not the one with the highest IQ in parameters. It is the one with the most disciplined context management.
