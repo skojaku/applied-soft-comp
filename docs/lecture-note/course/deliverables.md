@@ -2,54 +2,46 @@
 title: "Deliverables"
 ---
 
-## General remarks on the project reports
+::: {.callout-note title="What you'll learn in this module"}
+This guide outlines the expectations for your course project. We will define the philosophy behind a successful report, walk through the essential components of your proposal, and detail the requirements for your final video and code submission.
+:::
 
-Project reports are not solely focused on the final results, but also on the process and decisions made along the way. We expect to hear the reasons for your final decisions, for instance the reason why you choose X, over alternative options like Y.
+## The Philosophy of the Project
 
-1. Clarify the objectives and goal of your project. What do you want to do it, and why are your questions important to us?
-2. Provide a detailed description about the data you will use. Where the data are collected from, how they are compiled and preprocessed for your analysis. What are the data type of your focal features, and what features do you think are relevant for your analysis?
-3. Determine the appropriate methods. Additionally, consider discussing the methods used in previous studies. Considering the data types and the information you aim to present, what methods could potentially be suitable? It would also be beneficial to explore what approaches others have taken when working with similar datasets.
-4. Clarify the limitation and advantage of your approach. The limitation and advantage stems from data and methodologies, and must be discussed in light of existing works. For instance, you want to develop a link prediction algorithm for a social network based on the common neighbor approach. What are the fundamental assumption underlying the link prediction algorithms? When does the algorithm fail? Can you think of the advantage of your algorithm over other alternatives such as graph neural networks?
-5. Embrace failures. As Thomas Edison famously said, "I have not failed. I’ve just found 10,000 ways that won’t work." In many cases, works and analyses may appear to follow a single pathway, but it is important to recognize that this is just one of many paths that people have taken, many of which have turned out to be unsuccessful. It is crucial to try out multiple candidates, and more importantly, to document your failures and understand why they did not work. Consider using fake data, small subsets, mock-ups, and sketches. These methods can help you iterate and refine your approach, ultimately leading to more successful outcomes.
+Project reports often focus solely on final results. We want you to shift your attention to the **process and the decisions** you make along the way. Your report should explain the reasoning behind your choices, such as why you selected one method over an alternative.
 
-## Proposal
+You must start by clarifying your objectives. We need to know what you intend to do and why those questions matter. From there, you will provide a detailed description of your data. This includes the source of the data, how you compiled it, and the preprocessing steps you took. You should also identify the data types of your focal features and explain which features you believe are relevant for the analysis.
 
-A document should include the following sections:
+Determining the appropriate methods follows naturally. You should discuss methods used in previous studies to provide context. We encourage you to explore what approaches others have taken with similar datasets. This helps you justify why a particular method is suitable for the information you aim to present.
 
-1. Project Title
-2. Team Members (1-4 people; keep in mind that a larger team is expected to accomplish more than a smaller one)
-3. Abstract: A concise summary of your project.
-4. Introduction: Provide motivation, background, and objectives for your project. Explain why it is important or interesting and why others should care. Review and discuss relevant existing works, particularly those that have inspired your project. Critique these works substantively. Remember, there is always a wealth of relevant work available.
-5. Questions or Objectives: Specify the methods you plan to create and what you hope to discover from the data.
-6. Datasets and Methods: Identify the dataset you will be using. If you haven't done so already, I strongly encourage you to reconsider your project. Obtaining and cleaning datasets can be time-consuming. Describe the dataset, including its structure and data types if it is tabular. Explain the methods you plan to apply and why you have chosen them. Finally, provide detailed information about the dataset to convincingly argue that it is suitable for your project and proposed methods.
-- References
+An honest project clarifies the limitations and advantages of its approach. These constraints stem from your data and methodologies. You must discuss them in light of existing work. For instance, if you develop a link prediction algorithm based on common neighbors, you need to ask when that algorithm fails. You should also articulate the advantage of your algorithm over alternatives like graph neural networks.
 
-## Final presentation
+We also ask you to **embrace failures**. Thomas Edison famously said that he did not fail but simply found 10,000 ways that did not work. Research often appears to follow a single linear path. The reality is that people take many paths that turn out effectively unsuccessful. It is crucial to try multiple candidates. More importantly, you must document your failures to understand why they did not work. You can use fake data, small subsets, mock-ups, and sketches to iterate and refine your approach. These "failures" often lead to the most successful outcomes.
 
-Please create a 10-minute video (please adhere to the time limit) and upload it to YouTube. You have the option to either publish it or make it unlisted. The video can be in any format you prefer. Make sure to include a thorough analysis while also making it interesting and enjoyable! The video will be evaluated based on three criteria: (i) the strength of the case you present, (ii) the quality of your analysis, and (iii) the production and delivery of your presentation.
+## The Proposal
 
-Once you have completed your video, feel free to share it on Slack and receive feedback from your fellow students and instructors. It's always beneficial to see what others have accomplished, so I highly encourage you to share your work!
+A complete proposal includes several distinct sections that guide us through your plan.
 
-## Final report
+You begin with the Project Title and the names of your Team Members. Teams can range from one to four people. Keep in mind that we expect a larger team to accomplish more than a smaller one.
 
-You will need to submit your code and a report on your work. Ideally, your code will be in well-documented Jupyter notebooks (e.g. see [Peter Norvig's notebooks](http://norvig.com/ipython/) or good Kaggle exploratory data visualization kernels).
+The narrative starts with an Abstract. This is a concise summary of your project. You then move to the Introduction. This is where you must clearly present the **"diff of ideas."** The claim that "nobody has done this" is never a sufficient justification. You must convince us **why we should care**. This means explaining exactly how previous works are fundamentally flawed and demonstrating the value of your successful solution. We require **substantive critiques** of existing literature, not just a passive review.
 
-The report has no minimum or maximum length, but you need to make sure all the topics are thoroughly addressed in clear writing. The format and ingredients for the final report will depend on the types of projects that you do.
+Next you define your Questions or Objectives. This specifies the methods you plan to create and what you hope to discover from the data.
 
-If the project is more about creating a software package or a website, then the report may focus more on the technical aspects of the project.
+Finally you detail your Datasets and Methods. You must identify the dataset you will be using. If you have not done so already, we strongly encourage you to reconsider your project. Obtaining and cleaning datasets is time-consuming. You need to describe the dataset structure and data types. You also need to explain the methods you plan to apply and justify those choices. Provide enough detailed information to convincingly argue that the dataset is suitable for your proposed methods.
 
-## Idea sketch template
+## Sprint Projects
 
-The followings are the list of questions I personally use before starting a project. Every idea is nebulous when it comes to a mind. We can materialize it by writing down the ideas. It’s surprisingly hard to write it down first, and you will realize a lot of things. In sum, *writing is thinking*. It serves as a scaffolding to think through a research project. These list of questions are a living document, and you will constantly update as the project progresses.
+We review the documents and structure of the files, along with **git history**. We verify that your repository reflects a **structured, iterative process** rather than a chaotic last-minute rush.
 
-Answer each question in 2~3 sentences. I usually set a timer for 15 mins for each. If one of the questions takes more than 15 mins, it’s the weakness of the idea of the current form.
+## Final Presentation
 
-1. Project Overview: What is the core focus of your project? Are you developing something new or testing existing ideas?
-2. Project Value: What makes this work meaningful and worth pursuing?
-3. Research Gaps: What key questions or problems remain unsolved in this area?
-4. Novel Approach: What makes your proposed solution unique and different from existing methods?
-5. Necessity: Why develop a new solution if existing methods exist? What advantages does your approach offer?
-6. Success Metrics: How will you define and measure success for this project?
-7. Validation Strategy: What specific criteria or tests will demonstrate that your solution works?
-8. Broader Impact: How could this work benefit fields beyond your immediate research area?
-9. Implementation Plan: Break down each project goal into ~3 concrete, actionable tasks.
+We ask you to create a 10-minute video and upload it to YouTube. You have the option to publish it or keep it unlisted. You can choose any format you prefer. The goal is to include a thorough analysis while making the content interesting and enjoyable.
+
+We evaluate the video on three criteria. First we look at the strength of the case you present. Second we assess the quality of your analysis. Third we judge the production and delivery of your presentation. Once you complete your video, we encourage you to share it on Slack to receive feedback from fellow students and instructors. Seeing what others have accomplished is a great way to learn.
+
+## Final Report
+
+You will submit your code along with a report on your work. Ideally, you will organize your code in well-documented Jupyter notebooks. You can look at Peter Norvig's notebooks or high-quality Kaggle kernels for inspiration on structure and clarity.
+
+The report has no minimum or maximum length. Your responsibility is to ensure all topics are thoroughly addressed in clear writing. The specific format and ingredients will depend on the type of project you undertake. If you are creating a software package or a website, your report may focus more heavily on the technical aspects of implementation.

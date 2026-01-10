@@ -1,38 +1,33 @@
 ---
 title: "Time Series Visualization"
-jupyter: advnetsci
+jupyter: python3
 execute:
     enabled: true
 ---
 
-In March 2020, news outlets worldwide showed charts of COVID-19 cases rising exponentially. Some charts showed linear y-axes with curves shooting upward dramatically. Others used logarithmic y-axes where the same data appeared as straight lines. Politicians cherry-picked time windows to show "flattening curves." The same data told vastly different stories depending on how it was visualized.
+::: {.callout-note title="What you'll learn in this module"}
+This module explores how to visualize time series data effectively, moving beyond simple line charts to reveal true underlying patterns.
 
-Or consider stock market charts: show the last month, and a 10% drop looks catastrophic. Zoom out to show the last decade, and the same drop becomes a minor blip barely visible on the chart.
+You'll learn:
 
-Time series dataobservations ordered by timeis everywhere. But time is special. Unlike other variables, it flows in one direction, has natural rhythms (daily, seasonal, cyclical), and carries momentum. **Your visualization choices can reveal genuine patterns or create misleading narratives.**
+- How **line plots create continuity illusions** and when to use discrete representations instead.
+- Why **small multiples** solve the spaghetti problem when comparing multiple time series.
+- The crucial difference between **linear and log scales** and when each tells the honest story.
+- How **moving averages** balance noise and trend to reveal underlying patterns.
+- Techniques for **showing uncertainty** through ribbon plots and prediction intervals.
+- How **heatmaps and cycle plots** expose temporal rhythms like daily patterns and seasonality.
+- What **lag plots reveal about autocorrelation** and the memory of time series data.
+:::
 
-The key principle to keep in mind:
+## The nature of time
 
-**Time is specialshow how your data changes over time honestly and clearly.**
+Let's talk about time. In March 2020, charts of COVID-19 cases told vastly different stories depending on how they were visualized. Some used linear scales, showing a terrifying vertical wall. Others used log scales, showing a straight line.
 
-# Why Time Series Visualization Matters
+Why did the same data produce such different narratives? Time series data is special because it implies causality and momentum. Unlike other variables, time flows in one direction. Your choices of scale, aggregation, and geometry determine whether you reveal a genuine pattern or manufacture a misleading narrative.
 
-Time series visualizations are perhaps the most common type of chart in news media, scientific papers, and business dashboards. They answer fundamental questions: Is this trend going up or down? Are there cycles? When did something change?
+## Line plots and the continuity illusion
 
-But they're also easy to manipulate. By selecting the time window, changing the y-axis scale, or choosing different aggregation levels, the same data can support contradictory conclusions.
-
-Consider these common pitfalls:
-- **Truncated y-axes** that exaggerate small changes
-- **Cherry-picked time windows** that hide long-term trends
-- **Inappropriate scales** (linear vs. log) that obscure or inflate patterns
-- **Over-smoothing** that removes real variation
-- **Under-smoothing** that shows only noise
-
-Good time series visualization is about making honest choices that reveal the actual patterns in your data.
-
-# Basic Time Series: Line Plots
-
-The most fundamental time series visualization is the **line plot**: time on the x-axis, values on the y-axis, points connected by lines.
+The most fundamental choice is whether to connect the dots. A line plot suggests continuity, implying that a value exists at every moment between your measurements. This works for temperature or stock prices, where the variable has momentum.
 
 ```{python}
 #| fig-cap: "Basic line plot showing a time series with trend and seasonality"
@@ -69,9 +64,7 @@ ax.grid(True, alpha=0.3)
 sns.despine()
 ```
 
-The line connecting points implies **continuity**that values exist between measurements. This is appropriate for continuous processes (temperature, stock prices, heart rate) but not for discrete events or counts measured at intervals.
-
-When should you **not** connect the dots? When your data represents discrete events or when measurements are too sparse to imply continuity.
+But what if your data is discrete? If you plot distinct sales events or email arrivals as a line, you create a false narrative of values existing in the gaps. In those cases, let the silence between points speak.
 
 ```{python}
 #| fig-cap: "Line plot vs scatter plot: connecting points implies continuity"
@@ -106,11 +99,11 @@ for ax in axes:
 plt.tight_layout()
 ```
 
-For discrete events, stick with scatter plots or bar charts. Don't imply continuity where none exists.
+## Comparing series: The spaghetti problem
 
-# Comparing Multiple Time Series
+Often you need to compare multiple series. The natural instinct is to overlay them on the same plot. This works for two or three variables.
 
-Often you need to compare several time series. The natural approach is to overlay them on the same plot.
+But what happens when the count rises? You fall into the spaghetti trap where individual trends get lost in the tangle.
 
 ```{python}
 #| fig-cap: "Multiple time series overlaid with different colors"
@@ -145,9 +138,7 @@ ax.grid(True, alpha=0.3)
 sns.despine()
 ```
 
-This works well for 2-4 series. Beyond that, you risk creating a **spaghetti plot**a tangled mess where individual series become impossible to follow.
-
-When you have many time series, use **small multiples** (faceting): separate plots arranged in a grid, each with the same axes for easy comparison.
+The solution is small multiples (or faceting). By giving each series its own stage while locking the axes, you preserve both the individual trends and the ability to compare them.
 
 ```{python}
 #| fig-cap: "Small multiples avoid spaghetti plots when comparing many time series"
@@ -182,16 +173,11 @@ for ax in g.axes.flat:
 plt.tight_layout()
 ```
 
-Small multiples let you see each series clearly while maintaining comparability through shared axes.
+## The power of scale: Linear vs Log
 
-# The Power of Scale: Linear vs. Logarithmic
+Perhaps the most consequential choice in time series visualization is the y-axis scale. Your choice defines the question you are answering.
 
-Perhaps the most consequential choice in time series visualization is the **y-axis scale**. The same data looks completely different on linear vs. logarithmic scales.
-
-When should you use a log scale?
-- When your data spans **multiple orders of magnitude** (e.g., 10 to 10,000)
-- When you care about **percentage changes** rather than absolute changes
-- When visualizing **exponential growth or decay**
+A linear scale asks "How much did it increase?" A log scale asks "How fast is it growing?" In the example below, the linear scale suggests an explosive crisis at the end. The log scale reveals that the growth rate has been constant the entire time.
 
 ```{python}
 #| fig-cap: "The same exponential growth looks different on linear vs. log scales"
@@ -228,21 +214,17 @@ for ax in axes:
 plt.tight_layout()
 ```
 
-On a **linear scale**, exponential growth appears as a dramatic upward curvemost growth happens at the end. On a **log scale**, exponential growth becomes a straight line, making it easy to see if the growth rate is constant, accelerating, or decelerating.
+::: {.callout-note title="When to use log scales"}
+Log scales are essential for data spanning orders of magnitude or when percentage changes matter more than absolute units. However, they can downplay absolute magnitude.
 
-::: {.callout-warning}
-## Log Scales Can Hide Magnitude
-
-While log scales are essential for percentage changes and exponential processes, they can **downplay the absolute magnitude** of changes. A jump from 10,000 to 100,000 cases looks the same as a jump from 100 to 1,000both are one order of magnitude. But in human terms, 90,000 additional cases is far more significant than 900.
-
-**Always consider your audience and what you want to emphasize**: relative changes (use log) or absolute numbers (use linear).
+A jump from 100 to 1,000 looks the same as 10,000 to 100,000. This equality can be honest or deceptive depending on your question.
 :::
 
-# Smoothing and Trends
+## Smoothing and trends
 
-Real time series data is often noisy. **Smoothing** helps reveal underlying trends by averaging out short-term fluctuations.
+Real data is messy. Smoothing via moving averages mimics how we squint at a chart to blur out the details and see the trend.
 
-The most common approach is a **moving average**: replace each point with the average of nearby points.
+The window size controls the trade-off. A small window keeps the texture, showing volatility. A large window reveals the structure, showing the trend.
 
 ```{python}
 #| fig-cap: "Moving averages smooth noise to reveal underlying trends"
@@ -277,26 +259,9 @@ ax.grid(True, alpha=0.3)
 sns.despine()
 ```
 
-The smoothing window creates a trade-off:
-- **Short windows** (e.g., 7 days) preserve more detail but still show fluctuations
-- **Long windows** (e.g., 30 days) reveal long-term trends but may over-smooth and miss real changes
+## Showing uncertainty
 
-::: {.callout-note}
-## Choosing the Right Window
-
-The appropriate smoothing window depends on your data's frequency and the patterns you care about:
-- **Daily stock prices**: 5-20 day moving average
-- **Monthly sales**: 3-6 month moving average
-- **Annual measurements**: 3-5 year moving average
-
-Match your window to the timescale of meaningful variation in your domain.
-:::
-
-# Showing Uncertainty Over Time
-
-When forecasting or estimating, you don't just have point predictionsyou have **uncertainty**. Showing this uncertainty is crucial for honest communication.
-
-Use **ribbon plots** (also called envelope plots) to show confidence intervals or prediction intervals around your estimates.
+Predicting the future is an exercise in humility. A forecast without an error bar is a lie of precision. Use ribbon plots to visualize the widening cone of uncertainty as time moves forward.
 
 ```{python}
 #| fig-cap: "Ribbon plots show uncertainty bands around predictions"
@@ -347,13 +312,9 @@ ax.grid(True, alpha=0.3)
 sns.despine()
 ```
 
-The ribbon makes it clear that predictions further into the future are more uncertain. Without showing this uncertainty, forecasts can appear deceptively precise.
+## The rhythm of time: Heatmaps and cycles
 
-# Temporal Aggregation: Choosing Your Time Scale
-
-How you aggregate time can dramatically change what patterns emerge. The same data aggregated hourly, daily, or monthly reveals different stories.
-
-**Heat maps** are excellent for visualizing patterns across two time dimensionssay, hour of day vs. day of week.
+Time often cycles rather than marches. Does your data have a heartbeat? Heatmaps and cycle plots break the linear narrative to reveal patterns like daily lulls, weekend spikes, or seasonal waves.
 
 ```{python}
 #| fig-cap: "Heat map reveals daily and weekly patterns in temporal data"
@@ -406,18 +367,6 @@ ax.set_ylabel('Hour of Day')
 ax.set_title('Temporal Heatmap: Activity by Hour and Day of Week')
 plt.tight_layout()
 ```
-
-Heat maps immediately reveal patterns like "high activity on weekday afternoons" that would be invisible in a simple line plot.
-
-::: {.column-margin}
-![](https://raw.githubusercontent.com/scottlepp/plot-widget/master/resources/heatmap.png)
-
-Calendar heatmaps are widely used for visualizing GitHub contributions, showing commit activity over time in a compact, pattern-revealing format.
-:::
-
-# Visualizing Cycles and Seasonality
-
-Many time series have **seasonal patterns**: daily cycles, weekly patterns, annual seasons. **Cycle plots** decompose time series by season to reveal these patterns.
 
 ```{python}
 #| fig-cap: "Cycle plot reveals seasonal patterns by separating each cycle"
@@ -476,11 +425,9 @@ for ax in axes:
 plt.tight_layout()
 ```
 
-By overlaying each year's cycle, the cycle plot makes it obvious that values peak in summer (months 6-8) and dip in winter (months 12-2), while also showing year-over-year trends.
+## The memory of the past: Autocorrelation
 
-# Advanced: Lag Plots for Autocorrelation
-
-Time series data often exhibits **autocorrelation**: values depend on previous values. A **lag plot** helps visualize this by plotting each value against the previous value (lag-1) or earlier values.
+Does the past predict the future? Lag plots visualize the system's memory by plotting $x_t$ against $x_{t-1}$. A tight diagonal implies strong memory (autocorrelation) while a scattered cloud implies random noise.
 
 ```{python}
 #| fig-cap: "Lag plots reveal autocorrelation structure in time series"
@@ -525,27 +472,6 @@ for ax in axes:
 plt.tight_layout()
 ```
 
-A strong linear pattern in a lag plot indicates high autocorrelationknowing the current value helps predict the next value. Random, scattered points suggest no autocorrelation (e.g., white noise).
-
-# The Bigger Picture
-
-Time series visualization is about making choices that honestly represent temporal patterns while avoiding common pitfalls:
-
-**Key principles to remember:**
-
-1. **Choose the right scale**: Linear for absolute changes, log for relative/percentage changes
-2. **Show uncertainty**: Predictions without confidence intervals are misleading
-3. **Avoid spaghetti plots**: Use small multiples when comparing many series
-4. **Match aggregation to your question**: Daily, weekly, monthly aggregation reveals different patterns
-5. **Be transparent about time windows**: The time range you show matters enormously
-6. **Smooth appropriately**: Balance between preserving detail and revealing trends
-
-**Common pitfalls to avoid:**
-
-- Truncating the y-axis to exaggerate small changes
-- Cherry-picking time windows to support a narrative
-- Using line plots for discrete events (implies false continuity)
-- Over-smoothing to hide inconvenient variation
-- Mixing scales when comparing series (e.g., comparing growth rates on linear scale)
-
-Time series visualization is powerful because time is a dimension we all understand intuitively. But that familiarity also makes us vulnerable to manipulation. By following principled visualization practices, you ensure your temporal data tells its true storynot the story you wish it told.
+::: {.callout-note title="Summary"}
+Time series visualization is about making choices that honestly represent temporal patterns. By following these principled visualization practices, you ensure your temporal data tells its true story, not the story you wish it told.
+:::

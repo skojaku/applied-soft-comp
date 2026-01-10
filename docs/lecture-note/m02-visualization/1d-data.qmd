@@ -2,6 +2,18 @@
 title: "Visualizing One-Dimensional Data: Show Me the Data!"
 ---
 
+::: {.callout-note title="What you'll learn in this module"}
+This module teaches you how to visualize one-dimensional data honestly and clearly.
+
+You'll learn:
+
+- Why **hiding raw data** behind summary statistics is misleading and how to show all the data whenever possible.
+- How to use **swarm plots, strip plots, and barcode plots** to visualize individual data points effectively.
+- The principles of **histograms and kernel density estimation** for summarizing distributions.
+- How **cumulative distribution functions** reveal patterns in heavy-tailed data without arbitrary parameter choices.
+- Practical strategies for choosing the right visualization based on your dataset's size and characteristics.
+:::
+
 ## The Case of the Missing Data Points
 
 Imagine you're reading a research paper that claims "Treatment A is significantly better than Treatment B." The paper shows a bar chart with two bars and error bars. The difference looks impressive. But here's the question: what does the actual data look like? Are there 5 data points per group? 500? Are they normally distributed, or are there outliers? Are most points clustered together, or spread out?
@@ -12,7 +24,7 @@ Without seeing the raw data, you're flying blind. And unfortunately, many scient
 
 ## Why Showing All Data Matters
 
-In 2016, a group of researchers analyzed 118 papers in leading neuroscience journals and found something disturbing: when they requested the raw data and re-analyzed it, they found that the bar charts in many papers were misleading. The bar charts suggested clear differences between groups, but the raw data often told a different story---with substantial overlap between groups, unexpected distributions, or influential outliers.
+In 2016, a group of researchers analyzed 118 papers in leading neuroscience journals and found something disturbing: when they requested the raw data and re-analyzed it, they found that the bar charts in many papers were misleading. The bar charts suggested clear differences between groups, but the raw data often told a different story. There was substantial overlap between groups, unexpected distributions, or influential outliers.
 
 This isn't about fraud. It's about the limitations of summary statistics. When you reduce your data to a mean and a standard error, you lose a tremendous amount of information. The data might be bimodal, skewed, or contain outliers. These patterns are invisible in a bar chart, but they're crucial for understanding what's really going on.
 
@@ -50,11 +62,7 @@ plt.title('Swarm Plot: Every Point Visible')
 plt.show()
 ```
 
-Swarm plots are perfect for small to moderate datasets (roughly up to 100-200 points per group). They let you see:
-- The actual sample size
-- The distribution shape
-- Individual outliers
-- The spread of the data
+Swarm plots are perfect for small to moderate datasets (roughly up to 100-200 points per group). They let you see the actual sample size, so you know how much data went into each group. You can immediately perceive the distribution shape, spotting whether your data is symmetric, skewed, or bimodal. Individual outliers jump out visually, rather than being hidden in summary statistics. And you can see the overall spread of the data with a single glance.
 
 ### The Limits of Swarm Plots
 
@@ -73,9 +81,7 @@ plt.title('Strip Plot with Jittering')
 plt.show()
 ```
 
-The key parameters:
-- `alpha`: Controls transparency (0 = invisible, 1 = opaque). Values around 0.3-0.7 work well.
-- `jitter`: Amount of random horizontal displacement. Too much jitter and groups overlap; too little and points stack vertically.
+Two key parameters control the appearance. The `alpha` parameter controls transparency (0 = invisible, 1 = opaque), and values around 0.3-0.7 work well to see overlapping points. The `jitter` parameter controls the amount of random horizontal displacement. Too much jitter and your groups start to overlap and become confusing, while too little and points stack vertically in dense columns.
 
 ### Barcode Plots (Rug Plots)
 
@@ -115,11 +121,9 @@ plt.show()
 
 ### The Art of Choosing Bins
 
-The number of bins dramatically affects how your histogram looks:
-- **Too few bins**: You lose detail and might miss important features like bimodality
-- **Too many bins**: The histogram becomes noisy and hard to interpret
+The number of bins dramatically affects how your histogram looks. With too few bins, you lose detail and might miss important features like bimodality. With too many bins, the histogram becomes noisy and hard to interpret.
 
-A good starting point is the **Sturges' rule**: number of bins H $\log_2(n) + 1$, where $n$ is the sample size. But always experiment! Try different bin numbers and see what reveals the most about your data's structure.
+A good starting point is the **Sturges' rule**: number of bins = $\log_2(n) + 1$, where $n$ is the sample size. But always experiment! Try different bin numbers and see what reveals the most about your data's structure.
 
 ## Smooth Alternatives: Kernel Density Estimation
 
@@ -142,7 +146,7 @@ KDE plots are elegant and reveal the shape of your distribution without the arbi
 
 ## For Heavy-Tailed Data: Cumulative Distributions
 
-Some data are extremely heterogeneousthink income distributions, city populations, or earthquake magnitudes. These distributions often have heavy tails: most values are small, but a few are enormous.
+Some data are extremely heterogeneous. Think income distributions, city populations, or earthquake magnitudes. These distributions often have heavy tails: most values are small, but a few are enormous.
 
 For this kind of data, histograms and KDE plots can be misleading because they compress the tail into a tiny region of the plot.
 
@@ -170,20 +174,13 @@ plt.grid(True, alpha=0.3)
 plt.show()
 ```
 
-The CDF has several advantages:
-- **No binning decisions**: Every data point is shown
-- **Easy to read percentiles**: The median is where CDF = 0.5
-- **Great for comparisons**: Differences between groups are easy to spot
+The CDF has several advantages. First, there are no binning decisions to make, so every data point is effectively shown. Second, percentiles are easy to read: the median is where CDF = 0.5, and any other percentile is easy to find. Third, it's great for comparisons because differences between groups are easy to spot visually.
 
 ### Complementary Cumulative Distribution Function (CCDF)
 
 For heavy-tailed distributions, the **complementary cumulative distribution function (CCDF)** is even more useful. The CCDF shows the proportion of data points *greater than* each value: CCDF(x) = 1 - CDF(x).
 
-The magic of the CCDF is that when plotted on a log-log scale, power-law distributions appear as straight lines. This makes it the go-to tool for studying phenomena like:
-- Income and wealth distributions
-- City size distributions
-- Social network degree distributions
-- Earthquake magnitudes
+The magic of the CCDF is that when plotted on a log-log scale, power-law distributions appear as straight lines. This makes it the go-to tool for studying phenomena with power-law behavior. Think income and wealth distributions, city size distributions, social network degree distributions, and earthquake magnitudes. All of these follow power-law patterns where the tail is as important as the bulk of the distribution.
 
 ```python
 # CCDF on log-log scale
@@ -195,7 +192,7 @@ ccdf = 1 - (np.arange(1, len(sorted_data) + 1) / len(sorted_data))
 
 plt.loglog(sorted_data, ccdf, 'o', alpha=0.5, markersize=3)
 plt.xlabel('Value')
-plt.ylabel('P(X e x)')
+plt.ylabel('P(X ≥ x)')
 plt.title('Complementary Cumulative Distribution (CCDF)')
 plt.grid(True, alpha=0.3)
 plt.show()
@@ -218,7 +215,7 @@ Here's a quick decision guide:
 
 ## The Bigger Picture
 
-The methods you choose to visualize your data aren't just aesthetic choices---they're scientific choices. Different visualizations reveal different aspects of your data, and some can hide important patterns.
+The methods you choose to visualize your data aren't just aesthetic choices. They're scientific choices. Different visualizations reveal different aspects of your data, and some can hide important patterns.
 
 By starting with the raw data and building up to summaries, you ensure that you understand what you're working with. And by showing your data (not just summarizing it), you allow others to draw their own conclusions.
 

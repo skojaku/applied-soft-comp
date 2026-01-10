@@ -2,73 +2,90 @@
 title: "Perception in Data Visualization"
 ---
 
-We extensively rely on visuals to perceive the world around us. However, our visual perception is not as truthful as you might think. It can be easily misled or manipulated if we are not aware of the inherent biases in how we see.
+::: {.callout-note title="What you'll learn in this module"}
+This module explores the surprising ways our visual perception can deceive us in data visualization.
 
-# Part 1: The Perception of Color
+You'll learn:
 
-Color is one of the most powerful tools in data visualization, but it is also one of the most complex. Our perception of color is not absolute; it is contextual and subjective.
+- How **color perception** is contextual and subjective, and why systems like RGB, CMYK, and HSL matter for designing effective visualizations.
+- What **perceptually uniform palettes** are and why rainbow colormaps fail to represent data accurately.
+- How **Gestalt principles** (proximity, similarity, enclosure, closure) describe how our brains naturally organize visual information.
+- Why we perceive **length** more accurately than area or volume, and how Steven's Power Law and Weber's Law affect chart design.
+- How to use **preattentive attributes** (color, size, shape, orientation) to guide viewer attention and tell compelling data stories.
+:::
 
-### Color, Context, and Constancy
+## The Perception of Color
 
-Our visual system tries to maintain **color constancy**, meaning we perceive a familiar object as being a consistent color regardless of the lighting conditions. This is why we recognize a banana as yellow whether it's in bright sunlight or in a dim room. However, this helpful adaptation can create peculiar biases in unfamiliar contexts.
+Have you ever argued with someone about the color of an object? Here's the uncomfortable truth: our visual perception is far from accurate. Let's talk about the most powerful and complex tool in your visualization arsenal: color. Our perception of color is not absolute but contextual, subjective, and driven by unconscious processes in our brain.
 
-![The Dress](https://external-preview.redd.it/U9_nOExNxuuZc8vj8vm1UjvchQpBUgWBeZIGX3mOd9M.gif?auto=webp&s=b577a4f48f5bc87162a2db0c53d41f092e925c65)
+### How Color Perception Fools Us
 
-The infamous "dress" illusion highlights how our brain makes assumptions about lighting, causing some people to see the dress as blue and black (in bright light) and others as white and gold (in shadow). The colors are physically the same, but our perception of them is not.
+Our visual system tries to maintain **color constancy**. We perceive a familiar object as having a consistent color regardless of lighting conditions. This is why we recognize a banana as yellow in bright sunlight or in a dim room. This helpful adaptation creates peculiar biases in unfamiliar contexts.
 
-This happens because what we "see" is not just the raw wavelength of light hitting our eyes. Our visual cortex processes that raw signal, making inferences based on context and prior experience. For example, we perceive the leaves of a tree as green, even in a photograph made entirely of red, black, and white pixels, because our brain "knows" trees are green.
+::: {#fig-dress}
+![The infamous "dress" illusion](https://external-preview.redd.it/U9_nOExNxuuZc8vj8vm1UjvchQpBUgWBeZIGX3mOd9M.gif?auto=webp&s=b577a4f48f5bc87162a2db0c53d41f092e925c65){width=70% fig-align="center"}
+:::
 
-![A "green" tree with no green pixels](https://upload.wikimedia.org/wikipedia/en/thumb/8/81/Mountain-spring-redwhite.png/520px-Mountain-spring-redwhite.png)
+The dress illusion (@fig-dress) highlights this perfectly. Our brain makes assumptions about lighting, so some people see the dress as blue and black (assuming bright light) while others see it as white and gold (assuming shadow). The colors are physically the same, but our perception of them is not. What we "see" is not just raw wavelength hitting our eyes but our visual cortex making inferences based on context and prior experience.
+
+::: {#fig-green-tree}
+![A "green" tree with no green pixels](https://upload.wikimedia.org/wikipedia/en/thumb/8/81/Mountain-spring-redwhite.png/520px-Mountain-spring-redwhite.png){width=70% fig-align="center"}
+:::
+
+Look at @fig-green-tree. We perceive the leaves as green, even though the photograph contains only red, black, and white pixels. Our brain "knows" trees are green, so it fills in the gap.
 
 ### Encoding Color Objectively
 
-Since perception is subjective, we need objective systems to define color. The most common are:
-
--   **RGB (Red, Green, Blue):** An additive system for screens. Colors are created by adding light. Combining all three creates white.
--   **CMYK (Cyan, Magenta, Yellow, Black):** A subtractive system for print. Colors are created by subtracting light with ink. Combining all three (plus black for depth) creates black.
--   **HSL/HSV (Hue, Saturation, Lightness/Value):** More intuitive systems that align better with how we think about color. **Hue** is the pure color, **Saturation** is the intensity, and **Lightness/Value** is the brightness.
+Since perception is subjective, we need objective systems to define color. **RGB (Red, Green, Blue)** is an additive system for screens where colors are created by adding light (combining all three at full intensity produces white). **CMYK (Cyan, Magenta, Yellow, Black)** is a subtractive system for print where colors are created by subtracting light with ink (combining all three plus black creates black). **HSL/HSV (Hue, Saturation, Lightness/Value)** are more intuitive systems that align with how humans naturally think about color, where hue is the pure color, saturation is its intensity, and lightness or value is its brightness.
 
 ::: {.callout-note title="Accessibility Matters: Designing for Color Blindness"}
 A crucial aspect of color choice is ensuring your visualizations are accessible to everyone, including those with color vision deficiencies (CVD). Roughly 8% of men and 0.5% of women are affected.
 
--   **Avoid Red-Green Palettes:** The most common form of CVD is difficulty distinguishing between red and green.
--   **Use Perceptually Uniform Palettes:** Tools like **[ColorBrewer](https://colorbrewer2.org/)** provide palettes that are designed to be accessible.
--   **Combine Color with Other Cues:** Don't rely only on color. Use shape, pattern, or direct labels to distinguish data series.
+First, avoid red-green palettes. The most common form of CVD is difficulty distinguishing between red and green, so this combination creates barriers for a significant portion of your audience.
+
+Second, use perceptually uniform palettes. Tools like **[ColorBrewer](https://colorbrewer2.org/)** provide palettes specifically designed to be accessible to people with different vision deficiencies.
+
+Third, combine color with other visual cues. Don't rely solely on color to distinguish data series. Use shape, pattern, or direct labels so your visualization works for everyone, regardless of their color perception.
 :::
 
 ### The Problem with Rainbows: Perceptually Uniform Palettes
 
-A **perceptually uniform colormap** is one where equal steps in the data are perceived as equal steps in color. The common "rainbow" (or "jet") colormap fails at this because its brightness changes non-uniformly, creating false boundaries and hiding details. Palettes like **Viridis** were engineered to have a monotonically increasing luminance, making them accurate, intuitive, and accessible.
+What makes a good colormap? A **perceptually uniform colormap** is one where equal steps in the data are perceived as equal steps in color. The common "rainbow" (or "jet") colormap fails at this because its brightness changes non-uniformly, creating false boundaries and hiding details.
 
-![Viridis vs. Jet Colormap](https://i.ytimg.com/vi/k27_iSQLlB4/maxresdefault.jpg)
+::: {#fig-viridis-jet}
+![Viridis vs. Jet Colormap comparison](https://i.ytimg.com/vi/k27_iSQLlB4/maxresdefault.jpg){width=80% fig-align="center"}
+:::
 
-# Part 2: The Perception of Form and Quantity
+@fig-viridis-jet shows the stark difference. Palettes like **Viridis** were engineered to have monotonically increasing luminance. This makes them accurate, intuitive, and accessible to everyone.
 
-Beyond color, we must consider how we perceive shape, structure, and magnitude.
+## The Perception of Form and Quantity
 
-### Grouping and Structure: The Gestalt Principles
+Shift your attention from color to shape and structure. Our brains have an innate tendency to see whole forms rather than collections of parts. These **Gestalt principles** are fundamental to chart design because they describe how visual perception naturally organizes information.
 
-Our brains have an innate tendency to see whole forms rather than collections of parts. These **Gestalt principles** are fundamental to chart design.
+::: {#fig-gestalt}
+![Gestalt principles of visual perception](https://www.interaction-design.org/images/uploads/lit-resource-1698-1610178485.jpg){width=80% fig-align="center"}
+:::
 
--   **Proximity:** We group objects that are close together.
--   **Similarity:** We group objects that look similar (e.g., same color or shape).
--   **Enclosure:** We group objects that are inside a boundary.
--   **Closure & Continuity:** We see incomplete shapes as whole and prefer to see continuous lines.
-
-![Gestalt Principles](https://www.interaction-design.org/images/uploads/lit-resource-1698-1610178485.jpg)
+@fig-gestalt illustrates the core principles. **Proximity** describes how we group objects that are close together, so placing related data points near each other makes viewers automatically see them as belonging to the same group. **Similarity** means we group objects that look similar in color, shape, or texture (all bars representing revenue should look the same, distinct from bars representing costs). **Enclosure** works because we naturally group objects that share a boundary or container, so putting related information inside a box or circle makes viewers perceive it as a unit. **Closure and Continuity** reflect how we complete incomplete shapes and prefer continuous lines, so even if a line is broken into segments, we see it as one continuous path.
 
 ### Perceiving Quantity
 
-Our ability to accurately judge quantity varies by the visual encoding used. **Steven's Power Law** shows that we are very good at judging **length**, but poor at judging **area** and **volume**. This is why bar charts are often more effective than pie charts or bubble charts for precise comparisons.
+How accurately can we judge magnitude? Our ability varies dramatically depending on the visual encoding used.
 
-![Steven's Power law](https://graphworkflow.files.wordpress.com/2019/09/stevens_law.png)
+::: {#fig-stevens-law}
+![Steven's Power Law and visual perception accuracy](https://graphworkflow.files.wordpress.com/2019/09/stevens_law.png){width=80% fig-align="center"}
+:::
 
-Furthermore, **Weber's Law** suggests that our ability to perceive a change is relative to the magnitude. We can easily spot a 1-inch difference in a 5-inch line, but not in a 50-foot line.
+**Steven's Power Law** (@fig-stevens-law) shows that we are very good at judging **length**, but poor at judging **area** and **volume**, which is why bar charts often work better than pie charts or bubble charts for precise comparisons. What about detecting changes? **Weber's Law** suggests that our ability to perceive a change is relative to the magnitude, so we can easily spot a 1-inch difference in a 5-inch line, but that same 1-inch difference disappears in a 50-foot line.
 
-# Part 3: Guiding Attention with Preattentive Attributes
+## Guiding Attention with Preattentive Attributes
 
-**Preattentive attributes** are visual properties that our brains process in milliseconds, before we even pay conscious attention. By using them purposefully, you can control the visual hierarchy of your chart and tell a story.
+How do you direct the viewer's eye to what matters most? **Preattentive attributes** are visual properties that our brains process in milliseconds, before we pay conscious attention. By using them purposefully, you control the visual hierarchy of your chart and tell a story.
 
-![Preattentive Attributes](https://i.stack.imgur.com/52nC5.png)
+::: {#fig-preattentive}
+![Examples of preattentive attributes](https://i.stack.imgur.com/52nC5.png){width=80% fig-align="center"}
+:::
 
-Common attributes include a distinct color, size, shape, or orientation. The most effective way to use them is to de-emphasize the majority of your data (e.g., making it light grey) and use a single, strong attribute to highlight your key message. This "grey vs. red" technique immediately tells the viewer, "Look here! This is what matters."
+@fig-preattentive shows common attributes: distinct color, size, shape, or orientation. The most effective way to use them is to de-emphasize most of your data (making it light grey) and use a single, strong attribute to highlight your key message.
+
+This "grey vs. red" technique immediately tells the viewer one thing: Look here! This is what matters.
