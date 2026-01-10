@@ -18,11 +18,9 @@ You'll learn:
 
 ## Embedding Space as Contrast
 
-Have you ever wondered how to extract specific meanings from word embeddings? We intuitively treat word embeddings as static maps where "king" is simply near "queen". We assume the meaning is inherent to the coordinate itself, much like a city has a fixed latitude and longitude.
+Have you ever wondered how to extract specific meanings from word embeddings? We intuitively treat word embeddings as static maps where "king" is simply near "queen", assuming the meaning is inherent to the coordinate itself, much like a city has a fixed latitude and longitude. This is a convenient fiction. In embedding space, meaning emerges entirely from contrast.
 
-This is a convenient fiction. In embedding space, meaning emerges entirely from contrast. This is the key concept of SemAxis.
-
-SemAxis defines a semantic axis by subtracting one vector from its opposite (e.g., $v_{good} - v_{bad}$). This isolates a single semantic dimension, an "axis", that ignores all other information.
+SemAxis defines a semantic axis by subtracting one vector from its opposite (e.g., $v_{good} - v_{bad}$), isolating a single semantic dimension that ignores all other information.
 
 Given two pole words $w_+$ and $w_-$, the axis is defined as:
 
@@ -30,9 +28,7 @@ $$
 v_{\text{axis}} = \frac{v_{w_+} - v_{w_-}}{||v_{w_+} - v_{w_-}\||_2}
 $$
 
-The denominator is the $L_2$ norm of the difference vector. This ensures the axis vector $v_{\text{axis}}$ is a unit vector.
-
-Using this "ruler", we project words onto the axis. The position of a word $w$ is given by the cosine similarity between $v_{w}$ and $v_{\text{axis}}$:
+The denominator is the $L_2$ norm of the difference vector, ensuring $v_{\text{axis}}$ is a unit vector. Using this "ruler", we project words onto the axis with cosine similarity between $v_{w}$ and $v_{\text{axis}}$:
 
 $$
 \text{Position of w on axis } v_{\text{axis}} = \cos(v_{\text{axis}},v_{w})
@@ -64,9 +60,7 @@ sentiment_axis = create_axis("good", "bad", model)
 
 ## Measuring Alignment
 
-How do we see where a word falls on this axis? We project it.
-
-Mathematically, this is the dot product (normalized). If the vector points in the same direction, the score is positive. If it points away, it is negative.
+How do we see where a word falls on this axis? We project it using the normalized dot product. If the vector points in the same direction, the score is positive; if it points away, it is negative.
 
 ```{python}
 def get_score(word, axis, model):
@@ -82,9 +76,7 @@ for w in words:
 
 ## Robustness via Centroids
 
-Single words are noisy. "Bad" might carry connotations of "naughty" or "poor quality".
-
-What's the solution? We don't use single words. We use the centroid of a cluster of synonyms. This averages out the noise and leaves only the pure semantic signal.
+Single words are noisy since "bad" might carry connotations of "naughty" or "poor quality". The solution is to use the centroid of a cluster of synonyms, averaging out the noise to leave only the pure semantic signal.
 
 ```{python}
 def create_robust_axis(pos_word, neg_word, model, k=5):
@@ -111,9 +103,7 @@ robust_axis = create_robust_axis("good", "bad", model)
 
 ## The 2D Semantic Space
 
-When does the real power emerge? When we cross two axes.
-
-By plotting words against "Sentiment" and "Intensity" (Strong vs. Weak), we reveal relationships that a single list hides.
+When does the real power emerge? When we cross two axes, plotting words against "Sentiment" and "Intensity" (Strong vs. Weak) to reveal relationships that a single list hides.
 
 ```{python}
 #| code-fold: true
@@ -158,8 +148,4 @@ plot_2d(test_words, sentiment_axis, intensity_axis, model)
 
 ## The Key Insight
 
-What's the fundamental principle? To define a concept, you must first define its opposite.
-
-Meaning isn't stored in the word itself. It lives in the contrast space. The relationship between poles defines an axis.
-
-SemAxis operationalizes this principle. By defining opposition, we isolate the dimension that matters.
+To define a concept, you must first define its opposite. Meaning isn't stored in the word itself but lives in the contrast space, where the relationship between poles defines an axis. SemAxis operationalizes this principle, isolating the dimension that matters by defining opposition.
