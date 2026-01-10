@@ -17,15 +17,11 @@ You'll learn:
 
 ## The Old Way: Engineering Features by Hand
 
-Before 2012, computer vision meant one thing: carefully designing features by hand. Experts would analyze problems and craft mathematical operations to extract useful information. Edge detection, texture analysis, object boundaries. Every feature required human insight and engineering effort.
-
-Let's explore how this worked by examining edge detection, one of the fundamental problems in image processing.
+Before 2012, computer vision meant one thing: carefully designing features by hand. Experts would analyze problems and craft mathematical operations to extract useful information like edge detection, texture analysis, and object boundaries. Let's explore how this worked by examining edge detection, one of the fundamental problems in image processing.
 
 ### Detecting Edges Through Brightness Changes
 
-What makes an edge visible to human eyes? The answer is sudden changes in brightness. An edge appears when neighboring pixels have significantly different intensity values.
-
-Recall from Part 1 the small 6×6 grayscale image with a bright vertical line in the third column (values of 80) surrounded by dark pixels (values of 10). How do we detect that vertical edge?
+What makes an edge visible to human eyes? Sudden changes in brightness, appearing when neighboring pixels have significantly different intensity values. Recall from Part 1 the small 6×6 grayscale image with a bright vertical line in the third column (values of 80) surrounded by dark pixels (values of 10).
 
 We can approximate the horizontal derivative by subtracting the right neighbor from the left neighbor at each position. For the central pixel, this looks like:
 
@@ -126,9 +122,7 @@ Notice how the filter highlights horizontal boundaries where brightness changes 
 
 ### Thinking in Frequencies: The Fourier Transform
 
-Shift your attention from the spatial domain to the frequency domain. The **Fourier transform** offers an alternative view of images, representing them as combinations of sinusoidal patterns at different frequencies.
-
-For a discrete signal $x[n]$ of length $N$, the Discrete Fourier Transform is:
+Shift your attention from the spatial domain to the frequency domain. The **Fourier transform** represents images as combinations of sinusoidal patterns at different frequencies. For a discrete signal $x[n]$ of length $N$, the Discrete Fourier Transform is:
 
 $$
 \mathcal{F}(x)[k] = \sum_{n=0}^{N-1} x[n] \cdot e^{-2\pi i \frac{nk}{N}}
@@ -140,9 +134,7 @@ $$
 \mathcal{F}(x)[k] = \sum_{n=0}^{N-1} x[n]\Big[\cos(2\pi \tfrac{nk}{N}) - i\sin(2\pi \tfrac{nk}{N})\Big]
 $$
 
-The Fourier transform decomposes a signal into its frequency components. Low frequencies correspond to smooth, slowly varying regions. High frequencies correspond to sharp edges and fine details.
-
-The **convolution theorem** reveals a beautiful connection: convolution in the spatial domain is equivalent to multiplication in the frequency domain:
+The Fourier transform decomposes a signal into its frequency components, where low frequencies correspond to smooth, slowly varying regions and high frequencies correspond to sharp edges and fine details. The **convolution theorem** reveals a beautiful connection: convolution in the spatial domain is equivalent to multiplication in the frequency domain:
 
 $$
 X * K \quad\longleftrightarrow\quad \mathcal{F}(X) \cdot \mathcal{F}(K)
@@ -161,9 +153,7 @@ Here's the problem with hand-crafted features: experts had to design every singl
 
 ## The First Breakthrough: LeNet
 
-Have you ever wondered if there's a better way? Yann LeCun posed a radical question in the late 1980s: what if networks could learn features automatically from raw pixels?
-
-Instead of hand-designing edge detectors, let the network discover useful patterns through training. This vision led to **LeNet**, a pioneering convolutional architecture that demonstrated automated feature learning on handwritten digit recognition {footcite}`lecun1989backpropagation,lecun1998gradient`.
+Have you ever wondered if there's a better way? Yann LeCun posed a radical question in the late 1980s: what if networks could learn features automatically from raw pixels? Instead of hand-designing edge detectors, let the network discover useful patterns through training. This vision led to **LeNet**, a pioneering convolutional architecture that demonstrated automated feature learning on handwritten digit recognition {footcite}`lecun1989backpropagation,lecun1998gradient`.
 
 ::: {#fig-lenet-1}
 ![LeNet-1 architecture. The network learns to extract features through layers of convolution and pooling.](https://miro.medium.com/v2/resize:fit:1400/format:webp/1*ge5OLutAT9_3fxt_sKTBGA.png){width=100% fig-align="center"}
@@ -243,15 +233,11 @@ This simple architecture achieves high accuracy on MNIST, demonstrating the powe
 
 ### Why LeNet Mattered
 
-LeNet proved a crucial concept: networks can learn better features than human experts can design. This automated feature learning was revolutionary, but LeNet's impact remained limited. It worked well on simple tasks like digit recognition but struggled with complex, large-scale problems because the computational constraints of the 1990s prevented training deeper, more powerful networks. GPU acceleration didn't exist, datasets were small, and training techniques were primitive compared to modern methods.
-
-For nearly two decades, hand-crafted features remained dominant in computer vision. Techniques like SIFT (Scale-Invariant Feature Transform) and HOG (Histogram of Oriented Gradients) powered most practical systems, while neural networks remained interesting research curiosities rather than mainstream tools. Then came 2012.
+LeNet proved a crucial concept: networks can learn better features than human experts can design. This automated feature learning was revolutionary, but LeNet's impact remained limited. It worked well on simple tasks like digit recognition but struggled with complex, large-scale problems because the computational constraints of the 1990s prevented training deeper networks (no GPU acceleration, small datasets, primitive training techniques). For nearly two decades, hand-crafted features like SIFT (Scale-Invariant Feature Transform) and HOG (Histogram of Oriented Gradients) powered most practical systems, while neural networks remained research curiosities. Then came 2012.
 
 ## The Revolution: AlexNet
 
-The ImageNet Large Scale Visual Recognition Challenge (ILSVRC) posed a formidable test: classify images into 1000 categories using a training set of 1.2 million images. This scale dwarfed anything LeNet had tackled.
-
-The best systems in 2011 achieved around 25% top-5 error, using carefully engineered features and traditional machine learning methods.
+The ImageNet Large Scale Visual Recognition Challenge (ILSVRC) posed a formidable test: classify images into 1000 categories using a training set of 1.2 million images. This scale dwarfed anything LeNet had tackled, and the best systems in 2011 achieved around 25% top-5 error using carefully engineered features and traditional machine learning methods.
 
 ::: {#fig-imagenet-challenge}
 ![The ImageNet Large Scale Visual Recognition Challenge dataset contains over 1.2 million training images across 1000 categories.](https://media.springernature.com/lw685/springer-static/image/art%3A10.1007%2Fs11263-015-0816-y/MediaObjects/11263_2015_816_Fig2_HTML.gif){width=100% fig-align="center"}
@@ -267,17 +253,7 @@ AlexNet didn't just win. It demonstrated that deep learning could work at scale,
 
 ### Key Innovation 1: ReLU Activation
 
-Why did deep networks fail before AlexNet? Deep networks suffer from the **vanishing gradient problem**. During backpropagation, gradients shrink as they flow backward through layers.
-
-Traditional activations like sigmoid:
-
-$$
-\sigma(x) = \frac{1}{1 + e^{-x}}
-$$
-
-saturate for large positive or negative inputs, driving gradients toward zero. This makes early layers nearly impossible to train.
-
-AlexNet popularized the **Rectified Linear Unit (ReLU)** {footcite}`nair2010rectified`:
+Why did deep networks fail before AlexNet? Deep networks suffer from the **vanishing gradient problem**, where gradients shrink as they flow backward through layers. Traditional activations like sigmoid $\sigma(x) = \frac{1}{1 + e^{-x}}$ saturate for large positive or negative inputs, driving gradients toward zero and making early layers nearly impossible to train. AlexNet popularized the **Rectified Linear Unit (ReLU)** {footcite}`nair2010rectified`:
 
 $$
 \text{ReLU}(x) = \max(0, x)
@@ -287,11 +263,7 @@ $$
 ![Sigmoid saturates for large inputs (gradient approaches zero), while ReLU maintains constant gradient for positive inputs.](https://miro.medium.com/v2/resize:fit:474/1*HGctgaVdv9rEHIVvLYONdQ.jpeg){width=60% fig-align="center"}
 :::
 
-ReLU offers critical advantages. First, there is no vanishing gradient for positive inputs, where the gradient is exactly 1. Second, the operation is computationally cheap, requiring only a comparison to zero.
-
-Third, ReLU creates sparse activation, where many neurons output zero, leading to efficient representations. The drawback is that neurons can "die" if they always receive negative inputs, never activating again.
-
-Variants like Leaky ReLU introduce a small slope for negative inputs to mitigate this:
+ReLU offers critical advantages: no vanishing gradient for positive inputs (gradient is exactly 1), computationally cheap (requires only a comparison to zero), and sparse activation where many neurons output zero for efficient representations. The drawback is that neurons can "die" if they always receive negative inputs, never activating again. Variants like Leaky ReLU introduce a small slope for negative inputs to mitigate this:
 
 $$
 \text{Leaky ReLU}(x) = \begin{cases}
@@ -304,27 +276,21 @@ where $\alpha$ is typically 0.01.
 
 ### Key Innovation 2: Dropout Regularization
 
-What's the next big problem? Deep networks with millions of parameters easily overfit training data. AlexNet introduced **Dropout** as a powerful regularization technique {footcite}`srivastava2014dropout`.
+Deep networks with millions of parameters easily overfit training data. AlexNet introduced **Dropout** as a powerful regularization technique {footcite}`srivastava2014dropout`.
 
 ::: {#fig-dropout-animation}
 ![Dropout randomly disables neurons during training, forcing the network to learn robust features.](https://s3-ap-south-1.amazonaws.com/av-blog-media/wp-content/uploads/2018/04/1IrdJ5PghD9YoOyVAQ73MJw.gif){width=70% fig-align="center"}
 :::
 
-During training, Dropout randomly sets neuron outputs to zero with probability $p$ (typically 0.5). This prevents the network from relying too heavily on any single neuron.
-
-The effect is like training an ensemble of networks that share weights. At inference time, all neurons are active, but their outputs are scaled by $(1-p)$ to maintain expected values. Modern implementations often use inverse dropout, scaling during training instead to avoid scaling at inference.
+During training, Dropout randomly sets neuron outputs to zero with probability $p$ (typically 0.5), preventing the network from relying too heavily on any single neuron. The effect is like training an ensemble of networks that share weights. At inference time, all neurons are active but their outputs are scaled by $(1-p)$ to maintain expected values (modern implementations often use inverse dropout, scaling during training instead).
 
 ### Key Innovation 3: GPU Acceleration
 
-AlexNet demonstrated that deep learning needed massive computational power. The network was trained on two GPUs with 3GB memory each, splitting the computation to handle the large parameter count.
-
-This wasn't just an implementation detail. It showed that deep learning required specialized hardware. The success of AlexNet helped catalyze the GPU computing revolution that continues today, with modern networks training on dozens or hundreds of GPUs.
+AlexNet demonstrated that deep learning needed massive computational power. The network was trained on two GPUs with 3GB memory each, splitting the computation to handle the large parameter count. This wasn't just an implementation detail—it showed that deep learning required specialized hardware and helped catalyze the GPU computing revolution that continues today, with modern networks training on dozens or hundreds of GPUs.
 
 ### Key Innovation 4: Data Augmentation
 
-To combat overfitting with limited training data, AlexNet applied aggressive data augmentation. The team used random crops of 224×224 patches from 256×256 images, horizontal flips, and color and lighting perturbations through PCA-based color jittering.
-
-These transformations artificially expanded the training set, teaching the network to recognize objects regardless of position, orientation, or lighting conditions.
+To combat overfitting with limited training data, AlexNet applied aggressive data augmentation: random crops of 224×224 patches from 256×256 images, horizontal flips, and color and lighting perturbations through PCA-based color jittering. These transformations artificially expanded the training set, teaching the network to recognize objects regardless of position, orientation, or lighting conditions.
 
 ### The Architecture
 
@@ -334,13 +300,9 @@ AlexNet consists of five convolutional layers followed by three fully connected 
 ![AlexNet architecture with 5 convolutional layers and 3 fully connected layers. The network was split across two GPUs.](../figs/alexnet-architecture.jpg){width=70% fig-align="center"}
 :::
 
-The architecture processes a 224×224 RGB image through the following layers. Conv1 applies 96 filters of 11×11 with stride 4, followed by ReLU and max pooling (3×3, stride 2). Conv2 uses 256 filters of 5×5 with ReLU and max pooling.
+The architecture processes a 224×224 RGB image through the following layers. Conv1 applies 96 filters of 11×11 with stride 4, followed by ReLU and max pooling (3×3, stride 2), then Conv2 uses 256 filters of 5×5 with ReLU and max pooling. Conv3, Conv4, and Conv5 apply 384, 384, and 256 filters respectively using 3×3 kernels, with the final convolutional layer followed by max pooling. Three fully connected layers complete the network: FC6 and FC7 each contain 4096 neurons with ReLU and Dropout, while FC8 outputs 1000 class scores through Softmax.
 
-Conv3, Conv4, and Conv5 apply 384, 384, and 256 filters respectively using 3×3 kernels, with the final convolutional layer followed by max pooling. Three fully connected layers complete the network: FC6 and FC7 each contain 4096 neurons with ReLU and Dropout, while FC8 outputs 1000 class scores through Softmax.
-
-The network has approximately 60 million parameters. The first convolutional layer uses large 11×11 filters with stride 4 to rapidly reduce spatial dimensions.
-
-Later layers use smaller 3×3 filters to refine features. AlexNet also used Local Response Normalization (LRN) to normalize activations across adjacent channels. This technique is less common in modern architectures, which typically use batch normalization instead.
+The network has approximately 60 million parameters. The first convolutional layer uses large 11×11 filters with stride 4 to rapidly reduce spatial dimensions, while later layers use smaller 3×3 filters to refine features. AlexNet also used Local Response Normalization (LRN) to normalize activations across adjacent channels, though this technique is less common in modern architectures which typically use batch normalization instead.
 
 ### Using Pre-Trained AlexNet
 
@@ -361,15 +323,11 @@ This pre-trained model has learned rich visual representations from ImageNet's 1
 
 ## Why AlexNet Was a Paradigm Shift
 
-AlexNet proved several critical points that transformed the field. Depth matters: deeper networks learn more powerful representations. Data scale matters: large datasets like ImageNet's 1.2M images enable better learning. Compute matters: GPUs make training deep networks practical. Learned features win: automated feature learning beats hand-crafted features.
-
-Before AlexNet, these points were debated. After AlexNet, they became accepted wisdom, and the deep learning revolution had begun. Within months, researchers worldwide abandoned hand-crafted features, every computer vision competition became a deep learning competition, and companies invested billions in GPU infrastructure. The entire field transformed.
+AlexNet proved several critical points that transformed the field: depth matters (deeper networks learn more powerful representations), data scale matters (large datasets like ImageNet's 1.2M images enable better learning), compute matters (GPUs make training deep networks practical), and learned features win (automated feature learning beats hand-crafted features). Before AlexNet, these points were debated; after AlexNet, they became accepted wisdom. Within months, researchers worldwide abandoned hand-crafted features, every computer vision competition became a deep learning competition, and companies invested billions in GPU infrastructure.
 
 ## From Revolution to Practice
 
-AlexNet demonstrated that deep learning works at scale. But how do we actually use these powerful models in practice? How do we understand what's happening inside these black boxes? And how did researchers push even further, building networks with hundreds of layers?
-
-These questions lead us to the practical skills and advanced architectures we'll explore in the remaining sections. You now understand the paradigm shift. Next, you'll learn to harness it.
+AlexNet demonstrated that deep learning works at scale. But how do we actually use these powerful models in practice, understand what's happening inside these black boxes, and build networks with hundreds of layers? These questions lead us to the practical skills and advanced architectures we'll explore in the remaining sections.
 
 ```{footbibliography}
 :style: unsrt
@@ -377,8 +335,6 @@ These questions lead us to the practical skills and advanced architectures we'll
 
 ## Summary
 
-We traced computer vision's evolution from hand-crafted features to learned representations. Traditional approaches required experts to design edge detectors, Fourier transforms, and pattern recognizers for each task, creating a feature engineering bottleneck that limited the field's potential.
+We traced computer vision's evolution from hand-crafted features to learned representations. Traditional approaches required experts to design edge detectors, Fourier transforms, and pattern recognizers for each task, creating a feature engineering bottleneck that limited the field's potential. LeNet pioneered automated feature learning in the 1990s, showing that networks could discover useful patterns through training, but computational limits constrained its impact.
 
-LeNet pioneered automated feature learning in the 1990s, showing that networks could discover useful patterns through training, but computational limits constrained its impact. AlexNet's 2012 breakthrough on ImageNet changed everything. Key innovations included ReLU activation (solving vanishing gradients), Dropout (preventing overfitting), and GPU acceleration (enabling large-scale training). The 10+ percentage point improvement shocked the computer vision community and sparked the deep learning revolution.
-
-This paradigm shift transformed how we approach machine perception. Networks now learn features automatically from data, outperforming carefully engineered alternatives. The question is no longer whether deep learning works, but how to apply it effectively.
+AlexNet's 2012 breakthrough on ImageNet changed everything with key innovations: ReLU activation (solving vanishing gradients), Dropout (preventing overfitting), and GPU acceleration (enabling large-scale training). The 10+ percentage point improvement shocked the computer vision community and sparked the deep learning revolution. This paradigm shift transformed how we approach machine perception—networks now learn features automatically from data, outperforming carefully engineered alternatives.
