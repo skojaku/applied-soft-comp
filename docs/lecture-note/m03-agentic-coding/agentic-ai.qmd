@@ -19,9 +19,7 @@ You'll learn:
 
 ![ReAct Loop](../figs/react.png){width="70%" fig-align="center"}
 
-What makes an agent different from a chatbot? A chatbot generates text and stops. An agent generates text, parses it for actionable commands, executes those commands, observes the results, and feeds those results back into the next prompt.
-
-The intelligence does not come from the model. It comes from the feedback loop.
+What makes an agent different from a chatbot? A chatbot generates text and stops. An agent generates text, parses it for actionable commands, executes those commands, observes the results, and feeds those results back into the next prompt. The intelligence does not come from the model but from the feedback loop.
 
 This is the **ReAct Pattern**, short for Reason + Act. A chatbot is a pure function: $\text{Output} = \text{Model}(\text{Input})$. An agent is a state machine:
 
@@ -34,17 +32,11 @@ while not task_complete:
     observation = result  # Feedback loop
 ```
 
-The critical insight is the feedback loop. If the agent tries to import a missing library and receives a `ModuleNotFoundError`, the next iteration's thought will be "I need to install this library." It corrects itself not through introspection, but through collision with reality.
-
-How does this work in practice? The ReAct framework interleaves reasoning and action in three steps. First, the model reasons about the current state (Thought). Second, it outputs a specific command to interact with the environment (Action). Third, the environment executes that command and returns the result (Observation).
-
-This cycle repeats until the task is solved.
+The critical insight is the feedback loop. If the agent tries to import a missing library and receives a `ModuleNotFoundError`, the next iteration's thought will be "I need to install this library." It corrects itself not through introspection, but through collision with reality. The ReAct framework interleaves reasoning and action in three steps: the model reasons about the current state (Thought), outputs a specific command to interact with the environment (Action), and receives the result (Observation). This cycle repeats until the task is solved.
 
 ## The ReAct Framework with `langgraph`
 
-Let's build an agent that can explore and analyze a real dataset. We'll use **LangGraph**, a framework from LangChain that models agents as state machines. Unlike simple loops, LangGraph lets you define explicit control flow: decision nodes, parallel execution, conditional branching, and state persistence.
-
-Why use a framework instead of a simple loop? Because production agents need more than iteration. They need structured state management, error recovery, and observable transitions. LangGraph provides these.
+Let's build an agent that can explore and analyze a real dataset. We'll use **LangGraph**, a framework from LangChain that models agents as state machines. Unlike simple loops, LangGraph lets you define explicit control flow: decision nodes, parallel execution, conditional branching, and state persistence. Production agents need more than iteration. They need structured state management, error recovery, and observable transitions.
 
 
 ## Building Your First Agent
@@ -80,9 +72,7 @@ def inspect_data() -> str:
     return buffer.getvalue()
 ```
 
-The structure is minimal because LangGraph infers everything from the function definition. The function name becomes the tool name. The docstring becomes the description. Type hints and the Args section define the schema.
-
-This particular tool takes no inputs and returns the dataset schema so the agent can discover column names and types before writing queries.
+The structure is minimal because LangGraph infers everything from the function definition. The function name becomes the tool name, the docstring becomes the description, and type hints define the schema. This particular tool takes no inputs and returns the dataset schema so the agent can discover column names and types before writing queries.
 
 Let's add three more tools to give the agent more analytical capabilities:
 
@@ -166,7 +156,7 @@ for message in result["messages"]:
     print(message.content)
 ```
 
-What's happening here? The agent executes a ReAct loop. It reads your question, realizes it needs to use SQL to group by species and calculate averages, then LangGraph streams each step. You see the LLM's reasoning, the tool calls, and the observations in real time.
+The agent executes a ReAct loop. It reads your question, realizes it needs to use SQL to group by species and calculate averages, then LangGraph streams each step. You see the LLM's reasoning, the tool calls, and the observations in real time.
 
 Let's try another query that requires multiple steps:
 
