@@ -5,14 +5,23 @@ execute:
 ---
 
 ::: {.callout-note title="What you'll learn in this module"}
-Agents are not smarter chatbots. They are state machines that loop, using an LLM to decide the next transition. The ReAct pattern (Reason + Act) enables this loop: the agent reasons about the current state, takes an action, observes the result, and feeds that observation back as input. This feedback loop is where intelligence emerges, not from the model itself.
+This module introduces agentic AI systems and the ReAct pattern.
+
+You'll learn:
+
+- What **agentic AI** means and how it differs from chatbots through state-based loops.
+- How to implement the **ReAct pattern** (Reason + Act) for autonomous task-solving.
+- The critical role of **feedback loops** in enabling agent intelligence.
+- How to build practical agents using **LangGraph** that query and analyze real datasets.
 :::
 
 ## The Loop: Where Intelligence Emerges
 
 ![ReAct Loop](../figs/react.png){width="70%" fig-align="center"}
 
-Let's shift your attention from what agents are to how they actually work. An agent is not a smarter chatbot. A chatbot generates text and stops. An agent generates text, parses it for actionable commands, executes those commands in the real world, observes the results, and feeds those results back into the next prompt. The intelligence does not come from the model. It comes from the feedback loop.
+What makes an agent different from a chatbot? A chatbot generates text and stops. An agent generates text, parses it for actionable commands, executes those commands, observes the results, and feeds those results back into the next prompt.
+
+The intelligence does not come from the model. It comes from the feedback loop.
 
 This is the **ReAct Pattern**, short for Reason + Act. A chatbot is a pure function: $\text{Output} = \text{Model}(\text{Input})$. An agent is a state machine:
 
@@ -27,11 +36,15 @@ while not task_complete:
 
 The critical insight is the feedback loop. If the agent tries to import a missing library and receives a `ModuleNotFoundError`, the next iteration's thought will be "I need to install this library." It corrects itself not through introspection, but through collision with reality.
 
-The ReAct framework interleaves reasoning and action in three steps. First, the model reasons about the current state (Thought). Second, it outputs a specific command to interact with the environment (Action). Third, the environment executes that command and returns the result (Observation). This cycle repeats until the task is solved.
+How does this work in practice? The ReAct framework interleaves reasoning and action in three steps. First, the model reasons about the current state (Thought). Second, it outputs a specific command to interact with the environment (Action). Third, the environment executes that command and returns the result (Observation).
+
+This cycle repeats until the task is solved.
 
 ## The ReAct Framework with `langgraph`
 
-Let's build an agent that can explore and analyze a real dataset. We'll use **LangGraph**—a framework from LangChain that models agents as state machines. Unlike simple loops, LangGraph lets you define explicit control flow: decision nodes, parallel execution, conditional branching, and state persistence.
+Let's build an agent that can explore and analyze a real dataset. We'll use **LangGraph**, a framework from LangChain that models agents as state machines. Unlike simple loops, LangGraph lets you define explicit control flow: decision nodes, parallel execution, conditional branching, and state persistence.
+
+Why use a framework instead of a simple loop? Because production agents need more than iteration. They need structured state management, error recovery, and observable transitions. LangGraph provides these.
 
 
 ## Building Your First Agent
@@ -67,7 +80,9 @@ def inspect_data() -> str:
     return buffer.getvalue()
 ```
 
-The structure is minimal because LangGraph infers everything from the function definition. The function name becomes the tool name. The docstring becomes the description. Type hints and the Args section define the schema. This particular tool takes no inputs and returns the dataset schema so the agent can discover column names and types before writing queries.
+The structure is minimal because LangGraph infers everything from the function definition. The function name becomes the tool name. The docstring becomes the description. Type hints and the Args section define the schema.
+
+This particular tool takes no inputs and returns the dataset schema so the agent can discover column names and types before writing queries.
 
 Let's add three more tools to give the agent more analytical capabilities:
 
@@ -134,7 +149,9 @@ tools = [
 agent = create_react_agent(model, tools)
 ```
 
-The `create_react_agent` function builds a standard ReAct graph. It defines three nodes: call the LLM, execute tools, and check if done. The `recursion_limit` parameter sets the maximum iterations. Now let's run the agent and watch it autonomously choose which tools to use.
+The `create_react_agent` function builds a standard ReAct graph. It defines three nodes: call the LLM, execute tools, and check if done. The `recursion_limit` parameter sets the maximum iterations.
+
+Now let's run the agent and watch it autonomously choose which tools to use.
 
 ```{python}
 query = "Which fish species has the highest average weight?"
@@ -149,7 +166,7 @@ for message in result["messages"]:
     print(message.content)
 ```
 
-Watch as the agent executes a ReAct loop. It reads your question, realizes it needs to use SQL to group by species and calculate averages, then LangGraph streams each step. You see the LLM's reasoning, the tool calls, and the observations in real time.
+What's happening here? The agent executes a ReAct loop. It reads your question, realizes it needs to use SQL to group by species and calculate averages, then LangGraph streams each step. You see the LLM's reasoning, the tool calls, and the observations in real time.
 
 Let's try another query that requires multiple steps:
 
@@ -168,8 +185,12 @@ for message in result["messages"]:
 
 This demonstrates the power of the ReAct loop. The agent chains multiple observations together, building a solution step-by-step rather than attempting everything in one shot. Unlike opaque loops, LangGraph exposes every state transition, making debugging straightforward.
 
-Note that we're using simpler queries here rather than more complex ones. Real-world agentic systems face reliability challenges. Models sometimes generate malformed JSON. SQL libraries have limitations. Complex queries can hit iteration limits before completing. Production systems like Claude Code and Cursor handle these issues through better error recovery, more sophisticated prompting, and custom tool implementations. For learning, we focus on simple queries that reliably demonstrate the ReAct pattern.
+Why are we using simpler queries? Real-world agentic systems face reliability challenges. Models sometimes generate malformed JSON. SQL libraries have limitations. Complex queries can hit iteration limits before completing.
+
+Production systems like Claude Code and Cursor handle these issues through better error recovery, more sophisticated prompting, and custom tool implementations. For learning, we focus on simple queries that reliably demonstrate the ReAct pattern.
 
 ## The Takeaway
 
-This is the core architecture of Google Antigravity, Claude Code, and Cursor. Scale it up with better tools like file editing, terminal commands, and web browsing. Add better orchestration with parallel agents and verification artifacts. The loop remains the same: Reason, Act, Observe, and repeat.
+This is the core architecture of Google Antigravity, Claude Code, and Cursor. Scale it up with better tools like file editing, terminal commands, and web browsing. Add better orchestration with parallel agents and verification artifacts.
+
+The loop remains the same: Reason, Act, Observe, and repeat.
