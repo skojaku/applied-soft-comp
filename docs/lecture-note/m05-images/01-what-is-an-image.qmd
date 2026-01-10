@@ -1,0 +1,215 @@
+---
+title: "Part 1: What is an Image?"
+jupyter: python3
+---
+
+::: {.callout-note title="What you'll learn"}
+This section introduces images as structured data. We explore how computers represent visual information as numbers, examine the role of pixels and channels, and understand why spatial relationships matter for machine perception.
+:::
+
+## A Photograph is Just Numbers
+
+Let's talk about what an image really is from a computer's perspective. When you look at a photograph, you see faces, objects, and scenes. But to a machine, that same photograph is simply a grid of numbers. Each number represents the brightness or color at a specific location.
+
+This representation might seem strange at first. How can numbers capture the richness of visual information? The answer lies in spatial structure. Unlike a spreadsheet where row order doesn't matter, the arrangement of numbers in an image is everything. Neighboring pixels relate to each other, forming edges, textures, and patterns.
+
+## Grayscale Images: The Simplest Case
+
+The very first step in understanding images is to examine the grayscale case. A grayscale image contains only brightness information, with no color. We can think of it as a 2D matrix where each entry is a pixel intensity value.
+
+Consider a tiny 6×6 grayscale image:
+
+$$
+X = \begin{bmatrix}
+10 & 10 & 80 & 10 & 10 & 10 \\
+10 & 10 & 80 & 10 & 10 & 10 \\
+10 & 10 & 80 & 10 & 10 & 10 \\
+10 & 10 & 80 & 10 & 10 & 10 \\
+10 & 10 & 80 & 10 & 10 & 10 \\
+10 & 10 & 80 & 10 & 10 & 10
+\end{bmatrix}
+$$
+
+Here, the value 10 represents dark pixels, while 80 represents bright pixels. The third column forms a bright vertical line. This simple example shows how spatial patterns emerge from the arrangement of numbers.
+
+```{figure} https://ai.stanford.edu/~syyeung/cvweb/Pictures1/imagematrix.png
+---
+width: 80%
+name: image-matrix
+align: center
+---
+A grayscale image represented as a matrix of pixel intensity values. Each number encodes brightness at that location.
+```
+
+## Loading and Inspecting Real Images
+
+Let's make this concrete by loading an actual image and examining its structure. We'll use Python with standard libraries to see what an image really looks like under the hood.
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+from PIL import Image
+import requests
+from io import BytesIO
+
+def load_image_from_url(url):
+    """Load an image from a URL and convert to numpy array."""
+    response = requests.get(url)
+    img = Image.open(BytesIO(response.content))
+    return np.array(img)
+
+# Load an example image
+url = "https://www.binghamton.edu/news/images/uploads/features/20180815_peacequad02_jwc.jpg"
+img_array = load_image_from_url(url)
+
+# Display the image
+plt.figure(figsize=(8, 6))
+plt.imshow(img_array)
+plt.title("Original Image")
+plt.axis("off")
+plt.show()
+
+# Print its properties
+print(f"Image shape: {img_array.shape}")
+print(f"Data type: {img_array.dtype}")
+print(f"Value range: [{img_array.min()}, {img_array.max()}]")
+```
+
+What does the shape tell us? The output `(height, width, 3)` reveals three dimensions. The first two dimensions specify spatial location, while the third dimension holds three color channels.
+
+Let's zoom into a small patch to see the actual numbers:
+
+```{python}
+# Extract a tiny 5x5 patch from the center
+center_y, center_x = img_array.shape[0] // 2, img_array.shape[1] // 2
+patch = img_array[center_y:center_y+5, center_x:center_x+5, 0]  # Red channel only
+
+print("A 5x5 patch of pixel values (Red channel):")
+print(patch)
+```
+
+These are the actual numbers the computer sees. Each value between 0 and 255 represents brightness in the red channel for that pixel location.
+
+## Color Images: Three Stacked Layers
+
+Color images extend the grayscale concept by using three separate matrices, one for each color channel: Red, Green, and Blue (RGB). Think of these as three grayscale images stacked on top of each other.
+
+When you combine the values from all three channels at a given location, you get the color for that pixel. For example, `[255, 0, 0]` is pure red, `[0, 255, 0]` is pure green, and `[255, 255, 255]` is white.
+
+Let's visualize the three channels separately:
+
+```{python}
+fig, axes = plt.subplots(1, 4, figsize=(16, 4))
+
+# Original image
+axes[0].imshow(img_array)
+axes[0].set_title("Original Image")
+axes[0].axis("off")
+
+# Individual channels
+channel_names = ['Red', 'Green', 'Blue']
+colors = ['Reds', 'Greens', 'Blues']
+
+for i, (name, cmap) in enumerate(zip(channel_names, colors)):
+    axes[i+1].imshow(img_array[:, :, i], cmap=cmap)
+    axes[i+1].set_title(f"{name} Channel")
+    axes[i+1].axis("off")
+
+plt.tight_layout()
+plt.show()
+```
+
+Notice how each channel emphasizes different aspects of the scene. The red channel might be bright where red objects appear, while the blue channel highlights sky and water.
+
+## Why Spatial Structure Matters
+
+Shift your attention from individual pixel values to relationships between pixels. This is what makes images fundamentally different from tabular data.
+
+In a spreadsheet, you can shuffle the rows without losing information. But in an image, shuffling pixels destroys everything. The spatial arrangement is the information. An edge appears when neighboring pixels have very different values. A texture emerges from repeating patterns across nearby locations. An object is a coherent region of similar pixels.
+
+This spatial structure is why neural networks for images need special architectures. Fully connected networks treat every input independently, ignoring spatial relationships. Convolutional networks, which we'll explore soon, are designed specifically to exploit this structure.
+
+## Converting Between Representations
+
+Let's practice manipulating image representations to build intuition:
+
+```{python}
+# Convert to grayscale by averaging channels
+grayscale = np.mean(img_array, axis=2).astype(np.uint8)
+
+# Create a side-by-side comparison
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+axes[0].imshow(img_array)
+axes[0].set_title("RGB Image (3 channels)")
+axes[0].axis("off")
+
+axes[1].imshow(grayscale, cmap='gray')
+axes[1].set_title("Grayscale Image (1 channel)")
+axes[1].axis("off")
+
+plt.tight_layout()
+plt.show()
+
+print(f"RGB shape: {img_array.shape}")
+print(f"Grayscale shape: {grayscale.shape}")
+```
+
+The grayscale version loses color information but preserves spatial structure. For many computer vision tasks, this simplified representation is sufficient.
+
+## Image Dimensions in Deep Learning
+
+When we feed images into neural networks, we need to be precise about dimensions. Different frameworks use different conventions, so let's clarify the PyTorch standard.
+
+PyTorch expects images in `(batch_size, channels, height, width)` format, often abbreviated as NCHW:
+
+- **N**: Batch size (number of images processed together)
+- **C**: Channels (3 for RGB, 1 for grayscale)
+- **H**: Height in pixels
+- **W**: Width in pixels
+
+Let's convert our image to PyTorch format:
+
+```{python}
+import torch
+
+# Original numpy array is (H, W, C)
+print(f"NumPy format (H, W, C): {img_array.shape}")
+
+# Convert to PyTorch format (C, H, W) for a single image
+img_tensor = torch.from_numpy(img_array).permute(2, 0, 1).float() / 255.0
+print(f"PyTorch format (C, H, W): {img_tensor.shape}")
+
+# Add batch dimension to get (N, C, H, W)
+img_batch = img_tensor.unsqueeze(0)
+print(f"Batch format (N, C, H, W): {img_batch.shape}")
+```
+
+We also normalized pixel values from `[0, 255]` to `[0, 1]` by dividing by 255. This normalization helps neural networks train more stably.
+
+::: {.callout-tip title="Try it yourself"}
+Load your own image and explore its properties. Try these experiments:
+
+1. Extract and visualize a small patch of pixels as numbers
+2. Modify some pixel values and see how the image changes
+3. Swap the red and blue channels to see the color shift
+4. Convert between NumPy and PyTorch formats
+
+Understanding these representations at a hands-on level will make everything that follows more intuitive.
+:::
+
+## From Pixels to Patterns
+
+Now that we understand what images are as data structures, the next question becomes: how do we detect patterns in them? Human vision effortlessly recognizes edges, textures, and objects. But what computational operations allow machines to do the same?
+
+This question leads us to convolution, feature extraction, and ultimately to the deep learning revolution. In the next section, we'll explore how computer vision evolved from hand-crafted feature detectors to learned representations that can match or exceed human performance.
+
+The key insight to carry forward is this: images are spatial data where relationships between neighboring pixels encode visual information. Any successful vision system must respect and exploit this spatial structure.
+
+## Summary
+
+We explored images as structured numerical data. A grayscale image is a 2D matrix of brightness values, while a color image adds two more matrices for the other color channels. Spatial relationships between pixels encode edges, textures, and objects. Unlike tabular data, the arrangement of values matters fundamentally.
+
+We saw how to load, inspect, and manipulate images in Python, converting between NumPy arrays and PyTorch tensors. This hands-on understanding prepares us to work with the deep learning models that process these image representations.
+
+Images are not just collections of numbers. They are spatially organized data where local patterns combine into global structure. This insight motivates everything that follows in computer vision.
