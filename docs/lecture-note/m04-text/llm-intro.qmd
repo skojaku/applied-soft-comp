@@ -20,35 +20,21 @@ You'll learn:
 
 Let's talk about the most fundamental question: Can LLMs understand the world and reason about it?
 
-One might argue that fluency demonstrates understanding. This is the intuition behind Turing's 1950 test: if you can't tell it's a machine, treat it as intelligent. But let's examine counter-arguments starting with ELIZA.
-
-ELIZA, developed by Joseph Weizenbaum in the mid-1960s, is widely considered one of the first chatbots. It simulated a Rogerian psychotherapist using simple pattern matching and keyword substitution to generate responses.
-
-Despite its lack of true understanding, ELIZA famously convinced many users that they were conversing with an intelligent entity. This highlights the human tendency to anthropomorphize technology and the limitations of the Turing Test.
+One might argue that fluency demonstrates understanding. This is the intuition behind Turing's 1950 test: if you can't tell it's a machine, treat it as intelligent. But let's examine counter-arguments starting with ELIZA, developed by Joseph Weizenbaum in the mid-1960s as one of the first chatbots. It simulated a Rogerian psychotherapist using simple pattern matching and keyword substitution. Despite its lack of true understanding, ELIZA famously convinced many users that they were conversing with an intelligent entity, highlighting the human tendency to anthropomorphize technology and the limitations of the Turing Test.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/8jGpkdPO-1Y?si=MRGPj2SRvEL-ROW_" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
-Another argument against fluency is the Chinese Room argument, proposed by philosopher John Searle. Imagine a person in a room who receives Chinese characters and, using an English rulebook, manipulates these symbols to produce new Chinese characters. To an outside observer, it appears the room understands Chinese.
-
-However, the person inside merely follows instructions to manipulate symbols without understanding their meaning. Searle argues that this is analogous to how computers, including LLMs, operate: they process symbols based on rules without genuine comprehension.
+Another argument against fluency is the Chinese Room argument, proposed by philosopher John Searle. Imagine a person in a room who receives Chinese characters and, using an English rulebook, manipulates these symbols to produce new Chinese characters. To an outside observer, it appears the room understands Chinese, yet the person inside merely follows instructions to manipulate symbols without understanding their meaning. Searle argues that this is analogous to how computers, including LLMs, operate: they process symbols based on rules without genuine comprehension.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/TryOC83PH1g?si=XGuLMklRle-quAia" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
-So do LLMs understand the world? Probably not in the same way we do. LLMs are lossy compression algorithms, compressing data into their parameters to generate fluent outputs.
-
-To predict "The capital of France is ___," the model must compress not just the fact (Paris) but the statistical regularities governing how facts appear in text. It learns that capitals follow "The capital of," that France is a country, that countries have capitals. This compression is probabilistic, not factual.
-
-The model stores $P(\text{word}_{n+1} \mid \text{word}_1, \ldots, \text{word}_n)$, which words tend to follow which other words in which contexts. Just as a lottery memorizer stores patterns of number sequences, the LLM stores patterns of word sequences.
+So do LLMs understand the world? Probably not in the same way we do. LLMs are lossy compression algorithms, compressing data into their parameters to generate fluent outputs. To predict "The capital of France is ___," the model must compress not just the fact (Paris) but the statistical regularities governing how facts appear in text: that capitals follow "The capital of," that France is a country, that countries have capitals. The model stores $P(\text{word}_{n+1} \mid \text{word}_1, \ldots, \text{word}_n)$, which words tend to follow which other words in which contexts, just as a lottery memorizer stores patterns of number sequences.
 
 ![](../figs/llm-next-word.gif){width=50% fig-alt="A GIF showing how LLMs predict the next word by estimating probability distributions over the vocabulary." fig-align="center"}
 
-Training feeds the model billions of sentences. For each sentence, the model predicts the next word, compares its prediction to the actual next word, and adjusts its parameters to increase the probability of the correct word. Repeat trillions of times.
+Training feeds the model billions of sentences. For each sentence, the model predicts the next word, compares its prediction to the actual next word, and adjusts its parameters to increase the probability of the correct word. Repeat trillions of times. The result: a compressed representation of how language behaves statistically. The model doesn't learn "Paris is the capital of France" as a fact but rather that in contexts matching the pattern [The capital of France is], the token "Paris" appears with high probability.
 
-The result: a compressed representation of how language behaves statistically. The model doesn't learn "Paris is the capital of France" as a fact. It learns that in contexts matching the pattern [The capital of France is], the token "Paris" appears with high probability.
-
-The lottery memorizer doesn't understand what draws mean. It just knows what patterns appear most often. This is why LLMs create hallucinations: fluent but false outputs.
-
-Truth and fluency correlate in the training data, so the model is mostly truthful. But in the tails (obscure topics, recent events, precise recall), fluency diverges from truth, and the model follows fluency.
+The lottery memorizer doesn't understand what draws mean but just knows what patterns appear most often. This is why LLMs create hallucinations: fluent but false outputs. Truth and fluency correlate in the training data, so the model is mostly truthful, but in the tails (obscure topics, recent events, precise recall), fluency diverges from truth, and the model follows fluency.
 
 Keep this limitation in mind and use LLMs as a tool to scale pattern recognition, not judgment. Let's learn how to utilize them.
 
@@ -83,17 +69,11 @@ response = ollama.generate(
 print(response.response)
 ```
 
-Run this code twice. You'll get different outputs.
-
-Why? Because LLMs sample from probability distributions. The temperature parameter controls this randomness. Lower values (0.1) make outputs more deterministic; higher values (1.0) increase diversity.
-
-You're controlling how far into the tail of the probability distribution the model samples. Low temperature: the model picks the most likely next word. High temperature: it ventures into less probable territory. Sometimes that produces creativity. Sometimes it produces nonsense.
+Run this code twice and you'll get different outputs. Why? Because LLMs sample from probability distributions. The temperature parameter controls this randomness: lower values (0.1) make outputs more deterministic, higher values (1.0) increase diversity. You're controlling how far into the tail of the probability distribution the model samples. Low temperature means the model picks the most likely next word, while high temperature ventures into less probable territory, sometimes producing creativity, sometimes nonsense.
 
 ## Research Applications
 
-The strategy is simple: use LLMs for tasks where speed trumps precision, then verify the outputs that matter.
-
-Three workflows demonstrate this pattern.
+The strategy is simple: use LLMs for tasks where speed trumps precision, then verify the outputs that matter. Three workflows demonstrate this pattern.
 
 ### Abstract Summarization
 
@@ -117,9 +97,7 @@ response = ollama.generate(prompt=prompt, **params_llm)
 print(response.response)
 ```
 
-The model captures the pattern: propose method, evaluate, outperform baselines. It doesn't understand the paper. It has seen enough academic abstracts to recognize the structure.
-
-For multiple abstracts, loop through them.
+The model captures the pattern: propose method, evaluate, outperform baselines. It doesn't understand the paper but has seen enough academic abstracts to recognize the structure. For multiple abstracts, loop through them.
 
 ```{python}
 for i, abstract in enumerate(["Abstract 1...", "Abstract 2..."], 1):
@@ -148,9 +126,7 @@ response = ollama.generate(prompt=prompt, **params_llm)
 print(response.response)
 ```
 
-Scale this to hundreds of papers for meta-analysis. Always verify.
-
-LLMs misinterpret obscure terminology and fabricate plausible-sounding technical details when uncertain. Remember: the model is pattern-matching against academic writing it's seen, not reasoning about your domain.
+Scale this to hundreds of papers for meta-analysis, but always verify. LLMs misinterpret obscure terminology and fabricate plausible-sounding technical details when uncertain, pattern-matching against academic writing they've seen rather than reasoning about your domain.
 
 ### Hypothesis Generation
 
@@ -165,25 +141,15 @@ response = ollama.generate(prompt=prompt, **params_llm)
 print(response.response)
 ```
 
-Treat the model as a thought partner, not an oracle. It helps structure thinking but doesn't possess domain expertise.
-
-The suggestions reflect patterns in how research questions are framed, not deep knowledge of your field.
+Treat the model as a thought partner, not an oracle. It helps structure thinking but doesn't possess domain expertise, reflecting patterns in how research questions are framed rather than deep knowledge of your field.
 
 ## Failure Modes and Boundaries
 
-The failure modes follow directly from the mechanism. LLMs fabricate plausibly because they optimize for fluency, not truth.
+The failure modes follow directly from the mechanism. LLMs fabricate plausibly because they optimize for fluency, not truth. Ask about a non-existent "Smith et al. quantum paper" and receive fluent academic prose describing results that never happened. Always verify citations: the model has seen thousands of papers cited in the format "Smith et al. (2023) demonstrated that..." and generates outputs matching that pattern even when the citation is fictional.
 
-Ask about a non-existent "Smith et al. quantum paper" and receive fluent academic prose describing results that never happened. Always verify citations. The model has seen thousands of papers cited in the format "Smith et al. (2023) demonstrated that..." and generates outputs matching that pattern even when the citation is fictional.
+Context limits are architectural. Models see only 2,000–8,000 tokens at once. Paste 100 abstracts and early ones are mathematically evicted from working memory, gone. Knowledge cutoffs are temporal: Gemma 3N's training ended early 2024, so asking about recent events yields outdated information or plausible fabrications constructed from pre-cutoff patterns.
 
-Context limits are architectural. Models see only 2,000–8,000 tokens at once. Paste 100 abstracts and early ones are mathematically evicted from working memory. The model doesn't "remember" them. They're gone.
-
-Knowledge cutoffs are temporal. Gemma 3N's training ended early 2024. Ask about recent events and receive outdated information or plausible fabrications constructed from pre-cutoff patterns.
-
-Reasoning is absent. LLMs pattern-match, they don't reason.
-
-Ask "How many r's in 'Strawberry'?" and the model might answer correctly via pattern matching against similar questions in training data, not by counting letters. Sometimes right. Often wrong. The model has no internal representation of what counting means.
-
-These aren't bugs to be fixed. They're intrinsic to the architecture.
+Reasoning is absent. LLMs pattern-match, they don't reason. Ask "How many r's in 'Strawberry'?" and the model might answer correctly via pattern matching against similar questions in training data, not by counting letters. Sometimes right, often wrong, with no internal representation of what counting means. These aren't bugs to be fixed but intrinsic to the architecture.
 
 Use LLMs to accelerate work, not replace judgment. They excel at summarizing text, extracting structure, reformulating concepts, brainstorming, generating synthetic examples, and translation. They fail at literature reviews without verification, factual claims without sources, statistical analysis, and ethical decisions.
 
