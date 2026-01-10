@@ -36,7 +36,7 @@ But training deep networks in 2014 remained difficult. Gradients vanished. Train
 
 VGGNet demonstrated that systematic depth works {footcite}`simonyan2014very`. The key insight was using **small 3×3 convolutions** exclusively, stacked together to build deep networks.
 
-```{figure} ../archive/figs/vgg-architecture.jpg
+```{figure} ../figs/vgg-architecture.jpg
 ---
 width: 50%
 align: center
@@ -182,11 +182,7 @@ During training, the total loss combines the main classifier loss with auxiliary
 
 GoogLeNet achieved accuracy comparable to VGG with **12× fewer parameters**. This demonstrated that architecture efficiency matters as much as depth. The Inception ideas influenced countless subsequent designs.
 
-Later versions pushed these ideas further:
-
-- **Inception v2/v3**: Added batch normalization, factorized larger filters (5×5 → two 3×3)
-- **Inception v4**: Integrated with residual connections
-- **Xception**: Used depthwise separable convolutions, pushing channel-spatial separation further
+Later versions pushed these ideas further. Inception v2/v3 added batch normalization and factorized larger filters (5×5 became two 3×3 convolutions). Inception v4 integrated with residual connections. Xception used depthwise separable convolutions, pushing channel-spatial separation further.
 
 **Batch Normalization**, introduced around this time {footcite}`ioffe2015batch`, normalizes layer activations to zero mean and unit variance. This stabilizes training and allows higher learning rates. It became standard in nearly all subsequent architectures.
 
@@ -329,37 +325,13 @@ A special **CLS token** prepended to the sequence gathers global information. Af
 
 ### Trade-offs: Data and Compute
 
-Vision Transformers achieve state-of-the-art accuracy on large datasets like ImageNet-21k (14 million images). But they have important trade-offs:
+Vision Transformers achieve state-of-the-art accuracy on large datasets like ImageNet-21k (14 million images). But they have important trade-offs. Vision Transformers provide a global receptive field from the first layer, better scaling properties with dataset size, and a unified architecture for vision and language. However, they require more training data than CNNs due to less inductive bias, impose higher computational cost since self-attention is $O(n^2)$ in sequence length, and prove less effective on small datasets without strong augmentation.
 
-**Advantages**:
-- Global receptive field from the first layer
-- Better scaling properties with dataset size
-- Unified architecture for vision and language (same Transformer)
-
-**Disadvantages**:
-- Require more training data than CNNs (less inductive bias)
-- Higher computational cost (self-attention is $O(n^2)$ in sequence length)
-- Less effective on small datasets without strong augmentation
-
-For most practical applications, CNNs remain competitive. Use ViT when you have:
-
-- Large datasets (millions of images)
-- Substantial computational resources
-- Tasks benefiting from global context (scene understanding, fine-grained classification)
-
-Use CNNs when you have:
-
-- Limited data (thousands of images)
-- Constrained compute (edge devices, mobile)
-- Tasks benefiting from spatial locality (object detection, segmentation)
+For most practical applications, CNNs remain competitive. Use ViT when you have large datasets (millions of images), substantial computational resources, and tasks benefiting from global context like scene understanding or fine-grained classification. Use CNNs when you have limited data (thousands of images), constrained compute (edge devices, mobile), or tasks benefiting from spatial locality (object detection, segmentation).
 
 ### Hybrid Approaches
 
-Recent research combines CNN and Transformer strengths:
-
-- **Swin Transformer** {footcite}`liu2021swin`: Uses local attention windows (more like convolution) with hierarchical structure
-- **CoAtNet** {footcite}`dai2021coatnet`: Combines convolution in early layers with attention in later layers
-- **ConvNeXt** {footcite}`liu2022convnet`: Shows that modernized CNNs can match Transformer performance
+Recent research combines CNN and Transformer strengths. Swin Transformer {footcite}`liu2021swin` uses local attention windows (more like convolution) with hierarchical structure. CoAtNet {footcite}`dai2021coatnet` combines convolution in early layers with attention in later layers. ConvNeXt {footcite}`liu2022convnet` shows that modernized CNNs can match Transformer performance.
 
 The field continues evolving, blending ideas from both paradigms.
 
@@ -383,17 +355,7 @@ Each innovation addressed limitations of its predecessors while preserving their
 
 ## Choosing the Right Architecture
 
-For your next computer vision project, which architecture should you choose?
-
-**ResNet-50**: Default choice. Excellent accuracy-computational cost trade-off. Pre-trained weights widely available. Works well across diverse tasks.
-
-**EfficientNet**: When deployment efficiency matters. Carefully balanced depth, width, and resolution for optimal accuracy per parameter.
-
-**MobileNet/EfficientNet-Lite**: For mobile and edge devices. Sacrifices some accuracy for fast inference and small model size.
-
-**Vision Transformer (ViT)**: When you have large datasets (millions of images) and substantial compute. State-of-the-art accuracy on challenging benchmarks.
-
-**Swin Transformer**: When you want Transformer benefits with more reasonable compute requirements. Good for dense prediction tasks.
+For your next computer vision project, which architecture should you choose? ResNet-50 is the default choice, offering an excellent accuracy-computational cost trade-off with widely available pre-trained weights that work well across diverse tasks. EfficientNet matters when deployment efficiency is critical, carefully balancing depth, width, and resolution for optimal accuracy per parameter. MobileNet and EfficientNet-Lite serve mobile and edge devices, sacrificing some accuracy for fast inference and small model size. Vision Transformer (ViT) excels when you have large datasets (millions of images) and substantial compute, delivering state-of-the-art accuracy on challenging benchmarks. Swin Transformer provides Transformer benefits with more reasonable compute requirements, proving especially good for dense prediction tasks.
 
 Start with ResNet-50. It provides strong performance across almost all applications. Optimize later if specific constraints (speed, memory, accuracy) demand it.
 

@@ -17,20 +17,9 @@ Let's explore how this worked by examining edge detection, one of the fundamenta
 
 What makes an edge visible to human eyes? The answer is sudden changes in brightness. An edge appears when neighboring pixels have significantly different intensity values.
 
-Consider a small 6×6 image with a bright vertical line:
+Recall from Part 1 the small 6×6 grayscale image with a bright vertical line in the third column (values of 80) surrounded by dark pixels (values of 10). How do we detect that vertical edge?
 
-$$
-X = \begin{bmatrix}
-10 & 10 & 80 & 10 & 10 & 10 \\
-10 & 10 & 80 & 10 & 10 & 10 \\
-10 & 10 & 80 & 10 & 10 & 10 \\
-10 & 10 & 80 & 10 & 10 & 10 \\
-10 & 10 & 80 & 10 & 10 & 10 \\
-10 & 10 & 80 & 10 & 10 & 10
-\end{bmatrix}
-$$
-
-How do we detect the vertical edge in the third column? We can approximate the horizontal derivative by subtracting the right neighbor from the left neighbor at each position. For the central pixel, this looks like:
+We can approximate the horizontal derivative by subtracting the right neighbor from the left neighbor at each position. For the central pixel, this looks like:
 
 $$
 \nabla Z_{22} = Z_{2,1} - Z_{2,3}
@@ -145,7 +134,13 @@ This means we can perform convolution by:
 2. Multiplying them element-wise in the frequency domain
 3. Taking the inverse Fourier transform to get back to the spatial domain
 
-For large images, this approach can be computationally faster than direct convolution. For a beautiful visual explanation of Fourier transforms, watch 3Blue1Brown's video: [But what is the Fourier Transform?](https://www.youtube.com/watch?v=spUNpyF58BY)
+For large images, this approach can be computationally faster than direct convolution.
+
+::: {.column-margin}
+<iframe width="100%" height="150" src="https://www.youtube.com/embed/spUNpyF58BY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+3Blue1Brown's beautiful visual explanation of the Fourier Transform
+:::
 
 ### The Fundamental Limitation
 
@@ -410,11 +405,7 @@ name: relu-vs-sigmoid
 Sigmoid saturates for large inputs (gradient approaches zero), while ReLU maintains constant gradient for positive inputs.
 ```
 
-ReLU offers critical advantages:
-
-- **No vanishing gradient** for positive inputs (gradient is exactly 1)
-- **Computationally cheap** (just compare to zero)
-- **Sparse activation** (many neurons output zero, creating efficient representations)
+ReLU offers critical advantages. First, there is no vanishing gradient for positive inputs, where the gradient is exactly 1. Second, the operation is computationally cheap, requiring only a comparison to zero. Third, ReLU creates sparse activation, where many neurons output zero, leading to efficient representations.
 
 The drawback is that neurons can "die" if they always receive negative inputs, never activating again. Variants like Leaky ReLU introduce a small slope for negative inputs to mitigate this:
 
@@ -452,19 +443,13 @@ This wasn't just an implementation detail. It showed that deep learning required
 
 ### Key Innovation 4: Data Augmentation
 
-To combat overfitting with limited training data, AlexNet applied aggressive data augmentation:
-
-- Random crops of 224×224 patches from 256×256 images
-- Horizontal flips
-- Color and lighting perturbations (PCA-based color jittering)
-
-These transformations artificially expanded the training set, teaching the network to recognize objects regardless of position, orientation, or lighting conditions.
+To combat overfitting with limited training data, AlexNet applied aggressive data augmentation. The team used random crops of 224×224 patches from 256×256 images, horizontal flips, and color and lighting perturbations through PCA-based color jittering. These transformations artificially expanded the training set, teaching the network to recognize objects regardless of position, orientation, or lighting conditions.
 
 ### The Architecture
 
 AlexNet consists of five convolutional layers followed by three fully connected layers:
 
-```{figure} ../archive/figs/alexnet-architecture.jpg
+```{figure} ../figs/alexnet-architecture.jpg
 ---
 width: 70%
 align: center
@@ -473,17 +458,7 @@ name: alexnet-architecture
 AlexNet architecture with 5 convolutional layers and 3 fully connected layers. The network was split across two GPUs.
 ```
 
-**Layer-by-layer breakdown:**
-
-1. **Input**: 224×224 RGB image (3 channels)
-2. **Conv1**: 96 filters of 11×11, stride 4 → ReLU → Max Pool (3×3, stride 2)
-3. **Conv2**: 256 filters of 5×5 → ReLU → Max Pool (3×3, stride 2)
-4. **Conv3**: 384 filters of 3×3 → ReLU
-5. **Conv4**: 384 filters of 3×3 → ReLU
-6. **Conv5**: 256 filters of 3×3 → ReLU → Max Pool (3×3, stride 2)
-7. **FC6**: 4096 neurons → ReLU → Dropout
-8. **FC7**: 4096 neurons → ReLU → Dropout
-9. **FC8**: 1000 neurons (class scores) → Softmax
+The architecture processes a 224×224 RGB image through the following layers. Conv1 applies 96 filters of 11×11 with stride 4, followed by ReLU and max pooling (3×3, stride 2). Conv2 uses 256 filters of 5×5 with ReLU and max pooling. Conv3, Conv4, and Conv5 apply 384, 384, and 256 filters respectively using 3×3 kernels, with the final convolutional layer followed by max pooling. Three fully connected layers complete the network: FC6 and FC7 each contain 4096 neurons with ReLU and Dropout, while FC8 outputs 1000 class scores through Softmax.
 
 The network has approximately 60 million parameters. The first convolutional layer uses large 11×11 filters with stride 4 to rapidly reduce spatial dimensions. Later layers use smaller 3×3 filters to refine features.
 
@@ -550,12 +525,7 @@ alexnet = models.alexnet(pretrained=True)
 
 ## Why AlexNet Was a Paradigm Shift
 
-AlexNet proved several critical points:
-
-1. **Depth matters**: Deeper networks learn more powerful representations
-2. **Data scale matters**: Large datasets (ImageNet's 1.2M images) enable better learning
-3. **Compute matters**: GPUs make training deep networks practical
-4. **Learned features win**: Automated feature learning beats hand-crafted features
+AlexNet proved several critical points. Depth matters: deeper networks learn more powerful representations. Data scale matters: large datasets like ImageNet's 1.2M images enable better learning. Compute matters: GPUs make training deep networks practical. Learned features win: automated feature learning beats hand-crafted features.
 
 Before AlexNet, these points were debated. After AlexNet, they became accepted wisdom. The deep learning revolution had begun.
 
