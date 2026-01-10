@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2025-11-24">
+<meta name="dcterms.date" content="2026-01-10">
 
 <title>Visualizing One-Dimensional Data: Show Me the Data! – Applied Soft Computing</title>
 <style>
@@ -957,7 +957,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 24, 2025</p>
+      <p class="date">January 10, 2026</p>
     </div>
   </div>
   
@@ -969,6 +969,19 @@ window.Quarto = {
 </header>
 
 
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+What you’ll learn in this module
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This module teaches you how to visualize one-dimensional data honestly and clearly. You’ll discover why hiding raw data behind summary statistics is misleading, learn practical tools like swarm plots and kernel density estimation, and understand how to choose the right visualization for your dataset’s size and characteristics.</p>
+</div>
+</div>
 <section id="the-case-of-the-missing-data-points" class="level2">
 <h2 class="anchored" data-anchor-id="the-case-of-the-missing-data-points">The Case of the Missing Data Points</h2>
 <p>Imagine you’re reading a research paper that claims “Treatment A is significantly better than Treatment B.” The paper shows a bar chart with two bars and error bars. The difference looks impressive. But here’s the question: what does the actual data look like? Are there 5 data points per group? 500? Are they normally distributed, or are there outliers? Are most points clustered together, or spread out?</p>
@@ -1007,7 +1020,7 @@ window.Quarto = {
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>sns.swarmplot(data<span class="op">=</span>data, x<span class="op">=</span><span class="st">'Group'</span>, y<span class="op">=</span><span class="st">'Value'</span>)</span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Swarm Plot: Every Point Visible'</span>)</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Swarm plots are perfect for small to moderate datasets (roughly up to 100-200 points per group). They let you see: - The actual sample size - The distribution shape - Individual outliers - The spread of the data</p>
+<p>Swarm plots are perfect for small to moderate datasets (roughly up to 100-200 points per group). They let you see the actual sample size, so you know how much data went into each group. You can immediately perceive the distribution shape, spotting whether your data is symmetric, skewed, or bimodal. Individual outliers jump out visually, rather than being hidden in summary statistics. And you can see the overall spread of the data with a single glance.</p>
 </section>
 <section id="the-limits-of-swarm-plots" class="level3">
 <h3 class="anchored" data-anchor-id="the-limits-of-swarm-plots">The Limits of Swarm Plots</h3>
@@ -1023,7 +1036,7 @@ window.Quarto = {
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>sns.stripplot(data<span class="op">=</span>data, x<span class="op">=</span><span class="st">'Group'</span>, y<span class="op">=</span><span class="st">'Value'</span>, alpha<span class="op">=</span><span class="fl">0.6</span>, jitter<span class="op">=</span><span class="fl">0.2</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Strip Plot with Jittering'</span>)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The key parameters: - <code>alpha</code>: Controls transparency (0 = invisible, 1 = opaque). Values around 0.3-0.7 work well. - <code>jitter</code>: Amount of random horizontal displacement. Too much jitter and groups overlap; too little and points stack vertically.</p>
+<p>Two key parameters control the appearance. The <code>alpha</code> parameter controls transparency (0 = invisible, 1 = opaque), and values around 0.3-0.7 work well to see overlapping points. The <code>jitter</code> parameter controls the amount of random horizontal displacement. Too much jitter and your groups start to overlap and become confusing, while too little and points stack vertically in dense columns.</p>
 </section>
 <section id="barcode-plots-rug-plots" class="level3">
 <h3 class="anchored" data-anchor-id="barcode-plots-rug-plots">Barcode Plots (Rug Plots)</h3>
@@ -1055,7 +1068,7 @@ window.Quarto = {
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <section id="the-art-of-choosing-bins" class="level3">
 <h3 class="anchored" data-anchor-id="the-art-of-choosing-bins">The Art of Choosing Bins</h3>
-<p>The number of bins dramatically affects how your histogram looks: - <strong>Too few bins</strong>: You lose detail and might miss important features like bimodality - <strong>Too many bins</strong>: The histogram becomes noisy and hard to interpret</p>
+<p>The number of bins dramatically affects how your histogram looks. With too few bins, you lose detail and might miss important features like bimodality. With too many bins, the histogram becomes noisy and hard to interpret.</p>
 <p>A good starting point is the <strong>Sturges’ rule</strong>: number of bins H <span class="math inline">\log_2(n) + 1</span>, where <span class="math inline">n</span> is the sample size. But always experiment! Try different bin numbers and see what reveals the most about your data’s structure.</p>
 </section>
 </section>
@@ -1096,12 +1109,12 @@ window.Quarto = {
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Cumulative Distribution Function'</span>)</span>
 <span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
 <span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The CDF has several advantages: - <strong>No binning decisions</strong>: Every data point is shown - <strong>Easy to read percentiles</strong>: The median is where CDF = 0.5 - <strong>Great for comparisons</strong>: Differences between groups are easy to spot</p>
+<p>The CDF has several advantages. First, there are no binning decisions to make, so every data point is effectively shown. Second, percentiles are easy to read: the median is where CDF = 0.5, and any other percentile is easy to find. Third, it’s great for comparisons because differences between groups are easy to spot visually.</p>
 </section>
 <section id="complementary-cumulative-distribution-function-ccdf" class="level3">
 <h3 class="anchored" data-anchor-id="complementary-cumulative-distribution-function-ccdf">Complementary Cumulative Distribution Function (CCDF)</h3>
 <p>For heavy-tailed distributions, the <strong>complementary cumulative distribution function (CCDF)</strong> is even more useful. The CCDF shows the proportion of data points <em>greater than</em> each value: CCDF(x) = 1 - CDF(x).</p>
-<p>The magic of the CCDF is that when plotted on a log-log scale, power-law distributions appear as straight lines. This makes it the go-to tool for studying phenomena like: - Income and wealth distributions - City size distributions - Social network degree distributions - Earthquake magnitudes</p>
+<p>The magic of the CCDF is that when plotted on a log-log scale, power-law distributions appear as straight lines. This makes it the go-to tool for studying phenomena with power-law behavior. Think income and wealth distributions, city size distributions, social network degree distributions, and earthquake magnitudes. All of these follow power-law patterns where the tail is as important as the bulk of the distribution.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># CCDF on log-log scale</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate heavy-tailed data</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>heavy_tailed <span class="op">=</span> np.random.pareto(<span class="dv">2</span>, <span class="dv">1000</span>) <span class="op">+</span> <span class="dv">1</span></span>

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2026-01-09">
+<meta name="dcterms.date" content="2026-01-10">
 
 <title>High-Dimensional Data Visualization – Applied Soft Computing</title>
 <style>
@@ -151,7 +151,7 @@ window.Quarto = {
 <link rel="stylesheet" href="../assets/custom.css">
 </head>
 
-<body class="nav-sidebar docked nav-fixed slimcontent quarto-light">
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -934,10 +934,9 @@ window.Quarto = {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-    </div>
+    
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../m02-visualization/overview.html">Module 2: Visualizing Complexity</a></li><li class="breadcrumb-item"><a href="../m02-visualization/highd-data.html">Visualizing High-Dimensional Data</a></li></ol></nav>
 <div class="quarto-title">
@@ -958,7 +957,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">January 9, 2026</p>
+      <p class="date">January 10, 2026</p>
     </div>
   </div>
   
@@ -970,17 +969,30 @@ window.Quarto = {
 </header>
 
 
-<p>Imagine you’re analyzing data with 50 features per observation: gene expression levels, user behavior metrics, or environmental measurements. You want to understand the patterns in your data. How do different observations relate to each other? Are there clusters? Outliers?</p>
-<p>You can’t plot 50 dimensions directly. Our visual system lives in three dimensions (or really, two dimensions on a screen). This creates a fundamental challenge: <strong>how do you visualize data that lives in spaces you cannot see?</strong></p>
-<p>The answer is dimensionality reduction—projecting high-dimensional data into 2 or 3 dimensions while preserving important structure. But here’s the critical question: <strong>what structure matters?</strong></p>
-<p>Different methods preserve different aspects of your data. Some preserve global structure (how groups relate to each other across the entire dataset). Others preserve local structure (which points are nearest neighbors). Understanding these trade-offs is essential for choosing the right method—and for not being misled by beautiful but misleading visualizations.</p>
-<section id="the-curse-of-dimensionality" class="level1">
-<h1>The Curse of Dimensionality</h1>
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+What you’ll learn in this module
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This module introduces dimensionality reduction, a fundamental technique for visualizing and understanding high-dimensional data. We will explore the curse of dimensionality that makes high-dimensional space counterintuitive, examine linear methods like PCA that preserve global structure, investigate non-linear methods like t-SNE and UMAP that reveal local patterns, and understand the trade-offs between different approaches to choosing the right visualization strategy for your data.</p>
+</div>
+</div>
+<p>Imagine you’re analyzing data with 50 features per observation. Gene expression levels, user behavior metrics, environmental measurements. You want to understand the patterns in your data. How do different observations relate to each other? Are there clusters? Outliers?</p>
+<p>Here’s the fundamental problem: you can’t plot 50 dimensions directly. Our visual system lives in three dimensions, or really two dimensions on a screen. This creates a core challenge: how do you visualize data that lives in spaces you cannot see?</p>
+<p>The answer is dimensionality reduction. This technique projects high-dimensional data into 2 or 3 dimensions while preserving important structure. But here’s the critical question: what structure matters?</p>
+<p>Different methods preserve different aspects of your data. Some preserve global structure, showing how groups relate to each other across the entire dataset. Others preserve local structure, highlighting which points are nearest neighbors. Understanding these trade-offs is essential for choosing the right method and avoiding beautiful but misleading visualizations.</p>
+<section id="the-curse-of-dimensionality" class="level2">
+<h2 class="anchored" data-anchor-id="the-curse-of-dimensionality">The Curse of Dimensionality</h2>
 <p>Before we dive into methods, we need to understand what makes high-dimensional data fundamentally different.</p>
-<p>In high dimensions, <strong>everything is far from everything else</strong>. This sounds paradoxical, but it’s mathematically inevitable. As dimensions increase, the volume of space grows exponentially, and data points become increasingly sparse.</p>
-<p>Consider this: in 1D, if you have 10 points uniformly distributed in [0, 1], the average distance between neighbors is about 0.1. To maintain the same density in 2D, you need 100 points. In 3D, you need 1,000 points. In 10D, you need 10 billion points.</p>
-<p>Even stranger: in high dimensions, <strong>all distances become similar</strong>. The nearest and farthest neighbors become roughly equidistant. This makes many of our intuitions about “closeness” break down.</p>
-<div id="1b5d06c9" class="cell" data-fig-height="5" data-fig-width="10" data-execution_count="1">
+<p>In high dimensions, everything is far from everything else. This sounds paradoxical, but it’s mathematically inevitable. As dimensions increase, the volume of space grows exponentially, and data points become increasingly sparse.</p>
+<p>Consider this simple fact: in 1D, if you have 10 points uniformly distributed in [0, 1], the average distance between neighbors is about 0.1. To maintain the same density in 2D, you need 100 points. In 3D, you need 1,000 points. In 10D, you need 10 billion points.</p>
+<p>Even stranger than the sparsity is what happens to distances. In high dimensions, all distances become similar. The nearest and farthest neighbors become roughly equidistant. This makes many of our intuitions about “closeness” break down.</p>
+<div id="25c680ff" class="cell" data-fig-height="5" data-fig-width="10" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -1040,12 +1052,13 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>In order words, dimensionality reduction is useful not just for visualization, but also for analysis. For example, when you want to cluster data points, every point is equidistant from every other point, so you can’t cluster them. By projecting the data into lower dimensions, you can remedy this curse of dimensionality.</p>
+<p>The plot shows a striking pattern. As dimensions increase, the ratio of nearest to farthest distance gets closer to 1. At 200 dimensions, nearly every point is equally far from every other point.</p>
+<p>This curse of dimensionality is useful not just for visualization, but also for analysis. When you want to cluster data points, every point becomes equidistant from every other point, making clustering impossible. By projecting the data into lower dimensions, you can remedy this problem.</p>
 </section>
-<section id="pairwise-scatter-plots-the-brute-force-approach" class="level1">
-<h1>Pairwise Scatter Plots: The Brute Force Approach</h1>
-<p>When you have a <strong>moderate number of dimensions</strong> (roughly 3-10), you can visualize all pairwise relationships using a <strong>scatter plot matrix</strong> (also called a pairs plot or SPLOM).</p>
-<div id="8003f73e" class="cell" data-fig-height="14" data-fig-width="14" data-execution_count="2">
+<section id="pairwise-scatter-plots-the-brute-force-approach" class="level2">
+<h2 class="anchored" data-anchor-id="pairwise-scatter-plots-the-brute-force-approach">Pairwise Scatter Plots: The Brute Force Approach</h2>
+<p>When you have a moderate number of dimensions (roughly 3 to 10), you can visualize all pairwise relationships using a scatter plot matrix, also called a pairs plot or SPLOM.</p>
+<div id="62409da1" class="cell" data-fig-height="14" data-fig-width="14" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load classic iris dataset (4 dimensions)</span></span>
@@ -1077,16 +1090,16 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>The scatter plot matrix shows every possible 2D projection. The diagonal shows the univariate distribution of each feature (using KDE here), and off-diagonals show bivariate scatter plots.</p>
-<p>The problem: scatter plot matrices don’t scale. With 10 variables, you have 45 unique pairwise plots—manageable but crowded. With 20 variables, you have 190 plots—overwhelming. And you’re still only seeing 2D projections, never the full high-dimensional structure.</p>
-<p>This is where dimensionality reduction becomes essential.</p>
+<p>The scatter plot matrix shows every possible 2D projection. The diagonal displays the univariate distribution of each feature using KDE, while off-diagonals show bivariate scatter plots. This gives you a complete view of pairwise relationships.</p>
+<p>The problem is clear: scatter plot matrices don’t scale. With 10 variables, you have 45 unique pairwise plots, which is manageable but crowded. With 20 variables, you have 190 plots, which becomes overwhelming. And you’re still only seeing 2D projections, never the full high-dimensional structure.</p>
+<p>This is where dimensionality reduction becomes essential. Instead of looking at every pairwise combination, we project the data intelligently onto just 2 or 3 dimensions.</p>
 </section>
-<section id="linear-dimensionality-reduction-pca" class="level1 page-columns page-full">
-<h1>Linear Dimensionality Reduction: PCA</h1>
-<p><strong>Principal Component Analysis (PCA)</strong> is a linear dimensionality reduction method that finds the directions of maximum variance in your data.</p>
-<p>Imagine you have a cloud of points in high-dimensional space. PCA asks: “What direction captures the most variation in the data?” This becomes the first principal component (PC1). Then it asks: “What direction, perpendicular to the first, captures the most remaining variation?” This becomes PC2. And so on.</p>
-<p>Mathematically, PCA finds the eigenvectors of the covariance matrix. But conceptually, it’s rotating your coordinate system to align with the the highest variance directions of your data.</p>
-<div id="ba4dca71" class="cell" data-fig-height="6" data-fig-width="10" data-execution_count="3">
+<section id="linear-dimensionality-reduction-pca" class="level2">
+<h2 class="anchored" data-anchor-id="linear-dimensionality-reduction-pca">Linear Dimensionality Reduction: PCA</h2>
+<p>Principal Component Analysis (PCA) is a linear dimensionality reduction method that finds the directions of maximum variance in your data.</p>
+<p>Imagine you have a cloud of points in high-dimensional space. PCA asks a simple question: what direction captures the most variation in the data? This becomes the first principal component (PC1). Then it asks: what direction, perpendicular to the first, captures the most remaining variation? This becomes PC2. And so on.</p>
+<p>Mathematically, PCA finds the eigenvectors of the covariance matrix. But conceptually, it’s rotating your coordinate system to align with the highest variance directions of your data.</p>
+<div id="b729f563" class="cell" data-fig-height="6" data-fig-width="10" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
@@ -1131,12 +1144,11 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>PC1 (orange arrow) points along the direction of greatest spread. PC2 (green arrow) is perpendicular and captures the remaining variation.</p>
-<p>The percentage in parentheses shows how much variance each component explains. If PC1 explains 90% of variance, then projecting onto just PC1 preserves most of your data’s structure.</p>
-<section id="applying-pca-to-iris" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="applying-pca-to-iris">Applying PCA to Iris</h2>
-<p>Let’s apply PCA to the 4-dimensional Iris dataset:</p>
-<div id="9b69c812" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="4">
+<p>PC1 (orange arrow) points along the direction of greatest spread. PC2 (green arrow) is perpendicular and captures the remaining variation. The percentage in parentheses shows how much variance each component explains. If PC1 explains 90 percent of variance, then projecting onto just PC1 preserves most of your data’s structure.</p>
+<section id="applying-pca-to-iris" class="level3">
+<h3 class="anchored" data-anchor-id="applying-pca-to-iris">Applying PCA to Iris</h3>
+<p>Let’s apply PCA to the 4-dimensional Iris dataset and see how much information we can preserve in just 2 dimensions.</p>
+<div id="71b4bbf5" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare data</span></span>
@@ -1193,19 +1205,16 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>PC1 and PC2 together explain over 95% of the variance in the 4D dataset. The 2D projection preserves the main structure: setosa is well-separated, while versicolor and virginica have some overlap.</p>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<p><strong>Always standardize before PCA!</strong> If features have different units or scales, PCA will be dominated by high-variance features. Standardization (zero mean, unit variance) ensures all features contribute fairly.</p>
-</div></div></section>
+<p>PC1 and PC2 together explain over 95 percent of the variance in the 4D dataset. The 2D projection preserves the main structure beautifully: setosa is well-separated, while versicolor and virginica have some overlap, just as they do in the original high-dimensional space.</p>
+<p>A critical reminder: always standardize before PCA. If features have different units or scales, PCA will be dominated by high-variance features. Standardization (zero mean, unit variance) ensures all features contribute fairly to the analysis.</p>
 </section>
-<section id="non-linear-dimensionality-reduction-mds" class="level1 page-columns page-full">
-<h1>Non-Linear Dimensionality Reduction: MDS</h1>
-<p><strong>Multidimensional Scaling (MDS)</strong> takes a different approach: instead of finding directions of maximum variance, it tries to <strong>preserve distances between points</strong>.</p>
-<p>You give MDS a distance matrix—the distance between every pair of points in high-dimensional space—and it finds a low-dimensional configuration where those distances are preserved as well as possible.</p>
-<p>Think of it like arranging cities on a map. You know the distance between every pair of cities, but not their coordinates. MDS finds positions that preserve those distances.</p>
-<p>Mathematically, MDS minimizes <strong>stress</strong>: the difference between high-dimensional distances and low-dimensional distances. Classical MDS has a closed-form solution (like PCA), but more flexible variants use iterative optimization.</p>
-<div id="83dfdbc1" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="5">
+</section>
+<section id="non-linear-dimensionality-reduction-mds" class="level2">
+<h2 class="anchored" data-anchor-id="non-linear-dimensionality-reduction-mds">Non-Linear Dimensionality Reduction: MDS</h2>
+<p>Multidimensional Scaling (MDS) takes a different approach than PCA. Instead of finding directions of maximum variance, it tries to preserve distances between points.</p>
+<p>You give MDS a distance matrix showing the distance between every pair of points in high-dimensional space. MDS then finds a low-dimensional configuration where those distances are preserved as well as possible.</p>
+<p>Think of it like arranging cities on a map. You know the distance between every pair of cities, but not their coordinates. MDS finds positions that preserve those distances. Mathematically, MDS minimizes stress, the difference between high-dimensional distances and low-dimensional distances. Classical MDS has a closed-form solution like PCA, but more flexible variants use iterative optimization.</p>
+<div id="78b3f79f" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.manifold <span class="im">import</span> MDS</span>
@@ -1255,22 +1264,14 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>For the Iris dataset, PCA and MDS look very similar. This is because Iris data is fairly linear—the relationships between features don’t involve complex curves or non-linear structures.</p>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<p><strong>Why MDS isn’t perfect here:</strong> The S-curve has points that are close in Euclidean distance (across the bend) but far apart along the curved surface. MDS tries to preserve both types of distances, creating a compromise that partially straightens the curve but doesn’t fully recover the underlying smooth 1D gradient.</p>
-</div></div></section>
-<section id="isomap-preserving-geodesic-distances" class="level1">
-<h1>Isomap: Preserving Geodesic Distances</h1>
-<p>MDS preserves Euclidean distances—straight-line distances through space. But for curved manifolds, what matters is the <strong>geodesic distance</strong>: the distance along the surface.</p>
-<p><strong>Isomap</strong> (Isometric Mapping) addresses this by approximating geodesic distances using the neighborhood graph:</p>
-<ol type="1">
-<li><strong>Build a neighborhood graph</strong>: Connect each point to its k nearest neighbors</li>
-<li><strong>Compute shortest paths</strong>: The geodesic distance between points is approximated by the shortest path through this graph</li>
-<li><strong>Apply classical MDS</strong>: Use MDS on these geodesic distances instead of Euclidean distances</li>
-</ol>
+<p>For the Iris dataset, PCA and MDS look very similar. This is because Iris data is fairly linear. The relationships between features don’t involve complex curves or non-linear structures that would cause MDS to differ significantly from PCA.</p>
+</section>
+<section id="isomap-preserving-geodesic-distances" class="level2">
+<h2 class="anchored" data-anchor-id="isomap-preserving-geodesic-distances">Isomap: Preserving Geodesic Distances</h2>
+<p>MDS preserves Euclidean distances, which are straight-line distances through space. But for curved manifolds, what matters is the geodesic distance: the distance along the surface.</p>
+<p>Isomap (Isometric Mapping) addresses this by approximating geodesic distances using the neighborhood graph. The approach is elegant. First, build a neighborhood graph by connecting each point to its k nearest neighbors. Second, compute shortest paths through this graph. The geodesic distance between points is approximated by the shortest path. Third, apply classical MDS using these geodesic distances instead of Euclidean distances.</p>
 <p>Think of it like this: MDS measures distance “as the crow flies,” while Isomap measures distance “as you walk along the surface.”</p>
-<div id="61c427b4" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="6">
+<div id="7215c809" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.manifold <span class="im">import</span> Isomap</span>
@@ -1318,37 +1319,18 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Isomap successfully “straightens” the S-curve because it respects the manifold structure. By computing distances along the neighborhood graph, it avoids the shortcuts across the bend that confused MDS.</p>
-<p><strong>The key parameter: n_neighbors</strong> - <strong>Too few neighbors</strong>: Graph becomes disconnected, distances become infinite - <strong>Too many neighbors</strong>: You create shortcuts across the manifold, reverting to MDS-like behavior - <strong>Just right (5-15 typically)</strong>: Captures local manifold structure</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Global vs Local: A fundamental trade-off
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>We now see two extremes: - <strong>MDS</strong>: Preserves all pairwise distances globally (works on linear/convex data) - <strong>Isomap</strong>: Preserves geodesic distances using local neighborhoods (works on curved manifolds)</p>
-<p>But what if we <strong>only care about local structure</strong>? What if global relationships don’t matter?</p>
-</div>
-</div>
+<p>Isomap successfully “straightens” the S-curve because it respects the manifold structure. By computing distances along the neighborhood graph, it avoids the shortcuts across the bend that confused MDS. The key parameter is n_neighbors. Too few neighbors and the graph becomes disconnected with infinite distances. Too many neighbors and you create shortcuts across the manifold, reverting to MDS-like behavior. Getting it just right, typically 5 to 15, captures the local manifold structure perfectly.</p>
+<p>Now we see two extremes emerging. MDS preserves all pairwise distances globally, which works on linear or convex data. Isomap preserves geodesic distances using local neighborhoods, which works on curved manifolds. But what if we only care about local structure? What if global relationships don’t matter for our purposes?</p>
 </section>
-<section id="modern-non-linear-methods-t-sne-and-umap" class="level1 page-columns page-full">
-<h1>Modern Non-Linear Methods: t-SNE and UMAP</h1>
-<p>Both <strong>t-SNE</strong> (t-Distributed Stochastic Neighbor Embedding) and <strong>UMAP</strong> (Uniform Manifold Approximation and Projection) take a middle ground between MDS’s global approach and Isomap’s geodesic approach: they <strong>prioritize local structure</strong> while allowing some flexibility in global positioning.</p>
-<p>The key insight: for visualization, we often care most about <strong>which points are neighbors</strong>. Whether distant clusters are placed left vs right, or how far apart they are, matters less than preserving the local neighborhood relationships within and between clusters.</p>
-<section id="how-t-sne-works" class="level2">
-<h2 class="anchored" data-anchor-id="how-t-sne-works">How t-SNE works</h2>
-<p>t-SNE converts distances into similarity probabilities and preserves these local relationships:</p>
-<ol type="1">
-<li><strong>In high dimensions</strong>: Define probability <span class="math inline">p_{ij}</span> that point <span class="math inline">i</span> picks point <span class="math inline">j</span> as a neighbor (based on Gaussian distance)</li>
-<li><strong>In low dimensions</strong>: Define similar probability <span class="math inline">q_{ij}</span> using a t-distribution with heavy tails</li>
-<li><strong>Optimize</strong>: Move points in 2D to make <span class="math inline">q_{ij}</span> match <span class="math inline">p_{ij}</span> (minimize KL divergence)</li>
-</ol>
-<p>The t-distribution’s heavy tails are clever: they let well-separated clusters spread out in 2D without overlapping, while keeping local neighborhoods tight.</p>
-<div id="a9951ae7" class="cell" data-fig-height="5" data-fig-width="15" data-execution_count="7">
+<section id="modern-non-linear-methods-t-sne-and-umap" class="level2">
+<h2 class="anchored" data-anchor-id="modern-non-linear-methods-t-sne-and-umap">Modern Non-Linear Methods: t-SNE and UMAP</h2>
+<p>Both t-SNE (t-Distributed Stochastic Neighbor Embedding) and UMAP (Uniform Manifold Approximation and Projection) take a middle ground between MDS’s global approach and Isomap’s geodesic approach. They prioritize local structure while allowing some flexibility in global positioning.</p>
+<p>The key insight is simple: for visualization, we often care most about which points are neighbors. Whether distant clusters are placed left versus right, or how far apart they are, matters less than preserving the local neighborhood relationships within and between clusters.</p>
+<section id="how-t-sne-works" class="level3">
+<h3 class="anchored" data-anchor-id="how-t-sne-works">How t-SNE works</h3>
+<p>t-SNE converts distances into similarity probabilities and preserves these local relationships. In high dimensions, we define probability <span class="math inline">p_{ij}</span> that point <span class="math inline">i</span> picks point <span class="math inline">j</span> as a neighbor, based on a Gaussian distance. In low dimensions, we define similar probability <span class="math inline">q_{ij}</span> using a t-distribution with heavy tails. Then we optimize by moving points in 2D to make <span class="math inline">q_{ij}</span> match <span class="math inline">p_{ij}</span>, minimizing KL divergence.</p>
+<p>The t-distribution’s heavy tails are clever. They let well-separated clusters spread out in 2D without overlapping, while keeping local neighborhoods tight.</p>
+<div id="19c4df0e" class="cell" data-fig-height="5" data-fig-width="15" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.manifold <span class="im">import</span> TSNE</span>
@@ -1395,41 +1377,25 @@ Global vs Local: A fundamental trade-off
 </div>
 </div>
 </div>
-<p>All three methods successfully straighten the S-curve, but through different philosophies: MDS compromises between all distances, Isomap follows the manifold globally, and t-SNE focuses on preserving neighborhoods.</p>
+<p>All three methods successfully straighten the S-curve, but through different philosophies. MDS compromises between all distances. Isomap follows the manifold globally. t-SNE focuses on preserving neighborhoods. Each makes different trade-offs between local and global structure.</p>
+<p>The key parameter in t-SNE is perplexity, which typically ranges from 30 to 50. Perplexity controls the effective neighborhood size. Too low perplexity fragments clusters. Too high perplexity loses local detail. Finding the right balance is important.</p>
 </section>
-<section id="key-parameter-perplexity" class="level2">
-<h2 class="anchored" data-anchor-id="key-parameter-perplexity">Key parameter: Perplexity</h2>
-<p><strong>Perplexity</strong> (typically 30-50) controls the effective neighborhood size. Too low fragments clusters; too high loses local detail.</p>
+<section id="what-t-sne-preserves-and-what-it-doesnt" class="level3">
+<h3 class="anchored" data-anchor-id="what-t-sne-preserves-and-what-it-doesnt">What t-SNE preserves (and what it doesn’t)</h3>
+<p>t-SNE is powerful but has important limitations. It preserves local structure, keeping points that are neighbors in high dimensions as neighbors in 2D. It preserves clusters, keeping well-separated groups separated. It preserves relative relationships within neighborhoods, so if A is closer to B than to C locally, this is preserved.</p>
+<p>What t-SNE does NOT preserve: the actual distance between points is not meaningful. The relative position of distant clusters is arbitrary. Large clusters may appear smaller, and vice versa. Tight clusters may be spread out, and sparse regions may appear dense.</p>
+<p>You cannot conclude from a t-SNE plot that “cluster A is twice as far from B as from C.” Distances are not preserved. You cannot conclude that “cluster A is twice the size of B.” Sizes are not preserved. You cannot conclude that “the data has exactly 5 clusters.” Apparent clusters may be visualization artifacts.</p>
+<p>You can conclude that “these points form a distinct group separate from others.” You can conclude that “these points are more similar to each other than to distant points.” You can conclude that “the data has local structure and is not uniformly random.”</p>
 </section>
-<section id="what-t-sne-preserves-and-what-it-doesnt" class="level2">
-<h2 class="anchored" data-anchor-id="what-t-sne-preserves-and-what-it-doesnt">What t-SNE preserves (and what it doesn’t)</h2>
-<p>t-SNE is powerful but has important limitations:</p>
-<p><strong>What t-SNE preserves:</strong> -  <strong>Local structure</strong>: Points that are neighbors in high dimensions stay neighbors in 2D -  <strong>Clusters</strong>: Well-separated groups remain separated -  <strong>Relative relationships within neighborhoods</strong>: If A is closer to B than to C locally, this is preserved</p>
-<p><strong>What t-SNE does NOT preserve:</strong> -  <strong>Distances</strong>: The actual distance between points is not meaningful -  <strong>Global structure</strong>: The relative position of distant clusters is arbitrary -  <strong>Cluster sizes</strong>: Large clusters may appear smaller, and vice versa -  <strong>Density</strong>: Tight clusters may be spread out; sparse regions may appear dense</p>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Don’t over-interpret t-SNE!
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><strong>You cannot conclude</strong> from a t-SNE plot: - “Cluster A is twice as far from B as from C” (distances are not preserved) - “Cluster A is twice the size of B” (sizes are not preserved) - “The data has exactly 5 clusters” (apparent clusters may be visualization artifacts)</p>
-<p><strong>You can conclude:</strong> - “These points form a distinct group separate from others” - “These points are more similar to each other than to distant points” - “The data has local structure and is not uniformly random”</p>
-</div>
-</div>
-</section>
-<section id="applying-t-sne-to-real-data" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="applying-t-sne-to-real-data">Applying t-SNE to real data</h2>
-<p>Let’s apply t-SNE to a more realistic high-dimensional dataset—the MNIST digits dataset, which has 784 dimensions (28�28 pixel images):</p>
-<div id="ca8ac492" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="8">
+<section id="applying-t-sne-to-real-data" class="level3">
+<h3 class="anchored" data-anchor-id="applying-t-sne-to-real-data">Applying t-SNE to real data</h3>
+<p>Let’s apply t-SNE to a more realistic high-dimensional dataset: the digits dataset, which has 64 dimensions (8 by 8 pixel images).</p>
+<div id="0d4c4fa6" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_digits</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load digits dataset (8x8 images, 64 dimensions - a smaller version of MNIST)</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load digits dataset (8x8 images, 64 dimensions)</span></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>digits <span class="op">=</span> load_digits()</span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>X_digits <span class="op">=</span> digits.data</span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>y_digits <span class="op">=</span> digits.target</span>
@@ -1450,71 +1416,61 @@ Don’t over-interpret t-SNE!
 <span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>                     c<span class="op">=</span>y_subset, cmap<span class="op">=</span><span class="st">'tab10'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, s<span class="op">=</span><span class="dv">30</span>)</span>
 <span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'t-SNE1'</span>)</span>
 <span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'t-SNE2'</span>)</span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'t-SNE Visualization of Handwritten Digits (64D � 2D)'</span>)</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'t-SNE Visualization of Handwritten Digits (64D to 2D)'</span>)</span>
 <span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>cbar <span class="op">=</span> plt.colorbar(scatter, ax<span class="op">=</span>ax, ticks<span class="op">=</span><span class="bu">range</span>(<span class="dv">10</span>))</span>
 <span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>cbar.set_label(<span class="st">'Digit Class'</span>)</span>
 <span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>sns.despine()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stderr">
-<pre><code>/Users/skojaku-admin/Documents/projects/applied-soft-comp/.venv/lib/python3.11/site-packages/IPython/core/events.py:82: UserWarning: Glyph 65533 (\N{REPLACEMENT CHARACTER}) missing from font(s) Arial.
-  func(*args, **kwargs)
-/Users/skojaku-admin/Documents/projects/applied-soft-comp/.venv/lib/python3.11/site-packages/IPython/core/pylabtools.py:170: UserWarning: Glyph 65533 (\N{REPLACEMENT CHARACTER}) missing from font(s) Arial.
-  fig.canvas.print_figure(bytes_io, **kw)</code></pre>
-</div>
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="highd-data_files/figure-html/cell-9-output-2.png" class="img-fluid figure-img"></p>
-<figcaption>t-SNE visualization of MNIST digits (784 dimensions � 2D). Each color represents a digit class.</figcaption>
+<p><img src="highd-data_files/figure-html/cell-9-output-1.png" class="img-fluid figure-img"></p>
+<figcaption>t-SNE visualization of handwritten digits (64 dimensions to 2D). Each color represents a digit class.</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>The t-SNE projection beautifully separates most digit classes. Digits that look similar (like 3, 5, and 8, or 4 and 9) cluster near each other, while visually distinct digits (like 0 and 1) are well separated.</p>
-<p>This demonstrates t-SNE’s power: from 64 dimensions with no explicit information about what makes digits similar, t-SNE discovers the perceptual structure of handwritten digits.</p>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<p><strong>t-SNE is stochastic</strong>: Different runs produce different layouts (though cluster structure remains consistent). Always check multiple runs with different random seeds, especially for important scientific conclusions.</p>
-</div></div></section>
+<p>The t-SNE projection beautifully separates most digit classes. Digits that look similar, like 3, 5, and 8, cluster near each other. Visually distinct digits, like 0 and 1, are well separated.</p>
+<p>This demonstrates t-SNE’s power. From 64 dimensions with no explicit information about what makes digits similar, t-SNE discovers the perceptual structure of handwritten digits. It’s a remarkable achievement in unsupervised learning.</p>
+<p>An important note: t-SNE is stochastic. Different runs produce different layouts, though cluster structure remains consistent. Always check multiple runs with different random seeds, especially for important scientific conclusions.</p>
 </section>
-<section id="umap-a-faster-alternative" class="level1">
-<h1>UMAP: A Faster Alternative</h1>
-<p><strong>Uniform Manifold Approximation and Projection (UMAP)</strong> is a newer method (2018) that has become popular as an alternative to t-SNE. Like t-SNE, UMAP preserves local structure, but it’s based on different mathematical foundations (manifold learning and topological data analysis).</p>
-<section id="umap-vs-t-sne" class="level2">
-<h2 class="anchored" data-anchor-id="umap-vs-t-sne">UMAP vs t-SNE</h2>
-<p><strong>Advantages of UMAP:</strong> - <strong>Faster</strong>: Can be 10-100� faster than t-SNE on large datasets - <strong>Scales better</strong>: Works well on datasets with millions of points - <strong>Better global structure</strong>: Preserves more global relationships than t-SNE - <strong>Theoretically grounded</strong>: Based on Riemannian geometry and fuzzy topology</p>
-<p><strong>Trade-offs:</strong> - Less battle-tested than t-SNE (newer method) - More hyperparameters to tune (though defaults work well) - Can produce similar-looking results to t-SNE, so choice often comes down to speed</p>
-<div id="74f04bef" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="9">
+</section>
+<section id="umap-a-faster-alternative" class="level2">
+<h2 class="anchored" data-anchor-id="umap-a-faster-alternative">UMAP: A Faster Alternative</h2>
+<p>Uniform Manifold Approximation and Projection (UMAP) is a newer method from 2018 that has become popular as an alternative to t-SNE. Like t-SNE, UMAP preserves local structure, but it’s based on different mathematical foundations in manifold learning and topological data analysis.</p>
+<p>UMAP has several advantages over t-SNE. It’s faster, often 10 to 100 times faster than t-SNE on large datasets. It scales better, working well on datasets with millions of points. It preserves more global structure than t-SNE. It’s also theoretically grounded in Riemannian geometry and fuzzy topology.</p>
+<p>The trade-offs are worth noting. UMAP is less battle-tested than t-SNE since it’s newer. It has more hyperparameters to tune, though defaults work well. It often produces similar-looking results to t-SNE, so the choice often comes down to speed.</p>
+<div id="0d57f335" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> umap</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply UMAP</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>umap_model <span class="op">=</span> umap.UMAP(n_components<span class="op">=</span><span class="dv">2</span>, random_state<span class="op">=</span><span class="dv">42</span>, n_neighbors<span class="op">=</span><span class="dv">30</span>)</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>X_digits_umap <span class="op">=</span> umap_model.fit_transform(X_subset)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot comparison</span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">6</span>))</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># t-SNE</span></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>scatter <span class="op">=</span> axes[<span class="dv">0</span>].scatter(X_digits_tsne[:, <span class="dv">0</span>], X_digits_tsne[:, <span class="dv">1</span>],</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>                          c<span class="op">=</span>y_subset, cmap<span class="op">=</span><span class="st">'tab10'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, s<span class="op">=</span><span class="dv">30</span>)</span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">'t-SNE1'</span>)</span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">'t-SNE2'</span>)</span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">'t-SNE'</span>)</span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>sns.despine(ax<span class="op">=</span>axes[<span class="dv">0</span>])</span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="co"># UMAP</span></span>
-<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>scatter <span class="op">=</span> axes[<span class="dv">1</span>].scatter(X_digits_umap[:, <span class="dv">0</span>], X_digits_umap[:, <span class="dv">1</span>],</span>
-<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>                          c<span class="op">=</span>y_subset, cmap<span class="op">=</span><span class="st">'tab10'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, s<span class="op">=</span><span class="dv">30</span>)</span>
-<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">'UMAP1'</span>)</span>
-<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">'UMAP2'</span>)</span>
-<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">'UMAP'</span>)</span>
-<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>cbar <span class="op">=</span> plt.colorbar(scatter, ax<span class="op">=</span>axes[<span class="dv">1</span>], ticks<span class="op">=</span><span class="bu">range</span>(<span class="dv">10</span>))</span>
-<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>cbar.set_label(<span class="st">'Digit Class'</span>)</span>
-<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>sns.despine(ax<span class="op">=</span>axes[<span class="dv">1</span>])</span>
-<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> umap</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply UMAP</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>umap_model <span class="op">=</span> umap.UMAP(n_components<span class="op">=</span><span class="dv">2</span>, random_state<span class="op">=</span><span class="dv">42</span>, n_neighbors<span class="op">=</span><span class="dv">30</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>X_digits_umap <span class="op">=</span> umap_model.fit_transform(X_subset)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot comparison</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">6</span>))</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co"># t-SNE</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>scatter <span class="op">=</span> axes[<span class="dv">0</span>].scatter(X_digits_tsne[:, <span class="dv">0</span>], X_digits_tsne[:, <span class="dv">1</span>],</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>                          c<span class="op">=</span>y_subset, cmap<span class="op">=</span><span class="st">'tab10'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, s<span class="op">=</span><span class="dv">30</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">'t-SNE1'</span>)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">'t-SNE2'</span>)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">'t-SNE'</span>)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>sns.despine(ax<span class="op">=</span>axes[<span class="dv">0</span>])</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="co"># UMAP</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>scatter <span class="op">=</span> axes[<span class="dv">1</span>].scatter(X_digits_umap[:, <span class="dv">0</span>], X_digits_umap[:, <span class="dv">1</span>],</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>                          c<span class="op">=</span>y_subset, cmap<span class="op">=</span><span class="st">'tab10'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, s<span class="op">=</span><span class="dv">30</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">'UMAP1'</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">'UMAP2'</span>)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">'UMAP'</span>)</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>cbar <span class="op">=</span> plt.colorbar(scatter, ax<span class="op">=</span>axes[<span class="dv">1</span>], ticks<span class="op">=</span><span class="bu">range</span>(<span class="dv">10</span>))</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>cbar.set_label(<span class="st">'Digit Class'</span>)</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>sns.despine(ax<span class="op">=</span>axes[<span class="dv">1</span>])</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
 <pre><code>/Users/skojaku-admin/Documents/projects/applied-soft-comp/.venv/lib/python3.11/site-packages/umap/umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
@@ -1530,15 +1486,11 @@ Don’t over-interpret t-SNE!
 </div>
 </div>
 <p>Both methods reveal similar cluster structure, but UMAP tends to space clusters more evenly and preserve more of the global topology. Notice how UMAP places similar digits (3, 5, 8) in a connected region, suggesting they share underlying structure.</p>
+<p>Use UMAP when you have very large datasets (over 10,000 points) where t-SNE becomes slow. Use it when you want to preserve more global structure. Use it when you’re doing exploratory analysis and want fast iteration. UMAP also supports projecting new data onto an existing embedding, which t-SNE doesn’t easily support.</p>
+<p>Stick with t-SNE when you need the most established method with extensive literature. Use t-SNE when you’re working with moderate-sized datasets where speed isn’t critical. Use t-SNE when you’re replicating published work that used t-SNE.</p>
 </section>
-<section id="when-to-use-umap" class="level2">
-<h2 class="anchored" data-anchor-id="when-to-use-umap">When to use UMAP</h2>
-<p>Use UMAP when: - You have very large datasets (&gt;10,000 points) where t-SNE is slow - You want to preserve more global structure - You’re doing exploratory analysis and want fast iteration - You need to project new data onto an existing embedding (UMAP supports this, t-SNE doesn’t easily)</p>
-<p>Stick with t-SNE when: - You need the most established method with extensive literature - You’re working with moderate-sized datasets where speed isn’t critical - You’re replicating published work that used t-SNE</p>
-</section>
-</section>
-<section id="the-bigger-picture-choosing-the-right-method" class="level1">
-<h1>The Bigger Picture: Choosing the Right Method</h1>
+<section id="the-bigger-picture-choosing-the-right-method" class="level2">
+<h2 class="anchored" data-anchor-id="the-bigger-picture-choosing-the-right-method">The Bigger Picture: Choosing the Right Method</h2>
 <p>Dimensionality reduction is not a one-size-fits-all solution. Different methods make different trade-offs:</p>
 <table class="caption-top table">
 <colgroup>
@@ -1588,46 +1540,33 @@ Don’t over-interpret t-SNE!
 </tr>
 <tr class="odd">
 <td><strong>UMAP</strong></td>
-<td>Local + some global</td>
+<td>Local plus some global</td>
 <td>Fast</td>
 <td>Excellent (millions of points)</td>
 <td>Large datasets, faster alternative to t-SNE</td>
 </tr>
 </tbody>
 </table>
-<p><strong>A practical workflow:</strong></p>
-<ol type="1">
-<li><p><strong>Start with PCA</strong>: Always run PCA first. It’s fast, interpretable, and if it works well, you’re done. Check how much variance the first 2-3 components explain.</p></li>
-<li><p><strong>Check pairwise plots</strong> (if feasible): If you have &lt;10 dimensions, look at scatter plot matrices to understand pairwise relationships.</p></li>
-<li><p><strong>Try t-SNE or UMAP</strong> if:</p>
-<ul>
-<li>PCA doesn’t reveal clear structure (first 2 PCs explain &lt;50% variance)</li>
-<li>You suspect non-linear relationships</li>
-<li>You want to find clusters</li>
-</ul></li>
-<li><p><strong>Validate your findings</strong>: Don’t trust a single visualization. Try:</p>
-<ul>
-<li>Different random seeds (for t-SNE/UMAP)</li>
-<li>Different hyperparameters (perplexity, number of neighbors)</li>
-<li>Different methods (does t-SNE and PCA agree?)</li>
-<li>Statistical tests on apparent clusters</li>
-</ul></li>
-</ol>
-<div class="callout callout-style-default callout-important callout-titled">
+<p>A practical workflow begins with PCA. Always run PCA first. It’s fast, interpretable, and if it works well, you’re done. Check how much variance the first 2 or 3 components explain.</p>
+<p>Next, check pairwise plots if feasible. If you have fewer than 10 dimensions, look at scatter plot matrices to understand pairwise relationships.</p>
+<p>Try t-SNE or UMAP if PCA doesn’t reveal clear structure. Run them if the first 2 PCs explain less than 50 percent variance. Try them if you suspect non-linear relationships. Try them if you want to find clusters.</p>
+<p>Validate your findings with multiple approaches. Don’t trust a single visualization. Try different random seeds for t-SNE and UMAP. Try different hyperparameters like perplexity and number of neighbors. Try different methods and see if t-SNE and PCA agree. Run statistical tests on apparent clusters.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Try it yourself">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Beware of visualization artifacts
+Try it yourself
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Dimensionality reduction can create apparent patterns that don’t exist in the original data: - <strong>Spurious clusters</strong>: t-SNE can split continuous data into false clusters - <strong>Missing relationships</strong>: Two clusters might be connected in high dimensions but appear separated in 2D - <strong>Misleading distances</strong>: Distance and size in t-SNE/UMAP are not meaningful</p>
-<p><strong>Always validate</strong> important findings with statistical tests or domain knowledge. A beautiful t-SNE plot is a starting point for investigation, not a final conclusion.</p>
+<p>Take a dataset you’re familiar with and apply all four methods: PCA, MDS, t-SNE, and UMAP. Compare the results. What structure does each method reveal? What structure does each method hide? Which visualization best matches your intuition about the data?</p>
 </div>
 </div>
-<p>Visualizing high-dimensional data is as much art as science. The goal is not to find “the true projection”—there is no single true way to flatten high-dimensional space onto a page. The goal is to <strong>reveal structure that helps you understand your data and ask better questions</strong>.</p>
+<p>Dimensionality reduction can create apparent patterns that don’t exist in the original data. Spurious clusters appear when t-SNE splits continuous data into false groups. Missing relationships occur when two clusters might be connected in high dimensions but appear separated in 2D. Misleading distances happen when distance and size in t-SNE and UMAP are not meaningful.</p>
+<p>Always validate important findings with statistical tests or domain knowledge. A beautiful t-SNE plot is a starting point for investigation, not a final conclusion.</p>
+<p>Visualizing high-dimensional data is as much art as science. The goal is not to find “the true projection.” There is no single true way to flatten high-dimensional space onto a page. The goal is to reveal structure that helps you understand your data and ask better questions.</p>
 <p>As data scientist Jake VanderPlas wrote: “Dimensionality reduction is a form of lossy compression. The question is not whether you lose information—you always do—but whether you lose the information you care about.”</p>
 
 

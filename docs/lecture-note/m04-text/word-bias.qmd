@@ -1,14 +1,18 @@
 ---
-title: "Prompt Engineering"
+title: "Word Bias"
 execute:
     enabled: true
 ---
 
-## Bias in Word Embeddings
+::: {.callout-note title="What you'll learn in this module"}
+Word embeddings capture and reinforce societal biases from their training data through geometric relationships between vectors. This section explores how semantic axes reveal gender bias in occupations and concepts, demonstrating both the benefits and risks of embeddings encoding real-world associations.
+:::
 
-Word embeddings can capture and reinforce societal biases from their training data through the geometric relationships between word vectors. These relationships often reflect stereotypes about gender, race, age and other social factors. We'll examine how semantic axes help analyze gender bias in job-related terms, showing both the benefits and risks of word embeddings capturing these real-world associations @bolukbasi2016debiasing.
+## Understanding Bias in Word Embeddings
 
-SemAxis is a powerful tool to analyze gender bias in word embeddings by measuring word alignments along semantic axes @kwak2021frameaxis. Using antonym pairs like "she-he" as poles, it quantifies gender associations in words on a scale from -1 to 1, where positive values indicate feminine associations and negative values indicate masculine as ones.
+Word embeddings can capture and reinforce societal biases from their training data through geometric relationships between word vectors. These relationships often reflect stereotypes about gender, race, age, and other social factors. By using semantic axes, we can analyze gender bias in job-related terms, showing both the benefits and risks of word embeddings capturing these real-world associations.
+
+SemAxis is a powerful tool to analyze gender bias in word embeddings by measuring word alignments along semantic axes. Using antonym pairs like "she-he" as poles, it quantifies gender associations in words on a scale from -1 to 1, where positive values indicate feminine associations and negative values indicate masculine associations.
 
 Let's start with a simple example of analyzing gender bias in occupations.
 
@@ -36,12 +40,7 @@ def analyze(word, pos_word, neg_word, model):
     return bias
 ```
 
-::: {.callout-note}
-The `compute_bias` function calculates the cosine similarity between a word vector and a semantic axis (microframe).
-
-- **Numerator**: Dot product projects the word onto the axis.
-- **Denominator**: Normalizes by vector lengths to get a score between -1 and 1.
-:::
+The compute_bias function calculates the cosine similarity between a word vector and a semantic axis (microframe). The numerator computes the dot product, which projects the word onto the axis. The denominator normalizes by vector lengths to get a score between -1 and 1.
 
 We will use the following occupations:
 
@@ -91,20 +90,13 @@ for occupation in he_occupations:
     print(f"{occupation}: {bias:.3f}")
 ```
 
-::: {.callout-note}
-**Interpreting the Scores:**
+Interpreting the scores: Positive scores (greater than 0) indicate closer association to "she" (e.g., nurse, librarian). Negative scores (less than 0) indicate closer association to "he" (e.g., architect, captain). Magnitude indicates the strength of the gender association. A larger absolute value represents a stronger gender association.
 
-- **Positive scores (> 0)**: Closer to "she" (e.g., *nurse*, *librarian*).
-- **Negative scores (< 0)**: Closer to "he" (e.g., *architect*, *captain*).
-- **Magnitude**: A larger absolute value indicates a stronger gender association.
-:::
+Notice how occupations historically associated with women (like nurse and librarian) have strong positive scores, while those associated with men (like captain and architect) have negative scores. This confirms that the model has learned these gender stereotypes from the text data.
 
-Notice how occupations historically associated with women (like *nurse* and *librarian*) have strong positive scores, while those associated with men (like *captain* and *architect*) have negative scores. This confirms that the model has learned these gender stereotypes from the text data.
+## Stereotype Analogies
 
-### Stereotype Analogies
-
-Since word embeddings capture semantic relationships learned from large text corpora, they inevitably encode societal biases and stereotypes present in that training data. We can leverage this property to identify pairs of words that exhibit stereotypical gender associations. By measuring how different words align with the gender axis (she-he), we can find pairs where one word shows a strong feminine bias while its counterpart shows a masculine bias, revealing ingrained stereotypes in language use.
-
+Since word embeddings capture semantic relationships learned from large text corpora, they inevitably encode societal biases and stereotypes present in that training data. We can leverage this property to identify pairs of words that exhibit stereotypical gender associations. By measuring how different words align with the gender axis (she-he), we find pairs where one word shows strong feminine bias while its counterpart shows masculine bias, revealing ingrained stereotypes in language use.
 
 ```{python}
 # Stereotype analogies from the paper
@@ -128,18 +120,13 @@ for word1, word2 in stereotype_pairs:
     print(f"{word2}: {bias2:.3f}")
 ```
 
-The results show clear stereotypical alignments. *Sewing* and *nurse* align with "she", while *carpentry* and *surgeon* align with "he". This mirrors the "man is to computer programmer as woman is to homemaker" analogy found in early word embedding research.
+The results show clear stereotypical alignments. Sewing and nurse align with "she", while carpentry and surgeon align with "he". This mirrors the "man is to computer programmer as woman is to homemaker" analogy found in early word embedding research.
 
-### Indirect Bias Analysis
+## Indirect Bias: When Neutral Words Become Gendered
 
 Indirect bias occurs when seemingly neutral words or concepts become associated with gender through their relationships with other words. For example, while "softball" and "football" are not inherently gendered terms, they may show gender associations in word embeddings due to how they're used in language and society.
 
-We can detect indirect bias by:
-1. Identifying word pairs that form a semantic axis (e.g., softball-football)
-2. Measuring how other words align with this axis
-3. Examining if alignment with this axis correlates with gender bias
-
-This reveals how gender stereotypes can be encoded indirectly through word associations, even when the words themselves don't explicitly reference gender.
+We can detect indirect bias by identifying word pairs that form a semantic axis (like softball-football), measuring how other words align with this axis, and examining if alignment correlates with gender bias. This reveals how gender stereotypes can be encoded indirectly through word associations, even when the words themselves don't explicitly reference gender.
 
 Let's see how this works in practice. We first measure the gender bias of the following words:
 
@@ -201,16 +188,8 @@ plt.show()
 sns.despine()
 ```
 
-::: {.callout-note}
-**Indirect Bias:**
+The plot reveals a correlation: words associated with "softball" (y-axis greater than 0) also tend to be associated with "she" (x-axis greater than 0). Conversely, "football" terms align with "he". This suggests that even if we remove explicit gender words, the structure of the space still encodes gender through these proxy dimensions.
 
-The plot reveals a correlation: words associated with "softball" (y-axis > 0) also tend to be associated with "she" (x-axis > 0). Conversely, "football" terms align with "he".
+## The Impact and Path Forward
 
-This suggests that even if we remove explicit gender words, the *structure* of the space still encodes gender through these proxy dimensions.
-:::
-
-
-## Take away
-
-
-Word embeddings, while powerful, inevitably capture and reflect societal biases present in the large text corpora they are trained on. We observed both **direct bias**, where occupations or attributes align strongly with specific gender pronouns, and **indirect bias**, where seemingly neutral concepts become gendered through their associations with other words. This analysis highlights the importance of understanding and mitigating these biases to prevent the perpetuation of stereotypes in AI systems and ensure fairness in applications like search, recommendation, and hiring.
+Word embeddings, while powerful, inevitably capture and reflect societal biases present in the large text corpora they are trained on. We observed both direct bias, where occupations or attributes align strongly with specific gender pronouns, and indirect bias, where seemingly neutral concepts become gendered through their associations with other words. This analysis highlights the importance of understanding and mitigating these biases to prevent the perpetuation of stereotypes in AI systems and ensure fairness in applications like search, recommendation, and hiring.

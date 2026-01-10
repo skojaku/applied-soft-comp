@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2026-01-09">
+<meta name="dcterms.date" content="2026-01-10">
 
 <title>2D Data Visualization – Applied Soft Computing</title>
 <style>
@@ -108,7 +108,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link rel="stylesheet" href="../assets/custom.css">
 </head>
 
-<body class="nav-sidebar docked nav-fixed slimcontent quarto-light">
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -891,10 +891,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-    </div>
+    
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../m02-visualization/overview.html">Module 2: Visualizing Complexity</a></li><li class="breadcrumb-item"><a href="../m02-visualization/2d-data.html">Visualizing 2D Data</a></li></ol></nav>
 <div class="quarto-title">
@@ -915,7 +914,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">January 9, 2026</p>
+      <p class="date">January 10, 2026</p>
     </div>
   </div>
   
@@ -927,10 +926,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+What you’ll learn in this module
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This module teaches how to visualize relationships between two variables. You’ll learn how scatter plots, binning methods, and density estimation reveal patterns that summary statistics hide. We’ll explore how to handle overplotting in large datasets and how to compare relationships across different groups.</p>
+</div>
+</div>
 <p>You’ve probably heard that “correlation doesn’t equal causation.” But here’s an even more fundamental problem: <strong>a correlation coefficient doesn’t tell you what your data actually looks like.</strong></p>
-<p>In 1973, statistician Francis Anscombe created four datasets that became legendary in data visualization. Each dataset has 11 (x, y) pairs. Each has the same mean for x and y, the same variance, andmost remarkably—the same correlation coefficient (r = 0.816) and the same linear regression line.</p>
+<p>In 1973, statistician Francis Anscombe created four datasets that became legendary in data visualization. Each dataset has 11 (x, y) pairs. Each has the same mean for x and y, the same variance, and most remarkably, the same correlation coefficient (r = 0.816) and the same linear regression line.</p>
 <p>But when you plot them, they tell completely different stories.</p>
-<div id="aa5e604f" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="1">
+<div id="3593bae2" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
@@ -968,14 +980,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>Dataset I shows a nice linear relationship. Dataset II is clearly non-linear—a parabola that a linear model completely misses. Dataset III has a perfect linear relationship except for one outlier that changes everything. Dataset IV shows no relationship except for a single influential point that creates the illusion of correlation.</p>
+<p>Dataset I shows a nice linear relationship. Dataset II is clearly non-linear, a parabola that a linear model completely misses. Dataset III has a perfect linear relationship except for one outlier that changes everything. Dataset IV shows no relationship except for a single influential point that creates the illusion of correlation.</p>
 <p>The same correlation coefficient. The same regression line. Completely different data.</p>
-<p>This is why we visualize relationships:</p>
-<p><strong>Always plot your bivariate data. Summary statistics conceal structure.</strong></p>
-<section id="showing-all-points-scatter-plots" class="level1 page-columns page-full">
-<h1>Showing All Points: Scatter Plots</h1>
-<p>The most direct way to show a relationship between two variables is to plot every point. A <strong>scatter plot</strong> does exactly this: each observation becomes a point in 2D space.</p>
-<div id="f447a580" class="cell" data-fig-height="6" data-fig-width="10" data-execution_count="2">
+<p>This is why we visualize relationships. Always plot your bivariate data. Summary statistics conceal structure.</p>
+<section id="showing-all-points-scatter-plots" class="level2">
+<h2 class="anchored" data-anchor-id="showing-all-points-scatter-plots">Showing All Points: Scatter Plots</h2>
+<p>Let’s start with the most direct way to show a relationship between two variables. A <strong>scatter plot</strong> plots every point, so each observation becomes a single dot in 2D space.</p>
+<div id="647c3b10" class="cell" data-fig-height="6" data-fig-width="10" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate sample data with clear relationship</span></span>
@@ -1000,9 +1011,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>For small to moderate datasets (up to ~1,000 points), scatter plots are perfect. You can see: - The strength and direction of the relationship - The spread around the trend - Individual outliers - Non-linear patterns - Clusters or subgroups</p>
-<p>When points overlap heavily, use <strong>transparency (alpha)</strong>. This creates natural density shading—areas with many overlapping points appear darker.</p>
-<div id="f6ba6694" class="cell" data-fig-height="5" data-fig-width="14" data-execution_count="3">
+<p>For small to moderate datasets (up to roughly 1,000 points), scatter plots are perfect. You can see the strength and direction of the relationship, the spread around the trend, individual outliers, non-linear patterns, and clusters or subgroups all at once.</p>
+<p>When points overlap heavily, use <strong>transparency (alpha)</strong>. This creates natural density shading. Areas with many overlapping points appear darker, while sparse areas appear lighter.</p>
+<div id="b023d5ab" class="cell" data-fig-height="5" data-fig-width="14" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate data with heavy overlap</span></span>
@@ -1032,13 +1043,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>With alpha = 1.0 (opaque), the center is a solid blob—you can’t tell if there are 10 points or 100. With alpha = 0.1, the density gradient becomes visible. Dark regions have many points; light regions have few.</p>
-
-<div class="no-row-height column-margin column-container"><div class="">
+<p>With alpha = 1.0 (opaque), the center is a solid blob. You can’t tell if there are 10 points or 100. With alpha = 0.1, the density gradient becomes visible. Dark regions have many points; light regions have few.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
 <p><img src="https://www.science.org/cms/10.1126/science.aan8627/asset/d92c8e9c-6bad-48ad-a006-f9e76c62b72a/assets/graphic/358_1042_f3.jpeg" class="img-fluid"></p>
 <p>A figure from <a href="https://www.science.org/doi/10.1126/science.aan8627">Metaanalysis of faculty’s teaching effectiveness</a> showing the relationship between student evaluation of teaching and actual learning. Each bubble represents a course section, with size proportional to the number of students. Notice how transparency reveals the density of observations.</p>
-</div></div><p>For extremely dense data where even transparency doesn’t help, <strong>jittering</strong> can separate overlapping points by adding small random noise to their positions.</p>
-<div id="cd74389c" class="cell" data-fig-height="5" data-fig-width="14" data-execution_count="4">
+</div>
+</div>
+<p>For extremely dense data where even transparency doesn’t help, <strong>jittering</strong> can separate overlapping points. Jittering adds small random noise to point positions, spreading them out while keeping their relative positions meaningful.</p>
+<div id="b903826a" class="cell" data-fig-height="5" data-fig-width="14" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate data with discrete values (common in survey data)</span></span>
@@ -1076,15 +1097,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>Without jittering, many points stack on top of each other—you might think there are only 25 data points (5 � 5) when there are actually 500. Jittering reveals the true sample size and density at each location.</p>
+<p>Without jittering, many points stack on top of each other. You might think there are only 25 data points (5 times 5) when there are actually 500. Jittering reveals the true sample size and density at each location.</p>
 </section>
-<section id="when-points-overlap-binning-methods" class="level1">
-<h1>When Points Overlap: Binning Methods</h1>
-<p>When you have tens of thousands of points, even transparency and jittering don’t fully reveal the density structure. Individual points become less meaningful than the overall pattern. This is when we need to <strong>bin</strong> the datadivide the 2D space into regions and count observations in each.</p>
+<section id="when-points-overlap-binning-methods" class="level2">
+<h2 class="anchored" data-anchor-id="when-points-overlap-binning-methods">When Points Overlap: Binning Methods</h2>
+<p>When you have tens of thousands of points, even transparency and jittering don’t fully reveal the density structure. Individual points become less meaningful than the overall pattern. This is when we need to <strong>bin</strong> the data. Binning divides the 2D space into regions and counts observations in each region.</p>
+</section>
 <section id="d-histograms-heatmaps" class="level2">
 <h2 class="anchored" data-anchor-id="d-histograms-heatmaps">2D Histograms (Heatmaps)</h2>
 <p>A <strong>2D histogram</strong> extends the 1D histogram concept to two dimensions. The plane is divided into rectangular bins, and each bin’s color represents the number of points it contains.</p>
-<div id="bf617464" class="cell" data-fig-height="7" data-fig-width="10" data-execution_count="5">
+<div id="e3360588" class="cell" data-fig-height="7" data-fig-width="10" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate large dataset</span></span>
@@ -1112,7 +1134,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>The key parameter is <strong>bin size</strong> (or <code>gridsize</code>). Too few bins and you lose detail; too many bins and the plot becomes noisy. Like 1D histograms, this requires experimentation.</p>
-<div id="e12cacee" class="cell" data-fig-height="5" data-fig-width="14" data-execution_count="6">
+<div id="dca37dc6" class="cell" data-fig-height="5" data-fig-width="14" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
@@ -1137,12 +1159,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>With gridsize = 10, we see only coarse structure. With gridsize = 60, the plot is noisysome bins have few points by chance. Gridsize = 30 provides a good balance.</p>
-</section>
-<section id="hexbin-plots" class="level2">
-<h2 class="anchored" data-anchor-id="hexbin-plots">Hexbin Plots</h2>
-<p><strong>Hexagonal binning</strong> uses hexagons instead of rectangles. Hexagons are better for 2D binning because they’re closer to circlesevery edge is equidistant from the center, reducing bias in how we perceive density.</p>
-<div id="f1764e2b" class="cell" data-fig-height="5" data-fig-width="14" data-execution_count="7">
+<p>With gridsize = 10, we see only coarse structure. With gridsize = 60, the plot is noisy. Some bins have few points by chance. Gridsize = 30 provides a good balance between detail and stability.</p>
+<section id="hexbin-plots" class="level3">
+<h3 class="anchored" data-anchor-id="hexbin-plots">Hexbin Plots</h3>
+<p><strong>Hexagonal binning</strong> uses hexagons instead of rectangles. Hexagons are better for 2D binning because they’re closer to circles. Every edge is equidistant from the center, reducing bias in how we perceive density.</p>
+<div id="72e0cd10" class="cell" data-fig-height="5" data-fig-width="14" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate data with interesting structure</span></span>
@@ -1186,8 +1207,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>The hexbin plot clearly reveals the two clusters and their relative densitiessomething that’s harder to see in the scatter plot even with low alpha.</p>
-<p>Hexbin plots are particularly powerful for <strong>very large datasets</strong> (100,000+ points) where scatter plots become computationally expensive and visually overwhelming.</p>
+<p>The hexbin plot clearly reveals the two clusters and their relative densities. Something that’s harder to see in the scatter plot even with low alpha. Hexbin plots are particularly powerful for <strong>very large datasets</strong> (100,000+ points) where scatter plots become computationally expensive and visually overwhelming.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1198,16 +1218,16 @@ Choosing colors for density plots
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>When showing density or counts, use <strong>sequential colormaps</strong> that vary in lightness: light = low density, dark = high density. Good choices include: - <code>'YlOrRd'</code> (yellow-orange-red) - <code>'viridis'</code> (purple-blue-green-yellow, perceptually uniform) - <code>'Blues'</code> or <code>'Reds'</code> (single hue)</p>
-<p>Avoid rainbow colormaps like <code>'jet'</code>they create artificial boundaries where none exist and are not perceptually uniform.</p>
+<p>When showing density or counts, use <strong>sequential colormaps</strong> that vary in lightness: light equals low density, dark equals high density. Good choices include <code>'YlOrRd'</code> (yellow-orange-red), <code>'viridis'</code> (purple-blue-green-yellow, perceptually uniform), and <code>'Blues'</code> or <code>'Reds'</code> (single hue).</p>
+<p>Avoid rainbow colormaps like <code>'jet'</code>. They create artificial boundaries where none exist and are not perceptually uniform.</p>
 </div>
 </div>
 </section>
 </section>
-<section id="smooth-density-estimation-2d-kde" class="level1">
-<h1>Smooth Density Estimation: 2D KDE</h1>
+<section id="smooth-density-estimation-2d-kde" class="level2">
+<h2 class="anchored" data-anchor-id="smooth-density-estimation-2d-kde">Smooth Density Estimation: 2D KDE</h2>
 <p>Just as 1D kernel density estimation (KDE) provides a smooth alternative to histograms, <strong>2D KDE</strong> smooths 2D histograms by placing a kernel at each data point and summing them.</p>
-<div id="bc379ca4" class="cell" data-fig-height="7" data-fig-width="10" data-execution_count="8">
+<div id="5c6d484b" class="cell" data-fig-height="7" data-fig-width="10" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use the clustered data</span></span>
@@ -1227,8 +1247,8 @@ Choosing colors for density plots
 </div>
 </div>
 </div>
-<p>KDE reveals smooth density gradients without arbitrary binning decisions. The key parameter is <strong>bandwidth</strong>how wide each kernel is. Small bandwidth gives high detail but can be noisy; large bandwidth is smooth but may blur important features.</p>
-<div id="604c987c" class="cell" data-fig-height="5" data-fig-width="14" data-execution_count="9">
+<p>KDE reveals smooth density gradients without arbitrary binning decisions. The key parameter is <strong>bandwidth</strong>, which controls how wide each kernel is. Small bandwidth gives high detail but can be noisy. Large bandwidth is smooth but may blur important features.</p>
+<div id="3e830df1" class="cell" data-fig-height="5" data-fig-width="14" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
@@ -1254,10 +1274,10 @@ Choosing colors for density plots
 </div>
 </div>
 <p>With <code>bw_adjust=0.5</code> (narrow bandwidth), we see fine detail but some noise. With <code>bw_adjust=3.0</code> (wide bandwidth), the plot is very smooth but the two clusters nearly merge. The default <code>bw_adjust=1.0</code> (or around 1.5 here) balances detail and smoothness.</p>
-<section id="contour-plots" class="level2">
-<h2 class="anchored" data-anchor-id="contour-plots">Contour Plots</h2>
-<p>A <strong>contour plot</strong> represents the density surface as lines of equal densitylike a topographic map where each contour line represents an “elevation” of density.</p>
-<div id="77da62e1" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="10">
+<section id="contour-plots" class="level3">
+<h3 class="anchored" data-anchor-id="contour-plots">Contour Plots</h3>
+<p>A <strong>contour plot</strong> represents the density surface as lines of equal density. Think of it like a topographic map where each contour line represents an “elevation” of density.</p>
+<div id="24250b68" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">6</span>))</span>
@@ -1289,14 +1309,14 @@ Choosing colors for density plots
 </div>
 </div>
 </div>
-<p>Contour plots are excellent for: - Overlaying density information on scatter plots - Comparing multiple groups (different colored contours) - Showing the “shape” of the relationship clearly</p>
+<p>Contour plots excel at overlaying density information on scatter plots, comparing multiple groups with different colored contours, and showing the “shape” of relationships clearly.</p>
 </section>
 </section>
-<section id="joint-distributions-combining-2d-and-1d" class="level1 page-columns page-full">
-<h1>Joint Distributions: Combining 2D and 1D</h1>
+<section id="joint-distributions-combining-2d-and-1d" class="level2">
+<h2 class="anchored" data-anchor-id="joint-distributions-combining-2d-and-1d">Joint Distributions: Combining 2D and 1D</h2>
 <p>A powerful approach is to show both the <strong>joint (2D) distribution</strong> and the <strong>marginal (1D) distributions</strong> of each variable. This connects 2D visualization back to the 1D methods we learned earlier.</p>
 <p>A <strong>joint plot</strong> combines a central 2D plot with 1D histograms or density plots along the margins.</p>
-<div id="ccd687d3" class="cell" data-fig-height="10" data-fig-width="10" data-execution_count="11">
+<div id="7fce5569" class="cell" data-fig-height="10" data-fig-width="10" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate data with interesting marginals</span></span>
@@ -1322,9 +1342,9 @@ Choosing colors for density plots
 </div>
 </div>
 </div>
-<p>The marginal distributions (top and right) show that both X and Y are bimodalthere are two peaks. But the scatter plot reveals that the peaks are <em>correlated</em>: when X is low, Y tends to be low; when X is high, Y tends to be high. This relationship is invisible in the marginals alone.</p>
+<p>The marginal distributions (top and right) show that both X and Y are bimodal. There are two peaks. But the scatter plot reveals that the peaks are correlated. When X is low, Y tends to be low. When X is high, Y tends to be high. This relationship is invisible in the marginals alone.</p>
 <p>Joint plots can use different visualizations in the center:</p>
-<div id="afe14481" class="cell" data-fig-height="10" data-fig-width="10" data-execution_count="12">
+<div id="24189eb2" class="cell" data-fig-height="10" data-fig-width="10" data-execution_count="12">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create joint plot with hexbin and KDE</span></span>
@@ -1346,7 +1366,7 @@ Choosing colors for density plots
 </div>
 </div>
 <p>Or with KDE everywhere:</p>
-<div id="5f92ef68" class="cell" data-fig-height="10" data-fig-width="10" data-execution_count="13">
+<div id="f42d46ef" class="cell" data-fig-height="10" data-fig-width="10" data-execution_count="13">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> sns.jointplot(x<span class="op">=</span>x_clusters, y<span class="op">=</span>y_clusters, kind<span class="op">=</span><span class="st">'kde'</span>, height<span class="op">=</span><span class="dv">10</span>,</span>
@@ -1366,18 +1386,28 @@ Choosing colors for density plots
 </div>
 </div>
 </div>
-<p>Joint plots are particularly useful for: - Understanding if marginal distributions are misleading about the relationship - Seeing if there’s correlation between variables with interesting univariate structure - Presenting a complete picture of a bivariate relationship</p>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<p><strong>Pro tip</strong>: When presenting data, start with marginal distributions to establish what each variable looks like, then show the joint distribution to reveal the relationship. This guides your audience from the familiar (1D) to the complex (2D).</p>
-</div></div></section>
-<section id="visualizing-relationships-across-groups" class="level1">
-<h1>Visualizing Relationships Across Groups</h1>
+<p>Joint plots are particularly useful for understanding if marginal distributions are misleading about the relationship, seeing if there’s correlation between variables with interesting univariate structure, and presenting a complete picture of a bivariate relationship.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Pro tip</strong>: When presenting data, start with marginal distributions to establish what each variable looks like. Then show the joint distribution to reveal the relationship. This guides your audience from the familiar (1D) to the complex (2D).</p>
+</div>
+</div>
+</section>
+<section id="visualizing-relationships-across-groups" class="level2">
+<h2 class="anchored" data-anchor-id="visualizing-relationships-across-groups">Visualizing Relationships Across Groups</h2>
 <p>Often we want to compare relationships across multiple groups or categories. There are several effective approaches.</p>
-<section id="color-coding-by-group" class="level2">
-<h2 class="anchored" data-anchor-id="color-coding-by-group">Color coding by group</h2>
+<section id="color-coding-by-group" class="level3">
+<h3 class="anchored" data-anchor-id="color-coding-by-group">Color coding by group</h3>
 <p>The simplest approach is to use different colors for different groups:</p>
-<div id="925cd1cd" class="cell" data-fig-height="6" data-fig-width="10" data-execution_count="14">
+<div id="26b71c60" class="cell" data-fig-height="6" data-fig-width="10" data-execution_count="14">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate multi-group data</span></span>
@@ -1420,7 +1450,7 @@ Choosing colors for density plots
 </div>
 </div>
 </div>
-<p>This reveals that the three groups have different relationships: Group A has a positive moderate slope, Group B has a steeper positive relationship, and Group C has almost no relationship.</p>
+<p>This reveals that the three groups have different relationships. Group A has a positive moderate slope. Group B has a steeper positive relationship. Group C has almost no relationship.</p>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1435,10 +1465,10 @@ Simpson’s Paradox
 </div>
 </div>
 </section>
-<section id="small-multiples-faceting" class="level2">
-<h2 class="anchored" data-anchor-id="small-multiples-faceting">Small multiples (faceting)</h2>
-<p>When groups overlap heavily or there are many groups, <strong>small multiples</strong>separate plots for each groupwork better than color coding:</p>
-<div id="f6e51ed0" class="cell" data-fig-height="4" data-fig-width="14" data-execution_count="15">
+<section id="small-multiples-faceting" class="level3">
+<h3 class="anchored" data-anchor-id="small-multiples-faceting">Small multiples (faceting)</h3>
+<p>When groups overlap heavily or there are many groups, <strong>small multiples</strong> work better than color coding. Small multiples are separate plots for each group.</p>
+<div id="56daedf4" class="cell" data-fig-height="4" data-fig-width="14" data-execution_count="15">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> sns.FacetGrid(df_groups, col<span class="op">=</span><span class="st">'group'</span>, height<span class="op">=</span><span class="dv">4</span>, aspect<span class="op">=</span><span class="fl">1.3</span>)</span>
@@ -1460,10 +1490,10 @@ Simpson’s Paradox
 </div>
 <p>Small multiples make it easy to compare the strength and direction of relationships across groups without visual clutter.</p>
 </section>
-<section id="contour-overlays" class="level2">
-<h2 class="anchored" data-anchor-id="contour-overlays">Contour overlays</h2>
+<section id="contour-overlays" class="level3">
+<h3 class="anchored" data-anchor-id="contour-overlays">Contour overlays</h3>
 <p>For large datasets, overlaying density contours for each group can be very effective:</p>
-<div id="b1a425c8" class="cell" data-fig-height="7" data-fig-width="10" data-execution_count="16">
+<div id="e2209e73" class="cell" data-fig-height="7" data-fig-width="10" data-execution_count="16">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">7</span>))</span>
@@ -1481,7 +1511,7 @@ Simpson’s Paradox
 <span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>sns.despine()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
-<pre><code>/var/folders/j7/9dgqq5g53vnbsbmvh2yqtckr0000gr/T/ipykernel_89556/3335885635.py:12: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+<pre><code>/var/folders/j7/9dgqq5g53vnbsbmvh2yqtckr0000gr/T/ipykernel_6291/3335885635.py:12: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
   ax.legend()</code></pre>
 </div>
 <div class="cell-output cell-output-display">
@@ -1493,16 +1523,16 @@ Simpson’s Paradox
 </div>
 </div>
 </div>
-<p>This clearly shows that Groups A and B have elongated, correlated distributions (indicating strong relationships), while Group C is more circular (indicating weak correlation).</p>
+<p>This clearly shows that Groups A and B have elongated, correlated distributions. This indicates strong relationships. Group C is more circular, indicating weak correlation.</p>
 </section>
 </section>
-<section id="the-bigger-picture" class="level1">
-<h1>The Bigger Picture</h1>
-<p>Visualizing bivariate relationships isn’t just about making pretty picturesit’s about <strong>seeing patterns that summary statistics conceal</strong>.</p>
-<p>When you reduce a relationship to a single number (a correlation coefficient, a slope, a p-value), you lose crucial information: - Is the relationship linear or curved? - Are there outliers driving the result? - Are there subgroups with different patterns? - Is the relationship consistent across the range of your data?</p>
+<section id="the-bigger-picture" class="level2">
+<h2 class="anchored" data-anchor-id="the-bigger-picture">The Bigger Picture</h2>
+<p>Visualizing bivariate relationships isn’t just about making pretty pictures. It’s about <strong>seeing patterns that summary statistics conceal</strong>.</p>
+<p>When you reduce a relationship to a single number (a correlation coefficient, a slope, a p-value), you lose crucial information. Is the relationship linear or curved? Are there outliers driving the result? Are there subgroups with different patterns? Is the relationship consistent across the range of your data?</p>
 <p>Anscombe’s Quartet taught us this lesson half a century ago, yet papers still report correlations without showing scatter plots. Don’t make this mistake.</p>
-<p>The choice of visualization method matters: - <strong>Scatter plots</strong> for small to moderate datasets where individual points matter - <strong>Hexbin or heatmaps</strong> for large datasets where density matters more than individuals - <strong>2D KDE and contours</strong> for smooth, assumption-light density estimation - <strong>Joint plots</strong> for connecting bivariate relationships to univariate distributions</p>
-<p>But the most important choice is the simplest: <strong>always plot your data</strong>. Let your audience see what you see. Trust them to interpret patterns, not just summary statistics.</p>
+<p>The choice of visualization method matters. Use scatter plots for small to moderate datasets where individual points matter. Use hexbin or heatmaps for large datasets where density matters more than individuals. Use 2D KDE and contours for smooth, assumption-light density estimation. Use joint plots for connecting bivariate relationships to univariate distributions.</p>
+<p>But the most important choice is the simplest. Always plot your data. Let your audience see what you see. Trust them to interpret patterns, not just summary statistics.</p>
 <p>As statistician John Tukey wrote: “The greatest value of a picture is when it forces us to notice what we never expected to see.”</p>
 
 

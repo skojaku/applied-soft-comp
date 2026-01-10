@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2025-12-01">
+<meta name="dcterms.date" content="2026-01-10">
 
 <title>GPT Inference: Sampling Strategies – Applied Soft Computing</title>
 <style>
@@ -57,27 +57,7 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -98,7 +78,7 @@ div.csl-indent {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-626254e6f25d1c064b097183404b5529.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-a032929455e4d93731be0fa9bc28887b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -977,7 +957,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">December 1, 2025</p>
+      <p class="date">January 10, 2026</p>
     </div>
   </div>
   
@@ -989,25 +969,32 @@ window.Quarto = {
 </header>
 
 
-<section id="the-spoiler" class="level2">
-<h2 class="anchored" data-anchor-id="the-spoiler">The Spoiler</h2>
-<p><strong>GPT doesn’t generate text by picking the “right” word—it samples from a probability distribution, and how you sample determines whether you get coherent prose or repetitive nonsense.</strong></p>
-</section>
-<section id="the-mechanism" class="level2">
-<h2 class="anchored" data-anchor-id="the-mechanism">The Mechanism</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+What you’ll learn in this module
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>GPT doesn’t generate text by picking the “right” word. It samples from a probability distribution, and how you sample determines whether you get coherent prose or repetitive nonsense. This section explores sampling strategies from greedy to nucleus sampling, showing how temperature and other parameters control generation quality.</p>
+</div>
+</div>
+<section id="how-gpt-generates-text" class="level2">
+<h2 class="anchored" data-anchor-id="how-gpt-generates-text">How GPT Generates Text</h2>
 <p><img src="../figs/gpt-inference-sampling-manga.png" class="img-fluid"></p>
 <p>What do you think happens when GPT generates the next word in a sentence? Does it pick the “best” word, or something else?</p>
-<p>Here’s the reality: GPT doesn’t output a single word. It outputs a probability distribution over its entire vocabulary—millions of possible tokens, each with a likelihood. The naive approach is to always pick the highest probability token (greedy sampling), but this creates a deterministic trap. The model falls into repetitive loops because it always makes the same choice. The distribution is high-dimensional, making sampling computationally expensive, but also rich with alternative paths.</p>
+<p>Here’s the reality: GPT doesn’t output a single word. It outputs a probability distribution over its entire vocabulary (millions of possible tokens, each with a likelihood). The naive approach is to always pick the highest probability token (greedy sampling), but this creates a deterministic trap. The model falls into repetitive loops because it always makes the same choice. The distribution is high-dimensional, making sampling computationally expensive, but also rich with alternative paths.</p>
 <p>The solution is controlled randomness. By sampling from the distribution rather than deterministically selecting the peak, we introduce diversity. But blind random sampling produces incoherent text. The challenge is finding the middle ground: sample broadly enough to avoid repetition, but narrowly enough to maintain coherence.</p>
 <p>Think of it like improvisational jazz. A musician playing the same note repeatedly (greedy sampling) is boring. Playing random notes (uniform sampling) is noise. The art is in sampling from the most promising notes while occasionally taking creative risks. This jazz analogy—the balance between predictability and surprise—explains every sampling strategy we’ll explore.</p>
 </section>
-<section id="the-application" class="level2">
-<h2 class="anchored" data-anchor-id="the-application">The Application</h2>
-<p>Here is an interactive demo of GPT inference:</p>
-<p>https://static.marimo.app/static/gpt-ar61</p>
-<p>You can try different sampling strategies and see the results. GPT generates text one token at a time, repeatedly sampling from the probability distribution. Let’s examine the strategies for sampling that balance quality and diversity.</p>
+<section id="sampling-strategies-in-practice" class="level2">
+<h2 class="anchored" data-anchor-id="sampling-strategies-in-practice">Sampling Strategies in Practice</h2>
+<p>Here is an interactive demo of GPT inference available online at https://static.marimo.app/static/gpt-ar61. You can try different sampling strategies and see the results. GPT generates text one token at a time, repeatedly sampling from the probability distribution. Let’s examine the strategies for sampling that balance quality and diversity.</p>
 <p>First, let’s set up our connection to Ollama:</p>
-<div id="6fc66cc0" class="cell" data-execution_count="1">
+<div id="316357fc" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ollama</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Make sure you have Ollama running and a model pulled</span></span>
@@ -1015,20 +1002,17 @@ window.Quarto = {
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>MODEL <span class="op">=</span> <span class="st">"mapler/gpt2"</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>PROMPT <span class="op">=</span> <span class="st">"Hi there! "</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p><strong>Greedy Sampling</strong></p>
+<section id="greedy-sampling" class="level3">
+<h3 class="anchored" data-anchor-id="greedy-sampling">Greedy Sampling</h3>
 <p>Greedy sampling always picks the highest probability token, which is deterministic but can lead to repetitive or trapped text. For example, if the model predicts “the” with high probability, it will always predict “the” again. This is the jazz musician stuck on a single note.</p>
-<div id="fig-gpt-greedy-search" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-gpt-greedy-search-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://huggingface.co/blog/assets/02_how-to-generate/greedy_search.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gpt-greedy-search-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: GPT greedy search.
-</figcaption>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://huggingface.co/blog/assets/02_how-to-generate/greedy_search.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%"></p>
 </figure>
 </div>
+<p>GPT greedy search.</p>
 <p>Let’s see greedy sampling in action. We set temperature to 0 to make the sampling deterministic (always picking the highest probability token):</p>
-<div id="8f133f46" class="cell" data-execution_count="2">
+<div id="aae1a457" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>greedy_response <span class="op">=</span> ollama.generate(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>MODEL,</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    prompt<span class="op">=</span>PROMPT,</span>
@@ -1043,32 +1027,27 @@ Figure&nbsp;1: GPT greedy search.
 The first thing I did was to make a list</code></pre>
 </div>
 </div>
-<p>The output is often repetitive because greedy sampling always selects the most probable token at each step, leading to predictable and repetitive patterns. Try running it multiple times—you’ll get the exact same output each time.</p>
-<p><strong>Beam Search</strong></p>
+<p>The output is often repetitive because greedy sampling always selects the most probable token at each step, leading to predictable and repetitive patterns. Try running it multiple times. You’ll get the exact same output each time.</p>
+</section>
+<section id="beam-search" class="level3">
+<h3 class="anchored" data-anchor-id="beam-search">Beam Search</h3>
 <p>Beam search alleviates the repetition problem by taking into account the high-order dependencies between tokens. For example, in generating “The cat ran across the ___“, beam search might preserve a path containing”mat” even if “floor” or “room” have higher individual probabilities at that position. This is because the complete sequence like “mat quickly” could be more probable when considering the token next after “mat”. “The cat ran across the mat quickly” is a more natural phrase than “The cat ran across the floor quickly” when considering the full flow and common linguistic patterns.</p>
-<div id="fig-gpt-beam-search" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-gpt-beam-search-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://huggingface.co/blog/assets/02_how-to-generate/beam_search.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gpt-beam-search-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: GPT beam search.
-</figcaption>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://huggingface.co/blog/assets/02_how-to-generate/beam_search.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%"></p>
 </figure>
 </div>
-<p>Beam search maintains multiple possible sequences (beams) in parallel, exploring different paths simultaneously. At each step, it expands all current beams, scores the resulting sequences, and keeps only the top-k highest scoring ones. For instance, with a beam width of 3:</p>
-<ul>
-<li>First beams might be: [“The cat ran”, “The cat walked”, “The cat jumped”]</li>
-<li>Next step: [“The cat ran across”, “The cat ran through”, “The cat walked across”]</li>
-<li>And so on, keeping the 3 most promising complete sequences at each step</li>
-</ul>
-<p>This process continues until reaching the end, finally selecting the sequence with highest overall probability. The beam search can be combined with top-k sampling or nucleus sampling. For example, one can sample a token based on the top-k sampling or nucleus sampling to form the next beam.</p>
-<p>While beam search often produces high-quality outputs since it considers longer-term coherence, it can still suffer from the problem of repetitive or trapped text. It’s the jazz ensemble playing in perfect harmony—technically excellent but predictable.</p>
-<p><em>Note: Ollama doesn’t natively support beam search through its API. Beam search requires access to the model’s internal scoring mechanism, which is typically implemented at a lower level (e.g., using HuggingFace Transformers or direct PyTorch/TensorFlow implementations). For production beam search, you would use libraries like transformers or vLLM.</em></p>
-<p><strong>From Deterministic to Stochastic Sampling</strong></p>
+<p>GPT beam search.</p>
+<p>Beam search maintains multiple possible sequences (beams) in parallel, exploring different paths simultaneously. At each step, it expands all current beams, scores the resulting sequences, and keeps only the top-k highest scoring ones. For instance, with a beam width of 3, first beams might be [“The cat ran”, “The cat walked”, “The cat jumped”]. Next step: [“The cat ran across”, “The cat ran through”, “The cat walked across”]. And so on, keeping the 3 most promising complete sequences at each step.</p>
+<p>This process continues until reaching the end, finally selecting the sequence with highest overall probability. Beam search can be combined with top-k sampling or nucleus sampling. For example, one can sample a token based on top-k sampling or nucleus sampling to form the next beam.</p>
+<p>While beam search often produces high-quality outputs since it considers longer-term coherence, it can still suffer from the problem of repetitive or trapped text. It’s the jazz ensemble playing in perfect harmony, technically excellent but predictable.</p>
+<p>Note: Ollama doesn’t natively support beam search through its API. Beam search requires access to the model’s internal scoring mechanism, which is typically implemented at a lower level (using HuggingFace Transformers or direct PyTorch/TensorFlow implementations). For production beam search, you would use libraries like transformers or vLLM.</p>
+</section>
+<section id="from-deterministic-to-stochastic-sampling" class="level3">
+<h3 class="anchored" data-anchor-id="from-deterministic-to-stochastic-sampling">From Deterministic to Stochastic Sampling</h3>
 <p>Both greedy and beam search are deterministic. They pick the most likely token at each step. However, this creates a loop where the model always predicts the same tokens repeatedly. A simple way to alleviate this problem is to sample a token from the distribution.</p>
-<p>Top-k sampling relaxes the deterministic nature of greedy sampling by selecting randomly from the <span class="math inline">k</span> most likely next tokens at each generation step. While this introduces some diversity compared to greedy sampling, choosing a fixed <span class="math inline">k</span> can be problematic. Value of <span class="math inline">k</span> might be too large for some distribution tails (including many poor options) or too small for others (excluding reasonable options). In our jazz analogy, this is like saying “you can only improvise using these five specific notes”—sometimes that’s perfect, sometimes it’s too limiting.</p>
-<div id="eb45e58f" class="cell" data-execution_count="3">
+<p>Top-k sampling relaxes the deterministic nature of greedy sampling by selecting randomly from the k most likely next tokens at each generation step. While this introduces some diversity compared to greedy sampling, choosing a fixed k can be problematic. Value of k might be too large for some distribution tails (including many poor options) or too small for others (excluding reasonable options). In our jazz analogy, this is like saying “you can only improvise using these five specific notes”. Sometimes that’s perfect, sometimes it’s too limiting.</p>
+<div id="3c601eab" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>top_k_response <span class="op">=</span> ollama.generate(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>MODEL,</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    prompt<span class="op">=</span>PROMPT,</span>
@@ -1080,23 +1059,19 @@ Figure&nbsp;2: GPT beam search.
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(top_k_response[<span class="st">'response'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&nbsp;I've got to say it's been an incredible journey.
-So what do you think?</code></pre>
+<pre><code>~~~
+I was really excited to see that. The girl with a big red face and the</code></pre>
 </div>
 </div>
-<p>Try running this multiple times—you’ll get different outputs each time because the model samples randomly from the top-k tokens.</p>
-<p>Nucleus sampling <span class="citation" data-cites="holtzman2019curious">(<a href="#ref-holtzman2019curious" role="doc-biblioref">Holtzman et al. 2019</a>)</span> addresses this limitation by dynamically selecting tokens based on cumulative probability. It samples from the smallest set of tokens whose cumulative probability exceeds a threshold <span class="math inline">p</span> (e.g.&nbsp;0.9). This adapts naturally to different probability distributions, i.e., selecting few tokens when the distribution is concentrated and more when it’s spread out. This approach often provides a good balance between quality and diversity. The jazz musician now has flexibility—when the melody is clear, stick to a few notes; when it’s time to explore, draw from a wider palette.</p>
-<div id="fig-gpt-top-k-top-p" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-gpt-top-k-top-p-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://storage.googleapis.com/zenn-user-upload/8p2r9urhtn5nztdg6mnia3toibhl.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gpt-top-k-top-p-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Nucleus sampling. The image is taken from <a href="https://zenn.dev/hellorusk/articles/1c0bef15057b1d">this blog</a>.
-</figcaption>
+<p>Try running this multiple times. You’ll get different outputs each time because the model samples randomly from the top-k tokens.</p>
+<p>Nucleus sampling addresses this limitation by dynamically selecting tokens based on cumulative probability. It samples from the smallest set of tokens whose cumulative probability exceeds a threshold p (for example, 0.9). This adapts naturally to different probability distributions, selecting few tokens when the distribution is concentrated and more when it’s spread out. This approach often provides a good balance between quality and diversity. The jazz musician now has flexibility. When the melody is clear, stick to a few notes; when it’s time to explore, draw from a wider palette.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://storage.googleapis.com/zenn-user-upload/8p2r9urhtn5nztdg6mnia3toibhl.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
 </figure>
 </div>
-<div id="295156a5" class="cell" data-execution_count="4">
+<p>Nucleus sampling. The image is taken from <a href="https://zenn.dev/hellorusk/articles/1c0bef15057b1d">this blog</a>.</p>
+<div id="95adb223" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>top_p_response <span class="op">=</span> ollama.generate(</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>MODEL,</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    prompt<span class="op">=</span>PROMPT,</span>
@@ -1108,29 +1083,27 @@ Figure&nbsp;3: Nucleus sampling. The image is taken from <a href="https://zenn.d
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(top_p_response[<span class="st">'response'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&nbsp;If you're on a PC, and would like to join us live then check out our video</code></pre>
+<pre><code>&nbsp;I'd like to congratulate @TerraceParks_ for the first time. A lot</code></pre>
 </div>
 </div>
 <p>Nucleus sampling dynamically adjusts the number of candidate tokens based on the probability distribution, making it more adaptive than fixed top-k.</p>
-<p><strong>Temperature Control</strong></p>
+</section>
+<section id="temperature-control" class="level3">
+<h3 class="anchored" data-anchor-id="temperature-control">Temperature Control</h3>
 <p>Temperature (<span class="math inline">\tau</span>) modifies how “concentrated” the probability distribution is for sampling by scaling the logits before applying softmax:</p>
 <p><span class="math display">
 p_i = \frac{\exp(z_i/\tau)}{\sum_j \exp(z_j/\tau)}
 </span></p>
 <p>where <span class="math inline">z_i</span> are the logits and <span class="math inline">\tau</span> is the temperature parameter. Lower temperatures (<span class="math inline">\tau &lt; 1.0</span>) make the distribution more peaked, making high probability tokens even more likely to be chosen, leading to more focused and conservative outputs. Higher temperatures (<span class="math inline">\tau &gt; 1.0</span>) flatten the distribution by making the logits more similar, increasing the chances of selecting lower probability tokens and producing more diverse but potentially less coherent text. As <span class="math inline">\tau \to 0</span>, the distribution approaches a one-hot vector (equivalent to greedy search), while as <span class="math inline">\tau \to \infty</span>, it approaches a uniform distribution.</p>
 <p>In jazz terms, temperature controls the musician’s mood. Low temperature is playing it safe (sticking to the melody). High temperature is experimental improvisation (sometimes brilliant, sometimes cacophonous).</p>
-<div id="fig-gpt-temperature" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-gpt-temperature-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://cdn.prod.website-files.com/618399cd49d125734c8dec95/6639e35ce91c16b3b9564b2f_mxaIPcROZcBFYta1I0nzWjlGTgs-LxzUOE3p6Kbvf9qPpZzBh5AAZG7ciRtgVquhLTtrM8ToJdNd-ubXvuz8tRfrqBwSozWHCj457pm378buxz2-XrMfWzfSv3b793QP61kLxRKT299WP1gbas_E118.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gpt-temperature-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4: Temperature controls the concentration of the probability distribution. Lower temperature makes the distribution more peaked, while higher temperature makes the distribution more flat.
-</figcaption>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://cdn.prod.website-files.com/618399cd49d125734c8dec95/6639e35ce91c16b3b9564b2f_mxaIPcROZcBFYta1I0nzWjlGTgs-LxzUOE3p6Kbvf9qPpZzBh5AAZG7ciRtgVquhLTtrM8ToJdNd-ubXvuz8tRfrqBwSozWHCj457pm378buxz2-XrMfWzfSv3b793QP61kLxRKT299WP1gbas_E118.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
 </figure>
 </div>
+<p>Temperature controls the concentration of the probability distribution. Lower temperature makes the distribution more peaked, while higher temperature makes the distribution more flat.</p>
 <p>Let’s see how temperature affects generation:</p>
-<div id="7db91906" class="cell" data-execution_count="5">
+<div id="86ddf54f" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> tau <span class="kw">in</span> [<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="fl">5.0</span>]:</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> ollama.generate(</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span>MODEL,</span>
@@ -1142,18 +1115,20 @@ Figure&nbsp;4: Temperature controls the concentration of the probability distrib
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"τ = </span><span class="sc">{</span>tau<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>response[<span class="st">'response'</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>τ = 0.1: &nbsp;I'm going to be doing a lot of work on this project, so I'll have some
-τ = 0.5: _________________________________________
-My name is John. I'm a graphic designer and illustrator from Houston,
-τ = 1.0: &nbsp;I'm not sure I know what to say. So much for "Oh My Goddess!" and
-τ = 2.0: !!!! I had never been so excited to be a part of this. :) The first time around we
-τ = 5.0: &nbsp;I can definitely see it as well (if we could be so quick), this should not last</code></pre>
+<pre><code>τ = 0.1: &nbsp;I'm so glad you're here.
+The first thing I did was to get a picture
+τ = 0.5: &nbsp;I've been working on this project for almost two years now. I'm so excited to finally
+τ = 1.0: &nbsp;Just so I know, when you've been waiting for the post on my blog to be posted
+τ = 2.0: ____________________________________________ Let's see what you've found so far with this tutorial and tips on how to
+τ = 5.0: ____ |_/_ ___/ _ \ .\:(.* / )?| \\ || !</code></pre>
 </div>
 </div>
-<p>Notice how: - Low temperature (<span class="math inline">\tau = 0.1</span>): Conservative, focused output - Medium temperature (<span class="math inline">\tau = 1.0</span>): Balanced diversity - High temperature (<span class="math inline">\tau = 5.0</span>): Creative but potentially incoherent</p>
-<p><strong>Combining All Strategies</strong></p>
+<p>Notice how: Low temperature (τ = 0.1) produces conservative, focused output. Medium temperature (τ = 1.0) provides balanced diversity. High temperature (τ = 5.0) produces creative but potentially incoherent output.</p>
+</section>
+<section id="combining-all-strategies" class="level3">
+<h3 class="anchored" data-anchor-id="combining-all-strategies">Combining All Strategies</h3>
 <p>You can combine top-k, top-p, and temperature for fine-grained control:</p>
-<div id="366129ec" class="cell" data-execution_count="6">
+<div id="a9a803d6" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>combined_response <span class="op">=</span> ollama.generate(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>MODEL,</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    prompt<span class="op">=</span>PROMPT,</span>
@@ -1166,49 +1141,25 @@ My name is John. I'm a graphic designer and illustrator from Houston,
 <span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(combined_response[<span class="st">'response'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&nbsp;I've been looking forward to reading about your journey.
-Thanks for taking the time today,</code></pre>
+<pre><code>&nbsp;I'm glad that you guys are all enjoying the new release of this book. It's a</code></pre>
 </div>
 </div>
-<p>This combination restricts candidates to top-k tokens, then applies nucleus sampling, and finally uses temperature to control randomness—giving you maximum control over the generation process. The jazz musician now has a framework: work within these chords (top-k), adapt to the moment (nucleus), and choose your creative intensity (temperature).</p>
-<p><strong>Practical Recommendations</strong></p>
-<p>For most applications, use nucleus sampling with <span class="math inline">p = 0.9</span> and temperature <span class="math inline">\tau = 0.7</span>. This combination provides a good balance between coherence and creativity. For tasks requiring high factual accuracy (e.g., technical documentation), lower the temperature to <span class="math inline">\tau = 0.3</span> to make the model more conservative. For creative writing, increase the temperature to <span class="math inline">\tau = 1.0</span> or higher to encourage exploration.</p>
+<p>This combination restricts candidates to top-k tokens, then applies nucleus sampling, and finally uses temperature to control randomness, giving you maximum control over the generation process. The jazz musician now has a framework: work within these chords (top-k), adapt to the moment (nucleus), and choose your creative intensity (temperature).</p>
+</section>
+<section id="practical-recommendations" class="level3">
+<h3 class="anchored" data-anchor-id="practical-recommendations">Practical Recommendations</h3>
+<p>For most applications, use nucleus sampling with p = 0.9 and temperature τ = 0.7. This combination provides a good balance between coherence and creativity. For tasks requiring high factual accuracy (e.g., technical documentation), lower the temperature to τ = 0.3 to make the model more conservative. For creative writing, increase the temperature to τ = 1.0 or higher to encourage exploration.</p>
 <p>Beam search is useful when you need the single most probable sequence (e.g., machine translation), but it sacrifices diversity. Use it when correctness matters more than variety.</p>
 </section>
-<section id="the-takeaway" class="level2">
-<h2 class="anchored" data-anchor-id="the-takeaway">The Takeaway</h2>
+</section>
+<section id="the-key-insight" class="level2">
+<h2 class="anchored" data-anchor-id="the-key-insight">The Key Insight</h2>
 <p>Generation is sampling. Greedy picks the peak, beam search explores multiple peaks, and stochastic sampling adds controlled randomness. Temperature flattens or sharpens the distribution; nucleus sampling adapts to its shape. The right strategy depends on whether you’re optimizing for accuracy or creativity.</p>
 
 
-
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
-<div id="ref-holtzman2019curious" class="csl-entry" role="listitem">
-Holtzman, Ari, Jan Buys, Li Du, Maxwell Forbes, and Yejin Choi. 2019. <span>“The Curious Case of Neural Text Degeneration.”</span> <em>arXiv Preprint arXiv:1904.09751</em>.
-</div>
-</div></section></div></main> <!-- /main -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Find all breadcrumb containers
-  const breadcrumbs = document.querySelectorAll('.quarto-page-breadcrumbs ol.breadcrumb');
-
-  breadcrumbs.forEach(function(breadcrumb) {
-    // Create the TOC link as the first breadcrumb item
-    const tocItem = document.createElement('li');
-    tocItem.className = 'breadcrumb-item';
-
-    const tocLink = document.createElement('a');
-    tocLink.href = '../toc.html';
-    tocLink.textContent = 'Table of Contents';
-
-    tocItem.appendChild(tocLink);
-
-    // Insert at the beginning
-    breadcrumb.insertBefore(tocItem, breadcrumb.firstChild);
-  });
-});
-</script>
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
@@ -1641,6 +1592,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 </footer>
+<script src="../assets/breadcrumb-toc.js"></script>
 
 
 

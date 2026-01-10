@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2026-01-09">
+<meta name="dcterms.date" content="2026-01-10">
 
 <title>Reproducible Environments &amp; Projects – Applied Soft Computing</title>
 <style>
@@ -73,7 +73,7 @@ ul.task-list li input[type="checkbox"] {
 <link rel="stylesheet" href="../assets/custom.css">
 </head>
 
-<body class="nav-sidebar docked nav-fixed slimcontent quarto-light">
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -856,10 +856,9 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-    </div>
+    
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../m01-toolkit/overview.html">Module 1: The Data Scientist’s Toolkit</a></li><li class="breadcrumb-item"><a href="../m01-toolkit/reproduceability.html">Reproducibility</a></li></ol></nav>
 <div class="quarto-title">
@@ -880,7 +879,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">January 9, 2026</p>
+      <p class="date">January 10, 2026</p>
     </div>
   </div>
   
@@ -892,63 +891,68 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="the-importance-of-reproducibility" class="level2 page-columns page-full">
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+What you’ll learn in this module
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This module teaches you how to build truly reproducible projects. You’ll understand the three pillars of reproducibility: virtual environments, workflow automation, and comprehensive documentation. You’ll learn practical tools like uv and Snakemake, and discover how good project organization prevents errors and enables seamless collaboration.</p>
+</div>
+</div>
+<section id="the-importance-of-reproducibility" class="level2">
 <h2 class="anchored" data-anchor-id="the-importance-of-reproducibility">The Importance of Reproducibility</h2>
-<p>Reproducibility is a cornerstone of good science and a fundamental principle in computational research. It is the ability of an independent researcher to duplicate the results of a prior study using the same materials and procedures as were used by the original investigator. In the context of data science and soft computing, this means that your code, given the same input data, should produce the exact same outputs, every single time, regardless of the machine it is run on.</p>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<p>While the terms are often used interchangeably, it’s helpful to distinguish between them:</p>
-<ul>
-<li><p><strong>Reproducibility</strong>: Can an independent researcher achieve the exact same results using the original author’s data and code? This is a <em>computational</em> challenge.</p></li>
-<li><p><strong>Replicability</strong>: Can an independent researcher corroborate the scientific conclusions of a study by conducting a new, independent study? This is a <em>scientific</em> challenge.</p></li>
-</ul>
-<p>This note focuses on achieving <strong>computational reproducibility</strong>, which is the essential first step. If your own analysis isn’t reproducible, it’s impossible for anyone to even attempt to replicate your scientific findings.</p>
-</div></div></section>
-<section id="pillars-of-a-reproducible-project" class="level2 page-columns page-full">
+<p>Reproducibility is a cornerstone of good science and a fundamental principle in computational research. At its core, it means this: an independent researcher should be able to duplicate your results using the same materials and procedures you used. In data science, this means your code must produce the exact same outputs every single time, given the same input data, regardless of which machine runs it.</p>
+<p>Now, a quick distinction helps clarify what we’re really doing. <strong>Reproducibility</strong> asks: can an independent researcher achieve the exact same results using your data and code? This is a computational challenge. <strong>Replicability</strong>, on the other hand, asks: can an independent researcher confirm your scientific conclusions by conducting a brand new, independent study? This is a scientific challenge. We focus here on computational reproducibility, which is the essential first step. Without it, replication becomes impossible.</p>
+</section>
+<section id="pillars-of-a-reproducible-project" class="level2">
 <h2 class="anchored" data-anchor-id="pillars-of-a-reproducible-project">Pillars of a Reproducible Project</h2>
 <p>Achieving reproducibility requires a conscious effort and the right set of tools. We can think of a reproducible project as having three main pillars: <a href="https://aeturrell.github.io/python4DS/environments.html">Virtual Environments</a>, <a href="https://aeturrell.github.io/python4DS/workflows.html">Workflow automation</a>, and <a href="https://aeturrell.github.io/python4DS/documentation.html">Comprehensive documentation</a>.</p>
-<section id="virtual-environments" class="level3 page-columns page-full">
+<section id="virtual-environments" class="level3">
 <h3 class="anchored" data-anchor-id="virtual-environments">Virtual Environments</h3>
-<p><img src="https://www.saaspegasus.com/static/images/web/uv/no-venv.4e57a4b43eea.jpg" class="img-fluid"></p>
-<p>A virtual environment is an isolated container that holds all the necessary packages and dependencies for a specific project. This prevents conflicts between projects that might require different versions of the same library, a situation often referred to as “dependency hell.”</p>
-<p>For this course, we recommend <strong><a href="https://astral.sh/uv">uv</a></strong>. It is a modern and extremely fast Python package and environment manager, written in Rust. <code>uv</code> acts as an all-in-one tool, handling package installation (like <code>pip</code>) and virtual environment creation (like <code>venv</code>). Its integrated nature and high performance can significantly accelerate Python workflows.</p>
-<p>See the <a href="https://docs.astral.sh/uv/concepts/projects/init/#packaged-applications">documentation</a> on how to get started with <code>uv</code>.</p>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<p>Why not <code>conda</code>?</p>
-<p><code>conda</code> is an well-matuated and superior tool well-used in Python Community. Unlike <code>uv</code>, <code>conda</code> can have non-Python dependencies (like specific compilers or optimized BLAS/LAPACK libraries). Conda excels at managing these lower-level system packages. <code>uv</code>, on the other hand, focuses on Python packages. This apparently limited feature comes with some great benefits. Because <code>conda</code> supports non-Python packages, the virtual environment it created can have complex dependencies with your environments, preventing someone from recreating the same environment. <code>uv</code> has less issues since it focuses on Python packages.</p>
-</div></div></section>
+<p>A virtual environment is an isolated container holding all the packages and dependencies your project needs. Without one, you risk “dependency hell”: installing a new library for one project breaks another project that needs a different version of the same library.</p>
+<p>Picture the problem: you have project A using pandas 1.3 and project B using pandas 2.0. Without virtual environments, your system has only one pandas version installed, and one project breaks. Virtual environments solve this by giving each project its own isolated package space.</p>
+<p>For this course, we recommend <strong><a href="https://astral.sh/uv">uv</a></strong>. It’s a modern, blazingly fast Python package and environment manager written in Rust. Unlike older tools like <code>pip</code> and <code>venv</code>, <code>uv</code> combines both package installation and environment creation into one tool. This integrated approach and high performance can dramatically speed up your Python workflows.</p>
+<p>Ready to get started? Check the <a href="https://docs.astral.sh/uv/concepts/projects/init/#packaged-applications">uv documentation</a>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Why not conda?</strong> Conda is a mature, well-used tool in the Python community. Unlike <code>uv</code>, conda can manage non-Python dependencies like compilers or optimized BLAS libraries. This flexibility is powerful if you need system-level packages. However, this same flexibility creates complexity: conda environments can develop intricate dependencies that make them harder to replicate. <code>uv</code> focuses solely on Python packages, which actually simplifies reproducibility. Less flexibility sometimes means better reproducibility.</p>
+</div>
+</div>
+</section>
 <section id="workflow-management" class="level3">
 <h3 class="anchored" data-anchor-id="workflow-management">Workflow Management</h3>
+<p>As your project grows, the order of steps matters, and it gets complicated fast. One script preprocesses data, another trains a model, a third generates figures. If you run them manually in the wrong order, or forget which ones depend on which, errors creep in silently.</p>
 <div id="fig-workflow" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="https://divingintogeneticsandgenomics.com/img/rule_graph_lancet.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: This diagram dipicts a workflow of a research project, with each box representing a script/code and boxes are connected if the output of one box is the input of another box. As your project grows, the workflow can become complicated. So much so that you may not be able to remember the order of the steps. This is where workflow management tools come in.
+Figure&nbsp;1: This diagram shows a research project as a workflow, where each box is a script and connections show data flowing from one script to the next. As projects grow, these dependencies become impossible to track mentally.
 </figcaption>
 </figure>
 </div>
-<p>For complex projects with multiple steps, manually running scripts in the correct order is tedious and error-prone. A workflow management tool automates this process, defining a “pipeline” of computational steps and their dependencies.</p>
-<p>A recommended tool is <strong><a href="https://snakemake.readthedocs.io/en/stable/">Snakemake</a></strong>, a popular workflow management system that uses a human-readable, Python-based language. You define rules that specify how to create output files from input files. Snakemake automatically determines the order of execution and can parallelize tasks. See <strong>Introductory Video:</strong> <a href="https://www.youtube.com/watch?v=r9PWnEmz_tc">Link</a> on how to use it.</p>
-<p>A key principle when designing workflows is to <strong>make individual scripts atomic</strong>. For example, have one script for preprocessing data, another for performing an analysis, and a third for generating a figure. By making scripts minimal and short, they become more readable, reusable, and easier to debug.</p>
+<p>A workflow management tool automates this complexity. You define the steps and their dependencies, and the tool figures out the correct order, runs them all, and even parallelizes where possible.</p>
+<p><strong><a href="https://snakemake.readthedocs.io/en/stable/">Snakemake</a></strong> is excellent for this. It uses a readable, Python-based language where you define rules: here’s how to create output files from input files. Snakemake handles the rest. Want to learn more? Watch this <a href="https://www.youtube.com/watch?v=r9PWnEmz_tc">introductory video</a>.</p>
+<p>One principle matters deeply: make individual scripts <strong>atomic</strong>. One script preprocesses data. Another trains a model. A third generates figures. When scripts are minimal and focused, they become readable, reusable, and easy to debug.</p>
 </section>
 <section id="comprehensive-documentation" class="level3">
 <h3 class="anchored" data-anchor-id="comprehensive-documentation">Comprehensive Documentation</h3>
-<p>Code and data are not self-explanatory. Comprehensive documentation is crucial for another person (or your future self) to understand the what, why, and how of your project.</p>
-<section id="readme-files" class="level4">
-<h4 class="anchored" data-anchor-id="readme-files">README files</h4>
-<p>At a minimum, every project should have a <code>README.md</code> file in its root directory. This file should explain what the project is about, what the files are, and how to run the analysis. Ideally, a good README gives details like:</p>
-<ul>
-<li><strong>Project Description:</strong> What the project does and its goals.</li>
-<li><strong>File/Folder Structure:</strong> A brief summary so others can find what they need.</li>
-<li><strong>Data Table Structure:</strong> Describe columns and data format if example datasets are included.</li>
-<li><strong>Installation Instructions:</strong> How to set up the environment and dependencies.</li>
-<li><strong>Usage:</strong> How to run the main analysis/scripts.</li>
-<li><strong>Contact/License Information:</strong> Who to ask for help, licensing, or citation.</li>
-</ul>
-</section>
+<p>Code and data are not self-explanatory. Comprehensive documentation is crucial for anyone reading your project (including your future self) to understand the what, why, and how.</p>
+<p>Every project should have a <code>README.md</code> file in its root directory. This file explains what the project is about, what the files are, and how to run the analysis. A strong README includes a few key sections: start with a clear <strong>project description</strong> explaining what it does and its goals. Add a <strong>file structure summary</strong> so readers can navigate. If you include example datasets, describe the <strong>data table structure</strong>, including column names and formats. Provide <strong>installation instructions</strong> so people can set up the environment. Explain <strong>usage</strong> with examples of how to run the main scripts. Finally, add <strong>contact and license information</strong> so readers know who to ask and under what terms they can use your work.</p>
 </section>
 </section>
 <section id="project-organization-best-practices" class="level2">
@@ -956,24 +960,21 @@ Figure&nbsp;1: This diagram dipicts a workflow of a research project, with each 
 <p>Beyond the core tools, organizing your project thoughtfully is crucial for long-term reproducibility and collaboration.</p>
 <section id="file-and-directory-structure" class="level3">
 <h3 class="anchored" data-anchor-id="file-and-directory-structure">File and Directory Structure</h3>
-<p>It’s important to have a system to organize files and stick to it. A logical structure makes it easier for others (and your future self) to find things.</p>
-<ul>
-<li><strong>Descriptive Naming</strong>: Give files and directories clear, descriptive names. This is crucial to fully leverage keyword search.</li>
-<li><strong>Add Timestamps</strong>: For files that evolve over time (like datasets or reports), consider adding a timestamp (e.g., <code>2025-10-20_report.qmd</code>) to keep track of versions.</li>
-<li><strong>Further Watching</strong>:
-<ul>
-<li><a href="https://www.youtube.com/watch?v=ES1LTlnpLMk">How to name files</a></li>
-<li><a href="https://www.youtube.com/watch?v=MM-MPS57qKA&amp;t=230s">A Simple File Management System</a></li>
-</ul></li>
-</ul>
+<p>A logical file structure makes it easy for others and for future you to find things. Start with <strong>descriptive naming</strong>. Give files and directories clear, self-explanatory names so you can find them via search. Instead of <code>analysis.py</code>, use <code>preprocess_customer_data.py</code>.</p>
+<p>For files that evolve over time (like datasets or reports), consider <strong>adding timestamps</strong>. Name a report <code>2025-10-20_survey_analysis.qmd</code> instead of <code>report.qmd</code>. This lets you instantly identify which version is which.</p>
+<p>Want to dive deeper? Check out <a href="https://www.youtube.com/watch?v=ES1LTlnpLMk">How to name files</a> and <a href="https://www.youtube.com/watch?v=MM-MPS57qKA&amp;t=230s">A Simple File Management System</a>.</p>
 </section>
 <section id="writing-clean-code" class="level3">
 <h3 class="anchored" data-anchor-id="writing-clean-code">Writing Clean Code</h3>
-<p>The quality of your code directly impacts reproducibility. If your code is hard to read, it’s hard to verify. The book <a href="https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882">Clean Code: A Handbook of Agile Software Craftsmanship by Robert C. Martin</a> is an excellent resource on the principles of writing clean, maintainable code.</p>
-<p>By combining virtual environments, good documentation, workflow management, and thoughtful project organization, you can create robust, transparent, and fully reproducible computational projects.</p>
-
-
+<p>Here’s a simple truth: code quality directly impacts reproducibility. If your code is hard to read, it’s hard to verify. It’s hard to reuse. And it’s hard for someone else (or your future self) to understand why you made each choice.</p>
+<p>The book <a href="https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882">Clean Code: A Handbook of Agile Software Craftsmanship by Robert C. Martin</a> is an excellent guide to writing code that’s readable, maintainable, and trustworthy.</p>
 </section>
+</section>
+<section id="bringing-it-together" class="level2">
+<h2 class="anchored" data-anchor-id="bringing-it-together">Bringing It Together</h2>
+<p>By combining virtual environments, comprehensive documentation, workflow management, and thoughtful project organization, you’ve now built the foundation for reproducible computational projects. These practices protect your work, enable collaboration, and most importantly, help you trust your own results.</p>
+
+
 </section>
 
 </main> <!-- /main -->

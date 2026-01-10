@@ -10,14 +10,15 @@
         "    enabled: true\n",
         "---\n",
         "\n",
-        "## Semaxis\n",
+        "::: {.callout-note title=\"What you'll learn in this module\"}\n",
+        "Meaning in embeddings emerges entirely from contrast, not from inherent word properties. SemAxis provides a framework for defining semantic dimensions by subtracting antonym vectors, isolating specific axes that reveal how words align on dimensions like sentiment, intensity, or any conceptual opposition.\n",
+        ":::\n",
         "\n",
+        "## Embedding Space as Contrast\n",
         "\n",
-        "![Semaxis](../figs/semaxis-1.png)\n",
+        "We intuitively treat word embeddings as static maps where \"king\" is simply near \"queen\". We assume the meaning is inherent to the coordinate itself, much like a city has a fixed latitude and longitude. This is a convenient fiction. In embedding space, meaning emerges entirely from contrast, which is the key concept of SemAxis.\n",
         "\n",
-        "We intuitively treat word embeddings as static maps where \"king\" is simply near \"queen.\" We assume the meaning is inherent to the coordinate itself, much like a city has a fixed latitude and longitude. This is a convenient fiction. In embedding, meaning emerges entirely from *contrast*, which is the key concept of **Semaxis**.\n",
-        "\n",
-        "**Semaxis** [@an2018semaxis,kwak2020semaxis] is a way to define a semantic axis by subtracting the vector of an antonym from a word (e.g., $v_{good} - v_{bad}$). This isolates a semantic dimension---an \"axis\"---that ignores all other information.\n",
+        "SemAxis is a way to define a semantic axis by subtracting the vector of an antonym from a word (e.g., $v_{good} - v_{bad}$). This isolates a semantic dimension, an \"axis\", that ignores all other information.\n",
         "\n",
         "Formally, given two pole words $w_+$ and $w_-$, the axis is defined as:\n",
         "\n",
@@ -25,19 +26,17 @@
         "v_{\\text{axis}} = \\frac{v_{w_+} - v_{w_-}}{||v_{w_+} - v_{w_-}\\||_2}\n",
         "$$\n",
         "\n",
-        "where the denominator is the $L_2$ norm of the difference vector that ensures that axis vector $v_{axis}$ is a unit vector.\n",
-        "\n",
-        "Using this \"ruler\", we project the words into this axis. Operationally, the position of a word $w$ is given by the cosine similarity between $v_{w}$ and $v_{axis}$.\n",
+        "where the denominator is the $L_2$ norm of the difference vector that ensures the axis vector $v_{\\text{axis}}$ is a unit vector. Using this \"ruler\", we project words into this axis. Operationally, the position of a word $w$ is given by the cosine similarity between $v_{w}$ and $v_{\\text{axis}}$.\n",
         "\n",
         "$$\n",
-        "\\text{Position of w on axis $v_{\\text{axis}}$} = \\cos(v_{\\text{axis}},v_{w})\n",
+        "\\text{Position of w on axis } v_{\\text{axis}} = \\cos(v_{\\text{axis}},v_{w})\n",
         "$$\n",
         "\n",
-        "We will build a \"Sentiment Compass\" to measure the emotional charge of words that aren't explicitly emotional.\n",
+        "Let's build a \"Sentiment Compass\" to measure the emotional charge of words that aren't explicitly emotional.\n",
         "\n",
         "First, we load the standard GloVe embeddings."
       ],
-      "id": "bd60571c"
+      "id": "b6ed0d65"
     },
     {
       "cell_type": "code",
@@ -50,7 +49,7 @@
         "# Download and load pre-trained GloVe embeddings\n",
         "model = api.load(\"glove-wiki-gigaword-100\")"
       ],
-      "id": "c13613b3",
+      "id": "6e6cb7b2",
       "execution_count": null,
       "outputs": []
     },
@@ -58,11 +57,11 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
-        "### Defining the Axis\n",
+        "## Defining the Axis\n",
         "\n",
-        "We define the axis not as a point, but as the difference vector between two poles. This vector points from \"bad\" to \"good.\""
+        "We define the axis not as a point, but as the difference vector between two poles. This vector points from \"bad\" to \"good\"."
       ],
-      "id": "d2ab3bbf"
+      "id": "29ebc860"
     },
     {
       "cell_type": "code",
@@ -75,7 +74,7 @@
         "# The \"Sentiment\" Axis\n",
         "sentiment_axis = create_axis(\"good\", \"bad\", model)"
       ],
-      "id": "b2cd594d",
+      "id": "0892f582",
       "execution_count": null,
       "outputs": []
     },
@@ -83,11 +82,11 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
-        "### Measuring Alignment\n",
+        "## Measuring Alignment\n",
         "\n",
-        "To see where a word falls on this axis, we project it. Mathematically, this is the dot product (normalized). If the vector points in the same direction, the score is positive; if it points away, it is negative."
+        "To see where a word falls on this axis, we project it. Mathematically, this is the dot product (normalized). If the vector points in the same direction, the score is positive. If it points away, it is negative."
       ],
-      "id": "3facbe52"
+      "id": "211f26ca"
     },
     {
       "cell_type": "code",
@@ -103,7 +102,7 @@
         "for w in words:\n",
         "    print(f\"{w}: {get_score(w, sentiment_axis, model):.3f}\")"
       ],
-      "id": "d8e51a7c",
+      "id": "ed7abf5d",
       "execution_count": null,
       "outputs": []
     },
@@ -111,13 +110,11 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
-        "### Robustness via Centroids\n",
+        "## Robustness via Centroids\n",
         "\n",
-        "![Semaxis](../figs/semaxis-2.png)\n",
-        "\n",
-        "Single words are noisy. \"Bad\" might carry connotations of \"naughty\" or \"poor quality.\" To fix this, we don't use single words; we use the *centroid* of a cluster of synonyms. This averages out the noise and leaves only the pure semantic signal."
+        "Single words are noisy. \"Bad\" might carry connotations of \"naughty\" or \"poor quality\". To fix this, we don't use single words. We use the centroid of a cluster of synonyms. This averages out the noise and leaves only the pure semantic signal."
       ],
-      "id": "9f0300a8"
+      "id": "74a3299e"
     },
     {
       "cell_type": "code",
@@ -144,7 +141,7 @@
         "\n",
         "robust_axis = create_robust_axis(\"good\", \"bad\", model)"
       ],
-      "id": "3482c3a1",
+      "id": "273ed77d",
       "execution_count": null,
       "outputs": []
     },
@@ -152,11 +149,11 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
-        "### The 2D Semantic Space\n",
+        "## The 2D Semantic Space\n",
         "\n",
         "The real power comes when we cross two axes. By plotting words against \"Sentiment\" and \"Intensity\" (Strong vs. Weak), we reveal relationships that a single list hides."
       ],
-      "id": "8e9b0895"
+      "id": "7bc7777d"
     },
     {
       "cell_type": "code",
@@ -201,7 +198,7 @@
         "\n",
         "plot_2d(test_words, sentiment_axis, intensity_axis, model)"
       ],
-      "id": "ce67fc38",
+      "id": "4289ee0f",
       "execution_count": null,
       "outputs": []
     },
@@ -209,19 +206,19 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
-        "## The Takeaway\n",
+        "## The Key Insight\n",
         "\n",
-        "To define a concept, you must first define its opposite."
+        "To define a concept, you must first define its opposite. Meaning isn't stored in the word itself. It lives in the contrast space, the relationship between poles that defines an axis. SemAxis operationalizes this principle: by defining opposition, we isolate the dimension that matters."
       ],
-      "id": "729cd976"
+      "id": "19c88f4d"
     }
   ],
   "metadata": {
     "kernelspec": {
-      "name": "python3",
+      "name": "applsoftcomp",
       "language": "python",
-      "display_name": "Python 3 (ipykernel)",
-      "path": "/Users/skojaku-admin/Documents/projects/applied-soft-comp/.venv/share/jupyter/kernels/python3"
+      "display_name": "Python (applsoftcomp)",
+      "path": "/Users/skojaku-admin/Library/Jupyter/kernels/applsoftcomp"
     }
   },
   "nbformat": 4,

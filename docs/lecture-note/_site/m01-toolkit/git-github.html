@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2026-01-09">
+<meta name="dcterms.date" content="2026-01-10">
 
 <title>Git &amp; GitHub: Your Time Machine for Code – Applied Soft Computing</title>
 <style>
@@ -73,7 +73,7 @@ ul.task-list li input[type="checkbox"] {
 <link rel="stylesheet" href="../assets/custom.css">
 </head>
 
-<body class="nav-sidebar docked nav-fixed slimcontent quarto-light">
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -856,10 +856,9 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-    </div>
+    
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../m01-toolkit/overview.html">Module 1: The Data Scientist’s Toolkit</a></li><li class="breadcrumb-item"><a href="../m01-toolkit/git-github.html">Version Control with Git &amp; GitHub</a></li></ol></nav>
 <div class="quarto-title">
@@ -880,7 +879,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">January 9, 2026</p>
+      <p class="date">January 10, 2026</p>
     </div>
   </div>
   
@@ -892,14 +891,25 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="the-day-the-code-disappeared" class="level3 page-columns page-full">
-<h3 class="anchored" data-anchor-id="the-day-the-code-disappeared">The Day the Code Disappeared</h3>
-<p>Picture this: you’re working late on a project, you’ve finally fixed a major bug, and you’re about to go home. You close your laptop, and the next morning, you open it up to find that all your changes from the previous day are gone. Your heart sinks. You have no idea what you did to fix the bug, and you have to start all over again.</p>
-<p>Even the pros can make mistakes. In 2017, GitLab, a major code hosting platform, suffered a catastrophic outage. A system administrator accidentally deleted a massive amount of production data, and the backups… well, they didn’t work as expected. The company lost six hours of customer data, a lifetime in the fast-paced world of software development.</p>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<p>You can read the full, cringe-worthy post-mortem on the <a href="https://about.gitlab.com/blog/2017/02/01/gitlab-dot-com-database-incident/">GitLab blog</a>.</p>
-</div></div><blockquote class="twitter-tweet blockquote">
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+What you’ll learn in this module
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This module introduces Git and GitHub, your tools for tracking code changes and collaborating. You’ll learn why version control matters through real-world disasters, understand how Git saves snapshots of your work, and discover how to use GitHub to backup your code and work with others.</p>
+</div>
+</div>
+<section id="the-day-the-code-disappeared" class="level2">
+<h2 class="anchored" data-anchor-id="the-day-the-code-disappeared">The Day the Code Disappeared</h2>
+<p>Picture this: you’re working late on a project, and you finally fix a major bug. Your fingers are on the keyboard when you suddenly delete a line by accident, then save. You go home. The next morning, you open your laptop and realize all your work from yesterday is gone. The bug fix vanished. You have no idea what you did to fix it, and you have to start from scratch.</p>
+<p>Even big companies get it wrong. In 2017, GitLab, a major code hosting platform, suffered a catastrophic outage. A system administrator accidentally deleted massive amounts of production data. The backups didn’t work. The company lost six hours of customer data. That’s a lifetime in the software world.</p>
+<p>The details are uncomfortable reading. Check out the <a href="https://about.gitlab.com/blog/2017/02/01/gitlab-dot-com-database-incident/">GitLab post-mortem</a> if you want to see what went wrong.</p>
+<blockquote class="twitter-tweet blockquote">
 <p lang="en" dir="ltr">
 We accidentally deleted production data and might have to restore from backup. Google Doc with live notes <a href="https://t.co/EVRbHzYlk8">https://t.co/EVRbHzYlk8</a>
 </p>
@@ -907,30 +917,19 @@ We accidentally deleted production data and might have to restore from backup. G
 </blockquote>
 <script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 </section>
-<section id="version-control" class="level3 page-columns page-full">
-<h3 class="anchored" data-anchor-id="version-control">Version Control</h3>
-<p>Version control is a very important part of any data-related work. A version control system (VCS) saves “snapshots” of your files. The most popular system today is <strong>Git</strong>, and when you put Git in the cloud (like on <strong>GitHub</strong>), you can access your work from anywhere, share it, and even show it off.</p>
-
-<div class="no-row-height column-margin column-container"><div class="">
+<section id="version-control" class="level2">
+<h2 class="anchored" data-anchor-id="version-control">Version Control</h2>
+<p>Version control is essential for any data-related work. A version control system (VCS) saves “snapshots” of your files. Think of it as a time machine: you can travel back to any snapshot and see exactly what your code looked like at that moment.</p>
+<p>The most popular VCS today is <strong>Git</strong>. When you put Git in the cloud (like on <strong>GitHub</strong>), something magical happens: you can access your work from anywhere, share it with teammates, and back it up automatically. You’ve gone from a time machine to a collaborative, backed-up time machine.</p>
+<p>Here’s a quick intro video to get you oriented:</p>
 <iframe width="280" height="158" src="https://www.youtube.com/embed/RGOj5yH7evk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="">
 </iframe>
-</div></div><p>The following blog is a good minimal documentation about <code>git</code> and <code>github</code>.</p>
-<ul>
-<li><a href="https://webtuu.com/blog/04/a-laymans-introduction-to-git">A layman’s introduction to Git</a></li>
-</ul>
-<p>You can also test your understanding of Git and GitHub with the following interactive tutorial:</p>
-<ul>
-<li><a href="https://learngitbranching.js.org/">Interactive Git Tutorial</a> - Visual, hands-on learning</li>
-</ul>
-<p>For more comprehensive documentation, you can refer to the following resources:</p>
-<ul>
-<li><a href="https://git-scm.com/book/ms/v2/Getting-Started-About-Version-Control">Git Documentation</a></li>
-<li><a href="https://www.atlassian.com/git/tutorials">Atlassian Git Tutorials</a> - Detailed tutorials with examples</li>
-</ul>
-<p>And I recommend the beginners to start with <a href="https://desktop.github.com/">GitHub Desktop</a>, instead of command line, to manage your Git repositories.</p>
-<ul>
-<li><a href="https://docs.github.com/en/desktop">GitHub Desktop Documentation</a> - Official desktop app guide</li>
-</ul>
+</section>
+<section id="learning-resources" class="level2">
+<h2 class="anchored" data-anchor-id="learning-resources">Learning Resources</h2>
+<p>Start with <a href="https://webtuu.com/blog/04/a-laymans-introduction-to-git">A Layman’s Introduction to Git</a> for a readable overview. For hands-on learning, try the <a href="https://learngitbranching.js.org/">Interactive Git Tutorial</a>, which teaches Git visually through interactive exercises.</p>
+<p>If you want comprehensive documentation, check out the <a href="https://git-scm.com/book/ms/v2/Getting-Started-About-Version-Control">Git Documentation</a> or the <a href="https://www.atlassian.com/git/tutorials">Atlassian Git Tutorials</a> for detailed examples.</p>
+<p>For beginners, I recommend starting with <a href="https://desktop.github.com/">GitHub Desktop</a> instead of the command line. It gives you a graphical way to manage your repositories while you learn Git concepts. See the <a href="https://docs.github.com/en/desktop">GitHub Desktop Documentation</a> for more details.</p>
 
 
 </section>

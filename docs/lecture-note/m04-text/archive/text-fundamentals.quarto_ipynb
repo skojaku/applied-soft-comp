@@ -29,7 +29,7 @@
         "\n",
         "Break text into units (tokens)—usually words, but sometimes sentences, characters, or subwords."
       ],
-      "id": "85357d5a"
+      "id": "0fe81e31"
     },
     {
       "cell_type": "code",
@@ -43,7 +43,7 @@
         "tokens = text.lower().split()\n",
         "print(\"Tokens:\", tokens)"
       ],
-      "id": "d5038dc4",
+      "id": "42bf61a1",
       "execution_count": null,
       "outputs": []
     },
@@ -63,7 +63,7 @@
         "\n",
         "Modern tokenizers (like those in transformers) use sophisticated algorithms:"
       ],
-      "id": "5de3abba"
+      "id": "d8636c40"
     },
     {
       "cell_type": "code",
@@ -80,7 +80,7 @@
         "tokens = tokenizer.tokenize(text)\n",
         "print(\"BERT tokens:\", tokens)"
       ],
-      "id": "9de36e6d",
+      "id": "b1c3bf1d",
       "execution_count": null,
       "outputs": []
     },
@@ -111,7 +111,7 @@
         "\n",
         "Create a mapping from tokens to integers."
       ],
-      "id": "b30b692a"
+      "id": "63bb8933"
     },
     {
       "cell_type": "code",
@@ -134,7 +134,7 @@
         "print(\"Vocabulary:\", vectorizer.get_feature_names_out())\n",
         "print(\"Vocabulary size:\", len(vectorizer.vocabulary_))"
       ],
-      "id": "9e1cc2f2",
+      "id": "4890c221",
       "execution_count": null,
       "outputs": []
     },
@@ -155,7 +155,7 @@
         "\n",
         "**Idea**: Represent a document by counting how many times each word appears."
       ],
-      "id": "63d2125c"
+      "id": "6f142a60"
     },
     {
       "cell_type": "code",
@@ -174,7 +174,7 @@
         "    if count > 0:\n",
         "        print(f\"  {word}: {count}\")"
       ],
-      "id": "aec88306",
+      "id": "ee7d73bc",
       "execution_count": null,
       "outputs": []
     },
@@ -207,7 +207,7 @@
         "\n",
         "Now we can compute similarity between documents using **cosine similarity** (just like with embeddings!)."
       ],
-      "id": "b40eee41"
+      "id": "d7332529"
     },
     {
       "cell_type": "code",
@@ -226,7 +226,7 @@
         "        if i != j:\n",
         "            print(f\"  vs. Doc {j+1}: {similarities[i, j]:.3f}\")"
       ],
-      "id": "a4fbaafd",
+      "id": "aa82753a",
       "execution_count": null,
       "outputs": []
     },
@@ -283,7 +283,7 @@
         "\n",
         "### Example"
       ],
-      "id": "ebcc60ab"
+      "id": "44503c2f"
     },
     {
       "cell_type": "code",
@@ -312,7 +312,7 @@
         "    if doc1_tfidf[idx] > 0:\n",
         "        print(f\"  {feature_names[idx]:15s} {doc1_tfidf[idx]:.3f}\")"
       ],
-      "id": "4ddda2a7",
+      "id": "f31339b6",
       "execution_count": null,
       "outputs": []
     },
@@ -336,7 +336,7 @@
         "\n",
         "### Comparing BoW vs. TF-IDF"
       ],
-      "id": "48a1e2c7"
+      "id": "65a1e084"
     },
     {
       "cell_type": "code",
@@ -376,7 +376,7 @@
         "plt.tight_layout()\n",
         "plt.show()"
       ],
-      "id": "680f0e12",
+      "id": "dc3a7604",
       "execution_count": null,
       "outputs": []
     },
@@ -404,7 +404,7 @@
         "- **Bigram**: Two consecutive words (\"network analysis\")\n",
         "- **Trigram**: Three consecutive words (\"network analysis techniques\")"
       ],
-      "id": "8ca74080"
+      "id": "a002f188"
     },
     {
       "cell_type": "code",
@@ -424,7 +424,7 @@
         "bigrams = [f for f in features if ' ' in f]\n",
         "print(bigrams[:10])"
       ],
-      "id": "765f7956",
+      "id": "ef9569dc",
       "execution_count": null,
       "outputs": []
     },
@@ -451,7 +451,7 @@
         "\n",
         "Let's directly compare BoW, TF-IDF, and embeddings on the same task."
       ],
-      "id": "c1d1027b"
+      "id": "24691a9f"
     },
     {
       "cell_type": "code",
@@ -489,7 +489,7 @@
         "print(f\"TF-IDF similarity:     {tfidf_sim[0, 2]:.3f}\")\n",
         "print(f\"Embedding similarity:  {emb_sim[0, 2]:.3f}\")"
       ],
-      "id": "0396facb",
+      "id": "c6211bad",
       "execution_count": null,
       "outputs": []
     },
@@ -532,7 +532,7 @@
         "\n",
         "Let's build a complete pipeline showing all the steps."
       ],
-      "id": "7f3b7ea5"
+      "id": "f734adaa"
     },
     {
       "cell_type": "code",
@@ -594,7 +594,7 @@
         "for idx in top_indices:\n",
         "    print(f\"    {feature_names[idx]:15s} {tfidf_scores[idx]:.3f}\")"
       ],
-      "id": "496f9921",
+      "id": "1a748b4c",
       "execution_count": null,
       "outputs": []
     },
@@ -636,7 +636,7 @@
         "\n",
         "Let's compare BoW and embeddings on a practical task: classifying papers by topic."
       ],
-      "id": "86203168"
+      "id": "4510c413"
     },
     {
       "cell_type": "code",
@@ -688,7 +688,7 @@
         "print(\"Embeddings + Logistic Regression:\")\n",
         "print(f\"  Cross-validation accuracy: {scores_emb.mean():.3f} ± {scores_emb.std():.3f}\")"
       ],
-      "id": "6ec18419",
+      "id": "35760627",
       "execution_count": null,
       "outputs": []
     },
@@ -759,7 +759,7 @@
         "\n",
         "**Next**: [Semantic Analysis for Research →](semantic-research.qmd)"
       ],
-      "id": "82b7912a"
+      "id": "9808da41"
     }
   ],
   "metadata": {
@@ -767,7 +767,7 @@
       "name": "python3",
       "language": "python",
       "display_name": "Python 3 (ipykernel)",
-      "path": "/Users/skojaku-admin/Documents/projects/applied-soft-comp/.venv/share/jupyter/kernels/python3"
+      "path": "/Users/skojaku-admin/miniforge3/envs/advnetsci/share/jupyter/kernels/python3"
     }
   },
   "nbformat": 4,

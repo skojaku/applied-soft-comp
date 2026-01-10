@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2026-01-09">
+<meta name="dcterms.date" content="2026-01-10">
 
 <title>Time Series Visualization – Applied Soft Computing</title>
 <style>
@@ -104,11 +104,54 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../assets/custom.css">
 </head>
 
-<body class="nav-sidebar docked nav-fixed slimcontent quarto-light">
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -891,10 +934,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-    </div>
+    
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../m02-visualization/overview.html">Module 2: Visualizing Complexity</a></li><li class="breadcrumb-item"><a href="../m02-visualization/time-series.html">Visualizing Time-Series</a></li></ol></nav>
 <div class="quarto-title">
@@ -915,7 +957,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">January 9, 2026</p>
+      <p class="date">January 10, 2026</p>
     </div>
   </div>
   
@@ -927,22 +969,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>In March 2020, news outlets worldwide showed charts of COVID-19 cases rising exponentially. Some charts showed linear y-axes with curves shooting upward dramatically. Others used logarithmic y-axes where the same data appeared as straight lines. Politicians cherry-picked time windows to show “flattening curves.” The same data told vastly different stories depending on how it was visualized.</p>
-<p>Or consider stock market charts: show the last month, and a 10% drop looks catastrophic. Zoom out to show the last decade, and the same drop becomes a minor blip barely visible on the chart.</p>
-<p>Time series dataobservations ordered by timeis everywhere. But time is special. Unlike other variables, it flows in one direction, has natural rhythms (daily, seasonal, cyclical), and carries momentum. <strong>Your visualization choices can reveal genuine patterns or create misleading narratives.</strong></p>
-<p>The key principle to keep in mind:</p>
-<p><strong>Time is specialshow how your data changes over time honestly and clearly.</strong></p>
-<section id="why-time-series-visualization-matters" class="level1">
-<h1>Why Time Series Visualization Matters</h1>
-<p>Time series visualizations are perhaps the most common type of chart in news media, scientific papers, and business dashboards. They answer fundamental questions: Is this trend going up or down? Are there cycles? When did something change?</p>
-<p>But they’re also easy to manipulate. By selecting the time window, changing the y-axis scale, or choosing different aggregation levels, the same data can support contradictory conclusions.</p>
-<p>Consider these common pitfalls: - <strong>Truncated y-axes</strong> that exaggerate small changes - <strong>Cherry-picked time windows</strong> that hide long-term trends - <strong>Inappropriate scales</strong> (linear vs.&nbsp;log) that obscure or inflate patterns - <strong>Over-smoothing</strong> that removes real variation - <strong>Under-smoothing</strong> that shows only noise</p>
-<p>Good time series visualization is about making honest choices that reveal the actual patterns in your data.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+What you’ll learn in this module
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This module explores how to visualize time series data effectively, moving beyond simple line charts to reveal true underlying patterns. We will examine how choices in scale and geometry, such as small multiples, logarithmic axes, and lag plots, can either expose genuine trends or manufacture misleading narratives.</p>
+</div>
+</div>
+<section id="the-nature-of-time" class="level2">
+<h2 class="anchored" data-anchor-id="the-nature-of-time">The nature of time</h2>
+<p>Let’s talk about time. In March 2020, charts of COVID-19 cases told vastly different stories depending on how they were visualized. Some used linear scales, showing a terrifying vertical wall. Others used log scales, showing a straight line. Politicians cherry-picked time windows to claim “flattening curves.”</p>
+<p>Time series data is special because it implies causality and momentum. Unlike other variables, time flows in one direction. Your choices of scale, aggregation, and geometry determine whether you reveal a genuine pattern or manufacture a misleading narrative.</p>
 </section>
-<section id="basic-time-series-line-plots" class="level1">
-<h1>Basic Time Series: Line Plots</h1>
-<p>The most fundamental time series visualization is the <strong>line plot</strong>: time on the x-axis, values on the y-axis, points connected by lines.</p>
-<div id="3830c394" class="cell" data-fig-height="5" data-fig-width="12" data-execution_count="1">
+<section id="line-plots-and-the-continuity-illusion" class="level2">
+<h2 class="anchored" data-anchor-id="line-plots-and-the-continuity-illusion">Line plots and the continuity illusion</h2>
+<p>The most fundamental choice is whether to connect the dots. A line plot suggests continuity, implying that a value exists at every moment between your measurements. This works for temperature or stock prices, where the variable has momentum.</p>
+<div id="0c0028b1" class="cell" data-fig-height="5" data-fig-width="12" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -983,9 +1031,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>The line connecting points implies <strong>continuity</strong>that values exist between measurements. This is appropriate for continuous processes (temperature, stock prices, heart rate) but not for discrete events or counts measured at intervals.</p>
-<p>When should you <strong>not</strong> connect the dots? When your data represents discrete events or when measurements are too sparse to imply continuity.</p>
-<div id="059cfece" class="cell" data-fig-height="5" data-fig-width="14" data-execution_count="2">
+<p>But what if your data is discrete? If you plot distinct sales events or email arrivals as a line, you create a false narrative of values existing in the gaps. In those cases, let the silence between points speak.</p>
+<div id="139b51f4" class="cell" data-fig-height="5" data-fig-width="14" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate sparse discrete event data</span></span>
@@ -1024,12 +1071,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>For discrete events, stick with scatter plots or bar charts. Don’t imply continuity where none exists.</p>
 </section>
-<section id="comparing-multiple-time-series" class="level1">
-<h1>Comparing Multiple Time Series</h1>
-<p>Often you need to compare several time series. The natural approach is to overlay them on the same plot.</p>
-<div id="9c6db970" class="cell" data-fig-height="6" data-fig-width="12" data-execution_count="3">
+<section id="comparing-series-the-spaghetti-problem" class="level2">
+<h2 class="anchored" data-anchor-id="comparing-series-the-spaghetti-problem">Comparing series: The spaghetti problem</h2>
+<p>Often you need to compare multiple series. The natural instinct is to overlay them on the same plot. This works for two or three variables, but as the count rises, you fall into the spaghetti trap where individual trends get lost in the tangle.</p>
+<div id="a116350c" class="cell" data-fig-height="6" data-fig-width="12" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate three related time series</span></span>
@@ -1068,9 +1114,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>This works well for 2-4 series. Beyond that, you risk creating a <strong>spaghetti plot</strong>a tangled mess where individual series become impossible to follow.</p>
-<p>When you have many time series, use <strong>small multiples</strong> (faceting): separate plots arranged in a grid, each with the same axes for easy comparison.</p>
-<div id="6c1a065e" class="cell" data-fig-height="8" data-fig-width="14" data-execution_count="4">
+<p>The solution is small multiples (or faceting). By giving each series its own stage while locking the axes, you preserve both the individual trends and the ability to compare them.</p>
+<div id="49d19be9" class="cell" data-fig-height="8" data-fig-width="14" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate multiple time series</span></span>
@@ -1109,13 +1154,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>Small multiples let you see each series clearly while maintaining comparability through shared axes.</p>
 </section>
-<section id="the-power-of-scale-linear-vs.-logarithmic" class="level1">
-<h1>The Power of Scale: Linear vs.&nbsp;Logarithmic</h1>
-<p>Perhaps the most consequential choice in time series visualization is the <strong>y-axis scale</strong>. The same data looks completely different on linear vs.&nbsp;logarithmic scales.</p>
-<p>When should you use a log scale? - When your data spans <strong>multiple orders of magnitude</strong> (e.g., 10 to 10,000) - When you care about <strong>percentage changes</strong> rather than absolute changes - When visualizing <strong>exponential growth or decay</strong></p>
-<div id="1ac15aa4" class="cell" data-fig-height="5" data-fig-width="14" data-execution_count="5">
+<section id="the-power-of-scale-linear-vs-log" class="level2">
+<h2 class="anchored" data-anchor-id="the-power-of-scale-linear-vs-log">The power of scale: Linear vs Log</h2>
+<p>Perhaps the most consequential choice in time series visualization is the y-axis scale. Your choice defines the question you are answering. A linear scale asks “How much did it increase?” A log scale asks “How fast is it growing?”</p>
+<p>In the example below, the linear scale suggests an explosive crisis at the end. The log scale reveals that the growth rate has been constant the entire time.</p>
+<div id="29954f3a" class="cell" data-fig-height="5" data-fig-width="14" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate exponential growth data (e.g., epidemic spread)</span></span>
@@ -1156,27 +1200,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>On a <strong>linear scale</strong>, exponential growth appears as a dramatic upward curvemost growth happens at the end. On a <strong>log scale</strong>, exponential growth becomes a straight line, making it easy to see if the growth rate is constant, accelerating, or decelerating.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-default callout-note callout-titled" title="Why Log Scales?">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Log Scales Can Hide Magnitude
+Why Log Scales?
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>While log scales are essential for percentage changes and exponential processes, they can <strong>downplay the absolute magnitude</strong> of changes. A jump from 10,000 to 100,000 cases looks the same as a jump from 100 to 1,000both are one order of magnitude. But in human terms, 90,000 additional cases is far more significant than 900.</p>
-<p><strong>Always consider your audience and what you want to emphasize</strong>: relative changes (use log) or absolute numbers (use linear).</p>
+<p>Log scales are essential for data spanning orders of magnitude or when percentage changes matter more than absolute units. However, they can downplay absolute magnitude. A jump from 100 to 1,000 looks the same as 10,000 to 100,000.</p>
 </div>
 </div>
 </section>
-<section id="smoothing-and-trends" class="level1">
-<h1>Smoothing and Trends</h1>
-<p>Real time series data is often noisy. <strong>Smoothing</strong> helps reveal underlying trends by averaging out short-term fluctuations.</p>
-<p>The most common approach is a <strong>moving average</strong>: replace each point with the average of nearby points.</p>
-<div id="fd4f1d7b" class="cell" data-fig-height="6" data-fig-width="12" data-execution_count="6">
+<section id="smoothing-and-trends" class="level2">
+<h2 class="anchored" data-anchor-id="smoothing-and-trends">Smoothing and trends</h2>
+<p>Real data is messy. Smoothing via moving averages mimics how we squint at a chart to blur out the details and see the trend.</p>
+<p>The window size controls the trade-off. A small window keeps the texture, showing volatility. A large window reveals the structure, showing the trend.</p>
+<div id="5223ac9e" class="cell" data-fig-height="6" data-fig-width="12" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate noisy time series</span></span>
@@ -1215,27 +1257,11 @@ Log Scales Can Hide Magnitude
 </div>
 </div>
 </div>
-<p>The smoothing window creates a trade-off: - <strong>Short windows</strong> (e.g., 7 days) preserve more detail but still show fluctuations - <strong>Long windows</strong> (e.g., 30 days) reveal long-term trends but may over-smooth and miss real changes</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Choosing the Right Window
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>The appropriate smoothing window depends on your data’s frequency and the patterns you care about: - <strong>Daily stock prices</strong>: 5-20 day moving average - <strong>Monthly sales</strong>: 3-6 month moving average - <strong>Annual measurements</strong>: 3-5 year moving average</p>
-<p>Match your window to the timescale of meaningful variation in your domain.</p>
-</div>
-</div>
 </section>
-<section id="showing-uncertainty-over-time" class="level1">
-<h1>Showing Uncertainty Over Time</h1>
-<p>When forecasting or estimating, you don’t just have point predictionsyou have <strong>uncertainty</strong>. Showing this uncertainty is crucial for honest communication.</p>
-<p>Use <strong>ribbon plots</strong> (also called envelope plots) to show confidence intervals or prediction intervals around your estimates.</p>
-<div id="7b95e4a3" class="cell" data-fig-height="6" data-fig-width="12" data-execution_count="7">
+<section id="showing-uncertainty" class="level2">
+<h2 class="anchored" data-anchor-id="showing-uncertainty">Showing uncertainty</h2>
+<p>Predicting the future is an exercise in humility. A forecast without an error bar is a lie of precision. Use ribbon plots to visualize the widening cone of uncertainty as time moves forward.</p>
+<div id="52703eb6" class="cell" data-fig-height="6" data-fig-width="12" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate data with trend</span></span>
@@ -1290,13 +1316,11 @@ Choosing the Right Window
 </div>
 </div>
 </div>
-<p>The ribbon makes it clear that predictions further into the future are more uncertain. Without showing this uncertainty, forecasts can appear deceptively precise.</p>
 </section>
-<section id="temporal-aggregation-choosing-your-time-scale" class="level1 page-columns page-full">
-<h1>Temporal Aggregation: Choosing Your Time Scale</h1>
-<p>How you aggregate time can dramatically change what patterns emerge. The same data aggregated hourly, daily, or monthly reveals different stories.</p>
-<p><strong>Heat maps</strong> are excellent for visualizing patterns across two time dimensionssay, hour of day vs.&nbsp;day of week.</p>
-<div id="1eb2278c" class="cell" data-fig-height="8" data-fig-width="12" data-execution_count="8">
+<section id="the-rhythm-of-time-heatmaps-and-cycles" class="level2">
+<h2 class="anchored" data-anchor-id="the-rhythm-of-time-heatmaps-and-cycles">The rhythm of time: Heatmaps and Cycles</h2>
+<p>Time often cycles rather than marches. Heatmaps and cycle plots break the linear narrative to reveal the heartbeat of the data, such as daily lulls, weekend spikes, or seasonal waves.</p>
+<div id="ef3089b9" class="cell" data-fig-height="8" data-fig-width="12" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate synthetic hourly data with daily and weekly patterns</span></span>
@@ -1346,7 +1370,7 @@ Choosing the Right Window
 <span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
-<pre><code>/var/folders/j7/9dgqq5g53vnbsbmvh2yqtckr0000gr/T/ipykernel_89745/3637488205.py:3: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+<pre><code>/var/folders/j7/9dgqq5g53vnbsbmvh2yqtckr0000gr/T/ipykernel_7138/3637488205.py:3: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
   hours = pd.date_range('2023-01-01', periods=24*7*4, freq='H')  # 4 weeks</code></pre>
 </div>
 <div class="cell-output cell-output-display">
@@ -1358,16 +1382,7 @@ Choosing the Right Window
 </div>
 </div>
 </div>
-<p>Heat maps immediately reveal patterns like “high activity on weekday afternoons” that would be invisible in a simple line plot.</p>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<p><img src="https://raw.githubusercontent.com/scottlepp/plot-widget/master/resources/heatmap.png" class="img-fluid"></p>
-<p>Calendar heatmaps are widely used for visualizing GitHub contributions, showing commit activity over time in a compact, pattern-revealing format.</p>
-</div></div></section>
-<section id="visualizing-cycles-and-seasonality" class="level1">
-<h1>Visualizing Cycles and Seasonality</h1>
-<p>Many time series have <strong>seasonal patterns</strong>: daily cycles, weekly patterns, annual seasons. <strong>Cycle plots</strong> decompose time series by season to reveal these patterns.</p>
-<div id="1e5d1342" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="9">
+<div id="3e843bfc" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate monthly data with strong annual seasonality</span></span>
@@ -1422,7 +1437,7 @@ Choosing the Right Window
 <span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
-<pre><code>/var/folders/j7/9dgqq5g53vnbsbmvh2yqtckr0000gr/T/ipykernel_89745/3601020590.py:3: FutureWarning: 'M' is deprecated and will be removed in a future version, please use 'ME' instead.
+<pre><code>/var/folders/j7/9dgqq5g53vnbsbmvh2yqtckr0000gr/T/ipykernel_7138/3601020590.py:3: FutureWarning: 'M' is deprecated and will be removed in a future version, please use 'ME' instead.
   months = pd.date_range('2020-01-01', periods=48, freq='M')</code></pre>
 </div>
 <div class="cell-output cell-output-display">
@@ -1434,12 +1449,11 @@ Choosing the Right Window
 </div>
 </div>
 </div>
-<p>By overlaying each year’s cycle, the cycle plot makes it obvious that values peak in summer (months 6-8) and dip in winter (months 12-2), while also showing year-over-year trends.</p>
 </section>
-<section id="advanced-lag-plots-for-autocorrelation" class="level1">
-<h1>Advanced: Lag Plots for Autocorrelation</h1>
-<p>Time series data often exhibits <strong>autocorrelation</strong>: values depend on previous values. A <strong>lag plot</strong> helps visualize this by plotting each value against the previous value (lag-1) or earlier values.</p>
-<div id="2ed02ad2" class="cell" data-fig-height="5" data-fig-width="14" data-execution_count="10">
+<section id="the-memory-of-the-past-autocorrelation" class="level2">
+<h2 class="anchored" data-anchor-id="the-memory-of-the-past-autocorrelation">The memory of the past: Autocorrelation</h2>
+<p>Does the past predict the future? Lag plots visualize the system’s memory by plotting <span class="math inline">x_t</span> against <span class="math inline">x_{t-1}</span>. A tight diagonal implies strong memory (autocorrelation) while a scattered cloud implies random noise.</p>
+<div id="d78b153d" class="cell" data-fig-height="5" data-fig-width="14" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate time series with autocorrelation</span></span>
@@ -1488,29 +1502,19 @@ Choosing the Right Window
 </div>
 </div>
 </div>
-<p>A strong linear pattern in a lag plot indicates high autocorrelationknowing the current value helps predict the next value. Random, scattered points suggest no autocorrelation (e.g., white noise).</p>
-</section>
-<section id="the-bigger-picture" class="level1">
-<h1>The Bigger Picture</h1>
-<p>Time series visualization is about making choices that honestly represent temporal patterns while avoiding common pitfalls:</p>
-<p><strong>Key principles to remember:</strong></p>
-<ol type="1">
-<li><strong>Choose the right scale</strong>: Linear for absolute changes, log for relative/percentage changes</li>
-<li><strong>Show uncertainty</strong>: Predictions without confidence intervals are misleading</li>
-<li><strong>Avoid spaghetti plots</strong>: Use small multiples when comparing many series</li>
-<li><strong>Match aggregation to your question</strong>: Daily, weekly, monthly aggregation reveals different patterns</li>
-<li><strong>Be transparent about time windows</strong>: The time range you show matters enormously</li>
-<li><strong>Smooth appropriately</strong>: Balance between preserving detail and revealing trends</li>
-</ol>
-<p><strong>Common pitfalls to avoid:</strong></p>
-<ul>
-<li>Truncating the y-axis to exaggerate small changes</li>
-<li>Cherry-picking time windows to support a narrative</li>
-<li>Using line plots for discrete events (implies false continuity)</li>
-<li>Over-smoothing to hide inconvenient variation</li>
-<li>Mixing scales when comparing series (e.g., comparing growth rates on linear scale)</li>
-</ul>
-<p>Time series visualization is powerful because time is a dimension we all understand intuitively. But that familiarity also makes us vulnerable to manipulation. By following principled visualization practices, you ensure your temporal data tells its true storynot the story you wish it told.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Summary">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Summary
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Time series visualization is about making choices that honestly represent temporal patterns. By following these principled visualization practices, you ensure your temporal data tells its true story, not the story you wish it told.</p>
+</div>
+</div>
 
 
 </section>

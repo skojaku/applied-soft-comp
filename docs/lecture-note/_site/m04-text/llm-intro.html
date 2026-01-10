@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2025-12-01">
+<meta name="dcterms.date" content="2026-01-10">
 
 <title>Large Language Models in Practice – Applied Soft Computing</title>
 <style>
@@ -78,7 +78,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-626254e6f25d1c064b097183404b5529.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-a032929455e4d93731be0fa9bc28887b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -104,49 +104,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
-  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
-  <script>document.addEventListener("DOMContentLoaded", function () {
- var mathElements = document.getElementsByClassName("math");
- var macros = [];
- for (var i = 0; i < mathElements.length; i++) {
-  var texText = mathElements[i].firstChild;
-  if (mathElements[i].tagName == "SPAN") {
-   katex.render(texText.data, mathElements[i], {
-    displayMode: mathElements[i].classList.contains('display'),
-    throwOnError: false,
-    macros: macros,
-    fleqn: false
-   });
-}}});
-  </script>
-  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="../assets/custom.css">
 </head>
@@ -957,7 +914,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">December 1, 2025</p>
+      <p class="date">January 10, 2026</p>
     </div>
   </div>
   
@@ -969,49 +926,45 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
+<i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Spoiler
+What you’ll learn in this module
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Large language models don’t understand language—they compress statistical regularities from billions of text samples into probability distributions that generate fluent outputs correlated with truth but not guaranteed to be true.</p>
+<p>Large language models don’t understand language—they compress statistical regularities from billions of text samples into probability distributions. We’ll explore what LLMs are, how they work at a high level, and how to control them effectively as tools for practical tasks.</p>
 </div>
 </div>
-<section id="the-mechanism" class="level2">
-<h2 class="anchored" data-anchor-id="the-mechanism">The Mechanism</h2>
-<p>What do you think about the following question?</p>
-<blockquote class="blockquote">
-<p>Can LLMs understand the world and reason about it?</p>
-</blockquote>
-<p>One may argue that “fluency” demonstrates understanding. This is the intuition behind Turing’s 1950 test: if you can’t tell it’s a machine, treat it as intelligent. Fluency implies comprehension.</p>
-<p>But let’s see some counter arguments about this claim, starting with ELIZA.</p>
+<section id="do-llms-understand-language" class="level2">
+<h2 class="anchored" data-anchor-id="do-llms-understand-language">Do LLMs Understand Language?</h2>
+<p>What do you think about this question: Can LLMs understand the world and reason about it?</p>
+<p>One might argue that fluency demonstrates understanding. This is the intuition behind Turing’s 1950 test: if you can’t tell it’s a machine, treat it as intelligent. Fluency implies comprehension. But let’s examine counter-arguments starting with ELIZA.</p>
 <p>ELIZA, developed by Joseph Weizenbaum in the mid-1960s, is widely considered one of the first chatbots. It simulated a Rogerian psychotherapist by using simple pattern matching and keyword substitution to generate responses. Despite its lack of true understanding, ELIZA famously convinced many users that they were conversing with an intelligent entity, highlighting the human tendency to anthropomorphize technology and the limitations of the Turing Test.</p>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/8jGpkdPO-1Y?si=MRGPj2SRvEL-ROW_" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
 </iframe>
-<p>Another argument against fluency is the Chinese Room argument, proposed by philosopher John Searle. Imagine a person in a room who receives Chinese characters, and using an English rulebook, manipulates these symbols to produce new Chinese characters. To an outside observer, it appears the room understands Chinese. However, the person inside merely follows instructions to manipulate symbols without understanding their meaning. Searle argues that this is analogous to how computers, including LLMs, operate: they process symbols based on rules without genuine comprehension, raising questions about whether they can truly “understand” language or the world.</p>
+<p>Another argument against fluency is the Chinese Room argument, proposed by philosopher John Searle. Imagine a person in a room who receives Chinese characters and, using an English rulebook, manipulates these symbols to produce new Chinese characters. To an outside observer, it appears the room understands Chinese. However, the person inside merely follows instructions to manipulate symbols without understanding their meaning. Searle argues that this is analogous to how computers, including LLMs, operate: they process symbols based on rules without genuine comprehension, raising questions about whether they can truly “understand” language or the world.</p>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/TryOC83PH1g?si=XGuLMklRle-quAia" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
 </iframe>
-<p>So, do LLMs understand the world? Probably not, in the same way as we do. LLMs is a lossy compression algorithm, compressing the data into their parameters to generate fluent outputs. To predict “The capital of France is ___,” the model must compress not just the fact (Paris) but the <strong>statistical regularities</strong> governing how facts appear in text—that capitals follow “The capital of,” that France is a country, that countries have capitals. This compression is probabilistic, not factual. The model stores <span class="math inline">P(\text{word}_{n+1} \mid \text{word}_1, \ldots, \text{word}_n)</span>—which words tend to follow which other words in which contexts. Just as the lottery memorizer stores patterns of number sequences, the LLM stores patterns of word sequences.</p>
+<p>So do LLMs understand the world? Probably not in the same way we do. LLMs are lossy compression algorithms, compressing data into their parameters to generate fluent outputs. To predict “The capital of France is __<em>,” the model must compress not just the fact (Paris) but the statistical regularities governing how facts appear in text. It learns that capitals follow “The capital of,” that France is a country, that countries have capitals. This compression is probabilistic, not factual. The model stores P(word</em>{n+1} | word_1, …, word_n), which words tend to follow which other words in which contexts. Just as a lottery memorizer stores patterns of number sequences, the LLM stores patterns of word sequences.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../figs/llm-next-word.gif" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%" alt="A GIF showing how LLMs predict the next word by estimating probability distributions over the vocabulary."></p>
 </figure>
 </div>
-<p>Training feeds the model billions of sentences. For each sentence, the model predicts the next word, compares its prediction to the actual next word, and adjusts its parameters to increase the probability of the correct word. Repeat trillions of times. The result: a compressed representation of how language behaves statistically. The model doesn’t learn “Paris is the capital of France” as a fact; it learns that in contexts matching the pattern <code>[The capital of France is]</code>, the token “Paris” appears with high probability. The lottery memorizer doesn’t understand what draws mean; it just knows what patterns appear most often. This is why LLMs creates <strong>hallucination</strong>—fluent but false outputs. Truth and fluency correlate in the training data, so the model is mostly truthful. But in the tails—obscure topics, recent events, precise recall—fluency diverges from truth, and the model follows fluency.</p>
+<p>Training feeds the model billions of sentences. For each sentence, the model predicts the next word, compares its prediction to the actual next word, and adjusts its parameters to increase the probability of the correct word. Repeat trillions of times. The result: a compressed representation of how language behaves statistically. The model doesn’t learn “Paris is the capital of France” as a fact; it learns that in contexts matching the pattern [The capital of France is], the token “Paris” appears with high probability. The lottery memorizer doesn’t understand what draws mean; it just knows what patterns appear most often. This is why LLMs create hallucinations—fluent but false outputs. Truth and fluency correlate in the training data, so the model is mostly truthful. But in the tails—obscure topics, recent events, precise recall—fluency diverges from truth, and the model follows fluency.</p>
 <p>Keep this limitation in mind and use LLMs as a tool to scale pattern recognition, not judgment. Let’s learn how to utilize them.</p>
 </section>
 <section id="setting-up-ollama" class="level2">
 <h2 class="anchored" data-anchor-id="setting-up-ollama">Setting Up Ollama</h2>
-<p>For this course, we use Ollama, a tool for running LLMs locally, with Gemma 3N, a 4-billion parameter open-source model. Free, private, capable enough for research tasks. Visit <a href="https://ollama.ai">ollama.ai</a>, download the installer, and verify installation:</p>
+<p>For this course, we use Ollama, a tool for running LLMs locally, with Gemma 3N, a 4-billion parameter open-source model. It’s free, private, and capable enough for research tasks. Visit ollama.ai, download the installer, and verify installation.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ollama</span> <span class="at">--version</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">ollama</span> pull gemma3n:latest</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">ollama</span> run gemma3n:latest <span class="st">"What is a complex system?"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>If you receive a coherent response, install the Python client and send your first prompt:</p>
+<p>If you receive a coherent response, install the Python client and send your first prompt.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install ollama</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div id="cf10a394" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ollama</span>
@@ -1029,12 +982,14 @@ Spoiler
 </code></pre>
 </div>
 </div>
-<p>Run this code twice. You’ll get different outputs. Why? Because LLMs sample from probability distributions. The <strong>temperature</strong> parameter controls this randomness—lower values (0.1) make outputs more deterministic; higher values (1.0) increase diversity. You’re controlling how far into the tail of the probability distribution the model samples. Low temperature: the model picks the most likely next word. High temperature: it ventures into less probable territory. Sometimes that produces creativity. Sometimes it produces nonsense.</p>
+<p>Run this code twice. You’ll get different outputs. Why? Because LLMs sample from probability distributions. The temperature parameter controls this randomness. Lower values (0.1) make outputs more deterministic; higher values (1.0) increase diversity. You’re controlling how far into the tail of the probability distribution the model samples. Low temperature: the model picks the most likely next word. High temperature: it ventures into less probable territory. Sometimes that produces creativity. Sometimes it produces nonsense.</p>
 </section>
 <section id="research-applications" class="level2">
 <h2 class="anchored" data-anchor-id="research-applications">Research Applications</h2>
 <p>The strategy is simple: use LLMs for tasks where speed trumps precision, then verify the outputs that matter. Three workflows demonstrate this pattern.</p>
-<p><strong>Abstract summarization.</strong> You collected 50 papers on network science. Which deserve detailed reading? You don’t have time to read all 50 abstracts carefully. An LLM scans them in seconds:</p>
+<section id="abstract-summarization" class="level3">
+<h3 class="anchored" data-anchor-id="abstract-summarization">Abstract Summarization</h3>
+<p>You collected 50 papers on network science. Which deserve detailed reading? You don’t have time to read all 50 abstracts carefully. An LLM scans them in seconds.</p>
 <div id="f9ef170c" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>abstract <span class="op">=</span> <span class="st">"""</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="st">Community detection in networks is a fundamental problem in complex systems.</span></span>
@@ -1057,7 +1012,7 @@ Spoiler
 </code></pre>
 </div>
 </div>
-<p>The model captures the pattern: propose method, evaluate, outperform baselines. It doesn’t understand the paper; it has seen enough academic abstracts to recognize the structure. For multiple abstracts, loop through them:</p>
+<p>The model captures the pattern: propose method, evaluate, outperform baselines. It doesn’t understand the paper; it has seen enough academic abstracts to recognize the structure. For multiple abstracts, loop through them.</p>
 <div id="285be14f" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, abstract <span class="kw">in</span> <span class="bu">enumerate</span>([<span class="st">"Abstract 1..."</span>, <span class="st">"Abstract 2..."</span>], <span class="dv">1</span>):</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> ollama.generate(prompt<span class="op">=</span><span class="ss">f"Summarize:</span><span class="ch">\n\n</span><span class="sc">{</span>abstract<span class="sc">}</span><span class="ss">"</span>, <span class="op">**</span>params_llm)</span>
@@ -1079,8 +1034,11 @@ Just paste the abstract here, and I'll do my best to give you a concise and accu
 </code></pre>
 </div>
 </div>
-<p>Local models are slow (2–5 seconds per abstract). For thousands of papers, switch to cloud APIs. But the workflow scales: <strong>delegate skimming to the model, retain judgment for yourself.</strong> I ran this on 200 abstracts about power-law distributions. Gemma flagged the 15 that used preferential attachment models. Saved me 4 hours. I still read all 15 myself.</p>
-<p><strong>Structured extraction.</strong> Turn unstructured text into structured data automatically:</p>
+<p>Local models are slow (2–5 seconds per abstract). For thousands of papers, switch to cloud APIs. But the workflow scales: delegate skimming to the model, retain judgment for yourself. I ran this on 200 abstracts about power-law distributions. Gemma flagged the 15 that used preferential attachment models. Saved me 4 hours. I still read all 15 myself.</p>
+</section>
+<section id="structured-extraction" class="level3">
+<h3 class="anchored" data-anchor-id="structured-extraction">Structured Extraction</h3>
+<p>Turn unstructured text into structured data automatically.</p>
 <div id="80b235ed" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>abstract <span class="op">=</span> <span class="st">"""</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="st">We analyze scientific collaboration networks using 5 million papers from</span></span>
@@ -1104,8 +1062,11 @@ Key Finding: Interdisciplinarity increased by 25% between 2000-2020, with the st
 </code></pre>
 </div>
 </div>
-<p>Scale this to hundreds of papers for meta-analysis. Always verify—LLMs misinterpret obscure terminology and fabricate plausible-sounding technical details when uncertain. Remember: the model is pattern-matching against academic writing it’s seen, not reasoning about your domain.</p>
-<p><strong>Hypothesis generation.</strong> LLMs pattern-match against research questions they’ve encountered in training data:</p>
+<p>Scale this to hundreds of papers for meta-analysis. Always verify. LLMs misinterpret obscure terminology and fabricate plausible-sounding technical details when uncertain. Remember: the model is pattern-matching against academic writing it’s seen, not reasoning about your domain.</p>
+</section>
+<section id="hypothesis-generation" class="level3">
+<h3 class="anchored" data-anchor-id="hypothesis-generation">Hypothesis Generation</h3>
+<p>LLMs pattern-match against research questions they’ve encountered in training data.</p>
 <div id="4f1ed389" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>context <span class="op">=</span> <span class="st">"""I study concept spread in citation networks. Highly cited papers</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="st">combine existing concepts novelty. What should I study next?"""</span></span>
@@ -1154,6 +1115,7 @@ These questions are all interconnected and could be explored in combination.  Th
 </div>
 <p>Treat the model as a thought partner, not an oracle. It helps structure thinking but doesn’t possess domain expertise. The suggestions reflect patterns in how research questions are framed, not deep knowledge of your field.</p>
 </section>
+</section>
 <section id="failure-modes-and-boundaries" class="level2">
 <h2 class="anchored" data-anchor-id="failure-modes-and-boundaries">Failure Modes and Boundaries</h2>
 <p>The failure modes follow directly from the mechanism. LLMs fabricate plausibly because they optimize for fluency, not truth. Ask about a non-existent “Smith et al.&nbsp;quantum paper” and receive fluent academic prose describing results that never happened. Always verify citations. The model has seen thousands of papers cited in the format “Smith et al.&nbsp;(2023) demonstrated that…” and generates outputs matching that pattern even when the citation is fictional.</p>
@@ -1161,37 +1123,14 @@ These questions are all interconnected and could be explored in combination.  Th
 <p>Reasoning is absent. LLMs pattern-match, they don’t reason. Ask “How many r’s in ‘Strawberry’?” and the model might answer correctly via pattern matching against similar questions in training data, not by counting letters. Sometimes right. Often wrong. The model has no internal representation of what counting means.</p>
 <p>These aren’t bugs to be fixed. They’re intrinsic to the architecture. Use LLMs to accelerate work, not replace judgment. They excel at summarizing text, extracting structure, reformulating concepts, brainstorming, generating synthetic examples, and translation. They fail at literature reviews without verification, factual claims without sources, statistical analysis, and ethical decisions. Harvest the center of the distribution where fluency and truth correlate. Defend against the tails where they diverge.</p>
 </section>
-<section id="next" class="level2">
-<h2 class="anchored" data-anchor-id="next">Next</h2>
-<p>You’ve seen LLMs in practice—setup, summarization, extraction, limitations. But how do they actually work? What happens inside when you send a prompt?</p>
-<p>The rest of this module unboxes the technology: <strong>prompt engineering</strong> (communicating with LLMs), <strong>embeddings</strong> (representing meaning as numbers), <strong>transformers</strong> (the architecture enabling modern NLP), <strong>fundamentals</strong> (from word counts to neural representations).</p>
-<p>First, let’s master talking to machines.</p>
+<section id="what-comes-next" class="level2">
+<h2 class="anchored" data-anchor-id="what-comes-next">What Comes Next</h2>
+<p>You’ve seen LLMs in practice: setup, summarization, extraction, limitations. But how do they actually work? What happens inside when you send a prompt? The rest of this module unboxes the technology: prompt engineering (communicating with LLMs), embeddings (representing meaning as numbers), transformers (the architecture enabling modern NLP), fundamentals (from word counts to neural representations). First, let’s master talking to machines.</p>
 
 
 </section>
 
 </main> <!-- /main -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Find all breadcrumb containers
-  const breadcrumbs = document.querySelectorAll('.quarto-page-breadcrumbs ol.breadcrumb');
-
-  breadcrumbs.forEach(function(breadcrumb) {
-    // Create the TOC link as the first breadcrumb item
-    const tocItem = document.createElement('li');
-    tocItem.className = 'breadcrumb-item';
-
-    const tocLink = document.createElement('a');
-    tocLink.href = '../toc.html';
-    tocLink.textContent = 'Table of Contents';
-
-    tocItem.appendChild(tocLink);
-
-    // Insert at the beginning
-    breadcrumb.insertBefore(tocItem, breadcrumb.firstChild);
-  });
-});
-</script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
@@ -1624,6 +1563,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 </footer>
+<script src="../assets/breadcrumb-toc.js"></script>
 
 
 

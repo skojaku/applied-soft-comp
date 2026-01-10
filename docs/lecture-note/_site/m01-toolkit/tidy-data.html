@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2025-11-10">
+<meta name="dcterms.date" content="2026-01-10">
 
 <title>The Tidy Data Philosophy – Applied Soft Computing</title>
 <style>
@@ -78,7 +78,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-626254e6f25d1c064b097183404b5529.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-a032929455e4d93731be0fa9bc28887b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -917,7 +917,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 10, 2025</p>
+      <p class="date">January 10, 2026</p>
     </div>
   </div>
   
@@ -929,42 +929,46 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="introduction" class="level2">
-<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>It is often said that 80% of data analysis is spent on the process of cleaning and preparing the data. Read the following paper to learn more about the <code>tidy data</code> philosophy.</p>
-<ul>
-<li><a href="https://vita.had.co.nz/papers/tidy-data.pdf">Tidy Data by Hadley Wickham</a>“.</li>
-</ul>
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+What you’ll learn in this module
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This module introduces the tidy data philosophy. You’ll learn what makes data “tidy” and what pitfalls to avoid, explore practical tools like melt and pivot to reshape your data, and understand why standardizing data structure makes analysis faster and more reliable.</p>
+</div>
+</div>
+<section id="the-80-problem" class="level2">
+<h2 class="anchored" data-anchor-id="the-80-problem">The 80% Problem</h2>
+<p>It is often said that 80% of data analysis is spent cleaning and preparing data. This isn’t an exaggeration. Getting your data into the right shape makes everything else easier. The good news is that once you understand the tidy data philosophy, you can apply it consistently across projects.</p>
+<p>If you want to dive deeper, read <a href="https://vita.had.co.nz/papers/tidy-data.pdf">Tidy Data by Hadley Wickham</a>.</p>
 </section>
 <section id="what-is-tidy-data" class="level2">
 <h2 class="anchored" data-anchor-id="what-is-tidy-data">What is Tidy Data?</h2>
-<p>Tidy data is a standard way of mapping the meaning of a dataset to its structure. A dataset is messy or tidy depending on how rows, columns and tables are matched up with observations, variables and types. In tidy data:</p>
-<ol type="1">
-<li><strong>Each variable forms a column.</strong> A variable contains all values that measure the same underlying attribute (like height, temperature, duration) across units.</li>
-<li><strong>Each observation forms a row.</strong> An observation contains all values measured on the same unit (like a person, or a day, or a race) across attributes.</li>
-<li><strong>Each type of observational unit forms a table.</strong> For example, in a study of allergy medication, you might have a table for demographic data, a table for daily medical data, and a table for meteorological data, not just one big table that contains all the data.</li>
-</ol>
-<p>Tidy datasets are easy to manipulate, model and visualise. They make it easier to explore, manipulate and analyze the data. And most importantly, tidy formats standardize the way data is organized, making code reusable and reliable.</p>
-<section id="what-are-not-tidy-data" class="level3">
-<h3 class="anchored" data-anchor-id="what-are-not-tidy-data">What are not tidy data?</h3>
-<p>Here are five of the most common problems with not tidy datasets:</p>
-<ul>
-<li><strong>Column headers are values, not variable names.</strong> <em>For example, a table where months (“Jan”, “Feb”, “Mar”) are the column headers, instead of having a single “Month” column with “Jan”, “Feb”, etc. as values.</em></li>
-<li><strong>Multiple variables are stored in one column.</strong> <em>For example, a column named “height_weight” that contains values like “5.5_130”, rather than splitting these into separate “height” and “weight” columns.</em></li>
-<li><strong>Variables are stored in both rows and columns.</strong> <em>For example, a dataset where one piece of information (like gender) is encoded in both a specific column and within the values of another column, making analysis and transformation more difficult.</em></li>
-<li><strong>Multiple types of observational units are stored in the same table.</strong> <em>For example, a table that contains both patient demographic information and medical test results, mixing fundamentally different kinds of data in one place.</em></li>
-<li><strong>A single observational unit is stored in multiple tables.</strong> <em>For example, patient information split across one table for addresses, another for test results, and another for appointments—all without a neat way to link them together as single observations.</em></li>
-</ul>
+<p>At its core, tidy data is a standard way of mapping the meaning of a dataset to its structure. Whether your data is messy or tidy depends entirely on how rows, columns, and tables match up with observations, variables, and types.</p>
+<p>Let’s talk about the three core principles. First, each variable forms its own column. A variable measures the same underlying attribute (like height, temperature, or duration) across different units. Second, each observation forms a row. An observation captures all measurements on the same unit (like a person, a day, or a race) across different attributes. Third, each type of observational unit gets its own table. In a study of allergy medication, you’d have separate tables for demographic data, daily medical data, and meteorological data, not one giant table mixing everything together.</p>
+<p>Why does this matter? Tidy datasets are dramatically easier to manipulate, model, and visualize. They make exploration faster and analysis clearer. Most importantly, they standardize data organization, making your code reusable and reliable.</p>
+<section id="common-pitfalls" class="level3">
+<h3 class="anchored" data-anchor-id="common-pitfalls">Common Pitfalls</h3>
+<p>Now let’s flip the perspective and look at the most common mistakes. When you first encounter messy data, it usually falls into one of five patterns.</p>
+<p>The first problem is that column headers often contain values instead of variable names. Imagine a table where months (“Jan”, “Feb”, “Mar”) are the column headers, rather than having a single “Month” column with those values. This makes it hard to analyze across months.</p>
+<p>The second problem is multiple variables stored in one column. You might find a column like “height_weight” containing values like “5.5_130” instead of splitting those into separate “height” and “weight” columns. This breaks apart information that belongs together.</p>
+<p>The third problem is variables scattered across both rows and columns. A piece of information like gender might be encoded in a specific column and also hidden within the values of another column, creating redundancy and confusion during analysis.</p>
+<p>The fourth problem is mixing different types of observational units in one table. For example, a single table containing both patient demographic information and medical test results mashes two fundamentally different kinds of data together.</p>
+<p>The fifth and final problem is splitting a single observational unit across multiple tables. Patient information scattered across one table for addresses, another for test results, and another for appointments, with no clean way to link them together, makes every analysis painful.</p>
 </section>
 </section>
 <section id="tidy-tools" class="level2">
 <h2 class="anchored" data-anchor-id="tidy-tools">Tidy Tools</h2>
-<p>Let’s learn some tools to tidy your data through some examples.</p>
-<p>The following examples are from <a href="https://aeturrell.github.io/python4DS/data-tidy.html">Python for Data Science</a>.</p>
-<section id="melt" class="level3">
-<h3 class="anchored" data-anchor-id="melt">Melt</h3>
-<p>Often, data can be stored in a “wide” format, where different columns represent different variables of the same type. For example, think about the following dataset:</p>
-<div id="9b6bd772" class="cell" data-execution_count="1">
+<p>Now let’s learn practical tools to reshape your messy data into tidy form. The examples here are adapted from <a href="https://aeturrell.github.io/python4DS/data-tidy.html">Python for Data Science</a>.</p>
+<section id="melt-from-wide-to-long" class="level3">
+<h3 class="anchored" data-anchor-id="melt-from-wide-to-long">Melt: From Wide to Long</h3>
+<p>Picture data stored in “wide” format, where different columns represent different variables of the same type. Consider this simple example:</p>
+<div id="51b1cb93" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -974,7 +978,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>                   <span class="st">'weight'</span>: [<span class="dv">130</span>, <span class="dv">110</span>]})</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="83">
+<div class="cell-output cell-output-display" data-execution_count="1">
 <div>
 
 
@@ -1009,10 +1013,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>where “height” and “weight” are separate columns, but tidy data principles ask for each variable to form its own column and each observation to form a row. This “wide” format can make analysis more difficult if you want to compare or plot variables together.</p>
-<p>The <code>pandas.DataFrame.melt()</code> method fixes this by transforming the data from “wide” to “long” format, making it tidy. After melting, instead of having separate columns for “height” and “weight”, you have just one column storing the variable type (like “height” or “weight”) and another column with the corresponding value for each observation.</p>
-<p>Here’s how it works:</p>
-<div id="368d11aa" class="cell" data-execution_count="2">
+<p>Notice how “height” and “weight” sit in separate columns. This wide format breaks tidy principles and makes comparisons awkward when you want to plot or analyze these measurements together.</p>
+<p>The <code>pandas.DataFrame.melt()</code> method solves this by transforming data from wide to long format. After melting, instead of separate columns for “height” and “weight”, you get one column for the variable type and another for the value. Let’s see it in action:</p>
+<div id="2eb643ad" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df_melted <span class="op">=</span> df.melt(</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    id_vars<span class="op">=</span>[<span class="st">'first'</span>, <span class="st">'last'</span>],</span>
@@ -1020,7 +1023,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    value_name<span class="op">=</span><span class="st">'value'</span></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>df_melted</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="84">
+<div class="cell-output cell-output-display" data-execution_count="2">
 <div>
 
 
@@ -1069,12 +1072,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>Now each row represents a single measurement (either height or weight) for an individual, rather than having two measurements in one row. This is a key part of “tidy data”.</p>
+<p>Now each row represents a single measurement for an individual. If you want to compare height and weight, they’re in the same column format, making analysis natural. This is the essence of tidy data.</p>
 </section>
-<section id="pivot" class="level3">
-<h3 class="anchored" data-anchor-id="pivot">Pivot</h3>
-<p>Sometimes, your data is in a “long” format: for instance, you might have a separate row for each type of measurement (like “cases” or “population”) for each country and year. This can make it difficult to see all the information about a single observation (for example, all statistics for country A in 2020) at once.</p>
-<div id="5d309978" class="cell" data-execution_count="3">
+<section id="pivot-from-long-to-wide" class="level3">
+<h3 class="anchored" data-anchor-id="pivot-from-long-to-wide">Pivot: From Long to Wide</h3>
+<p>Sometimes the opposite problem arises. Your data starts in “long” format, with a separate row for each measurement type (like “cases” or “population”) for each country and year. This scatters information about a single observation across multiple rows, making it hard to see all statistics for country A in 2020 at once.</p>
+<div id="b3775130" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -1088,7 +1091,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>})</span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="85">
+<div class="cell-output cell-output-display" data-execution_count="3">
 <div>
 
 
@@ -1165,13 +1168,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>The <code>pivot()</code> function solves this problem by reshaping the data so that each observation (combination of country and year) has its measurements as columns. This transforms your data back to a wider, more analyzable format.</p>
-<p>Now, each row contains all measurements (“cases”, “population”) for a given country and year—making your data tidy and easier to analyze!</p>
+<p>The <code>pivot()</code> function reshapes the data so that each observation (a country-year combination) has its measurements spread across columns. This transforms long data back to a wider, more readable format. Now each row shows all measurements for a single country and year, making analysis straightforward.</p>
 </section>
 <section id="stack-and-unstack" class="level3">
 <h3 class="anchored" data-anchor-id="stack-and-unstack">Stack and Unstack</h3>
-<p>Sometimes your data uses multi-level column headers, where variables are split across two or more header rows (for example, measurements for different people and types, such as test results for multiple groups shown as columns). This structure can make it awkward to access or visualize the data, as related values are spread apart and grouped by columns.</p>
-<div id="c8411e8a" class="cell" data-execution_count="4">
+<p>A trickier situation emerges when your data has multi-level column headers, with variables split across two or more header rows. Imagine measurements for different people and types, with test results for multiple groups all shown as columns. This nested structure makes it hard to access and visualize data cleanly.</p>
+<div id="4846823b" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Example: multi-level columns for two participants (P1, P2) and two attributes (A, B)</span></span>
@@ -1180,7 +1182,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                  columns<span class="op">=</span>header)</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="86">
+<div class="cell-output cell-output-display" data-execution_count="4">
 <div>
 
 
@@ -1202,31 +1204,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">0</td>
-<td>0.285451</td>
-<td>0.309678</td>
-<td>0.451386</td>
-<td>0.759763</td>
+<td>0.834378</td>
+<td>0.846789</td>
+<td>0.815770</td>
+<td>0.866170</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">1</td>
-<td>0.670098</td>
-<td>0.003058</td>
-<td>0.453107</td>
-<td>0.435050</td>
+<td>0.212554</td>
+<td>0.130223</td>
+<td>0.411592</td>
+<td>0.883559</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">2</td>
-<td>0.255224</td>
-<td>0.676534</td>
-<td>0.569125</td>
-<td>0.564110</td>
+<td>0.163426</td>
+<td>0.127180</td>
+<td>0.483202</td>
+<td>0.347016</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">3</td>
-<td>0.302557</td>
-<td>0.370609</td>
-<td>0.731544</td>
-<td>0.961658</td>
+<td>0.596388</td>
+<td>0.458607</td>
+<td>0.698158</td>
+<td>0.199185</td>
 </tr>
 </tbody>
 </table>
@@ -1234,11 +1236,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>The <code>stack()</code> method helps to “tidy” this kind of data by turning one of the levels of columns into a new row index, effectively transforming wide-form data to long-form, so each row represents a single measurement. This makes analysis and plotting easier, as all values of the same variable are stacked in a single column. The <code>unstack()</code> method reverses this, spreading data back into columns from the index.</p>
-<p>Here’s how <code>stack()</code> and <code>unstack()</code> work in practice:</p>
-<div id="b6309827" class="cell" data-execution_count="5">
+<p>The <code>stack()</code> method solves this by converting one level of column headers into a row index, transforming wide data to long. Now each row represents a single measurement, and all values of the same variable sit together in one column. The <code>unstack()</code> method does the reverse, spreading data back out from the index into columns.</p>
+<p>Let’s see both methods in action:</p>
+<div id="49b84434" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df.stack(future_stack<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="87">
+<div class="cell-output cell-output-display" data-execution_count="5">
 <div>
 
 
@@ -1255,46 +1257,46 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tr class="odd">
 <td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">0</td>
 <td data-quarto-table-cell-role="th">A</td>
-<td>0.285451</td>
-<td>0.451386</td>
+<td>0.834378</td>
+<td>0.815770</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">B</td>
-<td>0.309678</td>
-<td>0.759763</td>
+<td>0.846789</td>
+<td>0.866170</td>
 </tr>
 <tr class="odd">
 <td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">1</td>
 <td data-quarto-table-cell-role="th">A</td>
-<td>0.670098</td>
-<td>0.453107</td>
+<td>0.212554</td>
+<td>0.411592</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">B</td>
-<td>0.003058</td>
-<td>0.435050</td>
+<td>0.130223</td>
+<td>0.883559</td>
 </tr>
 <tr class="odd">
 <td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">2</td>
 <td data-quarto-table-cell-role="th">A</td>
-<td>0.255224</td>
-<td>0.569125</td>
+<td>0.163426</td>
+<td>0.483202</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">B</td>
-<td>0.676534</td>
-<td>0.564110</td>
+<td>0.127180</td>
+<td>0.347016</td>
 </tr>
 <tr class="odd">
 <td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">3</td>
 <td data-quarto-table-cell-role="th">A</td>
-<td>0.302557</td>
-<td>0.731544</td>
+<td>0.596388</td>
+<td>0.698158</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">B</td>
-<td>0.370609</td>
-<td>0.961658</td>
+<td>0.458607</td>
+<td>0.199185</td>
 </tr>
 </tbody>
 </table>
@@ -1302,9 +1304,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="521a0e6a" class="cell" data-execution_count="6">
+<div id="f10e4290" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df.stack(future_stack<span class="op">=</span><span class="va">True</span>).unstack()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="88">
+<div class="cell-output cell-output-display" data-execution_count="6">
 <div>
 
 
@@ -1326,31 +1328,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">0</td>
-<td>0.285451</td>
-<td>0.309678</td>
-<td>0.451386</td>
-<td>0.759763</td>
+<td>0.834378</td>
+<td>0.846789</td>
+<td>0.815770</td>
+<td>0.866170</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">1</td>
-<td>0.670098</td>
-<td>0.003058</td>
-<td>0.453107</td>
-<td>0.435050</td>
+<td>0.212554</td>
+<td>0.130223</td>
+<td>0.411592</td>
+<td>0.883559</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">2</td>
-<td>0.255224</td>
-<td>0.676534</td>
-<td>0.569125</td>
-<td>0.564110</td>
+<td>0.163426</td>
+<td>0.127180</td>
+<td>0.483202</td>
+<td>0.347016</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">3</td>
-<td>0.302557</td>
-<td>0.370609</td>
-<td>0.731544</td>
-<td>0.961658</td>
+<td>0.596388</td>
+<td>0.458607</td>
+<td>0.698158</td>
+<td>0.199185</td>
 </tr>
 </tbody>
 </table>
@@ -1364,27 +1366,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 
 </main> <!-- /main -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Find all breadcrumb containers
-  const breadcrumbs = document.querySelectorAll('.quarto-page-breadcrumbs ol.breadcrumb');
-
-  breadcrumbs.forEach(function(breadcrumb) {
-    // Create the TOC link as the first breadcrumb item
-    const tocItem = document.createElement('li');
-    tocItem.className = 'breadcrumb-item';
-
-    const tocLink = document.createElement('a');
-    tocLink.href = '../toc.html';
-    tocLink.textContent = 'Table of Contents';
-
-    tocItem.appendChild(tocLink);
-
-    // Insert at the beginning
-    breadcrumb.insertBefore(tocItem, breadcrumb.firstChild);
-  });
-});
-</script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
@@ -1817,6 +1798,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 </footer>
+<script src="../assets/breadcrumb-toc.js"></script>
 
 
 

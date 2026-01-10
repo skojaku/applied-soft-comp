@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2026-01-09">
+<meta name="dcterms.date" content="2026-01-10">
 
 <title>From ChatBot to Agentic AI – Applied Soft Computing</title>
 <style>
@@ -57,27 +57,7 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -174,7 +154,7 @@ window.Quarto = {
 <link rel="stylesheet" href="../assets/custom.css">
 </head>
 
-<body class="nav-sidebar docked nav-fixed slimcontent quarto-light">
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -957,10 +937,9 @@ window.Quarto = {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-    </div>
+    
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../m03-agentic-coding/overview.html">Module 3: Agentic Coding</a></li><li class="breadcrumb-item"><a href="../m03-agentic-coding/agentic-ai.html">Agentic AI</a></li></ol></nav>
 <div class="quarto-title">
@@ -981,7 +960,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">January 9, 2026</p>
+      <p class="date">January 10, 2026</p>
     </div>
   </div>
   
@@ -993,52 +972,59 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-simple callout-note">
-<div class="callout-body d-flex">
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
+<div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<div class="callout-body-container">
-<p><strong>Spoiler</strong>: Agents don’t “think” in the human sense. They loop. They are state machines that use an LLM to decide the next transition.</p>
+<div class="callout-title-container flex-fill">
+What you’ll learn in this module
 </div>
 </div>
+<div class="callout-body-container callout-body">
+<p>Agents are not smarter chatbots. They are state machines that loop, using an LLM to decide the next transition. The ReAct pattern (Reason + Act) enables this loop: the agent reasons about the current state, takes an action, observes the result, and feeds that observation back as input. This feedback loop is where intelligence emerges, not from the model itself.</p>
 </div>
-<section id="the-mechanism" class="level2">
-<h2 class="anchored" data-anchor-id="the-mechanism">The Mechanism</h2>
+</div>
+<section id="the-loop-where-intelligence-emerges" class="level2">
+<h2 class="anchored" data-anchor-id="the-loop-where-intelligence-emerges">The Loop: Where Intelligence Emerges</h2>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../figs/react.png" class="img-fluid figure-img" style="width:70.0%"></p>
 <figcaption>ReAct Loop</figcaption>
 </figure>
 </div>
-<p>The naive view is that agents are “smarter” chatbots. They aren’t. They’re a core component wrapped in a control loop. A chatbot generates text and stops. An agent generates text, parses it for actionable commands, executes those commands in the real world, observes the results, and feeds those results back into the next prompt. The intelligence doesn’t come from the model—it comes from the <strong>feedback loop</strong>.</p>
-<p>This is the <strong>ReAct Pattern</strong> (Reason + Act). A standard chatbot is a pure function: <span class="math inline">\text{Output} = \text{Model}(\text{Input})</span>. An agent is a state machine:</p>
+<p>Let’s shift your attention from what agents are to how they actually work. An agent is not a smarter chatbot. A chatbot generates text and stops. An agent generates text, parses it for actionable commands, executes those commands in the real world, observes the results, and feeds those results back into the next prompt. The intelligence does not come from the model. It comes from the feedback loop.</p>
+<p>This is the <strong>ReAct Pattern</strong>, short for Reason + Act. A chatbot is a pure function: <span class="math inline">\text{Output} = \text{Model}(\text{Input})</span>. An agent is a state machine:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="kw">not</span> task_complete:</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    observation <span class="op">=</span> get_environment_state()</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    thought <span class="op">=</span> model(observation)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    action <span class="op">=</span> parse_action(thought)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> execute(action)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    observation <span class="op">=</span> result  <span class="co"># Feedback loop</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The critical insight is the feedback loop. If the agent tries to import a missing library (Action) and receives <code>ModuleNotFoundError</code> (Observation), the next iteration’s Thought will be “I need to install this library,” rather than hallucinating success. The model corrects itself not through introspection, but through collision with reality.</p>
-<p>ReAct framework is proposed by <span class="citation" data-cites="yao2022react">(<a href="#ref-yao2022react" role="doc-biblioref">Yao et al. 2022</a>)</span>. The core idea is to prompt the LLM to generate both reasoning traces and task-specific actions in an interleaved manner. Specifically, the prompt structure follows a sequence: <code>Thought</code> <span class="math inline">\rightarrow</span> <code>Action</code> <span class="math inline">\rightarrow</span> <code>Observation</code>.</p>
-<ol type="1">
-<li><strong>Thought</strong>: The model reasons about the current state and what needs to be done.</li>
-<li><strong>Action</strong>: The model outputs a specific command to interact with an external environment (e.g., <code>Search[Apple]</code>).</li>
-<li><strong>Observation</strong>: The environment executes the action and returns the result (e.g., search results for “Apple”).</li>
-</ol>
-<p>This cycle repeats until the task is solved.</p>
+<p>The critical insight is the feedback loop. If the agent tries to import a missing library and receives a <code>ModuleNotFoundError</code>, the next iteration’s thought will be “I need to install this library.” It corrects itself not through introspection, but through collision with reality.</p>
+<p>The ReAct framework interleaves reasoning and action in three steps. First, the model reasons about the current state (Thought). Second, it outputs a specific command to interact with the environment (Action). Third, the environment executes that command and returns the result (Observation). This cycle repeats until the task is solved.</p>
 </section>
-<section id="the-react-framework-with-langgraph" class="level2 page-columns page-full">
+<section id="the-react-framework-with-langgraph" class="level2">
 <h2 class="anchored" data-anchor-id="the-react-framework-with-langgraph">The ReAct Framework with <code>langgraph</code></h2>
 <p>Let’s build an agent that can explore and analyze a real dataset. We’ll use <strong>LangGraph</strong>—a framework from LangChain that models agents as state machines. Unlike simple loops, LangGraph lets you define explicit control flow: decision nodes, parallel execution, conditional branching, and state persistence.</p>
-
-<div class="no-row-height column-margin column-container"><div class="">
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
 <p>Install LangGraph and LangChain:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install langgraph langchain langchain-ollama</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div></div><section id="creating-a-tool-a-fish-market-dataset" class="level3 page-columns page-full">
+</div>
+</div>
+<section id="creating-a-tool-a-fish-market-dataset" class="level3">
 <h3 class="anchored" data-anchor-id="creating-a-tool-a-fish-market-dataset">Creating a Tool: A Fish Market Dataset</h3>
 <p>Let’s build an agent that can explore and analyze a real dataset. We’ll use the Fish Market dataset from Hugging Face—a collection of measurements from different fish species. First, load the data:</p>
-<div id="368fb4eb" class="cell" data-execution_count="1">
+<div id="905013be" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the Fish dataset</span></span>
@@ -1119,11 +1105,21 @@ window.Quarto = {
 </div>
 </div>
 <p>Now we’ll create tools that let the agent query this data. In LangGraph, tools are standard Python functions decorated with <code>@tool</code>. The function signature and docstring tell the LLM everything it needs.</p>
-
-<div class="no-row-height column-margin column-container"><div class="">
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
 <p><strong><span class="citation" data-cites="tool">(<a href="#ref-tool" role="doc-biblioref"><strong>tool?</strong></a>)</span></strong>: Decorator that converts a function into a LangChain tool. The docstring becomes the tool description; parameter names and type hints define the schema.</p>
 <p><strong>Args section</strong>: Must be explicitly documented for each parameter. LangGraph parses this to generate the JSON schema the LLM sees.</p>
-</div></div><div id="2cc46adc" class="cell" data-execution_count="2">
+</div>
+</div>
+<div id="e9f3677b" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> io</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_core.tools <span class="im">import</span> tool</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pandasql <span class="im">import</span> sqldf</span>
@@ -1144,7 +1140,7 @@ window.Quarto = {
 </ol>
 <p>This tool takes no inputs and returns the dataset schema. The agent calls it to discover column names and types before writing queries.</p>
 <p>Let’s add three more tools to give the agent more analytical capabilities:</p>
-<div id="2f11ba2b" class="cell" data-execution_count="3">
+<div id="bff7673c" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="at">@tool</span></span>
@@ -1188,12 +1184,22 @@ window.Quarto = {
 </details>
 </div>
 <p>Now create the agent. LangGraph is centered on a <strong>state graph</strong>—a directed graph where nodes are functions and edges define transitions. This gives you explicit control over the ReAct loop.</p>
-
-<div class="no-row-height column-margin column-container"><div class="">
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
 <p><strong>ChatOllama</strong>: LangChain’s Ollama integration. Supports tool calling via the model’s native API.</p>
 <p><strong>create_react_agent</strong>: Factory function that builds a standard ReAct graph. It defines three nodes: (1) call the LLM, (2) execute tools, (3) check if done.</p>
 <p><strong>recursion_limit</strong>: Maximum graph iterations. Equivalent to <code>max_steps</code> in smolagents.</p>
-</div></div><div id="c89e59b0" class="cell" data-execution_count="4">
+</div>
+</div>
+<div id="6d68583d" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_ollama <span class="im">import</span> ChatOllama</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langgraph.prebuilt <span class="im">import</span> create_react_agent</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1211,18 +1217,18 @@ window.Quarto = {
 <span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>agent <span class="op">=</span> create_react_agent(model, tools)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/var/folders/j7/9dgqq5g53vnbsbmvh2yqtckr0000gr/T/ipykernel_89772/1185369839.py:16: LangGraphDeprecatedSinceV10: create_react_agent has been moved to `langchain.agents`. Please update your import to `from langchain.agents import create_agent`. Deprecated in LangGraph V1.0 to be removed in V2.0.
+<pre><code>/var/folders/j7/9dgqq5g53vnbsbmvh2yqtckr0000gr/T/ipykernel_7962/1185369839.py:16: LangGraphDeprecatedSinceV10: create_react_agent has been moved to `langchain.agents`. Please update your import to `from langchain.agents import create_agent`. Deprecated in LangGraph V1.0 to be removed in V2.0.
   agent = create_react_agent(model, tools)</code></pre>
 </div>
 </div>
 <p>Run the agent and watch it autonomously choose which tools to use.</p>
-<div id="95e78119" class="cell" data-execution_count="5">
+<div id="01146c65" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> <span class="st">"Which fish species has the highest average weight?"</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> {<span class="st">"messages"</span>: [(<span class="st">"user"</span>, query)]}</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> agent.invoke(inputs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="e0d21c2c" class="cell" data-execution_count="6">
+<div id="fd227b1d" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> message <span class="kw">in</span> result[<span class="st">"messages"</span>]:</span>
@@ -1230,7 +1236,7 @@ window.Quarto = {
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Which fish species has the highest average weight?
-I'll help you find which fish species has the highest average weight. Let me first examine the dataset structure to see what columns are available.
+I'll help you find which fish species has the highest average weight. Let me first examine the dataset structure to understand what columns are available.
 &lt;class 'pandas.core.frame.DataFrame'&gt;
 RangeIndex: 159 entries, 0 to 158
 Data columns (total 7 columns):
@@ -1247,7 +1253,7 @@ dtypes: float64(6), object(1)
 memory usage: 8.8+ KB
 
 
-     Species   AvgWeight
+     Species  avg_weight
 0       Pike  718.705882
 1      Bream  617.828571
 2  Whitefish  531.000000
@@ -1255,27 +1261,30 @@ memory usage: 8.8+ KB
 4     Parkki  154.818182
 5      Roach  152.050000
 6      Smelt   11.178571
-The fish species with the highest average weight is **Pike**, with an average weight of approximately 718.71 grams.
+Based on the data analysis, **Pike** has the highest average weight at 718.71 grams.
 
-Here are all the species ranked by average weight from highest to lowest:
-1. Pike: 718.71 grams
-2. Bream: 617.83 grams
-3. Whitefish: 531.00 grams
-4. Perch: 382.24 grams
-5. Parkki: 154.82 grams
-6. Roach: 152.05 grams
-7. Smelt: 11.18 grams</code></pre>
+Here are all the fish species ranked by average weight:
+
+1. **Pike** - 718.71 grams
+2. **Bream** - 617.83 grams  
+3. **Whitefish** - 531.00 grams
+4. **Perch** - 382.24 grams
+5. **Parkki** - 154.82 grams
+6. **Roach** - 152.05 grams
+7. **Smelt** - 11.18 grams
+
+So Pike is significantly heavier on average than the other fish species in this dataset.</code></pre>
 </div>
 </div>
 <p>The agent executes a ReAct loop. It reads the question “Which fish species has the highest average weight?” and realizes it needs to use SQL to group by species and calculate averages. LangGraph streams each step—you see the LLM’s reasoning, the tool calls, and the observations in real time.</p>
 <p>Let’s try another query that requires multiple steps:</p>
-<div id="bba65ee9" class="cell" data-execution_count="7">
+<div id="d1e72a15" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> <span class="st">"What distinctive physical characteristics stand out to identify Pike?"</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> {<span class="st">"messages"</span>: [(<span class="st">"user"</span>, query)]}</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> agent.invoke(inputs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="c46d762e" class="cell" data-execution_count="8">
+<div id="308cd6bc" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> message <span class="kw">in</span> result[<span class="st">"messages"</span>]:</span>
@@ -1283,7 +1292,7 @@ Here are all the species ranked by average weight from highest to lowest:
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>What distinctive physical characteristics stand out to identify Pike?
-I'll help you identify the distinctive physical characteristics of Pike from the dataset. Let me first explore the dataset structure to understand what information is available.
+I'll help you identify Pike's distinctive physical characteristics. Let me first explore the fish dataset to see what information is available about Pike and other fish species.
 &lt;class 'pandas.core.frame.DataFrame'&gt;
 RangeIndex: 159 entries, 0 to 158
 Data columns (total 7 columns):
@@ -1299,136 +1308,12 @@ Data columns (total 7 columns):
 dtypes: float64(6), object(1)
 memory usage: 8.8+ KB
 
-
-   Species  Weight  Length1  Length2  Length3   Height   Width
-0     Pike   200.0     30.0     32.3     34.8   5.5680  3.3756
-1     Pike   300.0     31.7     34.0     37.8   5.7078  4.1580
-2     Pike   300.0     32.7     35.0     38.8   5.9364  4.3844
-3     Pike   300.0     34.8     37.3     39.8   6.2884  4.0198
-4     Pike   430.0     35.5     38.0     40.5   7.2900  4.5765
-5     Pike   345.0     36.0     38.5     41.0   6.3960  3.9770
-6     Pike   456.0     40.0     42.5     45.5   7.2800  4.3225
-7     Pike   510.0     40.0     42.5     45.5   6.8250  4.4590
-8     Pike   540.0     40.1     43.0     45.8   7.7860  5.1296
-9     Pike   500.0     42.0     45.0     48.0   6.9600  4.8960
-10    Pike   567.0     43.2     46.0     48.7   7.7920  4.8700
-11    Pike   770.0     44.8     48.0     51.2   7.6800  5.3760
-12    Pike   950.0     48.3     51.7     55.1   8.9262  6.1712
-13    Pike  1250.0     52.0     56.0     59.7  10.6863  6.9849
-14    Pike  1600.0     56.0     60.0     64.0   9.6000  6.1440
-15    Pike  1550.0     56.0     60.0     64.0   9.6000  6.1440
-16    Pike  1650.0     59.0     63.4     68.0  10.8120  7.4800
-
-     Species
-0      Bream
-1      Roach
-2  Whitefish
-3     Parkki
-4      Perch
-5       Pike
-6      Smelt
-
-Stats for Weight (Species: Pike):
-count      17.000000
-mean      718.705882
-std       494.140765
-min       200.000000
-25%       345.000000
-50%       510.000000
-75%       950.000000
-max      1650.000000
-
-Stats for Height (Species: Pike):
-count    17.000000
-mean      7.713771
-std       1.664228
-min       5.568000
-25%       6.396000
-50%       7.290000
-75%       8.926200
-max      10.812000
-
-Stats for Width (Species: Pike):
-count    17.000000
-mean      5.086382
-std       1.140269
-min       3.375600
-25%       4.322500
-50%       4.870000
-75%       6.144000
-max       7.480000
-
-Stats for Length1 (Species: Pike):
-count    17.000000
-mean     42.476471
-std       9.029087
-min      30.000000
-25%      35.500000
-50%      40.100000
-75%      48.300000
-max      59.000000
-
-Stats for Height:
-count    159.000000
-mean       8.970994
-std        4.286208
-min        1.728400
-25%        5.944800
-50%        7.786000
-75%       12.365900
-max       18.957000
-
-     Species  AvgHeight  AvgWidth  AvgLength1  Count
-0      Bream  15.183211  5.427614   30.305714     35
-1  Whitefish  10.027167  5.473050   28.800000      6
-2     Parkki   8.962427  3.220736   18.727273     11
-3      Perch   7.861870  4.745723   25.735714     56
-4       Pike   7.713771  5.086382   42.476471     17
-5      Roach   6.694795  3.657850   20.645000     20
-6      Smelt   2.209371  1.340093   11.257143     14
-
-     Species  AvgWidth
-0  Whitefish  5.473050
-1      Bream  5.427614
-2       Pike  5.086382
-3      Perch  4.745723
-4      Roach  3.657850
-5     Parkki  3.220736
-6      Smelt  1.340093
-Based on the fish dataset analysis, I can identify several distinctive physical characteristics that stand out for Pike compared to other species:
-
-## Key Distinguishing Characteristics of Pike:
-
-**1. Length: Pike are significantly longer than most other species**
-- Average Length1: 42.48 cm (highest among all species)
-- Range: 30-59 cm
-- This makes them the longest fish in the dataset
-
-**2. Weight-to-Length Ratio: Pike are relatively lightweight for their length**
-- Despite being the longest, their average weight (718.7g) is lower than Bream's average (626g) 
-- This suggests a more slender, streamlined body shape
-
-**3. Height: Moderately tall body**
-- Average Height: 7.71 cm (middle range among species)
-- Less height than Bream (15.18 cm) and Whitefish (10.03 cm)
-- More height than Perch (7.86 cm) and smaller species
-
-**4. Width: Relatively wide body for their size**
-- Average Width: 5.09 cm (3rd highest after Whitefish and Bream)
-- This, combined with their great length, gives them a distinctive elongated but robust body shape
-
-## Summary of Pike's Distinctive Profile:
-- **Very elongated body** (longest species)
-- **Streamlined but substantial** (good width relative to other species)
-- **Moderately tall** (not as flat as some species, not as deep-bodied as others)
-- **Light for their length** (suggests a slender, predatory body shape)
-
-The most distinctive characteristics that would help identify Pike are their exceptional length combined with substantial width, creating a long, powerful-looking predator fish - which aligns well with real Pike characteristics as elongated predatory fish.</code></pre>
+</code></pre>
 </div>
 </div>
 <p>This demonstrates the power of the ReAct loop—the agent chains multiple observations together, building a solution step-by-step rather than attempting everything in one shot. Unlike smolagents’ opaque loop, LangGraph exposes every state transition, making debugging straightforward.</p>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1437,7 +1322,7 @@ Why not more complex queries?
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>You might notice we’re using simpler queries than you’d expect. This is intentional. Real-world agentic systems face reliability challenges:</p>
 <ul>
@@ -1456,14 +1341,9 @@ Why not more complex queries?
 <p>This is the entire architecture of Google Antigravity, Claude Code, and Cursor—just scaled with better tools (file editing, terminal commands, web browsing) and better orchestration (parallel agents, verification artifacts).</p>
 
 
-
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
-<div id="ref-yao2022react" class="csl-entry" role="listitem">
-Yao, Shunyu, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik R Narasimhan, and Yuan Cao. 2022. <span>“React: Synergizing Reasoning and Acting in Language Models.”</span> In <em>The Eleventh International Conference on Learning Representations</em>.
-</div>
-</div></section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

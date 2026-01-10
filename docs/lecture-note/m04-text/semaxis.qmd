@@ -4,14 +4,15 @@ execute:
     enabled: true
 ---
 
-## Semaxis
+::: {.callout-note title="What you'll learn in this module"}
+Meaning in embeddings emerges entirely from contrast, not from inherent word properties. SemAxis provides a framework for defining semantic dimensions by subtracting antonym vectors, isolating specific axes that reveal how words align on dimensions like sentiment, intensity, or any conceptual opposition.
+:::
 
+## Embedding Space as Contrast
 
-![Semaxis](../figs/semaxis-1.png)
+We intuitively treat word embeddings as static maps where "king" is simply near "queen". We assume the meaning is inherent to the coordinate itself, much like a city has a fixed latitude and longitude. This is a convenient fiction. In embedding space, meaning emerges entirely from contrast, which is the key concept of SemAxis.
 
-We intuitively treat word embeddings as static maps where "king" is simply near "queen." We assume the meaning is inherent to the coordinate itself, much like a city has a fixed latitude and longitude. This is a convenient fiction. In embedding, meaning emerges entirely from *contrast*, which is the key concept of **Semaxis**.
-
-**Semaxis** [@an2018semaxis,kwak2020semaxis] is a way to define a semantic axis by subtracting the vector of an antonym from a word (e.g., $v_{good} - v_{bad}$). This isolates a semantic dimension---an "axis"---that ignores all other information.
+SemAxis is a way to define a semantic axis by subtracting the vector of an antonym from a word (e.g., $v_{good} - v_{bad}$). This isolates a semantic dimension, an "axis", that ignores all other information.
 
 Formally, given two pole words $w_+$ and $w_-$, the axis is defined as:
 
@@ -19,15 +20,13 @@ $$
 v_{\text{axis}} = \frac{v_{w_+} - v_{w_-}}{||v_{w_+} - v_{w_-}\||_2}
 $$
 
-where the denominator is the $L_2$ norm of the difference vector that ensures that axis vector $v_{axis}$ is a unit vector.
-
-Using this "ruler", we project the words into this axis. Operationally, the position of a word $w$ is given by the cosine similarity between $v_{w}$ and $v_{axis}$.
+where the denominator is the $L_2$ norm of the difference vector that ensures the axis vector $v_{\text{axis}}$ is a unit vector. Using this "ruler", we project words into this axis. Operationally, the position of a word $w$ is given by the cosine similarity between $v_{w}$ and $v_{\text{axis}}$.
 
 $$
-\text{Position of w on axis $v_{\text{axis}}$} = \cos(v_{\text{axis}},v_{w})
+\text{Position of w on axis } v_{\text{axis}} = \cos(v_{\text{axis}},v_{w})
 $$
 
-We will build a "Sentiment Compass" to measure the emotional charge of words that aren't explicitly emotional.
+Let's build a "Sentiment Compass" to measure the emotional charge of words that aren't explicitly emotional.
 
 First, we load the standard GloVe embeddings.
 
@@ -40,9 +39,9 @@ import gensim.downloader as api
 model = api.load("glove-wiki-gigaword-100")
 ```
 
-### Defining the Axis
+## Defining the Axis
 
-We define the axis not as a point, but as the difference vector between two poles. This vector points from "bad" to "good."
+We define the axis not as a point, but as the difference vector between two poles. This vector points from "bad" to "good".
 
 ```{python}
 def create_axis(pos_word, neg_word, model):
@@ -53,9 +52,9 @@ def create_axis(pos_word, neg_word, model):
 sentiment_axis = create_axis("good", "bad", model)
 ```
 
-### Measuring Alignment
+## Measuring Alignment
 
-To see where a word falls on this axis, we project it. Mathematically, this is the dot product (normalized). If the vector points in the same direction, the score is positive; if it points away, it is negative.
+To see where a word falls on this axis, we project it. Mathematically, this is the dot product (normalized). If the vector points in the same direction, the score is positive. If it points away, it is negative.
 
 ```{python}
 def get_score(word, axis, model):
@@ -69,11 +68,9 @@ for w in words:
     print(f"{w}: {get_score(w, sentiment_axis, model):.3f}")
 ```
 
-### Robustness via Centroids
+## Robustness via Centroids
 
-![Semaxis](../figs/semaxis-2.png)
-
-Single words are noisy. "Bad" might carry connotations of "naughty" or "poor quality." To fix this, we don't use single words; we use the *centroid* of a cluster of synonyms. This averages out the noise and leaves only the pure semantic signal.
+Single words are noisy. "Bad" might carry connotations of "naughty" or "poor quality". To fix this, we don't use single words. We use the centroid of a cluster of synonyms. This averages out the noise and leaves only the pure semantic signal.
 
 ```{python}
 def create_robust_axis(pos_word, neg_word, model, k=5):
@@ -98,7 +95,7 @@ def create_robust_axis(pos_word, neg_word, model, k=5):
 robust_axis = create_robust_axis("good", "bad", model)
 ```
 
-### The 2D Semantic Space
+## The 2D Semantic Space
 
 The real power comes when we cross two axes. By plotting words against "Sentiment" and "Intensity" (Strong vs. Weak), we reveal relationships that a single list hides.
 
@@ -143,7 +140,6 @@ test_words = [
 plot_2d(test_words, sentiment_axis, intensity_axis, model)
 ```
 
+## The Key Insight
 
-## The Takeaway
-
-To define a concept, you must first define its opposite.
+To define a concept, you must first define its opposite. Meaning isn't stored in the word itself. It lives in the contrast space, the relationship between poles that defines an axis. SemAxis operationalizes this principle: by defining opposition, we isolate the dimension that matters.
