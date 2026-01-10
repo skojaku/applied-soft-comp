@@ -1,0 +1,408 @@
+---
+title: "Part 4: The Innovation Timeline"
+jupyter: python3
+---
+
+::: {.callout-note title="What you'll learn"}
+This section traces CNN evolution through successive innovations. We explore how each architecture emerged to solve specific challenges: VGG demonstrated that depth matters, Inception showed how to compute efficiently, ResNet enabled training very deep networks through skip connections, and Vision Transformers replaced convolution with self-attention for global context. Each innovation builds on its predecessors, creating a narrative of problem-solving that shapes modern computer vision.
+:::
+
+## The Quest for Depth and Efficiency
+
+AlexNet proved that deep learning works at scale in 2012. This breakthrough sparked a race to improve CNN architectures. But simply adding more layers didn't work. Networks deeper than 20 layers degraded during training. Computational costs exploded. Memory constraints limited model size.
+
+The innovations we'll explore emerged as solutions to these challenges. Each architecture addressed specific problems while introducing ideas that influenced everything that followed. This is not a random collection of models, but a coherent story of progress through clever problem-solving.
+
+```{figure} https://viso.ai/wp-content/uploads/2024/02/imagenet-winners-by-year.jpg
+---
+width: 100%
+align: center
+name: imagenet-timeline
+---
+ImageNet competition winners from 2012 to 2017. Each year brought architectural innovations that pushed accuracy higher.
+```
+
+## Challenge 1: Going Deeper (VGG, 2014)
+
+AlexNet demonstrated the power of depth with 8 layers. But could we go deeper? By 2014, researchers at Oxford's Visual Geometry Group posed this question directly.
+
+### The Depth Hypothesis
+
+The intuition was compelling. Deeper networks should learn more complex representations. Early layers detect simple edges and colors. Middle layers combine these into textures and parts. Deep layers recognize complete objects and scenes. More layers mean more abstraction.
+
+But training deep networks in 2014 remained difficult. Gradients vanished. Training took weeks. Most researchers stuck with networks under 20 layers.
+
+### VGG's Answer: Stacked 3×3 Convolutions
+
+VGGNet demonstrated that systematic depth works {footcite}`simonyan2014very`. The key insight was using **small 3×3 convolutions** exclusively, stacked together to build deep networks.
+
+```{figure} ../archive/figs/vgg-architecture.jpg
+---
+width: 50%
+align: center
+name: vgg-architecture
+---
+VGG16 architecture showing progressive downsampling while doubling channels. The network uses only 3×3 convolutions throughout.
+```
+
+Why stack 3×3 filters instead of using larger filters? Consider the receptive field. Two 3×3 convolutions have the same receptive field as one 5×5 convolution (both see a 5×5 region of the input). But the stacked version has fewer parameters.
+
+For a single 5×5 convolution:
+
+$$
+\text{parameters} = 5 \times 5 = 25
+$$
+
+For two stacked 3×3 convolutions:
+
+$$
+\text{parameters} = 2 \times (3 \times 3) = 18
+$$
+
+This yields a **28% parameter reduction** while adding an extra ReLU nonlinearity between the layers, allowing the network to learn more complex functions.
+
+```{figure} https://miro.medium.com/v2/resize:fit:1200/1*k97NVvlMkRXau-uItlq5Gw.png
+---
+width: 70%
+align: center
+name: receptive-field-stacking
+---
+Two stacked 3×3 convolutions achieve the same receptive field as one 5×5 convolution but with fewer parameters and added nonlinearity.
+```
+
+### The Architecture Pattern
+
+VGG introduced a clean, systematic pattern that influenced all subsequent architectures:
+
+**After each pooling layer, double the channels**:
+
+$$
+\text{channels} = \{64 \to 128 \to 256 \to 512 \to 512\}
+$$
+
+**Spatial dimensions halve**:
+
+$$
+\text{spatial dimensions} = \{224 \to 112 \to 56 \to 28 \to 14 \to 7\}
+$$
+
+This creates a pyramid structure where computational cost per layer stays roughly constant. As spatial dimensions decrease, increasing channel depth compensates by expanding representational capacity.
+
+VGG16 (16 layers) and VGG19 (19 layers) achieved strong results on ImageNet, validating that systematic depth improves accuracy. The architecture's simplicity made it easy to understand and implement, contributing to its widespread adoption.
+
+### The Limitation
+
+VGG16 contains approximately **140 million parameters**. The majority (102 million) concentrate in the first fully connected layer. This massive parameter count means:
+
+- Training requires significant computational resources
+- Inference is memory-intensive
+- The model is prone to overfitting without strong regularization
+
+The question became: can we achieve similar accuracy with fewer parameters?
+
+## Challenge 2: Computing Efficiently (Inception/GoogLeNet, 2014)
+
+While VGG pushed depth systematically, researchers at Google asked a different question: how do we capture multi-scale features efficiently?
+
+### Multi-Scale Feature Extraction
+
+Look at a photograph. Some objects are large and occupy significant image area. Others are small details. To recognize both, the network needs to examine features at multiple scales simultaneously.
+
+Traditional CNN layers use a single kernel size (like 3×3). But the optimal kernel size varies by context. Large kernels capture broad patterns. Small kernels detect fine details.
+
+**Inception's answer**: use multiple kernel sizes in parallel within the same layer {footcite}`szegedy2015going`.
+
+### The 1×1 Convolution Trick
+
+Running multiple large convolutions in parallel is computationally expensive. Inception solves this through **1×1 convolutions** for channel dimensionality reduction.
+
+At first, 1×1 convolutions seem strange. They don't look at neighboring pixels, only at different channels at the same location. But this is precisely their power. They compress information across channels before applying larger, more expensive filters.
+
+Consider a 3×3 convolution on a 256-channel feature map producing 256 output channels:
+
+$$
+\text{parameters (without reduction)} = 3 \times 3 \times 256 \times 256 = 589{,}824
+$$
+
+With a 1×1 convolution reducing to 64 channels first:
+
+$$
+\text{parameters (with reduction)} = (1 \times 1 \times 256 \times 64) + (3 \times 3 \times 64 \times 256) = 163{,}840
+$$
+
+This achieves a **72% parameter reduction** while maintaining similar expressive power.
+
+The theoretical motivation behind 1×1 convolutions is elegant. Inception approximates sparse connectivity. Not every pixel needs to connect to every pixel in the next layer. The 1×1 convolutions sparsify connections efficiently by operating primarily across channels rather than spatial dimensions {footcite}`paperswithcode-inception`.
+
+### The Inception Module
+
+Each Inception module contains four parallel branches:
+
+1. **1×1 convolution**: Captures point-wise patterns
+2. **1×1 → 3×3 convolution**: Captures medium-scale patterns (with reduction)
+3. **1×1 → 5×5 convolution**: Captures large-scale patterns (with reduction)
+4. **3×3 max pooling → 1×1 convolution**: Preserves spatial structure differently
+
+These branches process the same input simultaneously. Their outputs concatenate along the channel dimension, creating a multi-scale representation.
+
+Mathematically, for input $X$:
+
+$$
+Y_{\text{inception}} = \text{Concat}\big(Y_{1\times1}, \,Y_{3\times3}, \,Y_{5\times5}, \,Y_{\text{pool}}\big)
+$$
+
+where each $Y$ represents the output of its respective branch.
+
+### Global Average Pooling
+
+VGG's fully connected layers contain 102 million parameters. Inception eliminates this bottleneck through **global average pooling** {footcite}`lin2013network`.
+
+Instead of flattening feature maps and passing through dense layers, take the average value of each channel across all spatial positions. For a feature map with 1000 channels, this produces a 1000-dimensional vector directly, regardless of spatial size. This:
+
+- Drastically reduces parameters (no heavy fully connected layers)
+- Creates translation invariance (averaging eliminates spatial dependence)
+- Reduces overfitting risk
+
+### Auxiliary Classifiers
+
+GoogLeNet introduced **auxiliary classifiers** at intermediate layers to combat vanishing gradients in deep networks. These classifiers attach to middle layers, computing losses that provide additional gradient signals during backpropagation.
+
+```{figure} https://production-media.paperswithcode.com/methods/GoogleNet-structure-and-auxiliary-classifier-units_CM5xsxk.png
+---
+width: 80%
+align: center
+name: inception-auxiliary
+---
+GoogLeNet architecture with auxiliary classifiers attached to intermediate layers to improve gradient flow.
+```
+
+During training, the total loss combines the main classifier loss with auxiliary losses (typically weighted at 0.3). At inference, only the main classifier is used.
+
+### The Impact
+
+GoogLeNet achieved accuracy comparable to VGG with **12× fewer parameters**. This demonstrated that architecture efficiency matters as much as depth. The Inception ideas influenced countless subsequent designs.
+
+Later versions pushed these ideas further:
+
+- **Inception v2/v3**: Added batch normalization, factorized larger filters (5×5 → two 3×3)
+- **Inception v4**: Integrated with residual connections
+- **Xception**: Used depthwise separable convolutions, pushing channel-spatial separation further
+
+**Batch Normalization**, introduced around this time {footcite}`ioffe2015batch`, normalizes layer activations to zero mean and unit variance. This stabilizes training and allows higher learning rates. It became standard in nearly all subsequent architectures.
+
+## Challenge 3: Training Very Deep Networks (ResNet, 2015)
+
+By 2015, researchers wanted networks with 50, 100, or even 150 layers. But a puzzling phenomenon blocked progress: networks deeper than about 20 layers exhibited **degradation**.
+
+### The Degradation Problem
+
+Here's what was strange. Add more layers to a working network and training error increases. Not test error (which would indicate overfitting). Training error itself gets worse.
+
+This shouldn't happen. A deeper network could theoretically learn the identity function for extra layers, matching the shallower network's performance. But in practice, optimization failed. The deeper network couldn't even learn to copy what the shallower network already achieved.
+
+This wasn't vanishing gradients alone (batch normalization addressed that). This was a fundamental optimization difficulty.
+
+### The Residual Learning Solution
+
+Microsoft Research proposed an elegant solution: **skip connections** {footcite}`he2016deep`.
+
+Instead of learning a direct mapping $H(\mathbf{x})$ from input $\mathbf{x}$ to output, learn the **residual** $F(\mathbf{x}) = H(\mathbf{x}) - \mathbf{x}$. Then add the input back:
+
+$$
+H(\mathbf{x}) = F(\mathbf{x}) + \mathbf{x}
+$$
+
+```{figure} https://www.researchgate.net/publication/364330795/figure/fig7/AS:11431281176036099@1689999593116/Basic-residual-block-of-ResNet.png
+---
+width: 60%
+align: center
+name: resnet-block
+---
+Residual block. The skip connection carries the input directly to the output, while convolutional layers learn the residual.
+```
+
+Why does this help? If the optimal mapping is close to identity (the layer isn't very useful), the network can easily learn $F(\mathbf{x}) \approx 0$ by pushing weights toward zero. The skip connection ensures input information flows through unchanged.
+
+If a more complex transformation is needed, $F(\mathbf{x})$ can still learn it. The skip connection doesn't constrain what the block can represent. It just makes optimization easier by providing a gradient highway.
+
+### Ensemble-Like Gradient Flow
+
+Skip connections create multiple paths for gradients to flow backward. Some paths go through all convolutions. Others skip multiple blocks via cascaded skip connections. This ensemble of paths accelerates training and prevents vanishing gradients {footcite}`veit2016residual`.
+
+```{figure} https://arxiv.org/html/2405.01725v1/x28.png
+---
+width: 100%
+align: center
+name: resnet-gradient-flow
+---
+Multiple gradient paths in ResNet. Gradients can skip layers via identity connections, providing stable training for very deep networks.
+```
+
+### Bottleneck Blocks for Deeper Networks
+
+ResNet-50, -101, and -152 use **bottleneck blocks** to maintain efficiency:
+
+1. **1×1 convolution**: Reduces channel dimension (e.g., 256 → 64)
+2. **3×3 convolution**: Operates on reduced dimension
+3. **1×1 convolution**: Restores dimension (e.g., 64 → 256)
+
+```{figure} https://i.sstatic.net/kbiIG.png
+---
+width: 80%
+align: center
+name: resnet-bottleneck
+---
+Bottleneck block (left) vs. basic block (right). The bottleneck design reduces computational cost in very deep networks.
+```
+
+This shrinks the intermediate feature map, dramatically reducing computational cost while maintaining representational capacity. The design was inspired by Inception's bottleneck idea.
+
+### The Results
+
+ResNet achieved:
+
+- **152 layers** trained successfully without degradation
+- **Top-5 error of 3.57%** on ImageNet (better than human performance on the test set)
+- Widespread adoption across computer vision tasks
+
+The impact extended beyond CNNs. Skip connections appeared in:
+
+- **U-Net** for medical image segmentation
+- **DenseNet** which connects every layer to every other layer
+- **Transformers** for natural language processing
+- Nearly all modern deep architectures
+
+ResNet showed that with the right architecture, depth isn't a limitation. It's a resource.
+
+### ResNeXt: Width Through Cardinality
+
+**ResNeXt** {footcite}`xie2017aggregated` extended ResNet by increasing network **width** through grouped convolutions rather than just adding depth or channels.
+
+The idea: split the bottleneck convolution path into multiple parallel groups (typically 32), each processing independently. Aggregate their outputs through concatenation or addition.
+
+```{figure} https://production-media.paperswithcode.com/methods/Screen_Shot_2020-06-06_at_4.32.52_PM.png
+---
+width: 60%
+align: center
+name: resnext-block
+---
+ResNeXt block with multiple grouped convolution paths. Increasing cardinality (number of groups) often improves accuracy more than increasing depth or channel count.
+```
+
+This "cardinality" dimension provides another axis for scaling networks. ResNeXt achieves better accuracy than ResNet at similar computational cost by increasing cardinality instead of just going deeper.
+
+## Challenge 4: Global Context (Vision Transformer, 2020)
+
+CNNs build global understanding slowly through stacked local operations. Early layers see only small patches (3×3 or 5×5 regions). Deeper layers expand the receptive field, but even in deep networks, truly global connections require many layers.
+
+What if we could capture global relationships immediately?
+
+### The Self-Attention Mechanism
+
+**Vision Transformers (ViT)** replace convolution with **self-attention** {footcite}`dosovitskiy2020image`.
+
+Self-attention computes relationships between all positions simultaneously. For each patch of the image, it determines which other patches are relevant, regardless of distance. This provides immediate global context.
+
+The mechanism works as follows. Given input features $X$, compute three matrices through learned linear projections:
+
+$$
+Q = XW_Q, \quad K = XW_K, \quad V = XW_V
+$$
+
+where $Q$ (queries), $K$ (keys), and $V$ (values) represent different views of the input.
+
+Attention scores measure similarity between queries and keys:
+
+$$
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
+$$
+
+This computes a weighted average of values, where weights depend on query-key similarity. Intuitively, each position "asks" (via its query) what information to gather from all other positions (via their keys), then aggregates their values accordingly.
+
+### Patches as Tokens
+
+ViT treats images like text. Divide the image into fixed-size patches (typically 16×16). Flatten each patch into a vector. Treat these vectors as "tokens" (analogous to words in NLP).
+
+Add positional encodings to preserve spatial information (since self-attention is permutation-invariant). Pass through a standard Transformer encoder with multiple self-attention layers.
+
+A special **CLS token** prepended to the sequence gathers global information. After all Transformer layers, the CLS token's representation feeds into the classification head.
+
+### Trade-offs: Data and Compute
+
+Vision Transformers achieve state-of-the-art accuracy on large datasets like ImageNet-21k (14 million images). But they have important trade-offs:
+
+**Advantages**:
+- Global receptive field from the first layer
+- Better scaling properties with dataset size
+- Unified architecture for vision and language (same Transformer)
+
+**Disadvantages**:
+- Require more training data than CNNs (less inductive bias)
+- Higher computational cost (self-attention is $O(n^2)$ in sequence length)
+- Less effective on small datasets without strong augmentation
+
+For most practical applications, CNNs remain competitive. Use ViT when you have:
+
+- Large datasets (millions of images)
+- Substantial computational resources
+- Tasks benefiting from global context (scene understanding, fine-grained classification)
+
+Use CNNs when you have:
+
+- Limited data (thousands of images)
+- Constrained compute (edge devices, mobile)
+- Tasks benefiting from spatial locality (object detection, segmentation)
+
+### Hybrid Approaches
+
+Recent research combines CNN and Transformer strengths:
+
+- **Swin Transformer** {footcite}`liu2021swin`: Uses local attention windows (more like convolution) with hierarchical structure
+- **CoAtNet** {footcite}`dai2021coatnet`: Combines convolution in early layers with attention in later layers
+- **ConvNeXt** {footcite}`liu2022convnet`: Shows that modernized CNNs can match Transformer performance
+
+The field continues evolving, blending ideas from both paradigms.
+
+## The Narrative of Progress
+
+Let's trace the thread connecting these innovations:
+
+**2012 (AlexNet)**: Depth works, but only to 8 layers
+↓
+**2014 (VGG)**: Stack small convolutions to go deeper (16-19 layers)
+↓
+**2014 (Inception)**: Use multi-scale features and 1×1 convolutions for efficiency
+↓
+**2015 (ResNet)**: Skip connections enable training very deep networks (152 layers)
+↓
+**2017 (ResNeXt)**: Increase width through cardinality, not just depth
+↓
+**2020 (ViT)**: Replace convolution with self-attention for global context
+
+Each innovation addressed limitations of its predecessors while preserving their insights. Modern architectures mix and match these ideas: residual connections for depth, multi-scale features for efficiency, attention for global context.
+
+## Choosing the Right Architecture
+
+For your next computer vision project, which architecture should you choose?
+
+**ResNet-50**: Default choice. Excellent accuracy-computational cost trade-off. Pre-trained weights widely available. Works well across diverse tasks.
+
+**EfficientNet**: When deployment efficiency matters. Carefully balanced depth, width, and resolution for optimal accuracy per parameter.
+
+**MobileNet/EfficientNet-Lite**: For mobile and edge devices. Sacrifices some accuracy for fast inference and small model size.
+
+**Vision Transformer (ViT)**: When you have large datasets (millions of images) and substantial compute. State-of-the-art accuracy on challenging benchmarks.
+
+**Swin Transformer**: When you want Transformer benefits with more reasonable compute requirements. Good for dense prediction tasks.
+
+Start with ResNet-50. It provides strong performance across almost all applications. Optimize later if specific constraints (speed, memory, accuracy) demand it.
+
+## Summary
+
+We traced CNN evolution through successive innovations solving specific challenges. VGG demonstrated that depth matters through stacked 3×3 convolutions. Inception showed how to capture multi-scale features efficiently using 1×1 convolutions and parallel branches. ResNet enabled training very deep networks (152 layers) through skip connections that ease optimization and improve gradient flow. Vision Transformers replaced convolution with self-attention, trading inductive bias for global context at the cost of requiring more data and compute.
+
+Each architecture built on its predecessors' insights. Modern networks combine ideas from all of them: residual connections for depth, multi-scale features for efficiency, attention for global understanding. Architecture design is problem-solving. Understanding why these innovations emerged helps you make informed choices for your own applications.
+
+```{footbibliography}
+:style: unsrt
+```
