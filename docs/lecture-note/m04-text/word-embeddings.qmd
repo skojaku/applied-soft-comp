@@ -19,11 +19,7 @@ You'll learn:
 
 ## Words as Relationships, Not Containers
 
-Have you ever wondered where meaning comes from?
-
-We intuitively assume words are containers for meaning. "Dog" holds the concept of a canine. This is incorrect.
-
-Structural linguistics reveals that a sign is defined solely by its relationships. "Dog" means "dog" only because it is not "cat", "wolf", or "log". Meaning is differential, not intrinsic.
+Have you ever wondered where meaning comes from? We intuitively assume words are containers for meaning, that "Dog" holds the concept of a canine. This is incorrect. Structural linguistics reveals that a sign is defined solely by its relationships: "Dog" means "dog" only because it is not "cat", "wolf", or "log". Meaning is differential, not intrinsic.
 
 ::: {#fig-structuralism}
 
@@ -53,9 +49,7 @@ model = api.load("word2vec-google-news-300")
 print(f"Loaded embeddings for {len(model):,} words.")
 ```
 
-If the map is accurate, "dog" should be surrounded by its semantic kin.
-
-We query the nearest neighbors in the vector space.
+If the map is accurate, "dog" should be surrounded by its semantic kin. We query the nearest neighbors in the vector space.
 
 ```{python}
 similar_to_dog = model.most_similar("dog", topn=10)
@@ -67,9 +61,7 @@ for word, similarity in similar_to_dog:
 
 The model groups "dog" with "dogs", "puppy", and "pooch" not because it knows biology, but because they are statistically interchangeable in sentences.
 
-What about semantic arithmetic?
-
-Since words are vectors, we can perform arithmetic on meaning. The relationship between "King" and "Man" is a vector. If we add that vector to "Woman", we should arrive at "Queen".
+What about semantic arithmetic? Since words are vectors, we can perform arithmetic on meaning. The relationship between "King" and "Man" is a vector, and if we add that vector to "Woman", we should arrive at "Queen".
 
 $$ \vec{\text{King}} - \vec{\text{Man}} + \vec{\text{Woman}} \approx \vec{\text{Queen}} $$
 
@@ -84,9 +76,7 @@ for word, similarity in result:
     print(f"  {word:15s} {similarity:.3f}")
 ```
 
-How do we visualize these relationships?
-
-We cannot see in 300 dimensions, but we can project the space down to 2D using PCA. This reveals consistent structures like the "capital city" relationship that the model has learned.
+How do we visualize these relationships? We cannot see in 300 dimensions, but we can project the space down to 2D using PCA. This reveals consistent structures like the "capital city" relationship that the model has learned.
 
 ```{python}
 #| fig-cap: "The 'Capital Of' relationship appears as a consistent direction in vector space."
@@ -172,15 +162,9 @@ plt.show()
 
 ## How Word2Vec Learns Meaning
 
-Let's talk about the mechanism behind the magic.
+Let's talk about the mechanism behind the magic. We intuitively treat words as containers that hold meaning, that "Green" contains the visual concept of a specific color. This is incorrect. Nature presents us with a messy, continuous spectrum without hard borders, and language is simply the set of arbitrary cuts we make in that continuum to create order.
 
-We intuitively treat words as containers that hold meaning. "Green" contains the visual concept of a specific color. This is incorrect.
-
-Nature presents us with a messy, continuous spectrum without hard borders. Language is simply the set of arbitrary cuts we make in that continuum to create order.
-
-Word2Vec operationalizes this by treating meaning as a game of contrast. It functions as a pair of linguistic scissors.
-
-It does not learn what a word is by looking up a definition. It learns what a word is like by pulling it close to neighbors, and more importantly, it learns what a word is not by pushing it away from random noise.
+Word2Vec operationalizes this by treating meaning as a game of contrast, functioning as a pair of linguistic scissors. It does not learn what a word is by looking up a definition. It learns what a word is like by pulling it close to neighbors, and more importantly, it learns what a word is not by pushing it away from random noise.
 
 The meaning of "Green" is simply the geometric region that remains after we have pushed away "Red", "Purple", and "Banana".
 
@@ -192,17 +176,9 @@ Starting from initially random vectors, word2vec learns iteratively to push away
 
 :::
 
-What's the underlying technique?
+What's the underlying technique? This process relies on contrastive learning. We cannot teach the model the exact meaning of each word, but we can let it learn the relationship between words through a binary classification problem: are these two words neighbors, or are they strangers? The training loop provides a positive pair from the text, instructing the model to maximize the similarity between their vectors, while simultaneously grabbing random negative samples (imposters from the vocabulary) and demanding the model minimize their similarity. This push-and-pull mechanic creates the vector space, where the "Green" cluster forms not because the model understands color, but because those words are statistically interchangeable when opposed to "Red".
 
-This process relies on a technique called contrastive learning. We cannot teach the model the exact meaning of each word, but we can let it learn the relationship between words through a binary classification problem: are these two words neighbors, or are they strangers?
-
-The training loop provides a positive pair from the text, instructing the model to maximize the similarity between their vectors. Simultaneously, it grabs random negative samples (imposters from the vocabulary) and demands the model minimize their similarity.
-
-This push-and-pull mechanic creates the vector space. The "Green" cluster forms not because the model understands color, but because those words are statistically interchangeable when opposed to "Red".
-
-How do we generate training pairs without human labeling?
-
-To generate these pairs without human labeling, we employ a sliding window technique. This moves over the raw text corpus, converting a sequence of words into a system of geometric queries.
+How do we generate training pairs without human labeling? We employ a sliding window technique that moves over the raw text corpus, converting a sequence of words into a system of geometric queries.
 
 ::: {#fig-sliding-window}
 
@@ -212,17 +188,11 @@ Without human labeling, word2vec assumes that words in the same context are rela
 
 :::
 
-What's the neural network architecture?
-
-Word2Vec is a simple neural network with one hidden layer. The input is a one-hot encoded vector of a word, which triggers neurons in the hidden layer to fire.
-
-The neural connection strength from the neuron representing the word to the neurons in the hidden layer (marked by red arrows) represents the query vector, $u$. The hidden layer neurons then trigger the firing of output layer neurons, which represents the probability of word $w$ appearing in the context of word $w_i$. The connection strength from an output word neuron to the hidden layer neurons represents the key vector, $v$.
+What's the neural network architecture? Word2Vec is a simple neural network with one hidden layer. The input is a one-hot encoded vector of a word, which triggers neurons in the hidden layer to fire. The neural connection strength from the neuron representing the word to the neurons in the hidden layer (marked by red arrows) represents the query vector, $u$, while the hidden layer neurons trigger the firing of output layer neurons. The connection strength from an output word neuron to the hidden layer neurons represents the key vector, $v$.
 
 ![](../figs/word2vec.jpg)
 
-The word in the center of the window acts as the Query vector ($u$), broadcasting its position to the surrounding Context words, which act as Keys ($v$).
-
-The neural network adjusts its weights to maximize the dot product $u \cdot v$ for these specific context pairs while suppressing the dot product for the negative samples. The probability of a word appearing in context is thus a function of their vector alignment.
+The word in the center of the window acts as the Query vector ($u$), broadcasting its position to the surrounding Context words, which act as Keys ($v$). The neural network adjusts its weights to maximize the dot product $u \cdot v$ for these specific context pairs while suppressing the dot product for the negative samples, making the probability of a word appearing in context a function of their vector alignment.
 
 $$
 P(j \vert i) = \frac{P(j) \exp(u_i \cdot v_j)}{\sum_{k=1}^{V} P(k) \exp(u_i \cdot v_k)}
@@ -230,15 +200,9 @@ $$
 
 where $P(j)$ is the probability of word $j$ appearing in the vocabulary.
 
-Why do we include $P(j)$ in the formula?
+Why do we include $P(j)$ in the formula? The original Word2Vec paper uses a different formulation that omits $P(j)$, which is correct conceptually but not practically. In practice, word2vec is trained with an efficient but biased training algorithm (negative sampling), and the term $P(j)$ enters the $P(j \vert i)$ when we account for this bias.
 
-The original Word2Vec paper uses a different formulation that omits $P(j)$. This original formulation is correct conceptually but not practically.
-
-In practice, word2vec is trained with an efficient but biased training algorithm (negative sampling). The term $P(j)$ enters the $P(j \vert i)$ when we account for bias, which is why we include it here.
-
-This closes the loop between high-level linguistic philosophy and low-level matrix operations. The machine proves the structuralist hypothesis: that meaning is relational.
-
-By mechanically slicing the continuum of language and applying the pressure of negative sampling, the model reconstructs a functional map of human concepts. We have successfully turned a philosophy of meaning into a runnable algorithm.
+This closes the loop between high-level linguistic philosophy and low-level matrix operations. The machine proves the structuralist hypothesis: that meaning is relational. By mechanically slicing the continuum of language and applying the pressure of negative sampling, the model reconstructs a functional map of human concepts, successfully turning a philosophy of meaning into a runnable algorithm.
 
 ::: {#fig-structuralism-loop}
 
