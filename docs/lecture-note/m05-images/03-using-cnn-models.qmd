@@ -210,15 +210,20 @@ preprocess = transforms.Compose([
 ])
 
 # Load and preprocess an image
-url = "https://upload.wikimedia.org/wikipedia/commons/3/3a/Cat03.jpg"
-response = requests.get(url)
-img = Image.open(BytesIO(response.content))
+# Using a sample image from torchvision datasets
+from torchvision.datasets import CIFAR10
+import tempfile
+
+# Download a sample image from CIFAR-10
+with tempfile.TemporaryDirectory() as tmpdir:
+    cifar = CIFAR10(root=tmpdir, train=True, download=True)
+    img, _ = cifar[0]  # Get first image
 
 # Display original image
 import matplotlib.pyplot as plt
 plt.figure(figsize=(6, 6))
 plt.imshow(img)
-plt.title("Input Image")
+plt.title("Input Image (from CIFAR-10)")
 plt.axis("off")
 plt.show()
 
