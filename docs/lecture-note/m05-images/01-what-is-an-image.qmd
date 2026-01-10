@@ -16,17 +16,15 @@ You'll learn:
 
 ## A Photograph is Just Numbers
 
-Let's talk about what an image really is from a computer's perspective. When you look at a photograph, you see faces, objects, and scenes. But to a machine, that same photograph is simply a grid of numbers.
+Let's talk about what an image really is from a computer's perspective. When you look at a photograph, you see faces, objects, and scenes. But to a machine, that same photograph is simply a grid of numbers. Each number represents the brightness or color at a specific location.
 
-Each number represents the brightness or color at a specific location. This representation might seem strange at first. How can numbers capture the richness of visual information?
-
-The answer lies in spatial structure. Unlike a spreadsheet where row order doesn't matter, the arrangement of numbers in an image is everything. Neighboring pixels relate to each other, forming edges, textures, and patterns.
+How can numbers capture the richness of visual information? The answer lies in spatial structure. Unlike a spreadsheet where row order doesn't matter, the arrangement of numbers in an image is everything. Neighboring pixels relate to each other, forming edges, textures, and patterns.
 
 ## Grayscale Images: The Simplest Case
 
-The very first step in understanding images is to examine the grayscale case. A grayscale image contains only brightness information, with no color.
+The very first step in understanding images is to examine the grayscale case. A grayscale image contains only brightness information, with no color. We can think of it as a 2D matrix where each entry is a pixel intensity value.
 
-We can think of it as a 2D matrix where each entry is a pixel intensity value. Consider a tiny 6×6 grayscale image:
+Consider a tiny 6×6 grayscale image:
 
 $$
 X = \begin{bmatrix}
@@ -89,9 +87,9 @@ print(f"Data type: {img_array.dtype}")
 print(f"Value range: [{img_array.min()}, {img_array.max()}]")
 ```
 
-What does the shape tell us? The output `(height, width, 3)` reveals three dimensions.
+What does the shape tell us? The output `(height, width, 3)` reveals three dimensions. The first two dimensions specify spatial location, while the third dimension holds three color channels.
 
-The first two dimensions specify spatial location, while the third dimension holds three color channels. Let's zoom into a small patch to see the actual numbers:
+Let's zoom into a small patch to see the actual numbers:
 
 ```{python}
 # Extract a tiny 5x5 patch from the center
@@ -140,13 +138,11 @@ Notice how each channel emphasizes different aspects of the scene. The red chann
 
 ## Why Spatial Structure Matters
 
-Shift your attention from individual pixel values to relationships between pixels. This is what makes images fundamentally different from tabular data.
-
-In a spreadsheet, you can shuffle the rows without losing information. But in an image, shuffling pixels destroys everything. The spatial arrangement is the information.
+Shift your attention from individual pixel values to relationships between pixels. This is what makes images fundamentally different from tabular data. In a spreadsheet, you can shuffle the rows without losing information. But in an image, shuffling pixels destroys everything because the spatial arrangement is the information itself.
 
 An edge appears when neighboring pixels have very different values. A texture emerges from repeating patterns across nearby locations. An object is a coherent region of similar pixels.
 
-Why does this matter for machine learning? This spatial structure is why neural networks for images need special architectures. Fully connected networks treat every input independently, ignoring spatial relationships. Convolutional networks, which we'll explore soon, are designed specifically to exploit this structure.
+Why does this matter for machine learning? Fully connected networks treat every input independently, ignoring spatial relationships. Convolutional networks, which we'll explore soon, are designed specifically to exploit this structure.
 
 ## Converting Between Representations
 
@@ -183,9 +179,7 @@ The grayscale version loses color information but preserves spatial structure. F
 
 ## Image Dimensions in Deep Learning
 
-When we feed images into neural networks, we need to be precise about dimensions. Different frameworks use different conventions.
-
-Let's clarify the PyTorch standard. PyTorch expects images in `(batch_size, channels, height, width)` format, often abbreviated as NCHW:
+When we feed images into neural networks, we need to be precise about dimensions. Different frameworks use different conventions. PyTorch expects images in `(batch_size, channels, height, width)` format, often abbreviated as NCHW:
 
 - **N**: Batch size (number of images processed together)
 - **C**: Channels (3 for RGB, 1 for grayscale)
@@ -219,18 +213,12 @@ Understanding these representations at a hands-on level will make everything tha
 
 ## From Pixels to Patterns
 
-Now that we understand what images are as data structures, the next question becomes: how do we detect patterns in them? Human vision effortlessly recognizes edges, textures, and objects.
+Now that we understand what images are as data structures, the next question becomes: how do we detect patterns in them? Human vision effortlessly recognizes edges, textures, and objects. But what computational operations allow machines to do the same?
 
-But what computational operations allow machines to do the same? This question leads us to convolution, feature extraction, and ultimately to the deep learning revolution.
-
-In the next section, we'll explore how computer vision evolved from hand-crafted feature detectors to learned representations that can match or exceed human performance. The key insight to carry forward is this: images are spatial data where relationships between neighboring pixels encode visual information. Any successful vision system must respect and exploit this spatial structure.
+This question leads us to convolution, feature extraction, and ultimately to the deep learning revolution. In the next section, we'll explore how computer vision evolved from hand-crafted feature detectors to learned representations that can match or exceed human performance. The key insight to carry forward is this: images are spatial data where relationships between neighboring pixels encode visual information.
 
 ## Summary
 
-We explored images as structured numerical data. A grayscale image is a 2D matrix of brightness values, while a color image adds two more matrices for the other color channels.
+We explored images as structured numerical data. A grayscale image is a 2D matrix of brightness values, while a color image adds two more matrices for the other color channels. Spatial relationships between pixels encode edges, textures, and objects. Unlike tabular data, the arrangement of values matters fundamentally.
 
-Spatial relationships between pixels encode edges, textures, and objects. Unlike tabular data, the arrangement of values matters fundamentally.
-
-We saw how to load, inspect, and manipulate images in Python, converting between NumPy arrays and PyTorch tensors. This hands-on understanding prepares us to work with the deep learning models that process these image representations.
-
-Images are not just collections of numbers. They are spatially organized data where local patterns combine into global structure. This insight motivates everything that follows in computer vision.
+We saw how to load, inspect, and manipulate images in Python, converting between NumPy arrays and PyTorch tensors. This hands-on understanding prepares us to work with the deep learning models that process these image representations. Images are not just collections of numbers but spatially organized data where local patterns combine into global structure.
