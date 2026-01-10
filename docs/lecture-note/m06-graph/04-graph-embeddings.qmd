@@ -5,8 +5,15 @@ execute:
     enabled: true
 ---
 
-::: {.callout-note title="What you'll learn in this part"}
-This part explores graph embeddings that map nodes to continuous vector spaces. We examine both spectral methods rooted in linear algebra and neural methods inspired by language modeling. These embeddings enable clustering, visualization, and downstream machine learning tasks.
+::: {.callout-note title="What you'll learn in this module"}
+This module introduces **graph embeddings** that transform networks into continuous vector spaces.
+
+You'll learn:
+
+- What **network embedding** means and how to compress graphs into low-dimensional representations.
+- How to use **spectral methods** (adjacency, modularity, Laplacian) for finding optimal embeddings through eigendecomposition.
+- The power of **neural embeddings** with word2vec, DeepWalk, and node2vec for learning from random walks.
+- Practical techniques for clustering, visualization, and downstream machine learning tasks on graph data.
 :::
 
 ## What is Network Embedding?
@@ -20,27 +27,29 @@ This figure is taken from [DeepWalk: Online Learning of Social Representations](
 
 Networks are high-dimensional discrete structures that resist traditional machine learning algorithms designed for continuous data. Network embedding transforms graphs into low-dimensional continuous spaces where each node becomes a point in $\mathbb{R}^d$ (typically $d \ll N$) while preserving important structural properties.
 
-The goal is simple but powerful. Map nodes to vectors such that similar nodes have similar embeddings. "Similar" can mean many things: connected by edges, sharing neighbors, playing similar structural roles, or belonging to the same community.
+The goal is simple but powerful. Map nodes to vectors such that similar nodes have similar embeddings.
+
+What does "similar" mean? It can mean many things: connected by edges, sharing neighbors, playing similar structural roles, or belonging to the same community.
 
 ## Spectral Embeddings
 
-Spectral methods use eigendecomposition to find low-dimensional representations. We explore three approaches: adjacency-based, modularity-based, and Laplacian-based.
+Let's talk about spectral methods. They use eigendecomposition to find low-dimensional representations. We explore three approaches: adjacency-based, modularity-based, and Laplacian-based.
 
 ### Compressing Networks
 
-Suppose we have an adjacency matrix ${\bf A}$ of size $N \times N$. We want to compress it into a matrix ${\bf U}$ of size $N \times d$ where $d \ll N$. Good embeddings should reconstruct the original network well:
+Suppose we have an adjacency matrix ${\bf A}$ of size $N \times N$. We want to compress it into a matrix ${\bf U}$ of size $N \times d$ where $d \ll N$.
+
+Good embeddings should reconstruct the original network well:
 
 $$
 \min_{{\bf U}} J({\bf U}), \quad J({\bf U}) = \| {\bf A} - {\bf U}{\bf U}^\top \|_F^2
 $$
 
-where $\|\cdot\|_F$ is the Frobenius norm (sum of squared elements).
-
-The outer product ${\bf U}{\bf U}^\top$ reconstructs the adjacency matrix from embeddings. Minimizing the difference between ${\bf A}$ and this reconstruction yields the best low-dimensional representation.
+where $\|\cdot\|_F$ is the Frobenius norm (sum of squared elements). The outer product ${\bf U}{\bf U}^\top$ reconstructs the adjacency matrix from embeddings. Minimizing the difference between ${\bf A}$ and this reconstruction yields the best low-dimensional representation.
 
 ### Spectral Decomposition Solution
 
-Consider the eigendecomposition of ${\bf A}$:
+How do we solve this optimization problem? Consider the eigendecomposition of ${\bf A}$:
 
 $$
 {\bf A} = \sum_{i=1}^N \lambda_i {\bf u}_i {\bf u}_i^\top
@@ -54,15 +63,15 @@ To compress the network, select the $d$ eigenvectors with largest eigenvalues an
 
 ### Modularity Embedding
 
-Instead of the adjacency matrix, we can embed the modularity matrix:
+What if we want to emphasize community structure? Instead of the adjacency matrix, we can embed the modularity matrix:
 
 $$
 Q_{ij} = \frac{1}{2m}A_{ij} - \frac{k_i k_j}{4m^2}
 $$
 
-where $k_i$ is node degree and $m$ is the number of edges.
+where $k_i$ is node degree and $m$ is the number of edges. The modularity matrix emphasizes connections beyond what random chance predicts.
 
-The modularity matrix emphasizes connections beyond what random chance predicts. Its eigenvectors naturally separate communities. A simple community detection algorithm: group nodes by the sign of the second eigenvector [@newman2006modularity].
+Its eigenvectors naturally separate communities. A simple community detection algorithm: group nodes by the sign of the second eigenvector [@newman2006modularity].
 
 ### Laplacian Eigenmap
 
@@ -78,10 +87,7 @@ $$
 J_{LE}({\bf U}) = \text{Tr}({\bf U}^\top {\bf L} {\bf U})
 $$
 
-where ${\bf L} = {\bf D} - {\bf A}$ is the graph Laplacian and $\text{Tr}$ denotes the trace.
-
-::: {.column-margin}
-**Derivation**:
+where ${\bf L} = {\bf D} - {\bf A}$ is the graph Laplacian and $\text{Tr}$ denotes the trace. The derivation proceeds as follows:
 
 $$
 \begin{aligned}
@@ -91,49 +97,32 @@ J_{LE} &= \frac{1}{2}\sum_{i,j} A_{ij} (\| {\bf u}_i \|^2 - 2 {\bf u}_i^\top {\b
 &= \text{Tr}({\bf U}^\top {\bf L} {\bf U})
 \end{aligned}
 $$
-:::
 
-The solution is the $d$ eigenvectors corresponding to the smallest eigenvalues of ${\bf L}$ (excluding the trivial zero eigenvalue).
-
-::: {.column-margin}
-The smallest eigenvalue is always zero with eigenvector of all ones. In practice, compute $d+1$ smallest eigenvectors and discard the first.
-:::
+The solution is the $d$ eigenvectors corresponding to the smallest eigenvalues of ${\bf L}$ (excluding the trivial zero eigenvalue). The smallest eigenvalue is always zero with eigenvector of all ones. In practice, compute $d+1$ smallest eigenvectors and discard the first.
 
 ## Neural Embeddings with word2vec
+
+Spectral methods are elegant but computationally expensive for large graphs. What's the alternative?
 
 Neural methods learn embeddings using neural networks trained on data. Before applying these to graphs, we introduce word2vec, which forms the foundation for many graph embedding techniques.
 
 ### How word2vec Works
 
-word2vec [@mikolov2013distributed] learns word meanings from context, following the principle: "You shall know a word by the company it keeps" [@church1988word].
+word2vec [@mikolov2013distributed] learns word meanings from context, following the principle: "You shall know a word by the company it keeps" [@church1988word]. This phrase comes from Aesop's fable *The Ass and his Purchaser*. A man brings an ass to his farm on trial. The ass immediately joins the laziest, greediest ass in the herd. The man returns it, knowing its character by the company it chose.
 
-::: {.column-margin}
-This phrase comes from Aesop's fable *The Ass and his Purchaser*. A man brings an ass to his farm on trial. The ass immediately joins the laziest, greediest ass in the herd. The man returns it, knowing its character by the company it chose.
-
-<iframe width="100%" height="200" src="https://www.youtube.com/embed/gQddtTdmG_8?si=x8DUQnll2Rnj8qkn" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-:::
-
-**The Core Idea**: Given a target word, predict surrounding context words within a fixed window. For example, in "The quick brown fox jumps over a lazy dog," the context of *fox* (window size 2) includes *quick*, *brown*, *jumps*, *over*.
+The core idea is simple. Given a target word, predict surrounding context words within a fixed window. For example, in "The quick brown fox jumps over a lazy dog," the context of *fox* (window size 2) includes *quick*, *brown*, *jumps*, *over*.
 
 Words appearing in similar contexts get similar embeddings. Both *fox* and *dog* appear with "quick," "brown," and action verbs, so they have similar embeddings. But *student* appears with "studies" and "library," giving it a distant embedding.
 
-**Network Architecture**:
-
 ![](../figs/word2vec.jpg){width="70%" fig-align="center"}
 
-- **Input layer**: One-hot encoding of target word
-- **Hidden layer**: The learned word embedding (low-dimensional)
-- **Output layer**: Probability distribution over context words (softmax)
+The network architecture has three layers. The input layer uses one-hot encoding of the target word. The hidden layer holds the learned word embedding (low-dimensional). The output layer produces a probability distribution over context words using softmax.
 
-The hidden layer activations become dense, low-dimensional vectors capturing semantic relationships.
-
-::: {.column-margin}
-For a visual walkthrough, see [The Illustrated Word2vec](https://jalammar.github.io/illustrated-word2vec/) by Jay Alammar.
-:::
+The hidden layer activations become dense, low-dimensional vectors capturing semantic relationships. For a visual walkthrough, see [The Illustrated Word2vec](https://jalammar.github.io/illustrated-word2vec/) by Jay Alammar.
 
 ### Efficient Training
 
-Computing the full softmax over vocabulary is expensive:
+Why don't we use this architecture directly? Computing the full softmax over vocabulary is expensive:
 
 $$
 P(w_c | w_t) = \frac{\exp({\bf v}_{w_c} \cdot {\bf v}_{w_t})}{\sum_{w \in V} \exp({\bf v}_w \cdot {\bf v}_{w_t})}
@@ -141,20 +130,20 @@ $$
 
 The denominator sums over all words (100,000+ terms), making training slow.
 
-**Two solutions**:
+Two solutions exist:
 
-1. **Hierarchical Softmax**: Organizes vocabulary as a binary tree. Computing probability becomes traversing root-to-leaf paths, reducing complexity from $\mathcal{O}(|V|)$ to $\mathcal{O}(\log |V|)$.
+**Hierarchical Softmax**: Organizes vocabulary as a binary tree. Computing probability becomes traversing root-to-leaf paths, reducing complexity from $\mathcal{O}(|V|)$ to $\mathcal{O}(\log |V|)$.
 
 ::: {#fig-hierarchical-softmax}
 ![](https://building-babylon.net/wp-content/uploads/2017/07/hs4-1536x834.png)
 Figure from [Hierarchical Softmax](https://building-babylon.net/2017/08/01/hierarchical-softmax/) by Building Babylon.
 :::
 
-2. **Negative Sampling**: Instead of normalizing over all words, sample a few "negative" (non-context) words and contrast them with true context words. This approximates the full softmax efficiently with 5-20 negative samples.
+**Negative Sampling**: Instead of normalizing over all words, sample a few "negative" (non-context) words and contrast them with true context words. This approximates the full softmax efficiently with 5-20 negative samples.
 
 ### word2vec's Power
 
-word2vec embeddings capture semantic relationships through simple linear algebra:
+What makes word2vec special? word2vec embeddings capture semantic relationships through simple linear algebra:
 
 ::: {#fig-word2vec-embedding}
 ![](https://miro.medium.com/v2/resize:fit:678/1*5F4TXdFYwqi-BWTToQPIfg.jpeg)
@@ -165,11 +154,9 @@ Famous examples include analogies: *man* is to *woman* as *king* is to *queen*. 
 
 ## Graph Embedding with word2vec
 
-How can we apply word2vec to graphs? The challenge is that word2vec expects sequences, while graphs are unordered. The solution: **random walks** transform graphs into sequences of nodes. Treat walks as sentences and nodes as words.
+How can we apply word2vec to graphs? The challenge is that word2vec expects sequences, while graphs are unordered.
 
-::: {.column-margin}
-Random walks create "sentences" from graphs: each walk is a sequence of nodes, just like a sentence is a sequence of words.
-:::
+The solution: **random walks** transform graphs into sequences of nodes. Treat walks as sentences and nodes as words. Random walks create "sentences" from graphs where each walk is a sequence of nodes, just like a sentence is a sequence of words.
 
 ### DeepWalk
 
@@ -184,7 +171,7 @@ DeepWalk uses skip-gram with hierarchical softmax for efficient training. Nodes 
 
 ### node2vec
 
-node2vec [@grover2016node2vec] extends DeepWalk with **biased random walks** controlled by parameters $p$ and $q$:
+What if we want more control over the random walks? node2vec [@grover2016node2vec] extends DeepWalk with **biased random walks** controlled by parameters $p$ and $q$:
 
 $$
 P(v_{t+1} = x | v_t = v, v_{t-1} = t) \propto
@@ -195,34 +182,21 @@ P(v_{t+1} = x | v_t = v, v_{t-1} = t) \propto
 \end{cases}
 $$
 
-where $d(t,x)$ is the shortest path from previous node $t$ to candidate $x$.
-
-**Controlling Exploration**:
-
-- Low $p$ → return bias (local revisiting)
-- Low $q$ → outward bias (exploration, DFS-like)
-- High $q$ → inward bias (stay local, BFS-like)
+where $d(t,x)$ is the shortest path from previous node $t$ to candidate $x$. Low $p$ creates return bias (local revisiting). Low $q$ creates outward bias (exploration, DFS-like). High $q$ creates inward bias (stay local, BFS-like).
 
 ![](https://www.researchgate.net/publication/354654762/figure/fig3/AS:1069013035655173@1631883977008/A-biased-random-walk-procedure-of-node2vec-B-BFS-and-DFS-search-strategies-from-node-u.png)
 
-**Two Exploration Strategies**:
-
-- **BFS-like** (low $q$): Explore immediate neighborhoods → captures **community structure**
-- **DFS-like** (high $q$): Explore deep paths → captures **structural roles**
+These parameters enable two exploration strategies. BFS-like walks (low $q$) explore immediate neighborhoods and capture **community structure**. DFS-like walks (high $q$) explore deep paths and capture **structural roles**.
 
 ![](https://miro.medium.com/v2/resize:fit:1138/format:webp/1*nCyF5jFSU5uJdAPdf-0HA.png)
 
-::: {.column-margin}
-**Technical Note**: node2vec uses **negative sampling** instead of hierarchical softmax, affecting embedding characteristics [@kojaku2021neurips; @dyer2014notes].
-:::
+Note that node2vec uses **negative sampling** instead of hierarchical softmax, affecting embedding characteristics [@kojaku2021neurips; @dyer2014notes].
 
 ### LINE
 
 LINE [@tang2015line] is equivalent to node2vec with $p=1$, $q=1$, and window size 1. It directly optimizes graph structure preservation.
 
-::: {.column-margin}
 Neural methods seem less transparent than spectral methods, but recent work establishes equivalences under specific conditions [@qiu2018network; @kojaku2024network]. Surprisingly, DeepWalk, node2vec, and LINE are provably optimal for stochastic block models [@kojaku2024network].
-:::
 
 ## Hands-On: Implementing Embeddings
 
@@ -231,11 +205,15 @@ Let's implement these methods on the Karate Club network.
 ### Data Preparation
 
 ```{python}
+#| echo: false
+#| output: false
 import numpy as np
 import igraph
 import matplotlib.pyplot as plt
 import seaborn as sns
+```
 
+```{python}
 # Load the karate club network
 g = igraph.Graph.Famous("Zachary")
 A = g.get_adjacency_sparse()
@@ -252,18 +230,19 @@ igraph.plot(g, vertex_color=[palette[label] for label in labels], bbox=(300, 300
 ### Spectral Embedding Example
 
 ```{python}
-# Convert to dense array for eigendecomposition
-A_dense = A.toarray()
-
 # Compute the spectral decomposition
+A_dense = A.toarray()
 eigvals, eigvecs = np.linalg.eig(A_dense)
 
 # Find the top d eigenvectors
 d = 2
 sorted_indices = np.argsort(eigvals)[::-1][:d]
-eigvals_top = eigvals[sorted_indices]
 eigvecs_top = eigvecs[:, sorted_indices]
+```
 
+```{python}
+#| code-fold: true
+#| code-summary: "Show visualization code"
 # Plot the results
 fig, ax = plt.subplots(figsize=(7, 5))
 sns.scatterplot(x=eigvecs_top[:, 0], y=eigvecs_top[:, 1], hue=labels, ax=ax)
@@ -278,6 +257,7 @@ The first eigenvector corresponds to eigencentrality. The second eigenvector cap
 ### Laplacian Eigenmap Example
 
 ```{python}
+# Compute the Laplacian
 D = np.diag(np.sum(A_dense, axis=1))
 L = D - A_dense
 
@@ -285,9 +265,12 @@ eigvals_L, eigvecs_L = np.linalg.eig(L)
 
 # Sort and select eigenvalues (exclude first)
 sorted_indices_L = np.argsort(eigvals_L)[1:d+1]
-eigvals_L_top = eigvals_L[sorted_indices_L]
 eigvecs_L_top = eigvecs_L[:, sorted_indices_L]
+```
 
+```{python}
+#| code-fold: true
+#| code-summary: "Show visualization code"
 # Plot the results
 fig, ax = plt.subplots(figsize=(7, 5))
 sns.scatterplot(x=eigvecs_L_top[:, 0], y=eigvecs_L_top[:, 1], hue=labels, ax=ax)
@@ -299,22 +282,19 @@ plt.show()
 
 ### DeepWalk Example
 
-First, implement random walk sampling:
-
 ```{python}
+#| code-fold: true
+#| code-summary: "Show random walk implementation"
 def random_walk(net, start_node, walk_length):
     """Generate a random walk starting from start_node."""
     walk = [start_node]
-
     while len(walk) < walk_length:
         cur = walk[-1]
         cur_nbrs = list(net[cur].indices)
-
         if len(cur_nbrs) > 0:
             walk.append(np.random.choice(cur_nbrs))
         else:
-            break  # Dead end
-
+            break
     return walk
 
 # Generate random walks
@@ -331,11 +311,14 @@ print(f"Generated {len(walks)} random walks")
 print(f"Example walk: {walks[0][:10]}...")
 ```
 
-Train word2vec on the walks:
+```{python}
+#| echo: false
+#| output: false
+from gensim.models import Word2Vec
+```
 
 ```{python}
-from gensim.models import Word2Vec
-
+# Train word2vec on the walks
 model = Word2Vec(
     walks,
     vector_size=32,
@@ -350,8 +333,6 @@ model = Word2Vec(
 embedding = np.array([model.wv[i] for i in range(n_nodes)])
 print(f"Embedding matrix shape: {embedding.shape}")
 ```
-
-Visualize using UMAP:
 
 ```{python}
 #| echo: false
@@ -387,13 +368,18 @@ Nodes from the same community cluster together, showing that DeepWalk captures c
 ### Clustering with K-means
 
 ```{python}
+#| echo: false
+#| output: false
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
+```
 
+```{python}
+#| code-fold: true
+#| code-summary: "Show clustering implementation"
 def find_optimal_clusters(embedding, n_clusters_range=(2, 10)):
     """Find optimal number of clusters using silhouette score."""
     silhouette_scores = []
-
     for n_clusters in range(*n_clusters_range):
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
         cluster_labels = kmeans.fit_predict(embedding)
@@ -409,7 +395,11 @@ def find_optimal_clusters(embedding, n_clusters_range=(2, 10)):
 
 # Find clusters
 cluster_labels = find_optimal_clusters(embedding)
+```
 
+```{python}
+#| code-fold: true
+#| code-summary: "Show clustering visualization"
 # Visualize clustering
 cmap = sns.color_palette().as_hex()
 igraph.plot(
@@ -424,7 +414,7 @@ K-means successfully identifies communities using only learned embeddings, demon
 
 ## Comparing Approaches
 
-We have explored multiple embedding methods, each with distinct trade-offs:
+Which method should you use? We have explored multiple embedding methods, each with distinct trade-offs:
 
 | Method | Approach | Strengths | Limitations |
 |--------|----------|-----------|-------------|
@@ -435,7 +425,7 @@ We have explored multiple embedding methods, each with distinct trade-offs:
 
 Spectral methods offer mathematical guarantees but scale poorly. Neural methods scale to large graphs and generalize to unseen nodes but require careful hyperparameter tuning.
 
-Recent work shows these methods are more connected than they appear. Under specific conditions, neural embeddings provably approximate spectral embeddings [@qiu2018network; @kojaku2024network]. This bridges the gap between elegant theory and practical scalability.
+Are these methods fundamentally different? Recent work shows these methods are more connected than they appear. Under specific conditions, neural embeddings provably approximate spectral embeddings [@qiu2018network; @kojaku2024network]. This bridges the gap between elegant theory and practical scalability.
 
 ## Key Takeaways
 
@@ -443,6 +433,6 @@ Graph embeddings transform discrete networks into continuous vector spaces, enab
 
 These embeddings power downstream tasks: node classification, link prediction, community detection, and visualization. They bridge the gap between graph theory and deep learning, showing that geometric intuitions about similarity and distance extend naturally to network data.
 
-In this module, we journeyed from pixels to nodes, extending convolution beyond regular grids. We explored spectral and spatial perspectives on graph neural networks. We learned how embeddings compress networks into vectors while preserving structure.
+What have we learned in this module? We journeyed from pixels to nodes, extending convolution beyond regular grids. We explored spectral and spatial perspectives on graph neural networks. We learned how embeddings compress networks into vectors while preserving structure.
 
 The principles transcend specific architectures. Locality matters. Parameter sharing generalizes. Hierarchical features extract increasingly abstract patterns. These insights apply wherever relationships exist, from molecules to social networks to knowledge graphs.
