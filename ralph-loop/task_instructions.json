@@ -40,7 +40,8 @@
       "Figures come before explanations with immediate commentary after the code block",
       "Headers use standard Markdown (##, ###)",
       "Center all figures with fig-cap and label",
-      "IMPORTANT: Use proper Quarto figure syntax - see figureSyntax below for details"
+      "IMPORTANT: Use proper Quarto figure syntax - see figureSyntax below for details",
+      "Keep code minimal - hide non-essential code, show only main concepts (see codeVisibility below)"
     ],
     "figureSyntax": {
       "description": "Proper Quarto figure reference syntax",
@@ -63,6 +64,56 @@
         {
           "description": "Subfigures",
           "code": "::: {#fig-elephants layout-ncol=2}\n![Surus](surus.png){#fig-surus}\n![Hanno](hanno.png){#fig-hanno}\nFamous Elephants\n:::"
+        }
+      ]
+    },
+    "codeVisibility": {
+      "description": "Guidelines for showing/hiding code in lecture notes",
+      "principles": [
+        "Lecture notes should focus on concepts, not implementation details",
+        "Hide utility/helper code that distracts from the main point",
+        "Show only code that illustrates the core concept being taught",
+        "Students interested in details can expand collapsed sections"
+      ],
+      "hidingMethods": [
+        {
+          "method": "Collapse code cells",
+          "syntax": "```{python}\n#| code-fold: true\n#| code-summary: \"Show helper code\"\n# Non-essential code here\n```",
+          "when": "For utility functions, data loading, plotting setup, imports that aren't the focus"
+        },
+        {
+          "method": "Hide output",
+          "syntax": "```{python}\n#| output: false\n# Code that runs but doesn't need to show output\n```",
+          "when": "For setup code that needs to run but produces no useful output"
+        },
+        {
+          "method": "Echo false",
+          "syntax": "```{python}\n#| echo: false\n# Code that runs but shouldn't be visible at all\n```",
+          "when": "For behind-the-scenes setup that students don't need to see"
+        }
+      ],
+      "whatToShow": [
+        "Core concept demonstrations (e.g., creating a neural network layer)",
+        "Key algorithms being taught (e.g., forward pass, loss calculation)",
+        "Interactive examples students should modify",
+        "Code that directly illustrates the pedagogical point"
+      ],
+      "whatToHide": [
+        "Import statements (unless teaching imports)",
+        "Helper functions for loading/preprocessing data",
+        "Plotting boilerplate (matplotlib setup, styling)",
+        "Data downloading/caching logic",
+        "Utility functions that aren't the lesson focus",
+        "Repetitive setup code"
+      ],
+      "examples": [
+        {
+          "description": "Hide data loading utility",
+          "code": "```{python}\n#| echo: false\n#| output: false\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom PIL import Image\nimport requests\nfrom io import BytesIO\n\ndef load_image_from_url(url):\n    response = requests.get(url)\n    img = Image.open(BytesIO(response.content))\n    return np.array(img)\n```"
+        },
+        {
+          "description": "Show main concept code",
+          "code": "```{python}\n# Load and display an image\nimg_array = load_image_from_url(url)\nplt.imshow(img_array)\nplt.show()\nprint(f\"Shape: {img_array.shape}\")\n```"
         }
       ]
     },
