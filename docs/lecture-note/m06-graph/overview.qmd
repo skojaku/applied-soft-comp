@@ -1,0 +1,46 @@
+---
+title: "Module 6: Deep Learning for Graphs"
+---
+
+::: {.callout-note title="What you'll learn in this module"}
+This module extends deep learning from regular grids to irregular structures.
+
+You'll learn:
+
+- How **convolution generalizes to graphs** by extending CNN principles (locality, parameter sharing, hierarchical features) to irregular structures.
+- The **spectral perspective** where graph Laplacian eigenvectors serve as frequency basis functions for defining graph convolution.
+- The **spatial perspective** where convolution becomes neighborhood aggregation through architectures like GCN, GraphSAGE, GAT, and GIN.
+- How to **embed graphs into vector spaces** using both spectral methods and neural approaches like DeepWalk inspired by word2vec.
+:::
+
+## The Journey
+
+Let's talk about where this module takes you. You have learned how convolutional neural networks process images, where a kernel slides across a regular grid extracting features through local operations. But networks shatter this regularity. Consider a social network where some people have 5 friends and others have 500, and ask: how do we define convolution when neighborhoods have wildly different sizes?
+
+This module answers these questions by extending the principles that make CNNs powerful to irregular graph structures. The journey reveals that convolution is not about grids but about relationships, and relationships exist everywhere.
+
+**[Part 1: From Images to Graphs](01-from-images-to-graphs.qmd)** introduces the pixel-node analogy and explains why irregular structure poses challenges. We preview two complementary perspectives: spectral methods that define convolution in frequency domains, and spatial methods that aggregate information from local neighborhoods.
+
+**[Part 2: The Spectral Perspective](02-spectral-perspective.qmd)** explores how graphs have their own notion of frequency. The graph Laplacian's eigenvectors serve as basis functions, and eigenvalues indicate how rapidly node features vary across edges. We design spectral filters that control which frequencies pass through, and build learnable spectral graph convolutional networks. We also examine why computational cost and lack of spatial locality motivate spatial approaches.
+
+**[Part 3: Spatial Graph Networks](03-spatial-networks.qmd)** defines convolution as neighborhood aggregation. We see how ChebNet bridges spectral and spatial domains, how GCN achieves radical simplification, and how modern architectures like GraphSAGE, GAT, and GIN push boundaries. GraphSAGE samples neighborhoods for scalability. Graph Attention Networks learn which neighbors matter most. Graph Isomorphism Networks maximize discriminative power through careful aggregation design.
+
+**[Part 4: Graph Embeddings](04-graph-embeddings.qmd)** shifts from supervised learning to representation learning. We explore both spectral embeddings rooted in eigendecomposition and neural embeddings inspired by word2vec. Random walks transform graphs into sequences, enabling us to treat nodes as words and apply language modeling techniques. These embeddings enable clustering, visualization, and transfer learning across tasks.
+
+## Why This Matters
+
+Graph-structured data appears everywhere: social networks capture friendships and influence, knowledge graphs encode facts and relationships, molecules represent atoms and bonds, citation networks link papers and ideas, and protein interaction networks reveal biological pathways.
+
+Traditional machine learning struggles with graphs because most algorithms assume feature vectors in Euclidean space, but graphs are discrete, irregular, and high-dimensional. Graph neural networks solve this by learning representations that preserve structure while enabling standard machine learning techniques. The applications are transformative, from drug discovery (predicting molecular properties) to recommendation systems (leveraging social network structure) to fraud detection (identifying suspicious patterns in transaction graphs) and scientific discovery (mining knowledge graphs for hidden connections).
+
+## Prerequisites
+
+This module assumes you understand basic linear algebra (matrices, eigenvalues, eigenvectors) and neural networks (layers, activations, backpropagation). We build heavily on your knowledge of CNNs from Module 5, drawing parallels between image convolution and graph convolution. The mathematics is more involved than previous modules because spectral graph theory connects linear algebra to networks, and understanding eigendecompositions and Laplacian matrices requires careful attention. But the payoff is worth it: these concepts reveal deep connections between seemingly disparate ideas like Fourier analysis, random walks, and neural networks. If you need to refresh linear algebra concepts, review eigenvalue decomposition and matrix operations before diving deep here, and familiarity with PyTorch or similar frameworks helps for implementing graph neural networks.
+
+## What You'll Build
+
+By the end of this module, you will implement spectral embeddings using eigendecomposition, train DeepWalk models that learn node representations through random walks, and build graph neural networks using PyTorch Geometric or similar frameworks. The coding examples use real networks like the Karate Club and citation networks, and you'll visualize learned representations to see how embeddings cluster nodes with similar roles. These hands-on experiences cement abstract concepts and show how theory translates to practice.
+
+You'll understand how to extend deep learning beyond regular structures, see connections between spectral graph theory, signal processing, and neural networks, and appreciate why graph neural networks have become indispensable tools for modern machine learning. Most importantly, you'll recognize that the core principles of deep learning transcend any particular data structure: locality enables learning from neighbors without considering the entire graph, parameter sharing allows models trained on small networks to generalize to large ones, and hierarchical features extract increasingly abstract patterns through stacked layers. Wherever relationships exist, we can learn.
+
+The journey from pixels to nodes begins with [Part 1: From Images to Graphs](01-from-images-to-graphs.qmd).
