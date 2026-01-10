@@ -29,9 +29,11 @@ The training objective is contrastive. If the sentences are semantically similar
 
 Think of it like creating a library catalog. Instead of storing every word on every page, you compress each book into a single Dewey Decimal number. Books on similar topics get similar numbers, enabling efficient retrieval. The compression loses fine-grained detail, but gains search speed.
 
-## What makes this work?
+## Why Does Weight Sharing Matter?
 
-The mathematical trick is the Siamese architecture. Weight sharing ensures both sentences are embedded into the same vector space using identical transformations. This makes the distance between vectors meaningful: similar sentences cluster together, dissimilar ones push apart.
+The mathematical trick is the Siamese architecture. Weight sharing ensures both sentences are embedded into the same vector space using identical transformations.
+
+This makes the distance between vectors meaningful. Similar sentences cluster together, dissimilar ones push apart.
 
 ## How to Use Sentence Transformers
 
@@ -124,7 +126,7 @@ Different Sentence Transformer models optimize for different trade-offs. The `al
 
 The `multi-qa-mpnet-base-dot-v1` model is optimized for question-answering and retrieval tasks. The `paraphrase-multilingual-mpnet-base-v2` model supports 50+ languages.
 
-Choose based on your constraints: speed vs. accuracy, monolingual vs. multilingual, general-purpose vs. domain-specific.
+What should drive your choice? Speed vs. accuracy, monolingual vs. multilingual, general-purpose vs. domain-specific. Pick the model that matches your constraints.
 
 ## How Does the Architecture Work?
 
@@ -138,7 +140,7 @@ During training, the loss function pushes similar sentence pairs together and di
 
 ### What Pooling Strategy Should You Use?
 
-Common pooling strategies include **mean pooling** (average all token vectors, most common), **max pooling** (take element-wise maximum across tokens), and **CLS-token** (use the [CLS] token's final hidden state, BERT's built-in sentence representation).
+You have three main choices. **Mean pooling** averages all token vectors (most common). **Max pooling** takes the element-wise maximum across tokens. **CLS-token** uses the [CLS] token's final hidden state (BERT's built-in sentence representation).
 
 Mean pooling generally works best. It captures information from all tokens while being robust to varying sentence lengths.
 
@@ -146,9 +148,11 @@ Mean pooling generally works best. It captures information from all tokens while
 
 Static compression is a limitation. A sentence gets exactly one vector, regardless of context. "The bank" in "the river bank" and "the financial bank" might get similar embeddings if they share enough surrounding words. The model compresses meaning into a fixed point, losing nuance.
 
-Word order sensitivity is another concern. "The dog bit the man" and "The man bit the dog" share the same words. If the model relies too heavily on lexical overlap (bag-of-words similarity), they'll end up dangerously close in vector space. Good models learn syntax, but they're not perfect.
+Word order sensitivity is another concern. "The dog bit the man" and "The man bit the dog" share the same words. If the model relies too heavily on lexical overlap (bag-of-words similarity), they'll end up dangerously close in vector space.
 
-Computational cost matters too. Although retrieval is fast (dot products), encoding large corpora is expensive. Encoding 1 million sentences with a large model can take hours. Pre-compute and cache embeddings whenever possible.
+Good models learn syntax, but they're not perfect.
+
+What about computational cost? Although retrieval is fast (dot products), encoding large corpora is expensive. Encoding 1 million sentences with a large model can take hours. Pre-compute and cache embeddings whenever possible.
 
 Domain shift is a practical issue. Models trained on general text (Wikipedia, news) may perform poorly on specialized domains (medical, legal). Fine-tuning on domain-specific data helps, but requires labeled sentence pairs.
 
