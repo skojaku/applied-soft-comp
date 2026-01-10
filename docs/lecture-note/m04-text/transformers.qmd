@@ -21,11 +21,7 @@ You'll learn:
 
 ![](../figs/attention-manga-problem.png){width=70% fig-align=center}
 
-For many years, natural language processing treated words as having fixed meanings. Each word (like "bank") received a single vector of numbers, called a static embedding.
-
-But there's a hidden catch in this "one meaning per word" mindset. With just a single fixed entry in the dictionary, "bank" means exactly the same thing in "I deposited money at the bank" as in "We had a picnic by the bank".
-
-Think of it like describing a population by its average height and pretending nobody's shorter or taller. Every possible meaning gets mashed into a one-size-fits-all average. The interesting details, the outliers, the context clues, all vanish in the mix.
+For many years, natural language processing treated words as having fixed meanings. Each word (like "bank") received a single vector of numbers, called a static embedding. But there's a hidden catch in this "one meaning per word" mindset: with just a single fixed entry in the dictionary, "bank" means exactly the same thing in "I deposited money at the bank" as in "We had a picnic by the bank". Think of it like describing a population by its average height and pretending nobody's shorter or taller, where every possible meaning gets mashed into a one-size-fits-all average and the interesting details vanish in the mix.
 
 What if we simply mixed the target word with its neighbors? For "I deposited money at the bank," we could compute a contextualized representation as:
 
@@ -211,11 +207,7 @@ function sliderWithLabel(min, max, step, width, defaultValue, label) {
 
 By changing the weights, we see that the vector for "bank" can lean more towards financial terms or geographical terms.
 
-So how do we determine the weights? The simplest idea gives each word equal weight: $w_i = 1/N$. This creates a basic bag-of-words average.
-
-But sentences aren't this fair. Some words are much more important than others. In "I deposited money at the bank," the words "deposited" and "money" are key, while "I", "at", and "the" add little meaning.
-
-If we treat all words the same, we lose the details that matter. We need a way to highlight important words and downplay the rest.
+So how do we determine the weights? The simplest idea gives each word equal weight: $w_i = 1/N$, creating a basic bag-of-words average. But sentences aren't this fair: some words are much more important than others. In "I deposited money at the bank," the words "deposited" and "money" are key, while "I", "at", and "the" add little meaning. If we treat all words the same, we lose the details that matter and need a way to highlight important words and downplay the rest.
 
 ## Attention Mechanism
 
@@ -243,9 +235,7 @@ $$
 \end{align}
 $$
 
-Why do we need three different vectors? Imagine you're at a dinner party. You want to identify people talking about a topic you care about.
-
-You listen to surrounding people (playing as a listener), broadcast your own interests (playing as a speaker), and engage with conversation content. The query vector represents you as a listener, the key vector represents the people as speakers, and the value vector represents the conversation content.
+Why do we need three different vectors? Imagine you're at a dinner party wanting to identify people talking about a topic you care about. You listen to surrounding people (playing as a listener), broadcast your own interests (playing as a speaker), and engage with conversation content. The query vector represents you as a listener, the key vector represents the people as speakers, and the value vector represents the conversation content.
 
 Once we have the query, key, and value vectors, we compute the attention scores between the query and key vector:
 
@@ -679,17 +669,13 @@ attentionHeatmap = {
 }
 ```
 
-Rows represent words asking for context (Queries). Columns represent words providing context (Keys).
-
-Each cell $(i,j)$ indicates how much word $i$ attends to word $j$. Each row sums to 1, forming a probability distribution over context words.
+Rows represent words asking for context (Queries), while columns represent words providing context (Keys). Each cell $(i,j)$ indicates how much word $i$ attends to word $j$, with each row summing to 1 to form a probability distribution over context words.
 
 ## Multi-head Attention
 
 ![](../figs/multihead-attention-manga.png){width=70% fig-align=center}
 
-Putting it all together (query-key-value transformation, attention matrix, and softmax normalization), this forms one attention head of the transformer.
-
-But we can have multiple attention heads in parallel, each with its own query-key-value transformation, attention matrix, and softmax normalization. The output of the attention heads are concatenated and then passed through a linear transformation to produce the final output.
+Putting it all together (query-key-value transformation, attention matrix, and softmax normalization), this forms one attention head of the transformer. But we can have multiple attention heads in parallel, each with its own query-key-value transformation, attention matrix, and softmax normalization. The output of the attention heads are concatenated and then passed through a linear transformation to produce the final output.
 
 $$
 \text{Output} = \text{Linear}(\text{Concat}(\text{head}_1, \text{head}_2, \ldots, \text{head}_h))
@@ -699,9 +685,7 @@ This is one attention block of the transformer. Why multiple heads? Having paral
 
 ## Transformer Architecture
 
-Let's step back and look at the transformer architecture at a high level.
-
-We base our discussion on the original Transformer paper, "Attention Is All You Need". Note that the transformer architecture has evolved since then, with many variants.
+Let's step back and look at the transformer architecture at a high level. We base our discussion on the original Transformer paper, "Attention Is All You Need", noting that the transformer architecture has evolved since then with many variants.
 
 ### Encoder Module
 
@@ -715,9 +699,7 @@ Let us go through each component in detail.
 
 ![](../figs/transformer-position-encoding-manga.png){width=70% fig-align=center}
 
-In the encoder module, we start from the positional encoding, which fixes a key issue: the attention modules are permutation invariant. That is, attention produces the same output even if we shuffle the words in the sentence.
-
-But position matters in language understanding and generation. Position encoding fixes this issue.
+In the encoder module, we start from the positional encoding, which fixes a key issue: the attention modules are permutation invariant (attention produces the same output even if we shuffle the words in the sentence). But position matters in language understanding and generation, so position encoding fixes this issue.
 
 Let's approach position encoding from a naive perspective. Suppose we have a sequence of $T$ token embeddings, denoted by $x_1, x_2, ..., x_T$, each a $d$-dimensional vector.
 
@@ -729,9 +711,7 @@ $$
 
 where $t = 1, 2, ..., T$ is the position index of the token in the sequence, and $\beta$ is the step size.
 
-This appears simple but has critical problems. First, the position index can be arbitrarily large. When models see sequences longer than those in training data, they may suffer because they'll be exposed to position indices they've never seen before.
-
-Second, the position index is discrete, meaning the model cannot capture position information smoothly.
+This appears simple but has critical problems. First, the position index can be arbitrarily large: when models see sequences longer than those in training data, they'll be exposed to position indices they've never seen before. Second, the position index is discrete, meaning the model cannot capture position information smoothly.
 
 Because this naive approach has problems, consider another approach. Let's represent position using a binary vector of length $d$. For example, with $d=4$:
 
@@ -766,7 +746,7 @@ where $\text{Pos}(t, i)$ is the position embedding vector of position index $t$ 
 
 This representation is bounded between 0 and 1, yet still discrete.
 
-What's a better approach? An elegant position embedding, used in transformers, is sinusoidal position embedding. It appears complicated but stay with me.
+What's a better approach? An elegant position embedding used in transformers is sinusoidal position embedding, which appears complicated but stay with me.
 
 $$
 \text{Pos}(t, i) =
@@ -788,9 +768,7 @@ To see this, let's plot the position embedding for the first 100 positions.
 
 ![](https://kazemnejad.com/img/transformer_architecture_positional_encoding/positional_encoding.png){width=70% fig-align=center}
 
-The position embedding exhibits the alternating pattern (vertically) with frequency increasing as the dimension index increases (horizontal axis).
-
-Additionally, sinusoidal position embedding is continuous, allowing the model to capture position information smoothly.
+The position embedding exhibits the alternating pattern (vertically) with frequency increasing as the dimension index increases (horizontal axis). Additionally, sinusoidal position embedding is continuous, allowing the model to capture position information smoothly.
 
 Another key property: the dot similarity between two position embedding vectors represents the similarity between the two positions, regardless of the position index.
 
@@ -798,11 +776,7 @@ Another key property: the dot similarity between two position embedding vectors 
 
 The dot similarity between position embedding vectors represents the distance between positions, regardless of the position index.
 
-Why additive position embedding? Sinusoidal position embedding is additive, altering the token embedding. Alternatively, one might concatenate the position embedding to the token embedding: $x_{t,i} := [x_{t,i}; \text{Pos}(t, i)]$.
-
-This makes it easier for a model to distinguish position from token information. So why not use concatenation? One reason: concatenation requires a larger embedding dimension, increasing the number of parameters.
-
-Instead, adding the position embedding creates an interesting effect in the attention mechanism. Interested readers can check out [this Reddit post](https://www.reddit.com/r/MachineLearning/comments/cttefo/comment/exs7d08/?utm_source=reddit&utm_medium=web2x&context=3).
+Why additive position embedding? Sinusoidal position embedding is additive, altering the token embedding. Alternatively, one might concatenate the position embedding to the token embedding: $x_{t,i} := [x_{t,i}; \text{Pos}(t, i)]$, which makes it easier for a model to distinguish position from token information. So why not use concatenation? Concatenation requires a larger embedding dimension, increasing the number of parameters. Instead, adding the position embedding creates an interesting effect in the attention mechanism (interested readers can check out [this Reddit post](https://www.reddit.com/r/MachineLearning/comments/cttefo/comment/exs7d08/?utm_source=reddit&utm_medium=web2x&context=3)).
 
 What about alternatives? Absolute position embedding is what we discussed above, where each position is represented by a unique vector. Relative position embedding, on the other hand, represents the position difference between two positions rather than the absolute position.
 
@@ -818,9 +792,7 @@ where $B$ is a learnable offset matrix added to the unnormalized attention score
 
 ![](../figs/transformer-residual-connection-manga.png){width=70% fig-align=center}
 
-Another important component is the residual connection. The input is first passed through multi-head attention, followed by layer normalization.
-
-Notice the parallel path from input to the output of the attention module. This is called a residual connection, or skip connection. It's a technique used to stabilize the training of deep neural networks by mitigating the problem of too large or too small input values, which can cause network instability.
+Another important component is the residual connection. The input is first passed through multi-head attention, followed by layer normalization. Notice the parallel path from input to the output of the attention module, called a residual connection (or skip connection), a technique used to stabilize the training of deep neural networks by mitigating the problem of too large or too small input values that can cause network instability.
 
 Let's denote by $f$ the neural network we want to train (the multi-head attention or feed-forward networks in the transformer block).
 
@@ -830,9 +802,7 @@ $$
 \underbrace{x_{\text{out}}}_{\text{output}} = \underbrace{x_{\text{in}}}_{\text{input}} + \underbrace{f(x_{\text{in}})}_{\text{component}}.
 $$
 
-Rather than learning the complete mapping from input to output, the network $f$ learns to model the residual (difference) between them.
-
-This is particularly advantageous when the desired transformation approximates an identity mapping, as the network can simply learn to output values near zero.
+Rather than learning the complete mapping from input to output, the network $f$ learns to model the residual (difference) between them. This is particularly advantageous when the desired transformation approximates an identity mapping, as the network can simply learn to output values near zero.
 
 Why are residual connections important? Residual connections help prevent the vanishing gradient problem. Deep learning models like LLMs consist of many layers, trained to minimize the loss function ${\cal L}_{\text{loss}}$ with respect to parameters $\theta$.
 
@@ -870,9 +840,7 @@ Residual connections also help prevent gradient explosion by providing alternati
 
 ![](../figs/transformer-layer-normalization-manga.png){width=70% fig-align=center}
 
-In transformer models, you find multiple layer normalization steps. Layer normalization is a technique used to stabilize the training of deep neural networks.
-
-It mitigates the problem of too large or too small input values, which can cause network instability.
+In transformer models, you find multiple layer normalization steps. Layer normalization is a technique used to stabilize the training of deep neural networks by mitigating the problem of too large or too small input values that can cause network instability.
 
 More specifically, layer normalization is computed as:
 
@@ -884,9 +852,7 @@ where $\mu$ and $\sigma$ are the mean and standard deviation of the input, $\gam
 
 The variables $\gamma$ and $\beta$ are learnable parameters initialized to 1 and 0, and updated during training.
 
-Note that layer normalization is applied to individual tokens. The normalization is token-wise, rather than feature-wise. The mean and standard deviation are calculated for each token across all feature dimensions.
-
-This differs from feature-wise normalization, where mean and standard deviation are calculated for each feature across all tokens.
+Note that layer normalization is applied to individual tokens: the normalization is token-wise rather than feature-wise, with mean and standard deviation calculated for each token across all feature dimensions. This differs from feature-wise normalization, where mean and standard deviation are calculated for each feature across all tokens.
 
 ## Decoder Module
 
@@ -896,15 +862,9 @@ This differs from feature-wise normalization, where mean and standard deviation 
 
 ![](../figs/transformer-causal-attention-manga.png){width=70% fig-align=center}
 
-One key advantage of transformers is their ability to generate contextualized vectors in parallel. Recurrent neural networks (RNNs) read the input sequence sequentially, limiting parallelism.
+One key advantage of transformers is their ability to generate contextualized vectors in parallel. Recurrent neural networks (RNNs) read the input sequence sequentially, limiting parallelism. Transformer models, on the other hand, can compute attention scores and weighted averages of value vectors in parallel, generating contextualized vectors at once, which speeds up training.
 
-Transformer models, on the other hand, can compute attention scores and weighted averages of value vectors in parallel, generating contextualized vectors at once. This speeds up training.
-
-In the decoder module, a vector is contextualized by attending to the previous vectors in the sequence. Importantly, it should not see the future token vectors, as that's what the model is tasked to predict.
-
-We prevent this by setting the attention scores to zero for future tokens.
-
-Another benefit of causal attention: the model doesn't suffer from the error accumulation problem, where prediction error from one step carries over to the next.
+In the decoder module, a vector is contextualized by attending to the previous vectors in the sequence. Importantly, it should not see the future token vectors, as that's what the model is tasked to predict. We prevent this by setting the attention scores to zero for future tokens. Another benefit of causal attention: the model doesn't suffer from the error accumulation problem, where prediction error from one step carries over to the next.
 
 How do we implement the masking? We set the attention scores to negative infinity for future tokens before the softmax operation, effectively zeroing out their contribution:
 
@@ -918,15 +878,11 @@ where $M$ is a matrix with $-\infty$ for positions corresponding to future token
 
 ![](../figs/transformer-cross-attention-manga.png){width=70% fig-align=center}
 
-Cross-attention occurs when the Query comes from one sequence (like a sentence being generated) and the Keys and Values come from another sequence (like the input sentence you want to translate).
-
-Here, the model learns to align information from input to output, a sort of bilingual dictionary lookup, but learned and fuzzy.
+Cross-attention occurs when the Query comes from one sequence (like a sentence being generated) and the Keys and Values come from another sequence (like the input sentence you want to translate). Here, the model learns to align information from input to output, a sort of bilingual dictionary lookup, but learned and fuzzy.
 
 The mechanism works by using queries (Q) from the decoder's previous layer and keys (K) and values (V) from the encoder's output. This enables each position in the decoder to attend to the full encoder sequence without any masking, since encoding is already complete.
 
-For instance, in translating "I love you" to "Je t'aime", cross-attention helps each French word focus on relevant English words. "Je" attends to "I", and "t'aime" to "love".
-
-This maintains semantic relationships between input and output.
+For instance, in translating "I love you" to "Je t'aime", cross-attention helps each French word focus on relevant English words ("Je" attends to "I", and "t'aime" to "love"), maintaining semantic relationships between input and output.
 
 The cross-attention formula is:
 
