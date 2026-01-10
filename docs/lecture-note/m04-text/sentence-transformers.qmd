@@ -6,22 +6,36 @@ execute:
 ---
 
 ::: {.callout-note title="What you'll learn in this module"}
-BERT produces a matrix of token vectors. Sentence Transformers collapse that matrix into a single coordinate, turning semantic similarity into geometric distance. This enables fast semantic search, clustering, and similarity comparisons across large document collections.
+This module introduces **Sentence Transformers**, which collapse BERT's token matrices into single vectors for fast semantic search.
+
+You'll learn:
+
+- How **Siamese Networks** use shared weights to embed sentences in a common vector space.
+- The role of **pooling strategies** (mean, max, CLS-token) in collapsing token matrices into sentence embeddings.
+- How to perform **semantic search** and **clustering** with pre-trained models.
+- The **speed-accuracy trade-offs** across different model sizes and architectures.
+- Where sentence embeddings **break down** (context collapse, word order sensitivity, domain shift).
 :::
 
-## The Challenge: From Matrices to Coordinates
+BERT gives you a vector for every token in a sentence. If you want to compare two sentences, you're stuck comparing two messy matrices of varying sizes.
 
-BERT gives you a vector for every token in a sentence. If you want to compare two sentences, you're stuck comparing two messy matrices of varying sizes. The naive approach (averaging all token vectors) throws away positional information and treats every word equally, which is wrong. The word "not" in "not good" should drastically change the sentence embedding, but simple averaging dilutes its impact.
+The naive approach is to average all token vectors. But this throws away positional information and treats every word equally. The word "not" in "not good" should drastically change the sentence embedding, but simple averaging dilutes its impact.
 
-Sentence-BERT (SBERT) solves this by training a Siamese Network. The same BERT model processes two sentences independently, producing their respective token matrices. We then apply pooling (mean, max, or CLS-token extraction) to collapse each matrix into a single vector. The training objective is contrastive: if the sentences are semantically similar (paraphrases), their vectors should be close in Euclidean or cosine space. If they're unrelated, their vectors should be distant.
+## What's the Solution?
+
+Sentence-BERT (SBERT) solves this by training a **Siamese Network**. The same BERT model processes two sentences independently, producing their respective token matrices. We then apply pooling (mean, max, or CLS-token extraction) to collapse each matrix into a single vector.
+
+The training objective is contrastive. If the sentences are semantically similar (paraphrases), their vectors should be close in Euclidean or cosine space. If they're unrelated, their vectors should be distant.
 
 Think of it like creating a library catalog. Instead of storing every word on every page, you compress each book into a single Dewey Decimal number. Books on similar topics get similar numbers, enabling efficient retrieval. The compression loses fine-grained detail, but gains search speed.
+
+## What makes this work?
 
 The mathematical trick is the Siamese architecture. Weight sharing ensures both sentences are embedded into the same vector space using identical transformations. This makes the distance between vectors meaningful: similar sentences cluster together, dissimilar ones push apart.
 
 ## How to Use Sentence Transformers
 
-Sentence Transformers enable semantic search, clustering, and similarity comparisons. Let's see how to use them in practice.
+Let's see how to use Sentence Transformers in practice. We'll start with semantic search, then move to clustering.
 
 ### Basic Semantic Search
 
@@ -60,7 +74,7 @@ for hit in hits[0]:
     print(f"{corpus[hit['corpus_id']]} (Score: {hit['score']:.4f})")
 ```
 
-Expected output shows that the model correctly identifies "eating pasta" is semantically closest to "eating food" and "eating bread", even though the exact words don't match. This is semantic search: matching by meaning, not keywords.
+The model correctly identifies "eating pasta" is semantically closest to "eating food" and "eating bread", even though the exact words don't match. This is semantic search: matching by meaning, not keywords.
 
 ### Clustering Documents
 
@@ -102,36 +116,44 @@ for cluster_id, cluster_sentences in clustered_sentences.items():
         print(f"  - {sentence}")
 ```
 
-Expected clustering shows the model separates technical/programming sentences from animal-related sentences without any labeled data.
+The model separates technical/programming sentences from animal-related sentences without any labeled data. This is unsupervised semantic clustering.
 
-### Choosing the Right Model
+### Which Model Should You Use?
 
-Different Sentence Transformer models optimize for different trade-offs. The all-MiniLM-L6-v2 model is fast and lightweight (384 dimensions), good for most applications. The all-mpnet-base-v2 model offers higher quality (768 dimensions), slower but more accurate. The multi-qa-mpnet-base-dot-v1 model is optimized for question-answering and retrieval tasks. The paraphrase-multilingual-mpnet-base-v2 model supports 50+ languages.
+Different Sentence Transformer models optimize for different trade-offs. The `all-MiniLM-L6-v2` model is fast and lightweight (384 dimensions), good for most applications. The `all-mpnet-base-v2` model offers higher quality (768 dimensions), slower but more accurate.
+
+The `multi-qa-mpnet-base-dot-v1` model is optimized for question-answering and retrieval tasks. The `paraphrase-multilingual-mpnet-base-v2` model supports 50+ languages.
 
 Choose based on your constraints: speed vs. accuracy, monolingual vs. multilingual, general-purpose vs. domain-specific.
 
-### Architecture: The Siamese Network
+## How Does the Architecture Work?
 
-The key innovation is the Siamese Network architecture:
+Let's talk about the Siamese Network architecture. Here's the visual:
 
 ![Siamese Network](https://raw.githubusercontent.com/UKPLab/sentence-transformers/master/docs/img/SBERT_Siamese_Network.png)
 
-Both sentences pass through the same BERT model (shared weights). This ensures they're embedded into a common vector space. The pooling layer then collapses each token matrix into a single vector. During training, the loss function pushes similar sentence pairs together and dissimilar pairs apart.
+Both sentences pass through the same BERT model (shared weights). This ensures they're embedded into a common vector space. The pooling layer then collapses each token matrix into a single vector.
 
-Common pooling strategies include mean pooling (average all token vectors, most common), max pooling (take element-wise maximum across tokens), and CLS-token (use the [CLS] token's final hidden state, BERT's built-in sentence representation).
+During training, the loss function pushes similar sentence pairs together and dissimilar pairs apart. This is contrastive learning: positive pairs attract, negative pairs repel.
 
-Mean pooling generally works best because it captures information from all tokens while being robust to varying sentence lengths.
+### What Pooling Strategy Should You Use?
 
-### Where This Breaks
+Common pooling strategies include **mean pooling** (average all token vectors, most common), **max pooling** (take element-wise maximum across tokens), and **CLS-token** (use the [CLS] token's final hidden state, BERT's built-in sentence representation).
 
-Static compression is a limitation: a sentence gets exactly one vector, regardless of context. "The bank" in "the river bank" and "the financial bank" might get similar embeddings if they share enough surrounding words. The model compresses meaning into a fixed point, losing nuance.
+Mean pooling generally works best. It captures information from all tokens while being robust to varying sentence lengths.
 
-Word order sensitivity is another concern: "The dog bit the man" and "The man bit the dog" share the same words. If the model relies too heavily on lexical overlap (bag-of-words similarity), they'll end up dangerously close in vector space. Good models learn syntax, but they're not perfect.
+## Where Does This Break?
+
+Static compression is a limitation. A sentence gets exactly one vector, regardless of context. "The bank" in "the river bank" and "the financial bank" might get similar embeddings if they share enough surrounding words. The model compresses meaning into a fixed point, losing nuance.
+
+Word order sensitivity is another concern. "The dog bit the man" and "The man bit the dog" share the same words. If the model relies too heavily on lexical overlap (bag-of-words similarity), they'll end up dangerously close in vector space. Good models learn syntax, but they're not perfect.
 
 Computational cost matters too. Although retrieval is fast (dot products), encoding large corpora is expensive. Encoding 1 million sentences with a large model can take hours. Pre-compute and cache embeddings whenever possible.
 
-Domain shift is a practical issue: models trained on general text (Wikipedia, news) may perform poorly on specialized domains (medical, legal). Fine-tuning on domain-specific data helps, but requires labeled sentence pairs.
+Domain shift is a practical issue. Models trained on general text (Wikipedia, news) may perform poorly on specialized domains (medical, legal). Fine-tuning on domain-specific data helps, but requires labeled sentence pairs.
 
 ## The Key Takeaway
 
-Sentence Transformers collapse BERT's token matrix into a single vector using Siamese Networks and contrastive learning. The result is fast semantic search: encode once, compare with dot products. Choose your pooling strategy and model size based on speed-accuracy trade-offs, and remember that compression always loses information.
+Sentence Transformers collapse BERT's token matrix into a single vector using Siamese Networks and contrastive learning. The result is fast semantic search: encode once, compare with dot products.
+
+Choose your pooling strategy and model size based on speed-accuracy trade-offs. Remember that compression always loses information.
