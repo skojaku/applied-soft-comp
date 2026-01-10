@@ -287,9 +287,26 @@ window.Quarto = {
     <a class="dropdown-item" href="../m05-images/04-cnn-innovations.html">
  <span class="dropdown-text">CNN Innovations</span></a>
   </li>  
+        <li class="dropdown-header">─── Module 6: Graphs ───</li>
         <li>
-    <a class="dropdown-item" href="../m05-images/05-student-challenge.html">
- <span class="dropdown-text">Student Challenge</span></a>
+    <a class="dropdown-item" href="../m06-graph/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m06-graph/01-from-images-to-graphs.html">
+ <span class="dropdown-text">From Images to Graphs</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m06-graph/02-spectral-perspective.html">
+ <span class="dropdown-text">The Spectral Perspective</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m06-graph/03-spatial-networks.html">
+ <span class="dropdown-text">Spatial Graph Networks</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m06-graph/04-graph-embeddings.html">
+ <span class="dropdown-text">Graph Embeddings</span></a>
   </li>  
     </ul>
   </li>
@@ -298,7 +315,7 @@ window.Quarto = {
  <span class="menu-text">Advanced Topics</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-advanced-topics">    
-        <li class="dropdown-header">─── Module 6: LLMs ───</li>
+        <li class="dropdown-header">─── Module 7: LLMs ───</li>
         <li>
     <a class="dropdown-item" href="../m06-llms/overview.qmd">
  <span class="dropdown-text">Overview</span></a>
@@ -334,11 +351,6 @@ window.Quarto = {
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
-  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
-  <div class="quarto-reader-toggle-btn">
-  <i class="bi"></i>
-  </div>
-</a>
 </div>
       </div> <!-- /container-fluid -->
     </nav>
@@ -669,10 +681,45 @@ window.Quarto = {
  <span class="menu-text">Part 4: CNN Innovations</span></a>
   </div>
 </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module 6: Deep Learning for Graphs</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../m05-images/05-student-challenge.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Part 5: Student Challenge</span></a>
+  <a href="../m06-graph/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-graph/01-from-images-to-graphs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Part 1: From Images to Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-graph/02-spectral-perspective.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Part 2: The Spectral Perspective</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-graph/03-spatial-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Part 3: Spatial Graph Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-graph/04-graph-embeddings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Part 4: Graph Embeddings</span></a>
   </div>
 </li>
       </ul>
@@ -740,7 +787,7 @@ What you’ll learn in this module
 <p>In high dimensions, everything is far from everything else. This sounds paradoxical, but it’s mathematically inevitable. As dimensions increase, the volume of space grows exponentially, and data points become increasingly sparse.</p>
 <p>Consider this simple fact: in 1D, if you have 10 points uniformly distributed in [0, 1], the average distance between neighbors is about 0.1. To maintain the same density in 2D, you need 100 points. In 3D, you need 1,000 points. In 10D, you need 10 billion points.</p>
 <p>Even stranger than the sparsity is what happens to distances. In high dimensions, all distances become similar. The nearest and farthest neighbors become roughly equidistant. This makes many of our intuitions about “closeness” break down.</p>
-<div id="25c680ff" class="cell" data-fig-height="5" data-fig-width="10" data-execution_count="1">
+<div id="6a7d065c" class="cell" data-fig-height="5" data-fig-width="10" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -806,7 +853,7 @@ What you’ll learn in this module
 <section id="pairwise-scatter-plots-the-brute-force-approach" class="level2">
 <h2 class="anchored" data-anchor-id="pairwise-scatter-plots-the-brute-force-approach">Pairwise Scatter Plots: The Brute Force Approach</h2>
 <p>When you have a moderate number of dimensions (roughly 3 to 10), you can visualize all pairwise relationships using a scatter plot matrix, also called a pairs plot or SPLOM.</p>
-<div id="62409da1" class="cell" data-fig-height="14" data-fig-width="14" data-execution_count="2">
+<div id="587c9495" class="cell" data-fig-height="14" data-fig-width="14" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load classic iris dataset (4 dimensions)</span></span>
@@ -847,7 +894,7 @@ What you’ll learn in this module
 <p>Principal Component Analysis (PCA) is a linear dimensionality reduction method that finds the directions of maximum variance in your data.</p>
 <p>Imagine you have a cloud of points in high-dimensional space. PCA asks a simple question: what direction captures the most variation in the data? This becomes the first principal component (PC1). Then it asks: what direction, perpendicular to the first, captures the most remaining variation? This becomes PC2. And so on.</p>
 <p>Mathematically, PCA finds the eigenvectors of the covariance matrix. But conceptually, it’s rotating your coordinate system to align with the highest variance directions of your data.</p>
-<div id="b729f563" class="cell" data-fig-height="6" data-fig-width="10" data-execution_count="3">
+<div id="222fdc94" class="cell" data-fig-height="6" data-fig-width="10" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
@@ -896,7 +943,7 @@ What you’ll learn in this module
 <section id="applying-pca-to-iris" class="level3">
 <h3 class="anchored" data-anchor-id="applying-pca-to-iris">Applying PCA to Iris</h3>
 <p>Let’s apply PCA to the 4-dimensional Iris dataset and see how much information we can preserve in just 2 dimensions.</p>
-<div id="71b4bbf5" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="4">
+<div id="41a53437" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare data</span></span>
@@ -962,7 +1009,7 @@ What you’ll learn in this module
 <p>Multidimensional Scaling (MDS) takes a different approach than PCA. Instead of finding directions of maximum variance, it tries to preserve distances between points.</p>
 <p>You give MDS a distance matrix showing the distance between every pair of points in high-dimensional space. MDS then finds a low-dimensional configuration where those distances are preserved as well as possible.</p>
 <p>Think of it like arranging cities on a map. You know the distance between every pair of cities, but not their coordinates. MDS finds positions that preserve those distances. Mathematically, MDS minimizes stress, the difference between high-dimensional distances and low-dimensional distances. Classical MDS has a closed-form solution like PCA, but more flexible variants use iterative optimization.</p>
-<div id="78b3f79f" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="5">
+<div id="ce69e55f" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.manifold <span class="im">import</span> MDS</span>
@@ -1019,7 +1066,7 @@ What you’ll learn in this module
 <p>MDS preserves Euclidean distances, which are straight-line distances through space. But for curved manifolds, what matters is the geodesic distance: the distance along the surface.</p>
 <p>Isomap (Isometric Mapping) addresses this by approximating geodesic distances using the neighborhood graph. The approach is elegant. First, build a neighborhood graph by connecting each point to its k nearest neighbors. Second, compute shortest paths through this graph. The geodesic distance between points is approximated by the shortest path. Third, apply classical MDS using these geodesic distances instead of Euclidean distances.</p>
 <p>Think of it like this: MDS measures distance “as the crow flies,” while Isomap measures distance “as you walk along the surface.”</p>
-<div id="7215c809" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="6">
+<div id="9508a69d" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.manifold <span class="im">import</span> Isomap</span>
@@ -1078,7 +1125,7 @@ What you’ll learn in this module
 <h3 class="anchored" data-anchor-id="how-t-sne-works">How t-SNE works</h3>
 <p>t-SNE converts distances into similarity probabilities and preserves these local relationships. In high dimensions, we define probability <span class="math inline">p_{ij}</span> that point <span class="math inline">i</span> picks point <span class="math inline">j</span> as a neighbor, based on a Gaussian distance. In low dimensions, we define similar probability <span class="math inline">q_{ij}</span> using a t-distribution with heavy tails. Then we optimize by moving points in 2D to make <span class="math inline">q_{ij}</span> match <span class="math inline">p_{ij}</span>, minimizing KL divergence.</p>
 <p>The t-distribution’s heavy tails are clever. They let well-separated clusters spread out in 2D without overlapping, while keeping local neighborhoods tight.</p>
-<div id="19c4df0e" class="cell" data-fig-height="5" data-fig-width="15" data-execution_count="7">
+<div id="539895ea" class="cell" data-fig-height="5" data-fig-width="15" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.manifold <span class="im">import</span> TSNE</span>
@@ -1138,7 +1185,7 @@ What you’ll learn in this module
 <section id="applying-t-sne-to-real-data" class="level3">
 <h3 class="anchored" data-anchor-id="applying-t-sne-to-real-data">Applying t-SNE to real data</h3>
 <p>Let’s apply t-SNE to a more realistic high-dimensional dataset: the digits dataset, which has 64 dimensions (8 by 8 pixel images).</p>
-<div id="0d4c4fa6" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="8">
+<div id="70f83fa6" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_digits</span>
@@ -1188,7 +1235,7 @@ What you’ll learn in this module
 <p>Uniform Manifold Approximation and Projection (UMAP) is a newer method from 2018 that has become popular as an alternative to t-SNE. Like t-SNE, UMAP preserves local structure, but it’s based on different mathematical foundations in manifold learning and topological data analysis.</p>
 <p>UMAP has several advantages over t-SNE. It’s faster, often 10 to 100 times faster than t-SNE on large datasets. It scales better, working well on datasets with millions of points. It preserves more global structure than t-SNE. It’s also theoretically grounded in Riemannian geometry and fuzzy topology.</p>
 <p>The trade-offs are worth noting. UMAP is less battle-tested than t-SNE since it’s newer. It has more hyperparameters to tune, though defaults work well. It often produces similar-looking results to t-SNE, so the choice often comes down to speed.</p>
-<div id="0d57f335" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="9">
+<div id="4dcefee6" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> umap</span>
@@ -1740,7 +1787,7 @@ Try it yourself
 </div>   
     <div class="nav-footer-center">
       &nbsp;
-    <div class="toc-actions"><ul><li><a href="https://github.com/skojaku/applied-soft-comp/edit/main/m02-visualization/highd-data.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/skojaku/applied-soft-comp/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    </div>
     <div class="nav-footer-right">
       <ul class="footer-items list-unstyled">
     <li class="nav-item compact">

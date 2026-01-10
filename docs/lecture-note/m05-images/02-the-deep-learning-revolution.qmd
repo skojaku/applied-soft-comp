@@ -77,19 +77,30 @@ def to_grayscale(img_array):
 ```
 
 ```{python}
-# Load an example image
+#| echo: false
+#| output: false
+
+# Load and prepare the example image
 url = "https://www.binghamton.edu/news/images/uploads/features/20180815_peacequad02_jwc.jpg"
 img_array = load_image_from_url(url)
 img_gray = to_grayscale(img_array)
 
-# Apply vertical edge detection using convolution
 from scipy.signal import convolve2d
+```
 
+```{python}
+# Define the vertical edge detection kernel
 K_v = np.array([[-1, -1, -1],
                 [0, 0, 0],
                 [1, 1, 1]])
 
+# Apply convolution to detect edges
 edges = convolve2d(img_gray, K_v, mode='same', boundary='symm')
+```
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show visualization code"
 
 fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 axes[0].imshow(img_gray, cmap='gray')
@@ -194,6 +205,9 @@ Yann LeCun's work on applying backpropagation to convolutional architectures in 
 Here's a simplified LeNet-1 implementation showing the core architecture:
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show LeNet-1 implementation"
+
 import torch
 import torch.nn as nn
 
