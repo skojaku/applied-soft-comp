@@ -19,7 +19,9 @@ LLMs are brilliant but bounded. Every model has a context window, the set of tok
 
 An LLM has an attention budget that degrades as context grows. As token count increases, the model's ability to accurately use that context degrades. This phenomenon is called context rot.
 
-![](../figs/context-engineering-context-rot-manga.png){width="70%" fig-align="center"}
+::: {#fig-context-rot}
+![Context rot degrades attention as token count increases](../figs/context-engineering-context-rot-manga.png){width="70%" fig-align="center"}
+:::
 
 Why does this happen? The root cause is architectural. LLMs use the transformer architecture where every token attends to every other token. For $n$ tokens, this creates $n^2$ pairwise relationships.
 
@@ -74,7 +76,9 @@ The result is consistent behavior, reduced redundant prompting, and coherence ac
 
 ## Selecting Context
 
-![](../figs/context-engineering-chibi-mcp.png){width="70%" fig-align="center"}
+::: {#fig-mcp-illustration}
+![Model Context Protocol enables on-demand data retrieval](../figs/context-engineering-chibi-mcp.png){width="70%" fig-align="center"}
+:::
 
 Now shift your attention to the second strategy: selecting. Selecting context means pulling it into the context window at runtime. The key insight is progressive disclosure: the agent does not need all the data upfront.
 
@@ -96,9 +100,13 @@ Google Antigravity connects to external MCP servers through a configuration file
 
 How do you set this up? First, open Google Antigravity and navigate to the MCP Store. Click Manage MCP Servers at the top, then click View raw config in the main tab. This opens `mcp_config.json`, which controls all external tools available to your agent.
 
-![](../figs/screenshot_2025-12-01_digital_garden_mcp.png){width="70%" fig-align="center"}
+::: {#fig-mcp-config layout-ncol=1}
+![Digital Garden MCP interface](../figs/screenshot_2025-12-01_digital_garden_mcp.png){#fig-mcp-digital-garden width="70%" fig-align="center"}
 
-![](../figs/screenshot_2025-12-01_manage_mcp_servers.png){width="70%" fig-align="center"}
+![Managing MCP servers in Antigravity](../figs/screenshot_2025-12-01_manage_mcp_servers.png){#fig-mcp-manage width="70%" fig-align="center"}
+
+Setting up Context7 in Google Antigravity
+:::
 
 Add this block to your `mcp_config.json`:
 
