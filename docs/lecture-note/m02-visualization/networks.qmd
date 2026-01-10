@@ -1,23 +1,29 @@
 ---
 title: "Network Visualization"
-jupyter: python3
+jupyter:
+   kernel: applsoftcomp
 execute:
     enabled: true
 ---
 
 ::: {.callout-note title="What you'll learn in this module"}
-This module introduces the art of network visualization. We will explore how to reveal hidden structures using force-directed layouts, examine specific techniques for hierarchical data, and understand how to avoid the dreaded "hairball" by matching layout algorithms to your analytical goals.
+This module introduces the art of network visualization.
+
+You'll learn:
+
+- How to choose **layout algorithms** that reveal rather than obscure network structure.
+- The principles of **force-directed layouts** (Fruchterman-Reingold and SFDP) and when to use each.
+- How to visualize **hierarchical community structure** using nested block models and edge bundling.
+- The tradeoffs between layout approaches and how to match algorithms to your analytical goals.
 :::
 
 ## The Art of Structure
 
 Have you ever looked at a network visualization that resembles a tangled ball of yarn? Nodes cluster in impenetrable clumps. Edges cross everywhere. These "hairball diagrams" are so common in publications that they have become a running joke in network science.
 
-The problem isn't that networks are inherently messy. The problem is that the layout fails to reveal the structure that is actually there.
+The problem isn't that networks are inherently messy. The problem is that the layout fails to reveal the structure that is actually there. A bad layout obscures answers, no matter how much you adjust colors or node sizes.
 
 What is the goal of network visualization? It is not to make pretty pictures. It is to make structure visible. A good layout answers your questions before you even ask them. It shows you if there are communities, if there is a hierarchy, or if certain nodes act as central hubs.
-
-A bad layout obscures these answers, no matter how much you adjust colors or node sizes.
 
 Let's talk about how to choose and use network layouts that reveal rather than obscure. We will start with the simplest case of trees, move to general networks with force-directed layouts, and finally explore hierarchical structures that combine both approaches with edge bundling.
 
@@ -25,11 +31,9 @@ The core principle is simple. Layout is not decoration. It is a hypothesis about
 
 ## The Challenge of Position
 
-A network, or graph, is a collection of nodes connected by links. These can represent social relationships, neural connections, or citations between papers.
+A network, or graph, is a collection of nodes connected by links. These can represent social relationships, neural connections, or citations between papers. Formally, a network $G = (V, E)$ consists of a set of nodes $V = \{v_1, v_2, ..., v_n\}$ and a set of edges $E \subseteq V \times V$. Edges can be directed (like citations) or undirected (like friendships).
 
 Here's the challenge. Unlike data points that have inherent positions like latitude and longitude or time stamps, networks have no natural layout. The positions you see in a visualization are entirely constructed by the placement algorithm.
-
-A network $G = (V, E)$ consists of a set of nodes $V = \{v_1, v_2, ..., v_n\}$ and a set of edges $E \subseteq V \times V$. Edges can be directed (like citations) or undirected (like friendships).
 
 Why visualize networks at all? Because topology is hard to grasp from data alone. Looking at an adjacency matrix gives you facts, but it rarely gives you insight. Visualization transforms abstract connectivity into spatial patterns your visual system can process.
 
@@ -37,11 +41,9 @@ Choosing a layout is choosing what to emphasize. Different algorithms can make t
 
 ## Visualizing Trees
 
-The simplest networks are trees. These are connected networks with no cycles, where every node except the root has exactly one parent.
+The simplest networks are trees. These are connected networks with no cycles, where every node except the root has exactly one parent. Trees appear everywhere in biological taxonomies, organizational charts, and file systems.
 
-Trees appear everywhere. You find them in biological taxonomies, organizational charts, and file systems. For trees, the structure is clear and the hierarchy is paramount.
-
-The **radial tree layout** makes this hierarchy visible by placing the root at the center and arranging descendants in concentric circles.
+For trees, the structure is clear and the hierarchy is paramount. The **radial tree layout** makes this hierarchy visible by placing the root at the center and arranging descendants in concentric circles.
 
 ```{python}
 #| fig-cap: "Radial tree layout of a random tree with 50 nodes. The root is at the center, and descendants are arranged in concentric circles by depth."
@@ -83,11 +85,9 @@ What does the radial layout reveal? It shows the depth of each node, indicating 
 
 ## Force-Directed Layouts
 
-Most networks are not trees. They have cycles, cross-links, and complex connectivity patterns.
+Most networks are not trees. They have cycles, cross-links, and complex connectivity patterns. For these networks, we need algorithms that can handle arbitrary topology.
 
-For these networks, we need algorithms that can handle arbitrary topology. The most common approach is the **force-directed layout**.
-
-The idea is intuitive. We treat nodes as charged particles that repel each other, and edges as springs that pull connected nodes together. We let the system simulate physics until it reaches equilibrium. Nodes that are closely connected end up near each other, while unconnected parts spread apart.
+The most common approach is the **force-directed layout**. The idea is intuitive. We treat nodes as charged particles that repel each other, and edges as springs that pull connected nodes together. We let the system simulate physics until it reaches equilibrium. Nodes that are closely connected end up near each other, while unconnected parts spread apart.
 
 The **Fruchterman-Reingold algorithm** is one of the most widely used force-directed methods. It balances the repulsive force between all pairs of nodes against the attractive force of the edges connecting them.
 
@@ -172,9 +172,7 @@ gt.graph_draw(g, pos=pos,
 
 The Karate Club dataset comes from a study by Wayne Zachary (1977). It documents the split of a university karate club into two factions and remains one of the most famous benchmarks in network science.
 
-Notice something remarkable here. Even though we didn't tell the algorithm about the two groups, it naturally separates them in space.
-
-Why does this happen? Nodes within each group are densely connected, creating a strong attractive pull. Connections between groups are sparse, leading to a weaker pull across the boundary. The physics does the rest.
+Notice something remarkable here. Even though we didn't tell the algorithm about the two groups, it naturally separates them in space. Why does this happen? Nodes within each group are densely connected, creating a strong attractive pull. Connections between groups are sparse, leading to a weaker pull across the boundary. The physics does the rest.
 
 ### Tuning the Physics
 
@@ -233,17 +231,15 @@ gt.graph_draw(g, pos=pos,
               inline=True)
 ```
 
-What do we see? With only 50 iterations, the nodes are still cramped near their initial positions. They haven't had time to spread out. Increasing this to 500 iterations allows the structure to emerge clearly.
-
-Pushing to 5000 iterations yields diminishing returns. The layout looks similar, but the computation time increases.
+What do we see? With only 50 iterations, the nodes are still cramped near their initial positions. They haven't had time to spread out. Increasing this to 500 iterations allows the structure to emerge clearly. Pushing to 5000 iterations yields diminishing returns. The layout looks similar, but the computation time increases.
 
 Here is a practical rule of thumb. For small networks (< 100 nodes), try 500-1000 iterations. For medium networks (100-1000 nodes), aim for 1000-2000. For anything larger, you need a different approach.
 
 ## Scaling Up with SFDP
 
-The standard Fruchterman-Reingold algorithm hits a wall as networks grow. Why? Because it computes forces between every single pair of nodes.
+The standard Fruchterman-Reingold algorithm hits a wall as networks grow. Why? Because it computes forces between every single pair of nodes. For larger networks, we need efficiency.
 
-For larger networks, we need efficiency. This is where **SFDP (Scalable Force-Directed Placement)** comes in. It uses a multilevel approach, similar to the Barnes-Hut algorithm in physics simulations, to approximate forces efficiently.
+This is where **SFDP (Scalable Force-Directed Placement)** comes in. It uses a multilevel approach, similar to the Barnes-Hut algorithm in physics simulations, to approximate forces efficiently.
 
 ```{python}
 #| fig-cap: "Comparison of Fruchterman-Reingold (left) vs. SFDP (right) on a larger network (500 nodes, scale-free topology). SFDP is much faster while producing comparable layouts."
@@ -300,15 +296,13 @@ gt.graph_draw(g, pos=pos_sfdp,
 
 SFDP is often orders of magnitude faster for large networks while producing layouts of comparable quality. Once your network exceeds a few hundred nodes, SFDP should be your default choice.
 
-Here's something important to remember. Force-directed layouts are non-deterministic. They start from random positions and settle into a local equilibrium. Different runs can produce different orientations.
-
-If you need reproducible figures for a paper, always set a random seed. The layout reveals *a* valid structure, not *the* structure.
+Here's something important to remember. Force-directed layouts are non-deterministic. They start from random positions and settle into a local equilibrium. Different runs can produce different orientations. If you need reproducible figures for a paper, always set a random seed. The layout reveals *a* valid structure, not *the* structure.
 
 ## Visualizing Hierarchical Structure
 
-Many real-world networks exhibit hierarchical community structure. Biological systems, large organizations, and social networks often have groups nested within groups.
+Many real-world networks exhibit hierarchical community structure. Biological systems, large organizations, and social networks often have groups nested within groups. Standard force-directed layouts can reveal the primary communities, but they often obscure the nested relationships between them.
 
-Standard force-directed layouts can reveal the primary communities. But they often obscure the nested relationships between them. For this, we use **circular hierarchy layouts with edge bundling**.
+For this, we use **circular hierarchy layouts with edge bundling**.
 
 ### The Nested Block Model
 
@@ -340,9 +334,7 @@ gt.draw_hierarchy(state,
 
 Danny Holten (2006) introduced hierarchical edge bundling to visualize adjacency relations in hierarchical data. The technique routes edges through their lowest common ancestor in the hierarchy tree. Think of it like cables tied together to reduce clutter.
 
-This visualization packs an enormous amount of information into a single image. The concentric rings represent levels of the hierarchy, from coarse inner groups to fine outer details. The colored wedges visually separate different communities.
-
-Most importantly, edge bundling acts as a visual compressor. By routing edges through the hierarchy tree, it creates bundled "highways" that reveal large-scale connectivity patterns.
+This visualization packs an enormous amount of information into a single image. The concentric rings represent levels of the hierarchy, from coarse inner groups to fine outer details. The colored wedges visually separate different communities. Most importantly, edge bundling acts as a visual compressor. By routing edges through the hierarchy tree, it creates bundled "highways" that reveal large-scale connectivity patterns.
 
 Without edge bundling, this network would look like an incomprehensible hairball. With it, we can see that most connections occur within communities or between closely related ones. This is exactly what we expect in a modular biological system.
 
@@ -414,15 +406,13 @@ This approach is useful when you want to emphasize local connectivity patterns o
 
 ## The Bigger Picture
 
-Every layout algorithm embodies a hypothesis about what makes nodes "similar" or "close." The radial tree layout assumes hierarchy is the key structure. The force-directed layout assumes that shared neighbors create similarity. The hierarchical layout with edge bundling assumes that a multi-scale community structure organizes the network.
+Every layout algorithm embodies a hypothesis about what makes nodes "similar" or "close." The radial tree layout assumes hierarchy is the key structure. The force-directed layout assumes that shared neighbors create similarity. The hierarchical layout with edge bundling assumes that a multi-scale community structure organizes the network. None of these is objectively "correct." They are different lenses for viewing the same data.
 
-None of these is objectively "correct." They are different lenses for viewing the same data. The critical skill is matching the layout to the question you are asking.
+The critical skill is matching the layout to the question you are asking. However, network visualization has fundamental limits. Layout is not analysis. A clear visual pattern is a hint, not a proof. You must always validate visual insights with quantitative analysis.
 
-However, network visualization has fundamental limits. Layout is not analysis. A clear visual pattern is a hint, not a proof. You must always validate visual insights with quantitative analysis.
+What are the fundamental limitations? First, 2D layouts lose information. Projecting a high-dimensional graph into two dimensions necessarily distorts distances. Nodes that appear close might not be similar. Nodes that appear far apart might be connected.
 
-2D layouts lose information. Projecting a high-dimensional graph into two dimensions necessarily distorts distances. Nodes that appear close might not be similar. Nodes that appear far apart might be connected.
-
-Large networks do not scale. Once you have thousands of nodes, even the best layouts become unreadable. At that point, you should switch to statistical summaries, aggregation, or interactive tools that allow you to zoom and filter.
+Second, large networks do not scale. Once you have thousands of nodes, even the best layouts become unreadable. At that point, you should switch to statistical summaries, aggregation, or interactive tools that allow you to zoom and filter.
 
 When publishing network figures, always set a random seed for reproducibility. Label only the most important nodes to avoid clutter, and use color meaningfully to encode communities or attributes. Most importantly, include a caption that explains the layout algorithm so readers know how to interpret the spatial relationships.
 
