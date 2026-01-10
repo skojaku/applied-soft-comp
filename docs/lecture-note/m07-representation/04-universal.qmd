@@ -26,79 +26,14 @@ Model A might be based on BERT (bidirectional transformer). Model B might use T5
 Now here's the question. Are these two models learning the same thing?
 
 You might expect the answer to be "no, obviously not." Different architectures, different training data, different optimization procedures. Why would they converge to the same representation?
-
-```{python}
-#| fig-cap: "Two models trained independently produce fundamentally incomparable embedding spaces."
-#| label: fig-incomparable-spaces
-#| code-fold: true
-
-import matplotlib.pyplot as plt
-import numpy as np
-
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7))
-
-np.random.seed(42)
-
-# Model A: BERT-style embeddings
-n_points = 50
-clusters_A = {
-    'Technology': np.random.randn(n_points, 2) * 0.5 + np.array([-2, 2]),
-    'Nature': np.random.randn(n_points, 2) * 0.5 + np.array([2, 2]),
-    'Politics': np.random.randn(n_points, 2) * 0.5 + np.array([-2, -2]),
-    'Sports': np.random.randn(n_points, 2) * 0.5 + np.array([2, -2]),
-}
-
-colors = {'Technology': '#e74c3c', 'Nature': '#27ae60',
-          'Politics': '#3498db', 'Sports': '#f39c12'}
-
-for topic, points in clusters_A.items():
-    ax1.scatter(points[:, 0], points[:, 1], s=80, c=colors[topic],
-                alpha=0.6, edgecolors='black', linewidth=0.5, label=topic)
-
-ax1.set_xlim(-4, 4)
-ax1.set_ylim(-4, 4)
-ax1.set_xlabel('Dimension 1', fontsize=12, fontweight='bold')
-ax1.set_ylabel('Dimension 2', fontsize=12, fontweight='bold')
-ax1.set_title('Model A: BERT-based (GTR)', fontsize=14, fontweight='bold')
-ax1.legend(loc='upper left', fontsize=10)
-ax1.grid(alpha=0.3, linestyle='--')
-ax1.set_aspect('equal')
-
-# Model B: T5-style embeddings (rotated and scaled differently)
-rotation = np.array([[np.cos(0.7), -np.sin(0.7)],
-                     [np.sin(0.7), np.cos(0.7)]])
-scale = 1.5
-
-clusters_B = {}
-for topic, points in clusters_A.items():
-    clusters_B[topic] = (points @ rotation.T) * scale
-
-for topic, points in clusters_B.items():
-    ax2.scatter(points[:, 0], points[:, 1], s=80, c=colors[topic],
-                alpha=0.6, edgecolors='black', linewidth=0.5, label=topic)
-
-ax2.set_xlim(-6, 6)
-ax2.set_ylim(-6, 6)
-ax2.set_xlabel('Dimension 1', fontsize=12, fontweight='bold')
-ax2.set_ylabel('Dimension 2', fontsize=12, fontweight='bold')
-ax2.set_title('Model B: T5-based (GTE)', fontsize=14, fontweight='bold')
-ax2.legend(loc='upper left', fontsize=10)
-ax2.grid(alpha=0.3, linestyle='--')
-ax2.set_aspect('equal')
-
-plt.tight_layout()
-plt.show()
-```
-
 What do these two spaces have in common? At first glance, nothing. The coordinates are different. The distances are different.
-
 If you compute the cosine similarity between two words in Model A versus Model B, you get completely different numbers. The spaces appear fundamentally incomparable.
 
 ## The Platonic Representation Hypothesis
 
 Yet recent research suggests something remarkable. Despite these surface differences, the two models may have learned essentially the same underlying structure.
 
-This conjecture is called the Platonic Representation Hypothesis. The hypothesis claims that all models of sufficient capacity, when trained on rich enough data, converge to the same latent representation of reality. The original hypothesis was introduced by Huh et al. (2024) in the context of vision models (see [arXiv:2405.07987](https://arxiv.org/abs/2405.07987)).
+This conjecture is called the Platonic Representation Hypothesis. The hypothesis claims that all models of sufficient capacity, when trained on rich enough data, converge to the same latent representation of reality. The original hypothesis was introduced by @huh2024platonic in the context of vision models.
 
 The original hypothesis focused on image models. Researchers observed that different CNN architectures, when trained on ImageNet, produced internal representations that aligned surprisingly well. The models discovered the same features (edges, textures, object parts) in the same hierarchical order, even though no one explicitly programmed this structure.
 
@@ -112,7 +47,7 @@ If you train many different models on the same underlying reality, they should a
 
 ![](https://vec2vec.github.io/assets/universal.png)
 
-Jha et al. (2024) proposed a stronger, constructive version of this hypothesis for text embeddings. They introduced vec2vec, an unsupervised method for translating between embedding spaces (see [project page](https://rishibommasani.github.io/vec2vec/)).
+@jha2025harnessing proposed a stronger, constructive version of this hypothesis for text embeddings. They introduced vec2vec, an unsupervised method for translating between embedding spaces.
 
 **Strong Platonic Representation Hypothesis:** The universal latent structure of text representations not only exists, but can be learned and harnessed to translate representations from one space to another without any paired data or encoders.
 
@@ -194,9 +129,8 @@ If all sufficiently powerful models converge to the same representation, does th
 
 ::: {.callout-note title="Further Reading"}
 
-Jha, R., Zhang, C., Shmatikov, V., & Morris, J. X. (2024). Harnessing the Universal Geometry of Embeddings. [Project page](https://rishibommasani.github.io/vec2vec/)
-
-Huh, M., Cheung, B., Wang, T., & Isola, P. (2024). The Platonic Representation Hypothesis. arXiv:2405.07987
+- @jha2025harnessing
+- @huh2024platonic
 
 Mikolov, T., Yih, W., & Zweig, G. (2013). Linguistic Regularities in Continuous Space Word Representations. NAACL-HLT.
 :::
