@@ -5,25 +5,33 @@ execute:
     enabled: true
 ---
 
-::: {.callout-note title="What you'll learn in this part"}
-This part bridges your knowledge of image convolution to graph data. We explore how pixels and nodes are analogous, why graph structure poses unique challenges, and introduce two complementary perspectives: spectral and spatial.
+::: {.callout-note title="What you'll learn in this module"}
+This module bridges your knowledge of image convolution to graph data.
+
+You'll learn:
+
+- How **pixels and nodes** are analogous and what this reveals about convolution.
+- Why **irregular graph structure** poses unique challenges for deep learning.
+- The **spectral perspective** that defines convolution using frequency domains.
+- The **spatial perspective** that aggregates features from local neighborhoods.
+- How these two perspectives complement each other in graph neural networks.
 :::
 
 ## The Pixel-Node Analogy
 
-We have seen how convolutional neural networks process images by sliding kernels across a regular grid of pixels. Each pixel is convolved with its neighbors to extract features like edges, textures, and patterns.
+Let's talk about a powerful reframing. We have seen how convolutional neural networks process images by sliding kernels across a regular grid of pixels. Each pixel is convolved with its neighbors to extract features like edges, textures, and patterns.
 
-Let's shift our perspective. Think of each pixel not as a grid cell, but as a **node** in a network. The neighbors involved in convolution become **edges** connecting that node to nearby nodes.
+Now shift your perspective. Think of each pixel not as a grid cell, but as a **node** in a network. The neighbors involved in convolution become **edges** connecting that node to nearby nodes.
 
 ![](https://av-eks-lekhak.s3.amazonaws.com/media/__sized__/article_images/conv_graph-thumbnail_webp-600x300.webp)
 
-This analogy suggests something powerful. If we can define convolution on a regular grid of pixels, perhaps we can extend it to irregular networks where nodes have varying numbers of neighbors. This opens the door to applying deep learning to graph-structured data: social networks, molecules, knowledge graphs, and more.
+What does this analogy reveal? If we can define convolution on a regular grid of pixels, perhaps we can extend it to irregular networks where nodes have varying numbers of neighbors. This opens the door to applying deep learning to graph-structured data: social networks, molecules, knowledge graphs, and more.
 
 ## The Challenge: Irregular Structure
 
-The analogy breaks down at a critical point. In images, every pixel (except boundaries) has the same number of neighbors. A 3×3 kernel always covers exactly 9 pixels. The convolution operation is **translation invariant**: the same kernel works everywhere.
+Here's where the analogy breaks down. In images, every pixel (except boundaries) has the same number of neighbors. A 3×3 kernel always covers exactly 9 pixels. The convolution operation is **translation invariant**: the same kernel works everywhere.
 
-Graphs shatter this regularity. Consider a social network. Some people have 5 friends, others have 500. Some molecules have 3 bonds, others have dozens. The number of neighbors varies wildly across nodes.
+Graphs shatter this regularity. Consider a social network: some people have 5 friends, others have 500. Some molecules have 3 bonds, others have dozens. The number of neighbors varies wildly across nodes.
 
 This irregularity raises fundamental questions. How do we define a "kernel" when neighborhoods have different sizes? How do we share parameters across nodes with vastly different connectivity patterns? How do we preserve the inductive biases that make CNNs so powerful?
 
@@ -35,7 +43,9 @@ The research community developed two complementary approaches to graph convoluti
 
 Remember the convolution theorem from signal processing? Convolution in the spatial domain corresponds to multiplication in the frequency domain. For images, we use the Fourier transform to decompose signals into sinusoidal basis functions.
 
-Graphs have their own notion of "frequency." The graph Laplacian's eigenvectors serve as basis functions, and eigenvalues indicate how much node features vary across edges. Small eigenvalues correspond to smooth signals (low frequency), where connected nodes have similar values. Large eigenvalues correspond to rapidly varying signals (high frequency), where neighbors differ significantly.
+Graphs have their own notion of "frequency." The graph Laplacian's eigenvectors serve as basis functions, and eigenvalues indicate how much node features vary across edges.
+
+What do these eigenvalues mean? Small eigenvalues correspond to smooth signals (low frequency), where connected nodes have similar values. Large eigenvalues correspond to rapidly varying signals (high frequency), where neighbors differ significantly.
 
 The spectral perspective defines graph convolution by designing filters in this frequency domain. We learn which frequencies to amplify or suppress, just as Fourier analysis filters images. This approach is mathematically elegant and connects to decades of spectral graph theory.
 
@@ -45,16 +55,12 @@ The spatial perspective takes a more direct route. Instead of transforming to a 
 
 This perspective leads to intuitive architectures. GraphSAGE samples fixed-size neighborhoods to control memory. Graph Attention Networks learn which neighbors to pay attention to. Graph Isomorphism Networks carefully design aggregation functions to maximize discriminative power.
 
-Spatial methods are often more efficient and easier to scale to large graphs. They also generalize naturally to new nodes not seen during training.
+Why choose spatial methods? They are often more efficient and easier to scale to large graphs. They also generalize naturally to new nodes not seen during training.
 
 ## Looking Ahead
 
 We have already learned what images are and how CNNs process them. Now we face a new frontier: irregular structures where the rules of regular grids no longer apply.
 
-In Part 2, we dive into the spectral perspective, exploring how graph Laplacians define frequency domains and how spectral filters enable learnable convolutions.
-
-In Part 3, we examine spatial graph networks, from the elegant simplicity of GCN to the sophisticated attention mechanisms of GAT.
-
-In Part 4, we explore graph embeddings, learning low-dimensional representations that capture both local and global structure.
+What's next? In Part 2, we dive into the spectral perspective, exploring how graph Laplacians define frequency domains and how spectral filters enable learnable convolutions. In Part 3, we examine spatial graph networks, from the elegant simplicity of GCN to the sophisticated attention mechanisms of GAT. In Part 4, we explore graph embeddings, learning low-dimensional representations that capture both local and global structure.
 
 The journey from pixels to nodes reveals a deeper truth. Convolution is not about grids. It is about locality, parameter sharing, and hierarchical feature extraction. These principles transcend regular structure and apply wherever relationships exist.
