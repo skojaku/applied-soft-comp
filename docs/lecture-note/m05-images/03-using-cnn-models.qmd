@@ -168,7 +168,7 @@ The model is trained on ImageNet with 1000 classes. Let's use it to classify an 
 To use a pre-trained model, we must preprocess images the same way they were during training. ImageNet models expect images resized to 224×224 (or 299×299 for some models) with pixel values normalized to mean=[0.485, 0.456, 0.406] and std=[0.229, 0.224, 0.225].
 
 ```{python}
-# Define the preprocessing transform
+# Define the preprocessing transform pipeline
 preprocess = transforms.Compose([
     transforms.Resize(256),
     transforms.CenterCrop(224),
@@ -178,33 +178,54 @@ preprocess = transforms.Compose([
         std=[0.229, 0.224, 0.225]
     ),
 ])
+```
 
-# Load and preprocess an image
-# Using a sample image from torchvision datasets
+```{python}
+#| echo: false
+#| output: false
+
+# Load a sample image from CIFAR-10 dataset
 from torchvision.datasets import CIFAR10
 import tempfile
+import matplotlib.pyplot as plt
 
-# Download a sample image from CIFAR-10
 with tempfile.TemporaryDirectory() as tmpdir:
     cifar = CIFAR10(root=tmpdir, train=True, download=True)
     img, _ = cifar[0]  # Get first image
+```
 
-# Display original image
-import matplotlib.pyplot as plt
+```{python}
+#| code-fold: true
+#| code-summary: "Show image display code"
+
+# Display the original image
 plt.figure(figsize=(6, 6))
 plt.imshow(img)
 plt.title("Input Image (from CIFAR-10)")
 plt.axis("off")
 plt.show()
+```
 
-# Preprocess and add batch dimension
+```{python}
+# Apply preprocessing and prepare for model input
 input_tensor = preprocess(img)
-input_batch = input_tensor.unsqueeze(0)
+input_batch = input_tensor.unsqueeze(0)  # Add batch dimension
 
 print(f"Input shape: {input_batch.shape}")  # [1, 3, 224, 224]
 ```
 
 Now classify the image:
+
+```{python}
+#| echo: false
+#| output: false
+
+# Load ImageNet class labels
+import requests
+url = "https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json"
+response = requests.get(url)
+labels = response.json()
+```
 
 ```{python}
 # Perform inference
@@ -214,16 +235,9 @@ with torch.no_grad():
 # Output is logits for 1000 classes
 print(f"Output shape: {output.shape}")  # [1, 1000]
 
-# Convert to probabilities
+# Convert to probabilities and get top 5 predictions
 probabilities = torch.nn.functional.softmax(output[0], dim=0)
-
-# Get top 5 predictions
 top5_prob, top5_catid = torch.topk(probabilities, 5)
-
-# Load ImageNet class labels
-url = "https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json"
-response = requests.get(url)
-labels = response.json()
 
 # Display predictions
 print("\nTop 5 predictions:")
@@ -310,6 +324,9 @@ Only 20,490 parameters (the final layer) are trainable. This makes training fast
 ### Training Loop
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show training loop implementation"
+
 # Define loss and optimizer
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.fc.parameters(), lr=0.001)
@@ -350,8 +367,17 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
 When training on limited data, augmentation is crucial. Transform each image differently each epoch to artificially expand the training set:
 
 ```{python}
-from torchvision import transforms
+#| echo: false
+#| output: false
 
+from torchvision import transforms
+```
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show training augmentation pipeline"
+
+# Training transforms with aggressive augmentation
 train_transform = transforms.Compose([
     transforms.RandomResizedCrop(224),      # Random crop and resize
     transforms.RandomHorizontalFlip(),       # Flip with 50% probability
@@ -367,7 +393,13 @@ train_transform = transforms.Compose([
         std=[0.229, 0.224, 0.225]
     ),
 ])
+```
 
+```{python}
+#| code-fold: true
+#| code-summary: "Show validation transform pipeline"
+
+# Validation transforms (deterministic, no randomness)
 val_transform = transforms.Compose([
     transforms.Resize(256),
     transforms.CenterCrop(224),
@@ -396,6 +428,9 @@ You'll likely achieve 80-90%+ accuracy with just a few hundred images per class,
 Let's peek inside a trained network to see what features it detects:
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show activation visualization code"
+
 # Extract intermediate feature maps
 def get_activation(name, activations):
     def hook(model, input, output):

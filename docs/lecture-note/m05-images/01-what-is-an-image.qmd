@@ -41,6 +41,9 @@ Here, the value 10 represents dark pixels, while 80 represents bright pixels. Th
 Let's make this concrete by loading an actual image and examining its structure. We'll use Python with standard libraries to see what an image really looks like under the hood.
 
 ```{python}
+#| echo: false
+#| output: false
+
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -53,9 +56,14 @@ def load_image_from_url(url):
     img = Image.open(BytesIO(response.content))
     return np.array(img)
 
-# Load an example image
+# Load the example image
 url = "https://www.binghamton.edu/news/images/uploads/features/20180815_peacequad02_jwc.jpg"
 img_array = load_image_from_url(url)
+```
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show image display code"
 
 # Display the image
 plt.figure(figsize=(8, 6))
@@ -63,8 +71,10 @@ plt.imshow(img_array)
 plt.title("Original Image")
 plt.axis("off")
 plt.show()
+```
 
-# Print its properties
+```{python}
+# Examine the image properties
 print(f"Image shape: {img_array.shape}")
 print(f"Data type: {img_array.dtype}")
 print(f"Value range: [{img_array.min()}, {img_array.max()}]")
@@ -94,6 +104,9 @@ When you combine the values from all three channels at a given location, you get
 Let's visualize the three channels separately:
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show channel visualization code"
+
 fig, axes = plt.subplots(1, 4, figsize=(16, 4))
 
 # Original image
@@ -132,6 +145,14 @@ Let's practice manipulating image representations to build intuition:
 # Convert to grayscale by averaging channels
 grayscale = np.mean(img_array, axis=2).astype(np.uint8)
 
+print(f"RGB shape: {img_array.shape}")
+print(f"Grayscale shape: {grayscale.shape}")
+```
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show RGB vs grayscale comparison"
+
 # Create a side-by-side comparison
 fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
@@ -145,9 +166,6 @@ axes[1].axis("off")
 
 plt.tight_layout()
 plt.show()
-
-print(f"RGB shape: {img_array.shape}")
-print(f"Grayscale shape: {grayscale.shape}")
 ```
 
 The grayscale version loses color information but preserves spatial structure. For many computer vision tasks, this simplified representation is sufficient.

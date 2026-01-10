@@ -247,9 +247,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="dropdown-item" href="../m05-images/04-cnn-innovations.html">
  <span class="dropdown-text">CNN Innovations</span></a>
   </li>  
+        <li class="dropdown-header">─── Module 6: Graphs ───</li>
         <li>
-    <a class="dropdown-item" href="../m05-images/05-student-challenge.html">
- <span class="dropdown-text">Student Challenge</span></a>
+    <a class="dropdown-item" href="../m06-graph/overview.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m06-graph/01-from-images-to-graphs.html">
+ <span class="dropdown-text">From Images to Graphs</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m06-graph/02-spectral-perspective.html">
+ <span class="dropdown-text">The Spectral Perspective</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m06-graph/03-spatial-networks.html">
+ <span class="dropdown-text">Spatial Graph Networks</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../m06-graph/04-graph-embeddings.html">
+ <span class="dropdown-text">Graph Embeddings</span></a>
   </li>  
     </ul>
   </li>
@@ -258,7 +275,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Advanced Topics</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-advanced-topics">    
-        <li class="dropdown-header">─── Module 6: LLMs ───</li>
+        <li class="dropdown-header">─── Module 7: LLMs ───</li>
         <li>
     <a class="dropdown-item" href="../m06-llms/overview.qmd">
  <span class="dropdown-text">Overview</span></a>
@@ -294,11 +311,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
-  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
-  <div class="quarto-reader-toggle-btn">
-  <i class="bi"></i>
-  </div>
-</a>
 </div>
       </div> <!-- /container-fluid -->
     </nav>
@@ -629,10 +641,45 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Part 4: CNN Innovations</span></a>
   </div>
 </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module 6: Deep Learning for Graphs</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../m05-images/05-student-challenge.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Part 5: Student Challenge</span></a>
+  <a href="../m06-graph/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-graph/01-from-images-to-graphs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Part 1: From Images to Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-graph/02-spectral-perspective.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Part 2: The Spectral Perspective</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-graph/03-spatial-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Part 3: Spatial Graph Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m06-graph/04-graph-embeddings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Part 4: Graph Embeddings</span></a>
   </div>
 </li>
       </ul>
@@ -716,7 +763,7 @@ What you’ll learn in this module
 <section id="melt-from-wide-to-long" class="level3">
 <h3 class="anchored" data-anchor-id="melt-from-wide-to-long">Melt: From Wide to Long</h3>
 <p>Picture data stored in “wide” format, where different columns represent different variables of the same type. Consider this simple example:</p>
-<div id="51b1cb93" class="cell" data-execution_count="1">
+<div id="dd406e30" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -763,7 +810,7 @@ What you’ll learn in this module
 </div>
 <p>Notice how “height” and “weight” sit in separate columns. This wide format breaks tidy principles and makes comparisons awkward when you want to plot or analyze these measurements together.</p>
 <p>The <code>pandas.DataFrame.melt()</code> method solves this by transforming data from wide to long format. After melting, instead of separate columns for “height” and “weight”, you get one column for the variable type and another for the value. Let’s see it in action:</p>
-<div id="2eb643ad" class="cell" data-execution_count="2">
+<div id="e9ae4826" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df_melted <span class="op">=</span> df.melt(</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    id_vars<span class="op">=</span>[<span class="st">'first'</span>, <span class="st">'last'</span>],</span>
@@ -825,7 +872,7 @@ What you’ll learn in this module
 <section id="pivot-from-long-to-wide" class="level3">
 <h3 class="anchored" data-anchor-id="pivot-from-long-to-wide">Pivot: From Long to Wide</h3>
 <p>Sometimes the opposite problem arises. Your data starts in “long” format, with a separate row for each measurement type (like “cases” or “population”) for each country and year. This scatters information about a single observation across multiple rows, making it hard to see all statistics for country A in 2020 at once.</p>
-<div id="b3775130" class="cell" data-execution_count="3">
+<div id="a4cf1450" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -921,7 +968,7 @@ What you’ll learn in this module
 <section id="stack-and-unstack" class="level3">
 <h3 class="anchored" data-anchor-id="stack-and-unstack">Stack and Unstack</h3>
 <p>A trickier situation emerges when your data has multi-level column headers, with variables split across two or more header rows. Imagine measurements for different people and types, with test results for multiple groups all shown as columns. This nested structure makes it hard to access and visualize data cleanly.</p>
-<div id="4846823b" class="cell" data-execution_count="4">
+<div id="5970ee7e" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Example: multi-level columns for two participants (P1, P2) and two attributes (A, B)</span></span>
@@ -952,31 +999,31 @@ What you’ll learn in this module
 <tbody>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">0</td>
-<td>0.834378</td>
-<td>0.846789</td>
-<td>0.815770</td>
-<td>0.866170</td>
+<td>0.495938</td>
+<td>0.658663</td>
+<td>0.385513</td>
+<td>0.886043</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">1</td>
-<td>0.212554</td>
-<td>0.130223</td>
-<td>0.411592</td>
-<td>0.883559</td>
+<td>0.385576</td>
+<td>0.559476</td>
+<td>0.440979</td>
+<td>0.733018</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">2</td>
-<td>0.163426</td>
-<td>0.127180</td>
-<td>0.483202</td>
-<td>0.347016</td>
+<td>0.118331</td>
+<td>0.715904</td>
+<td>0.743553</td>
+<td>0.195147</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">3</td>
-<td>0.596388</td>
-<td>0.458607</td>
-<td>0.698158</td>
-<td>0.199185</td>
+<td>0.180031</td>
+<td>0.341897</td>
+<td>0.170252</td>
+<td>0.977794</td>
 </tr>
 </tbody>
 </table>
@@ -986,7 +1033,7 @@ What you’ll learn in this module
 </div>
 <p>The <code>stack()</code> method solves this by converting one level of column headers into a row index, transforming wide data to long. Now each row represents a single measurement, and all values of the same variable sit together in one column. The <code>unstack()</code> method does the reverse, spreading data back out from the index into columns.</p>
 <p>Let’s see both methods in action:</p>
-<div id="49b84434" class="cell" data-execution_count="5">
+<div id="83159eb3" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df.stack(future_stack<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <div>
@@ -1005,46 +1052,46 @@ What you’ll learn in this module
 <tr class="odd">
 <td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">0</td>
 <td data-quarto-table-cell-role="th">A</td>
-<td>0.834378</td>
-<td>0.815770</td>
+<td>0.495938</td>
+<td>0.385513</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">B</td>
-<td>0.846789</td>
-<td>0.866170</td>
+<td>0.658663</td>
+<td>0.886043</td>
 </tr>
 <tr class="odd">
 <td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">1</td>
 <td data-quarto-table-cell-role="th">A</td>
-<td>0.212554</td>
-<td>0.411592</td>
+<td>0.385576</td>
+<td>0.440979</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">B</td>
-<td>0.130223</td>
-<td>0.883559</td>
+<td>0.559476</td>
+<td>0.733018</td>
 </tr>
 <tr class="odd">
 <td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">2</td>
 <td data-quarto-table-cell-role="th">A</td>
-<td>0.163426</td>
-<td>0.483202</td>
+<td>0.118331</td>
+<td>0.743553</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">B</td>
-<td>0.127180</td>
-<td>0.347016</td>
+<td>0.715904</td>
+<td>0.195147</td>
 </tr>
 <tr class="odd">
 <td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">3</td>
 <td data-quarto-table-cell-role="th">A</td>
-<td>0.596388</td>
-<td>0.698158</td>
+<td>0.180031</td>
+<td>0.170252</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">B</td>
-<td>0.458607</td>
-<td>0.199185</td>
+<td>0.341897</td>
+<td>0.977794</td>
 </tr>
 </tbody>
 </table>
@@ -1052,7 +1099,7 @@ What you’ll learn in this module
 </div>
 </div>
 </div>
-<div id="f10e4290" class="cell" data-execution_count="6">
+<div id="a347492e" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df.stack(future_stack<span class="op">=</span><span class="va">True</span>).unstack()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <div>
@@ -1076,31 +1123,31 @@ What you’ll learn in this module
 <tbody>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">0</td>
-<td>0.834378</td>
-<td>0.846789</td>
-<td>0.815770</td>
-<td>0.866170</td>
+<td>0.495938</td>
+<td>0.658663</td>
+<td>0.385513</td>
+<td>0.886043</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">1</td>
-<td>0.212554</td>
-<td>0.130223</td>
-<td>0.411592</td>
-<td>0.883559</td>
+<td>0.385576</td>
+<td>0.559476</td>
+<td>0.440979</td>
+<td>0.733018</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">2</td>
-<td>0.163426</td>
-<td>0.127180</td>
-<td>0.483202</td>
-<td>0.347016</td>
+<td>0.118331</td>
+<td>0.715904</td>
+<td>0.743553</td>
+<td>0.195147</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">3</td>
-<td>0.596388</td>
-<td>0.458607</td>
-<td>0.698158</td>
-<td>0.199185</td>
+<td>0.180031</td>
+<td>0.341897</td>
+<td>0.170252</td>
+<td>0.977794</td>
 </tr>
 </tbody>
 </table>
@@ -1533,7 +1580,7 @@ What you’ll learn in this module
 </div>   
     <div class="nav-footer-center">
       &nbsp;
-    <div class="toc-actions"><ul><li><a href="https://github.com/skojaku/applied-soft-comp/edit/main/m01-toolkit/tidy-data.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/skojaku/applied-soft-comp/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    </div>
     <div class="nav-footer-right">
       <ul class="footer-items list-unstyled">
     <li class="nav-item compact">
