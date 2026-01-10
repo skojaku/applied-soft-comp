@@ -52,10 +52,7 @@ Multi-channel convolution. Each kernel processes all input channels, producing o
 ```
 
 ::: {.callout-tip title="Interactive visualizations"}
-Explore CNN operations interactively:
-
-- [CNN Explainer](https://poloclub.github.io/cnn-explainer/) shows how convolution, activation, and pooling work step-by-step
-- [Interactive Node-Link Visualization](https://adamharley.com/nn_vis/cnn/2d.html) lets you see activations flow through a trained network
+Explore CNN operations interactively. The [CNN Explainer](https://poloclub.github.io/cnn-explainer/) shows how convolution, activation, and pooling work step-by-step. The [Interactive Node-Link Visualization](https://adamharley.com/nn_vis/cnn/2d.html) lets you see activations flow through a trained network.
 :::
 
 ### Translation Equivariance: A Key Property
@@ -187,7 +184,7 @@ import requests
 from io import BytesIO
 
 # Load a pre-trained ResNet-50 model
-resnet50 = models.resnet50(pretrained=True)
+resnet50 = models.resnet50(weights='IMAGENET1K_V1')
 resnet50.eval()  # Set to evaluation mode
 
 print(f"Model type: {type(resnet50)}")
@@ -198,10 +195,7 @@ The model is trained on ImageNet with 1000 classes. Let's use it to classify an 
 
 ### Image Classification Example
 
-To use a pre-trained model, we must preprocess images the same way they were during training. ImageNet models expect:
-
-- Images resized to 224×224 (or 299×299 for some models)
-- Pixel values normalized to mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+To use a pre-trained model, we must preprocess images the same way they were during training. ImageNet models expect images resized to 224×224 (or 299×299 for some models) with pixel values normalized to mean=[0.485, 0.456, 0.406] and std=[0.229, 0.224, 0.225].
 
 ```{python}
 # Define the preprocessing transform
@@ -286,13 +280,7 @@ Pre-trained models learn general visual features from ImageNet's 1000 categories
 
 ### Why Transfer Learning Works
 
-ImageNet-trained models learn a hierarchy of features:
-
-- **Early layers**: Detect edges, colors, simple textures (universal across tasks)
-- **Middle layers**: Detect patterns, parts, compositions (somewhat task-specific)
-- **Late layers**: Detect complete objects (ImageNet-specific)
-
-The early and middle layers learn representations useful for many vision tasks. We can reuse these features and only retrain the final layers for our specific problem.
+ImageNet-trained models learn a hierarchy of features. Early layers detect edges, colors, and simple textures that are universal across tasks. Middle layers detect patterns, parts, and compositions that are somewhat task-specific. Late layers detect complete objects specific to ImageNet categories. The early and middle layers learn representations useful for many vision tasks. We can reuse these features and only retrain the final layers for our specific problem.
 
 ### Two Approaches: Feature Extraction vs. Fine-Tuning
 
@@ -309,7 +297,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 # Load pre-trained ResNet-50
-model = models.resnet50(pretrained=True)
+model = models.resnet50(weights='IMAGENET1K_V1')
 
 # Replace the final fully connected layer
 # Original: 2048 -> 1000 (ImageNet classes)
@@ -420,24 +408,10 @@ Note that validation uses deterministic transforms (no randomness) for reproduci
 
 ### Best Practices for Transfer Learning
 
-**Start with feature extraction**: Train only the final layer first. This is fast and often achieves good results.
-
-**Then try fine-tuning**: If accuracy is insufficient, unfreeze earlier layers and train with a small learning rate (10× smaller than initial training).
-
-**Use learning rate schedules**: Reduce the learning rate when validation loss plateaus. This helps the model converge to better solutions.
-
-**Monitor for overfitting**: Use validation data to detect when the model stops generalizing. Apply more augmentation or stronger regularization (dropout, weight decay) if needed.
-
-**Match preprocessing**: Always use the same normalization as the pre-training dataset (ImageNet statistics for most models).
+Start with feature extraction by training only the final layer first. This is fast and often achieves good results. Then try fine-tuning if accuracy is insufficient by unfreezing earlier layers and training with a small learning rate (10× smaller than initial training). Use learning rate schedules to reduce the learning rate when validation loss plateaus, helping the model converge to better solutions. Monitor for overfitting by using validation data to detect when the model stops generalizing, then apply more augmentation or stronger regularization (dropout, weight decay) if needed. Always match preprocessing to the pre-training dataset, using ImageNet statistics for most models.
 
 ::: {.callout-tip title="Try it yourself"}
-Practice transfer learning on your own image dataset:
-
-1. Collect 100-500 images per class (even phone camera photos work)
-2. Split into train/val/test sets (70/15/15)
-3. Start with ResNet-50 feature extraction
-4. Train for 10-20 epochs
-5. Evaluate on test set
+Practice transfer learning on your own image dataset. Collect 100-500 images per class (even phone camera photos work), then split into train/val/test sets (70/15/15). Start with ResNet-50 feature extraction and train for 10-20 epochs before evaluating on the test set.
 
 You'll likely achieve 80-90%+ accuracy with just a few hundred images per class, demonstrating the power of pre-trained features.
 :::
