@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2025-11-10">
+<meta name="dcterms.date" content="2026-01-10">
 
 <title>Data Provenance: The Secret Life of Data – Applied Soft Computing</title>
 <style>
@@ -43,7 +43,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-626254e6f25d1c064b097183404b5529.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-a032929455e4d93731be0fa9bc28887b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -879,7 +879,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 10, 2025</p>
+      <p class="date">January 10, 2026</p>
     </div>
   </div>
   
@@ -891,61 +891,48 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+What you’ll learn in this module
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This module introduces data provenance, the complete record of where your data came from and what happened to it. You’ll learn why provenance matters through a real-world disaster, explore practical tools for tracking data transformations, and discover how good documentation practices prevent errors and enable reproducible science.</p>
+</div>
+</div>
 <section id="the-mystery-of-the-disappearing-data" class="level2">
 <h2 class="anchored" data-anchor-id="the-mystery-of-the-disappearing-data">The Mystery of the Disappearing Data</h2>
-<p>Have you ever opened a dataset you worked on a few months ago, only to find that you have no idea where it came from, what the columns mean, or what transformations you applied to it? It’s a common experience for data scientists, and it highlights the importance of <strong>data provenance</strong>.</p>
-<p>Data provenance is the story of your data. It’s the who, what, when, where, and why of your data’s journey from its raw form to its current state. It’s the secret life of your data, and understanding it is crucial for doing good science.</p>
+<p>Have you ever opened a dataset you worked on a few months ago, only to find that you have no idea where it came from? You can’t remember what the columns mean or what transformations you applied. This experience is common in data science, and it highlights the critical importance of <strong>data provenance</strong>.</p>
+<p>Think of data provenance as the complete story of your data. It answers the who, what, when, where, and why of your data’s journey from raw form to its current state. Understanding this story is crucial for doing good science and catching errors before they spread.</p>
 </section>
 <section id="a-tale-of-two-economists-and-a-spreadsheet-error" class="level2">
 <h2 class="anchored" data-anchor-id="a-tale-of-two-economists-and-a-spreadsheet-error">A Tale of Two Economists and a Spreadsheet Error</h2>
 <p><img src="https://images.theconversation.com/files/22721/original/8t83k4q5-1366606880.jpg?ixlib=rb-4.1.0&amp;rect=0%2C596%2C4288%2C2086&amp;q=45&amp;auto=format&amp;w=1356&amp;h=668&amp;fit=crop" class="img-fluid"></p>
-<p>In 2010, two Harvard economists, Carmen Reinhart and Kenneth Rogoff, published a paper called “Growth in a Time of Debt.” The paper argued that countries with high levels of government debt tend to have lower economic growth. The paper was incredibly influential and was used to justify austerity policies in countries around the world.</p>
-<p>But there was a problem. In 2013, a graduate student named Thomas Herndon tried to reproduce Reinhart and Rogoff’s results, and he couldn’t. He eventually got a copy of their original spreadsheet and found a simple error: they had accidentally excluded the first five countries from their analysis. When Herndon corrected the error, the main result of the paper disappeared.</p>
-<p>This story is a powerful reminder of why data provenance is so important. Without a clear record of how the data was processed, it’s easy for errors to creep in and for those errors to have a huge impact.</p>
-<p>See the <a href="https://theconversation.com/the-reinhart-rogoff-error-or-how-not-to-excel-at-economics-13646">full story</a> for more details.</p>
+<p>Picture this: in 2010, two Harvard economists named Carmen Reinhart and Kenneth Rogoff published a paper called “Growth in a Time of Debt.” Their main argument was simple and powerful: countries with high government debt have lower economic growth. The paper became incredibly influential and shaped policy decisions around the world, justifying austerity measures in multiple countries.</p>
+<p>Then in 2013, a graduate student named Thomas Herndon decided to reproduce their results. He couldn’t. After persistent effort, he obtained their original spreadsheet and discovered a simple but catastrophic error: they had accidentally excluded the first five countries from their analysis. When Herndon corrected that single mistake, the paper’s main finding vanished.</p>
+<p>This story reveals the stakes of data provenance. Without a clear, documented record of how data was processed, errors slip through unnoticed and spread far. The consequences can reshape entire economies.</p>
+<p>Want the full story? Read <a href="https://theconversation.com/the-reinhart-rogoff-error-or-how-not-to-excel-at-economics-13646">The Reinhart-Rogoff Error</a>.</p>
 </section>
 <section id="the-data-detectives-toolkit" class="level2">
 <h2 class="anchored" data-anchor-id="the-data-detectives-toolkit">The Data Detective’s Toolkit</h2>
-<p>So, how do you become a data detective and keep track of your data’s provenance? Here are a few tools and techniques:</p>
-<ul>
-<li><strong>Lab Notebooks</strong>: Keep a detailed record of your work in a lab notebook (physical or digital). This should include where you got your data, what you did to it, and why you did it.</li>
-<li><strong>Scripting</strong>: Use scripts (e.g., Python, R) to process your data. Your scripts are a form of documentation that can be version controlled.</li>
-<li><strong>Workflow Management Tools</strong>: For complex projects, use tools like <a href="https://snakemake.readthedocs.io/en/stable/">Snakemake</a> or <a href="https://www.nextflow.io/">Nextflow</a> to define and manage your data analysis pipelines. These tools automatically track the provenance of your data.</li>
-</ul>
-<p>By embracing the principles of data provenance, you can become a more effective and reproducible data scientist. You’ll be able to trust your own results, and others will be able to trust them too.</p>
+<p>Now let’s talk about how you actually track provenance. There are three essential approaches.</p>
+<p>First, keep a lab notebook. This can be physical or digital, but it should record where your data came from, what you did to it, and why you made each decision. A good lab notebook becomes the narrative companion to your code.</p>
+<p>Second, embrace scripting. When you process data with code (Python, R, or anything else), your scripts become documentation. They show exactly what transformations happened. And if you version control those scripts, you have a complete history of changes.</p>
+<p>Third, for complex projects, consider workflow management tools like <a href="https://snakemake.readthedocs.io/en/stable/">Snakemake</a> or <a href="https://www.nextflow.io/">Nextflow</a>. These tools let you define and track your entire analysis pipeline, automatically recording which data went into which step and what came out.</p>
+<p>When you embrace these provenance practices, you become a more trustworthy data scientist. You’ll trust your own results because you know exactly how they were created. Others will trust them too.</p>
 </section>
 <section id="further-reading" class="level2">
 <h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
-<ul>
-<li><a href="https://www.secoda.co/blog/data-provenance">What is Data Provenance and Why is it Important?</a></li>
-<li><a href="https://www.astera.com/type/blog/data-provenance/">Data Provenance: What It Is, Why It Matters, and How to Implement It</a></li>
-</ul>
+<p>Ready to go deeper? Check out <a href="https://www.secoda.co/blog/data-provenance">What is Data Provenance and Why is it Important?</a> and <a href="https://www.astera.com/type/blog/data-provenance/">Data Provenance: What It Is, Why It Matters, and How to Implement It</a> for more perspectives.</p>
 
 
 </section>
 
 </main> <!-- /main -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Find all breadcrumb containers
-  const breadcrumbs = document.querySelectorAll('.quarto-page-breadcrumbs ol.breadcrumb');
-
-  breadcrumbs.forEach(function(breadcrumb) {
-    // Create the TOC link as the first breadcrumb item
-    const tocItem = document.createElement('li');
-    tocItem.className = 'breadcrumb-item';
-
-    const tocLink = document.createElement('a');
-    tocLink.href = '../toc.html';
-    tocLink.textContent = 'Table of Contents';
-
-    tocItem.appendChild(tocLink);
-
-    // Insert at the beginning
-    breadcrumb.insertBefore(tocItem, breadcrumb.firstChild);
-  });
-});
-</script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
@@ -1378,6 +1365,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 </footer>
+<script src="../assets/breadcrumb-toc.js"></script>
 
 
 

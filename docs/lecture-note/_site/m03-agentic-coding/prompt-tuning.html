@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2025-12-01">
+<meta name="dcterms.date" content="2026-01-10">
 
 <title>Prompt Tuning – Applied Soft Computing</title>
 <style>
@@ -57,27 +57,7 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -98,7 +78,7 @@ div.csl-indent {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-626254e6f25d1c064b097183404b5529.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-a032929455e4d93731be0fa9bc28887b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -934,7 +914,7 @@ div.csl-indent {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">December 1, 2025</p>
+      <p class="date">January 10, 2026</p>
     </div>
   </div>
   
@@ -947,46 +927,46 @@ div.csl-indent {
 
 
 <p><img src="../figs/top-prompt-engineering.png" class="img-fluid"></p>
-<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
+<i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Spoiler
+What you’ll learn in this module
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>LLMs are stateless pattern matchers that sample from probability distributions—the same question phrased differently activates different statistical patterns, producing dramatically different outputs.</p>
+<p>LLMs are stateless pattern matchers that sample from probability distributions. The same question phrased differently activates different statistical patterns, producing dramatically different outputs. This module teaches you to design inputs that reliably activate desired patterns across varied tasks. You’ll learn to structure prompts using instruction, data, format, persona, and context. You’ll discover how examples guide the model toward specific patterns. You’ll see how chain-of-thought reasoning and output constraints can transform results.</p>
 </div>
 </div>
-<section id="the-naive-model-vs.-the-reality" class="level2">
-<h2 class="anchored" data-anchor-id="the-naive-model-vs.-the-reality">The Naive Model vs.&nbsp;The Reality</h2>
-<p>If a machine can answer questions, it should respond consistently regardless of phrasing. You’re asking for the same information; the answer shouldn’t change. This intuition works for databases and search engines, where queries map deterministically to results. We expect robustness to variation.</p>
-<p>LLMs shatter this expectation. Ask “Summarize this abstract” and get a concise two-sentence summary. Ask “What’s this abstract about?” and get three rambling paragraphs. Same content, different phrasing, completely different outputs. This isn’t a bug—it’s fundamental to how LLMs work. They don’t retrieve information; they <strong>sample from probability distributions conditioned on your exact phrasing.</strong> Every word in your prompt shifts the distribution. Change “Summarize” to “What’s this about?” and you activate different statistical patterns from the training data, patterns that correlate with different response lengths, structures, and styles.</p>
-<p>The paradox: LLMs are simultaneously powerful and brittle. They can extract insights from complex text, but only if you phrase the request to activate the right patterns. Prompt engineering is the discipline of designing inputs that reliably activate desired patterns across varied tasks.</p>
+<section id="why-phrasing-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-phrasing-matters">Why Phrasing Matters</h2>
+<p>If a machine can answer questions, it should respond consistently regardless of phrasing. You are asking for the same information, so the answer should not change. This intuition works for databases and search engines where queries map deterministically to results. We expect robustness to variation.</p>
+<p>LLMs shatter this expectation. Ask “Summarize this abstract” and get a concise two-sentence summary. Ask “What is this abstract about?” and get three rambling paragraphs. Same content, different phrasing, completely different outputs. This is not a bug. It is fundamental to how LLMs work. They do not retrieve information. They sample from probability distributions conditioned on your exact phrasing. Every word in your prompt shifts the distribution.</p>
+<p>LLMs are simultaneously powerful and brittle. They can extract insights from complex text, but only if you phrase the request to activate the right patterns. Prompt engineering is the discipline of designing inputs that reliably activate desired patterns across varied tasks.</p>
 </section>
-<section id="the-hidden-mechanism" class="level2">
-<h2 class="anchored" data-anchor-id="the-hidden-mechanism">The Hidden Mechanism</h2>
-<p>Imagine you’re playing a word association game. Someone says “capital,” and you must say the next word. If the previous sentence was “The capital of France is,” you say “Paris.” If it was “We need more capital to,” you say “fund” or “invest.” The word “capital” doesn’t have one meaning—it activates different patterns depending on context. LLMs work identically, but at massive scale.</p>
-<p>When you submit a prompt, the model converts it into tokens and embeds those tokens in high-dimensional space. Each token’s position in that space depends on surrounding tokens—context shapes meaning. The model then samples the next token from a probability distribution over its vocabulary, conditioned on all previous tokens. It repeats this process until it generates a complete response. Critically, <strong>your exact phrasing determines which region of probability space the model occupies when it begins sampling.</strong> Slightly different prompts place the model in different regions, where different tokens have high probability.</p>
-<p>This creates extreme sensitivity to phrasing. Adding “Think step by step” at the end of a prompt shifts the probability distribution toward reasoning patterns that include intermediate steps, because the training data contains many examples where “think step by step” preceded structured reasoning. Adding “You are an expert researcher” shifts the distribution toward formal, technical language patterns. Specifying “Output format: Domain: …, Methods: …” shifts toward structured extraction patterns. Each modification activates different statistical regularities compressed during training.</p>
-<p>The model has no internal representation of what you “really want.” It only knows which tokens tend to follow which other tokens in which contexts. Prompt engineering exploits this by deliberately activating patterns that produce desired outputs.</p>
+<section id="how-llms-actually-work" class="level2">
+<h2 class="anchored" data-anchor-id="how-llms-actually-work">How LLMs Actually Work</h2>
+<p>Imagine a word association game. Someone says “capital” and you must say the next word. If the previous sentence was “The capital of France is,” you say “Paris.” If it was “We need more capital to,” you say “fund” or “invest.” The word “capital” does not have one fixed meaning. It activates different patterns depending on context. LLMs work identically, but at massive scale.</p>
+<p>When you submit a prompt, the model converts it into tokens and embeds those tokens in high-dimensional space. Each token’s position depends on surrounding tokens. Context shapes meaning. The model then samples the next token from a probability distribution over its vocabulary, conditioned on all previous tokens. It repeats this process until it generates a complete response.</p>
+<p>Your exact phrasing determines which region of probability space the model occupies when it begins sampling. Slightly different prompts place the model in different regions where different tokens have high probability. Adding “Think step by step” shifts the distribution toward reasoning patterns because training data contains many examples where that phrase preceded structured reasoning. Adding “You are an expert researcher” shifts toward formal, technical language. Specifying “Output format: Domain: …, Methods: …” shifts toward structured extraction patterns. The model has no internal representation of what you “really want.” It only knows which tokens tend to follow which other tokens in which contexts. Prompt engineering exploits this by deliberately activating patterns that produce desired outputs.</p>
 </section>
-<section id="the-strategic-application" class="level2">
-<h2 class="anchored" data-anchor-id="the-strategic-application">The Strategic Application</h2>
+<section id="building-effective-prompts" class="level2">
+<h2 class="anchored" data-anchor-id="building-effective-prompts">Building Effective Prompts</h2>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../figs/prompt-tuning-manga.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:70.0%"></p>
 </figure>
 </div>
-<p>Effective prompts activate desired patterns by combining structural components that mirror patterns in training data. An <strong>instruction</strong> defines the task explicitly, mapping to countless examples where clear directives preceded specific outputs. <strong>Data</strong> provides the input to process. An <strong>output format</strong> constrains the structure, activating patterns where formal specifications preceded structured responses. A <strong>persona</strong> specifies who the model should emulate, triggering stylistic patterns associated with that role. <strong>Context</strong> provides background information—why the task matters, who the response serves, relevant constraints—that helps the model select appropriate patterns from ambiguous alternatives.</p>
-<p>Not every component is necessary. Simple extraction tasks need only instruction, data, and format. Style-sensitive tasks benefit from persona. Complex scenarios with ambiguity require context to disambiguate. The strategy is to provide exactly enough structure to activate the desired pattern without overloading the prompt with irrelevant information that dilutes the signal.</p>
-<p>We’ll build a prompt progressively, adding components one at a time to observe how each shifts the output distribution.</p>
-<section id="building-from-instruction-and-data" class="level3">
-<h3 class="anchored" data-anchor-id="building-from-instruction-and-data">Building from Instruction and Data</h3>
-<p>The most basic prompt consists of an instruction that defines the task and data that provides the input to process:</p>
-<div id="8ea77c65" class="cell" data-execution_count="1">
+<p>Effective prompts activate desired patterns by combining structural components that mirror patterns in training data. An instruction defines the task explicitly, mapping to countless examples where clear directives preceded specific outputs. Data provides the input to process. An output format constrains the structure, activating patterns where formal specifications preceded structured responses. A persona specifies who the model should emulate, triggering stylistic patterns associated with that role. Context provides background information about why the task matters, who the response serves, and relevant constraints. This helps the model select appropriate patterns from ambiguous alternatives.</p>
+<p>Not every component is necessary. Simple extraction tasks need only instruction, data, and format. Style-sensitive tasks benefit from persona. Complex scenarios with ambiguity require context to disambiguate. The strategy is to provide exactly enough structure to activate the desired pattern without overloading the prompt with irrelevant information.</p>
+<p>Let’s build a prompt progressively, adding components one at a time to observe how each shifts the output distribution.</p>
+</section>
+<section id="building-from-instruction-and-data" class="level2">
+<h2 class="anchored" data-anchor-id="building-from-instruction-and-data">Building from Instruction and Data</h2>
+<p>The most basic prompt consists of an instruction that defines the task and data that provides the input:</p>
+<div id="56d2f6c2" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>instruction <span class="op">=</span> <span class="st">"Summarize this abstract"</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> <span class="st">"""</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="st">We develop a graph neural network for predicting protein-protein interactions</span></span>
@@ -998,7 +978,7 @@ Spoiler
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>prompt <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>instruction<span class="sc">}</span><span class="ss">. </span><span class="sc">{</span>data<span class="sc">}</span><span class="ss">"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="7d26626b" class="cell" data-execution_count="2">
+<div id="1df105d8" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ollama</span>
@@ -1009,24 +989,24 @@ Spoiler
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(response.response)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>This abstract describes a graph neural network (GNN) for predicting protein-protein interactions. The model uses attention mechanisms to identify functionally important amino acid subsequences, achieving 89% accuracy on benchmark datasets and providing interpretable attention weights.
+<pre><code>This abstract describes a graph neural network (GNN) for predicting protein-protein interactions. The model utilizes attention mechanisms to identify functionally important amino acid subsequences. The network achieves 89% accuracy on benchmark datasets and provides interpretable attention weights, indicating its effectiveness.
 </code></pre>
 </div>
 </div>
-<p>This basic prompt works, but output varies—the model might produce a long summary, a short one, or change format across runs. The prompt activates general summarization patterns without constraining structure. Adding an output format specification narrows the distribution:</p>
-<div id="3940f3af" class="cell" data-execution_count="3">
+<p>This basic prompt works, but output varies. The model might produce a long summary, a short one, or change format across runs. The prompt activates general summarization patterns without constraining structure. Watch what happens when we add an output format specification to narrow the distribution:</p>
+<div id="74a772a3" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>output_format <span class="op">=</span> <span class="st">"""Provide the summary in exactly 2 sentences:</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="st">- First sentence: What problem and method</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="st">- Second sentence: Key result with numbers"""</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>prompt_with_format <span class="op">=</span> <span class="ss">f"""</span><span class="sc">{</span>instruction<span class="sc">}</span><span class="ss">. </span><span class="sc">{</span>data<span class="sc">}</span><span class="ss">. </span><span class="sc">{</span>output_format<span class="sc">}</span><span class="ss">"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>The output format constraint produces structured, consistent output by activating patterns where format specifications preceded conforming responses. This becomes critical when processing hundreds of papers—you need programmatically parseable structure, not freeform text.</p>
+<p>The output format constraint produces structured, consistent output by activating patterns where format specifications preceded conforming responses. This becomes critical when processing hundreds of papers. You need programmatically parseable structure, not freeform text.</p>
 </section>
-<section id="adding-persona-to-control-style" class="level3">
-<h3 class="anchored" data-anchor-id="adding-persona-to-control-style">Adding Persona to Control Style</h3>
-<p>A persona tells the LLM who it should emulate, activating stylistic patterns associated with that role in training data. Consider a customer support scenario where tone matters:</p>
-<div id="9619f1f7" class="cell" data-execution_count="4">
+<section id="adding-persona-to-control-style" class="level2">
+<h2 class="anchored" data-anchor-id="adding-persona-to-control-style">Adding Persona to Control Style</h2>
+<p>A persona tells the LLM who it should emulate, activating stylistic patterns associated with that role in training data. Imagine a customer support scenario where tone matters:</p>
+<div id="2be67f7f" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># New example for persona demonstration</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>instruction <span class="op">=</span> <span class="st">"Help the customer reconnect to the service by providing troubleshooting instructions."</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> <span class="st">"Customer: I cannot see any webpage. Need help ASAP!"</span></span>
@@ -1036,7 +1016,7 @@ Spoiler
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>prompt_with_persona <span class="op">=</span> <span class="ss">f"""</span><span class="sc">{</span>formal_persona<span class="sc">}</span><span class="ss">. </span><span class="sc">{</span>instruction<span class="sc">}</span><span class="ss">. </span><span class="sc">{</span>data<span class="sc">}</span><span class="ss">. </span><span class="sc">{</span>output_format<span class="sc">}</span><span class="ss">"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="5ed9d486" class="cell" data-execution_count="5">
+<div id="a65195f9" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"BASE (no persona):"</span>)</span>
@@ -1047,27 +1027,27 @@ Spoiler
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>BASE (no persona):
-Okay, I understand. Let's try to troubleshoot this. Please provide me with the specific webpage you're having trouble seeing. Once I have that information, I'll be happy to guide you through the steps.
+Okay, I understand. Let's try to figure out what's happening. Please try to re-enter the webpage. If that doesn't work, let me know what steps you've already taken to troubleshoot the issue.
 
 
 ============================================================
 
 WITH PERSONA:
-Hello, I understand you cannot see any webpage. Could you please try accessing the website again? I'm here to assist you with any troubleshooting steps you need.
+Hello, I understand you cannot see any webpage. Could you please try re-typing the URL? I'm here to assist you with any troubleshooting steps you need.
 </code></pre>
 </div>
 </div>
 <p>The persona shifts tone and style. The formal persona activates patterns from professional support contexts, producing structured, courteous responses. Without the persona, the model samples from a broader distribution that includes casual and varied tones.</p>
 </section>
-<section id="adding-context-to-disambiguate" class="level3">
-<h3 class="anchored" data-anchor-id="adding-context-to-disambiguate">Adding Context to Disambiguate</h3>
-<p>Context provides additional information that helps the model select appropriate patterns when multiple valid interpretations exist. Context can include background information explaining why the task matters, audience information specifying who the response serves, and constraints defining special circumstances. Consider adding background urgency:</p>
-<div id="47473b5e" class="cell" data-execution_count="6">
+<section id="adding-context-to-disambiguate" class="level2">
+<h2 class="anchored" data-anchor-id="adding-context-to-disambiguate">Adding Context to Disambiguate</h2>
+<p>Context provides additional information that helps the model select appropriate patterns when multiple valid interpretations exist. Context includes background information explaining why the task matters, audience information specifying who the response serves, and constraints defining special circumstances. Let’s add background urgency:</p>
+<div id="3b3c9458" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>context_background <span class="op">=</span> <span class="st">"""The customer is extremely frustrated because their internet has been down for three days, and they need it for an important online job interview. They emphasize that 'This is a life-or-death situation for my career!'"""</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>prompt_with_context <span class="op">=</span> <span class="ss">f"""</span><span class="sc">{</span>formal_persona<span class="sc">}</span><span class="ss">. </span><span class="sc">{</span>instruction<span class="sc">}</span><span class="ss">. </span><span class="sc">{</span>data<span class="sc">}</span><span class="ss">. </span><span class="sc">{</span>output_format<span class="sc">}</span><span class="ss">. Context: </span><span class="sc">{</span>context_background<span class="sc">}</span><span class="ss">"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="0cb26c76" class="cell" data-execution_count="7">
+<div id="ac17e9a6" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"WITH PERSONA:"</span>)</span>
@@ -1078,18 +1058,26 @@ Hello, I understand you cannot see any webpage. Could you please try accessing t
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>WITH PERSONA:
-Hello, I understand you cannot see any webpage. Could you please try a different browser? If that doesn't work, please let me know the exact browser you are using. I'll do my best to assist you.
+Okay, I understand. I'm here to assist you with your webpage issue. Please try to re-enter the webpage. I'll do my best to find a solution for you within the next 2-3 minutes.
 
 
 ============================================================
 
 WITH PERSONA + CONTEXT (background):
-Thank you for contacting us. We understand your frustration with your internet connection and are sorry to hear that you're experiencing this issue. We're working diligently to resolve this for you as quickly as possible. Please contact us again with a more specific description of the problem and a revised plan of action.</code></pre>
+Dear [Customer Name],
+
+I understand your frustration with your internet connection and the need for this important job interview. I'm here to assist you in troubleshooting the issue. Please try the following steps:
+1. Check your internet connection.
+2. Try restarting your modem and router.
+3. If the problem persists, please contact our technical support team.
+
+We'll get this resolved for you as quickly as possible.
+</code></pre>
 </div>
 </div>
-<p>Background context adds urgency and emotional weight, activating patterns where high-stakes situations preceded empathetic, prioritized responses. The model doesn’t understand emotion, but it has seen urgency markers correlate with specific response patterns.</p>
-<p>Audience information creates even more dramatic shifts. Compare responses for non-technical versus technical users:</p>
-<div id="1ccdd53c" class="cell" data-execution_count="8">
+<p>Background context adds urgency and emotional weight, activating patterns where high-stakes situations preceded empathetic, prioritized responses. The model does not understand emotion, but it has seen urgency markers correlate with specific response patterns.</p>
+<p>Audience information creates even more dramatic shifts. Watch what happens when we tailor the response for different technical levels:</p>
+<div id="97363d5f" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Context with audience information for non-technical user</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>context_with_audience_nontech <span class="op">=</span> <span class="ss">f"""</span><span class="sc">{</span>context_background<span class="sc">}</span><span class="ss"> The customer does not know any technical terms like modem, router, networks, etc."""</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1098,7 +1086,7 @@ Thank you for contacting us. We understand your frustration with your internet c
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>prompt_with_context_nontech <span class="op">=</span> <span class="ss">f"""</span><span class="sc">{</span>formal_persona<span class="sc">}</span><span class="ss">. </span><span class="sc">{</span>instruction<span class="sc">}</span><span class="ss">. </span><span class="sc">{</span>data<span class="sc">}</span><span class="ss">. </span><span class="sc">{</span>output_format<span class="sc">}</span><span class="ss">. Context: </span><span class="sc">{</span>context_with_audience_nontech<span class="sc">}</span><span class="ss">"""</span></span>
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>prompt_with_context_tech <span class="op">=</span> <span class="ss">f"""</span><span class="sc">{</span>formal_persona<span class="sc">}</span><span class="ss">. </span><span class="sc">{</span>instruction<span class="sc">}</span><span class="ss">. </span><span class="sc">{</span>data<span class="sc">}</span><span class="ss">. </span><span class="sc">{</span>output_format<span class="sc">}</span><span class="ss">. Context: </span><span class="sc">{</span>context_with_audience_tech<span class="sc">}</span><span class="ss">"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="38f42e95" class="cell" data-execution_count="9">
+<div id="66a559ab" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"WITH PERSONA + CONTEXT (background only):"</span>)</span>
@@ -1112,25 +1100,24 @@ Thank you for contacting us. We understand your frustration with your internet c
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>WITH PERSONA + CONTEXT (background only):
-Thank you for contacting us. I understand your frustration regarding your internet connection and the need for this important job interview. We apologize for the inconvenience and are working diligently to resolve this issue. We will be sure to provide you with a clear and concise troubleshooting guide within 24 hours.
+Thank you for contacting us. I understand your frustration with the internet outage and the need for this vital job interview. I'm here to assist you in troubleshooting the issue and providing you with the necessary information. Please let me know if you have any further questions.
 
 
 ============================================================
 
 WITH PERSONA + CONTEXT (background + non-tech audience):
-"I understand your frustration, and I apologize for the inconvenience this is causing. To help me assist you, could you please tell me which website you are having trouble accessing? I'll do my best to find a solution for you."
+"I understand your frustration, and I apologize for the inconvenience this is causing. To help me troubleshoot this, could you please tell me what specific webpage you're having trouble with? Knowing the exact URL will help me pinpoint the issue."
 
 
 ============================================================
 
 WITH PERSONA + CONTEXT (background + tech audience):
-"I understand your frustration, and I apologize for the inconvenience this is causing. To help me assist you, could you please provide me with the exact URL of the webpage you're having trouble seeing? I'll do my best to troubleshoot this for you."
-</code></pre>
+"I understand your frustration, and I apologize for the inconvenience this is causing. To help me assist you, could you please provide me with the exact URL of the webpage you're having trouble seeing? I'll do my best to troubleshoot this for you."</code></pre>
 </div>
 </div>
-<p>Audience information dramatically shifts technical level and terminology. For non-technical users, the response avoids jargon because the training data contains many examples where “does not know technical terms” preceded simplified explanations. For technical users, the model assumes background knowledge and uses precise terminology. Same underlying mechanism—pattern matching—but different patterns activated.</p>
-<p>The complete template combines all components, but not every prompt needs every component. Simple extraction tasks need only instruction, data, and output format. Style-sensitive tasks benefit from persona. Complex scenarios with ambiguity require context:</p>
-<div id="4aadf84e" class="cell" data-execution_count="10">
+<p>Audience information dramatically shifts technical level and terminology. For non-technical users, the response avoids jargon because training data contains many examples where “does not know technical terms” preceded simplified explanations. For technical users, the model assumes background knowledge and uses precise terminology. The mechanism is identical. The patterns activated are different.</p>
+<p>The complete template combines all components:</p>
+<div id="108a8058" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>prompt_template <span class="op">=</span> <span class="st">"""</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="sc">{persona}</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1143,45 +1130,14 @@ WITH PERSONA + CONTEXT (background + tech audience):
 <span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="sc">{output_format}</span></span>
 <span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-When Personas Help (and When They Don’t)
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Research shows that adding personas can improve tone and style, but <strong>does not necessarily improve performance on factual tasks</strong>. In some cases, personas may even degrade performance or introduce biases.</p>
-<p><strong>Use personas when:</strong> You need specific tone/style, responses tailored to an audience, or a particular perspective.</p>
-<p><strong>Avoid personas when:</strong> You need maximum factual accuracy, the task is purely extraction/classification, or you’re concerned about bias introduction.</p>
-<p>Additionally, when prompted to adopt specific socio-demographic personas, LLMs may produce responses that reflect societal stereotypes. Be careful when designing persona prompts to avoid reinforcing harmful biases.</p>
-<p><strong>References:</strong> - <a href="https://arxiv.org/abs/2311.10054">When “A Helpful Assistant” Is Not Really Helpful</a> - <a href="https://arxiv.org/abs/2311.04892">Bias Runs Deep: Implicit Reasoning Biases in Persona-Assigned LLMs</a></p>
-</div>
-</div>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Context and Emotion Prompting
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Context can include: - <strong>Background information</strong>: Why the task is important, what led to this request - <strong>Audience information</strong>: Who the response is for (technical level, expertise, role) - <strong>Emotional cues</strong>: Research shows that including emotional cues (e.g., “This is very important to my career”) can enhance response quality - <strong>Constraints</strong>: Special circumstances, deadlines, limitations</p>
-<p>However, avoid overloading with unnecessary information that distracts from the main task.</p>
-<p><strong>Reference:</strong> <a href="https://arxiv.org/abs/2402.14848">Same Task, More Tokens: the Impact of Input Length on the Reasoning Performance of Large Language Models</a></p>
-</div>
-</div>
-</section>
+<p>Not every prompt needs every component. Simple extraction tasks need only instruction, data, and output format. Style-sensitive tasks benefit from persona. Complex scenarios with ambiguity require context.</p>
+<p>Research shows that personas can improve tone and style but do not necessarily improve performance on factual tasks. In some cases, personas may degrade performance or introduce biases. Use personas when you need specific tone, style tailored to an audience, or a particular perspective. Avoid personas when you need maximum factual accuracy, the task is purely extraction or classification, or you are concerned about bias introduction. When prompted to adopt specific socio-demographic personas, LLMs may produce responses that reflect societal stereotypes. Be careful when designing persona prompts to avoid reinforcing harmful biases.</p>
 </section>
 <section id="showing-rather-than-telling" class="level2">
 <h2 class="anchored" data-anchor-id="showing-rather-than-telling">Showing Rather Than Telling</h2>
-<p>Instead of describing what you want in words, show the model examples. This technique—called <strong>few-shot learning</strong> or in-context learning—exploits how LLMs compress patterns. When you provide examples, you’re not teaching the model new information; you’re activating pre-existing patterns by demonstrating the exact structure you want.</p>
-<p>The spectrum ranges from zero-shot (no examples, relying solely on the model’s prior knowledge) to few-shot (typically two to five examples, the sweet spot for most tasks) to many-shot (ten or more examples, where diminishing returns and context limits become problematic). Consider a zero-shot prompt first:</p>
-<div id="03c11dc0" class="cell" data-execution_count="11">
+<p>Instead of describing what you want in words, show the model examples. This technique is called few-shot learning or in-context learning. It exploits how LLMs compress patterns. When you provide examples, you are not teaching the model new information. You are activating pre-existing patterns by demonstrating the exact structure you want.</p>
+<p>The spectrum ranges from zero-shot (no examples, relying solely on the model’s prior knowledge) to few-shot (typically two to five examples, the sweet spot for most tasks) to many-shot (ten or more examples, where diminishing returns and context limits become problematic). Let’s start with a zero-shot prompt:</p>
+<div id="e9bec685" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>zero_shot_prompt <span class="op">=</span> <span class="st">"""Extract the domain and methods from this abstract:</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="st">Abstract: We apply reinforcement learning to optimize traffic flow in urban networks.</span></span>
@@ -1193,7 +1149,7 @@ Context and Emotion Prompting
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now add examples to activate more specific patterns:</p>
-<div id="04d01c51" class="cell" data-execution_count="12">
+<div id="a91ee753" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>few_shot_prompt <span class="op">=</span> <span class="st">"""Extract the domain and methods from abstracts. Here are examples:</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="st">Example 1:</span></span>
@@ -1215,7 +1171,7 @@ Context and Emotion Prompting
 <span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="st">Methods: ...</span></span>
 <span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="3cb496c4" class="cell" data-execution_count="13">
+<div id="4f8f37ac" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>response_zero <span class="op">=</span> ollama.generate(prompt<span class="op">=</span>zero_shot_prompt, <span class="op">**</span>params_llm)</span>
@@ -1235,31 +1191,13 @@ FEW-SHOT:
 Here's the extracted domain and methods from the abstract:
 
 *   **Domain:** Science
-*   **Methods:** Reinforcement Learning
-</code></pre>
+*   **Methods:** Reinforcement Learning</code></pre>
 </div>
 </div>
-<p>Few-shot prompting improves consistency because the examples demonstrate specificity level, edge case handling, and exact format. The model has seen countless abstract-extraction patterns, but your examples narrow the distribution to the specific pattern you want. This becomes critical when processing hundreds of abstracts—you need every output to match the same structure.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Biases in Few-Shot Prompting
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Be aware that few-shot examples can introduce biases:</p>
-<ul>
-<li><strong>Recency bias</strong>: Models may favor the most recent examples. The order of examples matters! <span class="citation" data-cites="lu2022fantastically">(<a href="#ref-lu2022fantastically" role="doc-biblioref">Lu et al. 2022</a>)</span></li>
-<li><strong>Majority label bias</strong>: If most examples have the same label/answer, the model may favor that label even when it’s not appropriate. <span class="citation" data-cites="gupta2023how">(<a href="#ref-gupta2023how" role="doc-biblioref">Gupta et al. 2023</a>)</span></li>
-</ul>
-<p>To mitigate: Vary the order of examples when testing, ensure examples are diverse and representative, and don’t overload examples with one particular pattern.</p>
-</div>
-</div>
-<p>What happens when a prompt presents information that contradicts a language model’s prior knowledge? For example, let’s ask a model what the capital of France is, but provide contradictory information:</p>
-<div id="6ddcaacd" class="cell" data-execution_count="14">
+<p>Few-shot prompting improves consistency because the examples demonstrate specificity level, edge case handling, and exact format. The model has seen countless abstract-extraction patterns. Your examples narrow the distribution to the specific pattern you want. This becomes critical when processing hundreds of abstracts. You need every output to match the same structure.</p>
+<p>Be aware that few-shot examples can introduce biases. Models may favor the most recent examples, so the order of examples matters. If most examples have the same label or answer, the model may favor that label even when inappropriate. To mitigate these effects, vary the order of examples when testing, ensure examples are diverse and representative, and do not overload examples with one particular pattern.</p>
+<p>Now let’s explore what happens when a prompt presents information that contradicts a language model’s prior knowledge. For example, let’s ask a model what the capital of France is, but provide contradictory information:</p>
+<div id="43545fb1" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>contradictory_prompt <span class="op">=</span> <span class="st">"""</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="st">France recently moved its capital from Paris to Lyon. Definitely, the capital of France is Lyon.</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1271,16 +1209,15 @@ Biases in Few-Shot Prompting
 <span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(response_contradictory.response)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>RESPONSE TO CONTRADICTORY INFORMATION:
-The capital of France is **Lyon**.
-</code></pre>
+The capital of France is Lyon.</code></pre>
 </div>
 </div>
-<p>The response depends on the model. Some models prioterize their own prior knowledge, while others may be more influenced by the contradictory information in the context. A study by Du et al. <span class="citation" data-cites="du2024context">(<a href="#ref-du2024context" role="doc-biblioref">Du et al. 2024</a>)</span> found that a model is <strong>more likely to be persuaded by context</strong> when an entity appears <strong>less frequently</strong> in its training data. Additionally, <strong>assertive contexts</strong> (e.g., “Definitely, the capital of France is Lyon.”) further increase the likelihood of persuasi</p>
+<p>The response depends on the model. Some prioritize their own prior knowledge while others may be more influenced by the contradictory information in context. Models are more likely to be persuaded by context when an entity appears less frequently in their training data. Assertive contexts (like “Definitely, the capital of France is Lyon.”) further increase the likelihood of persuasion.</p>
 </section>
 <section id="forcing-intermediate-steps" class="level2">
 <h2 class="anchored" data-anchor-id="forcing-intermediate-steps">Forcing Intermediate Steps</h2>
-<p>For complex tasks, asking for the final answer directly often produces shallow or incorrect results. The solution: ask the model to show its reasoning process before giving the final answer. This technique—called <strong>chain-of-thought prompting</strong>—activates patterns where intermediate reasoning steps preceded conclusions. Compare a direct prompt that asks for immediate answers:</p>
-<div id="c0fd39d1" class="cell" data-execution_count="15">
+<p>For complex tasks, asking for the final answer directly often produces shallow or incorrect results. The solution is to ask the model to show its reasoning process before giving the final answer. This technique is called chain-of-thought prompting. It activates patterns where intermediate reasoning steps preceded conclusions. Let’s compare a direct prompt that asks for immediate answers:</p>
+<div id="1e2c08a1" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>papers <span class="op">=</span> <span class="st">"""</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="st">Paper 1: Community detection in static networks using modularity optimization.</span></span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="st">Paper 2: Temporal network analysis with sliding windows.</span></span>
@@ -1295,7 +1232,7 @@ The capital of France is **Lyon**.
 <span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="ss">"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Against a chain-of-thought prompt that requests explicit reasoning steps:</p>
-<div id="13c6b77e" class="cell" data-execution_count="16">
+<div id="cb5023e4" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>cot_prompt <span class="op">=</span> <span class="ss">f"""Based on these paper titles, identify a research gap. Think step by step.</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="ss">Papers:</span></span>
@@ -1310,7 +1247,7 @@ The capital of France is **Lyon**.
 <span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="ss">Final answer: The research gap is...</span></span>
 <span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="ss">"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="1b1a54af" class="cell" data-execution_count="17">
+<div id="60e48015" class="cell" data-execution_count="17">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>response_direct <span class="op">=</span> ollama.generate(prompt<span class="op">=</span>direct_prompt, <span class="op">**</span>params_llm)</span>
@@ -1323,51 +1260,42 @@ The capital of France is **Lyon**.
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>DIRECT PROMPT:
-The gap is in the complexity of the problem and the methods used for analyzing community structure.
+The gap is in the complexity of the algorithms used for community detection and the limitations of the methods.
 
 
 CHAIN-OF-THOUGHT:
-Here's the breakdown of the research gap identified:
+Here's the breakdown of the research gap and a final answer:
 
 1.  **What does each paper focus on?**
+
     *   **Paper 1:** Community detection in static networks using modularity optimization.
     *   **Paper 2:** Temporal network analysis with sliding windows.
     *   **Paper 3:** Hierarchical community structure in social networks.
 
 2.  **What topics appear in multiple papers?**
+
     *   **Paper 1:** Community detection in static networks using modularity optimization.
     *   **Paper 2:** Temporal network analysis with sliding windows.
     *   **Paper 3:** Hierarchical community structure in social networks.
 
 3.  **What combination of topics is missing?**
+
     *   **Paper 1:** Community detection in static networks using modularity optimization.
     *   **Paper 2:** Temporal network analysis with sliding windows.
     *   **Paper 3:** Hierarchical community structure in social networks.
 
 4.  **What would be a valuable gap to fill?**
-    *   **Paper 1:** Community detection in static networks using modularity optimization.
-    *   **Paper 2:** Temporal network analysis with sliding windows.
-    *   **Paper 3:** Hierarchical community structure in social networks.
 
-Final answer: The research gap is **Community detection in static networks using modularity optimization.**</code></pre>
+    *   **Paper 1:** A gap in the literature that addresses the challenge of community detection in static networks using modularity optimization.
+    *   **Paper 2:** A gap in the literature that addresses the challenge of temporal network analysis with sliding windows.
+    *   **Paper 3:** A gap in the literature that addresses the challenge of hierarchical community structure in social networks.
+
+</code></pre>
 </div>
 </div>
-<p>Chain-of-thought produces more thoughtful, nuanced answers by forcing the model to decompose the problem into steps before committing to a conclusion. The mechanism is pattern matching: the training data contains many examples where “think step by step” preceded structured reasoning, so including that phrase activates those patterns. The model doesn’t actually reason—it generates text that looks like reasoning because that pattern correlates with higher-quality outputs in the training data.</p>
+<p>Chain-of-thought produces more thoughtful, nuanced answers by forcing the model to decompose the problem into steps before committing to a conclusion. The mechanism is pattern matching. Training data contains many examples where “think step by step” preceded structured reasoning, so including that phrase activates those patterns. The model does not actually reason. It generates text that looks like reasoning because that pattern correlates with higher-quality outputs in the training data.</p>
 <p>Use chain-of-thought when comparing multiple papers or concepts, identifying patterns, making recommendations, or analyzing arguments. Avoid it for simple extraction tasks where conciseness matters or time-critical applications where the extra tokens slow generation.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Can We Trust Chain-of-Thought Reasoning?
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Research indicates that chain-of-thought reasoning can be <strong>unfaithful</strong>—the explanations don’t always accurately reflect the model’s true decision-making process. The model may provide plausible but misleading justifications, especially when influenced by biased few-shot examples.</p>
-<p>Always validate the final answer independently rather than trusting the reasoning process alone.</p>
-</div>
-</div>
+<p>Research indicates that chain-of-thought reasoning can be unfaithful. The explanations do not always accurately reflect the model’s true decision-making process. The model may provide plausible but misleading justifications, especially when influenced by biased few-shot examples. Always validate the final answer independently rather than trusting the reasoning process alone.</p>
 </section>
 <section id="constraining-format-for-structured-extraction" class="level2">
 <h2 class="anchored" data-anchor-id="constraining-format-for-structured-extraction">Constraining Format for Structured Extraction</h2>
@@ -1376,8 +1304,8 @@ Can We Trust Chain-of-Thought Reasoning?
 <p><img src="../figs/structured-output-manga.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:70.0%"></p>
 </figure>
 </div>
-<p>LLMs often violate structured data necessary for parsing programmatically, not freeform text. The solution: constrain output format explicitly. Consider a prompt that requests JSON output:</p>
-<div id="f303abba" class="cell" data-execution_count="18">
+<p>LLMs often violate structured data necessary for parsing programmatically. You need machine-readable output, not freeform text. The solution is to constrain output format explicitly. Let’s consider a prompt that requests JSON output:</p>
+<div id="71bfd3a5" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pydantic <span class="im">import</span> BaseModel</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1401,7 +1329,7 @@ Can We Trust Chain-of-Thought Reasoning?
 <span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a><span class="ss">JSON:"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="55c9541a" class="cell" data-execution_count="19">
+<div id="523efe21" class="cell" data-execution_count="19">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use lower temperature for structured output</span></span>
@@ -1428,8 +1356,8 @@ Can We Trust Chain-of-Thought Reasoning?
 ```</code></pre>
 </div>
 </div>
-<p>This works by activating patterns where “return ONLY valid JSON” preceded JSON-formatted outputs. But smaller models often produce invalid JSON even with explicit instructions. For more reliability, use JSON schema constraints that enforce format during token generation—the model literally cannot generate tokens that violate the schema. Define the schema using Pydantic:</p>
-<div id="826c7d3b" class="cell" data-execution_count="20">
+<p>This works by activating patterns where “return ONLY valid JSON” preceded JSON-formatted outputs. But smaller models often produce invalid JSON even with explicit instructions. For more reliability, use JSON schema constraints that enforce format during token generation. The model literally cannot generate tokens that violate the schema. Define the schema using Pydantic:</p>
+<div id="4fd449d2" class="cell" data-execution_count="20">
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pydantic <span class="im">import</span> BaseModel</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PaperMetadata(BaseModel):</span>
@@ -1441,12 +1369,12 @@ Can We Trust Chain-of-Thought Reasoning?
 <span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>json_schema <span class="op">=</span> PaperMetadata.model_json_schema()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Then pass the schema directly to the API, which constrains token generation:</p>
-<div id="3afde816" class="cell" data-execution_count="21">
+<div id="aaf469b9" class="cell" data-execution_count="21">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>prompt_schema <span class="op">=</span> <span class="ss">f"""Extract information from this abstract:</span></span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="ss">Abstract: </span><span class="sc">{</span>abstract<span class="sc">}</span><span class="ss">"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="d92838fe" class="cell" data-execution_count="22">
+<div id="3b8a2ab8" class="cell" data-execution_count="22">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> ollama.generate(prompt<span class="op">=</span>prompt_schema, <span class="bu">format</span><span class="op">=</span>json_schema, <span class="op">**</span>params_structured)</span>
@@ -1474,30 +1402,18 @@ Can We Trust Chain-of-Thought Reasoning?
 }</code></pre>
 </div>
 </div>
-<p>JSON schema constraints are more reliable than prompt-based requests because they operate at the token level—the model cannot sample tokens that would create invalid JSON. The prompt activates extraction patterns; the schema enforces structure.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-JSON Parsing Reliability
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Smaller models (like Gemma 3N) sometimes produce invalid JSON even with schema constraints. Always wrap parsing in try-except blocks and validate outputs. For production systems, consider larger models or multiple attempts with validation.</p>
-</div>
-</div>
+<p>JSON schema constraints are more reliable than prompt-based requests because they operate at the token level. The model cannot sample tokens that would create invalid JSON. The prompt activates extraction patterns. The schema enforces structure.</p>
+<p>Smaller models sometimes produce invalid JSON even with schema constraints. Always wrap parsing in try-except blocks and validate outputs. For production systems, consider larger models or multiple attempts with validation.</p>
 </section>
 <section id="allowing-uncertainty-to-reduce-hallucination" class="level2">
 <h2 class="anchored" data-anchor-id="allowing-uncertainty-to-reduce-hallucination">Allowing Uncertainty to Reduce Hallucination</h2>
 <p>LLMs confidently fabricate facts when they don’t know the answer because they optimize for fluency, not truth. The model has seen countless examples where questions were followed by confident answers, so it generates confident-sounding responses even when the underlying probability distribution is flat across many possibilities. The solution: explicitly give the model permission to admit ignorance. Compare a prompt that implicitly demands an answer:</p>
-<div id="61c602c5" class="cell" data-execution_count="23">
+<div id="c1f789e8" class="cell" data-execution_count="23">
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>bad_prompt <span class="op">=</span> <span class="st">"""Summarize the main findings from the 2023 paper by Johnson et al.</span></span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="st">on quantum community detection in biological networks."""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Against a prompt that explicitly allows uncertainty:</p>
-<div id="7ae18016" class="cell" data-execution_count="24">
+<div id="8004ec4e" class="cell" data-execution_count="24">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>good_prompt <span class="op">=</span> <span class="st">"""I'm looking for a 2023 paper by Johnson et al. on quantum</span></span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="st">community detection in biological networks.</span></span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1507,7 +1423,7 @@ JSON Parsing Reliability
 <span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="st">Response:"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="a92fa08a" class="cell" data-execution_count="25">
+<div id="0cc93a7a" class="cell" data-execution_count="25">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>response_bad <span class="op">=</span> ollama.generate(prompt<span class="op">=</span>bad_prompt, <span class="op">**</span>params_llm)</span>
@@ -1522,39 +1438,27 @@ JSON Parsing Reliability
 <pre><code>BAD PROMPT (encourages hallucination):
 The 2023 paper by Johnson et al. on quantum community detection in biological networks, titled "Quantum Community Detection in Biological Networks," found that **quantum community detection (QCD) is a promising approach for identifying and characterizing biological networks, particularly in complex and heterogeneous environments.**
 
-The research highlights the potential of QCD for:
+The study highlighted several key findings:
 
-*   **Identifying complex and heterogeneous networks:** QCD can be used to detect networks that are difficult to characterize using traditional methods.
-*   **Characterizing network structure and topology:** QCD can be used to map and characterize the network structure and topology, providing insights into network behavior.
-*   **Detecting network heterogeneity:** QCD can be used to identify network heterogeneity, which is a key factor in network health and disease.
-*   **Developing new network detection algorithms:** QCD can be used to develop new network detection algorithms that are more robust and efficient.
+*   **Potential for enhanced detection:** QCD offers the potential to detect networks with complex and heterogeneous structures, which are often difficult to characterize using traditional methods.
+*   **Improved accuracy:** QCD can achieve higher accuracy compared to classical methods, especially in environments with high noise and complex interactions.
+*   **Robustness:** QCD is more robust to noise and environmental changes than classical methods, making it suitable for real-time applications.
+*   **Adaptability:** QCD can be adapted to different biological networks and environments, allowing for the development of tailored detection strategies.
+*   **Applications:** QCD is being explored for various applications, including network monitoring, disease detection, and environmental monitoring.
 
-In essence, the paper emphasizes the potential of QCD to revolutionize the field of biological network detection by providing a more comprehensive and accurate method for identifying and characterizing complex biological networks.
+In essence, the paper emphasizes the potential of QCD to improve the accuracy and robustness of biological network detection, making it a valuable tool for various research and development applications.
 
 GOOD PROMPT (allows uncertainty):
-I cannot verify this paper exists.
-</code></pre>
+I cannot verify this paper exists.</code></pre>
 </div>
 </div>
-<p>The good prompt activates patterns where explicit permission to admit ignorance preceded honest uncertainty statements. The bad prompt activates patterns where direct questions preceded confident answers, regardless of whether the model has relevant training data. Additional strategies include asking for confidence levels (though models often overestimate confidence), requesting citations (though models hallucinate these too), and cross-validating critical information with external sources. The fundamental issue remains: LLMs have no internal representation of what they “know” versus what they’re fabricating.</p>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Be a Good “Boss” to Your LLM
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><strong>Let LLMs admit ignorance</strong>: LLMs closely follow your instructions—even when they shouldn’t. They often attempt to answer beyond their actual capabilities. Explicitly tell your model: “If you don’t know the answer, just say so,” or “If you need more information, please ask.”</p>
-<p><strong>Encourage critical feedback</strong>: LLMs are trained to be agreeable, which can hinder productive brainstorming or honest critique. Explicitly invite critical input: “I want your honest opinion,” or “Point out any problems or weaknesses you see in this idea.”</p>
-</div>
-</div>
-<section id="sampling-multiple-times-for-consistency" class="level3">
-<h3 class="anchored" data-anchor-id="sampling-multiple-times-for-consistency">Sampling Multiple Times for Consistency</h3>
-<p>For tasks requiring reasoning, generating multiple responses and selecting the most common answer often improves accuracy. The technique—called <strong>self-consistency</strong>—exploits the fact that correct reasoning tends to converge on the same answer, while hallucinations vary randomly across samples. Define the prompt:</p>
-<div id="513d2f83" class="cell" data-execution_count="26">
+<p>The good prompt activates patterns where explicit permission to admit ignorance preceded honest uncertainty statements. The bad prompt activates patterns where direct questions preceded confident answers, regardless of whether the model has relevant training data. Additional strategies include asking for confidence levels (though models often overestimate confidence), requesting citations (though models hallucinate these too), and cross-validating critical information with external sources.</p>
+<p>LLMs closely follow your instructions, even when they should not. They often attempt to answer beyond their actual capabilities. Explicitly tell your model to admit ignorance: “If you don’t know the answer, just say so” or “If you need more information, please ask.” LLMs are trained to be agreeable, which can hinder productive brainstorming or honest critique. Explicitly invite critical input: “I want your honest opinion” or “Point out any problems or weaknesses you see in this idea.”</p>
+</section>
+<section id="sampling-multiple-times-for-consistency" class="level2">
+<h2 class="anchored" data-anchor-id="sampling-multiple-times-for-consistency">Sampling Multiple Times for Consistency</h2>
+<p>For tasks requiring reasoning, generating multiple responses and selecting the most common answer often improves accuracy. The technique is called self-consistency. It exploits the fact that correct reasoning tends to converge on the same answer while hallucinations vary randomly across samples. Let’s define the prompt:</p>
+<div id="199bbd62" class="cell" data-execution_count="26">
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>prompt_consistency <span class="op">=</span> <span class="st">"""Three papers study network robustness:</span></span>
@@ -1566,7 +1470,7 @@ Be a Good “Boss” to Your LLM
 <span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Generate multiple responses with higher temperature to increase diversity, then identify the most common answer:</p>
-<div id="c2c66fae" class="cell" data-execution_count="27">
+<div id="768bcdf8" class="cell" data-execution_count="27">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use higher temperature for diversity</span></span>
@@ -1585,58 +1489,29 @@ Be a Good “Boss” to Your LLM
 <div class="cell-output cell-output-stdout">
 <pre><code>Response 1: The research consensus on network robustness is that it's a complex issue influenced by both targeted attacks and random failures, with the vulnerability of critical hub nodes playing a significant role in overall network resilience.
 
-Response 2: The research consensus on network robustness is that it's a complex issue influenced by multiple factors, including the vulnerability of targeted attacks, the resilience to random failures, and the importance of critical nodes like hubs.
+Response 2: The research consensus on network robustness is that it's a complex issue influenced by both targeted attacks and random failures, with the vulnerability of critical hub nodes playing a significant role in overall network resilience.
 
-Response 3: The research consensus on network robustness is that it's a complex issue influenced by both targeted attacks and random failures, with the vulnerability of critical nodes (hubs) playing a significant role in overall network resilience.
+Response 3: The research consensus on network robustness is that it's a multifaceted issue, with targeted attacks posing a significant threat, random failures are generally less catastrophic, and the presence of critical hub nodes heavily influences overall network resilience.
 
-Response 4: The research consensus on network robustness is that it's a complex issue influenced by both targeted attacks and random failures, with the vulnerability of critical hub nodes playing a significant role in overall network stability.
+Response 4: The research consensus on network robustness is that it's a complex issue influenced by both targeted attacks and random failures, with the vulnerability of critical hub nodes playing a significant role in overall network resilience.
 
-Response 5: The research consensus on network robustness is that it's a complex issue influenced by factors like targeted attacks, random failures, and the importance of critical nodes, suggesting a multifaceted approach is needed to understand and improve network resilience.
+Response 5: The research consensus on network robustness is that it's a multifaceted issue, with targeted attacks posing a significant threat, random failures are generally less impactful, and the presence of critical hub nodes heavily influences overall network resilience.
 
 The most consistent theme across responses would be selected.</code></pre>
 </div>
 </div>
-<p>Self-consistency works because correct reasoning patterns converge toward the same conclusion when sampled multiple times, while fabricated details vary randomly. The tradeoff: generating five responses means five times the API calls, five times the cost, five times the latency. Use sparingly for critical decisions where accuracy justifies the expense.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Alternative: Tree of Thought
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2FTOT.3b13bc5e.png&amp;w=3840&amp;q=75" class="img-fluid"></p>
-<p>For even more sophisticated exploration, you can use “Tree of Thought” <span class="citation" data-cites="yao2023tree">(<a href="#ref-yao2023tree" role="doc-biblioref">Yao et al. 2023</a>)</span> prompting, where the model explicitly explores multiple reasoning paths, evaluates them, and selects the best one. This is more complex to implement but can yield better results for very difficult problems.</p>
-</div>
-</div>
-</section>
+<p>Self-consistency works because correct reasoning patterns converge toward the same conclusion when sampled multiple times while fabricated details vary randomly. The tradeoff is significant. Generating five responses means five times the API calls, five times the cost, and five times the latency. Use sparingly for critical decisions where accuracy justifies the expense.</p>
 </section>
 <section id="the-takeaway" class="level2">
 <h2 class="anchored" data-anchor-id="the-takeaway">The Takeaway</h2>
-<p>Prompt engineering is not magic—it’s deliberate activation of statistical patterns compressed during training. Every component you add to a prompt shifts the probability distribution the model samples from. Instructions activate task-specific patterns. Output formats activate structured-response patterns. Personas activate stylistic patterns. Context disambiguates when multiple patterns compete. Examples demonstrate exact structure. Chain-of-thought activates reasoning-like patterns. Format constraints enforce structure at the token level. Explicit uncertainty permission activates honest-ignorance patterns.</p>
-<p>None of this requires the model to understand what you want. It only requires that your phrasing activates patterns correlated with desired outputs in the training data. You’re not communicating intent; you’re manipulating probability distributions. Master this, and you can reliably extract value from LLMs for research workflows—summarization, structured extraction, hypothesis generation, literature analysis.</p>
-<p>But a question remains: how do these models represent text internally? When you send a prompt, the model doesn’t see English words—it sees numbers. Millions of numbers arranged in high-dimensional space. These numbers, called <strong>embeddings</strong>, are the foundation of everything LLMs do. Let’s unbox the first layer and see how meaning becomes mathematics.</p>
-
+<p>Prompt engineering is not magic. It is deliberate activation of statistical patterns compressed during training. Every component you add to a prompt shifts the probability distribution the model samples from. Instructions activate task-specific patterns. Output formats activate structured-response patterns. Personas activate stylistic patterns. Context disambiguates when multiple patterns compete. Examples demonstrate exact structure. Chain-of-thought activates reasoning-like patterns. Format constraints enforce structure at the token level. Explicit uncertainty permission activates honest-ignorance patterns.</p>
+<p>None of this requires the model to understand what you want. It only requires that your phrasing activates patterns correlated with desired outputs in the training data. You are not communicating intent. You are manipulating probability distributions. Master this, and you reliably extract value from LLMs for research workflows: summarization, structured extraction, hypothesis generation, and literature analysis.</p>
+<p>The deeper question remains: how do these models represent text internally? When you send a prompt, the model does not see English words. It sees numbers. Millions of numbers arranged in high-dimensional space. These numbers, called embeddings, are the foundation of everything LLMs do. Understanding embeddings is the next step toward mastering these systems.</p>
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
-<div id="ref-du2024context" class="csl-entry" role="listitem">
-Du, Kevin, Vésteinn Snæbjarnarson, Niklas Stoehr, Jennifer White, Aaron Schein, and Ryan Cotterell. 2024. <span>“<span class="nocase">Context versus Prior Knowledge in Language Models</span>.”</span> In <em>Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)</em>, 13211–35. Association for Computational Linguistics. <a href="https://doi.org/10.18653/v1/2024.acl-long.714">https://doi.org/10.18653/v1/2024.acl-long.714</a>.
-</div>
-<div id="ref-gupta2023how" class="csl-entry" role="listitem">
-Gupta, Karan, Sumegh Roychowdhury, Siva Rajesh Kasa, Santhosh Kumar Kasa, Anish Bhanushali, Nikhil Pattisapu, and Prasanna Srinivasa Murthy. 2023. <span>“<span class="nocase">How Robust are LLMs to In-Context Majority Label Bias?</span>”</span> arXiv. <a href="https://doi.org/10.48550/arxiv.2312.16549">https://doi.org/10.48550/arxiv.2312.16549</a>.
-</div>
-<div id="ref-lu2022fantastically" class="csl-entry" role="listitem">
-Lu, Yao, Max Bartolo, Alastair Moore, Sebastian Riedel, and Pontus Stenetorp. 2022. <span>“<span class="nocase">Fantastically Ordered Prompts and Where to Find Them: Overcoming Few-Shot Prompt Order Sensitivity</span>.”</span> In <em>Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)</em>. Association for Computational Linguistics. <a href="https://doi.org/10.18653/v1/2022.acl-long.556">https://doi.org/10.18653/v1/2022.acl-long.556</a>.
-</div>
-<div id="ref-yao2023tree" class="csl-entry" role="listitem">
-Yao, Shunyu, Dian Yu, Jeffrey Zhao, Izhak Shafran, Thomas L. Griffiths, Yuan Cao, and Karthik Narasimhan. 2023. <span>“<span class="nocase">Tree of Thoughts: Deliberate Problem Solving with Large Language Models</span>.”</span> arXiv. <a href="https://doi.org/10.48550/arxiv.2305.10601">https://doi.org/10.48550/arxiv.2305.10601</a>.
-</div>
-</div></section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

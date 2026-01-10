@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2025-11-29">
+<meta name="dcterms.date" content="2026-01-10">
 
 <title>BERT, GPT, and Sentence Transformers – Applied Soft Computing</title>
 <style>
@@ -57,27 +57,7 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -98,7 +78,7 @@ div.csl-indent {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-626254e6f25d1c064b097183404b5529.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-a032929455e4d93731be0fa9bc28887b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -977,7 +957,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 29, 2025</p>
+      <p class="date">January 10, 2026</p>
     </div>
   </div>
   
@@ -989,64 +969,41 @@ window.Quarto = {
 </header>
 
 
-<section id="the-spoiler" class="level2">
-<h2 class="anchored" data-anchor-id="the-spoiler">The Spoiler</h2>
-<p><strong>The difference between BERT and GPT isn’t just architecture; it’s the difference between studying a completed map and exploring a new territory one step at a time.</strong></p>
-</section>
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+What you’ll learn in this module
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>BERT and GPT are not variants of one architecture. They represent fundamentally different information flows: BERT reads the entire sentence at once for deep understanding, while GPT processes sequentially for text generation. Understanding this distinction shapes how you choose the right model for your task.</p>
+</div>
+</div>
 <section id="two-siblings-bert-and-gpt" class="level2">
-<h2 class="anchored" data-anchor-id="two-siblings-bert-and-gpt">Two siblings, BERT and GPT</h2>
+<h2 class="anchored" data-anchor-id="two-siblings-bert-and-gpt">Two Siblings, BERT and GPT</h2>
 <p><img src="https://miro.medium.com/v2/resize:fit:1400/format:webp/0*376uJu_fc_uR8H3X.png" class="img-fluid"></p>
-<p>We instinctively think of “Transformers” as a single unified model, but this is wrong. The original Transformer paper proposed an <strong>Encoder-Decoder</strong> architecture—a two-part machine. Modern models split this architecture in half, creating two distinct lineages with fundamentally different information flows. <strong>BERT</strong> (Bidirectional Encoder Representations from Transformers) <span class="citation" data-cites="devlin2019bert">(<a href="#ref-devlin2019bert" role="doc-biblioref">Devlin et al. 2019</a>)</span> uses the encoder stack and sees everything at once, like reading a completed sentence. <strong>GPT</strong> (Generative Pre-trained Transformer) <span class="citation" data-cites="radford2018language">Brown et al. (<a href="#ref-brown2020language" role="doc-biblioref">2020</a>)</span> uses the decoder stack and processes text causally, like improvising a story where you can only react to what’s already been said. This architectural choice isn’t cosmetic—it determines what the model can learn and what tasks it excels at.</p>
+<p>We instinctively think of “Transformers” as a single unified model, but this is wrong. The original Transformer paper proposed an Encoder-Decoder architecture, a two-part machine. Modern models split this architecture in half, creating two distinct lineages with fundamentally different information flows. BERT (Bidirectional Encoder Representations from Transformers) uses the encoder stack and sees everything at once, like reading a completed sentence. GPT (Generative Pre-trained Transformer) uses the decoder stack and processes text causally, like improvising a story where you can only react to what’s already been said. This architectural choice isn’t cosmetic. It determines what the model can learn and what tasks it excels at.</p>
 <p>Think of it like two different reading strategies. BERT is the student who reads the entire paragraph, then goes back to understand each word in context. GPT is the actor performing a cold read, processing each line sequentially without peeking ahead at the script. The first strategy gives you deeper understanding; the second gives you the ability to continue the story.</p>
 </section>
 <section id="architecture" class="level2">
 <h2 class="anchored" data-anchor-id="architecture">Architecture</h2>
 <p><img src="../figs/bidirectional-vs-unidirectional-attention.png" class="img-fluid"></p>
-<p>Perhaps the most important difference between BERT and GPT is the attention mechanism. BERT uses <strong>bidirectional</strong> attention, meaning that every token at position <span class="math inline">t</span> can attend to positions every other token. This allows BERT to understand the context of a word by looking at all the words in the sentence, not just the ones before it, helping it to capture the full context of a token.</p>
-<p>GPT uses <strong>masked</strong> (or causal) attention, meaning that a token at position <span class="math inline">t</span> can only attend to previous tokens. This masking imposes a causal constraint, making it ideal for tasks like language generation where the model must predict future tokens based only on past context. Although GPT’s attention is not bidirectional, and thus less globally context-aware than BERT’s, this causal processing allows it to generate remarkably fluent and coherent text sequentially.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-More on BERT
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<section id="special-tokens" class="level3">
-<h3 class="anchored" data-anchor-id="special-tokens">Special tokens</h3>
-<p>BERT uses several special tokens to represent the input sentence.</p>
-<ul>
-<li>[CLS] is used to represent the start of the sentence.</li>
-<li>[SEP] is used to represent the end of the sentence.</li>
-<li>[MASK] is used to represent the masked words.</li>
-<li>[UNK] is used to represent the unknown words.</li>
-</ul>
-<p>For example, the sentence “The cat sat on the mat. It then went to sleep.” is represented as “[CLS] The cat sat on the mat [SEP] It then went to sleep [SEP]”.</p>
-<p>In BERT, [CLS] token is used to classify the input sentences, as we will see later. As a result, the model learns to encode a summary of the input sentence into the [CLS] token, which is particularly useful when we want the embedding of the whole input text, instead of the token level embeddings. <span class="citation" data-cites="reimers2019sentence">(<a href="#ref-reimers2019sentence" role="doc-biblioref">Reimers and Gurevych 2019</a>)</span>.</p>
+<p>Perhaps the most important difference between BERT and GPT is the attention mechanism. BERT uses bidirectional attention, meaning every token at position <span class="math inline">t</span> can attend to every other token. This allows BERT to understand the context of a word by looking at all the words in the sentence, not just the ones before it, helping it capture the full context of a token.</p>
+<p>GPT uses masked (or causal) attention, meaning a token at position <span class="math inline">t</span> can only attend to previous tokens. This masking imposes a causal constraint, making it ideal for tasks like language generation where the model must predict future tokens based only on past context. Although GPT’s attention is not bidirectional and thus less globally context-aware than BERT’s, this causal processing allows it to generate remarkably fluent and coherent text sequentially.</p>
+<section id="more-on-bert" class="level3">
+<h3 class="anchored" data-anchor-id="more-on-bert">More on BERT</h3>
+<p>BERT uses several special tokens to represent the input sentence. The [CLS] token is used to represent the start of the sentence. The [SEP] token is used to represent the end of the sentence. The [MASK] token is used to represent masked words. The [UNK] token is used to represent unknown words. For example, the sentence “The cat sat on the mat. It then went to sleep.” is represented as “[CLS] The cat sat on the mat [SEP] It then went to sleep [SEP]”.</p>
+<p>In BERT, the [CLS] token is used to classify the input sentences. As a result, the model learns to encode a summary of the input sentence into the [CLS] token, which is particularly useful when we want the embedding of the whole input text, instead of the token level embeddings.</p>
+<p>BERT uses position and segment embeddings to provide the model with information about the position of the tokens in the sequence. Position embeddings provide information about the position of tokens in the sequence. Unlike the sinusoidal position embedding used in the original transformer paper, BERT uses learnable position embeddings. Segment embeddings distinguish the sentences in the input. For example, for the sentence “The cat sat on the mat. It then went to sleep.”, the tokens in the first sentence are added with segment embedding 0, and the tokens in the second sentence are added with segment embedding 1. These segment embeddings are also learned during the pre-training process.</p>
+<p>Several BERT variants have been developed. RoBERTa (Robustly Optimized BERT Approach) improved upon BERT through several optimizations: removing the Next Sentence Prediction task, using dynamic masking that changes the mask patterns across training epochs, training with larger batches, and using a larger dataset. These changes led to significant performance improvements while maintaining BERT’s core architecture.</p>
+<p>DistilBERT focused on making BERT more efficient through knowledge distillation, where a smaller student model learns from the larger BERT teacher model. It achieves 95% of BERT’s performance while being 40% smaller and 60% faster, making it more suitable for resource-constrained environments and real-world applications.</p>
+<p>ALBERT introduced parameter reduction techniques to address BERT’s memory limitations. It uses factorized embedding parameterization and cross-layer parameter sharing to dramatically reduce parameters while maintaining performance. ALBERT also replaced Next Sentence Prediction with Sentence Order Prediction, where the model must determine if two consecutive sentences are in the correct order.</p>
+<p>Domain-specific BERT models have been trained on specialized corpora to better handle specific fields. Examples include BioBERT for biomedical text, SciBERT for scientific papers, and FinBERT for financial documents. These models demonstrate superior performance in their respective domains compared to the general-purpose BERT.</p>
+<p>Multilingual BERT (mBERT) was trained on Wikipedia data from 104 languages, using a shared vocabulary across all languages. Despite not having explicit cross-lingual objectives during training, mBERT shows remarkable zero-shot cross-lingual transfer abilities, allowing it to perform tasks in languages it wasn’t explicitly aligned on. This has made it a valuable resource for low-resource languages and cross-lingual applications.</p>
 </section>
-<section id="position-and-segment-embeddings" class="level3">
-<h3 class="anchored" data-anchor-id="position-and-segment-embeddings">Position and Segment embeddings</h3>
-<p>BERT uses <em>position</em> and <em>segment</em> embeddings to provide the model with information about the position of the tokens in the sequence.</p>
-<ul>
-<li><p>Position embeddings are used to provide the model with information about the position of the tokens in the sequence. Unlike the sinusoidal position embedding used in the original transformer paper {footcite}<code>vaswani2017attention</code>, BERT uses learnable position embeddings.</p></li>
-<li><p>The segment embeddings are used to distinguish the sentences in the input. For example, for the sentence “The cat sat on the mat. It then went to sleep.”, the tokens in the first sentence are added with segment embedding 0, and the tokens in the second sentence are added with segment embedding 1. These segmend embeddings are also learned during the pre-training process.</p></li>
-</ul>
-</section>
-<section id="variants" class="level3">
-<h3 class="anchored" data-anchor-id="variants">Variants</h3>
-<p>**RoBERTa (Robustly Optimized BERT Approach)* <span class="citation" data-cites="liu2019roberta">(<a href="#ref-liu2019roberta" role="doc-biblioref">Liu et al. 2019</a>)</span> improved upon BERT through several optimizations: removing the Next Sentence Prediction task, using dynamic masking that changes the mask patterns across training epochs, training with larger batches, and using a larger dataset. These changes led to significant performance improvements while maintaining BERT’s core architecture.</p>
-<p><strong>DistilBERT</strong> <span class="citation" data-cites="sanh2019distilbert">(<a href="#ref-sanh2019distilbert" role="doc-biblioref">Sanh et al. 2019</a>)</span> focused on making BERT more efficient through knowledge distillation, where a smaller student model learns from the larger BERT teacher model. It achieves 95% of BERT’s performance while being 40% smaller and 60% faster, making it more suitable for resource-constrained environments and real-world applications.</p>
-<p><strong>ALBERT</strong> <span class="citation" data-cites="lan2019albert">(<a href="#ref-lan2019albert" role="doc-biblioref">Lan et al. 2020</a>)</span> introduced parameter reduction techniques to address BERT’s memory limitations. It uses factorized embedding parameterization and cross-layer parameter sharing to dramatically reduce parameters while maintaining performance. ALBERT also replaced Next Sentence Prediction with Sentence Order Prediction, where the model must determine if two consecutive sentences are in the correct order.</p>
-<p>Domain-specific BERT models have been trained on specialized corpora to better handle specific fields. Examples include <strong>BioBERT</strong> <span class="citation" data-cites="lee2020biobert">(<a href="#ref-lee2020biobert" role="doc-biblioref">Lee et al. 2020</a>)</span> for biomedical text, <strong>SciBERT</strong> <span class="citation" data-cites="reimers2019sentence">(<a href="#ref-reimers2019sentence" role="doc-biblioref">Reimers and Gurevych 2019</a>)</span> for scientific papers, and <strong>FinBERT</strong> <span class="citation" data-cites="araci2019finbert">(<a href="#ref-araci2019finbert" role="doc-biblioref">Araci 2019</a>)</span> for financial documents. These models demonstrate superior performance in their respective domains compared to the general-purpose BERT.</p>
-<p><strong>Multilingual BERT (mBERT)</strong> <span class="citation" data-cites="liu2019roberta">(<a href="#ref-liu2019roberta" role="doc-biblioref">Liu et al. 2019</a>)</span> was trained on Wikipedia data from 104 languages, using a shared vocabulary across all languages. Despite not having explicit cross-lingual objectives during training, mBERT shows remarkable zero-shot cross-lingual transfer abilities, allowing it to perform tasks in languages it wasn’t explicitly aligned on. This has made it a valuable resource for low-resource languages and cross-lingual applications.</p>
-</section>
-</div>
-</div>
-</div>
 </section>
 <section id="training" class="level2">
 <h2 class="anchored" data-anchor-id="training">Training</h2>
@@ -1057,7 +1014,7 @@ More on BERT
 </div>
 <section id="bert" class="level3">
 <h3 class="anchored" data-anchor-id="bert">BERT</h3>
-<p>The fundamental difference in their architectures naturally leads to distinct training objectives. BERT, with its encoder-only design, is trained using two primary unsupervised tasks: <strong>Masked Language Modeling (MLM)</strong> and <strong>Next Sentence Prediction (NSP)</strong>.</p>
+<p>The fundamental difference in their architectures naturally leads to distinct training objectives. BERT, with its encoder-only design, is trained using two primary unsupervised tasks: Masked Language Modeling (MLM) and Next Sentence Prediction (NSP).</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://raw.githubusercontent.com/UKPLab/sentence-transformers/master/docs/img/MLM.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:70.0%"></p>
@@ -1066,65 +1023,24 @@ More on BERT
 <p>In MLM, a percentage of input tokens are randomly masked, and the model is tasked with predicting the original masked tokens based on the full, bidirectional context of the sentence. For example, given the sentence “The quick brown fox jumps over the lazy dog,” BERT might see “The quick brown [MASK] jumps over the lazy dog” and predict “fox.”</p>
 <p><img src="https://amitness.com/posts/images/bert-nsp.png" class="img-fluid"></p>
 <p>NSP involves presenting the model with two sentences and asking it to predict whether the second sentence logically follows the first. For instance, given Sentence A: “The cat sat on the mat.” and Sentence B: “It was a sunny day.”, BERT would predict ‘IsNextSentence = No’, whereas for Sentence A: “The cat sat on the mat.” and Sentence B: “It was purring softly.”, BERT would predict ‘IsNextSentence = Yes’. These tasks enable BERT to learn deep contextual representations useful for understanding existing text.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Receipe for MLM
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>To generate training data for MLM, BERT randomly masks 15% of the tokens in each sequence. However, the masking process is not as straightforward as simply replacing words with [MASK] tokens. For the 15% of tokens chosen for masking:</p>
-<ul>
-<li>80% of the time, replace the word with the [MASK] token
-<ul>
-<li>Example: “the cat sat on the mat” → “the cat [MASK] on the mat”</li>
-</ul></li>
-<li>10% of the time, replace the word with a random word
-<ul>
-<li>Example: “the cat sat on the mat” → “the cat dog on the mat”</li>
-</ul></li>
-<li>10% of the time, keep the word unchanged
-<ul>
-<li>Example: “the cat sat on the mat” → “the cat sat on the mat”</li>
-</ul></li>
-</ul>
-<p>The model must predict the original token for all selected positions, regardless of whether they were masked, replaced, or left unchanged. This helps prevent the model from simply learning to detect replaced tokens.</p>
-<p>During training, the model processes the modified input sequence through its transformer layers and predicts the original token at each masked position using the contextual representations.</p>
-<p>While replacing words with random tokens or leaving them unchanged may seem counterintuitive, research has shown this approach is effective <span class="citation" data-cites="raffel2020exploring">(<a href="#ref-raffel2020exploring" role="doc-biblioref">Raffel et al. 2020</a>)</span>. It has become an essential component of BERT’s pre-training process.</p>
-</div>
-</div>
-</div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Receipe for NSP
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-3" class="callout-3-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
+</section>
+<section id="recipe-for-mlm" class="level3">
+<h3 class="anchored" data-anchor-id="recipe-for-mlm">Recipe for MLM</h3>
+<p>To generate training data for MLM, BERT randomly masks 15% of the tokens in each sequence. However, the masking process is not as straightforward as simply replacing words with [MASK] tokens. For the 15% of tokens chosen for masking, 80% of the time the word is replaced with the [MASK] token (example: “the cat sat on the mat” becomes “the cat [MASK] on the mat”). 10% of the time the word is replaced with a random word (example: “the cat sat on the mat” becomes “the cat dog on the mat”). 10% of the time the word is kept unchanged (example: “the cat sat on the mat” stays “the cat sat on the mat”).</p>
+<p>The model must predict the original token for all selected positions, regardless of whether they were masked, replaced, or left unchanged. This helps prevent the model from simply learning to detect replaced tokens. During training, the model processes the modified input sequence through its transformer layers and predicts the original token at each masked position using the contextual representations. While replacing words with random tokens or leaving them unchanged may seem counterintuitive, research has shown this approach is effective. It has become an essential component of BERT’s pre-training process.</p>
+</section>
+<section id="recipe-for-nsp" class="level3">
+<h3 class="anchored" data-anchor-id="recipe-for-nsp">Recipe for NSP</h3>
 <p>Next Sentence Prediction (NSP) trains BERT to understand relationships between sentences. The model learns to predict whether two sentences naturally follow each other in text. During training, half of the sentence pairs are consecutive sentences from documents (labeled as IsNext), while the other half are random sentence pairs (labeled as NotNext).</p>
 <p>The input format uses special tokens to structure the sentence pairs: a [CLS] token at the start, the first sentence, a [SEP] token, the second sentence, and a final [SEP] token. For instance:</p>
 <p><span class="math display">
-\text{``[CLS] }\underbrace{\text{I went to the store}}_{\text{Sentence 1}}\text{ [SEP] }\underbrace{\text{They were out of milk}}_{\text{Sentence 2}}\text{ [SEP]}".
+\text{``[CLS] }\underbrace{\text{I went to the store}}_{\text{Sentence 1}}\text{ [SEP] }\underbrace{\text{They were out of milk}}_{\text{Sentence 2}}\text{ [SEP]''}.
 </span></p>
 <p>BERT uses the final hidden state of the [CLS] token to classify whether the sentences are consecutive or not. This helps the model develop a broader understanding of language context and relationships between sentences.</p>
-<p>These two objectives help BERT learn the structure of language, such as the relationship between words and sentences.</p>
-</div>
-</div>
-</div>
 </section>
 <section id="gpt" class="level3">
 <h3 class="anchored" data-anchor-id="gpt">GPT</h3>
-<p>GPT, on the other hand, uses its decoder-only architecture for <strong>Causal Language Modeling (CLM)</strong>. Causal (autoregressive) language modeling is the pre-training objective of GPT, where the model learns to predict the next token given all previous tokens in the sequence. More formally, given a sequence of tokens <span class="math inline">(x_1, x_2, ..., x_n)</span>, the model is trained to maximize the likelihood:</p>
+<p>GPT, on the other hand, uses its decoder-only architecture for Causal Language Modeling (CLM). Causal (autoregressive) language modeling is the pre-training objective of GPT, where the model learns to predict the next token given all previous tokens in the sequence. More formally, given a sequence of tokens <span class="math inline">(x_1, x_2, ..., x_n)</span>, the model is trained to maximize the likelihood:</p>
 <p><span class="math display">
 P(x_1, ..., x_n) = \prod_{i=1}^n P(x_i|x_1, ..., x_{i-1})
 </span></p>
@@ -1135,7 +1051,7 @@ P(x_1, ..., x_n) = \prod_{i=1}^n P(x_i|x_1, ..., x_{i-1})
 <section id="visualizing-attention-what-is-bert-looking-at" class="level2">
 <h2 class="anchored" data-anchor-id="visualizing-attention-what-is-bert-looking-at">Visualizing Attention: What Is BERT Looking At?</h2>
 <p>BERT produces attention weights—a matrix showing which tokens influence each other. We can extract these weights and visualize them to understand how the model disambiguates meaning.</p>
-<div id="79a160f0" class="cell">
+<div id="3d5543c8" class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModel, AutoTokenizer</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -1166,69 +1082,16 @@ P(x_1, ..., x_n) = \prod_{i=1}^n P(x_i|x_1, ..., x_{i-1})
 <span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Query (Target)"</span>)</span>
 <span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>In this heatmap, a bright spot at row “bank” and column “river” reveals that BERT is using “river” to understand “bank”—disambiguating it from a financial institution. This bidirectional flow is why BERT excels at tasks requiring deep contextual understanding like question answering and named entity recognition.</p>
+<p>In this heatmap, a bright spot at row “bank” and column “river” reveals that BERT is using “river” to understand “bank”, disambiguating it from a financial institution. This bidirectional flow is why BERT excels at tasks requiring deep contextual understanding like question answering and named entity recognition.</p>
 </section>
 <section id="the-takeaway" class="level2">
 <h2 class="anchored" data-anchor-id="the-takeaway">The Takeaway</h2>
-<p>BERT reads to understand, GPT writes to create. Choose the architecture that matches your information flow: bidirectional for deep contextual analysis, causal for sequential generation.</p>
-
+<p>BERT reads to understand. GPT writes to create. Choose the architecture that matches your information flow: bidirectional for deep contextual analysis, causal for sequential generation.</p>
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
-<div id="ref-araci2019finbert" class="csl-entry" role="listitem">
-Araci, Dogu. 2019. <span>“FinBERT: Financial Sentiment Analysis with Pre-Trained Language Models.”</span> <em>ArXiv</em> abs/1908.10063. <a href="https://api.semanticscholar.org/CorpusID:201646244">https://api.semanticscholar.org/CorpusID:201646244</a>.
-</div>
-<div id="ref-brown2020language" class="csl-entry" role="listitem">
-Brown, Tom B., Benjamin Mann, Nick Ryder, Melanie Subbiah, Jared Kaplan, Prafulla Dhariwal, Arvind Neelakantan, et al. 2020. <span>“<span class="nocase">Language Models are Few-Shot Learners</span>.”</span> arXiv. <a href="https://doi.org/10.48550/arxiv.2005.14165">https://doi.org/10.48550/arxiv.2005.14165</a>.
-</div>
-<div id="ref-devlin2019bert" class="csl-entry" role="listitem">
-Devlin, Jacob, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. 2019. <span>“Bert: Pre-Training of Deep Bidirectional Transformers for Language Understanding.”</span> In <em>Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers)</em>, 4171–86.
-</div>
-<div id="ref-lan2019albert" class="csl-entry" role="listitem">
-Lan, Zhenzhong, Mingda Chen, Sebastian Goodman, Kevin Gimpel, Piyush Sharma, and Radu Soricut. 2020. <span>“ALBERT: A Lite BERT for Self-Supervised Learning of Language Representations.”</span> In <em>International Conference on Learning Representations</em>. <a href="https://openreview.net/forum?id=H1eA7AEtvS">https://openreview.net/forum?id=H1eA7AEtvS</a>.
-</div>
-<div id="ref-lee2020biobert" class="csl-entry" role="listitem">
-Lee, Jinhyuk, Wonjin Yoon, Sungdong Kim, Donghyeon Kim, Sunkyu Kim, Chan Ho So, and Jaewoo Kang. 2020. <span>“BioBERT: A Pre-Trained Biomedical Language Representation Model for Biomedical Text Mining.”</span> <em>Bioinformatics</em> 36 (4): 1234–40.
-</div>
-<div id="ref-liu2019roberta" class="csl-entry" role="listitem">
-Liu, Yinhan, Myle Ott, Naman Goyal, Jingfei Du, Mandar Joshi, Danqi Chen, Omer Levy, Mike Lewis, Luke Zettlemoyer, and Veselin Stoyanov. 2019. <span>“RoBERTa: A Robustly Optimized BERT Pretraining Approach.”</span> <em>ArXiv</em> abs/1907.11692. <a href="https://api.semanticscholar.org/CorpusID:198953378">https://api.semanticscholar.org/CorpusID:198953378</a>.
-</div>
-<div id="ref-radford2018language" class="csl-entry" role="listitem">
-Radford, Alec, Karthik Narasimhan, Tim Salimans, and lya Sutskever. 2018. <span>“Improving Language Understanding by Generative Pre-Training.”</span> In <em>OpenAI Technical Report</em>. <a href="https://api.semanticscholar.org/CorpusID:49313245">https://api.semanticscholar.org/CorpusID:49313245</a>.
-</div>
-<div id="ref-raffel2020exploring" class="csl-entry" role="listitem">
-Raffel, Colin, Noam Shazeer, Adam Roberts, Katherine Lee, Sharan Narang, Michael Matena, Yanqi Zhou, Wei Li, and Peter J Liu. 2020. <span>“Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer.”</span> <em>Journal of Machine Learning Research</em> 21 (140): 1–67.
-</div>
-<div id="ref-reimers2019sentence" class="csl-entry" role="listitem">
-Reimers, Nils, and Iryna Gurevych. 2019. <span>“Sentence-BERT: Sentence Embeddings Using Siamese BERT-Networks.”</span> In <em>Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing</em>. Association for Computational Linguistics. <a href="https://arxiv.org/abs/1908.10084">https://arxiv.org/abs/1908.10084</a>.
-</div>
-<div id="ref-sanh2019distilbert" class="csl-entry" role="listitem">
-Sanh, Victor, Lysandre Debut, Julien Chaumond, and Thomas Wolf. 2019. <span>“DistilBERT, a Distilled Version of BERT: Smaller, Faster, Cheaper and Lighter.”</span> <em>ArXiv</em> abs/1910.01108. <a href="https://api.semanticscholar.org/CorpusID:203626972">https://api.semanticscholar.org/CorpusID:203626972</a>.
-</div>
-</div></section></div></main> <!-- /main -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Find all breadcrumb containers
-  const breadcrumbs = document.querySelectorAll('.quarto-page-breadcrumbs ol.breadcrumb');
-
-  breadcrumbs.forEach(function(breadcrumb) {
-    // Create the TOC link as the first breadcrumb item
-    const tocItem = document.createElement('li');
-    tocItem.className = 'breadcrumb-item';
-
-    const tocLink = document.createElement('a');
-    tocLink.href = '../toc.html';
-    tocLink.textContent = 'Table of Contents';
-
-    tocItem.appendChild(tocLink);
-
-    // Insert at the beginning
-    breadcrumb.insertBefore(tocItem, breadcrumb.firstChild);
-  });
-});
-</script>
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
@@ -1661,6 +1524,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 </footer>
+<script src="../assets/breadcrumb-toc.js"></script>
 
 
 

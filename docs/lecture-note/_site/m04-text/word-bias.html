@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2026-01-09">
+<meta name="dcterms.date" content="2026-01-10">
 
-<title>Prompt Engineering – Applied Soft Computing</title>
+<title>Word Bias – Applied Soft Computing</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -57,27 +57,7 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -128,7 +108,7 @@ div.csl-indent {
 <link rel="stylesheet" href="../assets/custom.css">
 </head>
 
-<body class="nav-sidebar docked nav-fixed slimcontent quarto-light">
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -911,14 +891,13 @@ div.csl-indent {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-    </div>
+    
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../m04-text/overview.html">Module 4: Deep Learning for Text</a></li><li class="breadcrumb-item"><a href="../m04-text/word-bias.html">Word Bias</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Prompt Engineering</h1>
+<h1 class="title">Word Bias</h1>
 </div>
 
 
@@ -935,7 +914,7 @@ div.csl-indent {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">January 9, 2026</p>
+      <p class="date">January 10, 2026</p>
     </div>
   </div>
   
@@ -947,19 +926,32 @@ div.csl-indent {
 </header>
 
 
-<section id="bias-in-word-embeddings" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="bias-in-word-embeddings">Bias in Word Embeddings</h2>
-<p>Word embeddings can capture and reinforce societal biases from their training data through the geometric relationships between word vectors. These relationships often reflect stereotypes about gender, race, age and other social factors. We’ll examine how semantic axes help analyze gender bias in job-related terms, showing both the benefits and risks of word embeddings capturing these real-world associations <span class="citation" data-cites="bolukbasi2016debiasing">Bolukbasi et al. (<a href="#ref-bolukbasi2016debiasing" role="doc-biblioref">2016</a>)</span>.</p>
-<p>SemAxis is a powerful tool to analyze gender bias in word embeddings by measuring word alignments along semantic axes <span class="citation" data-cites="kwak2021frameaxis">Kwak et al. (<a href="#ref-kwak2021frameaxis" role="doc-biblioref">2021</a>)</span>. Using antonym pairs like “she-he” as poles, it quantifies gender associations in words on a scale from -1 to 1, where positive values indicate feminine associations and negative values indicate masculine as ones.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+What you’ll learn in this module
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Word embeddings capture and reinforce societal biases from their training data through geometric relationships between vectors. This section explores how semantic axes reveal gender bias in occupations and concepts, demonstrating both the benefits and risks of embeddings encoding real-world associations.</p>
+</div>
+</div>
+<section id="understanding-bias-in-word-embeddings" class="level2">
+<h2 class="anchored" data-anchor-id="understanding-bias-in-word-embeddings">Understanding Bias in Word Embeddings</h2>
+<p>Word embeddings can capture and reinforce societal biases from their training data through geometric relationships between word vectors. These relationships often reflect stereotypes about gender, race, age, and other social factors. By using semantic axes, we can analyze gender bias in job-related terms, showing both the benefits and risks of word embeddings capturing these real-world associations.</p>
+<p>SemAxis is a powerful tool to analyze gender bias in word embeddings by measuring word alignments along semantic axes. Using antonym pairs like “she-he” as poles, it quantifies gender associations in words on a scale from -1 to 1, where positive values indicate feminine associations and negative values indicate masculine associations.</p>
 <p>Let’s start with a simple example of analyzing gender bias in occupations.</p>
-<div id="7fb06c81" class="cell" data-execution_count="1">
+<div id="4537d605" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> gensim.downloader <span class="im">as</span> api</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Load pre-trained Word2vec embeddings</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> api.load(<span class="st">"word2vec-google-news-300"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="b9d2c516" class="cell" data-execution_count="2">
+<div id="bd04320d" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_bias(word, microframe, model):</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    word_vector <span class="op">=</span> model[word]</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    numerator <span class="op">=</span> np.dot(word_vector, microframe)</span>
@@ -974,15 +966,9 @@ div.csl-indent {
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    bias <span class="op">=</span> compute_bias(word, microframe, model)</span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> bias</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<p>The <code>compute_bias</code> function calculates the cosine similarity between a word vector and a semantic axis (microframe).</p>
-<ul>
-<li><strong>Numerator</strong>: Dot product projects the word onto the axis.</li>
-<li><strong>Denominator</strong>: Normalizes by vector lengths to get a score between -1 and 1.</li>
-</ul>
-</div></div><p>We will use the following occupations:</p>
-<div id="462c6c50" class="cell" data-execution_count="3">
+<p>The compute_bias function calculates the cosine similarity between a word vector and a semantic axis (microframe). The numerator computes the dot product, which projects the word onto the axis. The denominator normalizes by vector lengths to get a score between -1 and 1.</p>
+<p>We will use the following occupations:</p>
+<div id="2ebc1cf3" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Occupations from the paper</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>she_occupations <span class="op">=</span> [</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"homemaker"</span>,</span>
@@ -1012,7 +998,7 @@ div.csl-indent {
 <span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We measure the gender bias in these occupations by measuring how they align with the “she-he” axis.</p>
-<div id="d0f037fc" class="cell" data-execution_count="4">
+<div id="23ae827f" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Gender Bias in Occupations (she-he axis):"</span>)</span>
@@ -1055,19 +1041,13 @@ magician: -0.110
 boss: -0.090</code></pre>
 </div>
 </div>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<p><strong>Interpreting the Scores:</strong></p>
-<ul>
-<li><strong>Positive scores (&gt; 0)</strong>: Closer to “she” (e.g., <em>nurse</em>, <em>librarian</em>).</li>
-<li><strong>Negative scores (&lt; 0)</strong>: Closer to “he” (e.g., <em>architect</em>, <em>captain</em>).</li>
-<li><strong>Magnitude</strong>: A larger absolute value indicates a stronger gender association.</li>
-</ul>
-</div></div><p>Notice how occupations historically associated with women (like <em>nurse</em> and <em>librarian</em>) have strong positive scores, while those associated with men (like <em>captain</em> and <em>architect</em>) have negative scores. This confirms that the model has learned these gender stereotypes from the text data.</p>
-<section id="stereotype-analogies" class="level3">
-<h3 class="anchored" data-anchor-id="stereotype-analogies">Stereotype Analogies</h3>
-<p>Since word embeddings capture semantic relationships learned from large text corpora, they inevitably encode societal biases and stereotypes present in that training data. We can leverage this property to identify pairs of words that exhibit stereotypical gender associations. By measuring how different words align with the gender axis (she-he), we can find pairs where one word shows a strong feminine bias while its counterpart shows a masculine bias, revealing ingrained stereotypes in language use.</p>
-<div id="eda779cc" class="cell" data-execution_count="5">
+<p>Interpreting the scores: Positive scores (greater than 0) indicate closer association to “she” (e.g., nurse, librarian). Negative scores (less than 0) indicate closer association to “he” (e.g., architect, captain). Magnitude indicates the strength of the gender association. A larger absolute value represents a stronger gender association.</p>
+<p>Notice how occupations historically associated with women (like nurse and librarian) have strong positive scores, while those associated with men (like captain and architect) have negative scores. This confirms that the model has learned these gender stereotypes from the text data.</p>
+</section>
+<section id="stereotype-analogies" class="level2">
+<h2 class="anchored" data-anchor-id="stereotype-analogies">Stereotype Analogies</h2>
+<p>Since word embeddings capture semantic relationships learned from large text corpora, they inevitably encode societal biases and stereotypes present in that training data. We can leverage this property to identify pairs of words that exhibit stereotypical gender associations. By measuring how different words align with the gender axis (she-he), we find pairs where one word shows strong feminine bias while its counterpart shows masculine bias, revealing ingrained stereotypes in language use.</p>
+<div id="b815ff11" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Stereotype analogies from the paper</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>stereotype_pairs <span class="op">=</span> [</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"sewing"</span>, <span class="st">"carpentry"</span>),</span>
@@ -1077,7 +1057,7 @@ boss: -0.090</code></pre>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"vocalist"</span>, <span class="st">"guitarist"</span>),</span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="06159fc6" class="cell" data-execution_count="6">
+<div id="bb73ee5f" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Analyzing Gender Stereotype Pairs:"</span>)</span>
@@ -1113,15 +1093,14 @@ vocalist: 0.140
 guitarist: -0.041</code></pre>
 </div>
 </div>
-<p>The results show clear stereotypical alignments. <em>Sewing</em> and <em>nurse</em> align with “she”, while <em>carpentry</em> and <em>surgeon</em> align with “he”. This mirrors the “man is to computer programmer as woman is to homemaker” analogy found in early word embedding research.</p>
+<p>The results show clear stereotypical alignments. Sewing and nurse align with “she”, while carpentry and surgeon align with “he”. This mirrors the “man is to computer programmer as woman is to homemaker” analogy found in early word embedding research.</p>
 </section>
-<section id="indirect-bias-analysis" class="level3 page-columns page-full">
-<h3 class="anchored" data-anchor-id="indirect-bias-analysis">Indirect Bias Analysis</h3>
+<section id="indirect-bias-when-neutral-words-become-gendered" class="level2">
+<h2 class="anchored" data-anchor-id="indirect-bias-when-neutral-words-become-gendered">Indirect Bias: When Neutral Words Become Gendered</h2>
 <p>Indirect bias occurs when seemingly neutral words or concepts become associated with gender through their relationships with other words. For example, while “softball” and “football” are not inherently gendered terms, they may show gender associations in word embeddings due to how they’re used in language and society.</p>
-<p>We can detect indirect bias by: 1. Identifying word pairs that form a semantic axis (e.g., softball-football) 2. Measuring how other words align with this axis 3. Examining if alignment with this axis correlates with gender bias</p>
-<p>This reveals how gender stereotypes can be encoded indirectly through word associations, even when the words themselves don’t explicitly reference gender.</p>
+<p>We can detect indirect bias by identifying word pairs that form a semantic axis (like softball-football), measuring how other words align with this axis, and examining if alignment correlates with gender bias. This reveals how gender stereotypes can be encoded indirectly through word associations, even when the words themselves don’t explicitly reference gender.</p>
 <p>Let’s see how this works in practice. We first measure the gender bias of the following words:</p>
-<div id="72b64778" class="cell" data-execution_count="7">
+<div id="957705fa" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Words associated with softball-football axis</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>softball_associations <span class="op">=</span> [</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"pitcher"</span>,</span>
@@ -1151,7 +1130,7 @@ guitarist: -0.041</code></pre>
 <span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    sports_biases.append(sports_bias)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s plot the results:</p>
-<div id="3baeda1d" class="cell" data-execution_count="8">
+<div id="dec91974" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Analyze bias along both gender and sports axes</span></span>
@@ -1188,29 +1167,16 @@ guitarist: -0.041</code></pre>
 <pre><code>&lt;Figure size 672x480 with 0 Axes&gt;</code></pre>
 </div>
 </div>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<p><strong>Indirect Bias:</strong></p>
-<p>The plot reveals a correlation: words associated with “softball” (y-axis &gt; 0) also tend to be associated with “she” (x-axis &gt; 0). Conversely, “football” terms align with “he”.</p>
-<p>This suggests that even if we remove explicit gender words, the <em>structure</em> of the space still encodes gender through these proxy dimensions.</p>
-</div></div></section>
+<p>The plot reveals a correlation: words associated with “softball” (y-axis greater than 0) also tend to be associated with “she” (x-axis greater than 0). Conversely, “football” terms align with “he”. This suggests that even if we remove explicit gender words, the structure of the space still encodes gender through these proxy dimensions.</p>
 </section>
-<section id="take-away" class="level2">
-<h2 class="anchored" data-anchor-id="take-away">Take away</h2>
-<p>Word embeddings, while powerful, inevitably capture and reflect societal biases present in the large text corpora they are trained on. We observed both <strong>direct bias</strong>, where occupations or attributes align strongly with specific gender pronouns, and <strong>indirect bias</strong>, where seemingly neutral concepts become gendered through their associations with other words. This analysis highlights the importance of understanding and mitigating these biases to prevent the perpetuation of stereotypes in AI systems and ensure fairness in applications like search, recommendation, and hiring.</p>
-
+<section id="the-impact-and-path-forward" class="level2">
+<h2 class="anchored" data-anchor-id="the-impact-and-path-forward">The Impact and Path Forward</h2>
+<p>Word embeddings, while powerful, inevitably capture and reflect societal biases present in the large text corpora they are trained on. We observed both direct bias, where occupations or attributes align strongly with specific gender pronouns, and indirect bias, where seemingly neutral concepts become gendered through their associations with other words. This analysis highlights the importance of understanding and mitigating these biases to prevent the perpetuation of stereotypes in AI systems and ensure fairness in applications like search, recommendation, and hiring.</p>
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
-<div id="ref-bolukbasi2016debiasing" class="csl-entry" role="listitem">
-Bolukbasi, Tolga, Kai-Wei Chang, James Zou, Venkatesh Saligrama, and Adam Kalai. 2016. <span>“Man Is to Computer Programmer as Woman Is to Homemaker? Debiasing Word Embeddings.”</span> In <em>Proceedings of the 30th International Conference on Neural Information Processing Systems</em>, 4356–64. NIPS’16. Red Hook, NY, USA: Curran Associates Inc.
-</div>
-<div id="ref-kwak2021frameaxis" class="csl-entry" role="listitem">
-Kwak, Haewoon, Jisun An, Elise Jing, and Yong-Yeol Ahn. 2021. <span>“FrameAxis: Characterizing Microframe Bias and Intensity with Word Embedding.”</span> <em>PeerJ Computer Science</em> 7 (July): e644. <a href="https://doi.org/10.7717/peerj-cs.644">https://doi.org/10.7717/peerj-cs.644</a>.
-</div>
-</div></section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

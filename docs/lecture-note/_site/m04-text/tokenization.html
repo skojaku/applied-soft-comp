@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2026-01-09">
+<meta name="dcterms.date" content="2026-01-10">
 
 <title>Tokenization: Unboxing How LLMs Read Text – Applied Soft Computing</title>
 <style>
@@ -108,7 +108,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link rel="stylesheet" href="../assets/custom.css">
 </head>
 
-<body class="nav-sidebar docked nav-fixed slimcontent quarto-light">
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -891,10 +891,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-    </div>
+    
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../m04-text/overview.html">Module 4: Deep Learning for Text</a></li><li class="breadcrumb-item"><a href="../m04-text/tokenization.html">Tokenization: Unboxing How LLMs Read Text</a></li></ol></nav>
 <div class="quarto-title">
@@ -915,7 +914,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">January 9, 2026</p>
+      <p class="date">January 10, 2026</p>
     </div>
   </div>
   
@@ -927,17 +926,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+What you’ll learn in this module
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>LLMs don’t read words as you do. They read compressed fragments called tokens, optimized for probability engines. This section explores why subword tokenization matters, how it works, and what it means for model behavior.</p>
+</div>
+</div>
 <p><img src="https://curator-production.s3.us.cloud-object-storage.appdomain.cloud/uploads/course-v1:IBMSkillsNetwork+GPXX0A7BEN+v1.jpg" class="img-fluid"></p>
-<p><strong>Spoiler:</strong> LLMs don’t read words—they read compressed fragments optimized for a probability engine.</p>
-<section id="the-mechanism-why-subwords-not-words" class="level2">
-<h2 class="anchored" data-anchor-id="the-mechanism-why-subwords-not-words">The Mechanism (Why Subwords, Not Words)</h2>
-<p>You might assume that an LLM reads text the way you do: word by word, with each word treated as an atomic unit. This is wrong. The model operates on <strong>tokens</strong>—subword chunks that could be full words (“the”), word parts (“ingham”), or single characters (“B”). This choice is not arbitrary; it’s a geometric compression strategy.</p>
-<p>If we used whole words, the vocabulary would balloon to millions of entries. Each entry requires a row in the embedding matrix, meaning memory scales linearly with vocabulary size. A 1-million-word vocabulary with 2048-dimensional embeddings would require over 8GB just for the lookup table. Subword tokenization collapses this problem by focusing on frequently occurring fragments. With roughly 50,000 subwords, the model can reconstruct both common words (stored as single tokens) and rare words (assembled from parts). The system trades a small increase in sequence length for a massive reduction in memory and computational overhead.</p>
-<p>This also explains why LLMs sometimes fail on seemingly trivial tasks like counting letters. The word “strawberry” might tokenize as <code>["straw", "berry"]</code>, meaning the model never sees the individual “r” characters as separate units. It’s not stupidity—it’s compression artifacts.</p>
+<section id="why-not-just-words" class="level2">
+<h2 class="anchored" data-anchor-id="why-not-just-words">Why Not Just Words?</h2>
+<p>You might assume an LLM reads text the way you do, word by word, treating each word as an atomic unit. This assumption is wrong. The model operates on tokens, which are subword chunks. These could be full words like “the”, word parts like “ingham”, or single characters like “B”. This choice isn’t arbitrary. It’s a geometric compression strategy.</p>
+<p>If we used whole words, the vocabulary would balloon to millions of entries. Each entry requires a row in the embedding matrix, so memory scales linearly with vocabulary size. A 1-million-word vocabulary with 2048-dimensional embeddings would require over 8GB just for the lookup table. Subword tokenization collapses this problem by focusing on frequently occurring fragments. With roughly 50,000 subwords, the model reconstructs both common words (stored as single tokens) and rare words (assembled from parts). The system trades a small increase in sequence length for massive reductions in memory and computational overhead.</p>
+<p>This compression also explains a quirk: why LLMs sometimes fail at seemingly trivial tasks like counting letters. The word “strawberry” might tokenize as [“straw”, “berry”], meaning the model never sees individual “r” characters as separate units. It’s not stupidity, it’s compression artifacts.</p>
 </section>
-<section id="the-application-how-tokenization-works-in-practice" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="the-application-how-tokenization-works-in-practice">The Application (How Tokenization Works in Practice)</h2>
-<p>Let’s unbox an actual tokenizer from Hugging Face and trace the pipeline from raw text to embeddings. We’ll use <strong>Phi-1.5</strong>, a compact model from Microsoft. For tokenization experiments, we only need the tokenizer—no need to load the full multi-gigabyte model.</p>
+<section id="how-tokenization-works-in-practice" class="level2">
+<h2 class="anchored" data-anchor-id="how-tokenization-works-in-practice">How Tokenization Works in Practice</h2>
+<p>Let’s unbox an actual tokenizer from Hugging Face and trace the pipeline from raw text to embeddings. We’ll use Phi-1.5, a compact model from Microsoft. For tokenization experiments, we only need the tokenizer itself, not the full multi-gigabyte model.</p>
 <div id="d05620a6" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
@@ -958,8 +969,8 @@ Max sequence length: 2048 tokens</code></pre>
 </div>
 </div>
 <p>This tokenizer knows 50,257 unique tokens and enforces a maximum sequence length of 2048 tokens. If your input exceeds this limit, the model will truncate or reject it. This is a hard boundary imposed by the positional encoding system, not a soft guideline.</p>
-<section id="text-to-tokens" class="level3 page-columns page-full">
-<h3 class="anchored" data-anchor-id="text-to-tokens">Text to Tokens</h3>
+<section id="from-text-to-tokens" class="level3">
+<h3 class="anchored" data-anchor-id="from-text-to-tokens">From Text to Tokens</h3>
 <p>Tokenization splits text into the subword fragments the model actually processes. Watch what happens when we tokenize a university name.</p>
 <div id="5ae9c93b" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">"Binghamton University."</span></span>
@@ -975,11 +986,9 @@ Max sequence length: 2048 tokens</code></pre>
 <pre><code>Tokens: ['B', 'ingham', 'ton', 'ĠUniversity', '.']</code></pre>
 </div>
 </div>
-<p>The rare word “Binghamton” fractures into <code>['B', 'ingham', 'ton']</code>. The common word “University” survives intact (with a leading space marker). The tokenizer learned these splits from frequency statistics during training. High-frequency words get dedicated tokens; rare words get decomposed into reusable parts.</p>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<p>The <code>Ġ</code> character (U+0120) is a GPT-style tokenizer convention for encoding spaces. When you see <code>ĠUniversity</code>, it means “University” preceded by a space. This preserves word boundaries while allowing subword splits.</p>
-</div></div><p>Let’s test a few more examples to see the pattern.</p>
+<p>The rare word “Binghamton” fractures into [‘B’, ‘ingham’, ‘ton’]. The common word “University” survives intact (with a leading space marker). The tokenizer learned these splits from frequency statistics during training. High-frequency words get dedicated tokens; rare words get decomposed into reusable parts.</p>
+<p>The Ġ character (U+0120) is a GPT-style tokenizer convention for encoding spaces. When you see ĠUniversity, it means “University” preceded by a space. This preserves word boundaries while allowing subword splits.</p>
+<p>Let’s test a few more examples to see the pattern.</p>
 <div id="e0988600" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
@@ -1000,13 +1009,11 @@ Bearcats   → ['Bear', 'cats']
 New York   → ['New', 'ĠYork']</code></pre>
 </div>
 </div>
-<p>“Bearcats” splits because it’s domain-specific jargon. “New York” remains whole because it’s common. The tokenizer’s behavior is a direct reflection of its training corpus.</p>
-
-<div class="no-row-height column-margin column-container"><div class="">
+<p>“Bearcats” splits because it’s domain-specific jargon. “New York” remains whole because it’s common. The tokenizer’s behavior directly reflects its training corpus.</p>
 <p>Check out <a href="https://platform.openai.com/tokenizer">OpenAI’s tokenizer</a> to see how different models slice the same text differently.</p>
-</div></div></section>
-<section id="tokens-to-token-ids" class="level3">
-<h3 class="anchored" data-anchor-id="tokens-to-token-ids">Tokens to Token IDs</h3>
+</section>
+<section id="from-tokens-to-token-ids" class="level3">
+<h3 class="anchored" data-anchor-id="from-tokens-to-token-ids">From Tokens to Token IDs</h3>
 <p>Tokens are still strings. The model needs integers. Each token maps to a unique ID in the vocabulary dictionary.</p>
 <div id="a1ba2d9f" class="cell" data-execution_count="7">
 <details class="code-fold">
@@ -1030,7 +1037,7 @@ ton        →   1122
 ĠUniversity →   2059</code></pre>
 </div>
 </div>
-<p>Each token receives a unique integer ID. The vocabulary is a dictionary: <code>{token_string: integer_id}</code>. Let’s peek inside.</p>
+<p>Each token receives a unique integer ID. The vocabulary is a dictionary mapping token strings to integer IDs. Let’s peek inside.</p>
 <div id="6101b5e9" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the full vocabulary</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>vocab <span class="op">=</span> tokenizer.get_vocab()</span>
@@ -1056,12 +1063,12 @@ ton        →   1122
 <pre><code>Token ID: [50256] → Token: &lt;|endoftext|&gt;</code></pre>
 </div>
 </div>
-<p>Token ID 50256 is Phi-specific. Other models use different conventions (e.g., BERT uses <code>[SEP]</code> and <code>[CLS]</code>). Always check your tokenizer’s special tokens before preprocessing data.</p>
+<p>Token ID 50256 is Phi-specific. Other models use different conventions (BERT uses [SEP] and [CLS]). Always check your tokenizer’s special tokens before preprocessing data.</p>
 </section>
-<section id="token-ids-to-embeddings" class="level3">
-<h3 class="anchored" data-anchor-id="token-ids-to-embeddings">Token IDs to Embeddings</h3>
+<section id="from-token-ids-to-embeddings" class="level3">
+<h3 class="anchored" data-anchor-id="from-token-ids-to-embeddings">From Token IDs to Embeddings</h3>
 <p><img src="https://res.cloudinary.com/lesswrong-2-0/image/upload/v1676309872/mirroredImages/pHPmMGEMYefk9jLeh/wegwbgiqyhig42gidlsg.png" class="img-fluid"></p>
-<p>Now we need the full model to access the embedding layer—the matrix that converts token IDs into dense vectors.</p>
+<p>Now we need the full model to access the embedding layer, the matrix that converts token IDs into dense vectors.</p>
 <div id="bf344b64" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForCausalLM</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
@@ -1094,13 +1101,13 @@ ton        →   1122
 <p>These numbers are learned parameters, optimized during training to capture semantic relationships. Token IDs are discrete symbols; embeddings are continuous coordinates in a 2048-dimensional space. This is what the transformer layers operate on.</p>
 </section>
 </section>
-<section id="the-bigger-picture" class="level2">
-<h2 class="anchored" data-anchor-id="the-bigger-picture">The Bigger Picture</h2>
-<p>You’ve now traced the full pipeline: raw text fractures into subword tokens, tokens map to integer IDs, and IDs retrieve vector embeddings from a learned matrix. This tokenization step is foundational—without it, the model cannot begin processing language. The transformer layers come next, using attention mechanisms to extract patterns from these embeddings.</p>
-<p>Remember three constraints. First, LLMs operate on subwords, not words, because vocabulary size is a memory bottleneck. Second, tokenization is learned from data, not hand-designed, meaning different models will split text differently. Third, compression has side effects—tasks like character counting fail because the model never sees individual characters as atomic units.</p>
-<p>With this machinery exposed, we’re ready to examine the transformer itself—the architecture that processes these embeddings and enables LLMs to predict the next token.</p>
+<section id="the-full-pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="the-full-pipeline">The Full Pipeline</h2>
+<p>You’ve now traced the complete pipeline: raw text fractures into subword tokens, tokens map to integer IDs, and IDs retrieve vector embeddings from a learned matrix. This tokenization step is foundational. Without it, the model cannot begin processing language. The transformer layers come next, using attention mechanisms to extract patterns from these embeddings.</p>
+<p>Remember three key constraints. First, LLMs operate on subwords, not words, because vocabulary size is a memory bottleneck. Second, tokenization is learned from data, not hand-designed, so different models split text differently. Third, compression has side effects. Tasks like character counting fail because the model never sees individual characters as atomic units.</p>
+<p>With this machinery exposed, we’re ready to examine the transformer itself. It’s the architecture that processes these embeddings and enables LLMs to predict the next token.</p>
 <hr>
-<p><strong>Next</strong>: <a href="../m04-text/transformers.html">Transformers: The Architecture Behind the Magic →</a></p>
+<p><strong>Next</strong>: <a href="../m04-text/transformers.html">Transformers: The Architecture Behind the Magic</a></p>
 
 
 </section>

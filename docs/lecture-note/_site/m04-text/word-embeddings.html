@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2026-01-09">
+<meta name="dcterms.date" content="2026-01-10">
 
 <title>Word Embeddings – Applied Soft Computing</title>
 <style>
@@ -57,27 +57,7 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -171,7 +151,7 @@ window.Quarto = {
 <link rel="stylesheet" href="../assets/custom.css">
 </head>
 
-<body class="nav-sidebar docked nav-fixed slimcontent quarto-light">
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -954,10 +934,9 @@ window.Quarto = {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-    </div>
+    
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../m04-text/overview.html">Module 4: Deep Learning for Text</a></li><li class="breadcrumb-item"><a href="../m04-text/word-embeddings.html">Word Embeddings</a></li></ol></nav>
 <div class="quarto-title">
@@ -978,7 +957,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">January 9, 2026</p>
+      <p class="date">January 10, 2026</p>
     </div>
   </div>
   
@@ -990,28 +969,37 @@ window.Quarto = {
 </header>
 
 
-<section id="the-spoiler" class="level3">
-<h3 class="anchored" data-anchor-id="the-spoiler">The Spoiler</h3>
-<p>Meaning isn’t stored in words; it’s stored in the geometric relationship between them.</p>
-</section>
-<section id="words-are-not-containers-for-meaning" class="level3">
-<h3 class="anchored" data-anchor-id="words-are-not-containers-for-meaning">Words are not containers for meaning</h3>
-<p>We intuitively assume words are containers for meaning—that “dog” holds the concept of a canine. This is incorrect. Structural linguistics reveals that a sign is defined solely by its relationships: “dog” means “dog” only because it is not “cat,” “wolf,” or “log.” Meaning is differential, not intrinsic.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+What you’ll learn in this module
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Meaning isn’t stored in words as containers. It emerges from geometric relationships in high-dimensional space. We’ll explore how Word2Vec learns these relationships through contrast, turning linguistic philosophy into runnable algorithms.</p>
+</div>
+</div>
+<section id="words-as-relationships-not-containers" class="level2">
+<h2 class="anchored" data-anchor-id="words-as-relationships-not-containers">Words as Relationships, Not Containers</h2>
+<p>We intuitively assume words are containers for meaning. “Dog” holds the concept of a canine. This is incorrect. Structural linguistics reveals that a sign is defined solely by its relationships. “Dog” means “dog” only because it is not “cat”, “wolf”, or “log”. Meaning is differential, not intrinsic.</p>
 <div id="fig-structuralism" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-structuralism-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="../figs/word2vec-manga-1.jpg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-structuralism-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Green is the color that is not non-green (not red, not blue, not yellow, …).
+Figure&nbsp;1: Green is the color that is not non-green (not red, not blue, not yellow, etc.).
 </figcaption>
 </figure>
 </div>
-<p><strong>Word2vec</strong>—the very foundational model that grounds modern NLP—learns to map the statistical topology of language. Think of it like mapping a city based purely on traffic data. You don’t know what a “school” is, but you see that “buses” and “children” congregate there at 8 AM. By placing these entities close together on a map, you reconstruct the city’s functional structure. Word2vec does this for language, turning semantic proximity into geometric distance.</p>
+<p>Word2Vec, the foundational model grounding modern NLP, learns to map the statistical topology of language. Think of it like mapping a city based purely on traffic data. You don’t know what a “school” is, but you see that “buses” and “children” congregate there at 8 AM. By placing these entities close together on a map, you reconstruct the city’s functional structure. Word2Vec does this for language, turning semantic proximity into geometric distance.</p>
 </section>
-<section id="word2vec" class="level2">
-<h2 class="anchored" data-anchor-id="word2vec">Word2vec</h2>
-<p>Let’s first learn the power of Word2Vec and then understand how it works. We will use a pre-trained model. We aren’t teaching it anything; we are simply inspecting the map it created from 100 billion words of Google News.</p>
+<section id="exploring-word2vec" class="level2">
+<h2 class="anchored" data-anchor-id="exploring-word2vec">Exploring Word2Vec</h2>
+<p>Let’s first experience the power of Word2Vec, then understand how it works. We’ll use a pre-trained model trained on 100 billion words of Google News. We aren’t teaching it anything; we’re simply inspecting the map it created.</p>
 <div id="3d4dfc1f" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> gensim.downloader <span class="im">as</span> api</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -1046,8 +1034,7 @@ Loaded embeddings for 3,000,000 words.</code></pre>
   pup                  0.741</code></pre>
 </div>
 </div>
-<p>The model groups “dog” with “dogs,” “puppy,” and “pooch” <strong>not because it knows biology</strong>, but because they are statistically interchangeable in sentences.</p>
-<p>Since words are vectors, we can perform arithmetic on meaning. The relationship between “King” and “Man” is a vector. If we add that vector to “Woman,” we should arrive at “Queen.”</p>
+<p>The model groups “dog” with “dogs”, “puppy”, and “pooch” not because it knows biology, but because they are statistically interchangeable in sentences. Since words are vectors, we can perform arithmetic on meaning. The relationship between “King” and “Man” is a vector. If we add that vector to “Woman”, we should arrive at “Queen”.</p>
 <p><span class="math display"> \vec{\text{King}} - \vec{\text{Man}} + \vec{\text{Woman}} \approx \vec{\text{Queen}} </span></p>
 <div id="fc2baead" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> model.most_similar(</span>
@@ -1067,7 +1054,7 @@ Loaded embeddings for 3,000,000 words.</code></pre>
   prince          0.538</code></pre>
 </div>
 </div>
-<p>We cannot see in 300 dimensions, but we can project the space down to 2D using PCA. This reveals the consistent structures—like the “capital city” relationship—that the model has learned.</p>
+<p>We cannot see in 300 dimensions, but we can project the space down to 2D using PCA. This reveals consistent structures like the “capital city” relationship that the model has learned.</p>
 <div id="34d1843c" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
@@ -1157,62 +1144,41 @@ Loaded embeddings for 3,000,000 words.</code></pre>
 </div>
 </div>
 </section>
-<section id="lets-unbox-word2vec." class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="lets-unbox-word2vec.">Let’s unbox Word2Vec.</h2>
-<p>We intuitively treat words as containers that hold meaning—that the word “Green” contains the visual concept of a specific color. This is incorrect. Nature presents us with a messy, continuous spectrum without hard borders; language is simply the set of arbitrary cuts we make in that continuum to create order.</p>
-<p><strong>Word2Vec</strong> operationalizes this by treating meaning as a game of contrast. It functions as a pair of “Linguistic Scissors.” It does not learn what a word is by looking up a definition; it learns what a word is <em>like</em> by pulling it close to neighbors, and more importantly, it learns what a word is <em>not</em> by pushing it away from random noise. The meaning of “Green” is simply the geometric region that remains after we have pushed away “Red,” “Purple,” and “Banana.”</p>
+<section id="how-word2vec-learns-meaning" class="level2">
+<h2 class="anchored" data-anchor-id="how-word2vec-learns-meaning">How Word2Vec Learns Meaning</h2>
+<p>We intuitively treat words as containers that hold meaning. “Green” contains the visual concept of a specific color. This is incorrect. Nature presents us with a messy, continuous spectrum without hard borders. Language is simply the set of arbitrary cuts we make in that continuum to create order.</p>
+<p>Word2Vec operationalizes this by treating meaning as a game of contrast. It functions as a pair of linguistic scissors. It does not learn what a word is by looking up a definition. It learns what a word is like by pulling it close to neighbors, and more importantly, it learns what a word is not by pushing it away from random noise. The meaning of “Green” is simply the geometric region that remains after we have pushed away “Red”, “Purple”, and “Banana”.</p>
 <div id="fig-contrastive" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-contrastive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="../figs/word2vec-manga-2.jpg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-contrastive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: Starting from initially random vectors, word2vec learns iteratively to push away the words that are not related, and pull the words that are related. The resulting vector space is a map of the relationships between words.
+Figure&nbsp;2: Starting from initially random vectors, word2vec learns iteratively to push away the words that are not related and pull words that are related. The resulting vector space is a map of the relationships between words.
 </figcaption>
 </figure>
 </div>
-<p>This process of carving structure out of noise relies on a technique called <strong>Contrastive Learning</strong>. We cannot teach the model the exact meaning of each word but we can let it to learn the relationship between words through a binary classification problem: are these two words neighbors, or are they strangers?</p>
-<p>The training loop provides a <strong>positive pair</strong> from the text, instructing the model to maximize the similarity between their vectors. Simultaneously, it grabs random <strong>negative samples</strong>–imposters from the vocabulary–and demands the model minimize their similarity. This push-and-pull mechanic creates the vector space; the “Green” cluster forms not because the model understands color, but because those words are statistically interchangeable when opposed to “Red.”</p>
-<p>To generate these pairs without human labeling, we employ a <strong>sliding window technique</strong>. This moves over the raw text corpus, converting a sequence of words into a system of geometric queries.</p>
+<p>This process relies on a technique called contrastive learning. We cannot teach the model the exact meaning of each word, but we can let it learn the relationship between words through a binary classification problem: are these two words neighbors, or are they strangers?</p>
+<p>The training loop provides a positive pair from the text, instructing the model to maximize the similarity between their vectors. Simultaneously, it grabs random negative samples (imposters from the vocabulary) and demands the model minimize their similarity. This push-and-pull mechanic creates the vector space. The “Green” cluster forms not because the model understands color, but because those words are statistically interchangeable when opposed to “Red”.</p>
+<p>To generate these pairs without human labeling, we employ a sliding window technique. This moves over the raw text corpus, converting a sequence of words into a system of geometric queries.</p>
 <div id="fig-sliding-window" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sliding-window-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="../figs/word2vec-manga-3.jpg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sliding-window-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Without human labeling, word2vec assumes that the words in the same context are related. The context is defined as the words that are within a window of an predefined size. For example, in the sentence “The quick brown fox jumps over the lazy dog”, the context of the word “fox” is the words “brown”, “jumps”, “over”, and “lazy”.
+Figure&nbsp;3: Without human labeling, word2vec assumes that words in the same context are related. Context is defined as the words within a window of predefined size. For example, in “The quick brown fox jumps over the lazy dog”, the context of “fox” includes “brown”, “jumps”, “over”, and “lazy”.
 </figcaption>
 </figure>
 </div>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<p>Word2Vec is a simple neural network with one-hidden layer. The input is one-hot encoded vector of a word, which triggers the neurons in the hidden layer to fire. The neural connection strength from the neuron representing the word to the neurons in the hidden layer (marked by red arrows) represents the query vector, <span class="math inline">u</span>. The hidden layer neurons then trigger the firing of the output layer neurons, which represents the probability of word <span class="math inline">w</span> appearing in the context of the word <span class="math inline">w_i</span>. The connection strength from an output word neuron to the hidden layer neurons represents the key vector, <span class="math inline">v</span>.</p>
+<p>Word2Vec is a simple neural network with one hidden layer. The input is a one-hot encoded vector of a word, which triggers neurons in the hidden layer to fire. The neural connection strength from the neuron representing the word to the neurons in the hidden layer (marked by red arrows) represents the query vector, <span class="math inline">u</span>. The hidden layer neurons then trigger the firing of output layer neurons, which represents the probability of word <span class="math inline">w</span> appearing in the context of word <span class="math inline">w_i</span>. The connection strength from an output word neuron to the hidden layer neurons represents the key vector, <span class="math inline">v</span>.</p>
 <p><img src="../figs/word2vec.jpg" class="img-fluid"></p>
-</div></div><p>The word in the center of the window acts as the Query vector (<span class="math inline">u</span>), broadcasting its position to the surrounding Context words, which act as Keys (<span class="math inline">v</span>). The neural network adjusts its weights to maximize the dot product <span class="math inline">u \cdot v</span> for these specific context pairs while suppressing the dot product for the negative samples. The probability of a word appearing in context is thus a function of their vector alignment.</p>
+<p>The word in the center of the window acts as the Query vector (<span class="math inline">u</span>), broadcasting its position to the surrounding Context words, which act as Keys (<span class="math inline">v</span>). The neural network adjusts its weights to maximize the dot product <span class="math inline">u \cdot v</span> for these specific context pairs while suppressing the dot product for the negative samples. The probability of a word appearing in context is thus a function of their vector alignment.</p>
 <p><span class="math display">
 P(j \vert i) = \frac{P(j) \exp(u_i \cdot v_j)}{\sum_{k=1}^{V} P(k) \exp(u_i \cdot v_k)}
 </span></p>
 <p>where <span class="math inline">P(j)</span> is the probability of word <span class="math inline">j</span> appearing in the vocabulary.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Original Formulation of Word2Vec is different from the one we use here
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>The original paper of word2vec puts the following formula for the probability:</p>
-<p><span class="math display">
-P(j \vert i) = \frac{\exp(u_i \cdot v_j)}{\sum_{k=1}^{V} \exp(u_i \cdot v_k)}.
-</span></p>
-<p>Notice that <span class="math inline">P(j)</span>—the marginal probability of word <span class="math inline">j</span>—is omitted in this formulation <span class="citation" data-cites="mikolov2013distributed">(<a href="#ref-mikolov2013distributed" role="doc-biblioref">Mikolov et al. 2013</a>)</span>. This original formulation is correct conceptually but not practically. In practice, we train word2vec with an efficient but biased training algorithm (i.e., negative sampling). Term <span class="math inline">P(j)</span> enters the <span class="math inline">P(j \vert i)</span> when taking into account the bias <span class="citation" data-cites="kojaku2021residual">(<a href="#ref-kojaku2021residual" role="doc-biblioref"><strong>kojaku2021residual?</strong></a>)</span>, which is why we include it in the formula above.</p>
-</div>
-</div>
-</div>
+<p>The original Word2Vec paper uses a different formulation that omits <span class="math inline">P(j)</span>. This original formulation is correct conceptually but not practically. In practice, word2vec is trained with an efficient but biased training algorithm (negative sampling). The term <span class="math inline">P(j)</span> enters the <span class="math inline">P(j \vert i)</span> when we account for bias, which is why we include it here.</p>
 <p>This closes the loop between high-level linguistic philosophy and low-level matrix operations. The machine proves the structuralist hypothesis: that meaning is relational. By mechanically slicing the continuum of language and applying the pressure of negative sampling, the model reconstructs a functional map of human concepts. We have successfully turned a philosophy of meaning into a runnable algorithm.</p>
 <div id="fig-structuralism-loop" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -1225,23 +1191,14 @@ Figure&nbsp;4
 </figure>
 </div>
 </section>
-<section id="other-references" class="level2">
-<h2 class="anchored" data-anchor-id="other-references">Other references</h2>
-<p>There is a nice blog post that walks through the inner workings of Word2Vec by Chris McCormick. See <a href="https://mccormickml.com/2016/04/19/word2vec-tutorial-the-skip-gram-model/">here</a>. Strongly encourage you to read it.</p>
-</section>
-<section id="the-takeaway" class="level2">
-<h2 class="anchored" data-anchor-id="the-takeaway">The Takeaway</h2>
-<p>You don’t need to know what a thing <em>is</em> to understand it; you only need to know where it stands relative to everything it isn’t.</p>
-
+<section id="key-takeaway" class="level2">
+<h2 class="anchored" data-anchor-id="key-takeaway">Key Takeaway</h2>
+<p>You don’t need to know what a thing is to understand it. You only need to know where it stands relative to everything it isn’t. There’s a nice blog post by Chris McCormick that walks through the inner workings of Word2Vec. See <a href="https://mccormickml.com/2016/04/19/word2vec-tutorial-the-skip-gram-model/">here</a>.</p>
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
-<div id="ref-mikolov2013distributed" class="csl-entry" role="listitem">
-Mikolov, Tomas, Ilya Sutskever, Kai Chen, Greg S Corrado, and Jeff Dean. 2013. <span>“Distributed Representations of Words and Phrases and Their Compositionality.”</span> <em>Advances in Neural Information Processing Systems</em> 26.
-</div>
-</div></section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

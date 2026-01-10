@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2025-11-29">
+<meta name="dcterms.date" content="2026-01-10">
 
 <title>Sentence Transformers – Applied Soft Computing</title>
 <style>
@@ -78,7 +78,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-626254e6f25d1c064b097183404b5529.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-a032929455e4d93731be0fa9bc28887b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -914,7 +914,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 29, 2025</p>
+      <p class="date">January 10, 2026</p>
     </div>
   </div>
   
@@ -926,24 +926,33 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="the-spoiler" class="level2">
-<h2 class="anchored" data-anchor-id="the-spoiler">The Spoiler</h2>
-<p><strong>BERT produces a matrix of token vectors; Sentence Transformers collapse that matrix into a single coordinate, turning semantic similarity into geometric distance.</strong></p>
-</section>
-<section id="the-mechanism-why-it-works" class="level2">
-<h2 class="anchored" data-anchor-id="the-mechanism-why-it-works">The Mechanism (Why It Works)</h2>
-<p>BERT gives you a vector for every token in a sentence. If you want to compare two sentences, you’re stuck comparing two messy matrices of varying sizes. The naive approach—averaging all token vectors—throws away positional information and treats every word equally, which is wrong. The word “not” in “not good” should drastically change the sentence embedding, but simple averaging dilutes its impact.</p>
-<p><strong>Sentence-BERT</strong> (SBERT) solves this by training a <strong>Siamese Network</strong>. The same BERT model processes two sentences independently, producing their respective token matrices. We then apply pooling (mean, max, or CLS-token extraction) to collapse each matrix into a single vector. The training objective is contrastive: if the sentences are semantically similar (e.g., paraphrases), their vectors should be close in Euclidean or cosine space. If they’re unrelated, their vectors should be distant.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+What you’ll learn in this module
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>BERT produces a matrix of token vectors. Sentence Transformers collapse that matrix into a single coordinate, turning semantic similarity into geometric distance. This enables fast semantic search, clustering, and similarity comparisons across large document collections.</p>
+</div>
+</div>
+<section id="the-challenge-from-matrices-to-coordinates" class="level2">
+<h2 class="anchored" data-anchor-id="the-challenge-from-matrices-to-coordinates">The Challenge: From Matrices to Coordinates</h2>
+<p>BERT gives you a vector for every token in a sentence. If you want to compare two sentences, you’re stuck comparing two messy matrices of varying sizes. The naive approach (averaging all token vectors) throws away positional information and treats every word equally, which is wrong. The word “not” in “not good” should drastically change the sentence embedding, but simple averaging dilutes its impact.</p>
+<p>Sentence-BERT (SBERT) solves this by training a Siamese Network. The same BERT model processes two sentences independently, producing their respective token matrices. We then apply pooling (mean, max, or CLS-token extraction) to collapse each matrix into a single vector. The training objective is contrastive: if the sentences are semantically similar (paraphrases), their vectors should be close in Euclidean or cosine space. If they’re unrelated, their vectors should be distant.</p>
 <p>Think of it like creating a library catalog. Instead of storing every word on every page, you compress each book into a single Dewey Decimal number. Books on similar topics get similar numbers, enabling efficient retrieval. The compression loses fine-grained detail, but gains search speed.</p>
-<p>The mathematical trick is the <strong>Siamese architecture</strong>—weight sharing ensures both sentences are embedded into the same vector space using identical transformations. This makes the distance between vectors meaningful: similar sentences cluster together, dissimilar ones push apart.</p>
+<p>The mathematical trick is the Siamese architecture. Weight sharing ensures both sentences are embedded into the same vector space using identical transformations. This makes the distance between vectors meaningful: similar sentences cluster together, dissimilar ones push apart.</p>
 </section>
-<section id="the-application-how-we-use-it" class="level2">
-<h2 class="anchored" data-anchor-id="the-application-how-we-use-it">The Application (How We Use It)</h2>
+<section id="how-to-use-sentence-transformers" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-use-sentence-transformers">How to Use Sentence Transformers</h2>
 <p>Sentence Transformers enable semantic search, clustering, and similarity comparisons. Let’s see how to use them in practice.</p>
 <section id="basic-semantic-search" class="level3">
 <h3 class="anchored" data-anchor-id="basic-semantic-search">Basic Semantic Search</h3>
 <p>Here’s how to encode sentences and find the most similar matches:</p>
-<div id="5a4ed3ae" class="cell">
+<div id="3308cb9c" class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sentence_transformers <span class="im">import</span> SentenceTransformer, util</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load a pre-trained model</span></span>
@@ -975,131 +984,82 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> hit <span class="kw">in</span> hits[<span class="dv">0</span>]:</span>
 <span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>corpus[hit[<span class="st">'corpus_id'</span>]]<span class="sc">}</span><span class="ss"> (Score: </span><span class="sc">{</span>hit[<span class="st">'score'</span>]<span class="sc">:.4f}</span><span class="ss">)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Expected output:</p>
-<pre><code>Query: A man is eating pasta.
-
-Top 3 most similar sentences:
-A man is eating food. (Score: 0.6964)
-A man is eating a piece of bread. (Score: 0.6281)
-A man is riding a horse. (Score: 0.2235)</code></pre>
-<p>The model correctly identifies that “eating pasta” is semantically closest to “eating food” and “eating bread,” even though the exact words don’t match. This is semantic search—matching by meaning, not keywords.</p>
+<p>Expected output shows that the model correctly identifies “eating pasta” is semantically closest to “eating food” and “eating bread”, even though the exact words don’t match. This is semantic search: matching by meaning, not keywords.</p>
 </section>
 <section id="clustering-documents" class="level3">
 <h3 class="anchored" data-anchor-id="clustering-documents">Clustering Documents</h3>
 <p>You can also cluster documents by their semantic content:</p>
-<div id="f09a77cc" class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sentence_transformers <span class="im">import</span> SentenceTransformer</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> KMeans</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> SentenceTransformer(<span class="st">'all-MiniLM-L6-v2'</span>)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>sentences <span class="op">=</span> [</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Python is a programming language"</span>,</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Java is used for software development"</span>,</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"The cat sat on the mat"</span>,</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Dogs are loyal animals"</span>,</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Machine learning is a subset of AI"</span>,</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Neural networks mimic the brain"</span>,</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> model.encode(sentences)</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Cluster into 2 groups</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>num_clusters <span class="op">=</span> <span class="dv">2</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>clustering_model <span class="op">=</span> KMeans(n_clusters<span class="op">=</span>num_clusters, random_state<span class="op">=</span><span class="dv">42</span>)</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>clustering_model.fit(embeddings)</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>cluster_assignment <span class="op">=</span> clustering_model.labels_</span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>clustered_sentences <span class="op">=</span> {}</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sentence_id, cluster_id <span class="kw">in</span> <span class="bu">enumerate</span>(cluster_assignment):</span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cluster_id <span class="kw">not</span> <span class="kw">in</span> clustered_sentences:</span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>        clustered_sentences[cluster_id] <span class="op">=</span> []</span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    clustered_sentences[cluster_id].append(sentences[sentence_id])</span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> cluster_id, cluster_sentences <span class="kw">in</span> clustered_sentences.items():</span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Cluster </span><span class="sc">{</span>cluster_id <span class="op">+</span> <span class="dv">1</span><span class="sc">}</span><span class="ss">:"</span>)</span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> sentence <span class="kw">in</span> cluster_sentences:</span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  - </span><span class="sc">{</span>sentence<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="a4d4db4b" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sentence_transformers <span class="im">import</span> SentenceTransformer</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> KMeans</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> SentenceTransformer(<span class="st">'all-MiniLM-L6-v2'</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>sentences <span class="op">=</span> [</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Python is a programming language"</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Java is used for software development"</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"The cat sat on the mat"</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Dogs are loyal animals"</span>,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Machine learning is a subset of AI"</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Neural networks mimic the brain"</span>,</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> model.encode(sentences)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Cluster into 2 groups</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>num_clusters <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>clustering_model <span class="op">=</span> KMeans(n_clusters<span class="op">=</span>num_clusters, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>clustering_model.fit(embeddings)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>cluster_assignment <span class="op">=</span> clustering_model.labels_</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>clustered_sentences <span class="op">=</span> {}</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sentence_id, cluster_id <span class="kw">in</span> <span class="bu">enumerate</span>(cluster_assignment):</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cluster_id <span class="kw">not</span> <span class="kw">in</span> clustered_sentences:</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        clustered_sentences[cluster_id] <span class="op">=</span> []</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    clustered_sentences[cluster_id].append(sentences[sentence_id])</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> cluster_id, cluster_sentences <span class="kw">in</span> clustered_sentences.items():</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Cluster </span><span class="sc">{</span>cluster_id <span class="op">+</span> <span class="dv">1</span><span class="sc">}</span><span class="ss">:"</span>)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> sentence <span class="kw">in</span> cluster_sentences:</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  - </span><span class="sc">{</span>sentence<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Expected clustering:</p>
-<pre><code>Cluster 1:
-  - Python is a programming language
-  - Java is used for software development
-  - Machine learning is a subset of AI
-  - Neural networks mimic the brain
-
-Cluster 2:
-  - The cat sat on the mat
-  - Dogs are loyal animals</code></pre>
-<p>The model separates technical/programming sentences from animal-related sentences without any labeled data.</p>
+<p>Expected clustering shows the model separates technical/programming sentences from animal-related sentences without any labeled data.</p>
 </section>
 <section id="choosing-the-right-model" class="level3">
 <h3 class="anchored" data-anchor-id="choosing-the-right-model">Choosing the Right Model</h3>
-<p>Different Sentence Transformer models optimize for different trade-offs:</p>
-<ul>
-<li><strong>all-MiniLM-L6-v2</strong>: Fast and lightweight (384 dimensions), good for most applications</li>
-<li><strong>all-mpnet-base-v2</strong>: Higher quality (768 dimensions), slower but more accurate</li>
-<li><strong>multi-qa-mpnet-base-dot-v1</strong>: Optimized for question-answering and retrieval tasks</li>
-<li><strong>paraphrase-multilingual-mpnet-base-v2</strong>: Supports 50+ languages</li>
-</ul>
+<p>Different Sentence Transformer models optimize for different trade-offs. The all-MiniLM-L6-v2 model is fast and lightweight (384 dimensions), good for most applications. The all-mpnet-base-v2 model offers higher quality (768 dimensions), slower but more accurate. The multi-qa-mpnet-base-dot-v1 model is optimized for question-answering and retrieval tasks. The paraphrase-multilingual-mpnet-base-v2 model supports 50+ languages.</p>
 <p>Choose based on your constraints: speed vs.&nbsp;accuracy, monolingual vs.&nbsp;multilingual, general-purpose vs.&nbsp;domain-specific.</p>
 </section>
 <section id="architecture-the-siamese-network" class="level3">
 <h3 class="anchored" data-anchor-id="architecture-the-siamese-network">Architecture: The Siamese Network</h3>
-<p>The key innovation is the <strong>Siamese Network</strong> architecture:</p>
+<p>The key innovation is the Siamese Network architecture:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://raw.githubusercontent.com/UKPLab/sentence-transformers/master/docs/img/SBERT_Siamese_Network.png" class="img-fluid figure-img"></p>
 <figcaption>Siamese Network</figcaption>
 </figure>
 </div>
-<p>Both sentences pass through the <strong>same BERT model</strong> (shared weights). This ensures they’re embedded into a common vector space. The pooling layer then collapses each token matrix into a single vector. During training, the loss function pushes similar sentence pairs together and dissimilar pairs apart.</p>
-<p>Common pooling strategies:</p>
-<ul>
-<li><strong>Mean pooling</strong>: Average all token vectors (most common)</li>
-<li><strong>Max pooling</strong>: Take element-wise maximum across tokens</li>
-<li><strong>CLS-token</strong>: Use the [CLS] token’s final hidden state (BERT’s built-in sentence representation)</li>
-</ul>
+<p>Both sentences pass through the same BERT model (shared weights). This ensures they’re embedded into a common vector space. The pooling layer then collapses each token matrix into a single vector. During training, the loss function pushes similar sentence pairs together and dissimilar pairs apart.</p>
+<p>Common pooling strategies include mean pooling (average all token vectors, most common), max pooling (take element-wise maximum across tokens), and CLS-token (use the [CLS] token’s final hidden state, BERT’s built-in sentence representation).</p>
 <p>Mean pooling generally works best because it captures information from all tokens while being robust to varying sentence lengths.</p>
 </section>
 <section id="where-this-breaks" class="level3">
 <h3 class="anchored" data-anchor-id="where-this-breaks">Where This Breaks</h3>
-<p><strong>Static Compression</strong>: A sentence gets exactly one vector, regardless of context. “The bank” in “the river bank” and “the financial bank” might get similar embeddings if they share enough surrounding words. The model compresses meaning into a fixed point, losing nuance.</p>
-<p><strong>Word Order Sensitivity</strong>: “The dog bit the man” and “The man bit the dog” share the same words. If the model relies too heavily on lexical overlap (bag-of-words similarity), they’ll end up dangerously close in vector space. Good models learn syntax, but they’re not perfect.</p>
-<p><strong>Computational Cost</strong>: Although retrieval is fast (dot products), encoding large corpora is expensive. Encoding 1 million sentences with a large model can take hours. Pre-compute and cache embeddings whenever possible.</p>
-<p><strong>Domain Shift</strong>: Models trained on general text (Wikipedia, news) may perform poorly on specialized domains (medical, legal). Fine-tuning on domain-specific data helps, but requires labeled sentence pairs.</p>
+<p>Static compression is a limitation: a sentence gets exactly one vector, regardless of context. “The bank” in “the river bank” and “the financial bank” might get similar embeddings if they share enough surrounding words. The model compresses meaning into a fixed point, losing nuance.</p>
+<p>Word order sensitivity is another concern: “The dog bit the man” and “The man bit the dog” share the same words. If the model relies too heavily on lexical overlap (bag-of-words similarity), they’ll end up dangerously close in vector space. Good models learn syntax, but they’re not perfect.</p>
+<p>Computational cost matters too. Although retrieval is fast (dot products), encoding large corpora is expensive. Encoding 1 million sentences with a large model can take hours. Pre-compute and cache embeddings whenever possible.</p>
+<p>Domain shift is a practical issue: models trained on general text (Wikipedia, news) may perform poorly on specialized domains (medical, legal). Fine-tuning on domain-specific data helps, but requires labeled sentence pairs.</p>
 </section>
 </section>
-<section id="the-takeaway" class="level2">
-<h2 class="anchored" data-anchor-id="the-takeaway">The Takeaway</h2>
+<section id="the-key-takeaway" class="level2">
+<h2 class="anchored" data-anchor-id="the-key-takeaway">The Key Takeaway</h2>
 <p>Sentence Transformers collapse BERT’s token matrix into a single vector using Siamese Networks and contrastive learning. The result is fast semantic search: encode once, compare with dot products. Choose your pooling strategy and model size based on speed-accuracy trade-offs, and remember that compression always loses information.</p>
 
 
 </section>
 
 </main> <!-- /main -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Find all breadcrumb containers
-  const breadcrumbs = document.querySelectorAll('.quarto-page-breadcrumbs ol.breadcrumb');
-
-  breadcrumbs.forEach(function(breadcrumb) {
-    // Create the TOC link as the first breadcrumb item
-    const tocItem = document.createElement('li');
-    tocItem.className = 'breadcrumb-item';
-
-    const tocLink = document.createElement('a');
-    tocLink.href = '../toc.html';
-    tocLink.textContent = 'Table of Contents';
-
-    tocItem.appendChild(tocLink);
-
-    // Insert at the beginning
-    breadcrumb.insertBefore(tocItem, breadcrumb.firstChild);
-  });
-});
-</script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
@@ -1532,6 +1492,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 </footer>
+<script src="../assets/breadcrumb-toc.js"></script>
 
 
 

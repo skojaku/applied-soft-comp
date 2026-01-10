@@ -41,7 +41,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-626254e6f25d1c064b097183404b5529.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-a032929455e4d93731be0fa9bc28887b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -969,7 +969,7 @@ window.Quarto = {
 \mathbf{y} = F(\mathbf{x}) + \mathbf{x}.
 </span></p>
 <p>In PyTorch, you can implement a basic residual block as follows:</p>
-<p>```yiarkbrcbpc ipython3 import torch import torch.nn as nn</p>
+<p>```zkqqhafabqy ipython3 import torch import torch.nn as nn</p>
 <p>class BasicBlock(nn.Module): def <strong>init</strong>(self, in_channels, out_channels, stride=1): super().__init__() self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False) self.bn1 = nn.BatchNorm2d(out_channels) self.relu = nn.ReLU(inplace=True)</p>
 <pre><code>    self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False)
     self.bn2 = nn.BatchNorm2d(out_channels)
@@ -998,14 +998,14 @@ A basic 2-layer residual block (left) vs. a plain block without skip (right). Th
 <li><p><strong>Easier Optimization</strong> Instead of learning a full mapping <span class="math inline">\mathbf{y} = G(\mathbf{x})</span>, the block learns only the difference <span class="math inline">G(\mathbf{x}) - \mathbf{x}</span>. This decomposition often proves easier to optimize.</p>
 <pre class="{note}"><code>If the optimal mapping is close to identity (i.e., the layer isn't very important), the network can easily "skip" it by learning $F(\mathbf{x}) \approx 0$. If a more complex transformation is needed, the residual path can still learn it. This makes training more robust—the network doesn’t have to work as hard to preserve important information through deep layers.</code></pre></li>
 <li><p><strong>Ensemble-Like Behavior</strong> When you chain <span class="math inline">N</span> residual blocks, you effectively create numerous paths for gradient flow—some skip many layers, some pass through multiple convolutions. This variety of gradient routes can speed convergence and reduce the risk of vanishing gradients {footcite}<code>veit2016residual</code>.</p>
-<p><code>ipuvygdw https://arxiv.org/html/2405.01725v1/x28.png  :name: resnet-gradient-flow  :align: center  :width: 100%  The gradient flow in ResNet with skip connections.</code></p></li>
+<p><code>bgoecjyf https://arxiv.org/html/2405.01725v1/x28.png  :name: resnet-gradient-flow  :align: center  :width: 100%  The gradient flow in ResNet with skip connections.</code></p></li>
 <li><p><strong>Deeper Without Degradation</strong> ResNet-50, -101, and -152 can be trained without suffering the performance drop typical of overly deep “plain” networks.</p></li>
 </ol>
 </section>
 <section id="bottleneck-blocks-for-deep-resnet" class="level3">
 <h3 class="anchored" data-anchor-id="bottleneck-blocks-for-deep-resnet">Bottleneck Blocks for Deep ResNet</h3>
 <p>ResNet has some variants depending on the depth. For deep ResNet, the <strong>bottleneck</strong> design is used to maintain computational efficiency.</p>
-<p><code>ipuvygdw https://i.sstatic.net/kbiIG.png :name: resnet-bottleneck-block :align: center :width: 80% A bottleneck block of ResNet.</code></p>
+<p><code>bgoecjyf https://i.sstatic.net/kbiIG.png :name: resnet-bottleneck-block :align: center :width: 80% A bottleneck block of ResNet.</code></p>
 <p>This bottleneck block consists of three convolutions instead of two, where: - the first <span class="math inline">1 \times 1</span> conv <strong>reduces</strong> the feature dimension. - the second <span class="math inline">3 \times 3</span> conv operates on this reduced dimension. - the third <span class="math inline">1 \times 1</span> conv <strong>restores</strong> the dimension.</p>
 <p>This approach shrinks the intermediate feature map, saving computational cost while retaining overall representational capacity. It was inspired by InceptionNet’s “bottleneck” idea {footcite}<code>szegedy2016inception,szegedy2015going</code>.</p>
 <pre class="{tip}"><code>**ResNet-50**, **ResNet-101**, and **ResNet-152** all use bottleneck blocks. While they have more layers, they remain computationally feasible and yield progressively better accuracy on ImageNet.</code></pre>
@@ -1016,7 +1016,7 @@ A basic 2-layer residual block (left) vs. a plain block without skip (right). Th
 <p><em>What if we can widen the residual blocks without drastically increasing overall parameters?</em></p>
 <p><strong>ResNeXt</strong> {footcite}<code>xie2017aggregated</code> is an evolution of ResNet that: 1. <strong>Splits</strong> the bottleneck conv pathway into multiple “cardinality” groups (e.g., 32 groups). 2. <strong>Aggregates</strong> those parallel paths (grouped convolutions) back into a single output.</p>
 <p>By increasing <strong>cardinality</strong> (the number of parallel conv groups) instead of just adding more channels or layers, ResNeXt achieves better accuracy with moderate complexity. This approach also draws on the idea of Inception’s multi-branch parallel conv, but unifies them into a single grouped-convolution block.</p>
-<p><code>ipuvygdw https://production-media.paperswithcode.com/methods/Screen_Shot_2020-06-06_at_4.32.52_PM.png :name: resnext-block :align: center :width: 50% A basic block of ResNeXt, showing multiple grouped-conv “paths” that are aggregated.</code></p>
+<p><code>bgoecjyf https://production-media.paperswithcode.com/methods/Screen_Shot_2020-06-06_at_4.32.52_PM.png :name: resnext-block :align: center :width: 50% A basic block of ResNeXt, showing multiple grouped-conv “paths” that are aggregated.</code></p>
 </section>
 <section id="implementation-of-resnet" class="level2">
 <h2 class="anchored" data-anchor-id="implementation-of-resnet">Implementation of ResNet</h2>
@@ -1053,7 +1053,7 @@ A basic 2-layer residual block (left) vs. a plain block without skip (right). Th
 <li>Check the parameter count and performance difference on CIFAR-10 or a subset of ImageNet.</li>
 </ul></li>
 </ol>
-<p><code>tlsfltzepoxzxlotmt references.bib :style: unsrt :filter: docname in docnames</code></p>
+<p><code>jtxvvgqnnpksoxdeko references.bib :style: unsrt :filter: docname in docnames</code></p>
 
 
 </section>
