@@ -15,14 +15,9 @@ AlexNet proved that deep learning works at scale. But how do these networks actu
 
 At the heart of CNNs lies a remarkably elegant operation called **convolution**. Imagine sliding a small window (a **kernel** or **filter**) across an image. At each position, we multiply the kernel values by the overlapping image pixels and sum the results. This produces a single output value. Repeat across all positions to create an output **feature map**.
 
-```{figure} https://anhreynolds.com/img/cnn.png
----
-width: 100%
-name: convolution-operation
-align: center
----
-Convolution operation. The kernel slides across the input, computing weighted sums at each position to produce a feature map.
-```
+::: {#fig-convolution-operation}
+![Convolution operation. The kernel slides across the input, computing weighted sums at each position to produce a feature map.](https://anhreynolds.com/img/cnn.png){width=100% fig-align="center"}
+:::
 
 Mathematically, for a single-channel input (grayscale image), 2D convolution is:
 
@@ -42,14 +37,9 @@ $$
 
 where $C$ is the number of input channels. Each kernel processes all channels simultaneously, combining color information into a single output value.
 
-```{figure} https://d2l.ai/_images/conv-multi-in.svg
----
-width: 100%
-name: multi-channel-convolution
-align: center
----
-Multi-channel convolution. Each kernel processes all input channels, producing one output feature map.
-```
+::: {#fig-multi-channel-convolution}
+![Multi-channel convolution. Each kernel processes all input channels, producing one output feature map.](https://d2l.ai/_images/conv-multi-in.svg){width=100% fig-align="center"}
+:::
 
 ::: {.callout-tip title="Interactive visualizations"}
 Explore CNN operations interactively. The [CNN Explainer](https://poloclub.github.io/cnn-explainer/) shows how convolution, activation, and pooling work step-by-step. The [Interactive Node-Link Visualization](https://adamharley.com/nn_vis/cnn/2d.html) lets you see activations flow through a trained network.
@@ -61,14 +51,9 @@ One crucial feature of convolutional layers is **translation equivariance**. Thi
 
 Consider detecting a vertical edge. If the edge moves one pixel to the right in the input image, the detected edge feature also moves one pixel to the right in the output. The detection operation doesn't care about absolute position, only relative patterns.
 
-```{figure} https://miro.medium.com/v2/resize:fit:1400/1*NoAQ4ZgofpkK6esl4sMHkA.png
----
-width: 80%
-name: translation-equivariance
-align: center
----
-Translation equivariance. The same kernel detects the same feature regardless of position in the input.
-```
+::: {#fig-translation-equivariance}
+![Translation equivariance. The same kernel detects the same feature regardless of position in the input.](https://miro.medium.com/v2/resize:fit:1400/1*NoAQ4ZgofpkK6esl4sMHkA.png){width=80% fig-align="center"}
+:::
 
 This property allows CNNs to recognize objects anywhere in an image. A cat detector learned on centered cats will also detect cats in image corners. The network doesn't need to learn separate detectors for every possible position.
 
@@ -84,14 +69,9 @@ The **receptive field** is the region of input pixels that influence each output
 
 Consider two 3×3 convolutional layers. Each output pixel in the second layer depends on a 3×3 region in the first layer's output. But each of those positions depends on a 3×3 region in the input. So the second layer's receptive field is 5×5 in the original input.
 
-```{figure} https://www.researchgate.net/publication/316950618/figure/fig4/AS:11431281212123378@1702542797323/The-receptive-field-of-each-convolution-layer-with-a-3-3-kernel-The-green-area-marks.tif
----
-width: 50%
-name: receptive-field
-align: center
----
-Receptive field grows with network depth. Deeper layers see increasingly large regions of the input image.
-```
+::: {#fig-receptive-field}
+![Receptive field grows with network depth. Deeper layers see increasingly large regions of the input image.](https://www.researchgate.net/publication/316950618/figure/fig4/AS:11431281212123378@1702542797323/The-receptive-field-of-each-convolution-layer-with-a-3-3-kernel-The-green-area-marks.tif){width=50% fig-align="center"}
+:::
 
 This hierarchical structure allows CNNs to detect increasingly complex, abstract features. Early layers detect edges and simple patterns. Middle layers combine these into textures and parts. Deep layers recognize complete objects and scenes.
 
@@ -113,25 +93,15 @@ $$
 
 Larger strides reduce computational cost and increase the receptive field, but might miss fine details.
 
-```{figure} https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJTOGcDwPXtlNnev9ayPj92FIysGddxe__Fw&s
----
-width: 50%
-name: stride-visualization
-align: center
----
-Stride controls how far the kernel moves at each step. Stride 2 produces half the spatial dimensions of stride 1.
-```
+::: {#fig-stride-visualization}
+![Stride controls how far the kernel moves at each step. Stride 2 produces half the spatial dimensions of stride 1.](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJTOGcDwPXtlNnev9ayPj92FIysGddxe__Fw&s){width=50% fig-align="center"}
+:::
 
 **Padding** addresses information loss at borders. Without padding (called "valid" padding), the output shrinks after each convolution because the kernel can't fully overlap with border pixels. Zero padding adds a border of zeros around the input, allowing the kernel to process edge pixels and control output dimensions.
 
-```{figure} https://svitla.com/uploads/ckeditor/2024/Math%20at%20the%20heart%20of%20CNN/image_930660943761713546482755.gif
----
-width: 50%
-name: padding-visualization
-align: center
----
-Zero padding extends the input with zeros, preserving spatial dimensions and processing border pixels.
-```
+::: {#fig-padding-visualization}
+![Zero padding extends the input with zeros, preserving spatial dimensions and processing border pixels.](https://svitla.com/uploads/ckeditor/2024/Math%20at%20the%20heart%20of%20CNN/image_930660943761713546482755.gif){width=50% fig-align="center"}
+:::
 
 For a square input of size $W$ with kernel size $K$, stride $S$, and padding $P$, the output dimension is:
 

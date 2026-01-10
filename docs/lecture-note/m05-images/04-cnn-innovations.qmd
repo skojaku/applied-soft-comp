@@ -13,14 +13,9 @@ AlexNet proved that deep learning works at scale in 2012. This breakthrough spar
 
 The innovations we'll explore emerged as solutions to these challenges. Each architecture addressed specific problems while introducing ideas that influenced everything that followed. This is not a random collection of models, but a coherent story of progress through clever problem-solving.
 
-```{figure} https://viso.ai/wp-content/uploads/2024/02/imagenet-winners-by-year.jpg
----
-width: 100%
-align: center
-name: imagenet-timeline
----
-ImageNet competition winners from 2012 to 2017. Each year brought architectural innovations that pushed accuracy higher.
-```
+::: {#fig-imagenet-timeline}
+![ImageNet competition winners from 2012 to 2017. Each year brought architectural innovations that pushed accuracy higher.](https://viso.ai/wp-content/uploads/2024/02/imagenet-winners-by-year.jpg){width=100% fig-align="center"}
+:::
 
 ## Challenge 1: Going Deeper (VGG, 2014)
 
@@ -36,14 +31,9 @@ But training deep networks in 2014 remained difficult. Gradients vanished. Train
 
 VGGNet demonstrated that systematic depth works {footcite}`simonyan2014very`. The key insight was using **small 3×3 convolutions** exclusively, stacked together to build deep networks.
 
-```{figure} ../figs/vgg-architecture.jpg
----
-width: 50%
-align: center
-name: vgg-architecture
----
-VGG16 architecture showing progressive downsampling while doubling channels. The network uses only 3×3 convolutions throughout.
-```
+::: {#fig-vgg-architecture}
+![VGG16 architecture showing progressive downsampling while doubling channels. The network uses only 3×3 convolutions throughout.](../figs/vgg-architecture.jpg){width=50% fig-align="center"}
+:::
 
 Why stack 3×3 filters instead of using larger filters? Consider the receptive field. Two 3×3 convolutions have the same receptive field as one 5×5 convolution (both see a 5×5 region of the input). But the stacked version has fewer parameters.
 
@@ -61,14 +51,9 @@ $$
 
 This yields a **28% parameter reduction** while adding an extra ReLU nonlinearity between the layers, allowing the network to learn more complex functions.
 
-```{figure} https://miro.medium.com/v2/resize:fit:1200/1*k97NVvlMkRXau-uItlq5Gw.png
----
-width: 70%
-align: center
-name: receptive-field-stacking
----
-Two stacked 3×3 convolutions achieve the same receptive field as one 5×5 convolution but with fewer parameters and added nonlinearity.
-```
+::: {#fig-receptive-field-stacking}
+![Two stacked 3×3 convolutions achieve the same receptive field as one 5×5 convolution but with fewer parameters and added nonlinearity.](https://miro.medium.com/v2/resize:fit:1200/1*k97NVvlMkRXau-uItlq5Gw.png){width=70% fig-align="center"}
+:::
 
 ### The Architecture Pattern
 
@@ -167,14 +152,9 @@ Instead of flattening feature maps and passing through dense layers, take the av
 
 GoogLeNet introduced **auxiliary classifiers** at intermediate layers to combat vanishing gradients in deep networks. These classifiers attach to middle layers, computing losses that provide additional gradient signals during backpropagation.
 
-```{figure} https://production-media.paperswithcode.com/methods/GoogleNet-structure-and-auxiliary-classifier-units_CM5xsxk.png
----
-width: 80%
-align: center
-name: inception-auxiliary
----
-GoogLeNet architecture with auxiliary classifiers attached to intermediate layers to improve gradient flow.
-```
+::: {#fig-inception-auxiliary}
+![GoogLeNet architecture with auxiliary classifiers attached to intermediate layers to improve gradient flow.](https://production-media.paperswithcode.com/methods/GoogleNet-structure-and-auxiliary-classifier-units_CM5xsxk.png){width=80% fig-align="center"}
+:::
 
 During training, the total loss combines the main classifier loss with auxiliary losses (typically weighted at 0.3). At inference, only the main classifier is used.
 
@@ -208,14 +188,9 @@ $$
 H(\mathbf{x}) = F(\mathbf{x}) + \mathbf{x}
 $$
 
-```{figure} https://www.researchgate.net/publication/364330795/figure/fig7/AS:11431281176036099@1689999593116/Basic-residual-block-of-ResNet.png
----
-width: 60%
-align: center
-name: resnet-block
----
-Residual block. The skip connection carries the input directly to the output, while convolutional layers learn the residual.
-```
+::: {#fig-resnet-block}
+![Residual block. The skip connection carries the input directly to the output, while convolutional layers learn the residual.](https://www.researchgate.net/publication/364330795/figure/fig7/AS:11431281176036099@1689999593116/Basic-residual-block-of-ResNet.png){width=60% fig-align="center"}
+:::
 
 Why does this help? If the optimal mapping is close to identity (the layer isn't very useful), the network can easily learn $F(\mathbf{x}) \approx 0$ by pushing weights toward zero. The skip connection ensures input information flows through unchanged.
 
@@ -225,14 +200,9 @@ If a more complex transformation is needed, $F(\mathbf{x})$ can still learn it. 
 
 Skip connections create multiple paths for gradients to flow backward. Some paths go through all convolutions. Others skip multiple blocks via cascaded skip connections. This ensemble of paths accelerates training and prevents vanishing gradients {footcite}`veit2016residual`.
 
-```{figure} https://arxiv.org/html/2405.01725v1/x28.png
----
-width: 100%
-align: center
-name: resnet-gradient-flow
----
-Multiple gradient paths in ResNet. Gradients can skip layers via identity connections, providing stable training for very deep networks.
-```
+::: {#fig-resnet-gradient-flow}
+![Multiple gradient paths in ResNet. Gradients can skip layers via identity connections, providing stable training for very deep networks.](https://arxiv.org/html/2405.01725v1/x28.png){width=100% fig-align="center"}
+:::
 
 ### Bottleneck Blocks for Deeper Networks
 
@@ -242,14 +212,9 @@ ResNet-50, -101, and -152 use **bottleneck blocks** to maintain efficiency:
 2. **3×3 convolution**: Operates on reduced dimension
 3. **1×1 convolution**: Restores dimension (e.g., 64 → 256)
 
-```{figure} https://i.sstatic.net/kbiIG.png
----
-width: 80%
-align: center
-name: resnet-bottleneck
----
-Bottleneck block (left) vs. basic block (right). The bottleneck design reduces computational cost in very deep networks.
-```
+::: {#fig-resnet-bottleneck}
+![Bottleneck block (left) vs. basic block (right). The bottleneck design reduces computational cost in very deep networks.](https://i.sstatic.net/kbiIG.png){width=80% fig-align="center"}
+:::
 
 This shrinks the intermediate feature map, dramatically reducing computational cost while maintaining representational capacity. The design was inspired by Inception's bottleneck idea.
 
@@ -276,14 +241,9 @@ ResNet showed that with the right architecture, depth isn't a limitation. It's a
 
 The idea: split the bottleneck convolution path into multiple parallel groups (typically 32), each processing independently. Aggregate their outputs through concatenation or addition.
 
-```{figure} https://production-media.paperswithcode.com/methods/Screen_Shot_2020-06-06_at_4.32.52_PM.png
----
-width: 60%
-align: center
-name: resnext-block
----
-ResNeXt block with multiple grouped convolution paths. Increasing cardinality (number of groups) often improves accuracy more than increasing depth or channel count.
-```
+::: {#fig-resnext-block}
+![ResNeXt block with multiple grouped convolution paths. Increasing cardinality (number of groups) often improves accuracy more than increasing depth or channel count.](https://production-media.paperswithcode.com/methods/Screen_Shot_2020-06-06_at_4.32.52_PM.png){width=60% fig-align="center"}
+:::
 
 This "cardinality" dimension provides another axis for scaling networks. ResNeXt achieves better accuracy than ResNet at similar computational cost by increasing cardinality instead of just going deeper.
 
