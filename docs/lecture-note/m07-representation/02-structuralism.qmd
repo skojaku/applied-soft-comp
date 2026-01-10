@@ -1,0 +1,405 @@
+---
+title: "Part 2: Meaning as Difference"
+jupyter: python3
+execute:
+    enabled: true
+    cache: true
+---
+
+::: {.callout-note title="What you'll learn in this section"}
+Meaning doesn't live inside words like water in a container. It emerges from networks of contrast and opposition. We'll explore how Saussure, Buddhist logic, Jakobson, and Lévi-Strauss converged on this structuralist insight, and why it matters for machine learning.
+:::
+
+## The Arbitrary Nature of Signs
+
+Let's start with a simple observation that changes everything. What makes the English word "dog" mean what it means? You might answer that it refers to a four-legged canine animal. But why those particular sounds? Why not "chien" (French), "perro" (Spanish), or "犬" (Japanese)? The connection between the sound pattern and the concept is arbitrary.
+
+Ferdinand de Saussure, the founder of modern linguistics, called this the arbitrariness of the sign. A sign has two parts: the signifier (the sound or written form) and the signified (the concept). The relationship between them is not natural or inevitable. It's a social convention.
+
+::: {.column-margin}
+Saussure's *Course in General Linguistics* (1916) revolutionized language study by treating it as a system of relationships rather than a collection of labels.
+:::
+
+But Saussure went further. He argued that the signified (the concept itself) is also arbitrary. We think "dog" refers to a pre-existing natural category, but nature doesn't draw boundaries between dogs, wolves, and foxes. We do. Different languages slice the animal kingdom differently. Some languages have multiple words for what English calls "rice" (depending on whether it's cooked or raw). English distinguishes "river" from "stream" where other languages use one word. The concepts themselves are products of how a language chooses to divide conceptual space.
+
+This leads to a radical conclusion. The meaning of "dog" isn't determined by what dogs are. It's determined by what dogs are not. "Dog" means "dog" because it occupies a specific position in a network of differences: not "cat", not "wolf", not "fox", not "log", not "fog".
+
+```{python}
+#| fig-cap: "The meaning of 'dog' emerges from its position in a network of contrasts, not from an intrinsic essence."
+#| label: fig-saussure-system
+#| code-fold: true
+
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(10, 8))
+
+# Create a network showing semantic relationships
+G = nx.Graph()
+
+# Add nodes
+center_word = "DOG"
+related = ["cat", "wolf", "fox", "puppy", "pet"]
+contrasts = ["log", "fog", "cog", "dig"]
+
+G.add_node(center_word)
+for word in related + contrasts:
+    G.add_node(word)
+
+# Add edges for related terms
+for word in related:
+    G.add_edge(center_word, word)
+
+# Position nodes
+pos = {center_word: (0, 0)}
+
+# Related words in a circle around center
+angle_step = 2 * np.pi / len(related)
+for i, word in enumerate(related):
+    angle = i * angle_step
+    pos[word] = (1.5 * np.cos(angle), 1.5 * np.sin(angle))
+
+# Contrast words further out
+angle_step = 2 * np.pi / len(contrasts)
+for i, word in enumerate(contrasts):
+    angle = i * angle_step + np.pi/4
+    pos[word] = (2.5 * np.cos(angle), 2.5 * np.sin(angle))
+
+# Draw the network
+# Center node
+nx.draw_networkx_nodes(G, pos, nodelist=[center_word],
+                       node_color='#e74c3c', node_size=3000,
+                       alpha=0.9, ax=ax)
+
+# Related nodes
+nx.draw_networkx_nodes(G, pos, nodelist=related,
+                       node_color='#3498db', node_size=2000,
+                       alpha=0.7, ax=ax)
+
+# Contrast nodes
+nx.draw_networkx_nodes(G, pos, nodelist=contrasts,
+                       node_color='#95a5a6', node_size=1500,
+                       alpha=0.5, ax=ax)
+
+# Edges
+nx.draw_networkx_edges(G, pos, width=2, alpha=0.3, ax=ax)
+
+# Labels
+nx.draw_networkx_labels(G, pos,
+                        {center_word: center_word},
+                        font_size=16, font_weight='bold',
+                        font_color='white', ax=ax)
+
+label_pos = {k: (v[0], v[1]) for k, v in pos.items() if k != center_word}
+nx.draw_networkx_labels(G, label_pos,
+                        {k: k for k in related + contrasts},
+                        font_size=11, font_weight='bold', ax=ax)
+
+# Add annotations
+ax.text(0, -3.3, '"Dog" is defined by what it is NOT', fontsize=13,
+        ha='center', style='italic', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+
+ax.set_xlim(-3.5, 3.5)
+ax.set_ylim(-3.5, 3.5)
+ax.axis('off')
+ax.set_title('Saussurean Semiotics: Meaning Through Difference',
+             fontsize=16, fontweight='bold', pad=20)
+
+plt.tight_layout()
+plt.show()
+```
+
+## Apoha: Buddhist Logic of Negation
+
+This idea that concepts are defined through negation has deep roots. Buddhist philosophers in ancient India developed a theory called Apoha (literally "exclusion") around the 5th century CE. They argued that we cannot understand what a thing is, only what it is not.
+
+When you see a horse, you don't directly grasp "horseness". Instead, you implicitly exclude everything that is not-horse: not-cow, not-stone, not-water, not-tree. The concept of "horse" is nothing more than the region of conceptual space that remains after all these exclusions. It's a purely negative definition.
+
+::: {.column-margin}
+Dignāga and Dharmakīrti, the primary developers of Apoha theory, influenced both Indian and Tibetan Buddhist philosophy. Their ideas parallel Saussure's insights developed independently 1400 years later.
+:::
+
+Why does this matter? Because it reveals that categories are not containers holding essences. They're regions in a space of possibilities, carved out by contrast. This shifts the entire frame. You don't need to know what something is. You only need to know what it is not. The meaning is in the boundaries, not the interior.
+
+## Jakobson's Binary Oppositions
+
+Roman Jakobson, a 20th-century linguist, took the structuralist insight and formalized it. He studied phonemes—the basic sound units of language—and showed they could be decomposed into binary features.
+
+Consider the difference between "p" and "b". They're produced almost identically: both are bilabial stops (you close your lips and release air). The only difference is voicing. Your vocal cords vibrate for "b" but not for "p". We can represent this as:
+
+- "p": [+bilabial, +stop, -voiced]
+- "b": [+bilabial, +stop, +voiced]
+
+Jakobson showed that all phonemes in all languages could be analyzed as bundles of such binary oppositions: voiced/voiceless, nasal/oral, fricative/stop, and so on. A phoneme isn't a sound. It's a position in a multidimensional space of contrasts.
+
+```{python}
+#| fig-cap: "Phonemes as vectors in a space of binary features. Position, not essence, determines identity."
+#| label: fig-jakobson-features
+#| code-fold: true
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+# Define phonemes with binary features
+phonemes = {
+    'p': [1, 1, 0],  # [bilabial, stop, voiced]
+    'b': [1, 1, 1],
+    't': [0, 1, 0],  # [dental, stop, voiced]
+    'd': [0, 1, 1],
+    'k': [0, 0, 0],  # [velar, stop, voiced]
+    'g': [0, 0, 1]
+}
+
+# Create DataFrame
+df = pd.DataFrame.from_dict(phonemes, orient='index',
+                            columns=['Bilabial', 'Stop', 'Voiced'])
+
+fig, ax = plt.subplots(figsize=(10, 8))
+
+# Create a heatmap-style visualization
+for i, (phoneme, features) in enumerate(phonemes.items()):
+    y = 5 - i
+    for j, (feature, value) in enumerate(zip(['Bilabial', 'Stop', 'Voiced'], features)):
+        color = '#3498db' if value == 1 else '#ecf0f1'
+        rect = plt.Rectangle((j, y - 0.4), 0.8, 0.8, facecolor=color,
+                            edgecolor='black', linewidth=2)
+        ax.add_patch(rect)
+
+        # Add value text
+        text_color = 'white' if value == 1 else 'black'
+        ax.text(j + 0.4, y, '+' if value == 1 else '−',
+               ha='center', va='center', fontsize=18,
+               fontweight='bold', color=text_color)
+
+    # Add phoneme label
+    ax.text(-0.5, y, f'/{phoneme}/',
+           ha='right', va='center', fontsize=16, fontweight='bold')
+
+# Add feature labels
+feature_labels = ['Bilabial', 'Stop', 'Voiced']
+for j, label in enumerate(feature_labels):
+    ax.text(j + 0.4, 6, label, ha='center', va='center',
+           fontsize=14, fontweight='bold', rotation=0)
+
+ax.set_xlim(-1, 3)
+ax.set_ylim(-0.5, 6.5)
+ax.axis('off')
+ax.set_title('Jakobsonian Distinctive Features: Phonemes as Feature Bundles',
+             fontsize=16, fontweight='bold', pad=20)
+
+plt.tight_layout()
+plt.show()
+```
+
+This is a vectorization of meaning. Each phoneme is represented not by a symbol but by a coordinate in feature space. Two phonemes are similar if their feature vectors are close. The entire phonological system of a language becomes a geometry problem.
+
+## The Culinary Triangle
+
+Claude Lévi-Strauss, the structural anthropologist, extended this approach beyond language to culture itself. He argued that human thought operates through binary oppositions: nature/culture, raw/cooked, male/female, sacred/profane. These aren't universal truths. They're structural patterns that organize how different societies make sense of experience.
+
+His "culinary triangle" is a famous example. He analyzed how different cultures process food through two axes: the nature-culture axis (raw vs. transformed) and the means of transformation (cooking vs. rotting). This creates a conceptual space where different food preparation methods occupy specific positions.
+
+::: {.column-margin}
+Lévi-Strauss developed these ideas in *The Raw and the Cooked* (1964), the first volume of his four-volume *Mythologiques* series analyzing the structure of myths across cultures.
+:::
+
+```{python}
+#| fig-cap: "Lévi-Strauss's culinary triangle maps food preparation methods through binary oppositions."
+#| label: fig-culinary-triangle
+#| code-fold: true
+
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import FancyArrowPatch
+
+fig, ax = plt.subplots(figsize=(10, 10))
+
+# Define triangle vertices
+raw = (0, 0)
+cooked = (-1.5, 2.5)
+rotted = (1.5, 2.5)
+
+# Draw triangle
+triangle = plt.Polygon([raw, cooked, rotted], fill=False,
+                       edgecolor='black', linewidth=3)
+ax.add_patch(triangle)
+
+# Add points
+points = {'Raw': raw, 'Cooked': cooked, 'Rotted': rotted}
+for label, (x, y) in points.items():
+    ax.plot(x, y, 'o', markersize=20, color='#e74c3c', zorder=3)
+    offset = (0, -0.4) if label == 'Raw' else (0, 0.3)
+    ax.text(x + offset[0], y + offset[1], label,
+           fontsize=16, fontweight='bold', ha='center', va='center',
+           bbox=dict(boxstyle='round', facecolor='white', alpha=0.9))
+
+# Add intermediate categories
+intermediates = {
+    'Smoked': (-0.5, 0.8),
+    'Boiled': (-0.9, 1.5),
+    'Roasted': (-0.3, 1.2),
+    'Fermented': (0.8, 1.3)
+}
+
+for label, (x, y) in intermediates.items():
+    ax.plot(x, y, 's', markersize=12, color='#3498db', alpha=0.7, zorder=2)
+    ax.text(x, y - 0.3, label, fontsize=11, ha='center',
+           style='italic', color='#2c3e50')
+
+# Add axes labels
+ax.annotate('', xy=(-2, 1.25), xytext=(2, 1.25),
+           arrowprops=dict(arrowstyle='<->', color='gray', lw=2))
+ax.text(0, 1.65, 'Culture (transformed)', ha='center',
+       fontsize=12, fontweight='bold', color='gray')
+
+ax.annotate('', xy=(-0.75, -0.5), xytext=(-0.75, 3),
+           arrowprops=dict(arrowstyle='<->', color='gray', lw=2))
+ax.text(-1.3, 1.25, 'Elaborated', ha='center', fontsize=12,
+       fontweight='bold', color='gray', rotation=90)
+
+ax.text(0, -1.2, 'Nature (untransformed)', ha='center',
+       fontsize=12, fontweight='bold', color='gray')
+
+ax.set_xlim(-2.5, 2.5)
+ax.set_ylim(-1.5, 3.5)
+ax.axis('off')
+ax.set_title("Lévi-Strauss's Culinary Triangle:\nCulture as Binary Oppositions",
+             fontsize=16, fontweight='bold', pad=20)
+
+plt.tight_layout()
+plt.show()
+```
+
+Roasted meat sits between raw and cooked (less elaborated cooking). Boiled meat is fully cooked (more elaborated). Fermented foods sit between raw and rotted (cultural transformation through natural processes). Each food type's meaning comes from its position in this structural space, not from any intrinsic property.
+
+This is the structuralist thesis in full form: meaning is relational, not substantive. Systems of meaning are systems of differences. To understand anything, map the space of contrasts.
+
+## Metaphor and Metonymy: Two Modes of Connection
+
+Jakobson identified two fundamental ways that concepts connect: through similarity (metaphor) and through contiguity (metonymy). These aren't just literary devices. They're cognitive structures that organize how we think and how language operates.
+
+**Metaphor** works by similarity. "Juliet is the sun" connects two unlike things through shared properties (brightness, warmth, centrality). Metaphor lets us understand the abstract through the concrete, the unfamiliar through the familiar. Western philosophy and science tend toward metaphorical thinking: classification systems, taxonomies, and abstraction hierarchies all rely on grouping similar things.
+
+**Metonymy** works by contiguity—spatial or conceptual adjacency. "The White House announced..." uses a location to refer to the president. "Hollywood is obsessed with franchises" uses a place to refer to the film industry. Metonymy captures association, co-occurrence, and context. Eastern philosophy often emphasizes metonymic thinking: understanding things through their relationships and contexts rather than their essential properties.
+
+::: {.column-margin}
+Jakobson argued that aphasia patients show selective impairment of either metaphoric (similarity-based) or metonymic (contiguity-based) operations, suggesting these are fundamental cognitive mechanisms.
+:::
+
+```{python}
+#| fig-cap: "Metaphor groups by similarity, metonymy by co-occurrence. Different structures of meaning."
+#| label: fig-metaphor-metonymy
+#| code-fold: true
+
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7))
+
+# Metaphor network (similarity clusters)
+G_metaphor = nx.Graph()
+clusters = {
+    'Brightness': ['sun', 'star', 'lamp', 'fire'],
+    'Water': ['ocean', 'river', 'tears', 'rain'],
+    'Journey': ['road', 'path', 'voyage', 'quest']
+}
+
+for cluster, words in clusters.items():
+    for word in words:
+        G_metaphor.add_node(word, cluster=cluster)
+    # Connect words within cluster
+    for i, w1 in enumerate(words):
+        for w2 in words[i+1:]:
+            G_metaphor.add_edge(w1, w2)
+
+# Position metaphor nodes in clusters
+pos_metaphor = {}
+cluster_centers = [(0, 2), (-2, -1), (2, -1)]
+for (cluster, words), center in zip(clusters.items(), cluster_centers):
+    angle_step = 2 * np.pi / len(words)
+    for i, word in enumerate(words):
+        angle = i * angle_step
+        pos_metaphor[word] = (center[0] + 0.8 * np.cos(angle),
+                             center[1] + 0.8 * np.sin(angle))
+
+# Draw metaphor network
+colors = {'Brightness': '#f39c12', 'Water': '#3498db', 'Journey': '#9b59b6'}
+for cluster, words in clusters.items():
+    nx.draw_networkx_nodes(G_metaphor, pos_metaphor, nodelist=words,
+                          node_color=colors[cluster], node_size=1200,
+                          alpha=0.8, ax=ax1)
+
+nx.draw_networkx_edges(G_metaphor, pos_metaphor, alpha=0.3, width=2, ax=ax1)
+nx.draw_networkx_labels(G_metaphor, pos_metaphor, font_size=9,
+                       font_weight='bold', ax=ax1)
+
+ax1.set_title('Metaphor: Clustering by Similarity', fontsize=14, fontweight='bold')
+ax1.axis('off')
+ax1.set_xlim(-3.5, 3.5)
+ax1.set_ylim(-2.5, 3.5)
+
+# Metonymy network (chain of associations)
+G_metonymy = nx.DiGraph()
+sequence = [
+    ('cherry\nblossoms', 'spring'),
+    ('spring', 'hanami\n(viewing)'),
+    ('hanami\n(viewing)', 'sake'),
+    ('sake', 'party'),
+    ('party', 'friends'),
+    ('friends', 'memories'),
+    ('memories', 'nostalgia'),
+]
+
+for source, target in sequence:
+    G_metonymy.add_edge(source, target)
+
+# Position metonymy nodes in a flowing path
+pos_metonymy = {}
+x_positions = np.linspace(-3, 3, len(G_metonymy.nodes()))
+y_positions = [0.5 * np.sin(x * 0.8) for x in x_positions]
+
+for i, node in enumerate(G_metonymy.nodes()):
+    pos_metonymy[node] = (x_positions[i], y_positions[i])
+
+# Draw metonymy network
+nx.draw_networkx_nodes(G_metonymy, pos_metonymy,
+                      node_color='#e74c3c', node_size=1500,
+                      alpha=0.8, ax=ax2)
+
+nx.draw_networkx_edges(G_metonymy, pos_metonymy,
+                      edge_color='gray', width=3, alpha=0.6,
+                      arrowsize=20, arrowstyle='->', ax=ax2,
+                      connectionstyle='arc3,rad=0.1')
+
+nx.draw_networkx_labels(G_metonymy, pos_metonymy, font_size=8,
+                       font_weight='bold', ax=ax2)
+
+ax2.set_title('Metonymy: Chaining by Contiguity', fontsize=14, fontweight='bold')
+ax2.axis('off')
+ax2.set_xlim(-4, 4)
+ax2.set_ylim(-1.5, 1.5)
+
+plt.tight_layout()
+plt.show()
+```
+
+Why does this distinction matter for machine learning? Because different algorithms capture different types of relationships. Classification algorithms and clustering methods are metaphorical—they group by similarity. But sequence models, language models, and graph neural networks are metonymic—they learn from co-occurrence and context. Understanding which type of relationship you're trying to capture shapes which tools you should use.
+
+## From Philosophy to Algorithm
+
+We've traced a philosophical thread through linguistics, Buddhist logic, structural anthropology, and cognitive science. The insight is consistent: meaning is not intrinsic. It emerges from patterns of difference, opposition, and relationship.
+
+This sounds abstract, but it becomes concrete when you try to teach a machine what words mean. You cannot program in definitions. Dictionaries are circular (look up "large" and you find "big"; look up "big" and you find "large"). Instead, you need to let the machine discover the structure of language by observing how words relate to each other.
+
+That's exactly what word2vec does. It doesn't learn what "dog" means by reading a definition. It learns by observing which words appear near "dog" in actual text. "Dog" appears near "bark", "pet", "leash", "puppy". It doesn't appear near "meow", "aquarium", or "carburetor". The meaning of "dog" is implicitly defined through this pattern of co-occurrence and exclusion.
+
+Word2vec operationalizes Saussure's insight that meaning is differential. It implements Apoha's theory that concepts are defined by exclusion. It builds Jakobson's feature space where similarity is geometric distance. It captures both metaphoric (similarity-based) and metonymic (context-based) relationships.
+
+The next section shows how this works mechanically. How do you turn a philosophical theory about the nature of meaning into working code? How do you represent the continuous space of semantic relationships without imposing arbitrary boundaries? The answer involves vector embeddings, contrastive learning, and a mathematical framework that makes structuralism computable.
+
+::: {.callout-tip title="Try it yourself"}
+Pick a concept you use often (democracy, friendship, justice, art). Try to define it without using synonyms or related terms. You'll find it's almost impossible. Now try defining it negatively, through what it is not. Which approach feels more precise? This exercise reveals why structuralism works.
+:::
