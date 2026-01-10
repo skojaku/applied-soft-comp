@@ -61,11 +61,11 @@
 
 ## Module 6: Deep Learning for Graphs
 
-- [Overview](m06-graphs/overview.html)
-- [Spectral Graph Embedding](m06-graphs/spectral-embedding.html)
-- [Graph Embeddings with Word2Vec](m06-graphs/graph-embedding-w-word2vec.html)
-- [Spectral vs. Neural Embeddings](m06-graphs/spectral-vs-neural-embedding.html)
-- [From Images to Graphs](m06-graphs/from-image-to-graph.html)
-- [Graph Convolutional Networks](m06-graphs/graph-convolutional-network.html)
-- [Popular GNN Architectures](m06-graphs/popular-gnn.html)
-- [GNN Software & Tools](m06-graphs/software.html)
+- [Overview](m06-graph/overview.html)
+- [Spectral Graph Embedding](m06-graph/spectral-embedding.html)
+- [Graph Embeddings with Word2Vec](m06-graph/graph-embedding-w-word2vec.html)
+- [Spectral vs. Neural Embeddings](m06-graph/spectral-vs-neural-embedding.html)
+- [From Images to Graphs](m06-graph/from-image-to-graph.html)
+- [Graph Convolutional Networks](m06-graph/graph-convolutional-network.html)
+- [Popular GNN Architectures](m06-graph/popular-gnn.html)
+- [GNN Software & Tools](m06-graph/software.html)
