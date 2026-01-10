@@ -39,8 +39,33 @@
       "Insert empty line before bullet points when bullets are necessary",
       "Figures come before explanations with immediate commentary after the code block",
       "Headers use standard Markdown (##, ###)",
-      "Center all figures with fig-cap and label"
+      "Center all figures with fig-cap and label",
+      "IMPORTANT: Use proper Quarto figure syntax - see figureSyntax below for details"
     ],
+    "figureSyntax": {
+      "description": "Proper Quarto figure reference syntax",
+      "correct": "::: {#fig-id}\n![Caption text](image.png){width=80% fig-align=\"center\"}\n:::",
+      "incorrect": "```{figure} image.png\n---\nwidth: 80%\nname: fig-id\nalign: center\n---\nCaption text\n```",
+      "rules": [
+        "Always use div syntax ::: {#fig-id} for figures",
+        "Figure IDs must start with 'fig-' prefix (e.g., #fig-image-matrix)",
+        "Use markdown image syntax ![caption](url){attributes} inside the div",
+        "Attributes: width=80%, fig-align=\"center\", etc.",
+        "Close with ::: on its own line",
+        "Reference figures in text using @fig-id syntax",
+        "For subfigures, use layout-ncol attribute: ::: {#fig-parent layout-ncol=2}"
+      ],
+      "examples": [
+        {
+          "description": "Single figure",
+          "code": "::: {#fig-example}\n![This is the caption](image.png){width=70% fig-align=\"center\"}\n:::"
+        },
+        {
+          "description": "Subfigures",
+          "code": "::: {#fig-elephants layout-ncol=2}\n![Surus](surus.png){#fig-surus}\n![Hanno](hanno.png){#fig-hanno}\nFamous Elephants\n:::"
+        }
+      ]
+    },
     "writingPatterns": [
       "Hook with weirdness: When introducing concept X, first show how strange/counterintuitive X is with concrete examples, then reveal why X is crucial. This twist grabs attention.",
       "Open with engaging questions or historical/cultural hooks to draw readers in",
