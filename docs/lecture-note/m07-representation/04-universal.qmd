@@ -2,21 +2,33 @@
 title: "Part 4: Universal Representations"
 jupyter: python3
 execute:
-    enabled: true
+    enabled: false
     cache: true
 ---
 
-::: {.callout-note title="What you'll learn in this section"}
-The representational insight extends far beyond text. Images, graphs, molecules, time series, and even entire systems can be embedded in continuous space where structure becomes geometry. We'll explore how this universal framework unifies machine learning across domains.
+::: {.callout-note title="What you'll learn in this module"}
+This module explores how the representational paradigm extends beyond text to unify machine learning across domains.
+
+You'll learn:
+
+- How **graph embeddings** transform network topology into geometry using random walks.
+- What **visual representations** reveal about CNN embeddings and semantic similarity.
+- The way **molecular, musical, and protein embeddings** apply the same framework to diverse structured domains.
+- How **time series become trajectories** in latent space, dissolving boundaries between similar dynamics.
+- The **unified perspective** showing that all representations follow the same philosophical insight: meaning is relational, structure emerges from contrast.
 :::
 
 ## The Representational Paradigm
 
-Word2vec revealed something profound. You don't need to know what things are. You only need to observe how they relate. This principle transcends language. Any structured system where entities co-occur, interact, or connect can be embedded in vector space.
+Let's talk about the most profound insight from word2vec. You don't need to know what things are. You only need to observe how they relate.
 
-The recipe is consistent across domains. First, define what "context" means for your data type. For words, context is nearby words. For images, context might be nearby pixels or visual features. For nodes in a network, context is neighboring nodes. Second, learn representations that preserve this contextual structure. Entities with similar contexts get similar embeddings. Third, use the geometry of the resulting space to reason about relationships.
+This principle transcends language. Any structured system where entities co-occur, interact, or connect can be embedded in vector space.
 
-This is the representational paradigm. Instead of building task-specific models (classifiers, detectors, predictors), we first learn universal representations of the input space, then solve downstream tasks by operating on those representations. The representation becomes the shared foundation.
+What's the recipe? It's consistent across domains. First, define what "context" means for your data type. For words, context is nearby words. For images, context might be nearby pixels or visual features. For nodes in a network, context is neighboring nodes.
+
+Second, learn representations that preserve this contextual structure. Entities with similar contexts get similar embeddings. Third, use the geometry of the resulting space to reason about relationships.
+
+This is the representational paradigm. Instead of building task-specific models (classifiers, detectors, predictors), we first learn universal representations of the input space. Then we solve downstream tasks by operating on those representations. The representation becomes the shared foundation.
 
 ```{python}
 #| fig-cap: "The representational paradigm: map diverse inputs to a shared geometric space."
@@ -111,13 +123,13 @@ plt.show()
 
 ## Graph Embeddings: Node2Vec
 
-Networks present a natural extension of word2vec's logic. Words appear in sequences. Nodes appear in neighborhoods. If we can generate sequences of nodes by walking through the network, we can apply the same contrastive learning approach.
+Let's shift your attention to networks. Networks present a natural extension of word2vec's logic. Words appear in sequences. Nodes appear in neighborhoods.
+
+What if we could generate sequences of nodes by walking through the network? Then we could apply the same contrastive learning approach.
 
 Node2Vec does exactly this. It performs random walks on a graph, treating the sequence of visited nodes like a sentence. A walk might go: NodeA → NodeB → NodeC → NodeD. This generates training pairs: (NodeB, NodeA), (NodeB, NodeC), and so on. The model learns embeddings where nodes with similar neighborhoods end up nearby in vector space.
 
-::: {.column-margin}
 Node2Vec (Grover & Leskovec, 2016) extends DeepWalk by introducing biased random walks that interpolate between breadth-first and depth-first exploration, capturing different notions of network similarity.
-:::
 
 ```{python}
 #| fig-cap: "Random walks on graphs generate sequences that reveal structural similarity."
@@ -215,19 +227,21 @@ plt.tight_layout()
 plt.show()
 ```
 
-The beautiful part is what counts as "similar". Two nodes might be similar because they're directly connected (local similarity). Or they're similar because they play equivalent roles in different parts of the network (structural equivalence). Node2Vec captures both. By adjusting the random walk strategy, you can emphasize different notions of similarity without changing the core algorithm.
+What's the beautiful part? It's what counts as "similar". Two nodes might be similar because they're directly connected (local similarity). Or they're similar because they play equivalent roles in different parts of the network (structural equivalence).
 
-This dissolves the boundary between topology and geometry. The network's structure becomes a coordinate system. Questions about network properties become questions about spatial relationships in the embedding space.
+Node2Vec captures both. By adjusting the random walk strategy, you can emphasize different notions of similarity without changing the core algorithm.
+
+Notice what this does. It dissolves the boundary between topology and geometry. The network's structure becomes a coordinate system. Questions about network properties become questions about spatial relationships in the embedding space.
 
 ## Image Embeddings: Learning Visual Representations
 
-Images pose a different challenge. Pixels don't appear in "context" the way words do. But convolutional neural networks (CNNs) learn hierarchical representations where each layer captures increasingly abstract visual features. The final layer before classification is a vector embedding of the image.
+Now let's talk about images. Images pose a different challenge. Pixels don't appear in "context" the way words do.
 
-These embeddings exhibit the same geometric properties as word embeddings. Images of similar objects cluster together. The vector from "cat" images to "tiger" images parallels the vector from "dog" images to "wolf" images (the "wild version" relationship). You can do visual analogy through vector arithmetic.
+But convolutional neural networks (CNNs) learn hierarchical representations where each layer captures increasingly abstract visual features. The final layer before classification is a vector embedding of the image.
 
-::: {.column-margin}
+What do these embeddings reveal? They exhibit the same geometric properties as word embeddings. Images of similar objects cluster together. The vector from "cat" images to "tiger" images parallels the vector from "dog" images to "wolf" images (the "wild version" relationship). You can do visual analogy through vector arithmetic.
+
 Modern vision models like CLIP learn joint embeddings of images and text, creating a shared semantic space where "a photo of a cat" and actual cat photos occupy similar regions.
-:::
 
 ```{python}
 #| fig-cap: "CNN embeddings map images to vectors where visual similarity becomes geometric proximity."
@@ -304,15 +318,17 @@ plt.tight_layout()
 plt.show()
 ```
 
-What's remarkable is that these representations are learned without explicit supervision about semantic relationships. The network is trained to classify images (cat vs. dog vs. car vs. tree). The embedding space emerges as a byproduct. The geometric structure of visual similarity is discovered, not programmed.
+What's remarkable here? These representations are learned without explicit supervision about semantic relationships. The network is trained to classify images (cat vs. dog vs. car vs. tree). The embedding space emerges as a byproduct. The geometric structure of visual similarity is discovered, not programmed.
 
-This is representation learning's power. The same network architecture can be used for classification, similarity search, image retrieval, and transfer learning, all because the learned embeddings capture meaningful structure.
+This is representation learning's power. The same network architecture can be used for classification, similarity search, image retrieval, and transfer learning. Why? Because the learned embeddings capture meaningful structure.
 
 ## Molecules, Music, and More
 
-The technique generalizes to any structured domain. Molecular embeddings represent chemical compounds as vectors based on their structural properties and interactions. Similar molecules end up nearby, enabling drug discovery through geometric search. Musical embeddings capture harmonic and rhythmic relationships, making it possible to search for songs by similarity or generate variations.
+Let's zoom out. The technique generalizes to any structured domain. Molecular embeddings represent chemical compounds as vectors based on their structural properties and interactions. Similar molecules end up nearby, enabling drug discovery through geometric search.
 
-Even proteins can be embedded by treating amino acid sequences like sentences and using transformer models (the same architecture behind GPT and BERT). The learned embeddings capture functional relationships. Proteins with similar functions cluster together, even if their sequences differ significantly.
+Musical embeddings capture harmonic and rhythmic relationships. This makes it possible to search for songs by similarity or generate variations.
+
+What about proteins? They can be embedded by treating amino acid sequences like sentences and using transformer models (the same architecture behind GPT and BERT). The learned embeddings capture functional relationships. Proteins with similar functions cluster together, even if their sequences differ significantly.
 
 ```{python}
 #| fig-cap: "The representational framework applies across domains: from molecules to music to proteins."
@@ -386,11 +402,15 @@ plt.tight_layout()
 plt.show()
 ```
 
-The pattern is consistent. Define what "context" means for your domain. Learn representations where similar contexts produce similar vectors. Use the geometry of the resulting space to solve tasks. The specific implementation details vary, but the philosophical insight remains: meaning is relational, structure emerges from contrast, and continuous representations dissolve artificial boundaries.
+Notice the pattern. It's consistent. Define what "context" means for your domain. Learn representations where similar contexts produce similar vectors. Use the geometry of the resulting space to solve tasks.
+
+The specific implementation details vary. But the philosophical insight remains: meaning is relational, structure emerges from contrast, and continuous representations dissolve artificial boundaries.
 
 ## Time Series as Trajectories
 
-Time series present yet another perspective. Instead of embedding individual points, you can embed entire sequences as trajectories through latent space. Similar dynamic processes produce similar trajectories. You can measure similarity between time series by comparing their paths, cluster them by trajectory shape, or forecast by extrapolating the path.
+Now shift your attention to time. Time series present yet another perspective. Instead of embedding individual points, you can embed entire sequences as trajectories through latent space.
+
+What happens then? Similar dynamic processes produce similar trajectories. You can measure similarity between time series by comparing their paths. You can cluster them by trajectory shape. You can forecast by extrapolating the path.
 
 ```{python}
 #| fig-cap: "Time series as trajectories in latent space. Similar dynamics produce similar paths."
@@ -459,11 +479,13 @@ plt.tight_layout()
 plt.show()
 ```
 
-This perspective transforms time series analysis. Instead of comparing raw signals (which are sensitive to noise, scaling, and temporal alignment), you compare their underlying dynamical patterns as captured by their embeddings. The boundary between "similar" and "different" becomes a matter of distance in latent space rather than a hard classification rule.
+Why does this perspective transform time series analysis? Instead of comparing raw signals (which are sensitive to noise, scaling, and temporal alignment), you compare their underlying dynamical patterns as captured by their embeddings.
+
+The boundary between "similar" and "different" becomes a matter of distance in latent space. Not a hard classification rule.
 
 ## The Unified View
 
-Step back and see the pattern. Across all these domains, we're doing the same thing:
+Let's step back and see the pattern. Across all these domains, we're doing the same thing:
 
 1. Observe how entities relate (co-occur, connect, interact, transform).
 2. Learn vector representations that preserve these relationships.
@@ -471,17 +493,23 @@ Step back and see the pattern. Across all these domains, we're doing the same th
 4. Dissolve artificial boundaries in favor of smooth gradients.
 5. Answer questions geometrically rather than categorically.
 
-This is structuralism made computational. This is the insight that boundaries are observer-dependent, turned into working technology. This is the philosophy that meaning is relational, implemented as neural networks and optimization algorithms.
+What is this? This is structuralism made computational. This is the insight that boundaries are observer-dependent, turned into working technology. This is the philosophy that meaning is relational, implemented as neural networks and optimization algorithms.
 
-Modern machine learning increasingly operates in this representational paradigm. Large language models learn representations of language. Vision transformers learn representations of images. Graph neural networks learn representations of networks. Multimodal models learn shared representations across modalities. The representations themselves become the primary object of study.
+How does modern machine learning work? It increasingly operates in this representational paradigm. Large language models learn representations of language. Vision transformers learn representations of images. Graph neural networks learn representations of networks. Multimodal models learn shared representations across modalities.
+
+The representations themselves become the primary object of study.
 
 ## What We've Learned
 
-We started with regional dialects and generational labels, noticing that the boundaries we draw are often arbitrary. We explored structuralist philosophy, learning that meaning emerges from networks of contrast rather than intrinsic essence. We saw how word2vec operationalizes these ideas through contrastive learning and vector embeddings. And we've now seen how this insight generalizes across all structured domains.
+Let's return to where we started. We began with regional dialects and generational labels, noticing that the boundaries we draw are often arbitrary. We explored structuralist philosophy, learning that meaning emerges from networks of contrast rather than intrinsic essence.
 
-The lesson is philosophical and practical. Philosophically, it reminds us that the categories we use are tools of analysis, not features of reality. The world is continuous. The boundaries are ours. Practically, it suggests that whenever we're tempted to force phenomena into discrete boxes, we should ask: could a continuous representation serve better?
+Then we saw how word2vec operationalizes these ideas through contrastive learning and vector embeddings. And we've now seen how this insight generalizes across all structured domains.
 
-The representational turn in machine learning isn't just about better algorithms. It's about better epistemology. It's about building systems that preserve the nuance, gradation, and relational structure that discrete labels destroy. It's about melting the boundaries we've artificially frozen, and letting the true structure of similarity and difference emerge from the data itself.
+What's the lesson? It's both philosophical and practical. Philosophically, it reminds us that the categories we use are tools of analysis, not features of reality. The world is continuous. The boundaries are ours.
+
+Practically, it suggests that whenever we're tempted to force phenomena into discrete boxes, we should ask: could a continuous representation serve better?
+
+Why does this matter? The representational turn in machine learning isn't just about better algorithms. It's about better epistemology. It's about building systems that preserve the nuance, gradation, and relational structure that discrete labels destroy. It's about melting the boundaries we've artificially frozen. And letting the true structure of similarity and difference emerge from the data itself.
 
 ::: {.callout-tip title="Explore further"}
 Think about your own research domain. What are the discrete categories you use? Could they be embedded in continuous space? What new questions become answerable when you work with gradients instead of boundaries? The representational perspective often reveals structures that categorical thinking obscures.
