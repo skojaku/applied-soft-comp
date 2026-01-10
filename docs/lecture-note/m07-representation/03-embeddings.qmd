@@ -6,160 +6,44 @@ execute:
     cache: true
 ---
 
-::: {.callout-note title="What you'll learn in this section"}
-Vector embeddings operationalize structuralism by mapping concepts into continuous space where meaning becomes geometry. We'll explore how word2vec learns these representations through context and contrast, dissolving the artificial boundaries that discrete labels impose.
+::: {.callout-note title="What you'll learn in this module"}
+This module introduces vector embeddings as the computational realization of structuralism.
+
+You'll learn:
+
+- What **vector embeddings** are and how they dissolve artificial category boundaries.
+- How **word2vec** learns meaning from context through the distributional hypothesis.
+- The role of **contrastive learning** and negative sampling in carving semantic space.
+- Why **vector arithmetic** captures relationships as geometric directions.
+- The counterintuitive insight that meaning emerges from exclusion (Apoha theory) and the notion of **continuous representation**.
+- Practical consequences for understanding political ideology, semantic similarity, and beyond.
 :::
 
 ## The Limits of Traditional Classification
 
-Traditional machine learning builds decision boundaries. You collect labeled data, extract features, and train a classifier to draw a line (or hyperplane) separating Class A from Class B. The output is binary: spam or not-spam, fraud or legitimate, cat or dog.
+Let's talk about how traditional machine learning builds decision boundaries. You collect labeled data, extract features, and train a classifier to draw a line (or hyperplane) separating Class A from Class B. The output is binary: spam or not-spam, fraud or legitimate, cat or dog.
 
-```{python}
-#| fig-cap: "Traditional classification imposes hard boundaries in feature space."
-#| label: fig-classification-boundary
-#| code-fold: true
+This approach works when categories are genuinely discrete. But what about political ideology? You might lean liberal on economic issues but conservative on others. Your position isn't "left or right". It's a point in a multidimensional space. Forcing it into a binary choice destroys information.
 
-import matplotlib.pyplot as plt
-import numpy as np
-from sklearn.datasets import make_blobs
+What about word meanings? Is "dog" more similar to "wolf" or "cat"? The answer is "it depends". Dogs and wolves are biologically closer (same genus). Dogs and cats are domestically closer (both pets).
 
-np.random.seed(42)
-
-# Generate sample data
-X, y = make_blobs(n_samples=200, centers=2, n_features=2,
-                  center_box=(-3, 3), cluster_std=1.2)
-
-fig, ax = plt.subplots(figsize=(10, 8))
-
-# Plot points
-colors = ['#3498db', '#e74c3c']
-for i in range(2):
-    mask = y == i
-    ax.scatter(X[mask, 0], X[mask, 1], c=colors[i], s=100,
-              alpha=0.6, edgecolors='black', linewidth=1,
-              label=f'Class {i}')
-
-# Draw decision boundary
-x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
-x_boundary = np.linspace(x_min, x_max, 100)
-# Simple linear boundary
-y_boundary = 0.1 * x_boundary + 0.5
-
-ax.plot(x_boundary, y_boundary, 'k-', linewidth=3, label='Decision Boundary')
-ax.fill_between(x_boundary, y_boundary, y_max=8, alpha=0.1, color='red')
-ax.fill_between(x_boundary, y_boundary, y_min=-8, alpha=0.1, color='blue')
-
-ax.set_xlabel('Feature 1', fontsize=12, fontweight='bold')
-ax.set_ylabel('Feature 2', fontsize=12, fontweight='bold')
-ax.set_title('Classification: The World in Binary', fontsize=16, fontweight='bold')
-ax.legend(fontsize=11, loc='upper left')
-ax.grid(alpha=0.3, linestyle='--')
-ax.set_xlim(x_min, x_max)
-ax.set_ylim(-8, 8)
-
-plt.tight_layout()
-plt.show()
-```
-
-This approach works when categories are genuinely discrete. But what about political ideology? You might lean liberal on economic issues but conservative on others. Your position isn't "left or right"—it's a point in a multidimensional space. Forcing it into a binary choice destroys information.
-
-What about word meanings? Is "dog" more similar to "wolf" or "cat"? The answer is "it depends". Dogs and wolves are biologically closer (same genus). Dogs and cats are domestically closer (both pets). A classification system would force you to choose one dimension. A continuous representation can capture both simultaneously.
+A classification system would force you to choose one dimension. A continuous representation can capture both simultaneously.
 
 ## Enter Vector Embeddings
 
-Vector embeddings solve this by mapping each concept to coordinates in a high-dimensional continuous space. Instead of "this word belongs to category X", you get "this word lives at position $[0.23, -0.15, 0.87, ...]$ in 300-dimensional space". Similarity becomes geometric distance. Relationships become directional vectors.
+What's the solution? Vector embeddings solve this by mapping each concept to coordinates in a high-dimensional continuous space. Instead of "this word belongs to category X", you get "this word lives at position $[0.23, -0.15, 0.87, ...]$ in 300-dimensional space". Similarity becomes geometric distance. Relationships become directional vectors.
 
-This is the mathematical realization of structuralism. Each word's meaning is determined by its position relative to all other words. There are no hard boundaries, only neighborhoods of varying density. The gradation that exists in reality is preserved in the representation.
+This is the mathematical realization of structuralism. Each word's meaning is determined by its position relative to all other words. There are no hard boundaries, only neighborhoods of varying density.
 
-```{python}
-#| fig-cap: "In embedding space, concepts form continuous neighborhoods without hard boundaries."
-#| label: fig-embedding-space
-#| code-fold: true
-
-import matplotlib.pyplot as plt
-import numpy as np
-from sklearn.manifold import MDS
-
-np.random.seed(42)
-
-# Create semantic clusters with overlaps
-animals_domestic = np.random.randn(8, 2) * 0.4 + np.array([0, 2])
-animals_wild = np.random.randn(8, 2) * 0.4 + np.array([1.5, 2.5])
-furniture = np.random.randn(8, 2) * 0.4 + np.array([-2, -1])
-colors = np.random.randn(8, 2) * 0.4 + np.array([2, -1.5])
-
-labels_domestic = ['dog', 'cat', 'hamster', 'rabbit', 'bird', 'fish', 'horse', 'cow']
-labels_wild = ['wolf', 'fox', 'bear', 'lion', 'tiger', 'eagle', 'hawk', 'deer']
-labels_furniture = ['chair', 'table', 'sofa', 'desk', 'bed', 'lamp', 'shelf', 'cabinet']
-labels_colors = ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'brown']
-
-fig, ax = plt.subplots(figsize=(12, 10))
-
-# Plot clusters with gradients
-scatter1 = ax.scatter(animals_domestic[:, 0], animals_domestic[:, 1],
-                     c=range(len(animals_domestic)), cmap='Blues',
-                     s=300, alpha=0.6, edgecolors='black', linewidth=1.5)
-
-scatter2 = ax.scatter(animals_wild[:, 0], animals_wild[:, 1],
-                     c=range(len(animals_wild)), cmap='Greens',
-                     s=300, alpha=0.6, edgecolors='black', linewidth=1.5)
-
-scatter3 = ax.scatter(furniture[:, 0], furniture[:, 1],
-                     c=range(len(furniture)), cmap='Oranges',
-                     s=300, alpha=0.6, edgecolors='black', linewidth=1.5)
-
-scatter4 = ax.scatter(colors[:, 0], colors[:, 1],
-                     c=range(len(colors)), cmap='RdPu',
-                     s=300, alpha=0.6, edgecolors='black', linewidth=1.5)
-
-# Add labels
-for i, label in enumerate(labels_domestic):
-    ax.text(animals_domestic[i, 0], animals_domestic[i, 1], label,
-           ha='center', va='center', fontsize=9, fontweight='bold')
-
-for i, label in enumerate(labels_wild):
-    ax.text(animals_wild[i, 0], animals_wild[i, 1], label,
-           ha='center', va='center', fontsize=9, fontweight='bold')
-
-for i, label in enumerate(labels_furniture):
-    ax.text(furniture[i, 0], furniture[i, 1], label,
-           ha='center', va='center', fontsize=9, fontweight='bold')
-
-for i, label in enumerate(labels_colors):
-    ax.text(colors[i, 0], colors[i, 1], label,
-           ha='center', va='center', fontsize=9, fontweight='bold')
-
-# Add cluster annotations
-ax.text(0, 3.5, 'Domestic\nAnimals', ha='center', fontsize=12,
-       fontweight='bold', bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.7))
-ax.text(1.5, 3.7, 'Wild\nAnimals', ha='center', fontsize=12,
-       fontweight='bold', bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.7))
-ax.text(-2, -2.3, 'Furniture', ha='center', fontsize=12,
-       fontweight='bold', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.7))
-ax.text(2, -2.7, 'Colors', ha='center', fontsize=12,
-       fontweight='bold', bbox=dict(boxstyle='round', facecolor='pink', alpha=0.7))
-
-ax.set_xlim(-4, 4)
-ax.set_ylim(-4, 4.5)
-ax.axis('off')
-ax.set_title('Embedding Space: Continuous Neighborhoods of Meaning',
-            fontsize=16, fontweight='bold', pad=20)
-
-plt.tight_layout()
-plt.show()
-```
-
-Notice the overlap between domestic and wild animals. "Dog" is close to "wolf" because they're related species. But "dog" is also in the domestic cluster near "cat". The space naturally captures multiple dimensions of similarity without forcing categorical choices.
+The gradation that exists in reality is preserved in the representation. Notice the overlap between domestic and wild animals. "Dog" is close to "wolf" because they're related species. But "dog" is also in the domestic cluster near "cat". The space naturally captures multiple dimensions of similarity without forcing categorical choices.
 
 ## How Word2Vec Works: Context is Everything
 
-Word2vec learns these embeddings from raw text without any human-provided definitions or labels. The core insight: a word's meaning is determined by the company it keeps. Words that appear in similar contexts have similar meanings.
+How does word2vec learn these embeddings? It learns from raw text without any human-provided definitions or labels. The core insight: a word's meaning is determined by the company it keeps. Words that appear in similar contexts have similar meanings.
 
 This is pure metonymy in action. We're not grouping words by what they are (metaphor), but by where they appear (contiguity). "Dog" means what it means because it shows up near "bark", "pet", "leash", "puppy", "tail". If another word appears in the same neighborhood of contexts, it must mean something similar.
 
-::: {.column-margin}
-The distributional hypothesis, formalized by Zellig Harris (1954) and J.R. Firth (1957), states: "You shall know a word by the company it keeps." Word2vec is its computational realization.
-:::
+This principle is called the distributional hypothesis, formalized by Zellig Harris (1954) and J.R. Firth (1957): "You shall know a word by the company it keeps." Word2vec is its computational realization.
 
 The algorithm slides a window over text, creating training pairs. If the window is size 2 and you encounter "The quick brown fox", you get pairs like:
 
@@ -167,207 +51,30 @@ The algorithm slides a window over text, creating training pairs. If the window 
 - (brown, quick)
 - (brown, fox)
 
-The word in the center (brown) is the target. The surrounding words are the context. Word2vec learns to predict context from target, or target from context. In doing so, it builds vector representations where words with similar contexts end up nearby.
+The word in the center (brown) is the target. The surrounding words are the context. Word2vec learns to predict context from target, or target from context.
 
-```{python}
-#| fig-cap: "A sliding window over text generates training pairs without human labeling."
-#| label: fig-sliding-window
-#| code-fold: true
+In doing so, it builds vector representations where words with similar contexts end up nearby.
 
-import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle, FancyBboxPatch
-
-fig, ax = plt.subplots(figsize=(14, 8))
-
-sentence = "The quick brown fox jumps over the lazy dog".split()
-window_size = 2
-
-# Show three different window positions
-window_positions = [2, 4, 7]  # Positions for "brown", "jumps", "lazy"
-
-for row, center_idx in enumerate(window_positions):
-    y_base = 2.5 - row * 2.5
-
-    # Draw all words
-    for i, word in enumerate(sentence):
-        x = i * 1.2
-
-        # Determine if word is in current window
-        in_window = abs(i - center_idx) <= window_size and i != center_idx
-        is_center = i == center_idx
-
-        if is_center:
-            # Center word (target)
-            box = FancyBboxPatch((x - 0.4, y_base - 0.25), 0.8, 0.5,
-                                boxstyle="round,pad=0.05",
-                                facecolor='#e74c3c', edgecolor='black',
-                                linewidth=2.5)
-            ax.add_patch(box)
-            ax.text(x, y_base, word, ha='center', va='center',
-                   fontsize=11, fontweight='bold', color='white')
-
-        elif in_window:
-            # Context words
-            box = FancyBboxPatch((x - 0.4, y_base - 0.25), 0.8, 0.5,
-                                boxstyle="round,pad=0.05",
-                                facecolor='#3498db', edgecolor='black',
-                                linewidth=2)
-            ax.add_patch(box)
-            ax.text(x, y_base, word, ha='center', va='center',
-                   fontsize=11, fontweight='bold', color='white')
-
-        else:
-            # Outside window
-            ax.text(x, y_base, word, ha='center', va='center',
-                   fontsize=11, color='gray', alpha=0.5)
-
-    # Add window bracket
-    window_start = (center_idx - window_size) * 1.2
-    window_end = (center_idx + window_size + 1) * 1.2
-    ax.plot([window_start - 0.5, window_end - 0.7],
-           [y_base + 0.5, y_base + 0.5],
-           'k-', linewidth=2)
-    ax.plot([window_start - 0.5, window_start - 0.5],
-           [y_base + 0.4, y_base + 0.5], 'k-', linewidth=2)
-    ax.plot([window_end - 0.7, window_end - 0.7],
-           [y_base + 0.4, y_base + 0.5], 'k-', linewidth=2)
-
-    # Add training pairs annotation
-    center_word = sentence[center_idx]
-    context_words = [sentence[i] for i in range(max(0, center_idx - window_size),
-                                                 min(len(sentence), center_idx + window_size + 1))
-                    if i != center_idx]
-
-    pairs_text = f"Target: '{center_word}' → Context: {', '.join(context_words)}"
-    ax.text(5, y_base - 0.7, pairs_text, ha='center', va='top',
-           fontsize=9, style='italic',
-           bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
-
-ax.set_xlim(-1, 11)
-ax.set_ylim(-5.5, 3.5)
-ax.axis('off')
-
-# Add legend
-legend_elements = [
-    plt.Rectangle((0, 0), 1, 1, fc='#e74c3c', edgecolor='black', label='Target Word'),
-    plt.Rectangle((0, 0), 1, 1, fc='#3498db', edgecolor='black', label='Context Words'),
-]
-ax.legend(handles=legend_elements, loc='upper right', fontsize=11)
-
-ax.set_title('Word2Vec Sliding Window: Learning from Context',
-            fontsize=16, fontweight='bold', pad=20)
-
-plt.tight_layout()
-plt.show()
-```
 
 ## Contrastive Learning: Meaning Through Negation
 
 But there's a problem. If you only train the model to predict which words appear together, it might learn that all words are related to all other words (since technically, any word could appear anywhere). You need negative examples. You need to teach the model not just what "dog" appears with, but what it doesn't appear with.
 
-This is where contrastive learning enters. For each true context pair ("brown", "fox"), you generate several negative samples by randomly selecting words from the vocabulary ("brown", "economics"), ("brown", "satellite"). The model learns to maximize the similarity between true pairs and minimize the similarity between false pairs.
+What's the solution? This is where contrastive learning enters. For each true context pair ("brown", "fox"), you generate several negative samples by randomly selecting words from the vocabulary ("brown", "economics"), ("brown", "satellite"). The model learns to maximize the similarity between true pairs and minimize the similarity between false pairs.
 
 This is Apoha theory in action. The meaning of "brown" emerges not from defining what "brown" is, but from systematically excluding what it is not. By pushing away "economics" and "satellite", the model carves out a region of semantic space that captures "brown-ness" through negation.
 
-::: {.column-margin}
-Negative sampling, introduced in Mikolov et al. (2013), makes word2vec computationally tractable by avoiding the expensive softmax over the full vocabulary.
-:::
+This technique is called negative sampling, introduced in Mikolov et al. (2013). It makes word2vec computationally tractable by avoiding the expensive softmax over the full vocabulary.
 
-```{python}
-#| fig-cap: "Contrastive learning: pull related words together, push unrelated words apart."
-#| label: fig-contrastive
-#| code-fold: true
-
-import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib.patches import FancyArrowPatch, Circle
-
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7))
-
-# Initial state (before training)
-np.random.seed(42)
-target = np.array([0, 0])
-positive = np.random.randn(4, 2) * 1.5  # Context words
-negative = np.random.randn(6, 2) * 1.5  # Random words
-
-# Plot initial state
-ax1.scatter(*target, s=500, c='#e74c3c', marker='*', edgecolors='black',
-           linewidth=2, zorder=3, label='Target: "brown"')
-ax1.scatter(positive[:, 0], positive[:, 1], s=300, c='#3498db', alpha=0.7,
-           edgecolors='black', linewidth=1.5, zorder=2, label='Context: "fox", "quick"...')
-ax1.scatter(negative[:, 0], negative[:, 1], s=200, c='#95a5a6', alpha=0.5,
-           edgecolors='black', linewidth=1, zorder=1, label='Random: "economics", "satellite"...')
-
-# Add circle to show initial spread
-circle = Circle((0, 0), 2.5, fill=False, edgecolor='gray',
-               linestyle='--', linewidth=2, alpha=0.5)
-ax1.add_patch(circle)
-
-ax1.set_xlim(-3.5, 3.5)
-ax1.set_ylim(-3.5, 3.5)
-ax1.set_aspect('equal')
-ax1.legend(loc='upper left', fontsize=10)
-ax1.set_title('Before Training: Random Positions', fontsize=14, fontweight='bold')
-ax1.grid(alpha=0.3, linestyle='--')
-ax1.axhline(0, color='k', linewidth=0.5, alpha=0.3)
-ax1.axvline(0, color='k', linewidth=0.5, alpha=0.3)
-
-# After training
-# Positive samples moved closer
-positive_trained = positive * 0.4 + target * 0.6
-# Negative samples pushed away
-negative_trained = negative * 1.8
-
-ax2.scatter(*target, s=500, c='#e74c3c', marker='*', edgecolors='black',
-           linewidth=2, zorder=3, label='Target: "brown"')
-ax2.scatter(positive_trained[:, 0], positive_trained[:, 1], s=300,
-           c='#3498db', alpha=0.7, edgecolors='black', linewidth=1.5,
-           zorder=2, label='Context words (pulled close)')
-ax2.scatter(negative_trained[:, 0], negative_trained[:, 1], s=200,
-           c='#95a5a6', alpha=0.5, edgecolors='black', linewidth=1,
-           zorder=1, label='Random words (pushed away)')
-
-# Draw arrows showing movement
-for i in range(len(positive)):
-    arrow = FancyArrowPatch(positive[i], positive_trained[i],
-                          arrowstyle='->', mutation_scale=15, linewidth=1.5,
-                          color='#3498db', alpha=0.6)
-    ax2.add_patch(arrow)
-
-for i in range(len(negative)):
-    arrow = FancyArrowPatch(negative[i], negative_trained[i],
-                          arrowstyle='->', mutation_scale=15, linewidth=1.5,
-                          color='#95a5a6', alpha=0.4)
-    ax2.add_patch(arrow)
-
-# Add tight circle showing cluster formation
-circle2 = Circle((0, 0), 0.8, fill=False, edgecolor='#3498db',
-                linestyle='--', linewidth=2.5, alpha=0.7)
-ax2.add_patch(circle2)
-
-ax2.set_xlim(-3.5, 3.5)
-ax2.set_ylim(-3.5, 3.5)
-ax2.set_aspect('equal')
-ax2.legend(loc='upper left', fontsize=10)
-ax2.set_title('After Training: Meaning Emerges from Contrast',
-             fontsize=14, fontweight='bold')
-ax2.grid(alpha=0.3, linestyle='--')
-ax2.axhline(0, color='k', linewidth=0.5, alpha=0.3)
-ax2.axvline(0, color='k', linewidth=0.5, alpha=0.3)
-
-plt.tight_layout()
-plt.show()
-```
-
-The math is elegant. The probability that word $j$ appears in the context of word $i$ is:
+Let's walk through the math. The probability that word $j$ appears in the context of word $i$ is:
 
 $$
 P(j \vert i) = \frac{\exp(\mathbf{u}_i \cdot \mathbf{v}_j)}{\sum_{k=1}^{V} \exp(\mathbf{u}_i \cdot \mathbf{v}_k)}
 $$
 
-where $\mathbf{u}_i$ is the target word's vector and $\mathbf{v}_j$ is the context word's vector. The dot product $\mathbf{u}_i \cdot \mathbf{v}_j$ measures their alignment. Higher dot product means higher probability. The model adjusts vectors to maximize this probability for true pairs and minimize it for negative samples.
+Here $\mathbf{u}_i$ is the target word's vector and $\mathbf{v}_j$ is the context word's vector. The dot product $\mathbf{u}_i \cdot \mathbf{v}_j$ measures their alignment. Higher dot product means higher probability.
 
-This is structuralism made computable. The entire semantic system emerges from patterns of co-occurrence and exclusion, with no predefined categories or boundaries.
+The model adjusts vectors to maximize this probability for true pairs and minimize it for negative samples. This is structuralism made computable. The entire semantic system emerges from patterns of co-occurrence and exclusion, with no predefined categories or boundaries.
 
 ## The Magic of Vector Arithmetic
 
@@ -375,174 +82,35 @@ Once you have vectors, you can do arithmetic on meaning. The famous example:
 
 $$ \vec{\text{King}} - \vec{\text{Man}} + \vec{\text{Woman}} \approx \vec{\text{Queen}} $$
 
-This works because relationships are directions in space. The vector from "Man" to "King" represents the relationship "royal-version-of". When you apply that same direction to "Woman", you arrive near "Queen".
+Why does this work? Relationships are directions in space. The vector from "Man" to "King" represents the relationship "royal-version-of". When you apply that same direction to "Woman", you arrive near "Queen".
 
-```{python}
-#| echo: true
-import gensim.downloader as api
+The arrows from countries to capitals are parallel. They point in roughly the same direction because they represent the same relationship. This structure wasn't programmed in.
 
-# Load pre-trained embeddings
-model = api.load("word2vec-google-news-300")
-
-# Vector arithmetic
-result = model.most_similar(positive=['king', 'woman'],
-                           negative=['man'], topn=5)
-
-print("king - man + woman =")
-for word, similarity in result:
-    print(f"  {word:15s} {similarity:.3f}")
-```
-
-```{python}
-#| echo: false
-#| fig-cap: "Relationships become consistent directions in vector space. Geography is encoded as geometry."
-#| label: fig-vector-arithmetic
-#| code-fold: true
-
-import matplotlib.pyplot as plt
-import numpy as np
-from sklearn.decomposition import PCA
-
-# Get word vectors
-words_countries = ['France', 'Germany', 'Italy', 'Spain']
-words_capitals = ['Paris', 'Berlin', 'Rome', 'Madrid']
-
-vectors_countries = np.array([model[w] for w in words_countries])
-vectors_capitals = np.array([model[w] for w in words_capitals])
-
-# Reduce to 2D
-all_vectors = np.vstack([vectors_countries, vectors_capitals])
-pca = PCA(n_components=2)
-coords = pca.fit_transform(all_vectors)
-
-coords_countries = coords[:len(words_countries)]
-coords_capitals = coords[len(words_countries):]
-
-# Plot
-fig, ax = plt.subplots(figsize=(12, 10))
-
-# Plot points
-for i, (country, capital) in enumerate(zip(words_countries, words_capitals)):
-    # Country
-    ax.scatter(coords_countries[i, 0], coords_countries[i, 1],
-              s=400, c='#e74c3c', marker='o', edgecolors='black',
-              linewidth=2, alpha=0.8, zorder=3)
-    ax.text(coords_countries[i, 0], coords_countries[i, 1] - 0.15,
-           country, ha='center', va='top', fontsize=13, fontweight='bold')
-
-    # Capital
-    ax.scatter(coords_capitals[i, 0], coords_capitals[i, 1],
-              s=400, c='#3498db', marker='s', edgecolors='black',
-              linewidth=2, alpha=0.8, zorder=3)
-    ax.text(coords_capitals[i, 0], coords_capitals[i, 1] + 0.15,
-           capital, ha='center', va='bottom', fontsize=13, fontweight='bold')
-
-    # Arrow from country to capital
-    ax.annotate('', xy=(coords_capitals[i, 0], coords_capitals[i, 1]),
-               xytext=(coords_countries[i, 0], coords_countries[i, 1]),
-               arrowprops=dict(arrowstyle='->', lw=2.5, color='gray', alpha=0.7))
-
-ax.set_aspect('equal')
-ax.grid(alpha=0.3, linestyle='--')
-ax.set_title('The "Capital Of" Relationship as Parallel Vectors',
-            fontsize=16, fontweight='bold', pad=20)
-
-# Add legend
-from matplotlib.patches import Patch
-legend_elements = [
-    Patch(facecolor='#e74c3c', edgecolor='black', label='Countries'),
-    Patch(facecolor='#3498db', edgecolor='black', label='Capitals'),
-]
-ax.legend(handles=legend_elements, loc='upper left', fontsize=12)
-
-plt.tight_layout()
-plt.show()
-```
-
-The arrows from countries to capitals are parallel. They point in roughly the same direction because they represent the same relationship. This structure wasn't programmed in. It emerged from observing how words co-occur in text. The model discovered that "France" and "Paris" appear in similar contexts to how "Germany" and "Berlin" appear, and encoded this as geometric parallelism.
+It emerged from observing how words co-occur in text. The model discovered that "France" and "Paris" appear in similar contexts to how "Germany" and "Berlin" appear, and encoded this as geometric parallelism.
 
 ## Dissolving Boundaries
 
 Let's return to where we started. Traditional classification forces the world into boxes. Word embeddings work differently. They map concepts into a continuous space where boundaries are soft and meaning is relational.
 
-Consider political ideology. Instead of "left" vs "right", imagine each political position as a point in a high-dimensional space. Two politicians might be close on economic policy but far apart on social issues. Their overall similarity is measured by Euclidean distance across all dimensions. There's no moment where someone crosses from "liberal" to "conservative"—there's only smooth variation.
+Consider political ideology. Instead of "left" vs "right", imagine each political position as a point in a high-dimensional space. Two politicians might be close on economic policy but far apart on social issues.
 
-```{python}
-#| fig-cap: "Political positions as continuous coordinates rather than discrete labels."
-#| label: fig-political-space
-#| code-fold: true
+Their overall similarity is measured by Euclidean distance across all dimensions. There's no moment where someone crosses from "liberal" to "conservative". There's only smooth variation.
 
-import matplotlib.pyplot as plt
-import numpy as np
+This isn't just philosophically satisfying. It's practically powerful. When you preserve the continuous structure of reality, you can answer questions that categorical systems can't handle.
 
-np.random.seed(42)
-
-# Generate synthetic political positions
-n_points = 40
-economic = np.random.randn(n_points)
-social = np.random.randn(n_points)
-
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7))
-
-# Left: Traditional view (quadrants)
-ax1.scatter(economic, social, s=200, c='#95a5a6', alpha=0.6,
-           edgecolors='black', linewidth=1)
-
-# Draw boundaries
-ax1.axhline(0, color='black', linewidth=2)
-ax1.axvline(0, color='black', linewidth=2)
-
-# Label quadrants
-ax1.text(-1.5, 1.5, 'Left-Liberal', fontsize=14, fontweight='bold',
-        ha='center', bbox=dict(boxstyle='round', facecolor='lightblue'))
-ax1.text(1.5, 1.5, 'Right-Liberal', fontsize=14, fontweight='bold',
-        ha='center', bbox=dict(boxstyle='round', facecolor='lightcoral'))
-ax1.text(-1.5, -1.5, 'Left-Conservative', fontsize=14, fontweight='bold',
-        ha='center', bbox=dict(boxstyle='round', facecolor='lightgreen'))
-ax1.text(1.5, -1.5, 'Right-Conservative', fontsize=14, fontweight='bold',
-        ha='center', bbox=dict(boxstyle='round', facecolor='lightyellow'))
-
-ax1.set_xlabel('Economic Policy →', fontsize=12, fontweight='bold')
-ax1.set_ylabel('Social Policy →', fontsize=12, fontweight='bold')
-ax1.set_title('Traditional View: Discrete Quadrants', fontsize=14, fontweight='bold')
-ax1.set_xlim(-3, 3)
-ax1.set_ylim(-3, 3)
-ax1.grid(alpha=0.3, linestyle='--')
-
-# Right: Continuous view
-scatter = ax2.scatter(economic, social, s=200, c=np.sqrt(economic**2 + social**2),
-                     cmap='viridis', alpha=0.7, edgecolors='black', linewidth=1)
-
-# Draw smooth gradient circles
-for radius in [0.5, 1.0, 1.5, 2.0]:
-    circle = plt.Circle((0, 0), radius, fill=False, edgecolor='gray',
-                       linestyle='--', linewidth=1, alpha=0.3)
-    ax2.add_patch(circle)
-
-ax2.set_xlabel('Economic Policy →', fontsize=12, fontweight='bold')
-ax2.set_ylabel('Social Policy →', fontsize=12, fontweight='bold')
-ax2.set_title('Embedding View: Continuous Space', fontsize=14, fontweight='bold')
-ax2.set_xlim(-3, 3)
-ax2.set_ylim(-3, 3)
-ax2.grid(alpha=0.3, linestyle='--')
-
-# Add colorbar
-cbar = plt.colorbar(scatter, ax=ax2)
-cbar.set_label('Distance from Center', fontsize=11)
-
-plt.tight_layout()
-plt.show()
-```
-
-This isn't just philosophically satisfying. It's practically powerful. When you preserve the continuous structure of reality, you can answer questions that categorical systems can't handle. What's 70% of the way between two concepts? Which items are on the boundary of a cluster? How does meaning shift gradually across a spectrum? Embeddings make these questions answerable.
+What's 70% of the way between two concepts? Which items are on the boundary of a cluster? How does meaning shift gradually across a spectrum? Embeddings make these questions answerable.
 
 ## Beyond Words
 
-The word2vec insight generalizes. Any discrete symbol in a structured system can be embedded. Users in a social network. Products in a catalog. Genes in a regulatory network. Nodes in any graph. The technique is the same: observe co-occurrence patterns, learn representations where similar entities end up nearby, and dissolve the artificial boundaries that discrete labels impose.
+The word2vec insight generalizes. Any discrete symbol in a structured system can be embedded. Users in a social network. Products in a catalog. Genes in a regulatory network. Nodes in any graph.
 
-This is the representational turn in machine learning. Instead of building classifiers that make decisions, we build encoders that map concepts into continuous space. The space itself becomes the knowledge. Relationships emerge as geometry. Similarity becomes distance. Analogy becomes vector arithmetic.
+The technique is the same: observe co-occurrence patterns, learn representations where similar entities end up nearby, and dissolve the artificial boundaries that discrete labels impose.
 
-The next section explores how this perspective extends beyond text to images, graphs, time series, and more. The structuralist insight—that meaning is relational and boundaries are observer-dependent—becomes a universal principle for understanding complex systems through their embedded representations.
+This is the representational turn in machine learning. Instead of building classifiers that make decisions, we build encoders that map concepts into continuous space. The space itself becomes the knowledge.
+
+Relationships emerge as geometry. Similarity becomes distance. Analogy becomes vector arithmetic.
+
+The next section explores how this perspective extends beyond text to images, graphs, time series, and more. The structuralist insight (that meaning is relational and boundaries are observer-dependent) becomes a universal principle for understanding complex systems through their embedded representations.
 
 ::: {.callout-tip title="Try it yourself"}
 Load a pre-trained word2vec model and explore its semantic neighborhoods. Start with a concept you care about and query its nearest neighbors. Then try vector arithmetic with analogies. What relationships does the model capture? What does it miss? This hands-on exploration reveals both the power and limitations of learned representations.
