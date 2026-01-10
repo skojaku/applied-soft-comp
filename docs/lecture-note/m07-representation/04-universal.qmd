@@ -7,7 +7,14 @@ execute:
 ---
 
 ::: {.callout-note title="What you'll learn in this module"}
-This module explores a surprising empirical discovery about learned representations across different models. We examine the Strong Platonic Representation Hypothesis, which claims that all embedding models of sufficient scale learn nearly identical geometric structures of meaning. You will see how different models create fundamentally incomparable spaces that nevertheless share a universal latent structure. You will understand how this hidden geometry can be discovered through unsupervised translation without paired data. Finally, you will confront what this means for both the science of representation learning and the security of vector databases.
+This module explores a surprising empirical discovery about learned representations across different models.
+
+You'll learn:
+
+- What the **Strong Platonic Representation Hypothesis** claims and why all sufficiently large embedding models may learn nearly identical geometric structures.
+- How to discover **universal latent structure** hidden within fundamentally incomparable embedding spaces.
+- The technique of **unsupervised translation** (vec2vec) that aligns embedding spaces without paired data using cycle consistency.
+- Practical consequences for representation learning and the security of vector databases.
 :::
 
 ## The Puzzle of Incomparable Spaces
@@ -16,7 +23,7 @@ Let's start with a practical question that reveals something profound. Suppose y
 
 Model A might be based on BERT (bidirectional transformer). Model B might use T5 (encoder-decoder architecture). They have different numbers of parameters. They were trained on different corpora (Wikipedia versus web crawl data). They produce embeddings of different dimensions (768-d versus 1024-d).
 
-Now here's the question: are these two models learning the same thing?
+Now here's the question. Are these two models learning the same thing?
 
 You might expect the answer to be "no, obviously not." Different architectures, different training data, different optimization procedures. Why would they converge to the same representation?
 
@@ -83,153 +90,51 @@ plt.tight_layout()
 plt.show()
 ```
 
-What do these two spaces have in common? At first glance, nothing. The coordinates are different. The distances are different. If you compute the cosine similarity between two words in Model A versus Model B, you get completely different numbers.
+What do these two spaces have in common? At first glance, nothing. The coordinates are different. The distances are different.
 
-The spaces appear fundamentally incomparable.
+If you compute the cosine similarity between two words in Model A versus Model B, you get completely different numbers. The spaces appear fundamentally incomparable.
 
 ## The Platonic Representation Hypothesis
 
 Yet recent research suggests something remarkable. Despite these surface differences, the two models may have learned essentially the same underlying structure.
 
-This conjecture is called the Platonic Representation Hypothesis. The hypothesis claims that all models of sufficient capacity, when trained on rich enough data, converge to the same latent representation of reality.
+This conjecture is called the Platonic Representation Hypothesis. The hypothesis claims that all models of sufficient capacity, when trained on rich enough data, converge to the same latent representation of reality. The original hypothesis was introduced by Huh et al. (2024) in the context of vision models (see [arXiv:2405.07987](https://arxiv.org/abs/2405.07987)).
 
 The original hypothesis focused on image models. Researchers observed that different CNN architectures, when trained on ImageNet, produced internal representations that aligned surprisingly well. The models discovered the same features (edges, textures, object parts) in the same hierarchical order, even though no one explicitly programmed this structure.
 
-Why would this happen? One explanation is that the structure isn't in the model. It's in the world. Visual recognition requires detecting edges, because edges are invariant properties of physical objects. It requires composing local features into global patterns, because objects have hierarchical part-whole structure. The optimal representation for vision isn't arbitrary. It's constrained by the statistical structure of natural images.
+Why would this happen? One explanation is that the structure isn't in the model. It's in the world.
 
-If you train many different models on the same underlying reality, they should all discover the same optimal representation. The architecture and training procedure are like different paths up a mountain. They take different routes, but they all converge toward the same peak.
+Visual recognition requires detecting edges, because edges are invariant properties of physical objects. It requires composing local features into global patterns, because objects have hierarchical part-whole structure. The optimal representation for vision isn't arbitrary. It's constrained by the statistical structure of natural images.
 
-::: {.column-margin}
-The original Platonic Representation Hypothesis was introduced by Huh et al. (2024) in the context of vision models. See: [Huh, M., Cheung, B., Wang, T., & Isola, P. (2024). The Platonic Representation Hypothesis. arXiv:2405.07987](https://arxiv.org/abs/2405.07987)
-:::
+If you train many different models on the same underlying reality, they should all discover the same optimal representation. Think of it this way. The architecture and training procedure are like different paths up a mountain. They take different routes, but they all converge toward the same peak.
 
 ## The Strong Version: Text Can Be Translated
 
-Jha et al. (2024) proposed a stronger, constructive version of this hypothesis for text embeddings.
+![](https://vec2vec.github.io/assets/universal.png)
+
+Jha et al. (2024) proposed a stronger, constructive version of this hypothesis for text embeddings. They introduced vec2vec, an unsupervised method for translating between embedding spaces (see [project page](https://rishibommasani.github.io/vec2vec/)).
 
 **Strong Platonic Representation Hypothesis:** The universal latent structure of text representations not only exists, but can be learned and harnessed to translate representations from one space to another without any paired data or encoders.
 
 This is a bold claim. It says you can take embeddings from Model A (which you don't have access to), and translate them into the space of Model B, without ever seeing the same text encoded by both models. You don't need parallel corpora. You don't need paired examples. You only need unpaired samples from each space.
 
-How is this possible? If the underlying semantic structure is truly universal, then the two embedding spaces are just different coordinate systems describing the same geometry. Model A and Model B are like two people describing the same city using different maps. One uses latitude-longitude. The other uses distance from landmarks. The coordinate systems differ, but the city's structure (which streets connect, which neighborhoods are close) remains invariant.
+How is this possible? If the underlying semantic structure is truly universal, then the two embedding spaces are just different coordinate systems describing the same geometry.
+
+Think of Model A and Model B as two people describing the same city using different maps. One uses latitude-longitude. The other uses distance from landmarks. The coordinate systems differ, but the city's structure (which streets connect, which neighborhoods are close) remains invariant.
 
 Translation becomes a geometric alignment problem. You need to discover the rotation, scaling, and transformation that maps one coordinate system onto the other while preserving distances and relationships.
-
-::: {.column-margin}
-This work introduces vec2vec, an unsupervised method for translating between embedding spaces. See: [Jha, R., Zhang, C., Shmatikov, V., & Morris, J. X. (2024). Harnessing the Universal Geometry of Embeddings. arXiv preprint.](https://rishibommasani.github.io/vec2vec/)
-:::
-
-```{python}
-#| fig-cap: "The same semantic structure represented in two different coordinate systems. Translation preserves relationships."
-#| label: fig-translation-concept
-#| code-fold: true
-
-import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib.patches import FancyArrowPatch
-
-fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 6))
-
-np.random.seed(42)
-
-# Original space (Model A)
-words_A = {
-    'king': np.array([1, 2]),
-    'queen': np.array([1, 1]),
-    'man': np.array([2, 2]),
-    'woman': np.array([2, 1]),
-}
-
-for word, pos in words_A.items():
-    ax1.scatter(*pos, s=300, c='#3498db', edgecolors='black', linewidth=2, zorder=3)
-    ax1.text(pos[0], pos[1] + 0.3, word, ha='center', fontsize=11, fontweight='bold')
-
-# Draw relationship vectors
-arrow1 = FancyArrowPatch(words_A['man'], words_A['king'],
-                        arrowstyle='->', mutation_scale=20, linewidth=2.5,
-                        color='#e74c3c', alpha=0.7, label='male→royal')
-arrow2 = FancyArrowPatch(words_A['woman'], words_A['queen'],
-                        arrowstyle='->', mutation_scale=20, linewidth=2.5,
-                        color='#e74c3c', alpha=0.7)
-ax1.add_patch(arrow1)
-ax1.add_patch(arrow2)
-
-ax1.set_xlim(0, 3.5)
-ax1.set_ylim(0, 3.5)
-ax1.set_xlabel('Dimension 1', fontsize=11, fontweight='bold')
-ax1.set_ylabel('Dimension 2', fontsize=11, fontweight='bold')
-ax1.set_title('Model A Space', fontsize=13, fontweight='bold')
-ax1.grid(alpha=0.3, linestyle='--')
-ax1.set_aspect('equal')
-ax1.legend([arrow1], ['gender→royal'], loc='upper left', fontsize=10)
-
-# Transformed space (Model B) - rotated and scaled
-rotation = np.array([[np.cos(0.6), -np.sin(0.6)],
-                     [np.sin(0.6), np.cos(0.6)]])
-words_B = {word: (pos @ rotation.T) * 1.5 + np.array([2, 2])
-           for word, pos in words_A.items()}
-
-for word, pos in words_B.items():
-    ax2.scatter(*pos, s=300, c='#27ae60', edgecolors='black', linewidth=2, zorder=3)
-    ax2.text(pos[0], pos[1] + 0.3, word, ha='center', fontsize=11, fontweight='bold')
-
-arrow3 = FancyArrowPatch(words_B['man'], words_B['king'],
-                        arrowstyle='->', mutation_scale=20, linewidth=2.5,
-                        color='#e74c3c', alpha=0.7)
-arrow4 = FancyArrowPatch(words_B['woman'], words_B['queen'],
-                        arrowstyle='->', mutation_scale=20, linewidth=2.5,
-                        color='#e74c3c', alpha=0.7)
-ax2.add_patch(arrow3)
-ax2.add_patch(arrow4)
-
-ax2.set_xlim(0, 5)
-ax2.set_ylim(0, 5)
-ax2.set_xlabel('Dimension 1', fontsize=11, fontweight='bold')
-ax2.set_ylabel('Dimension 2', fontsize=11, fontweight='bold')
-ax2.set_title('Model B Space (rotated & scaled)', fontsize=13, fontweight='bold')
-ax2.grid(alpha=0.3, linestyle='--')
-ax2.set_aspect('equal')
-
-# Universal latent representation
-words_latent = {
-    'king': np.array([0, 1.5]),
-    'queen': np.array([0, 0.5]),
-    'man': np.array([1, 1.5]),
-    'woman': np.array([1, 0.5]),
-}
-
-for word, pos in words_latent.items():
-    ax3.scatter(*pos, s=300, c='#9b59b6', edgecolors='black', linewidth=2, zorder=3)
-    ax3.text(pos[0], pos[1] + 0.25, word, ha='center', fontsize=11, fontweight='bold')
-
-arrow5 = FancyArrowPatch(words_latent['man'], words_latent['king'],
-                        arrowstyle='->', mutation_scale=20, linewidth=2.5,
-                        color='#e74c3c', alpha=0.7)
-arrow6 = FancyArrowPatch(words_latent['woman'], words_latent['queen'],
-                        arrowstyle='->', mutation_scale=20, linewidth=2.5,
-                        color='#e74c3c', alpha=0.7)
-ax3.add_patch(arrow5)
-ax3.add_patch(arrow6)
-
-ax3.set_xlim(-0.5, 2)
-ax3.set_ylim(-0.5, 2.5)
-ax3.set_xlabel('Universal Dimension 1', fontsize=11, fontweight='bold')
-ax3.set_ylabel('Universal Dimension 2', fontsize=11, fontweight='bold')
-ax3.set_title('Universal Latent Space', fontsize=13, fontweight='bold')
-ax3.grid(alpha=0.3, linestyle='--')
-ax3.set_aspect('equal')
-
-plt.tight_layout()
-plt.show()
-```
 
 The key insight is that semantic relationships (the parallel arrows representing analogies like man:king :: woman:queen) remain intact across all three spaces. The coordinates change. The geometry persists.
 
 ## How Vec2Vec Works
 
+![](https://vec2vec.github.io/assets/align.gif)
+
 The vec2vec method learns this translation through an adversarial game similar to CycleGAN (a technique from computer vision for image-to-image translation without paired examples).
 
 The setup involves two generators and two discriminators. Generator $G_{A \to B}$ attempts to translate embeddings from Model A's space into Model B's space. Generator $G_{B \to A}$ does the reverse. Each generator is paired with a discriminator that tries to distinguish real embeddings from translated ones.
+
+### Three Key Losses
 
 The training objective combines three losses. First, the adversarial loss encourages the generator to produce embeddings that look indistinguishable from real embeddings in the target space. If $G_{A \to B}$ transforms an embedding from Model A, the discriminator $D_B$ should not be able to tell it apart from genuine Model B embeddings.
 
@@ -237,7 +142,11 @@ Second, the cycle consistency loss ensures that if you translate from Space A to
 
 Third, the identity loss encourages the translation to preserve structure when no translation is needed. If you feed an embedding that already belongs to the target space, the generator should leave it mostly unchanged.
 
-What makes this work? The cycle consistency constraint. It forces the model to preserve the intrinsic geometry of the space. You cannot map every point to the same location (that would minimize adversarial loss but violate cycle consistency). You cannot scramble relationships arbitrarily (that would break the round-trip property). The only way to satisfy all constraints simultaneously is to discover the true structural alignment between spaces.
+### Why Does This Work?
+
+What makes this work? The cycle consistency constraint. It forces the model to preserve the intrinsic geometry of the space.
+
+You cannot map every point to the same location (that would minimize adversarial loss but violate cycle consistency). You cannot scramble relationships arbitrarily (that would break the round-trip property). The only way to satisfy all constraints simultaneously is to discover the true structural alignment between spaces.
 
 ## Empirical Evidence
 
@@ -245,236 +154,25 @@ Jha et al. tested this by training vec2vec on multiple pairs of embedding models
 
 The results were striking. After training without any paired examples, vec2vec could translate embeddings between spaces while preserving their geometry. The cosine similarity between translated embeddings and ideal target embeddings reached above 0.9 in many cases.
 
-```{python}
-#| fig-cap: "Cosine similarity between translated embeddings and true target embeddings across training steps."
-#| label: fig-translation-accuracy
-#| code-fold: true
+![](https://vec2vec.github.io/assets/latent_sims.png)
 
-import matplotlib.pyplot as plt
-import numpy as np
+What does this convergence tell us? Different embedding models, despite appearing incomparable on the surface, encode nearly identical semantic structures.
 
-fig, ax = plt.subplots(figsize=(12, 7))
-
-np.random.seed(42)
-
-steps = np.linspace(0, 50000, 100)
-
-# Simulate learning curves for different model pairs
-pairs = [
-    ('GTR → GTE', '#e74c3c', 0.88),
-    ('GTE → GTR', '#3498db', 0.85),
-    ('E5 → BGE', '#27ae60', 0.92),
-    ('BGE → E5', '#f39c12', 0.90),
-]
-
-for name, color, final_sim in pairs:
-    # Sigmoid-like growth
-    noise = np.random.randn(100) * 0.02
-    similarity = final_sim / (1 + np.exp(-0.0001 * (steps - 25000))) + noise
-    similarity = np.clip(similarity, 0, 1)
-    ax.plot(steps, similarity, linewidth=2.5, color=color, label=name, alpha=0.8)
-
-ax.axhline(y=0.5, color='gray', linestyle='--', linewidth=1.5, alpha=0.5, label='Random baseline')
-ax.set_xlabel('Training Steps', fontsize=13, fontweight='bold')
-ax.set_ylabel('Cosine Similarity', fontsize=13, fontweight='bold')
-ax.set_title('Vec2Vec Translation Quality Across Training', fontsize=15, fontweight='bold')
-ax.legend(fontsize=11, loc='lower right')
-ax.grid(alpha=0.3, linestyle='--')
-ax.set_ylim(0, 1)
-
-plt.tight_layout()
-plt.show()
-```
-
-What does this convergence tell us? Different embedding models, despite appearing incomparable on the surface, encode nearly identical semantic structures. The universal geometry exists. It can be discovered. It can be exploited.
-
-## Visualizing the Alignment
-
-Perhaps the most compelling evidence comes from visualizing the similarity structure before and after translation. Take a batch of documents. Encode each document using both Model A and Model B. Compute the pairwise cosine similarities within each space. You should see two different similarity matrices.
-
-Now translate Model A's embeddings into Model B's space using vec2vec. Recompute the similarity matrix. If the translation preserves geometry, the translated similarity matrix should closely match Model B's original similarity matrix.
-
-```{python}
-#| fig-cap: "Pairwise cosine similarities before and after translation. The geometry aligns."
-#| label: fig-similarity-alignment
-#| code-fold: true
-
-import matplotlib.pyplot as plt
-import numpy as np
-
-fig, axes = plt.subplots(1, 3, figsize=(18, 6))
-
-np.random.seed(42)
-n = 32
-
-# Generate a "true" similarity structure
-true_structure = np.random.rand(n, n)
-true_structure = (true_structure + true_structure.T) / 2
-np.fill_diagonal(true_structure, 1.0)
-
-# Model A: similar structure with noise
-sim_A = true_structure + np.random.randn(n, n) * 0.15
-sim_A = (sim_A + sim_A.T) / 2
-sim_A = np.clip(sim_A, 0, 1)
-np.fill_diagonal(sim_A, 1.0)
-
-# Model B: similar structure with different noise
-sim_B = true_structure + np.random.randn(n, n) * 0.15
-sim_B = (sim_B + sim_B.T) / 2
-sim_B = np.clip(sim_B, 0, 1)
-np.fill_diagonal(sim_B, 1.0)
-
-# After translation: A's structure becomes much closer to B
-sim_translated = 0.9 * sim_B + 0.1 * sim_A
-
-# Plot
-im1 = axes[0].imshow(sim_A, cmap='viridis', vmin=0, vmax=1)
-axes[0].set_title('Model A Embeddings\n(original)', fontsize=13, fontweight='bold')
-axes[0].set_xlabel('Document Index', fontsize=11)
-axes[0].set_ylabel('Document Index', fontsize=11)
-plt.colorbar(im1, ax=axes[0], fraction=0.046, pad=0.04)
-
-im2 = axes[1].imshow(sim_translated, cmap='viridis', vmin=0, vmax=1)
-axes[1].set_title('Model A → Model B\n(translated)', fontsize=13, fontweight='bold')
-axes[1].set_xlabel('Document Index', fontsize=11)
-axes[1].set_ylabel('Document Index', fontsize=11)
-plt.colorbar(im2, ax=axes[1], fraction=0.046, pad=0.04)
-
-im3 = axes[2].imshow(sim_B, cmap='viridis', vmin=0, vmax=1)
-axes[2].set_title('Model B Embeddings\n(target)', fontsize=13, fontweight='bold')
-axes[2].set_xlabel('Document Index', fontsize=11)
-axes[2].set_ylabel('Document Index', fontsize=11)
-plt.colorbar(im3, ax=axes[2], fraction=0.046, pad=0.04)
-
-plt.tight_layout()
-plt.show()
-```
-
-The middle panel shows the translated similarity structure. Compare it to the target (right panel). The alignment is nearly perfect. The patterns of which documents are similar to which other documents are preserved across the transformation.
-
-This is not just coordinate alignment. This is structural preservation. The topology of similarity, the clusters of related concepts, the gradients of semantic distance all remain intact.
+The universal geometry exists. It can be discovered. It can be exploited.
 
 ## Generalization to Unseen Data
+
+![](https://vec2vec.github.io/assets/table.png)
 
 Perhaps the most surprising result is how well vec2vec generalizes. Train the translation model on embeddings from one dataset (say, Wikipedia articles). Then test it on a completely different dataset (say, biomedical abstracts or code documentation).
 
 The translation quality remains high. The model learned something general about the relationship between the two embedding spaces, not something specific to the training distribution.
 
-Why does this work? If the Platonic Representation Hypothesis is correct, then the universal structure isn't tied to any particular domain. It's a property of language itself (or more generally, of the data modality). Medical texts and Wikipedia articles may discuss different topics, but they use the same semantic relationships. Hierarchies, analogies, contrasts, and associations all follow the same geometric patterns regardless of domain.
+Why does this work? If the Platonic Representation Hypothesis is correct, then the universal structure isn't tied to any particular domain. It's a property of language itself (or more generally, of the data modality).
+
+Medical texts and Wikipedia articles may discuss different topics, but they use the same semantic relationships. Hierarchies, analogies, contrasts, and associations all follow the same geometric patterns regardless of domain.
 
 The translation captures this invariant structure. It doesn't memorize domain-specific content. It learns the transformation that aligns coordinate systems while preserving the universal geometry underneath.
-
-## Security Implications
-
-Now shift your attention to the darker side of this discovery. If embeddings from different models share a universal latent structure, and if that structure can be discovered without paired data, what does this mean for privacy?
-
-Many systems store text as embedding vectors rather than raw text. The justification is that embeddings are "safe" because they're irreversible. You cannot reconstruct the original text from a vector. The information is compressed, abstracted, encoded in a learned representation specific to one model.
-
-But vec2vec shows this assumption is fragile. If you can translate embeddings into a different space (a space where you do have access to the encoder), you can perform inversion attacks.
-
-Here's how it works. An adversary gains access to a vector database containing embeddings (perhaps through a data breach or insider threat). The adversary doesn't have access to the encoder that produced these embeddings. The adversary cannot simply decode the vectors back to text.
-
-However, the adversary can collect unpaired embeddings from their own model encoding different texts. Using vec2vec, they learn a translation from the stolen embedding space to their own space. Now they can translate the stolen embeddings. Once translated, they can use inversion techniques (training a decoder on their own model's embeddings) to extract approximate text.
-
-```{python}
-#| fig-cap: "Embedding inversion attack pipeline using vec2vec translation."
-#| label: fig-inversion-attack
-#| code-fold: true
-
-import matplotlib.pyplot as plt
-from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
-
-fig, ax = plt.subplots(figsize=(16, 10))
-
-# Stage 1: Stolen embeddings
-box1 = FancyBboxPatch((0, 7), 3, 1.5, boxstyle="round,pad=0.1",
-                      facecolor='#e74c3c', edgecolor='black', linewidth=2, alpha=0.7)
-ax.add_patch(box1)
-ax.text(1.5, 7.75, 'Stolen Embeddings\n(unknown encoder)', ha='center', va='center',
-        fontsize=12, fontweight='bold', color='white')
-
-# Arrow to vec2vec
-arrow1 = FancyArrowPatch((3.1, 7.75), (5.9, 7.75),
-                        arrowstyle='->', mutation_scale=30, linewidth=3,
-                        color='#34495e')
-ax.add_patch(arrow1)
-ax.text(4.5, 8.3, 'Unsupervised\nTranslation', ha='center',
-        fontsize=10, style='italic', color='#34495e')
-
-# Stage 2: vec2vec translation
-box2 = FancyBboxPatch((6, 7), 3, 1.5, boxstyle="round,pad=0.1",
-                      facecolor='#3498db', edgecolor='black', linewidth=2, alpha=0.7)
-ax.add_patch(box2)
-ax.text(7.5, 7.75, 'vec2vec\nTranslator', ha='center', va='center',
-        fontsize=12, fontweight='bold', color='white')
-
-# Arrow to translated embeddings
-arrow2 = FancyArrowPatch((9.1, 7.75), (11.9, 7.75),
-                        arrowstyle='->', mutation_scale=30, linewidth=3,
-                        color='#34495e')
-ax.add_patch(arrow2)
-ax.text(10.5, 8.3, 'Preserve\nGeometry', ha='center',
-        fontsize=10, style='italic', color='#34495e')
-
-# Stage 3: Translated embeddings
-box3 = FancyBboxPatch((12, 7), 3, 1.5, boxstyle="round,pad=0.1",
-                      facecolor='#27ae60', edgecolor='black', linewidth=2, alpha=0.7)
-ax.add_patch(box3)
-ax.text(13.5, 7.75, 'Translated to\nKnown Space', ha='center', va='center',
-        fontsize=12, fontweight='bold', color='white')
-
-# Arrow to decoder
-arrow3 = FancyArrowPatch((13.5, 6.9), (13.5, 5.1),
-                        arrowstyle='->', mutation_scale=30, linewidth=3,
-                        color='#34495e')
-ax.add_patch(arrow3)
-ax.text(14.5, 6, 'Inversion', ha='center',
-        fontsize=10, style='italic', color='#34495e')
-
-# Stage 4: Reconstructed text
-box4 = FancyBboxPatch((11.5, 3.5), 4, 1.5, boxstyle="round,pad=0.1",
-                      facecolor='#f39c12', edgecolor='black', linewidth=2, alpha=0.7)
-ax.add_patch(box4)
-ax.text(13.5, 4.25, 'Reconstructed Text\n"Patient diagnosed with..."', ha='center', va='center',
-        fontsize=11, fontweight='bold', color='white')
-
-# Supporting data (left side)
-box5 = FancyBboxPatch((0, 3.5), 4, 1.5, boxstyle="round,pad=0.1",
-                      facecolor='#95a5a6', edgecolor='black', linewidth=2, alpha=0.5)
-ax.add_patch(box5)
-ax.text(2, 4.25, 'Adversary\'s Own Data\n(unpaired texts + embeddings)', ha='center', va='center',
-        fontsize=10, fontweight='bold')
-
-# Arrow showing training data flow
-arrow4 = FancyArrowPatch((2, 5.1), (6.5, 6.9),
-                        arrowstyle='->', mutation_scale=25, linewidth=2.5,
-                        color='#7f8c8d', linestyle='dashed')
-ax.add_patch(arrow4)
-ax.text(3.5, 5.5, 'Train translator', ha='center',
-        fontsize=9, style='italic', color='#7f8c8d')
-
-# Arrow showing decoder training
-arrow5 = FancyArrowPatch((4.1, 4.25), (11.4, 4.25),
-                        arrowstyle='->', mutation_scale=25, linewidth=2.5,
-                        color='#7f8c8d', linestyle='dashed')
-ax.add_patch(arrow5)
-ax.text(7.75, 4.8, 'Train decoder', ha='center',
-        fontsize=9, style='italic', color='#7f8c8d')
-
-ax.set_xlim(-0.5, 16)
-ax.set_ylim(2, 9)
-ax.axis('off')
-ax.set_title('Embedding Inversion Attack via Vec2Vec', fontsize=18, fontweight='bold', pad=20)
-
-plt.tight_layout()
-plt.show()
-```
-
-Jha et al. demonstrated that this attack works in practice. Given only embedding vectors from a healthcare dataset (no access to the encoder, no access to the original texts), they could extract sensitive information about patient diagnoses. They could infer entities (names, diseases, medications) and partial content from corporate emails.
-
-The reconstructions are not perfect. They do not recover the exact original text word-for-word. But they recover enough semantic content to violate privacy. You might not reconstruct "The patient was diagnosed with Type 2 diabetes on March 15th", but you can extract "patient diabetes diagnosis recent". For many adversarial purposes, this is sufficient.
-
-What makes this attack practical? It requires no insider access to the model. It requires no paired training data. It only requires unlabeled embeddings from the target system and unlabeled embeddings from the adversary's own model. The universal geometry does the rest.
 
 ## What Does This Mean?
 
@@ -482,42 +180,19 @@ Let's step back and consider what these results imply. The Strong Platonic Repre
 
 Different models are not exploring a vast landscape of alternative ways to represent meaning. They are converging to a narrow region, a canonical structure dictated by the statistical properties of language and the world it describes.
 
-This has both beautiful and troubling consequences. On the beautiful side, it means representation learning is discovering something real. Word embeddings are not arbitrary constructs. They reflect the intrinsic geometry of semantic relationships. When multiple models trained independently learn similar structures, it suggests those structures are inevitable. They are features of meaning itself, not artifacts of a particular algorithm.
+### The Beautiful Side
 
-On the troubling side, it means embeddings are less private than we assumed. The universality that makes them powerful also makes them vulnerable. You cannot hide behind model-specific encoding. The latent structure leaks through.
+This has both beautiful and troubling consequences. On the beautiful side, it means representation learning is discovering something real. Word embeddings are not arbitrary constructs. They reflect the intrinsic geometry of semantic relationships.
 
-It also raises deeper questions about what machine learning is doing. Are we building models that impose structure on data, or are we building telescopes that reveal pre-existing structure? If all sufficiently powerful models converge to the same representation, does that mean the representation was "already there" in some Platonic sense, waiting to be discovered?
+When multiple models trained independently learn similar structures, it suggests those structures are inevitable. They are features of meaning itself, not artifacts of a particular algorithm.
 
-## Limitations and Open Questions
+### The Philosophical Question
 
-We should be careful not to overstate the case. Vec2vec works remarkably well on several embedding model pairs, but the universal hypothesis is not yet proven for all models and all domains.
+It also raises deeper questions about what machine learning is doing. Are we building models that impose structure on data, or are we building telescopes that reveal pre-existing structure?
 
-Some embedding architectures may learn genuinely different structures. Models trained on radically different tasks (contrastive learning versus masked language modeling versus causal language modeling) might carve up semantic space in fundamentally incompatible ways. The hypothesis may hold within families of models but break down across families.
+If all sufficiently powerful models converge to the same representation, does that mean the representation was "already there" in some Platonic sense, waiting to be discovered?
 
-Translation quality also depends on model capacity. Very small models may not have enough representational power to capture the universal structure. Very large models (like modern LLMs with billions of parameters) may learn richer, more nuanced structures that are harder to align.
-
-Generalization across domains is impressive but not perfect. Translation trained on web text performs worse on specialized domains (legal documents, medical records, ancient languages). The universal geometry may have domain-specific refinements.
-
-Finally, the inversion attacks, while concerning, are not yet production-ready threats. They extract partial information, not complete reconstruction. Improving translation quality will improve attack success, but fundamental limits remain. Embeddings do compress information irreversibly. The question is whether enough survives compression to be dangerous.
-
-## What We've Learned
-
-We began with the puzzle of incomparable spaces. Two embedding models, trained independently, produce vectors with different coordinates, different scales, different dimensions. They appear to be speaking different languages.
-
-Yet beneath the surface, a universal geometry emerges. The relational structure, the topology of similarity and difference, remains invariant. Different models are rotating and rescaling the same underlying shape.
-
-Vec2vec reveals this hidden alignment through unsupervised translation. It shows that you can map between spaces without paired data, because the spaces are not as different as they appear. They are alternative views of the same semantic reality.
-
-This has profound implications. Philosophically, it suggests that meaning has an intrinsic geometry discoverable through observation, not imposed by theory. Practically, it means embeddings are interoperable (you can translate between models) and less private (adversaries can exploit this interoperability).
-
-The Platonic Representation Hypothesis, whether fully validated or not, provokes a shift in how we think about learned representations. We are not building arbitrary encodings. We are not constructing meaning from scratch. We are uncovering a structure that was already latent in the data, waiting for sufficiently powerful models and large enough datasets to make it visible.
-
-::: {.callout-tip title="Try it yourself"}
-Consider two different language models you have access to (perhaps via APIs like OpenAI and Cohere). Encode the same set of sentences using both models. Compute the pairwise similarity matrix within each model's embedding space. How similar are the two matrices? This is a simple empirical test of whether different models capture similar semantic structure. If the hypothesis holds, you should see correlated patterns even without explicit alignment.
-:::
-
-::: {.column-margin}
-**Further Reading:**
+::: {.callout-note title="Further Reading"}
 
 Jha, R., Zhang, C., Shmatikov, V., & Morris, J. X. (2024). Harnessing the Universal Geometry of Embeddings. [Project page](https://rishibommasani.github.io/vec2vec/)
 
