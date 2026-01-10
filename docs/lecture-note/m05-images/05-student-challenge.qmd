@@ -120,14 +120,17 @@ val_dataset.dataset = torchvision.datasets.CIFAR100(
 
 # Create data loaders
 batch_size = 128  # Adjust based on your GPU memory
+# Use num_workers=0 for MPS (macOS) or 2 for CUDA
+num_workers = 0 if str(device) == 'mps' else 2
+
 train_loader = DataLoader(
-    train_dataset, batch_size=batch_size, shuffle=True, num_workers=2
+    train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers
 )
 val_loader = DataLoader(
-    val_dataset, batch_size=batch_size, shuffle=False, num_workers=2
+    val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers
 )
 test_loader = DataLoader(
-    test_dataset, batch_size=batch_size, shuffle=False, num_workers=2
+    test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers
 )
 
 print(f"Train batches: {len(train_loader)}")
@@ -167,7 +170,13 @@ def create_model(arch='resnet50', num_classes=100, pretrained=True):
     return model
 
 # Create your model
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+if torch.cuda.is_available():
+    device = torch.device('cuda')
+elif torch.backends.mps.is_available():
+    device = torch.device('mps')
+else:
+    device = torch.device('cpu')
+
 model = create_model(arch='resnet18', num_classes=100, pretrained=True)
 model = model.to(device)
 
@@ -235,7 +244,7 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # Learning rate scheduler
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-    optimizer, mode='min', factor=0.5, patience=3, verbose=True
+    optimizer, mode='min', factor=0.5, patience=3
 )
 
 # Training loop
