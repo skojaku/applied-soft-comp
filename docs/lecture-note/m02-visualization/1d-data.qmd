@@ -16,7 +16,7 @@ Without seeing the raw data, you're flying blind. And unfortunately, many scient
 
 ## Why Showing All Data Matters
 
-In 2016, a group of researchers analyzed 118 papers in leading neuroscience journals and found something disturbing: when they requested the raw data and re-analyzed it, they found that the bar charts in many papers were misleading. The bar charts suggested clear differences between groups, but the raw data often told a different story---with substantial overlap between groups, unexpected distributions, or influential outliers.
+In 2016, a group of researchers analyzed 118 papers in leading neuroscience journals and found something disturbing: when they requested the raw data and re-analyzed it, they found that the bar charts in many papers were misleading. The bar charts suggested clear differences between groups, but the raw data often told a different story. There was substantial overlap between groups, unexpected distributions, or influential outliers.
 
 This isn't about fraud. It's about the limitations of summary statistics. When you reduce your data to a mean and a standard error, you lose a tremendous amount of information. The data might be bimodal, skewed, or contain outliers. These patterns are invisible in a bar chart, but they're crucial for understanding what's really going on.
 
@@ -115,7 +115,7 @@ plt.show()
 
 The number of bins dramatically affects how your histogram looks. With too few bins, you lose detail and might miss important features like bimodality. With too many bins, the histogram becomes noisy and hard to interpret.
 
-A good starting point is the **Sturges' rule**: number of bins H $\log_2(n) + 1$, where $n$ is the sample size. But always experiment! Try different bin numbers and see what reveals the most about your data's structure.
+A good starting point is the **Sturges' rule**: number of bins = $\log_2(n) + 1$, where $n$ is the sample size. But always experiment! Try different bin numbers and see what reveals the most about your data's structure.
 
 ## Smooth Alternatives: Kernel Density Estimation
 
@@ -138,7 +138,7 @@ KDE plots are elegant and reveal the shape of your distribution without the arbi
 
 ## For Heavy-Tailed Data: Cumulative Distributions
 
-Some data are extremely heterogeneousthink income distributions, city populations, or earthquake magnitudes. These distributions often have heavy tails: most values are small, but a few are enormous.
+Some data are extremely heterogeneous. Think income distributions, city populations, or earthquake magnitudes. These distributions often have heavy tails: most values are small, but a few are enormous.
 
 For this kind of data, histograms and KDE plots can be misleading because they compress the tail into a tiny region of the plot.
 
@@ -184,7 +184,7 @@ ccdf = 1 - (np.arange(1, len(sorted_data) + 1) / len(sorted_data))
 
 plt.loglog(sorted_data, ccdf, 'o', alpha=0.5, markersize=3)
 plt.xlabel('Value')
-plt.ylabel('P(X e x)')
+plt.ylabel('P(X ≥ x)')
 plt.title('Complementary Cumulative Distribution (CCDF)')
 plt.grid(True, alpha=0.3)
 plt.show()
