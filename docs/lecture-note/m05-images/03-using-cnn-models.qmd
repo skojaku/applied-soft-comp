@@ -18,7 +18,7 @@ You'll learn:
 
 ## Understanding CNN Building Blocks
 
-AlexNet proved that deep learning works at scale. But how do these networks actually process images? Let's break down the fundamental operations that make CNNs powerful.
+AlexNet proved that deep learning works at scale, but how do these networks actually process images? Let's break down the fundamental operations that make CNNs powerful.
 
 ### Convolutional Layers: Learnable Pattern Detectors
 
@@ -36,9 +36,7 @@ $$
 
 where $I$ is the input image, $K$ is the kernel of size $L \times L$, and $(i,j)$ specifies the output position.
 
-What makes CNNs powerful is that these kernels are **learnable parameters**. During training, each kernel evolves to detect specific visual patterns like edges, textures, colors, or more complex features. The network discovers useful features automatically rather than relying on hand-crafted filters.
-
-Real-world images have multiple channels (RGB). Convolution extends naturally to 3D inputs using 3D kernels:
+What makes CNNs powerful is that these kernels are **learnable parameters**. During training, each kernel evolves to detect specific visual patterns like edges, textures, colors, or more complex features. The network discovers useful features automatically rather than relying on hand-crafted filters. Real-world images have multiple channels (RGB), and convolution extends naturally to 3D inputs using 3D kernels:
 
 $$
 (I * K)_{i,j} = \sum_{c=1}^{C}\sum_{m=0}^{L-1}\sum_{n=0}^{L-1} I_{c,i+m,j+n} \cdot K_{c,m,n}
@@ -62,13 +60,11 @@ A crucial feature of convolutional layers is **translation equivariance**: if yo
 ![Translation equivariance. The same kernel detects the same feature regardless of position in the input.](https://miro.medium.com/v2/resize:fit:1400/1*NoAQ4ZgofpkK6esl4sMHkA.png){width=80% fig-align="center"}
 :::
 
-This property allows CNNs to recognize objects anywhere in an image. A cat detector learned on centered cats will also detect cats in image corners. The network doesn't need to learn separate detectors for every possible position.
+This property allows CNNs to recognize objects anywhere in an image. A cat detector learned on centered cats will also detect cats in image corners, and the network doesn't need to learn separate detectors for every possible position.
 
 ### Parameter Sharing: Efficient Learning
 
-Unlike fully connected networks where each weight is used once, convolutional layers **reuse kernel weights** across all spatial positions. A 3×3 kernel applied to a 224×224 RGB image uses just 27 parameters (3×3×3), not the millions required by a fully connected layer.
-
-This weight-sharing dramatically reduces parameter count while preserving spatial relationships in the data. It's a key reason CNNs can process high-resolution images efficiently.
+Unlike fully connected networks where each weight is used once, convolutional layers **reuse kernel weights** across all spatial positions. A 3×3 kernel applied to a 224×224 RGB image uses just 27 parameters (3×3×3), not the millions required by a fully connected layer. This weight-sharing dramatically reduces parameter count while preserving spatial relationships, a key reason CNNs can process high-resolution images efficiently.
 
 ### Receptive Field: Seeing More with Depth
 
@@ -78,13 +74,11 @@ The **receptive field** is the region of input pixels that influence each output
 ![Receptive field grows with network depth. Deeper layers see increasingly large regions of the input image.](https://www.researchgate.net/publication/316950618/figure/fig4/AS:11431281212123378@1702542797323/The-receptive-field-of-each-convolution-layer-with-a-3-3-kernel-The-green-area-marks.tif){width=50% fig-align="center"}
 :::
 
-Why does this matter? This hierarchical structure allows CNNs to detect increasingly complex, abstract features. Early layers detect edges and simple patterns. Middle layers combine these into textures and parts. Deep layers recognize complete objects and scenes.
+Why does this matter? This hierarchical structure allows CNNs to detect increasingly complex, abstract features: early layers detect edges and simple patterns, middle layers combine these into textures and parts, and deep layers recognize complete objects and scenes.
 
 ### Stride and Padding: Controlling Dimensions
 
-**Stride** determines how many pixels we skip when sliding the kernel. With stride 1, we move one pixel at a time, creating dense feature maps. With stride 2, we skip every other position, effectively downsampling the output.
-
-For a 1D example with input $[a,b,c,d,e,f]$ and kernel $[1,2]$:
+**Stride** determines how many pixels we skip when sliding the kernel. With stride 1, we move one pixel at a time creating dense feature maps, while stride 2 skips every other position, effectively downsampling the output. For a 1D example with input $[a,b,c,d,e,f]$ and kernel $[1,2]$:
 
 **Stride 1:**
 $$
@@ -96,7 +90,7 @@ $$
 [1a + 2b, 1c + 2d, 1e + 2f]
 $$
 
-Larger strides reduce computational cost and increase the receptive field, but might miss fine details.
+Larger strides reduce computational cost and increase the receptive field but might miss fine details.
 
 ::: {#fig-stride-visualization}
 ![Stride controls how far the kernel moves at each step. Stride 2 produces half the spatial dimensions of stride 1.](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJTOGcDwPXtlNnev9ayPj92FIysGddxe__Fw&s){width=50% fig-align="center"}
@@ -138,13 +132,11 @@ $$
 P_{i,j} = \frac{1}{w^2}\sum_{m=0}^{w-1}\sum_{n=0}^{w-1} F_{si+m,sj+n}
 $$
 
-Max pooling creates local translation invariance: if an edge moves slightly within a pooling window, the maximum value remains unchanged, helping the network focus on whether a feature is present rather than its exact position. Pooling also reduces computational cost by decreasing spatial dimensions. A common pattern is to double the number of channels while halving spatial dimensions, maintaining roughly constant computational load across layers.
-
-Some recent architectures replace pooling with strided convolutions, arguing that learnable downsampling might be more effective {footcite}`springenberg2015striving`. The choice involves trade-offs between parameter efficiency and flexibility.
+Max pooling creates local translation invariance: if an edge moves slightly within a pooling window, the maximum value remains unchanged, helping the network focus on whether a feature is present rather than its exact position. Pooling also reduces computational cost by decreasing spatial dimensions, and a common pattern is to double the number of channels while halving spatial dimensions, maintaining roughly constant computational load across layers. Some recent architectures replace pooling with strided convolutions, arguing that learnable downsampling might be more effective {footcite}`springenberg2015striving`, though the choice involves trade-offs between parameter efficiency and flexibility.
 
 ## Using Pre-Trained Models
 
-Now that we understand CNN building blocks, let's use them in practice. Training a CNN from scratch on ImageNet requires weeks of GPU time. But we can leverage pre-trained models trained by research labs with vast computational resources.
+Now that we understand CNN building blocks, let's use them in practice. Training a CNN from scratch on ImageNet requires weeks of GPU time, but we can leverage pre-trained models trained by research labs with vast computational resources.
 
 ### Loading Models from torchvision
 
@@ -166,7 +158,7 @@ print(f"Model type: {type(resnet50)}")
 print(f"Number of parameters: {sum(p.numel() for p in resnet50.parameters()):,}")
 ```
 
-The model is trained on ImageNet with 1000 classes. Let's use it to classify an image.
+The model is trained on ImageNet with 1000 classes, and we can use it to classify images directly.
 
 ### Image Classification Example
 
@@ -250,7 +242,7 @@ for i in range(5):
     print(f"{i+1}. {labels[top5_catid[i]]}: {top5_prob[i].item()*100:.2f}%")
 ```
 
-The model correctly identifies the object with high confidence. This demonstrates the power of pre-trained networks: they've learned rich visual representations from ImageNet's diverse images.
+The model correctly identifies the object with high confidence, demonstrating the power of pre-trained networks that have learned rich visual representations from ImageNet's diverse images.
 
 ### When to Use Which Architecture
 
@@ -258,7 +250,7 @@ Different architectures offer trade-offs between accuracy, speed, and memory. **
 
 ## Transfer Learning: Adapting Pre-Trained Models
 
-Pre-trained models learn general visual features from ImageNet's 1000 categories. But what if you want to classify different objects? Transfer learning adapts these models to new tasks.
+Pre-trained models learn general visual features from ImageNet's 1000 categories, but what if you want to classify different objects? Transfer learning adapts these models to new tasks.
 
 ### Why Transfer Learning Works
 
@@ -266,9 +258,7 @@ ImageNet-trained models learn a hierarchy of features: early layers detect edges
 
 ### Two Approaches: Feature Extraction vs. Fine-Tuning
 
-**Feature Extraction**: Freeze all convolutional layers, only train a new classifier head. Fast and works well with small datasets.
-
-**Fine-Tuning**: Initialize with pre-trained weights, then train the entire network (or parts of it) on your data. Better accuracy but requires more data and computation.
+**Feature Extraction** freezes all convolutional layers and trains only a new classifier head, running fast and working well with small datasets. **Fine-Tuning** initializes with pre-trained weights then trains the entire network (or parts of it) on your data, achieving better accuracy but requiring more data and computation.
 
 ### Example: Fine-Tuning for Custom Classification
 
@@ -312,7 +302,7 @@ total_params = sum(p.numel() for p in model.parameters())
 print(f"Trainable parameters: {trainable_params:,} / {total_params:,}")
 ```
 
-Only 20,490 parameters (the final layer) are trainable. This makes training fast and prevents overfitting on small datasets.
+Only 20,490 parameters (the final layer) are trainable, making training fast and preventing overfitting on small datasets.
 
 ### Training Loop
 
@@ -357,7 +347,7 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
 
 ### Data Augmentation: Essential for Small Datasets
 
-When training on limited data, augmentation is crucial. Transform each image differently each epoch to artificially expand the training set:
+When training on limited data, augmentation is crucial: transform each image differently each epoch to artificially expand the training set.
 
 ```{python}
 #| echo: false
@@ -411,9 +401,7 @@ Note that validation uses deterministic transforms (no randomness) for reproduci
 Start with feature extraction by training only the final layer first, which is fast and often achieves good results. If accuracy is insufficient, try fine-tuning by unfreezing earlier layers and training with a small learning rate (10× smaller than initial training). Use learning rate schedules to reduce the learning rate when validation loss plateaus. Monitor for overfitting using validation data, and apply more augmentation or stronger regularization (dropout, weight decay) if needed. Always match preprocessing to the pre-training dataset, using ImageNet statistics for most models.
 
 ::: {.callout-tip title="Try it yourself"}
-Practice transfer learning on your own image dataset. Collect 100-500 images per class (even phone camera photos work), then split into train/val/test sets (70/15/15). Start with ResNet-50 feature extraction and train for 10-20 epochs before evaluating on the test set.
-
-You'll likely achieve 80-90%+ accuracy with just a few hundred images per class, demonstrating the power of pre-trained features.
+Practice transfer learning on your own image dataset. Collect 100-500 images per class (even phone camera photos work), then split into train/val/test sets (70/15/15). Start with ResNet-50 feature extraction and train for 10-20 epochs before evaluating on the test set. You'll likely achieve 80-90%+ accuracy with just a few hundred images per class, demonstrating the power of pre-trained features.
 :::
 
 ## Visualizing What Networks Learn
@@ -453,7 +441,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-Early layers show edge detection and simple patterns. Deeper layers show increasingly abstract features that are harder to interpret but encode high-level semantic information.
+Early layers show edge detection and simple patterns, while deeper layers show increasingly abstract features that are harder to interpret but encode high-level semantic information.
 
 ## Summary
 
