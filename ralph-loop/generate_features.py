@@ -42,6 +42,27 @@ def expand_pattern(pattern: str, base_dir: Path) -> list[str]:
     return sorted(matches)
 
 
+def expand_glob(glob_pattern: str, base_dir: Path) -> list[str]:
+    """
+    Expand a glob pattern to matching file paths.
+
+    Args:
+        glob_pattern: Glob pattern (e.g., "m01-*/*.qmd")
+        base_dir: Base directory to search from
+
+    Returns:
+        List of matching file paths (relative to base_dir)
+    """
+    matches = []
+
+    for path in base_dir.glob(glob_pattern):
+        if path.is_file():
+            relative = path.relative_to(base_dir)
+            matches.append(str(relative))
+
+    return sorted(matches)
+
+
 def generate_features(task_file: str, output_file: str) -> None:
     """Generate expanded features.json from task_instructions.json."""
     with open(task_file, "r") as f:
@@ -51,9 +72,12 @@ def generate_features(task_file: str, output_file: str) -> None:
     core = tasks["coreInstructions"]
     files = tasks["files"]
 
-    # Determine project base directory
+    # Determine directories
     script_dir = Path(__file__).parent
     project_dir = (script_dir / meta.get("projectDir", ".")).resolve()
+
+    # For glob patterns, use script_dir as base since patterns may use relative paths
+    glob_base_dir = script_dir
 
     # Build output structure
     output = {
@@ -75,35 +99,41 @@ def generate_features(task_file: str, output_file: str) -> None:
         category = file_entry["category"]
         priority = file_entry["priority"]
 
-        # Check if pattern is specified, otherwise use explicit path
+        matched_paths = []
+
+        # Check if pattern (regex) is specified
         if "pattern" in file_entry:
             pattern = file_entry["pattern"]
             matched_paths = expand_pattern(pattern, project_dir)
 
             if not matched_paths:
-                print(f"Warning: Pattern '{pattern}' matched no files")
+                print(f"Warning: Regex pattern '{pattern}' matched no files")
                 continue
 
-            print(f"Pattern '{pattern}' matched {len(matched_paths)} files")
+            print(f"Regex pattern '{pattern}' matched {len(matched_paths)} files")
 
-            # Create features for all matched files
-            for idx, file_path in enumerate(matched_paths):
-                feature = {
-                    "id": generate_feature_id(file_path, priority + idx),
-                    "priority": priority + idx,
-                    "category": category,
-                    "file": file_path,
-                    "description": f"{core['description']}: {file_path}",
-                    "steps": core["steps"],
-                    "passes": False,
-                }
-                output["features"].append(feature)
-        else:
-            # Use explicit path (backward compatibility)
-            file_path = file_entry["path"]
+        # Check if path contains glob patterns
+        elif "path" in file_entry:
+            path = file_entry["path"]
+
+            # Detect glob patterns (*, ?, [, ])
+            if any(char in path for char in ["*", "?", "[", "]"]):
+                matched_paths = expand_glob(path, glob_base_dir)
+
+                if not matched_paths:
+                    print(f"Warning: Glob pattern '{path}' matched no files")
+                    continue
+
+                print(f"Glob pattern '{path}' matched {len(matched_paths)} files")
+            else:
+                # Explicit path - single file
+                matched_paths = [path]
+
+        # Create features for all matched files
+        for idx, file_path in enumerate(matched_paths):
             feature = {
-                "id": generate_feature_id(file_path, priority),
-                "priority": priority,
+                "id": generate_feature_id(file_path, priority + idx),
+                "priority": priority + idx,
                 "category": category,
                 "file": file_path,
                 "description": f"{core['description']}: {file_path}",
