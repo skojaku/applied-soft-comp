@@ -36,6 +36,8 @@ def generate_features(task_file: str, output_file: str) -> None:
             "structure": meta["structure"],
             "validators": meta["validators"],
             "notes": core["styleRules"],
+            "writingPatterns": core.get("writingPatterns", {}),
+            "learningGoalsTemplate": core.get("learningGoalsTemplate", ""),
         },
         "features": [],
     }
