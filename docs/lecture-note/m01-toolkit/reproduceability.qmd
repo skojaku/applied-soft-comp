@@ -2,19 +2,15 @@
 title: "Reproducible Environments & Projects"
 ---
 
+::: {.callout-note title="What you'll learn in this module"}
+This module teaches you how to build truly reproducible projects. You'll understand the three pillars of reproducibility: virtual environments, workflow automation, and comprehensive documentation. You'll learn practical tools like uv and Snakemake, and discover how good project organization prevents errors and enables seamless collaboration.
+:::
+
 ## The Importance of Reproducibility
 
-Reproducibility is a cornerstone of good science and a fundamental principle in computational research. It is the ability of an independent researcher to duplicate the results of a prior study using the same materials and procedures as were used by the original investigator. In the context of data science and soft computing, this means that your code, given the same input data, should produce the exact same outputs, every single time, regardless of the machine it is run on.
+Reproducibility is a cornerstone of good science and a fundamental principle in computational research. At its core, it means this: an independent researcher should be able to duplicate your results using the same materials and procedures you used. In data science, this means your code must produce the exact same outputs every single time, given the same input data, regardless of which machine runs it.
 
-::: {.callout-note}
-While the terms are often used interchangeably, it's helpful to distinguish between them:
-
--   **Reproducibility**: Can an independent researcher achieve the exact same results using the original author's data and code? This is a *computational* challenge.
-
--   **Replicability**: Can an independent researcher corroborate the scientific conclusions of a study by conducting a new, independent study? This is a *scientific* challenge.
-
-This note focuses on achieving **computational reproducibility**, which is the essential first step. If your own analysis isn't reproducible, it's impossible for anyone to even attempt to replicate your scientific findings.
-:::
+Now, a quick distinction helps clarify what we're really doing. **Reproducibility** asks: can an independent researcher achieve the exact same results using your data and code? This is a computational challenge. **Replicability**, on the other hand, asks: can an independent researcher confirm your scientific conclusions by conducting a brand new, independent study? This is a scientific challenge. We focus here on computational reproducibility, which is the essential first step. Without it, replication becomes impossible.
 
 ## Pillars of a Reproducible Project
 
@@ -22,54 +18,39 @@ Achieving reproducibility requires a conscious effort and the right set of tools
 
 ### Virtual Environments
 
-![](https://www.saaspegasus.com/static/images/web/uv/no-venv.4e57a4b43eea.jpg)
+A virtual environment is an isolated container holding all the packages and dependencies your project needs. Without one, you risk "dependency hell": installing a new library for one project breaks another project that needs a different version of the same library.
 
-A virtual environment is an isolated container that holds all the necessary packages and dependencies for a specific project. This prevents conflicts between projects that might require different versions of the same library, a situation often referred to as "dependency hell."
+Picture the problem: you have project A using pandas 1.3 and project B using pandas 2.0. Without virtual environments, your system has only one pandas version installed, and one project breaks. Virtual environments solve this by giving each project its own isolated package space.
 
+For this course, we recommend **[uv](https://astral.sh/uv)**. It's a modern, blazingly fast Python package and environment manager written in Rust. Unlike older tools like `pip` and `venv`, `uv` combines both package installation and environment creation into one tool. This integrated approach and high performance can dramatically speed up your Python workflows.
 
-For this course, we recommend **[uv](https://astral.sh/uv)**. It is a modern and extremely fast Python package and environment manager, written in Rust. `uv` acts as an all-in-one tool, handling package installation (like `pip`) and virtual environment creation (like `venv`). Its integrated nature and high performance can significantly accelerate Python workflows.
-
-See the [documentation](https://docs.astral.sh/uv/concepts/projects/init/#packaged-applications) on how to get started with `uv`.
+Ready to get started? Check the [uv documentation](https://docs.astral.sh/uv/concepts/projects/init/#packaged-applications).
 
 ::: {.callout-note}
-Why not `conda`?
-
-`conda` is an well-matuated and superior tool well-used in Python Community.
-Unlike `uv`, `conda` can have non-Python dependencies (like specific compilers or optimized BLAS/LAPACK libraries). Conda excels at managing these lower-level system packages.
-`uv`, on the other hand, focuses on Python packages. This apparently limited feature comes with some great benefits.
-Because `conda` supports non-Python packages, the virtual environment it created can have complex dependencies with your environments, preventing someone from recreating the same environment.
-`uv` has less issues since it focuses on Python packages.
-
+**Why not conda?** Conda is a mature, well-used tool in the Python community. Unlike `uv`, conda can manage non-Python dependencies like compilers or optimized BLAS libraries. This flexibility is powerful if you need system-level packages. However, this same flexibility creates complexity: conda environments can develop intricate dependencies that make them harder to replicate. `uv` focuses solely on Python packages, which actually simplifies reproducibility. Less flexibility sometimes means better reproducibility.
 :::
 
 ### Workflow Management
 
+As your project grows, the order of steps matters, and it gets complicated fast. One script preprocesses data, another trains a model, a third generates figures. If you run them manually in the wrong order, or forget which ones depend on which, errors creep in silently.
+
 ::: {#fig-workflow}
 ![](https://divingintogeneticsandgenomics.com/img/rule_graph_lancet.png)
 
-This diagram dipicts a workflow of a research project, with each box representing a script/code and boxes are connected if the output of one box is the input of another box. As your project grows, the workflow can become complicated. So much so that you may not be able to remember the order of the steps. This is where workflow management tools come in.
+This diagram shows a research project as a workflow, where each box is a script and connections show data flowing from one script to the next. As projects grow, these dependencies become impossible to track mentally.
 :::
 
-For complex projects with multiple steps, manually running scripts in the correct order is tedious and error-prone. A workflow management tool automates this process, defining a "pipeline" of computational steps and their dependencies.
+A workflow management tool automates this complexity. You define the steps and their dependencies, and the tool figures out the correct order, runs them all, and even parallelizes where possible.
 
-A recommended tool is **[Snakemake](https://snakemake.readthedocs.io/en/stable/)**, a popular workflow management system that uses a human-readable, Python-based language. You define rules that specify how to create output files from input files. Snakemake automatically determines the order of execution and can parallelize tasks. See **Introductory Video:** [Link](https://www.youtube.com/watch?v=r9PWnEmz_tc) on how to use it.
+**[Snakemake](https://snakemake.readthedocs.io/en/stable/)** is excellent for this. It uses a readable, Python-based language where you define rules: here's how to create output files from input files. Snakemake handles the rest. Want to learn more? Watch this [introductory video](https://www.youtube.com/watch?v=r9PWnEmz_tc).
 
-
-A key principle when designing workflows is to **make individual scripts atomic**. For example, have one script for preprocessing data, another for performing an analysis, and a third for generating a figure. By making scripts minimal and short, they become more readable, reusable, and easier to debug.
+One principle matters deeply: make individual scripts **atomic**. One script preprocesses data. Another trains a model. A third generates figures. When scripts are minimal and focused, they become readable, reusable, and easy to debug.
 
 ### Comprehensive Documentation
 
-Code and data are not self-explanatory. Comprehensive documentation is crucial for another person (or your future self) to understand the what, why, and how of your project.
+Code and data are not self-explanatory. Comprehensive documentation is crucial for anyone reading your project (including your future self) to understand the what, why, and how.
 
-#### README files
-At a minimum, every project should have a `README.md` file in its root directory. This file should explain what the project is about, what the files are, and how to run the analysis. Ideally, a good README gives details like:
-
-   - **Project Description:** What the project does and its goals.
-   - **File/Folder Structure:** A brief summary so others can find what they need.
-   - **Data Table Structure:** Describe columns and data format if example datasets are included.
-   - **Installation Instructions:** How to set up the environment and dependencies.
-   - **Usage:** How to run the main analysis/scripts.
-   - **Contact/License Information:** Who to ask for help, licensing, or citation.
+Every project should have a `README.md` file in its root directory. This file explains what the project is about, what the files are, and how to run the analysis. A strong README includes a few key sections: start with a clear **project description** explaining what it does and its goals. Add a **file structure summary** so readers can navigate. If you include example datasets, describe the **data table structure**, including column names and formats. Provide **installation instructions** so people can set up the environment. Explain **usage** with examples of how to run the main scripts. Finally, add **contact and license information** so readers know who to ask and under what terms they can use your work.
 
 ## Project Organization Best Practices
 
@@ -77,16 +58,18 @@ Beyond the core tools, organizing your project thoughtfully is crucial for long-
 
 ### File and Directory Structure
 
-It's important to have a system to organize files and stick to it. A logical structure makes it easier for others (and your future self) to find things.
+A logical file structure makes it easy for others and for future you to find things. Start with **descriptive naming**. Give files and directories clear, self-explanatory names so you can find them via search. Instead of `analysis.py`, use `preprocess_customer_data.py`.
 
--   **Descriptive Naming**: Give files and directories clear, descriptive names. This is crucial to fully leverage keyword search.
--   **Add Timestamps**: For files that evolve over time (like datasets or reports), consider adding a timestamp (e.g., `2025-10-20_report.qmd`) to keep track of versions.
--   **Further Watching**:
-    -   [How to name files](https://www.youtube.com/watch?v=ES1LTlnpLMk)
-    -   [A Simple File Management System](https://www.youtube.com/watch?v=MM-MPS57qKA&t=230s)
+For files that evolve over time (like datasets or reports), consider **adding timestamps**. Name a report `2025-10-20_survey_analysis.qmd` instead of `report.qmd`. This lets you instantly identify which version is which.
+
+Want to dive deeper? Check out [How to name files](https://www.youtube.com/watch?v=ES1LTlnpLMk) and [A Simple File Management System](https://www.youtube.com/watch?v=MM-MPS57qKA&t=230s).
 
 ### Writing Clean Code
 
-The quality of your code directly impacts reproducibility. If your code is hard to read, it's hard to verify. The book [Clean Code: A Handbook of Agile Software Craftsmanship by Robert C. Martin](https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882) is an excellent resource on the principles of writing clean, maintainable code.
+Here's a simple truth: code quality directly impacts reproducibility. If your code is hard to read, it's hard to verify. It's hard to reuse. And it's hard for someone else (or your future self) to understand why you made each choice.
 
-By combining virtual environments, good documentation, workflow management, and thoughtful project organization, you can create robust, transparent, and fully reproducible computational projects.
+The book [Clean Code: A Handbook of Agile Software Craftsmanship by Robert C. Martin](https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882) is an excellent guide to writing code that's readable, maintainable, and trustworthy.
+
+## Bringing It Together
+
+By combining virtual environments, comprehensive documentation, workflow management, and thoughtful project organization, you've now built the foundation for reproducible computational projects. These practices protect your work, enable collaboration, and most importantly, help you trust your own results.
