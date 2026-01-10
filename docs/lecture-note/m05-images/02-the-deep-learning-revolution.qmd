@@ -1,0 +1,580 @@
+---
+title: "Part 2: The Deep Learning Revolution"
+jupyter: python3
+---
+
+::: {.callout-note title="What you'll learn"}
+This section traces the paradigm shift in computer vision from hand-crafted features to learned representations. We explore how researchers designed edge detectors and frequency transforms, examine LeNet's pioneering approach to automated feature learning, and understand AlexNet's breakthrough that demonstrated deep learning works at scale.
+:::
+
+## The Old Way: Engineering Features by Hand
+
+Before 2012, computer vision meant one thing: carefully designing features by hand. Experts would analyze problems and craft mathematical operations to extract useful information. Edge detection, texture analysis, object boundaries. Every feature required human insight and engineering effort.
+
+Let's explore how this worked by examining edge detection, one of the fundamental problems in image processing.
+
+### Detecting Edges Through Brightness Changes
+
+What makes an edge visible to human eyes? The answer is sudden changes in brightness. An edge appears when neighboring pixels have significantly different intensity values.
+
+Consider a small 6×6 image with a bright vertical line:
+
+$$
+X = \begin{bmatrix}
+10 & 10 & 80 & 10 & 10 & 10 \\
+10 & 10 & 80 & 10 & 10 & 10 \\
+10 & 10 & 80 & 10 & 10 & 10 \\
+10 & 10 & 80 & 10 & 10 & 10 \\
+10 & 10 & 80 & 10 & 10 & 10 \\
+10 & 10 & 80 & 10 & 10 & 10
+\end{bmatrix}
+$$
+
+How do we detect the vertical edge in the third column? We can approximate the horizontal derivative by subtracting the right neighbor from the left neighbor at each position. For the central pixel, this looks like:
+
+$$
+\nabla Z_{22} = Z_{2,1} - Z_{2,3}
+$$
+
+Applied to the entire image, we get large values where brightness changes suddenly (the edge) and near-zero values elsewhere. This simple operation reveals structure.
+
+### Convolution: A General Pattern Matching Operation
+
+The derivative calculation we just performed is a special case of a more general operation called **convolution**. The idea is elegant: define a small matrix of weights called a **kernel** or **filter**, then slide it across the image, computing weighted sums at each position.
+
+For a 3×3 kernel $K$ applied to a local patch $Z$:
+
+$$
+\text{output}_{i,j} = \sum_{m=-1}^{1} \sum_{n=-1}^{1} K_{m,n} \cdot Z_{i+m, j+n}
+$$
+
+The Prewitt operator provides kernels specifically designed for edge detection:
+
+$$
+K_h = \begin{bmatrix}
+-1 & 0 & 1 \\
+-1 & 0 & 1 \\
+-1 & 0 & 1
+\end{bmatrix}
+\quad\text{and}\quad
+K_v = \begin{bmatrix}
+-1 & -1 & -1 \\
+0 & 0 & 0 \\
+1 & 1 & 1
+\end{bmatrix}
+$$
+
+The horizontal kernel $K_h$ detects vertical edges, while the vertical kernel $K_v$ detects horizontal edges. Each kernel responds strongly when the image patch matches its pattern.
+
+```{python}
+#| echo: false
+#| output: false
+import numpy as np
+import matplotlib.pyplot as plt
+from PIL import Image
+import requests
+from io import BytesIO
+
+def load_image_from_url(url):
+    response = requests.get(url)
+    img = Image.open(BytesIO(response.content))
+    if img.mode != 'RGB':
+        img = img.convert('RGB')
+    return np.array(img)
+
+def to_grayscale(img_array):
+    return np.mean(img_array, axis=2)
+```
+
+```{python}
+# Load an example image
+url = "https://www.binghamton.edu/news/images/uploads/features/20180815_peacequad02_jwc.jpg"
+img_array = load_image_from_url(url)
+img_gray = to_grayscale(img_array)
+
+# Apply vertical edge detection using convolution
+from scipy.signal import convolve2d
+
+K_v = np.array([[-1, -1, -1],
+                [0, 0, 0],
+                [1, 1, 1]])
+
+edges = convolve2d(img_gray, K_v, mode='same', boundary='symm')
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+axes[0].imshow(img_gray, cmap='gray')
+axes[0].set_title("Original Grayscale Image")
+axes[0].axis("off")
+
+axes[1].imshow(edges, cmap='gray')
+axes[1].set_title("Vertical Edge Detection (Prewitt Filter)")
+axes[1].axis("off")
+
+plt.tight_layout()
+plt.show()
+```
+
+Notice how the filter highlights horizontal boundaries where brightness changes rapidly in the vertical direction. An excellent interactive demo of various image kernels can be found at [Setosa Image Kernels](https://setosa.io/ev/image-kernels/).
+
+### Thinking in Frequencies: The Fourier Transform
+
+Shift your attention from the spatial domain to the frequency domain. The **Fourier transform** offers an alternative view of images, representing them as combinations of sinusoidal patterns at different frequencies.
+
+For a discrete signal $x[n]$ of length $N$, the Discrete Fourier Transform is:
+
+$$
+\mathcal{F}(x)[k] = \sum_{n=0}^{N-1} x[n] \cdot e^{-2\pi i \frac{nk}{N}}
+$$
+
+Using Euler's formula $e^{ix} = \cos(x) + i\sin(x)$, we can rewrite this as:
+
+$$
+\mathcal{F}(x)[k] = \sum_{n=0}^{N-1} x[n]\Big[\cos(2\pi \tfrac{nk}{N}) - i\sin(2\pi \tfrac{nk}{N})\Big]
+$$
+
+The Fourier transform decomposes a signal into its frequency components. Low frequencies correspond to smooth, slowly varying regions. High frequencies correspond to sharp edges and fine details.
+
+The **convolution theorem** reveals a beautiful connection: convolution in the spatial domain is equivalent to multiplication in the frequency domain:
+
+$$
+X * K \quad\longleftrightarrow\quad \mathcal{F}(X) \cdot \mathcal{F}(K)
+$$
+
+This means we can perform convolution by:
+1. Taking the Fourier transform of both the image and the kernel
+2. Multiplying them element-wise in the frequency domain
+3. Taking the inverse Fourier transform to get back to the spatial domain
+
+For large images, this approach can be computationally faster than direct convolution. For a beautiful visual explanation of Fourier transforms, watch 3Blue1Brown's video: [But what is the Fourier Transform?](https://www.youtube.com/watch?v=spUNpyF58BY)
+
+### The Fundamental Limitation
+
+Here's the problem with hand-crafted features: experts had to design every single one. Want to detect corners? Design a corner detector. Need to recognize textures? Craft texture descriptors. Each feature required mathematical sophistication and domain expertise.
+
+This approach worked for simple, well-defined tasks. But it scaled poorly to complex problems like recognizing thousands of object categories. The feature engineering bottleneck limited what computer vision could achieve.
+
+## The First Breakthrough: LeNet
+
+Yann LeCun posed a radical question in the late 1980s: what if networks could learn features automatically from raw pixels? Instead of hand-designing edge detectors, let the network discover useful patterns through training.
+
+This vision led to **LeNet**, a pioneering convolutional architecture that demonstrated automated feature learning on handwritten digit recognition {footcite}`lecun1989backpropagation,lecun1998gradient`.
+
+```{figure} https://miro.medium.com/v2/resize:fit:1400/format:webp/1*ge5OLutAT9_3fxt_sKTBGA.png
+---
+width: 100%
+name: lenet-1
+align: center
+---
+LeNet-1 architecture. The network learns to extract features through layers of convolution and pooling.
+```
+
+### Architecture: Hierarchical Feature Learning
+
+LeNet introduced a pattern that remains fundamental to modern CNNs:
+
+1. **Convolutional layers** apply learnable filters (not hand-designed) to extract local patterns
+2. **Pooling layers** downsample feature maps, creating spatial invariance
+3. **Stacking multiple layers** builds increasingly abstract representations
+4. **Fully connected layers** at the end combine features for classification
+
+The key innovation was making the convolutional filters learnable parameters. During training, backpropagation adjusts filter weights to extract features useful for the task. The network discovers edge detectors, corner detectors, and more complex patterns automatically.
+
+LeNet-5, the most influential version, processed 32×32 grayscale images through this architecture:
+
+```{figure} https://www.datasciencecentral.com/wp-content/uploads/2021/10/1lvvWF48t7cyRWqct13eU0w.jpeg
+---
+width: 100%
+name: lenet-5
+align: center
+---
+LeNet-5 architecture with input normalization, sparse connectivity, and multiple convolution-pooling pairs.
+```
+
+Let's understand each component:
+
+**C1: First Convolutional Layer**
+Takes the input image and applies learnable 5×5 filters. These filters start random but evolve during training to detect basic patterns like edges at various orientations.
+
+**S2: Subsampling (Pooling)**
+Reduces spatial dimensions through average pooling with 2×2 windows. This creates local translation invariance—small shifts in feature positions don't change the output significantly.
+
+**C3: Second Convolutional Layer**
+Combines features from the previous layer to build more complex patterns. LeNet-5 used sparse connectivity here (not every feature map connects to every previous map), reducing parameters while encouraging diverse features.
+
+**S4: Second Subsampling**
+Further reduces spatial dimensions, allowing the network to focus on increasingly abstract representations.
+
+**Fully Connected Layers**
+Flatten the spatial feature maps into a vector and make the final classification decision across 10 digit classes.
+
+Yann LeCun's work on applying backpropagation to convolutional architectures in the 1980s was met with skepticism. But LeNet's success on real-world tasks like automated check reading at banks helped spark wider interest in neural networks.
+
+### Implementing LeNet in Modern PyTorch
+
+Let's implement a simplified LeNet-1 using contemporary tools. While the original used custom training procedures, we'll use PyTorch Lightning for clean, maintainable code.
+
+```{python}
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import pytorch_lightning as pl
+from torch.utils.data import DataLoader, random_split
+from torchvision import datasets, transforms
+from torchmetrics import Accuracy
+
+class MNISTDataModule(pl.LightningDataModule):
+    """PyTorch Lightning data module for MNIST dataset."""
+
+    def __init__(self, data_dir='./data', batch_size=32):
+        super().__init__()
+        self.data_dir = data_dir
+        self.batch_size = batch_size
+
+        self.transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0,), (1,))
+        ])
+
+    def prepare_data(self):
+        datasets.MNIST(self.data_dir, train=True, download=True)
+        datasets.MNIST(self.data_dir, train=False, download=True)
+
+    def setup(self, stage=None):
+        if stage == 'fit' or stage is None:
+            mnist_full = datasets.MNIST(
+                self.data_dir, train=True, transform=self.transform
+            )
+            self.mnist_train, self.mnist_val = random_split(
+                mnist_full, [55000, 5000],
+                generator=torch.Generator().manual_seed(42)
+            )
+
+        if stage == 'test' or stage is None:
+            self.mnist_test = datasets.MNIST(
+                self.data_dir, train=False, transform=self.transform
+            )
+
+    def train_dataloader(self):
+        return DataLoader(
+            self.mnist_train, batch_size=self.batch_size,
+            shuffle=True, num_workers=2
+        )
+
+    def val_dataloader(self):
+        return DataLoader(
+            self.mnist_val, batch_size=self.batch_size, num_workers=2
+        )
+
+    def test_dataloader(self):
+        return DataLoader(
+            self.mnist_test, batch_size=self.batch_size, num_workers=2
+        )
+
+class LeNet1(pl.LightningModule):
+    """PyTorch Lightning implementation of LeNet-1."""
+
+    def __init__(self, learning_rate=1e-3):
+        super().__init__()
+        self.save_hyperparameters()
+
+        # Metrics
+        self.train_accuracy = Accuracy(task="multiclass", num_classes=10)
+        self.val_accuracy = Accuracy(task="multiclass", num_classes=10)
+
+        # Network architecture
+        self.conv1 = nn.Conv2d(1, 4, kernel_size=5, stride=1)
+        self.pool = nn.AvgPool2d(kernel_size=2, stride=2)
+        self.conv2 = nn.Conv2d(4, 12, kernel_size=5, stride=1)
+        self.fc = nn.Linear(12 * 4 * 4, 10)
+
+        # Initialize weights
+        self._init_weights()
+
+    def _init_weights(self):
+        for m in self.modules():
+            if isinstance(m, (nn.Conv2d, nn.Linear)):
+                nn.init.xavier_uniform_(m.weight)
+                nn.init.zeros_(m.bias)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = torch.tanh(x)
+        x = self.pool(x)
+
+        x = self.conv2(x)
+        x = torch.tanh(x)
+        x = self.pool(x)
+
+        x = x.view(-1, 12 * 4 * 4)
+        x = self.fc(x)
+        return x
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(
+            self.parameters(), lr=self.hparams.learning_rate
+        )
+        return optimizer
+
+    def training_step(self, batch, batch_idx):
+        x, y = batch
+        logits = self(x)
+        loss = F.cross_entropy(logits, y)
+        acc = self.train_accuracy(logits, y)
+
+        self.log("train_loss", loss, prog_bar=True)
+        self.log("train_acc", acc, prog_bar=True)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        x, y = batch
+        logits = self(x)
+        loss = F.cross_entropy(logits, y)
+        acc = self.val_accuracy(logits, y)
+
+        self.log("val_loss", loss, prog_bar=True)
+        self.log("val_acc", acc, prog_bar=True)
+
+# Train the model
+model = LeNet1(learning_rate=1e-3)
+data_module = MNISTDataModule(batch_size=256)
+
+trainer = pl.Trainer(
+    max_epochs=3,
+    accelerator="auto",
+    devices=1,
+)
+
+trainer.fit(model, data_module)
+```
+
+Even this simple architecture achieves high accuracy on MNIST, demonstrating the power of learned features. The convolutional filters automatically discover edge detectors and pattern recognizers through training.
+
+### Why LeNet Mattered
+
+LeNet proved a crucial concept: networks can learn better features than human experts can design. This automated feature learning was revolutionary, but LeNet's impact remained limited. It worked well on simple tasks like digit recognition but struggled with complex, large-scale problems.
+
+The computational constraints of the 1990s prevented training deeper, more powerful networks. GPU acceleration didn't exist. Datasets were small. Training techniques were primitive compared to modern methods.
+
+For nearly two decades, hand-crafted features remained dominant in computer vision. Techniques like SIFT (Scale-Invariant Feature Transform) and HOG (Histogram of Oriented Gradients) powered most practical systems. Neural networks were interesting research curiosities, not mainstream tools.
+
+Then came 2012.
+
+## The Revolution: AlexNet
+
+The ImageNet Large Scale Visual Recognition Challenge (ILSVRC) posed a formidable test: classify images into 1000 categories using a training set of 1.2 million images. This scale dwarfed anything LeNet had tackled. The best systems in 2011 achieved around 25% top-5 error, using carefully engineered features and traditional machine learning methods.
+
+```{figure} https://media.springernature.com/lw685/springer-static/image/art%3A10.1007%2Fs11263-015-0816-y/MediaObjects/11263_2015_816_Fig2_HTML.gif
+---
+width: 100%
+align: center
+name: imagenet-challenge
+---
+The ImageNet Large Scale Visual Recognition Challenge dataset contains over 1.2 million training images across 1000 categories.
+```
+
+In 2012, Alex Krizhevsky, Ilya Sutskever, and Geoffrey Hinton submitted a deep convolutional network that reduced top-5 error to **16.4%**. This more than 10 percentage point improvement shocked the community {footcite}`krizhevsky2012alexnet`.
+
+```{figure} https://viso.ai/wp-content/uploads/2024/02/imagenet-winners-by-year.jpg
+---
+width: 100%
+align: center
+name: imagenet-results
+---
+Top-5 error rates on ImageNet from 2010 to 2017. AlexNet's breakthrough in 2012 sparked the deep learning revolution.
+```
+
+AlexNet didn't just win. It demonstrated that deep learning could work at scale, igniting the revolution that transformed computer vision, speech recognition, natural language processing, and countless other domains.
+
+### Key Innovation 1: ReLU Activation
+
+Deep networks suffer from the **vanishing gradient problem**. During backpropagation, gradients shrink as they flow backward through layers. Traditional activations like sigmoid:
+
+$$
+\sigma(x) = \frac{1}{1 + e^{-x}}
+$$
+
+saturate for large positive or negative inputs, driving gradients toward zero. This makes early layers nearly impossible to train.
+
+AlexNet popularized the **Rectified Linear Unit (ReLU)** {footcite}`nair2010rectified`:
+
+$$
+\text{ReLU}(x) = \max(0, x)
+$$
+
+```{figure} https://miro.medium.com/v2/resize:fit:474/1*HGctgaVdv9rEHIVvLYONdQ.jpeg
+---
+width: 60%
+align: center
+name: relu-vs-sigmoid
+---
+Sigmoid saturates for large inputs (gradient approaches zero), while ReLU maintains constant gradient for positive inputs.
+```
+
+ReLU offers critical advantages:
+
+- **No vanishing gradient** for positive inputs (gradient is exactly 1)
+- **Computationally cheap** (just compare to zero)
+- **Sparse activation** (many neurons output zero, creating efficient representations)
+
+The drawback is that neurons can "die" if they always receive negative inputs, never activating again. Variants like Leaky ReLU introduce a small slope for negative inputs to mitigate this:
+
+$$
+\text{Leaky ReLU}(x) = \begin{cases}
+x & \text{if } x > 0 \\
+\alpha x & \text{if } x \leq 0
+\end{cases}
+$$
+
+where $\alpha$ is typically 0.01.
+
+### Key Innovation 2: Dropout Regularization
+
+Deep networks with millions of parameters easily overfit training data. AlexNet introduced **Dropout** as a powerful regularization technique {footcite}`srivastava2014dropout`.
+
+```{figure} https://s3-ap-south-1.amazonaws.com/av-blog-media/wp-content/uploads/2018/04/1IrdJ5PghD9YoOyVAQ73MJw.gif
+---
+width: 70%
+align: center
+name: dropout-animation
+---
+Dropout randomly disables neurons during training, forcing the network to learn robust features.
+```
+
+During training, Dropout randomly sets neuron outputs to zero with probability $p$ (typically 0.5). This prevents the network from relying too heavily on any single neuron. The effect is like training an ensemble of networks that share weights.
+
+At inference time, all neurons are active, but their outputs are scaled by $(1-p)$ to maintain expected values. Modern implementations often use inverse dropout, scaling during training instead to avoid scaling at inference.
+
+### Key Innovation 3: GPU Acceleration
+
+AlexNet demonstrated that deep learning needed massive computational power. The network was trained on two GPUs with 3GB memory each, splitting the computation to handle the large parameter count.
+
+This wasn't just an implementation detail. It showed that deep learning required specialized hardware. The success of AlexNet helped catalyze the GPU computing revolution that continues today, with modern networks training on dozens or hundreds of GPUs.
+
+### Key Innovation 4: Data Augmentation
+
+To combat overfitting with limited training data, AlexNet applied aggressive data augmentation:
+
+- Random crops of 224×224 patches from 256×256 images
+- Horizontal flips
+- Color and lighting perturbations (PCA-based color jittering)
+
+These transformations artificially expanded the training set, teaching the network to recognize objects regardless of position, orientation, or lighting conditions.
+
+### The Architecture
+
+AlexNet consists of five convolutional layers followed by three fully connected layers:
+
+```{figure} ../archive/figs/alexnet-architecture.jpg
+---
+width: 70%
+align: center
+name: alexnet-architecture
+---
+AlexNet architecture with 5 convolutional layers and 3 fully connected layers. The network was split across two GPUs.
+```
+
+**Layer-by-layer breakdown:**
+
+1. **Input**: 224×224 RGB image (3 channels)
+2. **Conv1**: 96 filters of 11×11, stride 4 → ReLU → Max Pool (3×3, stride 2)
+3. **Conv2**: 256 filters of 5×5 → ReLU → Max Pool (3×3, stride 2)
+4. **Conv3**: 384 filters of 3×3 → ReLU
+5. **Conv4**: 384 filters of 3×3 → ReLU
+6. **Conv5**: 256 filters of 3×3 → ReLU → Max Pool (3×3, stride 2)
+7. **FC6**: 4096 neurons → ReLU → Dropout
+8. **FC7**: 4096 neurons → ReLU → Dropout
+9. **FC8**: 1000 neurons (class scores) → Softmax
+
+The network has approximately 60 million parameters. The first convolutional layer uses large 11×11 filters with stride 4 to rapidly reduce spatial dimensions. Later layers use smaller 3×3 filters to refine features.
+
+AlexNet also used Local Response Normalization (LRN) to normalize activations across adjacent channels. This technique is less common in modern architectures, which typically use batch normalization instead.
+
+### Implementing AlexNet
+
+Here's a simplified AlexNet implementation in PyTorch:
+
+```{python}
+class SimpleAlexNet(nn.Module):
+    def __init__(self, num_classes=1000):
+        super(SimpleAlexNet, self).__init__()
+
+        self.features = nn.Sequential(
+            nn.Conv2d(3, 96, kernel_size=11, stride=4, padding=2),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2),
+
+            nn.Conv2d(96, 256, kernel_size=5, padding=2),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2),
+
+            nn.Conv2d(256, 384, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+
+            nn.Conv2d(384, 384, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+
+            nn.Conv2d(384, 256, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2),
+        )
+
+        self.classifier = nn.Sequential(
+            nn.Dropout(p=0.5),
+            nn.Linear(256 * 6 * 6, 4096),
+            nn.ReLU(inplace=True),
+
+            nn.Dropout(p=0.5),
+            nn.Linear(4096, 4096),
+            nn.ReLU(inplace=True),
+
+            nn.Linear(4096, num_classes),
+        )
+
+    def forward(self, x):
+        x = self.features(x)
+        x = torch.flatten(x, 1)
+        x = self.classifier(x)
+        return x
+
+# Create the model
+model = SimpleAlexNet(num_classes=1000)
+print(f"Total parameters: {sum(p.numel() for p in model.parameters()):,}")
+```
+
+PyTorch provides a pre-trained version through `torchvision.models.alexnet()`, trained on ImageNet. You can load it with:
+
+```{python}
+import torchvision.models as models
+alexnet = models.alexnet(pretrained=True)
+```
+
+## Why AlexNet Was a Paradigm Shift
+
+AlexNet proved several critical points:
+
+1. **Depth matters**: Deeper networks learn more powerful representations
+2. **Data scale matters**: Large datasets (ImageNet's 1.2M images) enable better learning
+3. **Compute matters**: GPUs make training deep networks practical
+4. **Learned features win**: Automated feature learning beats hand-crafted features
+
+Before AlexNet, these points were debated. After AlexNet, they became accepted wisdom. The deep learning revolution had begun.
+
+Within months, researchers worldwide abandoned hand-crafted features. Every computer vision competition became a deep learning competition. Companies invested billions in GPU infrastructure. The entire field transformed.
+
+## From Revolution to Practice
+
+AlexNet demonstrated that deep learning works at scale. But how do we actually use these powerful models in practice? How do we understand what's happening inside these black boxes? And how did researchers push even further, building networks with hundreds of layers?
+
+These questions lead us to the practical skills and advanced architectures we'll explore in the remaining sections. You now understand the paradigm shift. Next, you'll learn to harness it.
+
+```{footbibliography}
+:style: unsrt
+```
+
+## Summary
+
+We traced computer vision's evolution from hand-crafted features to learned representations. Traditional approaches required experts to design edge detectors, Fourier transforms, and pattern recognizers for each task. LeNet pioneered automated feature learning in the 1990s, showing that networks could discover useful patterns through training. But computational limits constrained its impact.
+
+AlexNet's 2012 breakthrough on ImageNet demonstrated that deep learning works at scale. Key innovations included ReLU activation (solving vanishing gradients), Dropout (preventing overfitting), and GPU acceleration (enabling large-scale training). The 10+ percentage point improvement shocked the computer vision community and sparked the deep learning revolution.
+
+This paradigm shift transformed how we approach machine perception. Networks now learn features automatically from data, outperforming carefully engineered alternatives. The question is no longer whether deep learning works, but how to apply it effectively.
