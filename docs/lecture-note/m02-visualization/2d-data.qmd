@@ -5,9 +5,13 @@ execute:
     enabled: true
 ---
 
+::: {.callout-note title="What you'll learn in this module"}
+This module teaches how to visualize relationships between two variables. You'll learn how scatter plots, binning methods, and density estimation reveal patterns that summary statistics hide. We'll explore how to handle overplotting in large datasets and how to compare relationships across different groups.
+:::
+
 You've probably heard that "correlation doesn't equal causation." But here's an even more fundamental problem: **a correlation coefficient doesn't tell you what your data actually looks like.**
 
-In 1973, statistician Francis Anscombe created four datasets that became legendary in data visualization. Each dataset has 11 (x, y) pairs. Each has the same mean for x and y, the same variance, andmost remarkably---the same correlation coefficient (r = 0.816) and the same linear regression line.
+In 1973, statistician Francis Anscombe created four datasets that became legendary in data visualization. Each dataset has 11 (x, y) pairs. Each has the same mean for x and y, the same variance, and most remarkably, the same correlation coefficient (r = 0.816) and the same linear regression line.
 
 But when you plot them, they tell completely different stories.
 
@@ -43,17 +47,15 @@ sns.despine()
 plt.tight_layout()
 ```
 
-Dataset I shows a nice linear relationship. Dataset II is clearly non-linear---a parabola that a linear model completely misses. Dataset III has a perfect linear relationship except for one outlier that changes everything. Dataset IV shows no relationship except for a single influential point that creates the illusion of correlation.
+Dataset I shows a nice linear relationship. Dataset II is clearly non-linear, a parabola that a linear model completely misses. Dataset III has a perfect linear relationship except for one outlier that changes everything. Dataset IV shows no relationship except for a single influential point that creates the illusion of correlation.
 
 The same correlation coefficient. The same regression line. Completely different data.
 
-This is why we visualize relationships:
+This is why we visualize relationships. Always plot your bivariate data. Summary statistics conceal structure.
 
-**Always plot your bivariate data. Summary statistics conceal structure.**
+## Showing All Points: Scatter Plots
 
-# Showing All Points: Scatter Plots
-
-The most direct way to show a relationship between two variables is to plot every point. A **scatter plot** does exactly this: each observation becomes a point in 2D space.
+Let's start with the most direct way to show a relationship between two variables. A **scatter plot** plots every point, so each observation becomes a single dot in 2D space.
 
 ```{python}
 #| fig-cap: "Basic scatter plot showing relationship between two variables"
@@ -74,14 +76,9 @@ ax.set_title('Scatter Plot: Every Point Visible')
 sns.despine()
 ```
 
-For small to moderate datasets (up to ~1,000 points), scatter plots are perfect. You can see:
-- The strength and direction of the relationship
-- The spread around the trend
-- Individual outliers
-- Non-linear patterns
-- Clusters or subgroups
+For small to moderate datasets (up to roughly 1,000 points), scatter plots are perfect. You can see the strength and direction of the relationship, the spread around the trend, individual outliers, non-linear patterns, and clusters or subgroups all at once.
 
-When points overlap heavily, use **transparency (alpha)**. This creates natural density shading---areas with many overlapping points appear darker.
+When points overlap heavily, use **transparency (alpha)**. This creates natural density shading. Areas with many overlapping points appear darker, while sparse areas appear lighter.
 
 ```{python}
 #| fig-cap: "Scatter plots with different alpha values showing how transparency reveals density"
@@ -107,7 +104,7 @@ for ax, alpha in zip(axes, alphas):
 plt.tight_layout()
 ```
 
-With alpha = 1.0 (opaque), the center is a solid blob---you can't tell if there are 10 points or 100. With alpha = 0.1, the density gradient becomes visible. Dark regions have many points; light regions have few.
+With alpha = 1.0 (opaque), the center is a solid blob. You can't tell if there are 10 points or 100. With alpha = 0.1, the density gradient becomes visible. Dark regions have many points; light regions have few.
 
 ::: {.callout-note}
 
@@ -117,7 +114,7 @@ A figure from [Metaanalysis of faculty's teaching effectiveness](https://www.sci
 
 :::
 
-For extremely dense data where even transparency doesn't help, **jittering** can separate overlapping points by adding small random noise to their positions.
+For extremely dense data where even transparency doesn't help, **jittering** can separate overlapping points. Jittering adds small random noise to point positions, spreading them out while keeping their relative positions meaningful.
 
 ```{python}
 #| fig-cap: "Jittering helps separate discrete or overlapping points"
@@ -151,11 +148,11 @@ sns.despine(ax=axes[1])
 plt.tight_layout()
 ```
 
-Without jittering, many points stack on top of each other---you might think there are only 25 data points (5 � 5) when there are actually 500. Jittering reveals the true sample size and density at each location.
+Without jittering, many points stack on top of each other. You might think there are only 25 data points (5 times 5) when there are actually 500. Jittering reveals the true sample size and density at each location.
 
-# When Points Overlap: Binning Methods
+## When Points Overlap: Binning Methods
 
-When you have tens of thousands of points, even transparency and jittering don't fully reveal the density structure. Individual points become less meaningful than the overall pattern. This is when we need to **bin** the datadivide the 2D space into regions and count observations in each.
+When you have tens of thousands of points, even transparency and jittering don't fully reveal the density structure. Individual points become less meaningful than the overall pattern. This is when we need to **bin** the data. Binning divides the 2D space into regions and counts observations in each region.
 
 ## 2D Histograms (Heatmaps)
 
@@ -203,11 +200,11 @@ for ax, gridsize in zip(axes, gridsizes):
 plt.tight_layout()
 ```
 
-With gridsize = 10, we see only coarse structure. With gridsize = 60, the plot is noisysome bins have few points by chance. Gridsize = 30 provides a good balance.
+With gridsize = 10, we see only coarse structure. With gridsize = 60, the plot is noisy. Some bins have few points by chance. Gridsize = 30 provides a good balance between detail and stability.
 
-## Hexbin Plots
+### Hexbin Plots
 
-**Hexagonal binning** uses hexagons instead of rectangles. Hexagons are better for 2D binning because they're closer to circlesevery edge is equidistant from the center, reducing bias in how we perceive density.
+**Hexagonal binning** uses hexagons instead of rectangles. Hexagons are better for 2D binning because they're closer to circles. Every edge is equidistant from the center, reducing bias in how we perceive density.
 
 ```{python}
 #| fig-cap: "Hexbin plot provides more perceptually uniform density representation"
@@ -247,22 +244,17 @@ sns.despine(ax=axes[1])
 plt.tight_layout()
 ```
 
-The hexbin plot clearly reveals the two clusters and their relative densitiessomething that's harder to see in the scatter plot even with low alpha.
-
-Hexbin plots are particularly powerful for **very large datasets** (100,000+ points) where scatter plots become computationally expensive and visually overwhelming.
+The hexbin plot clearly reveals the two clusters and their relative densities. Something that's harder to see in the scatter plot even with low alpha. Hexbin plots are particularly powerful for **very large datasets** (100,000+ points) where scatter plots become computationally expensive and visually overwhelming.
 
 ::: {.callout-note}
 ## Choosing colors for density plots
 
-When showing density or counts, use **sequential colormaps** that vary in lightness: light = low density, dark = high density. Good choices include:
-- `'YlOrRd'` (yellow-orange-red)
-- `'viridis'` (purple-blue-green-yellow, perceptually uniform)
-- `'Blues'` or `'Reds'` (single hue)
+When showing density or counts, use **sequential colormaps** that vary in lightness: light equals low density, dark equals high density. Good choices include `'YlOrRd'` (yellow-orange-red), `'viridis'` (purple-blue-green-yellow, perceptually uniform), and `'Blues'` or `'Reds'` (single hue).
 
-Avoid rainbow colormaps like `'jet'`they create artificial boundaries where none exist and are not perceptually uniform.
+Avoid rainbow colormaps like `'jet'`. They create artificial boundaries where none exist and are not perceptually uniform.
 :::
 
-# Smooth Density Estimation: 2D KDE
+## Smooth Density Estimation: 2D KDE
 
 Just as 1D kernel density estimation (KDE) provides a smooth alternative to histograms, **2D KDE** smooths 2D histograms by placing a kernel at each data point and summing them.
 
@@ -280,7 +272,7 @@ ax.set_title('2D Kernel Density Estimation')
 sns.despine()
 ```
 
-KDE reveals smooth density gradients without arbitrary binning decisions. The key parameter is **bandwidth**how wide each kernel is. Small bandwidth gives high detail but can be noisy; large bandwidth is smooth but may blur important features.
+KDE reveals smooth density gradients without arbitrary binning decisions. The key parameter is **bandwidth**, which controls how wide each kernel is. Small bandwidth gives high detail but can be noisy. Large bandwidth is smooth but may blur important features.
 
 ```{python}
 #| fig-cap: "Effect of bandwidth on 2D KDE smoothness"
@@ -303,9 +295,9 @@ plt.tight_layout()
 
 With `bw_adjust=0.5` (narrow bandwidth), we see fine detail but some noise. With `bw_adjust=3.0` (wide bandwidth), the plot is very smooth but the two clusters nearly merge. The default `bw_adjust=1.0` (or around 1.5 here) balances detail and smoothness.
 
-## Contour Plots
+### Contour Plots
 
-A **contour plot** represents the density surface as lines of equal densitylike a topographic map where each contour line represents an "elevation" of density.
+A **contour plot** represents the density surface as lines of equal density. Think of it like a topographic map where each contour line represents an "elevation" of density.
 
 ```{python}
 #| fig-cap: "Contour plot shows density as topographic lines"
@@ -333,12 +325,9 @@ sns.despine(ax=axes[1])
 plt.tight_layout()
 ```
 
-Contour plots are excellent for:
-- Overlaying density information on scatter plots
-- Comparing multiple groups (different colored contours)
-- Showing the "shape" of the relationship clearly
+Contour plots excel at overlaying density information on scatter plots, comparing multiple groups with different colored contours, and showing the "shape" of relationships clearly.
 
-# Joint Distributions: Combining 2D and 1D
+## Joint Distributions: Combining 2D and 1D
 
 A powerful approach is to show both the **joint (2D) distribution** and the **marginal (1D) distributions** of each variable. This connects 2D visualization back to the 1D methods we learned earlier.
 
@@ -361,7 +350,7 @@ g.set_axis_labels('X Variable', 'Y Variable')
 g.fig.suptitle('Joint Distribution with Marginal Histograms', y=1.01)
 ```
 
-The marginal distributions (top and right) show that both X and Y are bimodalthere are two peaks. But the scatter plot reveals that the peaks are *correlated*: when X is low, Y tends to be low; when X is high, Y tends to be high. This relationship is invisible in the marginals alone.
+The marginal distributions (top and right) show that both X and Y are bimodal. There are two peaks. But the scatter plot reveals that the peaks are correlated. When X is low, Y tends to be low. When X is high, Y tends to be high. This relationship is invisible in the marginals alone.
 
 Joint plots can use different visualizations in the center:
 
@@ -390,22 +379,19 @@ g.set_axis_labels('X Variable', 'Y Variable')
 g.fig.suptitle('Joint Plot: All KDE', y=1.01)
 ```
 
-Joint plots are particularly useful for:
-- Understanding if marginal distributions are misleading about the relationship
-- Seeing if there's correlation between variables with interesting univariate structure
-- Presenting a complete picture of a bivariate relationship
+Joint plots are particularly useful for understanding if marginal distributions are misleading about the relationship, seeing if there's correlation between variables with interesting univariate structure, and presenting a complete picture of a bivariate relationship.
 
 ::: {.callout-note}
 
-**Pro tip**: When presenting data, start with marginal distributions to establish what each variable looks like, then show the joint distribution to reveal the relationship. This guides your audience from the familiar (1D) to the complex (2D).
+**Pro tip**: When presenting data, start with marginal distributions to establish what each variable looks like. Then show the joint distribution to reveal the relationship. This guides your audience from the familiar (1D) to the complex (2D).
 
 :::
 
-# Visualizing Relationships Across Groups
+## Visualizing Relationships Across Groups
 
 Often we want to compare relationships across multiple groups or categories. There are several effective approaches.
 
-## Color coding by group
+### Color coding by group
 
 The simplest approach is to use different colors for different groups:
 
@@ -446,7 +432,7 @@ ax.legend()
 sns.despine()
 ```
 
-This reveals that the three groups have different relationships: Group A has a positive moderate slope, Group B has a steeper positive relationship, and Group C has almost no relationship.
+This reveals that the three groups have different relationships. Group A has a positive moderate slope. Group B has a steeper positive relationship. Group C has almost no relationship.
 
 ::: {.callout-warning}
 ## Simpson's Paradox
@@ -454,9 +440,9 @@ This reveals that the three groups have different relationships: Group A has a p
 Be careful! Sometimes the overall trend (pooling all groups) can be opposite to the trend within each group. This is called **Simpson's Paradox**. Always visualize groups separately to check if pooling is appropriate.
 :::
 
-## Small multiples (faceting)
+### Small multiples (faceting)
 
-When groups overlap heavily or there are many groups, **small multiples**separate plots for each groupwork better than color coding:
+When groups overlap heavily or there are many groups, **small multiples** work better than color coding. Small multiples are separate plots for each group.
 
 ```{python}
 #| fig-cap: "Small multiples showing relationship for each group separately"
@@ -474,7 +460,7 @@ plt.tight_layout()
 
 Small multiples make it easy to compare the strength and direction of relationships across groups without visual clutter.
 
-## Contour overlays
+### Contour overlays
 
 For large datasets, overlaying density contours for each group can be very effective:
 
@@ -498,26 +484,18 @@ ax.legend()
 sns.despine()
 ```
 
-This clearly shows that Groups A and B have elongated, correlated distributions (indicating strong relationships), while Group C is more circular (indicating weak correlation).
+This clearly shows that Groups A and B have elongated, correlated distributions. This indicates strong relationships. Group C is more circular, indicating weak correlation.
 
-# The Bigger Picture
+## The Bigger Picture
 
-Visualizing bivariate relationships isn't just about making pretty picturesit's about **seeing patterns that summary statistics conceal**.
+Visualizing bivariate relationships isn't just about making pretty pictures. It's about **seeing patterns that summary statistics conceal**.
 
-When you reduce a relationship to a single number (a correlation coefficient, a slope, a p-value), you lose crucial information:
-- Is the relationship linear or curved?
-- Are there outliers driving the result?
-- Are there subgroups with different patterns?
-- Is the relationship consistent across the range of your data?
+When you reduce a relationship to a single number (a correlation coefficient, a slope, a p-value), you lose crucial information. Is the relationship linear or curved? Are there outliers driving the result? Are there subgroups with different patterns? Is the relationship consistent across the range of your data?
 
 Anscombe's Quartet taught us this lesson half a century ago, yet papers still report correlations without showing scatter plots. Don't make this mistake.
 
-The choice of visualization method matters:
-- **Scatter plots** for small to moderate datasets where individual points matter
-- **Hexbin or heatmaps** for large datasets where density matters more than individuals
-- **2D KDE and contours** for smooth, assumption-light density estimation
-- **Joint plots** for connecting bivariate relationships to univariate distributions
+The choice of visualization method matters. Use scatter plots for small to moderate datasets where individual points matter. Use hexbin or heatmaps for large datasets where density matters more than individuals. Use 2D KDE and contours for smooth, assumption-light density estimation. Use joint plots for connecting bivariate relationships to univariate distributions.
 
-But the most important choice is the simplest: **always plot your data**. Let your audience see what you see. Trust them to interpret patterns, not just summary statistics.
+But the most important choice is the simplest. Always plot your data. Let your audience see what you see. Trust them to interpret patterns, not just summary statistics.
 
 As statistician John Tukey wrote: "The greatest value of a picture is when it forces us to notice what we never expected to see."
