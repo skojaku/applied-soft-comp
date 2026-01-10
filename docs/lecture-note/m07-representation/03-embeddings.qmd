@@ -24,19 +24,13 @@ You'll learn:
 
 Let's talk about how traditional machine learning builds decision boundaries. You collect labeled data, extract features, and train a classifier to draw a line (or hyperplane) separating Class A from Class B. The output is binary: spam or not-spam, fraud or legitimate, cat or dog.
 
-This approach works when categories are genuinely discrete. But what about political ideology?
+This approach works when categories are genuinely discrete. But what about political ideology? You might lean liberal on economic issues but conservative on others. Your position isn't "left or right" but a point in a multidimensional space, and forcing it into a binary choice destroys information.
 
-You might lean liberal on economic issues but conservative on others. Your position isn't "left or right". It's a point in a multidimensional space. Forcing it into a binary choice destroys information.
-
-What about word meanings? Is "dog" more similar to "wolf" or "cat"?
-
-The answer is "it depends". Dogs and wolves are biologically closer (same genus). Dogs and cats are domestically closer (both pets). A classification system would force you to choose one dimension. A continuous representation can capture both simultaneously.
+What about word meanings? Is "dog" more similar to "wolf" or "cat"? The answer is "it depends" on whether you care about biology (dogs and wolves share a genus) or domestication (dogs and cats are both pets). A classification system would force you to choose one dimension, while a continuous representation can capture both simultaneously.
 
 ## Enter Vector Embeddings
 
-What's the solution? Vector embeddings solve this by mapping each concept to coordinates in a high-dimensional continuous space.
-
-Instead of "this word belongs to category X", you get "this word lives at position $[0.23, -0.15, 0.87, ...]$ in 300-dimensional space". Similarity becomes geometric distance. Relationships become directional vectors.
+Vector embeddings solve this by mapping each concept to coordinates in a high-dimensional continuous space. Instead of "this word belongs to category X", you get "this word lives at position $[0.23, -0.15, 0.87, ...]$ in 300-dimensional space". Similarity becomes geometric distance, and relationships become directional vectors.
 
 ![](https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgzOCWLMCxaOTTpZKlTr-o3t4l2Uq_IekgKg8P-1nM1OdwonDOiNs0ZCXaMbv12MMTMrstCb2NuKVwS2Oalw7R615Agjr2dkU6-P31BTQxZCHrBAQWJynwROgxFTuHCpwQzTPQauoDd5JQ/s1600/embedding-mnist.gif)
 
@@ -54,9 +48,7 @@ $$
 
 where $u_i$ is the "in-vector" of center word $i$ and $v_j$ is the "out-vector" of context word $j$.
 
-But here's the problem. The denominator is not computable even for a moderate vocabulary size.
-
-It involves a sum over all words in the dictionary. This sum is expensive to compute during training as we need to compute the probability of all words many times.
+But here's the problem. The denominator involves a sum over all words in the dictionary, which is not computable even for a moderate vocabulary size since we need to compute the probability of all words many times during training.
 
 What's the solution? **Negative Sampling** offers an elegant answer.
 
@@ -235,31 +227,17 @@ The model doesn't just memorize pixels. It learns the underlying factors of vari
 
 ![](https://ja.stateofaiguides.com/content/images/2022/12/poincare-01.png){fig-align="center"}
 
-Shift your attention to a fundamental limitation in everything we've seen so far.
+Shift your attention to a fundamental limitation in everything we've seen so far. Models like Word2Vec and GloVe are built on **Metonymy** (from the Greek *meta* "change" + *onyma* "name"), learning from the syntagmatic axis, the "next-to" relationship. "Crown" is embedded near "King" because they appear together in text context. They capture *association*.
 
-Models like Word2Vec and GloVe are built on **Metonymy** (from the Greek *meta* "change" + *onyma* "name"). They learn from the syntagmatic axis, the "next-to" relationship.
-
-"Crown" is embedded near "King" because they appear together in text context. They capture *association*.
-
-But what about **Metaphor**?
-
-Metaphor relies on the paradigmatic axis, the "is-a" or "substitution" relationship. A "Lion" is implicitly like a "Tiger" not because they hang out together, but because they occupy the same structural slot in the hierarchy of life. They are both big cats.
+But what about **Metaphor**? Metaphor relies on the paradigmatic axis, the "is-a" or "substitution" relationship. A "Lion" is implicitly like a "Tiger" not because they hang out together, but because they occupy the same structural slot in the hierarchy of life (they are both big cats).
 
 To capture this structural similarity, researchers turned to **WordNet**, a massive database explicitly constructed to map these "is-a" (hypernym) relationships. It is a map of taxonomies, effectively a giant tree of concepts.
 
-When they tried to train standard Euclidean embeddings on WordNet, they hit a wall. Even with hundreds of dimensions, the models struggled to represent the deep, branching hierarchy without distorting the relationships.
+When they tried to train standard Euclidean embeddings on WordNet, they hit a wall. Even with hundreds of dimensions, the models struggled to represent the deep, branching hierarchy without distorting the relationships. The problem wasn't the data but the geometry itself.
 
-What was the problem? The problem wasn't the data. It was the geometry itself.
+Euclidean space is flat, but in a hierarchy (like a biological taxonomy or a corporate org chart), the number of nodes expands **exponentially** as you go deeper (Root $\to$ Children $\to$ Grandchildren). In flat space, the available volume only grows polynomially, so there simply isn't enough "room" at the boundaries to fit this exponential growth. You end up crushing the leaf nodes together, losing the distinct structure.
 
-Euclidean space is flat. In a hierarchy (like a biological taxonomy or a corporate org chart), the number of nodes expands **exponentially** as you go deeper.
-
-Root $\to$ Children $\to$ Grandchildren. In flat space, the available volume only grows polynomially. There simply isn't enough "room" at the boundaries to fit this exponential growth. You end up crushing the leaf nodes together, losing the distinct structure.
-
-To solve this, we need to exit flat space and enter **Hyperbolic Space**, often visualized as a Poincaré ball.
-
-In this non-Euclidean geometry, space itself expands exponentially as you move away from the center. Imagine a disk where, using a specific distance metric (Poincaré distance), the path to the edge is effectively infinite.
-
-Because the "room" available grows exactly as fast as the tree branches, you can fit an infinite tree structure within this finite disk. You place the root at the center, and the leaves fit naturally near the boundary without crushing into each other.
+To solve this, we need to exit flat space and enter **Hyperbolic Space**, often visualized as a Poincaré ball. In this non-Euclidean geometry, space itself expands exponentially as you move away from the center. Imagine a disk where, using a specific distance metric (Poincaré distance), the path to the edge is effectively infinite. Because the "room" available grows exactly as fast as the tree branches, you can fit an infinite tree structure within this finite disk by placing the root at the center, with the leaves fitting naturally near the boundary without crushing into each other.
 
 This alignment of geometry and data is powerful. While Euclidean models might require 300 dimensions to separate concepts in WordNet, **Poincaré embeddings** can capture the same complex structure with high precision in as few as **5 dimensions**.
 
