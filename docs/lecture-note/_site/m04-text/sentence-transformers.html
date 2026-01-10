@@ -6,8 +6,6 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2026-01-10">
 
 <title>Sentence Transformers – Applied Soft Computing</title>
 <style>
@@ -618,19 +616,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div class="quarto-title-meta">
 
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Sadamori Kojaku </p>
-          </div>
-  </div>
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">January 10, 2026</p>
-    </div>
-  </div>
   
     
   </div>
@@ -669,9 +655,10 @@ What you’ll learn in this module
 <p>The training objective is contrastive. If the sentences are semantically similar (paraphrases), their vectors should be close in Euclidean or cosine space. If they’re unrelated, their vectors should be distant.</p>
 <p>Think of it like creating a library catalog. Instead of storing every word on every page, you compress each book into a single Dewey Decimal number. Books on similar topics get similar numbers, enabling efficient retrieval. The compression loses fine-grained detail, but gains search speed.</p>
 </section>
-<section id="what-makes-this-work" class="level2">
-<h2 class="anchored" data-anchor-id="what-makes-this-work">What makes this work?</h2>
-<p>The mathematical trick is the Siamese architecture. Weight sharing ensures both sentences are embedded into the same vector space using identical transformations. This makes the distance between vectors meaningful: similar sentences cluster together, dissimilar ones push apart.</p>
+<section id="why-does-weight-sharing-matter" class="level2">
+<h2 class="anchored" data-anchor-id="why-does-weight-sharing-matter">Why Does Weight Sharing Matter?</h2>
+<p>The mathematical trick is the Siamese architecture. Weight sharing ensures both sentences are embedded into the same vector space using identical transformations.</p>
+<p>This makes the distance between vectors meaningful. Similar sentences cluster together, dissimilar ones push apart.</p>
 </section>
 <section id="how-to-use-sentence-transformers" class="level2">
 <h2 class="anchored" data-anchor-id="how-to-use-sentence-transformers">How to Use Sentence Transformers</h2>
@@ -679,7 +666,7 @@ What you’ll learn in this module
 <section id="basic-semantic-search" class="level3">
 <h3 class="anchored" data-anchor-id="basic-semantic-search">Basic Semantic Search</h3>
 <p>Here’s how to encode sentences and find the most similar matches:</p>
-<div id="933c8ac2" class="cell" data-execution_count="1">
+<div id="77f80c27" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sentence_transformers <span class="im">import</span> SentenceTransformer, util</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load a pre-trained model</span></span>
@@ -716,7 +703,7 @@ What you’ll learn in this module
 <section id="clustering-documents" class="level3">
 <h3 class="anchored" data-anchor-id="clustering-documents">Clustering Documents</h3>
 <p>You can also cluster documents by their semantic content:</p>
-<div id="01d66da9" class="cell" data-execution_count="2">
+<div id="f48383d1" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sentence_transformers <span class="im">import</span> SentenceTransformer</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> KMeans</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -757,7 +744,7 @@ What you’ll learn in this module
 <h3 class="anchored" data-anchor-id="which-model-should-you-use">Which Model Should You Use?</h3>
 <p>Different Sentence Transformer models optimize for different trade-offs. The <code>all-MiniLM-L6-v2</code> model is fast and lightweight (384 dimensions), good for most applications. The <code>all-mpnet-base-v2</code> model offers higher quality (768 dimensions), slower but more accurate.</p>
 <p>The <code>multi-qa-mpnet-base-dot-v1</code> model is optimized for question-answering and retrieval tasks. The <code>paraphrase-multilingual-mpnet-base-v2</code> model supports 50+ languages.</p>
-<p>Choose based on your constraints: speed vs.&nbsp;accuracy, monolingual vs.&nbsp;multilingual, general-purpose vs.&nbsp;domain-specific.</p>
+<p>What should drive your choice? Speed vs.&nbsp;accuracy, monolingual vs.&nbsp;multilingual, general-purpose vs.&nbsp;domain-specific. Pick the model that matches your constraints.</p>
 </section>
 </section>
 <section id="how-does-the-architecture-work" class="level2">
@@ -773,15 +760,16 @@ What you’ll learn in this module
 <p>During training, the loss function pushes similar sentence pairs together and dissimilar pairs apart. This is contrastive learning: positive pairs attract, negative pairs repel.</p>
 <section id="what-pooling-strategy-should-you-use" class="level3">
 <h3 class="anchored" data-anchor-id="what-pooling-strategy-should-you-use">What Pooling Strategy Should You Use?</h3>
-<p>Common pooling strategies include <strong>mean pooling</strong> (average all token vectors, most common), <strong>max pooling</strong> (take element-wise maximum across tokens), and <strong>CLS-token</strong> (use the [CLS] token’s final hidden state, BERT’s built-in sentence representation).</p>
+<p>You have three main choices. <strong>Mean pooling</strong> averages all token vectors (most common). <strong>Max pooling</strong> takes the element-wise maximum across tokens. <strong>CLS-token</strong> uses the [CLS] token’s final hidden state (BERT’s built-in sentence representation).</p>
 <p>Mean pooling generally works best. It captures information from all tokens while being robust to varying sentence lengths.</p>
 </section>
 </section>
 <section id="where-does-this-break" class="level2">
 <h2 class="anchored" data-anchor-id="where-does-this-break">Where Does This Break?</h2>
 <p>Static compression is a limitation. A sentence gets exactly one vector, regardless of context. “The bank” in “the river bank” and “the financial bank” might get similar embeddings if they share enough surrounding words. The model compresses meaning into a fixed point, losing nuance.</p>
-<p>Word order sensitivity is another concern. “The dog bit the man” and “The man bit the dog” share the same words. If the model relies too heavily on lexical overlap (bag-of-words similarity), they’ll end up dangerously close in vector space. Good models learn syntax, but they’re not perfect.</p>
-<p>Computational cost matters too. Although retrieval is fast (dot products), encoding large corpora is expensive. Encoding 1 million sentences with a large model can take hours. Pre-compute and cache embeddings whenever possible.</p>
+<p>Word order sensitivity is another concern. “The dog bit the man” and “The man bit the dog” share the same words. If the model relies too heavily on lexical overlap (bag-of-words similarity), they’ll end up dangerously close in vector space.</p>
+<p>Good models learn syntax, but they’re not perfect.</p>
+<p>What about computational cost? Although retrieval is fast (dot products), encoding large corpora is expensive. Encoding 1 million sentences with a large model can take hours. Pre-compute and cache embeddings whenever possible.</p>
 <p>Domain shift is a practical issue. Models trained on general text (Wikipedia, news) may perform poorly on specialized domains (medical, legal). Fine-tuning on domain-specific data helps, but requires labeled sentence pairs.</p>
 </section>
 <section id="the-key-takeaway" class="level2">

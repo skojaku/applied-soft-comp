@@ -90,7 +90,12 @@ def generate_features(task_file: str, output_file: str) -> None:
             "notes": core["styleRules"],
             "writingPatterns": core.get("writingPatterns", {}),
             "learningGoalsTemplate": core.get("learningGoalsTemplate", ""),
+            "figureSyntax": core.get("figureSyntax", {}),
+            "codeVisibility": core.get("codeVisibility", {}),
         },
+        "coreInstructions": core,
+        "codeBlockRefactoring": tasks.get("codeBlockRefactoring", {}),
+        "textCondensing": tasks.get("textCondensing", {}),
         "features": [],
     }
 
