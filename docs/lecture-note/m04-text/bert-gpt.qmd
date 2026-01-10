@@ -22,39 +22,29 @@ You'll learn:
 
 We instinctively think of "Transformers" as a single unified model, but this is wrong. The original Transformer paper proposed an Encoder-Decoder architecture, a two-part machine. Modern models split this architecture in half, creating two distinct lineages with fundamentally different information flows.
 
-BERT (Bidirectional Encoder Representations from Transformers) uses the encoder stack and sees everything at once, like reading a completed sentence. GPT (Generative Pre-trained Transformer) uses the decoder stack and processes text causally, like improvising a story where you can only react to what's already been said. This architectural choice isn't cosmetic. It determines what the model can learn and what tasks it excels at.
+BERT (Bidirectional Encoder Representations from Transformers) uses the encoder stack and sees everything at once, like reading a completed sentence. GPT (Generative Pre-trained Transformer) uses the decoder stack and processes text causally, like improvising a story where you can only react to what's already been said. This architectural choice determines what the model can learn and what tasks it excels at.
 
-Think of it like two different reading strategies. BERT is the student who reads the entire paragraph, then goes back to understand each word in context. GPT is the actor performing a cold read, processing each line sequentially without peeking ahead at the script. The first strategy gives you deeper understanding. The second gives you the ability to continue the story.
+Think of it like two different reading strategies: BERT is the student who reads the entire paragraph, then goes back to understand each word in context, while GPT is the actor performing a cold read, processing each line sequentially without peeking ahead at the script. The first strategy gives deeper understanding, the second gives the ability to continue the story.
 
 ## Architecture
 
 ![](../figs/bidirectional-vs-unidirectional-attention.png)
 
-What's the most important difference between BERT and GPT? The attention mechanism.
+What's the most important difference? The attention mechanism. BERT uses bidirectional attention, meaning every token at position $t$ can attend to every other token. This allows BERT to understand the context of a word by looking at all the words in the sentence, capturing full context.
 
-BERT uses bidirectional attention, meaning every token at position $t$ can attend to every other token. This allows BERT to understand the context of a word by looking at all the words in the sentence, not just the ones before it. The model captures the full context of each token.
-
-GPT uses masked (or causal) attention, meaning a token at position $t$ can only attend to previous tokens. This masking imposes a causal constraint, making it ideal for tasks like language generation where the model must predict future tokens based only on past context. Although GPT's attention is not bidirectional and thus less globally context-aware than BERT's, this causal processing allows it to generate remarkably fluent and coherent text sequentially.
+GPT uses masked (or causal) attention, meaning a token at position $t$ can only attend to previous tokens. This masking imposes a causal constraint, making it ideal for language generation where the model must predict future tokens based only on past context. Although less globally context-aware than BERT, this causal processing allows GPT to generate remarkably fluent and coherent text sequentially.
 
 ### More on BERT
 
-Let's talk about BERT's special tokens. The [CLS] token represents the start of the sentence. The [SEP] token represents the end of the sentence. The [MASK] token represents masked words. The [UNK] token represents unknown words. For example, the sentence "The cat sat on the mat. It then went to sleep." is represented as "[CLS] The cat sat on the mat [SEP] It then went to sleep [SEP]".
+Let's talk about BERT's special tokens. The [CLS] token represents the start of the sentence, [SEP] marks sentence boundaries, [MASK] represents masked words, and [UNK] represents unknown words. For example, the sentence "The cat sat on the mat. It then went to sleep." becomes "[CLS] The cat sat on the mat [SEP] It then went to sleep [SEP]".
 
-Why does the [CLS] token matter? In BERT, the [CLS] token is used to classify the input sentences. As a result, the model learns to encode a summary of the input sentence into the [CLS] token. This is particularly useful when we want the embedding of the whole input text, instead of the token level embeddings.
+Why does the [CLS] token matter? BERT learns to encode a summary of the input into the [CLS] token, making it particularly useful when we want the embedding of the whole input text rather than token-level embeddings.
 
-BERT uses position and segment embeddings to provide the model with information about the position of the tokens in the sequence. Position embeddings provide information about the position of tokens in the sequence. Unlike the sinusoidal position embedding used in the original transformer paper, BERT uses learnable position embeddings.
+BERT uses position and segment embeddings to provide contextual information. Unlike the sinusoidal position embedding used in the original transformer paper, BERT uses learnable position embeddings. Segment embeddings distinguish sentences in the input: tokens in the first sentence receive segment embedding 0, tokens in the second receive segment embedding 1. Both types of embeddings are learned during pre-training.
 
-Segment embeddings distinguish the sentences in the input. For example, for the sentence "The cat sat on the mat. It then went to sleep.", the tokens in the first sentence are added with segment embedding 0, and the tokens in the second sentence are added with segment embedding 1. These segment embeddings are also learned during the pre-training process.
+Several BERT variants have been developed. RoBERTa (Robustly Optimized BERT Approach) improved upon BERT by removing Next Sentence Prediction, using dynamic masking, training with larger batches and datasets, leading to significant performance improvements. DistilBERT focused on efficiency through knowledge distillation, achieving 95% of BERT's performance while being 40% smaller and 60% faster. ALBERT introduced parameter reduction techniques using factorized embedding parameterization and cross-layer parameter sharing while replacing NSP with Sentence Order Prediction.
 
-Several BERT variants have been developed. RoBERTa (Robustly Optimized BERT Approach) improved upon BERT through several optimizations. It removes the Next Sentence Prediction task, uses dynamic masking that changes the mask patterns across training epochs, trains with larger batches, and uses a larger dataset. These changes led to significant performance improvements while maintaining BERT's core architecture.
-
-DistilBERT focused on making BERT more efficient through knowledge distillation, where a smaller student model learns from the larger BERT teacher model. It achieves 95% of BERT's performance while being 40% smaller and 60% faster. This makes it more suitable for resource-constrained environments and real-world applications.
-
-ALBERT introduced parameter reduction techniques to address BERT's memory limitations. It uses factorized embedding parameterization and cross-layer parameter sharing to dramatically reduce parameters while maintaining performance. ALBERT also replaced Next Sentence Prediction with Sentence Order Prediction, where the model must determine if two consecutive sentences are in the correct order.
-
-Domain-specific BERT models have been trained on specialized corpora to better handle specific fields. Examples include BioBERT for biomedical text, SciBERT for scientific papers, and FinBERT for financial documents. These models demonstrate superior performance in their respective domains compared to the general-purpose BERT.
-
-Multilingual BERT (mBERT) was trained on Wikipedia data from 104 languages, using a shared vocabulary across all languages. Despite not having explicit cross-lingual objectives during training, mBERT shows remarkable zero-shot cross-lingual transfer abilities. It can perform tasks in languages it wasn't explicitly aligned on. This has made it a valuable resource for low-resource languages and cross-lingual applications.
+Domain-specific BERT models have been trained on specialized corpora for specific fields (BioBERT for biomedical text, SciBERT for scientific papers, FinBERT for financial documents), demonstrating superior performance in their respective domains. Multilingual BERT (mBERT) was trained on Wikipedia data from 104 languages and shows remarkable zero-shot cross-lingual transfer abilities despite lacking explicit cross-lingual objectives, making it valuable for low-resource languages.
 
 ## Training
 
@@ -62,51 +52,43 @@ Multilingual BERT (mBERT) was trained on Wikipedia data from 104 languages, usin
 
 ### BERT
 
-How do you train models with such different architectures? The fundamental difference in their architectures naturally leads to distinct training objectives. BERT, with its encoder-only design, is trained using two primary unsupervised tasks: Masked Language Modeling (MLM) and Next Sentence Prediction (NSP).
+How do you train models with such different architectures? BERT, with its encoder-only design, is trained using two primary unsupervised tasks: Masked Language Modeling (MLM) and Next Sentence Prediction (NSP).
 
 ![](https://raw.githubusercontent.com/UKPLab/sentence-transformers/master/docs/img/MLM.png){width=70% fig-align="center"}
 
-In MLM, a percentage of input tokens are randomly masked, and the model is tasked with predicting the original masked tokens based on the full, bidirectional context of the sentence. For example, given the sentence "The quick brown fox jumps over the lazy dog," BERT might see "The quick brown [MASK] jumps over the lazy dog" and predict "fox."
+In MLM, a percentage of input tokens are randomly masked, and the model predicts the original tokens based on full bidirectional context. For example, given "The quick brown fox jumps over the lazy dog," BERT might see "The quick brown [MASK] jumps over the lazy dog" and predict "fox."
 
 ![](https://amitness.com/posts/images/bert-nsp.png)
 
-NSP involves presenting the model with two sentences and asking it to predict whether the second sentence logically follows the first. For instance, given Sentence A: "The cat sat on the mat." and Sentence B: "It was a sunny day.", BERT would predict 'IsNextSentence = No'. But for Sentence A: "The cat sat on the mat." and Sentence B: "It was purring softly.", BERT would predict 'IsNextSentence = Yes'. These tasks enable BERT to learn deep contextual representations useful for understanding existing text.
+NSP involves presenting the model with two sentences and asking it to predict whether the second sentence logically follows the first. Given "The cat sat on the mat." followed by "It was a sunny day.", BERT would predict 'IsNextSentence = No', but for "It was purring softly.", BERT would predict 'IsNextSentence = Yes'. These tasks enable BERT to learn deep contextual representations for understanding text.
 
 ### Recipe for MLM
 
-To generate training data for MLM, BERT randomly masks 15% of the tokens in each sequence. However, the masking process is not as straightforward as simply replacing words with [MASK] tokens.
+To generate training data for MLM, BERT randomly masks 15% of the tokens in each sequence. The masking strategy uses three approaches: 80% of the time, replace the word with [MASK] ("the cat sat on the mat" becomes "the cat [MASK] on the mat"), 10% of the time, replace with a random word ("the cat dog on the mat"), and 10% of the time, keep unchanged ("the cat sat on the mat").
 
-For the 15% of tokens chosen for masking, 80% of the time the word is replaced with the [MASK] token (example: "the cat sat on the mat" becomes "the cat [MASK] on the mat"). 10% of the time the word is replaced with a random word (example: "the cat sat on the mat" becomes "the cat dog on the mat"). 10% of the time the word is kept unchanged (example: "the cat sat on the mat" stays "the cat sat on the mat").
-
-Why this strange mix? The model must predict the original token for all selected positions, regardless of whether they were masked, replaced, or left unchanged. This helps prevent the model from simply learning to detect replaced tokens.
-
-During training, the model processes the modified input sequence through its transformer layers and predicts the original token at each masked position using the contextual representations. While replacing words with random tokens or leaving them unchanged may seem counterintuitive, research has shown this approach is effective. It has become an essential component of BERT's pre-training process.
+Why this strange mix? The model must predict the original token for all selected positions regardless of how they were modified, preventing the model from simply learning to detect replaced tokens. During training, the model processes the modified sequence through its transformer layers and predicts the original token at each masked position using contextual representations. This approach, while counterintuitive, has proven effective and become essential to BERT's pre-training.
 
 ### Recipe for NSP
 
-Next Sentence Prediction (NSP) trains BERT to understand relationships between sentences. The model learns to predict whether two sentences naturally follow each other in text. During training, half of the sentence pairs are consecutive sentences from documents (labeled as IsNext). The other half are random sentence pairs (labeled as NotNext).
+Next Sentence Prediction (NSP) trains BERT to understand relationships between sentences by predicting whether two sentences naturally follow each other. During training, half of the pairs are consecutive sentences from documents (labeled IsNext), the other half are random pairs (labeled NotNext).
 
-The input format uses special tokens to structure the sentence pairs. A [CLS] token at the start, the first sentence, a [SEP] token, the second sentence, and a final [SEP] token. For instance:
+The input format uses special tokens: [CLS] at the start, the first sentence, [SEP], the second sentence, and a final [SEP]. For instance:
 
 $$
 \text{``[CLS] }\underbrace{\text{I went to the store}}_{\text{Sentence 1}}\text{ [SEP] }\underbrace{\text{They were out of milk}}_{\text{Sentence 2}}\text{ [SEP]''}.
 $$
 
-BERT uses the final hidden state of the [CLS] token to classify whether the sentences are consecutive or not. This helps the model develop a broader understanding of language context and relationships between sentences.
+BERT uses the final hidden state of the [CLS] token to classify whether the sentences are consecutive, helping the model develop broader understanding of language context and relationships.
 
 ### GPT
 
-What about GPT? GPT, on the other hand, uses its decoder-only architecture for Causal Language Modeling (CLM). Causal (autoregressive) language modeling is the pre-training objective of GPT, where the model learns to predict the next token given all previous tokens in the sequence.
-
-More formally, given a sequence of tokens $(x_1, x_2, ..., x_n)$, the model is trained to maximize the likelihood:
+What about GPT? GPT uses its decoder-only architecture for Causal Language Modeling (CLM), where the model learns to predict the next token given all previous tokens. More formally, given a sequence $(x_1, x_2, ..., x_n)$, the model maximizes:
 
 $$
 P(x_1, ..., x_n) = \prod_{i=1}^n P(x_i|x_1, ..., x_{i-1})
 $$
 
-For example, given the partial sentence "The cat sat on", the model learns to predict the next word by calculating probability distributions over its entire vocabulary. During training, it might learn that "mat" has a high probability in this context, while "laptop" has a lower probability.
-
-This autoregressive nature means GPT always processes text from left to right, learning to generate coherent and grammatically correct continuations. This objective directly aligns with its strength in text generation.
+For example, given "The cat sat on", the model calculates probability distributions over its vocabulary: "mat" might have high probability while "laptop" has lower probability. This autoregressive nature means GPT processes text left to right, learning to generate coherent and grammatically correct continuations that directly align with its strength in text generation.
 
 ## Visualizing Attention: What Is BERT Looking At?
 
