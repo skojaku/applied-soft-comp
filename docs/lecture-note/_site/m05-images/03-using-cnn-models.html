@@ -6,8 +6,6 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Sadamori Kojaku">
-<meta name="dcterms.date" content="2026-01-10">
 
 <title>Part 3: Using CNN Models – Applied Soft Computing</title>
 <style>
@@ -57,7 +55,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -209,16 +227,20 @@ window.Quarto = {
  <span class="dropdown-text">Module 6: Deep Learning for Graphs</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../m07-representation/overview.html">
+ <span class="dropdown-text">Module 7: Representations &amp; Structuralism</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../m06-llms/overview.qmd">
- <span class="dropdown-text">Module 7: Advanced LLMs</span></a>
+ <span class="dropdown-text">Module 8: Advanced LLMs</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../m07-self-supervised/overview.qmd">
- <span class="dropdown-text">Module 8: Self-Supervised Learning</span></a>
+ <span class="dropdown-text">Module 9: Self-Supervised Learning</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../m08-explainability/overview.qmd">
- <span class="dropdown-text">Module 9: Explainability &amp; Ethics</span></a>
+ <span class="dropdown-text">Module 10: Explainability &amp; Ethics</span></a>
   </li>  
     </ul>
   </li>
@@ -598,6 +620,47 @@ window.Quarto = {
 </li>
       </ul>
   </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module 7: Representations &amp; Structuralism</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-representation/overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-representation/01-boundaries.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Part 1: When Boundaries Blur</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-representation/02-structuralism.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Part 2: Meaning as Difference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-representation/03-embeddings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Part 3: From Categories to Coordinates</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../m07-representation/04-universal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Part 4: Universal Representations</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
     </ul>
     </div>
 </nav>
@@ -616,19 +679,7 @@ window.Quarto = {
 
 <div class="quarto-title-meta">
 
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Sadamori Kojaku </p>
-          </div>
-  </div>
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">January 10, 2026</p>
-    </div>
-  </div>
   
     
   </div>
@@ -638,25 +689,34 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn">
+<div class="callout callout-style-default callout-note callout-titled" title="What you'll learn in this module">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-What you’ll learn
+What you’ll learn in this module
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This section transforms you into a CNN practitioner. We explore the fundamental building blocks (convolution, pooling, stride, padding), understand key properties like translation equivariance, learn to use pre-trained models from torchvision, and master transfer learning techniques for adapting models to new tasks.</p>
+<p>This section transforms you into a CNN practitioner.</p>
+<p>You’ll learn:</p>
+<ul>
+<li>What <strong>convolution</strong> operations do and how learnable kernels detect visual patterns.</li>
+<li>The key properties of <strong>translation equivariance</strong> and <strong>parameter sharing</strong> that make CNNs efficient.</li>
+<li>How <strong>receptive fields</strong> grow with depth and why this enables hierarchical feature learning.</li>
+<li>The role of <strong>stride</strong>, <strong>padding</strong>, and <strong>pooling</strong> in controlling dimensions and creating invariance.</li>
+<li>How to use <strong>pre-trained models</strong> from torchvision for immediate image classification.</li>
+<li>Two approaches to <strong>transfer learning</strong>: feature extraction and fine-tuning for custom tasks.</li>
+</ul>
 </div>
 </div>
 <section id="understanding-cnn-building-blocks" class="level2">
 <h2 class="anchored" data-anchor-id="understanding-cnn-building-blocks">Understanding CNN Building Blocks</h2>
-<p>AlexNet proved that deep learning works at scale. But how do these networks actually process images? Let’s break down the fundamental operations that make CNNs powerful.</p>
+<p>AlexNet proved that deep learning works at scale, but how do these networks actually process images? Let’s break down the fundamental operations that make CNNs powerful.</p>
 <section id="convolutional-layers-learnable-pattern-detectors" class="level3">
 <h3 class="anchored" data-anchor-id="convolutional-layers-learnable-pattern-detectors">Convolutional Layers: Learnable Pattern Detectors</h3>
-<p>At the heart of CNNs lies a remarkably elegant operation called <strong>convolution</strong>. Imagine sliding a small window (a <strong>kernel</strong> or <strong>filter</strong>) across an image. At each position, we multiply the kernel values by the overlapping image pixels and sum the results. This produces a single output value. Repeat across all positions to create an output <strong>feature map</strong>.</p>
+<p>At the heart of CNNs lies a remarkably elegant operation called <strong>convolution</strong>. Imagine sliding a small window (a <strong>kernel</strong> or <strong>filter</strong>) across an image. At each position, we multiply the kernel values by the overlapping image pixels and sum the results to produce a single output value. Repeating this across all positions creates an output <strong>feature map</strong>.</p>
 <div id="fig-convolution-operation" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-convolution-operation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -677,8 +737,7 @@ Figure&nbsp;1
 (I * K)_{i,j} = \sum_{m=0}^{L-1}\sum_{n=0}^{L-1} I_{i+m,j+n} \cdot K_{m,n}
 </span></p>
 <p>where <span class="math inline">I</span> is the input image, <span class="math inline">K</span> is the kernel of size <span class="math inline">L \times L</span>, and <span class="math inline">(i,j)</span> specifies the output position.</p>
-<p>What makes CNNs powerful is that these kernels are <strong>learnable parameters</strong>. During training, each kernel evolves to detect specific visual patterns. Some kernels might become edge detectors, highlighting vertical or horizontal edges. Others might respond to textures, colors, or more complex patterns. The network discovers useful features automatically.</p>
-<p>Real-world images have multiple channels (RGB). Convolution extends naturally to 3D inputs using 3D kernels:</p>
+<p>What makes CNNs powerful is that these kernels are <strong>learnable parameters</strong>. During training, each kernel evolves to detect specific visual patterns like edges, textures, colors, or more complex features. The network discovers useful features automatically rather than relying on hand-crafted filters. Real-world images have multiple channels (RGB), and convolution extends naturally to 3D inputs using 3D kernels:</p>
 <p><span class="math display">
 (I * K)_{i,j} = \sum_{c=1}^{C}\sum_{m=0}^{L-1}\sum_{n=0}^{L-1} I_{c,i+m,j+n} \cdot K_{c,m,n}
 </span></p>
@@ -714,8 +773,7 @@ Interactive visualizations
 </section>
 <section id="translation-equivariance-a-key-property" class="level3">
 <h3 class="anchored" data-anchor-id="translation-equivariance-a-key-property">Translation Equivariance: A Key Property</h3>
-<p>One crucial feature of convolutional layers is <strong>translation equivariance</strong>. This means that if you shift the input, the output shifts by the same amount.</p>
-<p>Consider detecting a vertical edge. If the edge moves one pixel to the right in the input image, the detected edge feature also moves one pixel to the right in the output. The detection operation doesn’t care about absolute position, only relative patterns.</p>
+<p>A crucial feature of convolutional layers is <strong>translation equivariance</strong>: if you shift the input, the output shifts by the same amount. When detecting a vertical edge, if the edge moves one pixel to the right in the input, the detected feature also moves one pixel to the right in the output. The detection operation cares only about relative patterns, not absolute position.</p>
 <div id="fig-translation-equivariance" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-translation-equivariance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -731,17 +789,15 @@ Figure&nbsp;3
 </figcaption>
 </figure>
 </div>
-<p>This property allows CNNs to recognize objects anywhere in an image. A cat detector learned on centered cats will also detect cats in image corners. The network doesn’t need to learn separate detectors for every possible position.</p>
+<p>This property allows CNNs to recognize objects anywhere in an image. A cat detector learned on centered cats will also detect cats in image corners, and the network doesn’t need to learn separate detectors for every possible position.</p>
 </section>
 <section id="parameter-sharing-efficient-learning" class="level3">
 <h3 class="anchored" data-anchor-id="parameter-sharing-efficient-learning">Parameter Sharing: Efficient Learning</h3>
-<p>Unlike fully connected networks where each weight is used once, convolutional layers <strong>reuse kernel weights</strong> across all spatial positions. A 3×3 kernel applied to a 224×224 RGB image uses just 27 parameters (3×3×3), not the millions required by a fully connected layer.</p>
-<p>This weight-sharing dramatically reduces parameter count while preserving spatial relationships in the data. It’s a key reason CNNs can process high-resolution images efficiently.</p>
+<p>Unlike fully connected networks where each weight is used once, convolutional layers <strong>reuse kernel weights</strong> across all spatial positions. A 3×3 kernel applied to a 224×224 RGB image uses just 27 parameters (3×3×3), not the millions required by a fully connected layer. This weight-sharing dramatically reduces parameter count while preserving spatial relationships, a key reason CNNs can process high-resolution images efficiently.</p>
 </section>
 <section id="receptive-field-seeing-more-with-depth" class="level3">
 <h3 class="anchored" data-anchor-id="receptive-field-seeing-more-with-depth">Receptive Field: Seeing More with Depth</h3>
-<p>The <strong>receptive field</strong> is the region of input pixels that influence each output pixel. In the first convolutional layer, a 3×3 kernel has a receptive field of 3×3 pixels. But as we stack layers, the receptive field grows.</p>
-<p>Consider two 3×3 convolutional layers. Each output pixel in the second layer depends on a 3×3 region in the first layer’s output. But each of those positions depends on a 3×3 region in the input. So the second layer’s receptive field is 5×5 in the original input.</p>
+<p>The <strong>receptive field</strong> is the region of input pixels that influence each output pixel. In the first convolutional layer, a 3×3 kernel has a receptive field of 3×3 pixels. As we stack layers, the receptive field grows. Consider two 3×3 convolutional layers: each output pixel in the second layer depends on a 3×3 region in the first layer’s output, but each of those positions depends on a 3×3 region in the input, so the second layer’s receptive field is 5×5 in the original input.</p>
 <div id="fig-receptive-field" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-receptive-field-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -757,19 +813,18 @@ Figure&nbsp;4
 </figcaption>
 </figure>
 </div>
-<p>This hierarchical structure allows CNNs to detect increasingly complex, abstract features. Early layers detect edges and simple patterns. Middle layers combine these into textures and parts. Deep layers recognize complete objects and scenes.</p>
+<p>Why does this matter? This hierarchical structure allows CNNs to detect increasingly complex, abstract features: early layers detect edges and simple patterns, middle layers combine these into textures and parts, and deep layers recognize complete objects and scenes.</p>
 </section>
 <section id="stride-and-padding-controlling-dimensions" class="level3">
 <h3 class="anchored" data-anchor-id="stride-and-padding-controlling-dimensions">Stride and Padding: Controlling Dimensions</h3>
-<p><strong>Stride</strong> determines how many pixels we skip when sliding the kernel. With stride 1, we move one pixel at a time, creating dense feature maps. With stride 2, we skip every other position, effectively downsampling the output.</p>
-<p>For a 1D example with input <span class="math inline">[a,b,c,d,e,f]</span> and kernel <span class="math inline">[1,2]</span>:</p>
+<p><strong>Stride</strong> determines how many pixels we skip when sliding the kernel. With stride 1, we move one pixel at a time creating dense feature maps, while stride 2 skips every other position, effectively downsampling the output. For a 1D example with input <span class="math inline">[a,b,c,d,e,f]</span> and kernel <span class="math inline">[1,2]</span>:</p>
 <p><strong>Stride 1:</strong> <span class="math display">
 [1a + 2b, 1b + 2c, 1c + 2d, 1d + 2e, 1e + 2f]
 </span></p>
 <p><strong>Stride 2:</strong> <span class="math display">
 [1a + 2b, 1c + 2d, 1e + 2f]
 </span></p>
-<p>Larger strides reduce computational cost and increase the receptive field, but might miss fine details.</p>
+<p>Larger strides reduce computational cost and increase the receptive field but might miss fine details.</p>
 <div id="fig-stride-visualization" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-stride-visualization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -822,17 +877,16 @@ P_{i,j} = \max_{m,n} F_{si+m,sj+n}
 <p><span class="math display">
 P_{i,j} = \frac{1}{w^2}\sum_{m=0}^{w-1}\sum_{n=0}^{w-1} F_{si+m,sj+n}
 </span></p>
-<p>Max pooling creates local translation invariance. If an edge moves slightly within a pooling window, the maximum value (and thus the output) remains unchanged. This helps the network focus on whether a feature is present, not its exact position.</p>
-<p>Pooling also reduces computational cost in subsequent layers by decreasing spatial dimensions. A common pattern is to double the number of channels while halving spatial dimensions, maintaining roughly constant computational load across layers. Some recent architectures replace pooling with strided convolutions, arguing that learnable downsampling might be more effective {footcite}<code>springenberg2015striving</code>. The choice involves trade-offs between parameter efficiency and flexibility.</p>
+<p>Max pooling creates local translation invariance: if an edge moves slightly within a pooling window, the maximum value remains unchanged, helping the network focus on whether a feature is present rather than its exact position. Pooling also reduces computational cost by decreasing spatial dimensions, and a common pattern is to double the number of channels while halving spatial dimensions, maintaining roughly constant computational load across layers. Some recent architectures replace pooling with strided convolutions, arguing that learnable downsampling might be more effective <span class="citation" data-cites="springenberg2015striving">(<a href="#ref-springenberg2015striving" role="doc-biblioref">Springenberg et al. 2015</a>)</span>, though the choice involves trade-offs between parameter efficiency and flexibility.</p>
 </section>
 </section>
 <section id="using-pre-trained-models" class="level2">
 <h2 class="anchored" data-anchor-id="using-pre-trained-models">Using Pre-Trained Models</h2>
-<p>Now that we understand CNN building blocks, let’s use them in practice. Training a CNN from scratch on ImageNet requires weeks of GPU time. But we can leverage pre-trained models trained by research labs with vast computational resources.</p>
+<p>Now that we understand CNN building blocks, let’s use them in practice. Training a CNN from scratch on ImageNet requires weeks of GPU time, but we can leverage pre-trained models trained by research labs with vast computational resources.</p>
 <section id="loading-models-from-torchvision" class="level3">
 <h3 class="anchored" data-anchor-id="loading-models-from-torchvision">Loading Models from torchvision</h3>
 <p>PyTorch’s <code>torchvision.models</code> provides pre-trained implementations of major architectures:</p>
-<div id="77b453c5" class="cell" data-execution_count="1">
+<div id="acc59f57" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torchvision.models <span class="im">as</span> models</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision <span class="im">import</span> transforms</span>
@@ -851,12 +905,12 @@ P_{i,j} = \frac{1}{w^2}\sum_{m=0}^{w-1}\sum_{n=0}^{w-1} F_{si+m,sj+n}
 Number of parameters: 25,557,032</code></pre>
 </div>
 </div>
-<p>The model is trained on ImageNet with 1000 classes. Let’s use it to classify an image.</p>
+<p>The model is trained on ImageNet with 1000 classes, and we can use it to classify images directly.</p>
 </section>
 <section id="image-classification-example" class="level3">
 <h3 class="anchored" data-anchor-id="image-classification-example">Image Classification Example</h3>
 <p>To use a pre-trained model, we must preprocess images the same way they were during training. ImageNet models expect images resized to 224×224 (or 299×299 for some models) with pixel values normalized to mean=[0.485, 0.456, 0.406] and std=[0.229, 0.224, 0.225].</p>
-<div id="deace793" class="cell" data-execution_count="2">
+<div id="98f2ec56" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the preprocessing transform pipeline</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>preprocess <span class="op">=</span> transforms.Compose([</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    transforms.Resize(<span class="dv">256</span>),</span>
@@ -868,7 +922,7 @@ Number of parameters: 25,557,032</code></pre>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    ),</span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="eb493d8f" class="cell" data-execution_count="4">
+<div id="dfb5ca3a" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Show image display code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the original image</span></span>
@@ -886,7 +940,7 @@ Number of parameters: 25,557,032</code></pre>
 </div>
 </div>
 </div>
-<div id="77ea5b45" class="cell" data-execution_count="5">
+<div id="a6404ef5" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply preprocessing and prepare for model input</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>input_tensor <span class="op">=</span> preprocess(img)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>input_batch <span class="op">=</span> input_tensor.unsqueeze(<span class="dv">0</span>)  <span class="co"># Add batch dimension</span></span>
@@ -897,7 +951,7 @@ Number of parameters: 25,557,032</code></pre>
 </div>
 </div>
 <p>Now classify the image:</p>
-<div id="fd69e9ac" class="cell" data-execution_count="7">
+<div id="b674c582" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform inference</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    output <span class="op">=</span> resnet50(input_batch)</span>
@@ -924,35 +978,28 @@ Top 5 predictions:
 5. hot pot: 11.11%</code></pre>
 </div>
 </div>
-<p>The model correctly identifies the object with high confidence. This demonstrates the power of pre-trained networks: they’ve learned rich visual representations from ImageNet’s diverse images.</p>
+<p>The model correctly identifies the object with high confidence, demonstrating the power of pre-trained networks that have learned rich visual representations from ImageNet’s diverse images.</p>
 </section>
 <section id="when-to-use-which-architecture" class="level3">
 <h3 class="anchored" data-anchor-id="when-to-use-which-architecture">When to Use Which Architecture</h3>
-<p>Different architectures offer trade-offs between accuracy, speed, and memory:</p>
-<p><strong>ResNet-50</strong>: Excellent general-purpose model. Good accuracy, reasonable speed. Default choice for most applications.</p>
-<p><strong>EfficientNet</strong>: Optimized for mobile and edge devices. Best accuracy-per-parameter ratio.</p>
-<p><strong>VGG-16</strong>: Simple architecture, easy to understand. Larger and slower than modern alternatives.</p>
-<p><strong>MobileNet</strong>: Designed for mobile deployment. Fast inference, lower accuracy.</p>
-<p><strong>Vision Transformer (ViT)</strong>: State-of-the-art accuracy on large datasets. Requires more data and compute.</p>
-<p>For most applications, start with ResNet-50. It provides strong performance across diverse tasks. Optimize for speed or accuracy later if needed.</p>
+<p>Different architectures offer trade-offs between accuracy, speed, and memory. <strong>ResNet-50</strong> provides excellent general-purpose performance with good accuracy and reasonable speed. <strong>EfficientNet</strong> is optimized for mobile and edge devices with the best accuracy-per-parameter ratio. <strong>VGG-16</strong> has a simple, easy-to-understand architecture but is larger and slower than modern alternatives. <strong>MobileNet</strong> is designed for fast mobile inference at the cost of some accuracy. <strong>Vision Transformer (ViT)</strong> achieves state-of-the-art accuracy on large datasets but requires more data and compute. For most applications, start with ResNet-50 and optimize for speed or accuracy later if needed.</p>
 </section>
 </section>
 <section id="transfer-learning-adapting-pre-trained-models" class="level2">
 <h2 class="anchored" data-anchor-id="transfer-learning-adapting-pre-trained-models">Transfer Learning: Adapting Pre-Trained Models</h2>
-<p>Pre-trained models learn general visual features from ImageNet’s 1000 categories. But what if you want to classify different objects? Transfer learning adapts these models to new tasks.</p>
+<p>Pre-trained models learn general visual features from ImageNet’s 1000 categories, but what if you want to classify different objects? Transfer learning adapts these models to new tasks.</p>
 <section id="why-transfer-learning-works" class="level3">
 <h3 class="anchored" data-anchor-id="why-transfer-learning-works">Why Transfer Learning Works</h3>
-<p>ImageNet-trained models learn a hierarchy of features. Early layers detect edges, colors, and simple textures that are universal across tasks. Middle layers detect patterns, parts, and compositions that are somewhat task-specific. Late layers detect complete objects specific to ImageNet categories. The early and middle layers learn representations useful for many vision tasks. We can reuse these features and only retrain the final layers for our specific problem.</p>
+<p>ImageNet-trained models learn a hierarchy of features: early layers detect edges, colors, and simple textures that are universal across tasks; middle layers detect patterns, parts, and compositions that are somewhat task-specific; late layers detect complete objects specific to ImageNet categories. The early and middle layers learn representations useful for many vision tasks, so we can reuse these features and only retrain the final layers for our specific problem.</p>
 </section>
 <section id="two-approaches-feature-extraction-vs.-fine-tuning" class="level3">
 <h3 class="anchored" data-anchor-id="two-approaches-feature-extraction-vs.-fine-tuning">Two Approaches: Feature Extraction vs.&nbsp;Fine-Tuning</h3>
-<p><strong>Feature Extraction</strong>: Freeze all convolutional layers, only train a new classifier head. Fast and works well with small datasets.</p>
-<p><strong>Fine-Tuning</strong>: Initialize with pre-trained weights, then train the entire network (or parts of it) on your data. Better accuracy but requires more data and computation.</p>
+<p><strong>Feature Extraction</strong> freezes all convolutional layers and trains only a new classifier head, running fast and working well with small datasets. <strong>Fine-Tuning</strong> initializes with pre-trained weights then trains the entire network (or parts of it) on your data, achieving better accuracy but requiring more data and computation.</p>
 </section>
 <section id="example-fine-tuning-for-custom-classification" class="level3">
 <h3 class="anchored" data-anchor-id="example-fine-tuning-for-custom-classification">Example: Fine-Tuning for Custom Classification</h3>
 <p>Let’s adapt ResNet-50 to classify 10 animal species:</p>
-<div id="db42b389" class="cell" data-execution_count="8">
+<div id="85243ab1" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.optim <span class="im">as</span> optim</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -975,7 +1022,7 @@ Top 5 predictions:
 </div>
 </div>
 <p>For feature extraction, freeze early layers:</p>
-<div id="16151643" class="cell" data-execution_count="9">
+<div id="83173270" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Freeze all layers except the final classifier</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> param <span class="kw">in</span> model.parameters():</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    param.requires_grad <span class="op">=</span> <span class="va">False</span></span>
@@ -993,11 +1040,11 @@ Top 5 predictions:
 <pre><code>Trainable parameters: 20,490 / 23,528,522</code></pre>
 </div>
 </div>
-<p>Only 20,490 parameters (the final layer) are trainable. This makes training fast and prevents overfitting on small datasets.</p>
+<p>Only 20,490 parameters (the final layer) are trainable, making training fast and preventing overfitting on small datasets.</p>
 </section>
 <section id="training-loop" class="level3">
 <h3 class="anchored" data-anchor-id="training-loop">Training Loop</h3>
-<div id="0be00859" class="cell" data-execution_count="10">
+<div id="73dacdc1" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Show training loop implementation</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define loss and optimizer</span></span>
@@ -1038,8 +1085,8 @@ Top 5 predictions:
 </section>
 <section id="data-augmentation-essential-for-small-datasets" class="level3">
 <h3 class="anchored" data-anchor-id="data-augmentation-essential-for-small-datasets">Data Augmentation: Essential for Small Datasets</h3>
-<p>When training on limited data, augmentation is crucial. Transform each image differently each epoch to artificially expand the training set:</p>
-<div id="0d9d116f" class="cell" data-execution_count="12">
+<p>When training on limited data, augmentation is crucial: transform each image differently each epoch to artificially expand the training set.</p>
+<div id="edc5d844" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Show training augmentation pipeline</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Training transforms with aggressive augmentation</span></span>
@@ -1060,7 +1107,7 @@ Top 5 predictions:
 <span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="5d8551b6" class="cell" data-execution_count="13">
+<div id="78b60fb9" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Show validation transform pipeline</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Validation transforms (deterministic, no randomness)</span></span>
@@ -1079,7 +1126,7 @@ Top 5 predictions:
 </section>
 <section id="best-practices-for-transfer-learning" class="level3">
 <h3 class="anchored" data-anchor-id="best-practices-for-transfer-learning">Best Practices for Transfer Learning</h3>
-<p>Start with feature extraction by training only the final layer first. This is fast and often achieves good results. Then try fine-tuning if accuracy is insufficient by unfreezing earlier layers and training with a small learning rate (10× smaller than initial training). Use learning rate schedules to reduce the learning rate when validation loss plateaus, helping the model converge to better solutions. Monitor for overfitting by using validation data to detect when the model stops generalizing, then apply more augmentation or stronger regularization (dropout, weight decay) if needed. Always match preprocessing to the pre-training dataset, using ImageNet statistics for most models.</p>
+<p>Start with feature extraction by training only the final layer first, which is fast and often achieves good results. If accuracy is insufficient, try fine-tuning by unfreezing earlier layers and training with a small learning rate (10× smaller than initial training). Use learning rate schedules to reduce the learning rate when validation loss plateaus. Monitor for overfitting using validation data, and apply more augmentation or stronger regularization (dropout, weight decay) if needed. Always match preprocessing to the pre-training dataset, using ImageNet statistics for most models.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Try it yourself">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1090,16 +1137,15 @@ Try it yourself
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Practice transfer learning on your own image dataset. Collect 100-500 images per class (even phone camera photos work), then split into train/val/test sets (70/15/15). Start with ResNet-50 feature extraction and train for 10-20 epochs before evaluating on the test set.</p>
-<p>You’ll likely achieve 80-90%+ accuracy with just a few hundred images per class, demonstrating the power of pre-trained features.</p>
+<p>Practice transfer learning on your own image dataset. Collect 100-500 images per class (even phone camera photos work), then split into train/val/test sets (70/15/15). Start with ResNet-50 feature extraction and train for 10-20 epochs before evaluating on the test set. You’ll likely achieve 80-90%+ accuracy with just a few hundred images per class, demonstrating the power of pre-trained features.</p>
 </div>
 </div>
 </section>
 </section>
 <section id="visualizing-what-networks-learn" class="level2">
 <h2 class="anchored" data-anchor-id="visualizing-what-networks-learn">Visualizing What Networks Learn</h2>
-<p>Let’s peek inside a trained network to see what features it detects:</p>
-<div id="91b06200" class="cell" data-execution_count="14">
+<p>What features do trained networks actually detect? Let’s peek inside a trained network to see:</p>
+<div id="6389639d" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>Show activation visualization code</summary>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract intermediate feature maps</span></span>
@@ -1138,19 +1184,21 @@ Try it yourself
 </div>
 </div>
 </div>
-<p>Early layers show edge detection and simple patterns. Deeper layers show increasingly abstract features that are harder to interpret but encode high-level semantic information.</p>
+<p>Early layers show edge detection and simple patterns, while deeper layers show increasingly abstract features that are harder to interpret but encode high-level semantic information.</p>
 </section>
 <section id="summary" class="level2">
 <h2 class="anchored" data-anchor-id="summary">Summary</h2>
-<p>We explored the building blocks that make CNNs powerful: convolution operations with learnable kernels, translation equivariance that enables position-invariant recognition, parameter sharing for efficiency, growing receptive fields through depth, stride and padding for dimension control, and pooling for downsampling with invariance.</p>
-<p>We learned to use pre-trained models from torchvision for immediate deployment. Transfer learning lets us adapt these models to custom tasks through feature extraction (training only the classifier) or fine-tuning (training the entire network with small learning rates). Data augmentation artificially expands small datasets, preventing overfitting.</p>
-<p>These practical skills transform you from understanding CNNs conceptually to deploying them on real problems. You can now load state-of-the-art models, adapt them to your data, and achieve strong results with limited computational resources.</p>
-<pre class="{footbibliography}"><code>:style: unsrt</code></pre>
+<p>We explored the building blocks that make CNNs powerful: convolution operations with learnable kernels, translation equivariance for position-invariant recognition, parameter sharing for efficiency, growing receptive fields through depth, stride and padding for dimension control, and pooling for downsampling with invariance. We learned to use pre-trained models from torchvision and adapt them to custom tasks through transfer learning, either by feature extraction (training only the classifier) or fine-tuning (training the entire network with small learning rates). Data augmentation artificially expands small datasets to prevent overfitting. These practical skills let you load state-of-the-art models, adapt them to your data, and achieve strong results with limited computational resources.</p>
+
 
 
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-springenberg2015striving" class="csl-entry" role="listitem">
+Springenberg, Jost Tobias, Alexey Dosovitskiy, Thomas Brox, and Martin A. Riedmiller. 2015. <span>“Striving for Simplicity: The All Convolutional Net.”</span> In <em>3rd International Conference on Learning Representations, <span>ICLR</span> 2015, San Diego, CA, USA, May 7-9, 2015, Workshop Track Proceedings</em>, edited by Yoshua Bengio and Yann LeCun. <a href="http://arxiv.org/abs/1412.6806">http://arxiv.org/abs/1412.6806</a>.
+</div>
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

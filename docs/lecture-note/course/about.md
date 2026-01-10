@@ -9,29 +9,27 @@ Complex systems are everywhere—from social networks shaping our daily interact
 
 ### Instructor
 
-:::: {layout-ncol=2}
+::: {.columns}
 
-::: {#first-column}
-Welcome! My name is Sadamori Kojaku, the instructor of this course.
-I started my career as a computer scientist but couldn't resist falling in love with Complex Systems and Network Science right after I got my Ph.D.
-Complex systems appear in many different forms in our daily lives—social networks, biological systems, the internet, power grids, and you name it.
-But when we represent them using modern deep learning techniques, we can understand them in unified ways.
-We can study them using the same toolkit no matter what the domain is, and can find universal patterns and principles that govern seemingly different systems.
-Even more fascinating, large-scale deep learning models themselves exhibit emergent behaviors as complex systems!
-Sounds fun, right 😉?
+::: {.column width="70%"}
 
-This course will guide you through the fascinating intersection of deep learning and complex systems, from foundational theory to hands-on coding and real-world applications.
-I hope you will enjoy and find the course useful in your future endeavors.
+Welcome! My name is [Sadamori Kojaku](https://skojaku.github.io/), and I am the instructor of this course.
+The field of applied soft computing, which in part intersects with deep learning, is a very fast-paced area.
+The field is so fast-paced that I always feel like I'm not "teaching" students. Instead, I'm more like a student myself walking through the same journey with you.
 
 :::
 
-::: {#second-column}
+::: {.column width="30%"}
 
-![](https://skojaku.github.io/assets/attachments/selfy/sada-2021.jpg){width=260px}
+![](https://skojaku.github.io/assets/attachments/selfy/sada-2021.jpg){width=70% fig-align="center"}
 
 :::
 
-::::
+This is my third offering of this course, and everytime I have to look through the latest research and update the lecture notes to an extent beyond a simple minor text update.
+This time, I have included two new modules, i.e., *agentic coding* and *representation learning*, with former module designed to help students make use of advanced AI tools for research and for personal projects, and the later for philosophical and theoretical discussions on what ML/AI actually learn from data.
+All other modules are substantially restructured to align with the key theme: *how can we make use of advanced AI tools for my research?*, with a target audience being Systems Science students and Engineering students interested in applied computing.
+
+I have implemented several tricks to make the course fun and engaging, like Discord chatbot "Chibi", mini projects, and pen and paper exercises. I hope you will enjoy and find the course useful in your future endeavors.
 
 
 ### TA
@@ -39,21 +37,28 @@ I hope you will enjoy and find the course useful in your future endeavors.
 Teaching Assistant is not yet assigned.
 
 
-### AI Tutor (Minidora)
+### AI Tutor (Chibi)
 
+::: {.columns}
 
-:::: {layout-ncol=2}
-
-::: {#first-column}
-
-**Minidora** is an AI tutor robot conceived in the 22nd century and deployed in the present era to support students. (The original character is designed by [Fujiko Fujio](https://en.wikipedia.org/wiki/Fujiko_Fujio) for a famous Japanese manga called [Doraemon](https://en.wikipedia.org/wiki/Doraemon)). Minidora supports students in this course by providing dialogic explanations, quiz questions, and coding guidance on the course Discord.
+::: {.column width="70%"}
+**Chibi** is an AI-powered Discord bot designed to help you master the course material through natural conversation and interactive exercises. It is integrated with the course's lecture notes and can provide accurate, context-aware responses to your questions.
 
 :::
 
-::: {#second-column}
+::: {.column width="30%"}
 
-![](../figs/minidora.png){width=260px}
+![](../figs/chibi.png){width=120px}
 
 :::
 
 ::::
+
+With Chibi, you can:
+
+
+- **Query Course Content**: Ask questions about specific lectures or concepts directly on Discord.
+- **Test Your Knowledge**: Generate personalized quizzes for any module using the `/quiz` command.
+- **Challenge the AI**: Engage in "LLM-Quizzes" where you attempt to create questions that the AI cannot answer correctly.
+- **Monitor Mastery**: Track your learning progress and identify areas for improvement with the `/status` command.
+

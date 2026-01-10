@@ -9,7 +9,7 @@
 - [Discord](course/discord.html)
 - [Setup](course/setup.html)
 - [Minidora Usage](course/minidora-usage.html)
-- [How to Submit Assignment](course/how-to-submit-assignment.html)
+- [Sprint Projects](course/sprint-project.html)
 - [Deliverables](course/deliverables.html)
 
 ## Module 1: The Data Scientist's Toolkit
