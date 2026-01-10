@@ -62,10 +62,15 @@
 ## Module 6: Deep Learning for Graphs
 
 - [Overview](m06-graph/overview.html)
-- [Spectral Graph Embedding](m06-graph/spectral-embedding.html)
-- [Graph Embeddings with Word2Vec](m06-graph/graph-embedding-w-word2vec.html)
-- [Spectral vs. Neural Embeddings](m06-graph/spectral-vs-neural-embedding.html)
-- [From Images to Graphs](m06-graph/from-image-to-graph.html)
-- [Graph Convolutional Networks](m06-graph/graph-convolutional-network.html)
-- [Popular GNN Architectures](m06-graph/popular-gnn.html)
-- [GNN Software & Tools](m06-graph/software.html)
+- [Part 1: From Images to Graphs](m06-graph/01-from-images-to-graphs.html)
+- [Part 2: The Spectral Perspective](m06-graph/02-spectral-perspective.html)
+- [Part 3: Spatial Graph Networks](m06-graph/03-spatial-networks.html)
+- [Part 4: Graph Embeddings](m06-graph/04-graph-embeddings.html)
+
+## Module 7: Representations & Structuralism
+
+- [Overview](m07-representation/overview.html)
+- [Part 1: When Boundaries Blur](m07-representation/01-boundaries.html)
+- [Part 2: Meaning as Difference](m07-representation/02-structuralism.html)
+- [Part 3: From Categories to Coordinates](m07-representation/03-embeddings.html)
+- [Part 4: Universal Representations](m07-representation/04-universal.html)
