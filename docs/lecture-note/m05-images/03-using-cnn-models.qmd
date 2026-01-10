@@ -22,9 +22,7 @@ AlexNet proved that deep learning works at scale. But how do these networks actu
 
 ### Convolutional Layers: Learnable Pattern Detectors
 
-Let's talk about the core operation that makes CNNs work. At the heart of CNNs lies a remarkably elegant operation called **convolution**. Imagine sliding a small window (a **kernel** or **filter**) across an image.
-
-At each position, we multiply the kernel values by the overlapping image pixels and sum the results. This produces a single output value. Repeat across all positions to create an output **feature map**.
+At the heart of CNNs lies a remarkably elegant operation called **convolution**. Imagine sliding a small window (a **kernel** or **filter**) across an image. At each position, we multiply the kernel values by the overlapping image pixels and sum the results to produce a single output value. Repeating this across all positions creates an output **feature map**.
 
 ::: {#fig-convolution-operation}
 ![Convolution operation. The kernel slides across the input, computing weighted sums at each position to produce a feature map.](https://anhreynolds.com/img/cnn.png){width=100% fig-align="center"}
@@ -38,9 +36,7 @@ $$
 
 where $I$ is the input image, $K$ is the kernel of size $L \times L$, and $(i,j)$ specifies the output position.
 
-What makes CNNs powerful is that these kernels are **learnable parameters**. During training, each kernel evolves to detect specific visual patterns. Some kernels might become edge detectors, highlighting vertical or horizontal edges.
-
-Others might respond to textures, colors, or more complex patterns. The network discovers useful features automatically.
+What makes CNNs powerful is that these kernels are **learnable parameters**. During training, each kernel evolves to detect specific visual patterns like edges, textures, colors, or more complex features. The network discovers useful features automatically rather than relying on hand-crafted filters.
 
 Real-world images have multiple channels (RGB). Convolution extends naturally to 3D inputs using 3D kernels:
 
@@ -60,9 +56,7 @@ Explore CNN operations interactively. The [CNN Explainer](https://poloclub.githu
 
 ### Translation Equivariance: A Key Property
 
-Let's talk about a crucial feature of convolutional layers: **translation equivariance**. This means that if you shift the input, the output shifts by the same amount.
-
-Consider detecting a vertical edge. If the edge moves one pixel to the right in the input image, the detected edge feature also moves one pixel to the right in the output. The detection operation doesn't care about absolute position, only relative patterns.
+A crucial feature of convolutional layers is **translation equivariance**: if you shift the input, the output shifts by the same amount. When detecting a vertical edge, if the edge moves one pixel to the right in the input, the detected feature also moves one pixel to the right in the output. The detection operation cares only about relative patterns, not absolute position.
 
 ::: {#fig-translation-equivariance}
 ![Translation equivariance. The same kernel detects the same feature regardless of position in the input.](https://miro.medium.com/v2/resize:fit:1400/1*NoAQ4ZgofpkK6esl4sMHkA.png){width=80% fig-align="center"}
@@ -78,9 +72,7 @@ This weight-sharing dramatically reduces parameter count while preserving spatia
 
 ### Receptive Field: Seeing More with Depth
 
-Shift your attention to how CNNs see increasingly large regions of an image. The **receptive field** is the region of input pixels that influence each output pixel. In the first convolutional layer, a 3×3 kernel has a receptive field of 3×3 pixels.
-
-But what happens as we stack layers? The receptive field grows. Consider two 3×3 convolutional layers. Each output pixel in the second layer depends on a 3×3 region in the first layer's output. But each of those positions depends on a 3×3 region in the input. So the second layer's receptive field is 5×5 in the original input.
+The **receptive field** is the region of input pixels that influence each output pixel. In the first convolutional layer, a 3×3 kernel has a receptive field of 3×3 pixels. As we stack layers, the receptive field grows. Consider two 3×3 convolutional layers: each output pixel in the second layer depends on a 3×3 region in the first layer's output, but each of those positions depends on a 3×3 region in the input, so the second layer's receptive field is 5×5 in the original input.
 
 ::: {#fig-receptive-field}
 ![Receptive field grows with network depth. Deeper layers see increasingly large regions of the input image.](https://www.researchgate.net/publication/316950618/figure/fig4/AS:11431281212123378@1702542797323/The-receptive-field-of-each-convolution-layer-with-a-3-3-kernel-The-green-area-marks.tif){width=50% fig-align="center"}
@@ -132,7 +124,7 @@ The interplay between stride and padding lets network designers control spatial 
 
 ### Pooling Layers: Downsampling with Invariance
 
-Now shift your attention to another key operation. Pooling layers downsample feature maps, reducing spatial dimensions while preserving important information. **Max pooling** selects the maximum value in each local window:
+Pooling layers downsample feature maps, reducing spatial dimensions while preserving important information. **Max pooling** selects the maximum value in each local window:
 
 $$
 P_{i,j} = \max_{m,n} F_{si+m,sj+n}
@@ -146,9 +138,7 @@ $$
 P_{i,j} = \frac{1}{w^2}\sum_{m=0}^{w-1}\sum_{n=0}^{w-1} F_{si+m,sj+n}
 $$
 
-Why does max pooling matter? It creates local translation invariance. If an edge moves slightly within a pooling window, the maximum value (and thus the output) remains unchanged. This helps the network focus on whether a feature is present, not its exact position.
-
-Pooling also reduces computational cost in subsequent layers by decreasing spatial dimensions. A common pattern is to double the number of channels while halving spatial dimensions, maintaining roughly constant computational load across layers.
+Max pooling creates local translation invariance: if an edge moves slightly within a pooling window, the maximum value remains unchanged, helping the network focus on whether a feature is present rather than its exact position. Pooling also reduces computational cost by decreasing spatial dimensions. A common pattern is to double the number of channels while halving spatial dimensions, maintaining roughly constant computational load across layers.
 
 Some recent architectures replace pooling with strided convolutions, arguing that learnable downsampling might be more effective {footcite}`springenberg2015striving`. The choice involves trade-offs between parameter efficiency and flexibility.
 
@@ -264,19 +254,7 @@ The model correctly identifies the object with high confidence. This demonstrate
 
 ### When to Use Which Architecture
 
-Which architecture should you choose? Different architectures offer trade-offs between accuracy, speed, and memory.
-
-**ResNet-50**: Excellent general-purpose model. Good accuracy, reasonable speed. Default choice for most applications.
-
-**EfficientNet**: Optimized for mobile and edge devices. Best accuracy-per-parameter ratio.
-
-**VGG-16**: Simple architecture, easy to understand. Larger and slower than modern alternatives.
-
-**MobileNet**: Designed for mobile deployment. Fast inference, lower accuracy.
-
-**Vision Transformer (ViT)**: State-of-the-art accuracy on large datasets. Requires more data and compute.
-
-For most applications, start with ResNet-50. It provides strong performance across diverse tasks. Optimize for speed or accuracy later if needed.
+Different architectures offer trade-offs between accuracy, speed, and memory. **ResNet-50** provides excellent general-purpose performance with good accuracy and reasonable speed. **EfficientNet** is optimized for mobile and edge devices with the best accuracy-per-parameter ratio. **VGG-16** has a simple, easy-to-understand architecture but is larger and slower than modern alternatives. **MobileNet** is designed for fast mobile inference at the cost of some accuracy. **Vision Transformer (ViT)** achieves state-of-the-art accuracy on large datasets but requires more data and compute. For most applications, start with ResNet-50 and optimize for speed or accuracy later if needed.
 
 ## Transfer Learning: Adapting Pre-Trained Models
 
@@ -284,9 +262,7 @@ Pre-trained models learn general visual features from ImageNet's 1000 categories
 
 ### Why Transfer Learning Works
 
-Why can we reuse features from ImageNet for other tasks? ImageNet-trained models learn a hierarchy of features. Early layers detect edges, colors, and simple textures that are universal across tasks. Middle layers detect patterns, parts, and compositions that are somewhat task-specific.
-
-Late layers detect complete objects specific to ImageNet categories. The early and middle layers learn representations useful for many vision tasks. We can reuse these features and only retrain the final layers for our specific problem.
+ImageNet-trained models learn a hierarchy of features: early layers detect edges, colors, and simple textures that are universal across tasks; middle layers detect patterns, parts, and compositions that are somewhat task-specific; late layers detect complete objects specific to ImageNet categories. The early and middle layers learn representations useful for many vision tasks, so we can reuse these features and only retrain the final layers for our specific problem.
 
 ### Two Approaches: Feature Extraction vs. Fine-Tuning
 
@@ -381,7 +357,7 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
 
 ### Data Augmentation: Essential for Small Datasets
 
-What if you have limited training data? When training on limited data, augmentation is crucial. Transform each image differently each epoch to artificially expand the training set:
+When training on limited data, augmentation is crucial. Transform each image differently each epoch to artificially expand the training set:
 
 ```{python}
 #| echo: false
@@ -432,11 +408,7 @@ Note that validation uses deterministic transforms (no randomness) for reproduci
 
 ### Best Practices for Transfer Learning
 
-What's the right approach for your project? Start with feature extraction by training only the final layer first. This is fast and often achieves good results.
-
-Then try fine-tuning if accuracy is insufficient by unfreezing earlier layers and training with a small learning rate (10× smaller than initial training). Use learning rate schedules to reduce the learning rate when validation loss plateaus, helping the model converge to better solutions.
-
-Monitor for overfitting by using validation data to detect when the model stops generalizing, then apply more augmentation or stronger regularization (dropout, weight decay) if needed. Always match preprocessing to the pre-training dataset, using ImageNet statistics for most models.
+Start with feature extraction by training only the final layer first, which is fast and often achieves good results. If accuracy is insufficient, try fine-tuning by unfreezing earlier layers and training with a small learning rate (10× smaller than initial training). Use learning rate schedules to reduce the learning rate when validation loss plateaus. Monitor for overfitting using validation data, and apply more augmentation or stronger regularization (dropout, weight decay) if needed. Always match preprocessing to the pre-training dataset, using ImageNet statistics for most models.
 
 ::: {.callout-tip title="Try it yourself"}
 Practice transfer learning on your own image dataset. Collect 100-500 images per class (even phone camera photos work), then split into train/val/test sets (70/15/15). Start with ResNet-50 feature extraction and train for 10-20 epochs before evaluating on the test set.
@@ -485,11 +457,7 @@ Early layers show edge detection and simple patterns. Deeper layers show increas
 
 ## Summary
 
-We explored the building blocks that make CNNs powerful: convolution operations with learnable kernels, translation equivariance that enables position-invariant recognition, parameter sharing for efficiency, growing receptive fields through depth, stride and padding for dimension control, and pooling for downsampling with invariance.
-
-We learned to use pre-trained models from torchvision for immediate deployment. Transfer learning lets us adapt these models to custom tasks through feature extraction (training only the classifier) or fine-tuning (training the entire network with small learning rates). Data augmentation artificially expands small datasets, preventing overfitting.
-
-These practical skills transform you from understanding CNNs conceptually to deploying them on real problems. You can now load state-of-the-art models, adapt them to your data, and achieve strong results with limited computational resources.
+We explored the building blocks that make CNNs powerful: convolution operations with learnable kernels, translation equivariance for position-invariant recognition, parameter sharing for efficiency, growing receptive fields through depth, stride and padding for dimension control, and pooling for downsampling with invariance. We learned to use pre-trained models from torchvision and adapt them to custom tasks through transfer learning, either by feature extraction (training only the classifier) or fine-tuning (training the entire network with small learning rates). Data augmentation artificially expands small datasets to prevent overfitting. These practical skills let you load state-of-the-art models, adapt them to your data, and achieve strong results with limited computational resources.
 
 ```{footbibliography}
 :style: unsrt
