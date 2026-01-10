@@ -5,17 +5,25 @@ execute:
     enabled: true
 ---
 
-::: {.callout-note title="What you'll learn in this part"}
-This part introduces the spectral approach to graph convolution. We define a frequency domain for graphs using the Laplacian matrix, design spectral filters that control which frequencies pass through, and build learnable spectral graph convolutional networks.
+::: {.callout-note title="What you'll learn in this module"}
+This module introduces the spectral approach to graph convolution.
+
+You'll learn:
+
+- How to define **frequency** for graph signals using the **Laplacian matrix**.
+- Why **eigenvectors** act as basis functions and **eigenvalues** measure roughness.
+- How to design **spectral filters** that control which frequencies pass through.
+- How to build **learnable spectral graph convolutional networks**.
+- The computational limitations that motivate spatial methods.
 :::
 
 ## Finding Frequency in Graphs
 
 Images live in a spatial domain, but the Fourier transform reveals their frequency content. Low frequencies capture smooth gradients and overall structure. High frequencies capture sharp edges and fine details.
 
-Graphs need their own notion of frequency. Consider a network of nodes where each node has a feature value. What makes a signal "smooth" on a graph? Intuitively, smoothness means connected nodes have similar values. Roughness means neighbors differ significantly.
+Graphs need their own notion of frequency. Consider a network of nodes where each node has a feature value. What makes a signal "smooth" on a graph?
 
-Let's formalize this intuition.
+Intuitively, smoothness means connected nodes have similar values. Roughness means neighbors differ significantly. Let's formalize this intuition.
 
 ## Total Variation: Measuring Roughness
 
@@ -25,7 +33,9 @@ $$
 J = \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N A_{ij}(x_i - x_j)^2
 $$
 
-where $A_{ij}$ is the adjacency matrix. This quantity sums the squared differences between connected nodes. Small $J$ means smooth variation (low frequency). Large $J$ means rough variation (high frequency).
+where $A_{ij}$ is the adjacency matrix. This quantity sums the squared differences between connected nodes.
+
+Small $J$ means smooth variation (low frequency). Large $J$ means rough variation (high frequency).
 
 We can rewrite $J$ in matrix form. Through algebraic manipulation, we obtain:
 
@@ -68,7 +78,7 @@ The Laplacian ${\bf L}$ plays the same role for graphs that the derivative opera
 
 ## Eigenvectors as Basis Functions
 
-In Fourier analysis, we decompose signals into sinusoidal basis functions. For graphs, eigenvectors of the Laplacian serve as basis functions.
+In Fourier analysis, we decompose signals into sinusoidal basis functions. For graphs, eigenvectors of the Laplacian serve as basis functions. How does this work?
 
 Consider the eigendecomposition of ${\bf L}$:
 
@@ -92,11 +102,11 @@ $$
 
 This reveals the key insight. **Eigenvalues measure the total variation of their corresponding eigenvectors.** Small eigenvalues correspond to smooth eigenvectors (low frequency). Large eigenvalues correspond to rough eigenvectors (high frequency).
 
-If signal ${\bf x}$ aligns strongly with a low-eigenvalue eigenvector, ${\bf x}$ is smooth. If ${\bf x}$ aligns with a high-eigenvalue eigenvector, ${\bf x}$ is rough.
+Now consider any signal ${\bf x}$. If ${\bf x}$ aligns strongly with a low-eigenvalue eigenvector, ${\bf x}$ is smooth. If ${\bf x}$ aligns with a high-eigenvalue eigenvector, ${\bf x}$ is rough.
 
 ## Spectral Filtering
 
-Eigenvalues act as natural filters. We can design custom filters $h(\lambda_i)$ to control which frequencies pass through.
+Eigenvalues act as natural filters. We can design custom filters $h(\lambda_i)$ to control which frequencies pass through. Let's look at two fundamental filters.
 
 **Low-pass Filter** (smoothing):
 $$
@@ -110,7 +120,7 @@ $$
 h_{\text{high}}(\lambda) = \frac{\alpha\lambda}{1 + \alpha\lambda}
 $$
 
-This suppresses low frequencies and emphasizes high frequencies, highlighting rapid variations like boundaries between communities.
+This suppresses low frequencies and emphasizes high frequencies. The result highlights rapid variations like boundaries between communities.
 
 ```{python}
 #| echo: false
@@ -140,7 +150,7 @@ The parameter $\alpha$ controls the filter's strength. Larger $\alpha$ makes the
 
 ## Learnable Spectral Filters
 
-Hand-designed filters work for specific tasks, but what if we want to learn filters from data? This leads to **spectral graph convolutional networks**.
+Hand-designed filters work for specific tasks, but what if we want to learn filters from data? This question leads to **spectral graph convolutional networks**.
 
 The simplest learnable filter uses a linear combination of eigenvectors:
 
@@ -148,7 +158,7 @@ $$
 {\bf L}_{\text{learn}} = \sum_{k=1}^K \theta_k {\bf u}_k {\bf u}_k^\top
 $$
 
-where $\theta_k$ are learnable parameters and $K$ is the filter rank. Instead of fixed weights $\lambda_k$, we learn weights $\theta_k$ that maximize performance on downstream tasks.
+where $\theta_k$ are learnable parameters and $K$ is the filter rank. Instead of fixed weights $\lambda_k$, we learn weights $\theta_k$ that maximize performance on downstream tasks. This shifts from hand-designed to data-driven filters.
 
 Building on this idea, @bruna2014spectral proposed spectral convolutional neural networks by adding nonlinearity:
 
@@ -170,18 +180,18 @@ This architecture stacks multiple layers, each learning which spectral component
 
 ## The Computational Challenge
 
-Spectral methods face two critical limitations:
+Spectral methods face two critical limitations. What are they?
 
-1. **Computational cost**: Computing eigendecomposition requires $\mathcal{O}(N^3)$ operations, prohibitive for large graphs with millions of nodes.
+**Computational cost**: Computing eigendecomposition requires $\mathcal{O}(N^3)$ operations, prohibitive for large graphs with millions of nodes.
 
-2. **Lack of spatial locality**: Learned filters operate on all eigenvectors, meaning every node can influence every other node. This loses the inductive bias of locality that makes CNNs powerful.
+**Lack of spatial locality**: Learned filters operate on all eigenvectors, meaning every node can influence every other node. This loses the inductive bias of locality that makes CNNs powerful.
 
-These limitations motivated the development of spatial methods, which define convolution directly in the graph domain without requiring eigendecomposition. We explore spatial approaches in the next part.
+These limitations motivated the development of spatial methods. Spatial approaches define convolution directly in the graph domain without requiring eigendecomposition. We explore this alternative in the next part.
 
 ## Key Takeaways
 
-The spectral perspective reveals that graphs have frequency domains. The Laplacian's eigenvectors serve as basis functions, and eigenvalues indicate how rapidly signals vary. Spectral filters control which frequencies pass through, and we can learn these filters for specific tasks.
+The spectral perspective reveals that graphs have frequency domains. The Laplacian's eigenvectors serve as basis functions, and eigenvalues indicate how rapidly signals vary.
 
-This mathematical elegance comes at a cost. Eigendecomposition is expensive, and spectral filters lack spatial locality. But the insights gained inform spatial methods, creating a bridge between frequency and spatial domains.
+Spectral filters control which frequencies pass through. We can learn these filters for specific tasks. This mathematical elegance comes at a cost.
 
-In Part 3, we see how spatial methods address these limitations while preserving the power of learned graph convolution.
+Eigendecomposition is expensive, and spectral filters lack spatial locality. But the insights gained inform spatial methods. In Part 3, we see how spatial methods address these limitations while preserving the power of learned graph convolution.
