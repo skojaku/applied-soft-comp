@@ -19,13 +19,9 @@ You'll learn:
 
 ## The Puzzle of Incomparable Spaces
 
-Let's start with a practical question that reveals something profound. Suppose you have two different text embedding models, each trained independently on different datasets, using different architectures.
+Let's start with a practical question that reveals something profound. Suppose you have two different text embedding models, each trained independently on different datasets, using different architectures. Model A might be based on BERT (bidirectional transformer) while Model B might use T5 (encoder-decoder architecture), with different numbers of parameters, different training corpora (Wikipedia versus web crawl data), and different embedding dimensions (768-d versus 1024-d).
 
-Model A might be based on BERT (bidirectional transformer). Model B might use T5 (encoder-decoder architecture). They have different numbers of parameters. They were trained on different corpora (Wikipedia versus web crawl data). They produce embeddings of different dimensions (768-d versus 1024-d).
-
-Now here's the question. Are these two models learning the same thing?
-
-You might expect the answer to be "no, obviously not." Different architectures, different training data, different optimization procedures. Why would they converge to the same representation?
+Are these two models learning the same thing? You might expect the answer to be "no, obviously not" given their different architectures, training data, and optimization procedures.
 
 ```{python}
 #| fig-cap: "Two models trained independently produce fundamentally incomparable embedding spaces."
@@ -90,23 +86,17 @@ plt.tight_layout()
 plt.show()
 ```
 
-What do these two spaces have in common? At first glance, nothing. The coordinates are different. The distances are different.
-
-If you compute the cosine similarity between two words in Model A versus Model B, you get completely different numbers. The spaces appear fundamentally incomparable.
+What do these two spaces have in common? At first glance, nothing. The coordinates are different, the distances are different, and computing the cosine similarity between two words in Model A versus Model B yields completely different numbers. The spaces appear fundamentally incomparable.
 
 ## The Platonic Representation Hypothesis
 
 Yet recent research suggests something remarkable. Despite these surface differences, the two models may have learned essentially the same underlying structure.
 
-This conjecture is called the Platonic Representation Hypothesis. The hypothesis claims that all models of sufficient capacity, when trained on rich enough data, converge to the same latent representation of reality. The original hypothesis was introduced by Huh et al. (2024) in the context of vision models (see [arXiv:2405.07987](https://arxiv.org/abs/2405.07987)).
+This conjecture is called the Platonic Representation Hypothesis. The hypothesis claims that all models of sufficient capacity, when trained on rich enough data, converge to the same latent representation of reality. The original hypothesis was introduced by Huh et al. (2024) in the context of vision models (see [arXiv:2405.07987](https://arxiv.org/abs/2405.07987)), who observed that different CNN architectures trained on ImageNet produced internal representations that aligned surprisingly well, discovering the same features (edges, textures, object parts) in the same hierarchical order without explicit programming.
 
-The original hypothesis focused on image models. Researchers observed that different CNN architectures, when trained on ImageNet, produced internal representations that aligned surprisingly well. The models discovered the same features (edges, textures, object parts) in the same hierarchical order, even though no one explicitly programmed this structure.
+Why would this happen? One explanation is that the structure isn't in the model but in the world itself.
 
-Why would this happen? One explanation is that the structure isn't in the model. It's in the world.
-
-Visual recognition requires detecting edges, because edges are invariant properties of physical objects. It requires composing local features into global patterns, because objects have hierarchical part-whole structure. The optimal representation for vision isn't arbitrary. It's constrained by the statistical structure of natural images.
-
-If you train many different models on the same underlying reality, they should all discover the same optimal representation. Think of it this way. The architecture and training procedure are like different paths up a mountain. They take different routes, but they all converge toward the same peak.
+Visual recognition requires detecting edges (invariant properties of physical objects) and composing local features into global patterns (because objects have hierarchical part-whole structure). The optimal representation for vision isn't arbitrary but constrained by the statistical structure of natural images. If you train many different models on the same underlying reality, they should all discover the same optimal representation. Think of the architecture and training procedure as different paths up a mountain that take different routes but converge toward the same peak.
 
 ## The Strong Version: Text Can Be Translated
 
@@ -118,13 +108,9 @@ Jha et al. (2024) proposed a stronger, constructive version of this hypothesis f
 
 This is a bold claim. It says you can take embeddings from Model A (which you don't have access to), and translate them into the space of Model B, without ever seeing the same text encoded by both models. You don't need parallel corpora. You don't need paired examples. You only need unpaired samples from each space.
 
-How is this possible? If the underlying semantic structure is truly universal, then the two embedding spaces are just different coordinate systems describing the same geometry.
+How is this possible? If the underlying semantic structure is truly universal, then the two embedding spaces are just different coordinate systems describing the same geometry. Think of Model A and Model B as two people describing the same city using different maps, one using latitude-longitude and the other using distance from landmarks. The coordinate systems differ, but the city's structure (which streets connect, which neighborhoods are close) remains invariant.
 
-Think of Model A and Model B as two people describing the same city using different maps. One uses latitude-longitude. The other uses distance from landmarks. The coordinate systems differ, but the city's structure (which streets connect, which neighborhoods are close) remains invariant.
-
-Translation becomes a geometric alignment problem. You need to discover the rotation, scaling, and transformation that maps one coordinate system onto the other while preserving distances and relationships.
-
-The key insight is that semantic relationships (the parallel arrows representing analogies like man:king :: woman:queen) remain intact across all three spaces. The coordinates change. The geometry persists.
+Translation becomes a geometric alignment problem where you discover the rotation, scaling, and transformation that maps one coordinate system onto the other while preserving distances and relationships. The key insight is that semantic relationships (the parallel arrows representing analogies like man:king :: woman:queen) remain intact across all spaces. The coordinates change, but the geometry persists.
 
 ## How Vec2Vec Works
 
@@ -144,9 +130,7 @@ Third, the identity loss encourages the translation to preserve structure when n
 
 ### Why Does This Work?
 
-What makes this work? The cycle consistency constraint. It forces the model to preserve the intrinsic geometry of the space.
-
-You cannot map every point to the same location (that would minimize adversarial loss but violate cycle consistency). You cannot scramble relationships arbitrarily (that would break the round-trip property). The only way to satisfy all constraints simultaneously is to discover the true structural alignment between spaces.
+The cycle consistency constraint forces the model to preserve the intrinsic geometry of the space. You cannot map every point to the same location (that would minimize adversarial loss but violate cycle consistency) or scramble relationships arbitrarily (that would break the round-trip property). The only way to satisfy all constraints simultaneously is to discover the true structural alignment between spaces.
 
 ## Empirical Evidence
 
@@ -156,41 +140,27 @@ The results were striking. After training without any paired examples, vec2vec c
 
 ![](https://vec2vec.github.io/assets/latent_sims.png)
 
-What does this convergence tell us? Different embedding models, despite appearing incomparable on the surface, encode nearly identical semantic structures.
-
-The universal geometry exists. It can be discovered. It can be exploited.
+What does this convergence tell us? Different embedding models, despite appearing incomparable on the surface, encode nearly identical semantic structures. The universal geometry exists, can be discovered, and can be exploited.
 
 ## Generalization to Unseen Data
 
 ![](https://vec2vec.github.io/assets/table.png)
 
-Perhaps the most surprising result is how well vec2vec generalizes. Train the translation model on embeddings from one dataset (say, Wikipedia articles). Then test it on a completely different dataset (say, biomedical abstracts or code documentation).
+Perhaps the most surprising result is how well vec2vec generalizes. Train the translation model on embeddings from one dataset (say, Wikipedia articles), then test it on a completely different dataset (say, biomedical abstracts or code documentation), and the translation quality remains high. The model learned something general about the relationship between the two embedding spaces, not something specific to the training distribution.
 
-The translation quality remains high. The model learned something general about the relationship between the two embedding spaces, not something specific to the training distribution.
-
-Why does this work? If the Platonic Representation Hypothesis is correct, then the universal structure isn't tied to any particular domain. It's a property of language itself (or more generally, of the data modality).
-
-Medical texts and Wikipedia articles may discuss different topics, but they use the same semantic relationships. Hierarchies, analogies, contrasts, and associations all follow the same geometric patterns regardless of domain.
-
-The translation captures this invariant structure. It doesn't memorize domain-specific content. It learns the transformation that aligns coordinate systems while preserving the universal geometry underneath.
+Why does this work? If the Platonic Representation Hypothesis is correct, then the universal structure isn't tied to any particular domain but is a property of language itself (or more generally, of the data modality). Medical texts and Wikipedia articles may discuss different topics, but they use the same semantic relationships (hierarchies, analogies, contrasts, and associations) that follow the same geometric patterns regardless of domain. The translation captures this invariant structure, learning the transformation that aligns coordinate systems while preserving the universal geometry underneath rather than memorizing domain-specific content.
 
 ## What Does This Mean?
 
-Let's step back and consider what these results imply. The Strong Platonic Representation Hypothesis, if validated more broadly, suggests that the space of possible learned representations is far more constrained than we thought.
-
-Different models are not exploring a vast landscape of alternative ways to represent meaning. They are converging to a narrow region, a canonical structure dictated by the statistical properties of language and the world it describes.
+Let's step back and consider what these results imply. The Strong Platonic Representation Hypothesis, if validated more broadly, suggests that the space of possible learned representations is far more constrained than we thought. Different models are not exploring a vast landscape of alternative ways to represent meaning but converging to a narrow region, a canonical structure dictated by the statistical properties of language and the world it describes.
 
 ### The Beautiful Side
 
-This has both beautiful and troubling consequences. On the beautiful side, it means representation learning is discovering something real. Word embeddings are not arbitrary constructs. They reflect the intrinsic geometry of semantic relationships.
-
-When multiple models trained independently learn similar structures, it suggests those structures are inevitable. They are features of meaning itself, not artifacts of a particular algorithm.
+This has both beautiful and troubling consequences. On the beautiful side, it means representation learning is discovering something real: word embeddings are not arbitrary constructs but reflect the intrinsic geometry of semantic relationships. When multiple models trained independently learn similar structures, it suggests those structures are inevitable features of meaning itself, not artifacts of a particular algorithm.
 
 ### The Philosophical Question
 
-It also raises deeper questions about what machine learning is doing. Are we building models that impose structure on data, or are we building telescopes that reveal pre-existing structure?
-
-If all sufficiently powerful models converge to the same representation, does that mean the representation was "already there" in some Platonic sense, waiting to be discovered?
+It also raises deeper questions about what machine learning is doing. Are we building models that impose structure on data, or are we building telescopes that reveal pre-existing structure? If all sufficiently powerful models converge to the same representation, does that mean the representation was "already there" in some Platonic sense, waiting to be discovered?
 
 ::: {.callout-note title="Further Reading"}
 
