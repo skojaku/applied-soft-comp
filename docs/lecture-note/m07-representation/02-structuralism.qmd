@@ -16,99 +16,13 @@ Let's start with a simple observation that changes everything. What makes the En
 
 Ferdinand de Saussure, the founder of modern linguistics, called this the arbitrariness of the sign. A sign has two parts: the signifier (the sound or written form) and the signified (the concept). The relationship between them is not natural or inevitable. It's a social convention.
 
-::: {.column-margin}
-Saussure's *Course in General Linguistics* (1916) revolutionized language study by treating it as a system of relationships rather than a collection of labels.
-:::
-
 But Saussure went further. He argued that the signified (the concept itself) is also arbitrary. We think "dog" refers to a pre-existing natural category, but nature doesn't draw boundaries between dogs, wolves, and foxes. We do. Different languages slice the animal kingdom differently. Some languages have multiple words for what English calls "rice" (depending on whether it's cooked or raw). English distinguishes "river" from "stream" where other languages use one word. The concepts themselves are products of how a language chooses to divide conceptual space.
 
 This leads to a radical conclusion. The meaning of "dog" isn't determined by what dogs are. It's determined by what dogs are not. "Dog" means "dog" because it occupies a specific position in a network of differences: not "cat", not "wolf", not "fox", not "log", not "fog".
 
-```{python}
-#| fig-cap: "The meaning of 'dog' emerges from its position in a network of contrasts, not from an intrinsic essence."
-#| label: fig-saussure-system
-#| code-fold: true
+![](../figs/animal-puzzle-dog.png)
 
-import matplotlib.pyplot as plt
-import networkx as nx
-import numpy as np
 
-fig, ax = plt.subplots(figsize=(10, 8))
-
-# Create a network showing semantic relationships
-G = nx.Graph()
-
-# Add nodes
-center_word = "DOG"
-related = ["cat", "wolf", "fox", "puppy", "pet"]
-contrasts = ["log", "fog", "cog", "dig"]
-
-G.add_node(center_word)
-for word in related + contrasts:
-    G.add_node(word)
-
-# Add edges for related terms
-for word in related:
-    G.add_edge(center_word, word)
-
-# Position nodes
-pos = {center_word: (0, 0)}
-
-# Related words in a circle around center
-angle_step = 2 * np.pi / len(related)
-for i, word in enumerate(related):
-    angle = i * angle_step
-    pos[word] = (1.5 * np.cos(angle), 1.5 * np.sin(angle))
-
-# Contrast words further out
-angle_step = 2 * np.pi / len(contrasts)
-for i, word in enumerate(contrasts):
-    angle = i * angle_step + np.pi/4
-    pos[word] = (2.5 * np.cos(angle), 2.5 * np.sin(angle))
-
-# Draw the network
-# Center node
-nx.draw_networkx_nodes(G, pos, nodelist=[center_word],
-                       node_color='#e74c3c', node_size=3000,
-                       alpha=0.9, ax=ax)
-
-# Related nodes
-nx.draw_networkx_nodes(G, pos, nodelist=related,
-                       node_color='#3498db', node_size=2000,
-                       alpha=0.7, ax=ax)
-
-# Contrast nodes
-nx.draw_networkx_nodes(G, pos, nodelist=contrasts,
-                       node_color='#95a5a6', node_size=1500,
-                       alpha=0.5, ax=ax)
-
-# Edges
-nx.draw_networkx_edges(G, pos, width=2, alpha=0.3, ax=ax)
-
-# Labels
-nx.draw_networkx_labels(G, pos,
-                        {center_word: center_word},
-                        font_size=16, font_weight='bold',
-                        font_color='white', ax=ax)
-
-label_pos = {k: (v[0], v[1]) for k, v in pos.items() if k != center_word}
-nx.draw_networkx_labels(G, label_pos,
-                        {k: k for k in related + contrasts},
-                        font_size=11, font_weight='bold', ax=ax)
-
-# Add annotations
-ax.text(0, -3.3, '"Dog" is defined by what it is NOT', fontsize=13,
-        ha='center', style='italic', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
-
-ax.set_xlim(-3.5, 3.5)
-ax.set_ylim(-3.5, 3.5)
-ax.axis('off')
-ax.set_title('Saussurean Semiotics: Meaning Through Difference',
-             fontsize=16, fontweight='bold', pad=20)
-
-plt.tight_layout()
-plt.show()
-```
 
 ## Apoha: Buddhist Logic of Negation
 
@@ -116,9 +30,13 @@ This idea that concepts are defined through negation has deep roots. Buddhist ph
 
 When you see a horse, you don't directly grasp "horseness". Instead, you implicitly exclude everything that is not-horse: not-cow, not-stone, not-water, not-tree. The concept of "horse" is nothing more than the region of conceptual space that remains after all these exclusions. It's a purely negative definition.
 
-::: {.column-margin}
+![](../figs/negation-horse-emergence.png)
+
+::: {.callout-note}
 Dignāga and Dharmakīrti, the primary developers of Apoha theory, influenced both Indian and Tibetan Buddhist philosophy. Their ideas parallel Saussure's insights developed independently 1400 years later.
 :::
+
+
 
 Why does this matter? Because it reveals that categories are not containers holding essences. They're regions in a space of possibilities, carved out by contrast. This shifts the entire frame. You don't need to know what something is. You only need to know what it is not. The meaning is in the boundaries, not the interior.
 
@@ -133,67 +51,48 @@ Consider the difference between "p" and "b". They're produced almost identically
 
 Jakobson showed that all phonemes in all languages could be analyzed as bundles of such binary oppositions: voiced/voiceless, nasal/oral, fricative/stop, and so on. A phoneme isn't a sound. It's a position in a multidimensional space of contrasts.
 
-```{python}
-#| fig-cap: "Phonemes as vectors in a space of binary features. Position, not essence, determines identity."
-#| label: fig-jakobson-features
-#| code-fold: true
-
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-
-# Define phonemes with binary features
-phonemes = {
-    'p': [1, 1, 0],  # [bilabial, stop, voiced]
-    'b': [1, 1, 1],
-    't': [0, 1, 0],  # [dental, stop, voiced]
-    'd': [0, 1, 1],
-    'k': [0, 0, 0],  # [velar, stop, voiced]
-    'g': [0, 0, 1]
-}
-
-# Create DataFrame
-df = pd.DataFrame.from_dict(phonemes, orient='index',
-                            columns=['Bilabial', 'Stop', 'Voiced'])
-
-fig, ax = plt.subplots(figsize=(10, 8))
-
-# Create a heatmap-style visualization
-for i, (phoneme, features) in enumerate(phonemes.items()):
-    y = 5 - i
-    for j, (feature, value) in enumerate(zip(['Bilabial', 'Stop', 'Voiced'], features)):
-        color = '#3498db' if value == 1 else '#ecf0f1'
-        rect = plt.Rectangle((j, y - 0.4), 0.8, 0.8, facecolor=color,
-                            edgecolor='black', linewidth=2)
-        ax.add_patch(rect)
-
-        # Add value text
-        text_color = 'white' if value == 1 else 'black'
-        ax.text(j + 0.4, y, '+' if value == 1 else '−',
-               ha='center', va='center', fontsize=18,
-               fontweight='bold', color=text_color)
-
-    # Add phoneme label
-    ax.text(-0.5, y, f'/{phoneme}/',
-           ha='right', va='center', fontsize=16, fontweight='bold')
-
-# Add feature labels
-feature_labels = ['Bilabial', 'Stop', 'Voiced']
-for j, label in enumerate(feature_labels):
-    ax.text(j + 0.4, 6, label, ha='center', va='center',
-           fontsize=14, fontweight='bold', rotation=0)
-
-ax.set_xlim(-1, 3)
-ax.set_ylim(-0.5, 6.5)
-ax.axis('off')
-ax.set_title('Jakobsonian Distinctive Features: Phonemes as Feature Bundles',
-             fontsize=16, fontweight='bold', pad=20)
-
-plt.tight_layout()
-plt.show()
-```
-
 This is a vectorization of meaning. Each phoneme is represented not by a symbol but by a coordinate in feature space. Two phonemes are similar if their feature vectors are close. The entire phonological system of a language becomes a geometry problem.
+
+### Why Babies Say "Mama" and "Papa" Everywhere
+
+Let's make this concrete with one of the most striking examples of phonological universals. Consider how remarkably similar the words for "mother" and "father" are across completely unrelated languages:
+
+**Mother:** English "Mama", Mandarin "妈妈 (Māma)", Swahili "Mama", Hebrew "Ima", Spanish "Mamá"
+
+**Father:** English "Papa", Mandarin "爸爸 (Bàba)", French "Papa", Italian "Babbo", Turkish "Baba"
+
+Why do languages separated by continents and millennia converge on these particular sounds? The structuralist answer reveals something profound about how humans acquire language.
+
+Babies don't learn sounds in isolation. They learn contrasts. The first contrasts they master involve the most basic physiological oppositions their vocal apparatus can produce:
+
+**First opposition: Fully closed (m/p) versus fully open (a)**
+The consonants "m" and "p" require complete closure of the lips. The vowel "a" requires maximum opening of the mouth. This is the most extreme articulatory contrast possible. It's the easiest distinction for infants to produce and perceive.
+
+**Second opposition: Nasal (m) versus oral (p)**
+Both "m" and "p" involve closing the lips, but they differ in one binary feature: "m" lets air flow through the nose (nasal), while "p" blocks it completely and releases it as a burst (oral stop). This is another fundamental physiological switch.
+
+These oppositions create a minimal phonological system with maximum contrast. "Mama" combines nasal closure with open vowel, repeated. "Papa" combines oral closure with open vowel, repeated. The repetition itself is developmentally significant—reduplication is easier for infant motor systems than producing different syllables.
+
+::: {.column-margin}
+Jakobson argued that language acquisition follows an implicational hierarchy: children acquire contrasts in a universal order, from maximal to minimal distinctions. Complex sounds appear only after simpler foundations are established.
+:::
+
+### Distinctive Features as DNA
+
+Jakobson's insight was that you could decompose any phoneme into a bundle of binary features. Consider the phoneme /b/ (as in "baby"):
+
+- Where is it articulated? [+labial] (at the lips)
+- Do the vocal cords vibrate? [+voiced] (yes)
+- Does air flow through the nose? [-nasal] (no, it's oral)
+- How is airflow stopped? [+stop] (complete closure, then release)
+
+The phoneme /b/ isn't a primitive unit. It's a coordinate in feature space: [+labial, +voiced, -nasal, +stop, -continuant]. Change one feature and you get a different phoneme: flip [+voiced] to [-voiced] and you get /p/. Flip [+stop] to [-stop, +continuant] and you get /v/.
+
+Jakobson identified roughly twelve distinctive features that are sufficient to describe the phonological systems of all human languages. These features aren't arbitrary labels. They correspond to physiological and acoustic properties of speech production and perception. Languages don't choose their sounds randomly. They select from a universal feature space defined by human biology.
+
+This has a remarkable consequence: phonological systems aren't just collections of sounds. They're structured geometries. Languages can't have random inventories of phonemes. If a language has a complex sound, it must also have the simpler contrasts that build up to it. If a language distinguishes three levels of vowel height (high, mid, low), it must first distinguish high from non-high. If it has voiced fricatives like /z/, it must have voiceless fricatives like /s/.
+
+The diversity of human languages doesn't mean anything is possible. It means there's a universal space of phonological possibilities, and each language carves out a specific subset. The structure is in the oppositions, not the sounds themselves.
 
 ## The Culinary Triangle
 
@@ -201,76 +100,12 @@ Claude Lévi-Strauss, the structural anthropologist, extended this approach beyo
 
 His "culinary triangle" is a famous example. He analyzed how different cultures process food through two axes: the nature-culture axis (raw vs. transformed) and the means of transformation (cooking vs. rotting). This creates a conceptual space where different food preparation methods occupy specific positions.
 
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Culinary_Triangle.svg/1200px-Culinary_Triangle.svg.png)
+
 ::: {.column-margin}
 Lévi-Strauss developed these ideas in *The Raw and the Cooked* (1964), the first volume of his four-volume *Mythologiques* series analyzing the structure of myths across cultures.
 :::
 
-```{python}
-#| fig-cap: "Lévi-Strauss's culinary triangle maps food preparation methods through binary oppositions."
-#| label: fig-culinary-triangle
-#| code-fold: true
-
-import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib.patches import FancyArrowPatch
-
-fig, ax = plt.subplots(figsize=(10, 10))
-
-# Define triangle vertices
-raw = (0, 0)
-cooked = (-1.5, 2.5)
-rotted = (1.5, 2.5)
-
-# Draw triangle
-triangle = plt.Polygon([raw, cooked, rotted], fill=False,
-                       edgecolor='black', linewidth=3)
-ax.add_patch(triangle)
-
-# Add points
-points = {'Raw': raw, 'Cooked': cooked, 'Rotted': rotted}
-for label, (x, y) in points.items():
-    ax.plot(x, y, 'o', markersize=20, color='#e74c3c', zorder=3)
-    offset = (0, -0.4) if label == 'Raw' else (0, 0.3)
-    ax.text(x + offset[0], y + offset[1], label,
-           fontsize=16, fontweight='bold', ha='center', va='center',
-           bbox=dict(boxstyle='round', facecolor='white', alpha=0.9))
-
-# Add intermediate categories
-intermediates = {
-    'Smoked': (-0.5, 0.8),
-    'Boiled': (-0.9, 1.5),
-    'Roasted': (-0.3, 1.2),
-    'Fermented': (0.8, 1.3)
-}
-
-for label, (x, y) in intermediates.items():
-    ax.plot(x, y, 's', markersize=12, color='#3498db', alpha=0.7, zorder=2)
-    ax.text(x, y - 0.3, label, fontsize=11, ha='center',
-           style='italic', color='#2c3e50')
-
-# Add axes labels
-ax.annotate('', xy=(-2, 1.25), xytext=(2, 1.25),
-           arrowprops=dict(arrowstyle='<->', color='gray', lw=2))
-ax.text(0, 1.65, 'Culture (transformed)', ha='center',
-       fontsize=12, fontweight='bold', color='gray')
-
-ax.annotate('', xy=(-0.75, -0.5), xytext=(-0.75, 3),
-           arrowprops=dict(arrowstyle='<->', color='gray', lw=2))
-ax.text(-1.3, 1.25, 'Elaborated', ha='center', fontsize=12,
-       fontweight='bold', color='gray', rotation=90)
-
-ax.text(0, -1.2, 'Nature (untransformed)', ha='center',
-       fontsize=12, fontweight='bold', color='gray')
-
-ax.set_xlim(-2.5, 2.5)
-ax.set_ylim(-1.5, 3.5)
-ax.axis('off')
-ax.set_title("Lévi-Strauss's Culinary Triangle:\nCulture as Binary Oppositions",
-             fontsize=16, fontweight='bold', pad=20)
-
-plt.tight_layout()
-plt.show()
-```
 
 Roasted meat sits between raw and cooked (less elaborated cooking). Boiled meat is fully cooked (more elaborated). Fermented foods sit between raw and rotted (cultural transformation through natural processes). Each food type's meaning comes from its position in this structural space, not from any intrinsic property.
 
