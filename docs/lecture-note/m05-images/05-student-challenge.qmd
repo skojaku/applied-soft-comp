@@ -76,6 +76,16 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import random_split
 
+# Detect device (CUDA, MPS, or CPU)
+if torch.cuda.is_available():
+    device = torch.device('cuda')
+elif torch.backends.mps.is_available():
+    device = torch.device('mps')
+else:
+    device = torch.device('cpu')
+
+print(f"Using device: {device}")
+
 # TODO: Design your data augmentation strategy
 train_transform = transforms.Compose([
     # Add your augmentation techniques here
@@ -170,17 +180,9 @@ def create_model(arch='resnet50', num_classes=100, pretrained=True):
     return model
 
 # Create your model
-if torch.cuda.is_available():
-    device = torch.device('cuda')
-elif torch.backends.mps.is_available():
-    device = torch.device('mps')
-else:
-    device = torch.device('cpu')
-
 model = create_model(arch='resnet18', num_classes=100, pretrained=True)
 model = model.to(device)
 
-print(f"Using device: {device}")
 print(f"Total parameters: {sum(p.numel() for p in model.parameters()):,}")
 print(f"Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}")
 ```
