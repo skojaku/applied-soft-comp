@@ -15,23 +15,15 @@ You'll learn:
 - How to **choose the right method** for your data and avoid misleading visualizations.
 :::
 
-Imagine you're analyzing data with 50 features per observation. Gene expression levels, user behavior metrics, environmental measurements. You want to understand the patterns. How do different observations relate to each other? Are there clusters? Outliers?
+Imagine you're analyzing data with 50 features per observation: gene expression levels, user behavior metrics, environmental measurements. You want to understand the patterns, clusters, and outliers. Here's the fundamental problem: you can't plot 50 dimensions directly. Our visual system lives in three dimensions, or really two on a screen.
 
-Here's the fundamental problem: you can't plot 50 dimensions directly. Our visual system lives in three dimensions, or really two on a screen. How do you visualize data that lives in spaces you cannot see?
-
-The answer is dimensionality reduction. This technique projects high-dimensional data into 2 or 3 dimensions while preserving important structure. But here's the critical question: what structure matters?
-
-Different methods preserve different aspects of your data. Some preserve global structure, showing how groups relate across the entire dataset. Others preserve local structure, highlighting nearest neighbors. Understanding these trade-offs is essential for choosing the right method and avoiding beautiful but misleading visualizations.
+The answer is dimensionality reduction. This technique projects high-dimensional data into 2 or 3 dimensions while preserving important structure. But here's the critical question: what structure matters? Some methods preserve global structure, showing how groups relate across the entire dataset. Others preserve local structure, highlighting nearest neighbors. Understanding these trade-offs is essential for choosing the right method and avoiding beautiful but misleading visualizations.
 
 ## The Curse of Dimensionality
 
-Let's talk about what makes high-dimensional data fundamentally different.
+Let's talk about what makes high-dimensional data fundamentally different. In high dimensions, everything is far from everything else. This sounds paradoxical, but it's mathematically inevitable. As dimensions increase, the volume of space grows exponentially, and data points become increasingly sparse.
 
-In high dimensions, everything is far from everything else. This sounds paradoxical, but it's mathematically inevitable. As dimensions increase, the volume of space grows exponentially, and data points become increasingly sparse.
-
-Consider this simple fact. In 1D, if you have 10 points uniformly distributed in [0, 1], the average distance between neighbors is about 0.1. To maintain the same density in 2D, you need 100 points. In 3D, you need 1,000 points. In 10D, you need 10 billion points.
-
-Even stranger is what happens to distances. In high dimensions, all distances become similar. The nearest and farthest neighbors become roughly equidistant. This makes many of our intuitions about "closeness" break down.
+Consider this simple fact: In 1D, if you have 10 points uniformly distributed in [0, 1], the average distance between neighbors is about 0.1. To maintain the same density in 2D, you need 100 points. In 3D, you need 1,000 points. In 10D, you need 10 billion points. Even stranger is what happens to distances. In high dimensions, all distances become similar, the nearest and farthest neighbors becoming roughly equidistant. This makes many of our intuitions about "closeness" break down.
 
 ```{python}
 #| fig-cap: "As dimensions increase, the ratio of farthest to nearest distance approaches 1"
@@ -87,9 +79,7 @@ ax.legend(frameon=False)
 sns.despine()
 ```
 
-The plot shows a striking pattern. As dimensions increase, the ratio of nearest to farthest distance gets closer to 1. At 200 dimensions, nearly every point is equally far from every other point.
-
-Why does this matter? When you want to cluster data points, every point becomes equidistant from every other point, making clustering impossible. By projecting the data into lower dimensions, you can remedy this problem. This is why dimensionality reduction matters for analysis, not just visualization.
+The plot shows a striking pattern: As dimensions increase, the ratio of nearest to farthest distance gets closer to 1. At 200 dimensions, nearly every point is equally far from every other point. This makes clustering impossible since every point becomes equidistant from every other point. By projecting the data into lower dimensions, you can remedy this problem. This is why dimensionality reduction matters for analysis, not just visualization.
 
 ## Pairwise Scatter Plots: The Brute Force Approach
 
@@ -118,19 +108,16 @@ g = sns.pairplot(iris_df, hue='species', diag_kind='kde',
 g.fig.suptitle('Iris Dataset: All Pairwise Relationships', y=1.01)
 ```
 
-The scatter plot matrix shows every possible 2D projection. The diagonal displays the univariate distribution of each feature using KDE. Off-diagonals show bivariate scatter plots. This gives you a complete view of pairwise relationships.
-
-The problem is clear. Scatter plot matrices don't scale. With 10 variables, you have 45 unique pairwise plots, which is manageable but crowded. With 20 variables, you have 190 plots, which becomes overwhelming. And you're still only seeing 2D projections, never the full high-dimensional structure.
-
-This is where dimensionality reduction becomes essential. Instead of looking at every pairwise combination, we project the data intelligently onto just 2 or 3 dimensions.
+The scatter plot matrix shows every possible 2D projection: the diagonal displays the univariate distribution of each feature using KDE, while off-diagonals show bivariate scatter plots. The problem is clear: scatter plot matrices don't scale. With 10 variables, you have 45 unique pairwise plots (manageable but crowded). With 20 variables, you have 190 plots (overwhelming). And you're still only seeing 2D projections, never the full high-dimensional structure. This is where dimensionality reduction becomes essential, projecting the data intelligently onto just 2 or 3 dimensions.
 
 ## Linear Dimensionality Reduction: PCA
 
-Let's talk about Principal Component Analysis (PCA), a linear method that finds directions of maximum variance in your data.
+Let's talk about Principal Component Analysis (PCA), a linear method that finds directions of maximum variance in your data. Imagine you have a cloud of points in high-dimensional space. PCA asks: what direction captures the most variation (PC1)? Then: what direction, perpendicular to the first, captures the most remaining variation (PC2)? Mathematically, PCA finds the eigenvectors of the covariance matrix. Conceptually, it's rotating your coordinate system to align with the highest variance directions of your data.
 
-Imagine you have a cloud of points in high-dimensional space. PCA asks a simple question: what direction captures the most variation? This becomes the first principal component (PC1). Then it asks: what direction, perpendicular to the first, captures the most remaining variation? This becomes PC2. And so on.
-
-Mathematically, PCA finds the eigenvectors of the covariance matrix. But conceptually, it's rotating your coordinate system to align with the highest variance directions of your data.
+**The Math**:
+If we center our data matrix $X$ (so columns have zero mean), the covariance matrix is $C = \frac{1}{n-1} X^T X$. We want to find a vector $v$ that maximizes the variance of the projection $Xv$. This turns out to be an eigenvalue problem:
+$$ C v = \lambda v $$
+The eigenvector $v$ with the largest eigenvalue $\lambda$ is the first principal component. The eigenvalue $\lambda$ represents the amount of variance captured by that component.
 
 ```{python}
 #| fig-cap: "PCA finds directions of maximum variance. PC1 captures the most variation, PC2 the next most (perpendicular to PC1)."
@@ -171,7 +158,7 @@ ax.axis('equal')
 sns.despine()
 ```
 
-PC1 (orange arrow) points along the direction of greatest spread. PC2 (green arrow) is perpendicular and captures the remaining variation. The percentage shows how much variance each component explains. If PC1 explains 90 percent of variance, projecting onto just PC1 preserves most of your data's structure.
+PC1 (orange arrow) points along the direction of greatest spread, while PC2 (green arrow) is perpendicular and captures the remaining variation. The percentage shows how much variance each component explains. If PC1 explains 90 percent of variance, projecting onto just PC1 preserves most of your data's structure.
 
 ### Applying PCA to Iris
 
@@ -228,17 +215,16 @@ sns.despine(ax=axes[1])
 plt.tight_layout()
 ```
 
-PC1 and PC2 together explain over 95 percent of the variance in the 4D dataset. The 2D projection preserves the main structure beautifully. Setosa is well-separated, while versicolor and virginica have some overlap, just as they do in the original high-dimensional space.
-
-A critical reminder: always standardize before PCA. If features have different units or scales, PCA will be dominated by high-variance features. Standardization (zero mean, unit variance) ensures all features contribute fairly.
+PC1 and PC2 together explain over 95 percent of the variance in the 4D dataset, with the 2D projection preserving the main structure beautifully (Setosa well-separated, versicolor and virginica showing some overlap just as in the original high-dimensional space). A critical reminder: always standardize before PCA. If features have different units or scales, PCA will be dominated by high-variance features. Standardization (zero mean, unit variance) ensures all features contribute fairly.
 
 ## Non-Linear Dimensionality Reduction: MDS
 
-Shift your attention from variance to distances. Multidimensional Scaling (MDS) takes a different approach than PCA. Instead of finding directions of maximum variance, it tries to preserve distances between points.
+Shift your attention from variance to distances. Multidimensional Scaling (MDS) takes a different approach than PCA: instead of finding directions of maximum variance, it tries to preserve distances between points. You give MDS a distance matrix showing the distance between every pair of points in high-dimensional space, and MDS finds a low-dimensional configuration where those distances are preserved as well as possible. Think of it like arranging cities on a map. You know the distance between every pair of cities, but not their coordinates. MDS finds positions that preserve those distances.
 
-You give MDS a distance matrix showing the distance between every pair of points in high-dimensional space. MDS then finds a low-dimensional configuration where those distances are preserved as well as possible.
-
-Think of it like arranging cities on a map. You know the distance between every pair of cities, but not their coordinates. MDS finds positions that preserve those distances. Mathematically, MDS minimizes stress, the difference between high-dimensional and low-dimensional distances. Classical MDS has a closed-form solution like PCA, but more flexible variants use iterative optimization.
+**The Math**:
+Given a high-dimensional distance matrix $D$ where $d_{ij}$ is the distance between points $i$ and $j$, MDS seeks low-dimensional coordinates $y_1, \dots, y_n$ that minimize the **Stress** function:
+$$ \text{Stress} = \sqrt{ \frac{\sum_{i<j} (d_{ij} - \|y_i - y_j\|)^2}{\sum_{i<j} d_{ij}^2} } $$
+Minimizing this stress forces the Euclidean distances in the low-dimensional map $\|y_i - y_j\|$ to approximate the original distances $d_{ij}$.
 
 ```{python}
 #| fig-cap: "MDS vs PCA on Iris dataset. MDS preserves distances better but looks similar to PCA for this dataset."
@@ -288,11 +274,13 @@ For the Iris dataset, PCA and MDS look very similar. This is because Iris data i
 
 ## Isomap: Preserving Geodesic Distances
 
-MDS preserves Euclidean distances, which are straight-line distances through space. But for curved manifolds, what matters is the geodesic distance, the distance along the surface.
+MDS preserves Euclidean distances (straight-line distances through space). But for curved manifolds, what matters is the geodesic distance (the distance along the surface). Isomap (Isometric Mapping) addresses this by approximating geodesic distances using a neighborhood graph. First, build a neighborhood graph by connecting each point to its k nearest neighbors. Second, compute shortest paths through this graph (the geodesic distance approximated by the shortest path). Third, apply classical MDS using these geodesic distances instead of Euclidean distances. Think of it like this: MDS measures distance "as the crow flies," while Isomap measures distance "as you walk along the surface."
 
-Isomap (Isometric Mapping) addresses this by approximating geodesic distances using a neighborhood graph. The approach is elegant. First, build a neighborhood graph by connecting each point to its k nearest neighbors. Second, compute shortest paths through this graph. The geodesic distance between points is approximated by the shortest path. Third, apply classical MDS using these geodesic distances instead of Euclidean distances.
-
-Think of it like this. MDS measures distance "as the crow flies," while Isomap measures distance "as you walk along the surface."
+**The Math**:
+Isomap transforms the problem into MDS by changing the distance metric:
+1.  **Construct a Neighborhood Graph**: Connect point $i$ to $j$ if $d_{ij} < \epsilon$ (epsilon-Isomap) or if $j$ is among the $k$-nearest neighbors (k-Isomap).
+2.  **Compute Geodesic Distances**: Define the geodesic distance $d_G(i, j)$ as the shortest path distance between nodes $i$ and $j$ in the graph (using Dijkstra's or Floyd-Warshall algorithm).
+3.  **Apply MDS**: Run Classical MDS on the matrix of geodesic distances $D_G$.
 
 ```{python}
 #| fig-cap: "Isomap uses geodesic distances (along the surface) instead of Euclidean distances (through space), better recovering the S-curve structure"
@@ -336,21 +324,28 @@ sns.despine(ax=axes[1])
 plt.tight_layout()
 ```
 
-Isomap successfully "straightens" the S-curve because it respects the manifold structure. By computing distances along the neighborhood graph, it avoids shortcuts across the bend that confused MDS.
+Isomap successfully "straightens" the S-curve because it respects the manifold structure, computing distances along the neighborhood graph to avoid shortcuts across the bend that confused MDS. The key parameter is n_neighbors. Too few and the graph becomes disconnected with infinite distances. Too many and you create shortcuts across the manifold, reverting to MDS-like behavior. Getting it just right (typically 5 to 15) captures the local manifold structure perfectly.
 
-The key parameter is n_neighbors. Too few neighbors and the graph becomes disconnected with infinite distances. Too many neighbors and you create shortcuts across the manifold, reverting to MDS-like behavior. Getting it just right (typically 5 to 15) captures the local manifold structure perfectly.
-
-Now we see two extremes emerging. MDS preserves all pairwise distances globally, which works on linear or convex data. Isomap preserves geodesic distances using local neighborhoods, which works on curved manifolds. But what if we only care about local structure? What if global relationships don't matter?
+Now we see two extremes emerging: MDS preserves all pairwise distances globally (working on linear or convex data), while Isomap preserves geodesic distances using local neighborhoods (working on curved manifolds). But what if we only care about local structure and global relationships don't matter?
 
 ## Modern Non-Linear Methods: t-SNE and UMAP
 
-Let's shift focus to methods that prioritize local structure. Both t-SNE (t-Distributed Stochastic Neighbor Embedding) and UMAP (Uniform Manifold Approximation and Projection) take a middle ground between MDS's global approach and Isomap's geodesic approach. They prioritize local structure while allowing flexibility in global positioning.
-
-The key insight is simple. For visualization, we often care most about which points are neighbors. Whether distant clusters are placed left versus right, or how far apart they are, matters less than preserving local neighborhood relationships within and between clusters.
+Let's shift focus to methods that prioritize local structure. Both t-SNE (t-Distributed Stochastic Neighbor Embedding) and UMAP (Uniform Manifold Approximation and Projection) take a middle ground between MDS's global approach and Isomap's geodesic approach, prioritizing local structure while allowing flexibility in global positioning. The key insight: For visualization, we often care most about which points are neighbors. Whether distant clusters are placed left versus right, or how far apart they are, matters less than preserving local neighborhood relationships within and between clusters.
 
 ### How t-SNE works
 
-t-SNE converts distances into similarity probabilities and preserves these local relationships. In high dimensions, we define probability $p_{ij}$ that point $i$ picks point $j$ as a neighbor, based on a Gaussian distance. In low dimensions, we define similar probability $q_{ij}$ using a t-distribution with heavy tails. Then we optimize by moving points in 2D to make $q_{ij}$ match $p_{ij}$, minimizing KL divergence.
+t-SNE converts distances into similarity probabilities and preserves these local relationships.
+
+**The Math**:
+1.  **High-dimensional Probabilities ($P$)**: We define the conditional probability $p_{j|i}$ using a Gaussian kernel centered at $x_i$, where $\sigma_i$ is tuned to match the desired "perplexity":
+    $$ p_{j|i} = \frac{\exp(-\|x_i - x_j\|^2 / 2\sigma_i^2)}{\sum_{k \neq i} \exp(-\|x_i - x_k\|^2 / 2\sigma_i^2)} $$
+    We symmetrize this to get $p_{ij} = \frac{p_{j|i} + p_{i|j}}{2n}$.
+
+2.  **Low-dimensional Probabilities ($Q$)**: In the low-dimensional space $y$, we use a **Student t-distribution** with 1 degree of freedom (which has heavier tails than a Gaussian):
+    $$ q_{ij} = \frac{(1 + \|y_i - y_j\|^2)^{-1}}{\sum_{k \neq l} (1 + \|y_k - y_l\|^2)^{-1}} $$
+
+3.  **Optimization**: We minimize the **Kullback-Leibler (KL) divergence** between $P$ and $Q$ using gradient descent:
+    $$ C = KL(P||Q) = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}} $$
 
 The t-distribution's heavy tails are clever. They let well-separated clusters spread out in 2D without overlapping, while keeping local neighborhoods tight.
 
@@ -395,19 +390,13 @@ sns.despine(ax=axes[2])
 plt.tight_layout()
 ```
 
-All three methods successfully straighten the S-curve, but through different philosophies. MDS compromises between all distances. Isomap follows the manifold globally. t-SNE focuses on preserving neighborhoods. Each makes different trade-offs between local and global structure.
-
-The key parameter in t-SNE is perplexity, which typically ranges from 30 to 50. Perplexity controls the effective neighborhood size. Too low perplexity fragments clusters. Too high perplexity loses local detail. Finding the right balance is important.
+All three methods successfully straighten the S-curve through different philosophies: MDS compromises between all distances, Isomap follows the manifold globally, and t-SNE focuses on preserving neighborhoods. The key parameter in t-SNE is perplexity (typically 30 to 50), which controls the effective neighborhood size. Too low perplexity fragments clusters, too high perplexity loses local detail.
 
 ### What t-SNE preserves (and what it doesn't)
 
-t-SNE is powerful but has important limitations. It preserves local structure, keeping points that are neighbors in high dimensions as neighbors in 2D. It preserves clusters, keeping well-separated groups separated. It preserves relative relationships within neighborhoods. If A is closer to B than to C locally, this is preserved.
+t-SNE is powerful but has important limitations. It preserves local structure (keeping points that are neighbors in high dimensions as neighbors in 2D), preserves clusters (keeping well-separated groups separated), and preserves relative relationships within neighborhoods (if A is closer to B than to C locally, this is preserved). What t-SNE does NOT preserve: actual distances between points, the relative position of distant clusters (arbitrary), cluster sizes (large clusters may appear smaller and vice versa), or densities (tight clusters may spread out, sparse regions may appear dense).
 
-What t-SNE does NOT preserve: actual distances between points are not meaningful. The relative position of distant clusters is arbitrary. Large clusters may appear smaller, and vice versa. Tight clusters may be spread out, and sparse regions may appear dense.
-
-You cannot conclude from a t-SNE plot that "cluster A is twice as far from B as from C." Distances are not preserved. You cannot conclude that "cluster A is twice the size of B." Sizes are not preserved. You cannot conclude that "the data has exactly 5 clusters." Apparent clusters may be visualization artifacts.
-
-You can conclude that "these points form a distinct group separate from others." You can conclude that "these points are more similar to each other than to distant points." You can conclude that "the data has local structure and is not uniformly random."
+You cannot conclude that "cluster A is twice as far from B as from C" (distances not preserved), "cluster A is twice the size of B" (sizes not preserved), or "the data has exactly 5 clusters" (apparent clusters may be visualization artifacts). You can conclude that "these points form a distinct group separate from others," "these points are more similar to each other than to distant points," and "the data has local structure and is not uniformly random."
 
 ### Applying t-SNE to real data
 
@@ -447,19 +436,20 @@ cbar.set_label('Digit Class')
 sns.despine()
 ```
 
-The t-SNE projection beautifully separates most digit classes. Digits that look similar (3, 5, and 8) cluster near each other. Visually distinct digits (0 and 1) are well separated.
-
-This demonstrates t-SNE's power. From 64 dimensions with no explicit information about what makes digits similar, t-SNE discovers the perceptual structure of handwritten digits. It's a remarkable achievement in unsupervised learning.
-
-An important note: t-SNE is stochastic. Different runs produce different layouts, though cluster structure remains consistent. Always check multiple runs with different random seeds, especially for scientific conclusions.
+The t-SNE projection beautifully separates most digit classes, with similar digits (3, 5, and 8) clustering near each other while visually distinct digits (0 and 1) are well separated. This demonstrates t-SNE's power: from 64 dimensions with no explicit information about what makes digits similar, t-SNE discovers the perceptual structure of handwritten digits. An important note: t-SNE is stochastic. Different runs produce different layouts (though cluster structure remains consistent), so always check multiple runs with different random seeds, especially for scientific conclusions.
 
 ## UMAP: A Faster Alternative
 
-Uniform Manifold Approximation and Projection (UMAP) is a newer method from 2018 that has become popular as an alternative to t-SNE. Like t-SNE, UMAP preserves local structure. But it's based on different mathematical foundations in manifold learning and topological data analysis.
+Uniform Manifold Approximation and Projection (UMAP) is a newer method from 2018 that has become popular as an alternative to t-SNE. Like t-SNE, UMAP preserves local structure, but it's based on different mathematical foundations in manifold learning and topological data analysis. UMAP has several advantages over t-SNE: it's faster (often 10 to 100 times faster on large datasets), scales better (working well on datasets with millions of points), preserves more global structure, and is theoretically grounded in Riemannian geometry and fuzzy topology. The trade-offs: UMAP is less battle-tested (being newer), has more hyperparameters to tune (though defaults work well), and often produces similar-looking results to t-SNE, so the choice often comes down to speed.
 
-UMAP has several advantages over t-SNE. It's faster, often 10 to 100 times faster on large datasets. It scales better, working well on datasets with millions of points. It preserves more global structure than t-SNE. It's also theoretically grounded in Riemannian geometry and fuzzy topology.
-
-The trade-offs are worth noting. UMAP is less battle-tested since it's newer. It has more hyperparameters to tune, though defaults work well. It often produces similar-looking results to t-SNE, so the choice often comes down to speed.
+**The Math**:
+UMAP relies on fuzzy simplicial sets and a different cost function.
+1.  **Local Connectivity**: It computes high-dimensional probabilities $p_{ij}$ using a specific local connectivity constraint:
+    $$ p_{j|i} = \exp\left(-\frac{d(x_i, x_j) - \rho_i}{\sigma_i}\right) $$
+    where $\rho_i$ is the distance to the nearest neighbor. This ensures every point is connected to at least one neighbor.
+2.  **Binary Cross-Entropy**: Instead of KL divergence, UMAP minimizes the fuzzy set cross-entropy:
+    $$ C = \sum_{i \neq j} \left[ p_{ij} \log \left(\frac{p_{ij}}{q_{ij}}\right) + (1 - p_{ij}) \log \left(\frac{1 - p_{ij}}{1 - q_{ij}}\right) \right] $$
+    The second term $(1 - p_{ij}) \log (\dots)$ forces points that are *far* in high dimensions to also be far in low dimensions, helping UMAP preserve more global structure than t-SNE.
 
 ```{python}
 #| fig-cap: "UMAP vs t-SNE on digits dataset. UMAP often preserves more global structure while being much faster."
@@ -496,11 +486,7 @@ sns.despine(ax=axes[1])
 plt.tight_layout()
 ```
 
-Both methods reveal similar cluster structure. But UMAP tends to space clusters more evenly and preserve more global topology. Notice how UMAP places similar digits (3, 5, 8) in a connected region, suggesting they share underlying structure.
-
-When should you use UMAP? Use it for very large datasets (over 10,000 points) where t-SNE becomes slow. Use it when you want to preserve more global structure. Use it when you're doing exploratory analysis and want fast iteration. UMAP also supports projecting new data onto an existing embedding, which t-SNE doesn't easily support.
-
-When should you stick with t-SNE? Use it when you need the most established method with extensive literature. Use it for moderate-sized datasets where speed isn't critical. Use it when you're replicating published work that used t-SNE.
+Both methods reveal similar cluster structure, but UMAP tends to space clusters more evenly and preserve more global topology (notice how UMAP places similar digits like 3, 5, 8 in a connected region, suggesting they share underlying structure). Use UMAP for very large datasets (over 10,000 points where t-SNE becomes slow), when you want to preserve more global structure, when you're doing exploratory analysis and want fast iteration, or when you need to project new data onto an existing embedding (which t-SNE doesn't easily support). Stick with t-SNE when you need the most established method with extensive literature, for moderate-sized datasets where speed isn't critical, or when replicating published work that used t-SNE.
 
 ## The Bigger Picture: Choosing the Right Method
 
@@ -514,22 +500,14 @@ Let's step back and see the full landscape. Dimensionality reduction is not a on
 | **t-SNE** | Local structure | Slow | Moderate (10,000s of points) | Revealing clusters, local relationships |
 | **UMAP** | Local plus some global | Fast | Excellent (millions of points) | Large datasets, faster alternative to t-SNE |
 
-A practical workflow begins with PCA. Always run PCA first. It's fast, interpretable, and if it works well, you're done. Check how much variance the first 2 or 3 components explain.
+A practical workflow begins with PCA: always run PCA first (it's fast, interpretable, and if it works well, you're done). Check how much variance the first 2 or 3 components explain. Next, check pairwise plots if feasible (for fewer than 10 dimensions, look at scatter plot matrices to understand pairwise relationships). Try t-SNE or UMAP if PCA doesn't reveal clear structure, if the first 2 PCs explain less than 50 percent variance, if you suspect non-linear relationships, or if you want to find clusters.
 
-Next, check pairwise plots if feasible. If you have fewer than 10 dimensions, look at scatter plot matrices to understand pairwise relationships.
-
-Try t-SNE or UMAP if PCA doesn't reveal clear structure. Run them if the first 2 PCs explain less than 50 percent variance. Try them if you suspect non-linear relationships. Try them if you want to find clusters.
-
-Validate your findings with multiple approaches. Don't trust a single visualization. Try different random seeds for t-SNE and UMAP. Try different hyperparameters like perplexity and number of neighbors. Try different methods and see if t-SNE and PCA agree. Run statistical tests on apparent clusters.
+Validate your findings with multiple approaches. Don't trust a single visualization: try different random seeds for t-SNE and UMAP, try different hyperparameters (perplexity, number of neighbors), try different methods and see if they agree, and run statistical tests on apparent clusters.
 
 ::: {.callout-tip title="Try it yourself"}
 Take a dataset you're familiar with and apply all four methods: PCA, MDS, t-SNE, and UMAP. Compare the results. What structure does each method reveal? What structure does each method hide? Which visualization best matches your intuition about the data?
 :::
 
-Dimensionality reduction can create apparent patterns that don't exist in the original data. Spurious clusters appear when t-SNE splits continuous data into false groups. Missing relationships occur when two clusters might be connected in high dimensions but appear separated in 2D. Misleading distances happen when distance and size in t-SNE and UMAP are not meaningful.
+Dimensionality reduction can create apparent patterns that don't exist in the original data: spurious clusters (when t-SNE splits continuous data into false groups), missing relationships (when connected clusters in high dimensions appear separated in 2D), and misleading distances (when distance and size in t-SNE and UMAP are not meaningful). Always validate important findings with statistical tests or domain knowledge. A beautiful t-SNE plot is a starting point for investigation, not a final conclusion.
 
-Always validate important findings with statistical tests or domain knowledge. A beautiful t-SNE plot is a starting point for investigation, not a final conclusion.
-
-Visualizing high-dimensional data is as much art as science. The goal is not to find "the true projection." There is no single true way to flatten high-dimensional space onto a page. The goal is to reveal structure that helps you understand your data and ask better questions.
-
-As data scientist Jake VanderPlas wrote, "Dimensionality reduction is a form of lossy compression. The question is not whether you lose information (you always do) but whether you lose the information you care about."
+Visualizing high-dimensional data is as much art as science. The goal is not to find "the true projection" (there is no single true way to flatten high-dimensional space onto a page) but to reveal structure that helps you understand your data and ask better questions. As data scientist Jake VanderPlas wrote, "Dimensionality reduction is a form of lossy compression. The question is not whether you lose information (you always do) but whether you lose the information you care about."
