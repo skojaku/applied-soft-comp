@@ -1,5 +1,8 @@
 ---
 title: "Visualizing One-Dimensional Data: Show Me the Data!"
+jupyter: python3
+execute:
+    enabled: true
 ---
 
 ::: {.callout-note title="What you'll learn in this module"}
@@ -17,6 +20,8 @@ You'll learn:
 ## The Case of the Missing Data Points
 
 Imagine you're reading a research paper that claims "Treatment A is significantly better than Treatment B." The paper shows a bar chart with two bars and error bars. The difference looks impressive. But here's the question: what does the actual data look like? Are there 5 data points per group? 500? Are they normally distributed, or are there outliers? Are most points clustered together, or spread out?
+
+![](https://simplystatistics.org/posts/2019-02-21-dynamite-plots-must-die/index_files/figure-html5/dynamite-1.png){width="50%" fig-align="center" }
 
 Without seeing the raw data, you're flying blind. And unfortunately, many scientific papers and reports make this same mistake: they summarize data without showing it.
 
@@ -44,7 +49,11 @@ As Irizarry put it in his open letter to journal editors: dynamite plots conceal
 
 The most straightforward approach is to plot every single data point. A **swarm plot** (also called a beeswarm plot) does exactly this: it displays each observation as a point, with points arranged to avoid overlap.
 
-```python
+```{python}
+#| fig-cap: "Swarm plot: Every point visible"
+#| fig-width: 12
+#| fig-height: 10
+#| code-fold: true
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
@@ -74,8 +83,11 @@ But what happens when you have more data? With hundreds or thousands of points, 
 
 When you have too many points for a swarm plot, a **strip plot with jittering** can help. Instead of carefully arranging points to avoid overlap, we add random noise (jitter) to the x-position of each point.
 
-```python
-# Strip plot with jittering
+```{python}
+#| fig-cap: "Strip plot with jittering"
+#| fig-width: 12
+#| fig-height: 10
+#| code-fold: true
 sns.stripplot(data=data, x='Group', y='Value', alpha=0.6, jitter=0.2)
 plt.title('Strip Plot with Jittering')
 plt.show()
@@ -88,7 +100,10 @@ Two key parameters control the appearance. The `alpha` parameter controls transp
 For even larger datasets, consider a **barcode plot** (also called a rug plot). This shows each data point as a small vertical tick mark along an axis. It's minimalist but effective for showing the distribution of many points.
 
 ```python
-# Barcode plot using rug plot
+#| fig-cap: "Barcode plot"
+#| fig-width: 12
+#| fig-height: 10
+#| code-fold: true
 fig, ax = plt.subplots(figsize=(10, 2))
 for i, group in enumerate(['A', 'B']):
     values = data[data['Group'] == group]['Value']
@@ -108,8 +123,11 @@ When your dataset is large enough that individual points become impractical to s
 
 A histogram divides your data range into bins and counts how many observations fall into each bin. It's a powerful tool for understanding the shape of your distribution.
 
-```python
-# Histogram
+```{python}
+#| fig-cap: "Histogram: Distribution Comparison"
+#| fig-width: 12
+#| fig-height: 10
+#| code-fold: true
 plt.hist(group_a, bins=15, alpha=0.5, label='Group A', edgecolor='black')
 plt.hist(group_b, bins=15, alpha=0.5, label='Group B', edgecolor='black')
 plt.xlabel('Value')
@@ -131,8 +149,11 @@ Histograms have a problem: they're sensitive to bin width and bin placement. Mov
 
 **Kernel Density Estimation (KDE)** provides a smooth alternative. Instead of binning, KDE places a small "kernel" (usually a Gaussian curve) at each data point and sums them up. The result is a smooth density curve.
 
-```python
-# KDE plot
+```{python}
+#| fig-cap: "Kernel Density Estimate"
+#| fig-width: 12
+#| fig-height: 10
+#| code-fold: true
 sns.kdeplot(data=group_a, label='Group A', fill=True, alpha=0.5)
 sns.kdeplot(data=group_b, label='Group B', fill=True, alpha=0.5)
 plt.xlabel('Value')
@@ -156,8 +177,11 @@ The **cumulative distribution function** shows the proportion of data points les
 
 **The CDF is a density estimation method that requires no parameter choices.** Unlike histograms (which require bin size) or KDE (which requires bandwidth), the CDF is completely determined by your data. There are no arbitrary decisions that change how your data looks—making it one of the most honest ways to visualize a distribution.
 
-```python
-# CDF
+```{python}
+#| fig-cap: "Cumulative Distribution Function"
+#| fig-width: 12
+#| fig-height: 10
+#| code-fold: true
 sorted_a = np.sort(group_a)
 cdf_a = np.arange(1, len(sorted_a) + 1) / len(sorted_a)
 
@@ -182,8 +206,11 @@ For heavy-tailed distributions, the **complementary cumulative distribution func
 
 The magic of the CCDF is that when plotted on a log-log scale, power-law distributions appear as straight lines. This makes it the go-to tool for studying phenomena with power-law behavior. Think income and wealth distributions, city size distributions, social network degree distributions, and earthquake magnitudes. All of these follow power-law patterns where the tail is as important as the bulk of the distribution.
 
-```python
-# CCDF on log-log scale
+```{python}
+#| fig-cap: "Complementary Cumulative Distribution Function"
+#| fig-width: 12
+#| fig-height: 10
+#| code-fold: true
 # Generate heavy-tailed data
 heavy_tailed = np.random.pareto(2, 1000) + 1
 
