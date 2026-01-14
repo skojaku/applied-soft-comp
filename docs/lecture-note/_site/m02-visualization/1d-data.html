@@ -681,6 +681,11 @@ What you’ll learn in this module
 <section id="the-case-of-the-missing-data-points" class="level2">
 <h2 class="anchored" data-anchor-id="the-case-of-the-missing-data-points">The Case of the Missing Data Points</h2>
 <p>Imagine you’re reading a research paper that claims “Treatment A is significantly better than Treatment B.” The paper shows a bar chart with two bars and error bars. The difference looks impressive. But here’s the question: what does the actual data look like? Are there 5 data points per group? 500? Are they normally distributed, or are there outliers? Are most points clustered together, or spread out?</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://simplystatistics.org/posts/2019-02-21-dynamite-plots-must-die/index_files/figure-html5/dynamite-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%"></p>
+</figure>
+</div>
 <p>Without seeing the raw data, you’re flying blind. And unfortunately, many scientific papers and reports make this same mistake: they summarize data without showing it.</p>
 <p><strong>The golden rule of data visualization: Show all the data, whenever possible.</strong></p>
 </section>
@@ -701,7 +706,10 @@ What you’ll learn in this module
 <section id="swarm-plots-beeswarm-plots" class="level3">
 <h3 class="anchored" data-anchor-id="swarm-plots-beeswarm-plots">Swarm Plots (Beeswarm Plots)</h3>
 <p>The most straightforward approach is to plot every single data point. A <strong>swarm plot</strong> (also called a beeswarm plot) does exactly this: it displays each observation as a point, with points arranged to avoid overlap.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<div id="300a0afa" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -716,6 +724,16 @@ What you’ll learn in this module
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>sns.swarmplot(data<span class="op">=</span>data, x<span class="op">=</span><span class="st">'Group'</span>, y<span class="op">=</span><span class="st">'Value'</span>)</span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Swarm Plot: Every Point Visible'</span>)</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="1d-data_files/figure-html/cell-2-output-1.png" class="img-fluid figure-img"></p>
+<figcaption>Swarm plot: Every point visible</figcaption>
+</figure>
+</div>
+</div>
+</div>
 <p>Swarm plots are perfect for small to moderate datasets (roughly up to 100-200 points per group). They let you see the actual sample size, so you know how much data went into each group. You can immediately perceive the distribution shape, spotting whether your data is symmetric, skewed, or bimodal. Individual outliers jump out visually, rather than being hidden in summary statistics. And you can see the overall spread of the data with a single glance.</p>
 </section>
 <section id="the-limits-of-swarm-plots" class="level3">
@@ -728,25 +746,40 @@ What you’ll learn in this module
 <section id="strip-plots-with-jittering" class="level3">
 <h3 class="anchored" data-anchor-id="strip-plots-with-jittering">Strip Plots with Jittering</h3>
 <p>When you have too many points for a swarm plot, a <strong>strip plot with jittering</strong> can help. Instead of carefully arranging points to avoid overlap, we add random noise (jitter) to the x-position of each point.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Strip plot with jittering</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>sns.stripplot(data<span class="op">=</span>data, x<span class="op">=</span><span class="st">'Group'</span>, y<span class="op">=</span><span class="st">'Value'</span>, alpha<span class="op">=</span><span class="fl">0.6</span>, jitter<span class="op">=</span><span class="fl">0.2</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Strip Plot with Jittering'</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="9b5bfbcb" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>sns.stripplot(data<span class="op">=</span>data, x<span class="op">=</span><span class="st">'Group'</span>, y<span class="op">=</span><span class="st">'Value'</span>, alpha<span class="op">=</span><span class="fl">0.6</span>, jitter<span class="op">=</span><span class="fl">0.2</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Strip Plot with Jittering'</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="1d-data_files/figure-html/cell-3-output-1.png" class="img-fluid figure-img"></p>
+<figcaption>Strip plot with jittering</figcaption>
+</figure>
+</div>
+</div>
+</div>
 <p>Two key parameters control the appearance. The <code>alpha</code> parameter controls transparency (0 = invisible, 1 = opaque), and values around 0.3-0.7 work well to see overlapping points. The <code>jitter</code> parameter controls the amount of random horizontal displacement. Too much jitter and your groups start to overlap and become confusing, while too little and points stack vertically in dense columns.</p>
 </section>
 <section id="barcode-plots-rug-plots" class="level3">
 <h3 class="anchored" data-anchor-id="barcode-plots-rug-plots">Barcode Plots (Rug Plots)</h3>
 <p>For even larger datasets, consider a <strong>barcode plot</strong> (also called a rug plot). This shows each data point as a small vertical tick mark along an axis. It’s minimalist but effective for showing the distribution of many points.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Barcode plot using rug plot</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">2</span>))</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, group <span class="kw">in</span> <span class="bu">enumerate</span>([<span class="st">'A'</span>, <span class="st">'B'</span>]):</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> data[data[<span class="st">'Group'</span>] <span class="op">==</span> group][<span class="st">'Value'</span>]</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    ax.plot(values, [i]<span class="op">*</span><span class="bu">len</span>(values), <span class="st">'|'</span>, markersize<span class="op">=</span><span class="dv">10</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>ax.set_yticks([<span class="dv">0</span>, <span class="dv">1</span>])</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>ax.set_yticklabels([<span class="st">'A'</span>, <span class="st">'B'</span>])</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Value'</span>)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Barcode Plot'</span>)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Barcode plot"</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 12</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 10</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">2</span>))</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, group <span class="kw">in</span> <span class="bu">enumerate</span>([<span class="st">'A'</span>, <span class="st">'B'</span>]):</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> data[data[<span class="st">'Group'</span>] <span class="op">==</span> group][<span class="st">'Value'</span>]</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    ax.plot(values, [i]<span class="op">*</span><span class="bu">len</span>(values), <span class="st">'|'</span>, markersize<span class="op">=</span><span class="dv">10</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>ax.set_yticks([<span class="dv">0</span>, <span class="dv">1</span>])</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>ax.set_yticklabels([<span class="st">'A'</span>, <span class="st">'B'</span>])</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Value'</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Barcode Plot'</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Barcode plots work well when you have thousands of points and want to show density patterns without losing the “raw data” feel.</p>
 </section>
 </section>
@@ -754,14 +787,26 @@ What you’ll learn in this module
 <h2 class="anchored" data-anchor-id="summarizing-distributions-histograms">Summarizing Distributions: Histograms</h2>
 <p>When your dataset is large enough that individual points become impractical to show, you need to summarize the distribution. The most common approach is the <strong>histogram</strong>.</p>
 <p>A histogram divides your data range into bins and counts how many observations fall into each bin. It’s a powerful tool for understanding the shape of your distribution.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Histogram</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>plt.hist(group_a, bins<span class="op">=</span><span class="dv">15</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, label<span class="op">=</span><span class="st">'Group A'</span>, edgecolor<span class="op">=</span><span class="st">'black'</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>plt.hist(group_b, bins<span class="op">=</span><span class="dv">15</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, label<span class="op">=</span><span class="st">'Group B'</span>, edgecolor<span class="op">=</span><span class="st">'black'</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Value'</span>)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Count'</span>)</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Histogram: Distribution Comparison'</span>)</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="747eac95" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>plt.hist(group_a, bins<span class="op">=</span><span class="dv">15</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, label<span class="op">=</span><span class="st">'Group A'</span>, edgecolor<span class="op">=</span><span class="st">'black'</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>plt.hist(group_b, bins<span class="op">=</span><span class="dv">15</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, label<span class="op">=</span><span class="st">'Group B'</span>, edgecolor<span class="op">=</span><span class="st">'black'</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Value'</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Count'</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Histogram: Distribution Comparison'</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="1d-data_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></p>
+<figcaption>Histogram: Distribution Comparison</figcaption>
+</figure>
+</div>
+</div>
+</div>
 <section id="the-art-of-choosing-bins" class="level3">
 <h3 class="anchored" data-anchor-id="the-art-of-choosing-bins">The Art of Choosing Bins</h3>
 <p>The number of bins dramatically affects how your histogram looks. With too few bins, you lose detail and might miss important features like bimodality. With too many bins, the histogram becomes noisy and hard to interpret.</p>
@@ -772,14 +817,26 @@ What you’ll learn in this module
 <h2 class="anchored" data-anchor-id="smooth-alternatives-kernel-density-estimation">Smooth Alternatives: Kernel Density Estimation</h2>
 <p>Histograms have a problem: they’re sensitive to bin width and bin placement. Move your bins slightly, and the histogram can look quite different.</p>
 <p><strong>Kernel Density Estimation (KDE)</strong> provides a smooth alternative. Instead of binning, KDE places a small “kernel” (usually a Gaussian curve) at each data point and sums them up. The result is a smooth density curve.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># KDE plot</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>sns.kdeplot(data<span class="op">=</span>group_a, label<span class="op">=</span><span class="st">'Group A'</span>, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>sns.kdeplot(data<span class="op">=</span>group_b, label<span class="op">=</span><span class="st">'Group B'</span>, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Value'</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Density'</span>)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Kernel Density Estimate'</span>)</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="484d962b" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>sns.kdeplot(data<span class="op">=</span>group_a, label<span class="op">=</span><span class="st">'Group A'</span>, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>sns.kdeplot(data<span class="op">=</span>group_b, label<span class="op">=</span><span class="st">'Group B'</span>, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Value'</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Density'</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Kernel Density Estimate'</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="1d-data_files/figure-html/cell-5-output-1.png" class="img-fluid figure-img"></p>
+<figcaption>Kernel Density Estimate</figcaption>
+</figure>
+</div>
+</div>
+</div>
 <p>KDE plots are elegant and reveal the shape of your distribution without the arbitrary choices of histograms. However, they can be misleading at the edges of your data and may suggest data exists where it doesn’t.</p>
 </section>
 <section id="for-heavy-tailed-data-cumulative-distributions" class="level2">
@@ -790,40 +847,64 @@ What you’ll learn in this module
 <h3 class="anchored" data-anchor-id="cumulative-distribution-function-cdf">Cumulative Distribution Function (CDF)</h3>
 <p>The <strong>cumulative distribution function</strong> shows the proportion of data points less than or equal to each value. Instead of asking “how many points are in this bin?”, the CDF asks “what fraction of points are below this value?”</p>
 <p><strong>The CDF is a density estimation method that requires no parameter choices.</strong> Unlike histograms (which require bin size) or KDE (which requires bandwidth), the CDF is completely determined by your data. There are no arbitrary decisions that change how your data looks—making it one of the most honest ways to visualize a distribution.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># CDF</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>sorted_a <span class="op">=</span> np.sort(group_a)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>cdf_a <span class="op">=</span> np.arange(<span class="dv">1</span>, <span class="bu">len</span>(sorted_a) <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> <span class="bu">len</span>(sorted_a)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>sorted_b <span class="op">=</span> np.sort(group_b)</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>cdf_b <span class="op">=</span> np.arange(<span class="dv">1</span>, <span class="bu">len</span>(sorted_b) <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> <span class="bu">len</span>(sorted_b)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>plt.plot(sorted_a, cdf_a, label<span class="op">=</span><span class="st">'Group A'</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>plt.plot(sorted_b, cdf_b, label<span class="op">=</span><span class="st">'Group B'</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Value'</span>)</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Cumulative Probability'</span>)</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Cumulative Distribution Function'</span>)</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="415ccaa1" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>sorted_a <span class="op">=</span> np.sort(group_a)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>cdf_a <span class="op">=</span> np.arange(<span class="dv">1</span>, <span class="bu">len</span>(sorted_a) <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> <span class="bu">len</span>(sorted_a)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>sorted_b <span class="op">=</span> np.sort(group_b)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>cdf_b <span class="op">=</span> np.arange(<span class="dv">1</span>, <span class="bu">len</span>(sorted_b) <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> <span class="bu">len</span>(sorted_b)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>plt.plot(sorted_a, cdf_a, label<span class="op">=</span><span class="st">'Group A'</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>plt.plot(sorted_b, cdf_b, label<span class="op">=</span><span class="st">'Group B'</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Value'</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Cumulative Probability'</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Cumulative Distribution Function'</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="1d-data_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
+<figcaption>Cumulative Distribution Function</figcaption>
+</figure>
+</div>
+</div>
+</div>
 <p>The CDF has several advantages. First, there are no binning decisions to make, so every data point is effectively shown. Second, percentiles are easy to read: the median is where CDF = 0.5, and any other percentile is easy to find. Third, it’s great for comparisons because differences between groups are easy to spot visually.</p>
 </section>
 <section id="complementary-cumulative-distribution-function-ccdf" class="level3">
 <h3 class="anchored" data-anchor-id="complementary-cumulative-distribution-function-ccdf">Complementary Cumulative Distribution Function (CCDF)</h3>
 <p>For heavy-tailed distributions, the <strong>complementary cumulative distribution function (CCDF)</strong> is even more useful. The CCDF shows the proportion of data points <em>greater than</em> each value: CCDF(x) = 1 - CDF(x).</p>
 <p>The magic of the CCDF is that when plotted on a log-log scale, power-law distributions appear as straight lines. This makes it the go-to tool for studying phenomena with power-law behavior. Think income and wealth distributions, city size distributions, social network degree distributions, and earthquake magnitudes. All of these follow power-law patterns where the tail is as important as the bulk of the distribution.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># CCDF on log-log scale</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate heavy-tailed data</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>heavy_tailed <span class="op">=</span> np.random.pareto(<span class="dv">2</span>, <span class="dv">1000</span>) <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>sorted_data <span class="op">=</span> np.sort(heavy_tailed)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>ccdf <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> (np.arange(<span class="dv">1</span>, <span class="bu">len</span>(sorted_data) <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> <span class="bu">len</span>(sorted_data))</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>plt.loglog(sorted_data, ccdf, <span class="st">'o'</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, markersize<span class="op">=</span><span class="dv">3</span>)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Value'</span>)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'P(X ≥ x)'</span>)</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Complementary Cumulative Distribution (CCDF)'</span>)</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="80fd59b6" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate heavy-tailed data</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>heavy_tailed <span class="op">=</span> np.random.pareto(<span class="dv">2</span>, <span class="dv">1000</span>) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>sorted_data <span class="op">=</span> np.sort(heavy_tailed)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>ccdf <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> (np.arange(<span class="dv">1</span>, <span class="bu">len</span>(sorted_data) <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> <span class="bu">len</span>(sorted_data))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>plt.loglog(sorted_data, ccdf, <span class="st">'o'</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, markersize<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Value'</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'P(X ≥ x)'</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Complementary Cumulative Distribution (CCDF)'</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="1d-data_files/figure-html/cell-7-output-1.png" class="img-fluid figure-img"></p>
+<figcaption>Complementary Cumulative Distribution Function</figcaption>
+</figure>
+</div>
+</div>
+</div>
 <p>The CCDF reveals the tail behavior that’s invisible in traditional histograms. For heterogeneous, heavy-tailed data, it’s an essential tool.</p>
 </section>
 </section>
