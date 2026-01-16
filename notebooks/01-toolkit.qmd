@@ -414,6 +414,82 @@ git log --oneline --graph --all
 
 The `--graph` flag shows your branch structure visually. You can see where branches diverged and where they merged back together.
 
+### Pushing to GitHub
+
+So far, your repository lives entirely on your local machine. That's fine for personal work, but collaboration requires sharing. GitHub provides a central location where you can store your repository, collaborate with others, and showcase your work.
+
+Let's push your `git-practice` repository to GitHub. This connects your local Git repository to a remote server.
+
+First, create a GitHub account if you don't have one. Visit [https://github.com](https://github.com) and sign up. GitHub is free for public repositories and offers free private repositories as well.
+
+Once you're logged in, create a new repository. Click the "+" icon in the top right corner and select "New repository." Give it a name like `git-practice`. Leave it empty (don't add a README, .gitignore, or license). Click "Create repository."
+
+GitHub displays instructions for connecting your local repository. You'll see commands like these:
+
+```bash
+git remote add origin https://github.com/YOUR-USERNAME/git-practice.git
+git branch -M main
+git push -u origin main
+```
+
+Let's understand each command. The `git remote add` command tells your local repository about a remote location. The name `origin` is conventional for your primary remote server. Replace `YOUR-USERNAME` with your actual GitHub username.
+
+Run the commands in your `git-practice` directory:
+
+```bash
+git remote add origin https://github.com/YOUR-USERNAME/git-practice.git
+git branch -M main
+git push -u origin main
+```
+
+The `git branch -M main` command renames your default branch to `main` if it isn't already (older Git versions use `master`). The `git push -u origin main` command uploads your commits to GitHub. The `-u` flag sets `origin/main` as the upstream branch, so future pushes and pulls know where to go.
+
+Refresh your GitHub repository page. Your code is now online! You can see your commits, browse your files, and share the URL with others.
+
+Now push your other branches:
+
+```bash
+git push origin add-median
+git push origin use-numpy-mean
+git push origin add-mean-docstring
+```
+
+Visit your repository on GitHub and click the "branches" dropdown. You'll see all your branches listed. GitHub provides a visual interface for viewing diffs, commit history, and branch structure.
+
+### Cloning and Pulling
+
+GitHub serves as a backup and collaboration hub. If you're working on multiple computers, you can clone your repository anywhere:
+
+```bash
+git clone https://github.com/YOUR-USERNAME/git-practice.git
+cd git-practice
+```
+
+This downloads the entire repository, including all history and branches. You can make changes, commit them, and push back to GitHub.
+
+If someone else makes changes (or if you edit on GitHub's website), pull those changes:
+
+```bash
+git pull origin main
+```
+
+This fetches and merges changes from the remote repository into your local branch.
+
+::: {.callout-note title="Assignment Submission"}
+**Submit your work on Brightspace:**
+
+After completing all the Git exercises above (creating commits, working with branches, resolving merge conflicts, and pushing to GitHub), submit the following on Brightspace:
+
+1. **GitHub repository URL** - Submit the link to your `git-practice` repository (e.g., `https://github.com/YOUR-USERNAME/git-practice`)
+2. **Verification** - Your repository should contain:
+   - The `analysis.py` file with both mean and median functions
+   - At least 5 commits showing your progression
+   - Multiple branches (`add-median`, `use-numpy-mean`, `add-mean-docstring`)
+   - A merge commit showing conflict resolution
+
+Your instructor will review your repository to verify you've completed the hands-on Git exercises. This ensures you're ready to use version control throughout the course.
+:::
+
 ::: {.callout-tip title="Try it yourself"}
 Practice the complete workflow on your own:
 
@@ -422,6 +498,7 @@ Practice the complete workflow on your own:
 3. Create a branch to experiment with a new feature
 4. Deliberately create a merge conflict by editing the same lines on two different branches
 5. Practice resolving the conflict
+6. Push everything to GitHub
 
 The more you practice, the more natural Git becomes. Soon you'll be branching and merging without thinking twice.
 :::
