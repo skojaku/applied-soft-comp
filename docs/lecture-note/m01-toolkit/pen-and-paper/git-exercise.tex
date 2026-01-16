@@ -55,9 +55,14 @@
 
 \begin{document}
 
-\maketitle
+\begin{center}
+\Large\textbf{Building Your Code Time Machine}\\[0.5em]
+\large A Discovery Exercise
+\end{center}
 
-\section*{The Problem}
+\vspace{1em}
+
+\noindent\textbf{The Problem}
 
 You're working on a data analysis project. You have a file called \texttt{analysis.py}. Over the course of a week, you make many changes. Sometimes you break things. Sometimes you fix them. Sometimes you want to remember what you did yesterday.
 
@@ -219,63 +224,136 @@ Your current snapshot history represents your stable, working code. This is the 
 
 \end{enumerate}
 
-\section{Part 3: Collaboration}
+\section{Part 3: Hands-On with Git}
 
-You and a colleague are both working on the project. You're working on different paths:
+Now let's use actual Git commands to implement the system you designed. You'll create a repository, make commits, work with branches, and collaborate.
 
-\begin{center}
-\begin{tikzpicture}[node distance=2.5cm]
-    \node[draw, circle, fill=pltgreen!20, minimum size=1cm] (S1) {S1};
-    \node[draw, circle, fill=pltgreen!20, minimum size=1cm, right of=S1] (S2) {S2};
-    \node[draw, circle, fill=pltgreen!20, minimum size=1cm, right of=S2] (S3) {S3};
-    \node[draw, circle, fill=pltblue!20, minimum size=1cm, above right of=S3, node distance=2cm] (S4) {S4};
-    \node[draw, circle, fill=pltblue!20, minimum size=1cm, right of=S4, node distance=2cm] (S5) {S5};
-    \node[draw, circle, fill=pltorange!20, minimum size=1cm, below right of=S3, node distance=2cm] (S6) {S6};
+\subsection{Setup}
 
-    \draw[->, thick] (S1) -- (S2);
-    \draw[->, thick] (S2) -- (S3);
-    \draw[->, thick] (S3) -- (S4);
-    \draw[->, thick] (S4) -- (S5);
-    \draw[->, thick] (S3) -- (S6);
+\textbf{Installing Git:}
+\begin{itemize}
+    \item \textbf{macOS:} Open Terminal and type \texttt{git --version}. If not installed, it will prompt you to install.
+    \item \textbf{Windows:} Download from \url{https://git-scm.com/download/win} and install. Use Git Bash for commands.
+\end{itemize}
 
-    \node[above of=S5, node distance=1cm, color=pltblue] {\textbf{Your work}};
-    \node[below of=S6, node distance=1cm, color=pltorange] {\textbf{Colleague's work}};
-\end{tikzpicture}
-\end{center}
+\subsection{Exercise: Your First Repository}
 
-In S4 and S5, you modified \texttt{analysis.py} to add feature X. In S6, your colleague modified \texttt{README.md} to add documentation.
+Open your terminal (macOS) or Git Bash (Windows) and follow these steps:
 
 \begin{enumerate}[resume]
-    \item You both want to combine your work. You changed line 5 in \texttt{analysis.py} to \texttt{result = data * 2}. Your colleague also changed line 5 to \texttt{result = data * 3}. What problem occurs when you try to combine the work?
+    \item \textbf{Create a project folder and initialize Git:}
+
+    \begin{tcolorbox}[colback=white, colframe=black]
+    \begin{verbatim}
+mkdir my-project
+cd my-project
+git init
+    \end{verbatim}
+    \end{tcolorbox}
+
+    What did \texttt{git init} do? Check by running \texttt{ls -a} (macOS) or \texttt{dir /a} (Windows). You should see a \texttt{.git} folder.
+
+    \vspace{2cm}
+
+    \item \textbf{Create your first file and make a snapshot (commit):}
+
+    \begin{tcolorbox}[colback=white, colframe=black]
+    \begin{verbatim}
+echo "print('Hello, Git!')" > hello.py
+git add hello.py
+git commit -m "Add hello script"
+    \end{verbatim}
+    \end{tcolorbox}
+
+    Which part of your three-area system does \texttt{git add} implement? Which part does \texttt{git commit} implement?
+
+    \vspace{2cm}
+
+    \item \textbf{Create a branch for experiments:}
+
+    \begin{tcolorbox}[colback=white, colframe=black]
+    \begin{verbatim}
+git branch experiment
+git checkout experiment
+echo "print('Experimental feature')" >> hello.py
+git add hello.py
+git commit -m "Add experimental feature"
+    \end{verbatim}
+    \end{tcolorbox}
+
+    What does \texttt{git branch} do? What does \texttt{git checkout} do? How does this relate to the parallel paths you designed?
 
     \vspace{3cm}
 
-    \item Your team keeps snapshots on a backup server. When you want to send your snapshots to the server, what would you call this operation? When you want to retrieve snapshots from the server, what would you call that operation?
+    \item \textbf{Switch back to the main branch and check your file:}
+
+    \begin{tcolorbox}[colback=white, colframe=black]
+    \begin{verbatim}
+git checkout main
+cat hello.py
+    \end{verbatim}
+    \end{tcolorbox}
+
+    (Use \texttt{type hello.py} instead of \texttt{cat} on Windows)
+
+    What do you notice about the contents of \texttt{hello.py}? Why does it look different from when you were on the experiment branch?
 
     \vspace{3cm}
 
-    \item Before combining work into the main path, someone else on your team reviews your code. Why might this code review step be useful?
+    \item \textbf{Merge your experiment into main:}
+
+    \begin{tcolorbox}[colback=white, colframe=black]
+    \begin{verbatim}
+git merge experiment
+cat hello.py
+    \end{verbatim}
+    \end{tcolorbox}
+
+    What happened to \texttt{hello.py}? How does this relate to combining work from different paths?
+
+    \vspace{3cm}
+
+    \item \textbf{Setup remote repository (GitHub):}
+
+    Create a free account at \url{https://github.com} if you don't have one. Then create a new repository called \texttt{my-project} (empty, no README).
+
+    GitHub will show you commands. They'll look like this:
+
+    \begin{tcolorbox}[colback=white, colframe=black]
+    \begin{verbatim}
+git remote add origin https://github.com/YOUR-USERNAME/my-project.git
+git push -u origin main
+    \end{verbatim}
+    \end{tcolorbox}
+
+    What does \texttt{git remote add} do? What does \texttt{git push} do? How does this relate to the backup server concept?
+
+    \vspace{3cm}
+
+    \item \textbf{Make a change on GitHub and pull it:}
+
+    Go to your repository on GitHub. Click on \texttt{hello.py} and click the pencil icon to edit. Add a new line:
+
+    \texttt{print("Edited on GitHub")}
+
+    Click "Commit changes" at the bottom. Then in your terminal:
+
+    \begin{tcolorbox}[colback=white, colframe=black]
+    \begin{verbatim}
+git pull
+cat hello.py
+    \end{verbatim}
+    \end{tcolorbox}
+
+    What does \texttt{git pull} do? How is this different from \texttt{git push}?
 
     \vspace{3cm}
 
 \end{enumerate}
 
-\section{Part 4: The Complete System}
+\section{Git}
 
-\subsection{The Complete System}
-
-You've now designed a complete system for tracking code changes and collaborating with others.
-
-\begin{enumerate}[resume]
-    \item Summarize your system by describing: (1) How you save and track changes over time, (2) How you choose what to include in each save, (3) How you work on multiple versions simultaneously, (4) How you combine different people's work, and (5) How you synchronize work across computers.
-
-    \vspace{8cm}
-
-\end{enumerate}
-
-\subsection{The Real Names}
-
-The system you just designed is called \textbf{Git}. Here are the real names for the concepts you discovered:
+The system you just designed and used is called \textbf{Git}. Here are the real names for the concepts you discovered:
 
 \begin{tcolorbox}[colback=pltblue!10, colframe=pltblue]
 \begin{itemize}
@@ -283,11 +361,6 @@ The system you just designed is called \textbf{Git}. Here are the real names for
     \item \textbf{Area 2 (choosing what to save)} = Staging Area
     \item \textbf{Parallel paths} = Branches
     \item \textbf{Combining work} = Merge
-    \item \textbf{Backup server} = Remote Repository (e.g., GitHub)
-    \item \textbf{Sending to server} = Push
-    \item \textbf{Getting from server} = Pull
-    \item \textbf{Code review request} = Pull Request
-    \item \textbf{Change notation} = Diff
 \end{itemize}
 \end{tcolorbox}
 
