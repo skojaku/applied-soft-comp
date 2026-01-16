@@ -147,6 +147,27 @@ git status
 
 You'll see `analysis.py` listed as an "untracked file." Git sees the file exists but isn't tracking its history yet. This is Area 1 from the pen-and-paper exercise, where all your files live.
 
+```{=html}
+<svg width="800" height="200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Working Directory -->
+  <rect x="20" y="50" width="200" height="100" rx="10" fill="#A8E6CF" stroke="#2E86AB" stroke-width="3"/>
+  <text x="120" y="80" text-anchor="middle" font-size="16" font-weight="bold">Working Directory</text>
+  <text x="120" y="110" text-anchor="middle" font-size="14" font-style="italic">analysis.py</text>
+
+  <!-- Staging Area (empty) -->
+  <rect x="280" y="50" width="200" height="100" rx="10" fill="#E8E8E8" stroke="#666" stroke-width="3" stroke-dasharray="5,5"/>
+  <text x="380" y="80" text-anchor="middle" font-size="16" font-weight="bold" fill="#666">Staging Area</text>
+  <text x="380" y="110" text-anchor="middle" font-size="14" font-style="italic" fill="#999">(empty)</text>
+
+  <!-- Repository (empty) -->
+  <rect x="540" y="50" width="200" height="100" rx="10" fill="#E8E8E8" stroke="#666" stroke-width="3" stroke-dasharray="5,5"/>
+  <text x="640" y="80" text-anchor="middle" font-size="16" font-weight="bold" fill="#666">Repository</text>
+  <text x="640" y="110" text-anchor="middle" font-size="14" font-style="italic" fill="#999">(no commits)</text>
+</svg>
+```
+
+The diagram shows your file living in the working directory, while the staging area and repository remain empty.
+
 Add the file to the staging area:
 
 ```bash
@@ -160,6 +181,36 @@ git status
 ```
 
 Now `analysis.py` is listed as "Changes to be committed." This is your staging area. You've chosen what goes into your next snapshot.
+
+```{=html}
+<svg width="800" height="200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Working Directory -->
+  <rect x="20" y="50" width="200" height="100" rx="10" fill="#A8E6CF" stroke="#2E86AB" stroke-width="3"/>
+  <text x="120" y="80" text-anchor="middle" font-size="16" font-weight="bold">Working Directory</text>
+  <text x="120" y="110" text-anchor="middle" font-size="14" font-style="italic">analysis.py</text>
+
+  <!-- Arrow from working to staging -->
+  <defs>
+    <marker id="arrow1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 9 3 L 0 6 z" fill="#2E86AB"/>
+    </marker>
+  </defs>
+  <line x1="220" y1="100" x2="280" y2="100" stroke="#2E86AB" stroke-width="3" marker-end="url(#arrow1)"/>
+  <text x="250" y="85" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E86AB">git add</text>
+
+  <!-- Staging Area -->
+  <rect x="280" y="50" width="200" height="100" rx="10" fill="#FFE66D" stroke="#FF6B35" stroke-width="3"/>
+  <text x="380" y="80" text-anchor="middle" font-size="16" font-weight="bold">Staging Area</text>
+  <text x="380" y="110" text-anchor="middle" font-size="14" font-style="italic">analysis.py</text>
+
+  <!-- Repository (empty) -->
+  <rect x="540" y="50" width="200" height="100" rx="10" fill="#E8E8E8" stroke="#666" stroke-width="3" stroke-dasharray="5,5"/>
+  <text x="640" y="80" text-anchor="middle" font-size="16" font-weight="bold" fill="#666">Repository</text>
+  <text x="640" y="110" text-anchor="middle" font-size="14" font-style="italic" fill="#999">(no commits)</text>
+</svg>
+```
+
+The file has moved to the staging area. Think of this as packing your snapshot before taking the picture.
 
 Before making your first commit, you need to tell Git who you are. Git will prompt you to configure this if you haven't already:
 
@@ -179,6 +230,40 @@ git commit -m "Add mean calculation function"
 If you forgot to configure your identity, Git will display an error message with instructions. Just run the config commands above and try the commit again.
 
 Congratulations! You've created your first snapshot. The `-m` flag lets you add a message describing what this snapshot contains. Always write clear, descriptive commit messages. Your future self will thank you.
+
+```{=html}
+<svg width="800" height="250" xmlns="http://www.w3.org/2000/svg">
+  <!-- Working Directory -->
+  <rect x="20" y="80" width="200" height="100" rx="10" fill="#A8E6CF" stroke="#2E86AB" stroke-width="3"/>
+  <text x="120" y="110" text-anchor="middle" font-size="16" font-weight="bold">Working Directory</text>
+  <text x="120" y="140" text-anchor="middle" font-size="14" font-style="italic">analysis.py</text>
+
+  <!-- Staging Area -->
+  <rect x="280" y="80" width="200" height="100" rx="10" fill="#FFE66D" stroke="#FF6B35" stroke-width="3"/>
+  <text x="380" y="110" text-anchor="middle" font-size="16" font-weight="bold">Staging Area</text>
+  <text x="380" y="140" text-anchor="middle" font-size="14" font-style="italic">analysis.py</text>
+
+  <!-- Arrow from staging to repository -->
+  <defs>
+    <marker id="arrow2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 9 3 L 0 6 z" fill="#4ECDC4"/>
+    </marker>
+  </defs>
+  <line x1="480" y1="130" x2="540" y2="130" stroke="#4ECDC4" stroke-width="3" marker-end="url(#arrow2)"/>
+  <text x="510" y="115" text-anchor="middle" font-size="14" font-weight="bold" fill="#4ECDC4">git commit</text>
+
+  <!-- Repository with first commit -->
+  <rect x="540" y="80" width="200" height="100" rx="10" fill="#C7F0DB" stroke="#4ECDC4" stroke-width="3"/>
+  <text x="640" y="110" text-anchor="middle" font-size="16" font-weight="bold">Repository</text>
+
+  <!-- First commit node -->
+  <circle cx="640" cy="200" r="25" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="640" y="207" text-anchor="middle" font-size="16" font-weight="bold" fill="white">C1</text>
+  <text x="640" y="235" text-anchor="middle" font-size="12" font-style="italic">"Add mean calculation"</text>
+</svg>
+```
+
+Your first commit (C1) is now safely stored in the repository. This is a permanent snapshot you can always return to.
 
 ### Fixing a Bug
 
@@ -217,6 +302,41 @@ git log --oneline
 
 Each commit has a unique identifier (a hash) and your descriptive message. This is your project's timeline.
 
+```{=html}
+<svg width="800" height="250" xmlns="http://www.w3.org/2000/svg">
+  <!-- Timeline arrow -->
+  <defs>
+    <marker id="timeline-arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 9 3 L 0 6 z" fill="#666"/>
+    </marker>
+  </defs>
+  <line x1="100" y1="120" x2="650" y2="120" stroke="#666" stroke-width="2" marker-end="url(#timeline-arrow)"/>
+  <text x="60" y="125" text-anchor="end" font-size="14" font-style="italic" fill="#666">Time</text>
+
+  <!-- Connection line between commits -->
+  <line x1="230" y1="120" x2="420" y2="120" stroke="#666" stroke-width="2"/>
+
+  <!-- First commit -->
+  <circle cx="200" cy="120" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="200" y="128" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C1</text>
+  <text x="200" y="180" text-anchor="middle" font-size="13" font-style="italic">"Add mean</text>
+  <text x="200" y="198" text-anchor="middle" font-size="13" font-style="italic">calculation"</text>
+
+  <!-- Second commit -->
+  <circle cx="450" cy="120" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="450" y="128" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C2</text>
+  <text x="450" y="180" text-anchor="middle" font-size="13" font-style="italic">"Fix crash when</text>
+  <text x="450" y="198" text-anchor="middle" font-size="13" font-style="italic">data is empty"</text>
+
+  <!-- main branch pointer -->
+  <rect x="410" y="40" width="80" height="35" rx="8" fill="#FFE66D" stroke="#FF6B35" stroke-width="2"/>
+  <text x="450" y="62" text-anchor="middle" font-size="16" font-weight="bold">main</text>
+  <line x1="450" y1="75" x2="450" y2="90" stroke="#FF6B35" stroke-width="2"/>
+</svg>
+```
+
+Each commit points to its parent, forming a chain. The `main` branch pointer moves forward with each new commit.
+
 ### Working with Branches
 
 Branches let you experiment without breaking your stable code. Let's say you want to try a completely new approach to calculating statistics, but you're not sure it will work. Branches give you a safe playground.
@@ -236,7 +356,52 @@ Check which branch you're on:
 git branch
 ```
 
-The asterisk shows your current branch. Now open `analysis.py` in your text editor and add this new function at the end of the file:
+The asterisk shows your current branch.
+
+```{=html}
+<svg width="800" height="300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Timeline -->
+  <defs>
+    <marker id="timeline-arrow2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 9 3 L 0 6 z" fill="#666"/>
+    </marker>
+    <marker id="head-arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 9 0 L 0 3 L 9 6 z" fill="#E74C3C"/>
+    </marker>
+  </defs>
+  <line x1="100" y1="150" x2="650" y2="150" stroke="#666" stroke-width="2" marker-end="url(#timeline-arrow2)"/>
+
+  <!-- Connection line between commits -->
+  <line x1="230" y1="150" x2="420" y2="150" stroke="#666" stroke-width="2"/>
+
+  <!-- First commit -->
+  <circle cx="200" cy="150" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="200" y="158" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C1</text>
+
+  <!-- Second commit -->
+  <circle cx="450" cy="150" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="450" y="158" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C2</text>
+
+  <!-- main branch pointer -->
+  <rect x="410" y="50" width="80" height="35" rx="8" fill="#FFE66D" stroke="#FF6B35" stroke-width="2"/>
+  <text x="450" y="72" text-anchor="middle" font-size="16" font-weight="bold">main</text>
+  <line x1="450" y1="85" x2="450" y2="120" stroke="#FF6B35" stroke-width="2"/>
+
+  <!-- add-median branch pointer -->
+  <rect x="385" y="215" width="130" height="35" rx="8" fill="#E8DAEF" stroke="#9B59B6" stroke-width="2"/>
+  <text x="450" y="237" text-anchor="middle" font-size="16" font-weight="bold">add-median</text>
+  <line x1="450" y1="215" x2="450" y2="180" stroke="#9B59B6" stroke-width="2"/>
+
+  <!-- HEAD pointer -->
+  <rect x="560" y="215" width="70" height="35" rx="8" fill="#FADBD8" stroke="#E74C3C" stroke-width="3"/>
+  <text x="595" y="237" text-anchor="middle" font-size="16" font-weight="bold" fill="#C0392B">HEAD</text>
+  <line x1="560" y1="232" x2="515" y2="232" stroke="#E74C3C" stroke-width="2" marker-end="url(#head-arrow)"/>
+</svg>
+```
+
+Both branches point to the same commit. The `HEAD` pointer shows which branch you're currently on (the one that will move when you make a new commit).
+
+Now open `analysis.py` in your text editor and add this new function at the end of the file:
 
 ```python
 def calculate_median(data):
@@ -255,6 +420,50 @@ Your file should now have both `calculate_mean` and `calculate_median` functions
 git add analysis.py
 git commit -m "Add median calculation function"
 ```
+
+```{=html}
+<svg width="800" height="350" xmlns="http://www.w3.org/2000/svg">
+  <!-- Timeline -->
+  <defs>
+    <marker id="timeline-arrow3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 9 3 L 0 6 z" fill="#666"/>
+    </marker>
+  </defs>
+  <line x1="100" y1="180" x2="650" y2="180" stroke="#666" stroke-width="2" marker-end="url(#timeline-arrow3)"/>
+
+  <!-- Connection line between C1 and C2 -->
+  <line x1="230" y1="180" x2="420" y2="180" stroke="#666" stroke-width="2"/>
+
+  <!-- First commit -->
+  <circle cx="200" cy="180" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="200" y="188" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C1</text>
+
+  <!-- Second commit -->
+  <circle cx="450" cy="180" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="450" y="188" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C2</text>
+
+  <!-- Branch line from C2 to C3 -->
+  <line x1="470" y1="165" x2="580" y2="85" stroke="#9B59B6" stroke-width="2"/>
+
+  <!-- Third commit (on add-median branch) -->
+  <circle cx="600" cy="70" r="30" fill="#9B59B6" stroke="#7D3C98" stroke-width="2"/>
+  <text x="600" y="78" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C3</text>
+  <text x="600" y="25" text-anchor="middle" font-size="13" font-style="italic">"Add median</text>
+  <text x="600" y="43" text-anchor="middle" font-size="13" font-style="italic">calculation"</text>
+
+  <!-- main branch pointer -->
+  <rect x="410" y="260" width="80" height="35" rx="8" fill="#FFE66D" stroke="#FF6B35" stroke-width="2"/>
+  <text x="450" y="282" text-anchor="middle" font-size="16" font-weight="bold">main</text>
+  <line x1="450" y1="260" x2="450" y2="210" stroke="#FF6B35" stroke-width="2"/>
+
+  <!-- add-median branch pointer -->
+  <rect x="535" y="105" width="130" height="35" rx="8" fill="#E8DAEF" stroke="#9B59B6" stroke-width="2"/>
+  <text x="600" y="127" text-anchor="middle" font-size="16" font-weight="bold">add-median</text>
+  <line x1="600" y1="105" x2="600" y2="100" stroke="#9B59B6" stroke-width="2"/>
+</svg>
+```
+
+The `add-median` branch has moved forward to the new commit (C3), while `main` still points to C2. This is how branches let you experiment safely.
 
 Now for the magic. Switch back to your main branch:
 
@@ -288,6 +497,55 @@ cat analysis.py
 ```
 
 The median function is now in main. Your experiment succeeded and you've integrated it into your stable code. This merge was smooth because no conflicts existed.
+
+```{=html}
+<svg width="800" height="350" xmlns="http://www.w3.org/2000/svg">
+  <!-- Timeline -->
+  <defs>
+    <marker id="timeline-arrow4" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 9 3 L 0 6 z" fill="#666"/>
+    </marker>
+    <marker id="merge-arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 9 3 L 0 6 z" fill="#27AE60"/>
+    </marker>
+  </defs>
+  <line x1="100" y1="180" x2="650" y2="180" stroke="#666" stroke-width="2" marker-end="url(#timeline-arrow4)"/>
+
+  <!-- Connection line between C1 and C2 -->
+  <line x1="230" y1="180" x2="420" y2="180" stroke="#666" stroke-width="2"/>
+
+  <!-- First commit -->
+  <circle cx="200" cy="180" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="200" y="188" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C1</text>
+
+  <!-- Second commit -->
+  <circle cx="450" cy="180" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="450" y="188" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C2</text>
+
+  <!-- Branch line from C2 to C3 -->
+  <line x1="470" y1="165" x2="580" y2="85" stroke="#666" stroke-width="2"/>
+
+  <!-- Third commit (merged) -->
+  <circle cx="600" cy="70" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="600" y="78" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C3</text>
+
+  <!-- main branch pointer (moved to C3) -->
+  <rect x="560" y="10" width="80" height="35" rx="8" fill="#FFE66D" stroke="#FF6B35" stroke-width="2"/>
+  <text x="600" y="32" text-anchor="middle" font-size="16" font-weight="bold">main</text>
+  <line x1="600" y1="45" x2="600" y2="40" stroke="#FF6B35" stroke-width="2"/>
+
+  <!-- add-median branch pointer -->
+  <rect x="535" y="145" width="130" height="35" rx="8" fill="#E8DAEF" stroke="#9B59B6" stroke-width="2"/>
+  <text x="600" y="167" text-anchor="middle" font-size="16" font-weight="bold">add-median</text>
+  <line x1="600" y1="145" x2="600" y2="100" stroke="#9B59B6" stroke-width="2"/>
+
+  <!-- Curved merge arrow -->
+  <path d="M 450 210 Q 500 250 580 110" stroke="#27AE60" stroke-width="3" fill="none" marker-end="url(#merge-arrow)"/>
+  <text x="510" y="260" text-anchor="middle" font-size="16" font-weight="bold" fill="#27AE60">merge</text>
+</svg>
+```
+
+This was a "fast-forward" merge. Git simply moved the `main` pointer forward because no other work happened on main while you were working on the branch.
 
 ### Understanding Merge Conflicts
 
@@ -449,6 +707,65 @@ git log --oneline --graph --all
 ```
 
 The `--graph` flag shows your branch structure visually. You can see where branches diverged and where they merged back together.
+
+```{=html}
+<svg width="900" height="400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Main timeline -->
+  <line x1="100" y1="200" x2="750" y2="200" stroke="#666" stroke-width="2"/>
+
+  <!-- Connection lines -->
+  <line x1="170" y1="200" x2="270" y2="200" stroke="#666" stroke-width="2"/>
+
+  <!-- C1 commit -->
+  <circle cx="150" cy="200" r="25" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="150" y="207" text-anchor="middle" font-size="16" font-weight="bold" fill="white">C1</text>
+
+  <!-- C2 commit -->
+  <circle cx="290" cy="200" r="25" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="290" y="207" text-anchor="middle" font-size="16" font-weight="bold" fill="white">C2</text>
+
+  <!-- Branch 1: use-numpy-mean (upper) -->
+  <line x1="310" y1="190" x2="430" y2="90" stroke="#9B59B6" stroke-width="2"/>
+  <circle cx="450" cy="70" r="25" fill="#9B59B6" stroke="#7D3C98" stroke-width="2"/>
+  <text x="450" y="77" text-anchor="middle" font-size="16" font-weight="bold" fill="white">C4</text>
+  <text x="450" y="35" text-anchor="middle" font-size="12" font-style="italic">"Use NumPy"</text>
+
+  <!-- Branch 2: add-mean-docstring (lower) -->
+  <line x1="310" y1="210" x2="430" y2="310" stroke="#E67E22" stroke-width="2"/>
+  <circle cx="450" cy="330" r="25" fill="#E67E22" stroke="#CA6F1E" stroke-width="2"/>
+  <text x="450" y="337" text-anchor="middle" font-size="16" font-weight="bold" fill="white">C5</text>
+  <text x="450" y="370" text-anchor="middle" font-size="12" font-style="italic">"Add docstring"</text>
+
+  <!-- Merge C4 into main (fast-forward) -->
+  <line x1="470" y1="80" x2="580" y2="190" stroke="#666" stroke-width="2"/>
+  <circle cx="600" cy="200" r="25" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="600" y="207" text-anchor="middle" font-size="16" font-weight="bold" fill="white">C4</text>
+
+  <!-- Merge C5 into main (creates merge commit) -->
+  <line x1="470" y1="320" x2="690" y2="210" stroke="#E67E22" stroke-width="2"/>
+  <line x1="620" y1="200" x2="690" y2="200" stroke="#666" stroke-width="2"/>
+
+  <!-- Merge commit -->
+  <circle cx="710" cy="200" r="25" fill="#E74C3C" stroke="#C0392B" stroke-width="2"/>
+  <text x="710" y="207" text-anchor="middle" font-size="16" font-weight="bold" fill="white">M</text>
+  <text x="710" y="150" text-anchor="middle" font-size="11" font-style="italic">"Merge with</text>
+  <text x="710" y="165" text-anchor="middle" font-size="11" font-style="italic">conflict resolution"</text>
+
+  <!-- main branch pointer -->
+  <rect x="670" y="235" width="80" height="35" rx="8" fill="#FFE66D" stroke="#FF6B35" stroke-width="2"/>
+  <text x="710" y="257" text-anchor="middle" font-size="16" font-weight="bold">main</text>
+  <line x1="710" y1="235" x2="710" y2="225" stroke="#FF6B35" stroke-width="2"/>
+
+  <!-- Branch labels -->
+  <rect x="490" y="45" width="145" height="30" rx="8" fill="#E8DAEF" stroke="#9B59B6" stroke-width="2"/>
+  <text x="562" y="65" text-anchor="middle" font-size="13" font-weight="bold" fill="#7D3C98">use-numpy-mean</text>
+
+  <rect x="480" y="340" width="165" height="30" rx="8" fill="#FAE5D3" stroke="#E67E22" stroke-width="2"/>
+  <text x="562" y="360" text-anchor="middle" font-size="13" font-weight="bold" fill="#CA6F1E">add-mean-docstring</text>
+</svg>
+```
+
+This diagram shows the complete merge workflow. Both branches diverged from C2. The first branch (use-numpy-mean) merged cleanly into main at C4. The second branch (add-mean-docstring) created a merge commit (M) because it conflicted with changes from C4. The merge commit has two parents, combining work from both branches.
 
 ### Pushing to GitHub
 
