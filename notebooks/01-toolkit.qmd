@@ -1,0 +1,116 @@
+---
+title: "Setting Up Your Toolkit"
+jupyter: python3
+execute:
+    enabled: true
+---
+
+::: {.callout-note title="What you'll learn in this module"}
+This module guides you through setting up your Python development environment. You'll learn how to create a virtual environment using uv, install all necessary packages for this course, and verify your installation by importing key libraries we'll use throughout the semester.
+:::
+
+## Why a Consistent Environment Matters
+
+Before we dive into data analysis, machine learning, and network science, we need to get our tools in order. A well-configured development environment saves you from dependency conflicts, version mismatches, and the dreaded "works on my machine" problem.
+
+Think of it like a laboratory setup. Before conducting experiments, scientists ensure their equipment is properly calibrated and all reagents are in place. We do the same with our computational environment. Setting this up once at the start ensures every code example, every notebook, and every assignment works smoothly.
+
+## Enter uv: A Modern Python Package Manager
+
+We'll use `uv` to manage our Python environment. If you're familiar with `pip` and `virtualenv`, think of `uv` as a faster, more reliable alternative. It handles package installation and dependency resolution with impressive speed.
+
+The best part? It works seamlessly with the `pyproject.toml` file that defines all course dependencies. One command installs everything you need.
+
+## Setting Up Your Environment
+
+Let's walk through the setup process. The first step is creating a virtual environment. Open your terminal and navigate to the project directory. Then run this command:
+
+```bash
+uv venv
+```
+
+This creates an isolated Python environment in a `.venv` directory. Virtual environments keep project dependencies separate from your system Python, preventing conflicts between different projects.
+
+::: {.column-margin}
+**Note:** If you don't have `uv` installed yet, you can install it by following the instructions at [https://docs.astral.sh/uv/](https://docs.astral.sh/uv/). On macOS and Linux, you can use `curl -LsSf https://astral.sh/uv/install.sh | sh`. On Windows, use `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`.
+:::
+
+The second step is activating the environment. This tells your terminal to use the Python interpreter and packages from your virtual environment instead of the system-wide installation.
+
+On macOS and Linux, use:
+
+```bash
+source .venv/bin/activate
+```
+
+On Windows, use:
+
+```bash
+.venv\Scripts\activate
+```
+
+You'll notice your terminal prompt changes to show `(.venv)` at the beginning. This indicates the environment is active.
+
+The third step is installing all course dependencies. Since this project uses a `pyproject.toml` file, one command installs everything:
+
+```bash
+uv pip install -e .
+```
+
+The `-e` flag installs the project in "editable" mode, which is useful if you're developing or modifying code. The installation might take a few minutes since we're installing many powerful libraries for data science, machine learning, and network analysis.
+
+## Verifying Your Installation
+
+Now comes the moment of truth. Let's verify that all required libraries are properly installed. The code cell below imports every major library we'll use in this course.
+
+If everything is set up correctly, this cell will run without errors. If you encounter import errors, double check that you activated your virtual environment and ran the installation command.
+
+```{python}
+# Core data science libraries
+import numpy as np
+import pandas as pd
+import scipy
+
+# Visualization libraries
+import matplotlib.pyplot as plt
+import seaborn as sns
+import bokeh
+import altair as alt
+
+# Machine learning libraries
+import sklearn
+import torch
+import torchvision
+
+# Natural language processing libraries
+import transformers
+import sentence_transformers
+import gensim
+
+# Network analysis libraries
+import networkx as nx
+import igraph
+
+# LLM and agentic AI tools
+import ollama
+import langchain_core
+import langchain_ollama
+import langgraph
+
+# Utility libraries
+import requests
+from PIL import Image
+from tqdm import tqdm
+import pydantic
+
+print("All libraries imported successfully!")
+print(f"NumPy version: {np.__version__}")
+print(f"PyTorch version: {torch.__version__}")
+print(f"Transformers version: {transformers.__version__}")
+```
+
+If you see "All libraries imported successfully!" along with version numbers, congratulations! Your environment is ready. You now have access to some of the most powerful tools in data science, machine learning, and AI.
+
+Throughout this course, we'll use these libraries to analyze data, build models, create visualizations, and explore cutting-edge techniques in soft computing. Each module will introduce specific tools and demonstrate their practical applications.
+
+Let's get started.
