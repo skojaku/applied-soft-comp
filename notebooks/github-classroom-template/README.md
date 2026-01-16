@@ -14,34 +14,47 @@ Complete all Git exercises from the **01-toolkit.qmd** notebook in the course ma
 
 ## Getting Started
 
-### Step 1: Get Your Repository URL
+### Step 1: Accept the Assignment and Get Your Repository
 
-After accepting the GitHub Classroom assignment invitation, you'll be redirected to your personal repository page. It will look like this:
+Your instructor will provide an assignment invitation link on Brightspace. When you click this link:
+
+1. You'll be asked to accept the assignment (you may need to sign in to GitHub first)
+2. GitHub Classroom will create a personal repository for you
+3. After a few moments, you'll see a confirmation page with a link to your repository
+
+Click the link to your repository. You'll be taken to your repository page on GitHub. The URL in your browser will look like:
 
 ```
 https://github.com/sk-classroom/git-practice-assignment-YOUR-USERNAME
 ```
 
-**To copy the repository URL:**
+This is your personal repository page. Keep this page open—you'll need to copy the clone URL from here.
 
-1. On your repository page, click the green **"Code"** button
-2. Make sure **"HTTPS"** is selected (not SSH)
-3. Click the copy icon to copy the URL to your clipboard
+### Step 2: Find and Copy Your Repository Clone URL
 
-The URL will look like: `https://github.com/sk-classroom/git-practice-assignment-YOUR-USERNAME.git`
+On your repository page, look for the green **"<> Code"** button near the top right (below the repository name). Click it to open a dropdown menu.
 
-### Step 2: Clone This Repository
+In the dropdown:
 
-Open your terminal and navigate to where you want to work (e.g., your Documents folder or a projects directory). Then clone this repository:
+1. You'll see three tabs: **HTTPS**, **SSH**, and **GitHub CLI**
+2. Make sure **HTTPS** is selected (it should be underlined)
+3. You'll see a URL that looks like: `https://github.com/sk-classroom/git-practice-assignment-YOUR-USERNAME.git`
+4. Click the copy icon (📋) next to the URL to copy it to your clipboard
+
+Now you have your repository's clone URL!
+
+### Step 3: Clone Your Repository to Your Computer
+
+Open your terminal and navigate to where you want to work (e.g., your Documents folder or a projects directory). Then clone your repository using the URL you just copied:
 
 ```bash
 git clone https://github.com/sk-classroom/git-practice-assignment-YOUR-USERNAME.git
 cd git-practice-assignment-YOUR-USERNAME
 ```
 
-Replace `YOUR-USERNAME` with your actual GitHub username. This creates a local copy of the repository on your computer.
+You can also just paste the URL if you copied it in Step 2. This command creates a local copy of the repository on your computer.
 
-### Step 3: Complete the Exercises
+### Step 4: Complete the Exercises
 
 Now follow the Git exercises in the **01-toolkit.qmd** notebook. You'll create an `analysis.py` file and make commits as you work through:
 
@@ -55,7 +68,7 @@ Now follow the Git exercises in the **01-toolkit.qmd** notebook. You'll create a
 
 Work directly in this cloned directory. All your commits are already connected to GitHub!
 
-### Step 4: Push Your Work
+### Step 5: Push Your Work
 
 After completing each major step, push your commits to GitHub:
 
@@ -71,9 +84,9 @@ git push origin add-mean-docstring
 
 You can push as many times as you want. Each push updates your GitHub repository.
 
-### Step 5: Verify and Submit
+### Step 6: Verify and Submit
 
-Before submitting, visit your repository on GitHub and verify you see:
+Before submitting, visit your repository on GitHub (the same page from Step 1) and verify you see:
 
 - [ ] The `analysis.py` file with both `calculate_mean()` and `calculate_median()` functions
 - [ ] At least 5 commits showing your progression
