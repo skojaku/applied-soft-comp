@@ -131,15 +131,15 @@ The pen-and-paper exercise introduced you to Git's conceptual model. Now we'll p
 
 Let's create a simple Python script and track it with Git. Make sure you're in your repository directory (the folder containing this notebook).
 
-Now create a simple Python script called `analysis.py`:
+Create a new file called `analysis.py` in your repository directory with the following code:
 
-```bash
-echo 'def calculate_mean(data):
+```python
+def calculate_mean(data):
     total = sum(data)
-    return total / len(data)' > analysis.py
+    return total / len(data)
 ```
 
-Check the status of your repository:
+Save the file. Now check the status of your repository:
 
 ```bash
 git status
@@ -173,17 +173,17 @@ Congratulations! You've created your first snapshot. The `-m` flag lets you add 
 
 The function above has a critical bug. It crashes when given an empty list. Let's fix it and commit the fix.
 
-Edit `analysis.py` to add error handling:
+Open `analysis.py` in your text editor and replace its contents with this improved version:
 
-```bash
-echo 'def calculate_mean(data):
+```python
+def calculate_mean(data):
     if len(data) == 0:
         return 0
     total = sum(data)
-    return total / len(data)' > analysis.py
+    return total / len(data)
 ```
 
-Check what changed:
+Save the file. Now check what changed:
 
 ```bash
 git diff
@@ -225,10 +225,9 @@ Check which branch you're on:
 git branch
 ```
 
-The asterisk shows your current branch. Now add a new function to `analysis.py`:
+The asterisk shows your current branch. Now open `analysis.py` in your text editor and add this new function at the end of the file:
 
-```bash
-echo '
+```python
 def calculate_median(data):
     if len(data) == 0:
         return 0
@@ -236,10 +235,10 @@ def calculate_median(data):
     n = len(sorted_data)
     if n % 2 == 0:
         return (sorted_data[n//2 - 1] + sorted_data[n//2]) / 2
-    return sorted_data[n//2]' >> analysis.py
+    return sorted_data[n//2]
 ```
 
-Stage and commit the new function:
+Your file should now have both `calculate_mean` and `calculate_median` functions. Save the file, then stage and commit the new function:
 
 ```bash
 git add analysis.py
@@ -289,7 +288,12 @@ First, create a branch that changes the mean function to use NumPy:
 
 ```bash
 git checkout -b use-numpy-mean
-echo 'import numpy as np
+```
+
+Now open `analysis.py` and replace its entire contents with this version that uses NumPy:
+
+```python
+import numpy as np
 
 def calculate_mean(data):
     if len(data) == 0:
@@ -303,7 +307,12 @@ def calculate_median(data):
     n = len(sorted_data)
     if n % 2 == 0:
         return (sorted_data[n//2 - 1] + sorted_data[n//2]) / 2
-    return sorted_data[n//2]' > analysis.py
+    return sorted_data[n//2]
+```
+
+Save the file, then commit:
+
+```bash
 git add analysis.py
 git commit -m "Use NumPy for mean calculation"
 ```
@@ -313,7 +322,12 @@ Now switch back to main and create a different branch that also modifies the mea
 ```bash
 git checkout main
 git checkout -b add-mean-docstring
-echo 'def calculate_mean(data):
+```
+
+Open `analysis.py` and replace its entire contents with this version that adds a docstring:
+
+```python
+def calculate_mean(data):
     """Calculate the arithmetic mean of a dataset.
 
     Returns 0 for empty datasets."""
@@ -329,7 +343,12 @@ def calculate_median(data):
     n = len(sorted_data)
     if n % 2 == 0:
         return (sorted_data[n//2 - 1] + sorted_data[n//2]) / 2
-    return sorted_data[n//2]' > analysis.py
+    return sorted_data[n//2]
+```
+
+Save the file, then commit:
+
+```bash
 git add analysis.py
 git commit -m "Add docstring to mean function"
 ```
@@ -375,10 +394,12 @@ def calculate_mean(data):
 
 Everything between `<<<<<<< HEAD` and `=======` is the current version (from main). Everything between `=======` and `>>>>>>> add-mean-docstring` is the incoming version (from the branch you're merging).
 
-You must manually edit the file to keep what you want. Let's combine the best of both: use NumPy and add the docstring:
+You must manually edit the file to keep what you want. Let's combine the best of both: use NumPy and add the docstring.
 
-```bash
-echo 'import numpy as np
+Open `analysis.py` in your text editor. Delete all the conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`) and replace the entire file contents with this resolved version:
+
+```python
+import numpy as np
 
 def calculate_mean(data):
     """Calculate the arithmetic mean of a dataset using NumPy.
@@ -395,10 +416,10 @@ def calculate_median(data):
     n = len(sorted_data)
     if n % 2 == 0:
         return (sorted_data[n//2 - 1] + sorted_data[n//2]) / 2
-    return sorted_data[n//2]' > analysis.py
+    return sorted_data[n//2]
 ```
 
-After resolving the conflict, stage the resolved file:
+Save the file. After resolving the conflict, stage the resolved file:
 
 ```bash
 git add analysis.py
