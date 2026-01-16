@@ -11,11 +11,7 @@ This module guides you through setting up your Python development environment. Y
 
 ## Why a Consistent Environment Matters
 
-Before we dive into data analysis, machine learning, and network science, we need to get our tools in order. A well-configured development environment saves you from dependency conflicts, version mismatches, and the dreaded "works on my machine" problem.
-
-Think of it like a laboratory setup. Before conducting experiments, scientists ensure their equipment is properly calibrated and all reagents are in place. We do the same with our computational environment. Setting this up once at the start ensures every code example, every notebook, and every assignment works smoothly.
-
-## Enter uv: A Modern Python Package Manager
+Before we dive into data analysis, we need to get our tools in order. A well-configured development environment saves you from dependency conflicts, version mismatches, and the dreaded "works on my machine" problem.
 
 We'll use `uv` to manage our Python environment. If you're familiar with `pip` and `virtualenv`, think of `uv` as a faster, more reliable alternative. It handles package installation and dependency resolution with impressive speed.
 
@@ -111,6 +107,331 @@ print(f"Transformers version: {transformers.__version__}")
 
 If you see "All libraries imported successfully!" along with version numbers, congratulations! Your environment is ready. You now have access to some of the most powerful tools in data science, machine learning, and AI.
 
-Throughout this course, we'll use these libraries to analyze data, build models, create visualizations, and explore cutting-edge techniques in soft computing. Each module will introduce specific tools and demonstrate their practical applications.
+## Version Control with Git
+
+Now that your environment is ready, let's master version control. Think of Git as a time machine for your code. It lets you save snapshots of your work, experiment with new ideas without fear, and collaborate with others without stepping on each other's toes.
+
+The pen-and-paper exercise introduced you to Git's conceptual model. Now we'll put those concepts into practice with hands-on exercises that mirror real-world workflows.
+
+### Creating Your First Commits
+
+Let's start by creating a simple Python script and tracking it with Git. We'll build everything from scratch so you see exactly how the pieces fit together.
+
+First, create a new directory for this exercise and initialize a Git repository:
+
+```bash
+mkdir git-practice
+cd git-practice
+git init
+```
+
+The `git init` command creates a hidden `.git` folder that stores all version history. This folder is your local time machine database.
+
+Now create a simple Python script called `analysis.py`:
+
+```bash
+echo 'def calculate_mean(data):
+    total = sum(data)
+    return total / len(data)' > analysis.py
+```
+
+Check the status of your repository:
+
+```bash
+git status
+```
+
+You'll see `analysis.py` listed as an "untracked file." Git sees the file exists but isn't tracking its history yet. This is Area 1 from the pen-and-paper exercise, where all your files live.
+
+Add the file to the staging area:
+
+```bash
+git add analysis.py
+```
+
+This moves the file to Area 2, the staging area. You're telling Git "I want this file in my next snapshot." Check the status again:
+
+```bash
+git status
+```
+
+Now `analysis.py` is listed as "Changes to be committed." This is your staging area. You've chosen what goes into your next snapshot.
+
+Create your first commit:
+
+```bash
+git commit -m "Add mean calculation function"
+```
+
+Congratulations! You've created your first snapshot. The `-m` flag lets you add a message describing what this snapshot contains. Always write clear, descriptive commit messages. Your future self will thank you.
+
+### Fixing a Bug
+
+The function above has a critical bug. It crashes when given an empty list. Let's fix it and commit the fix.
+
+Edit `analysis.py` to add error handling:
+
+```bash
+echo 'def calculate_mean(data):
+    if len(data) == 0:
+        return 0
+    total = sum(data)
+    return total / len(data)' > analysis.py
+```
+
+Check what changed:
+
+```bash
+git diff
+```
+
+The `git diff` command shows exactly what changed. Lines starting with `-` were removed. Lines starting with `+` were added. This is incredibly useful for reviewing your work before committing.
+
+Stage and commit the fix:
+
+```bash
+git add analysis.py
+git commit -m "Fix crash when data is empty"
+```
+
+You now have two commits in your history. View them:
+
+```bash
+git log --oneline
+```
+
+Each commit has a unique identifier (a hash) and your descriptive message. This is your project's timeline.
+
+### Working with Branches
+
+Branches let you experiment without breaking your stable code. Let's say you want to try a completely new approach to calculating statistics, but you're not sure it will work. Branches give you a safe playground.
+
+Create a new branch called `add-median`:
+
+```bash
+git branch add-median
+git checkout add-median
+```
+
+The `git branch` command creates the branch. The `git checkout` command switches to it. You can combine these steps with `git checkout -b add-median`.
+
+Check which branch you're on:
+
+```bash
+git branch
+```
+
+The asterisk shows your current branch. Now add a new function to `analysis.py`:
+
+```bash
+echo '
+def calculate_median(data):
+    if len(data) == 0:
+        return 0
+    sorted_data = sorted(data)
+    n = len(sorted_data)
+    if n % 2 == 0:
+        return (sorted_data[n//2 - 1] + sorted_data[n//2]) / 2
+    return sorted_data[n//2]' >> analysis.py
+```
+
+Stage and commit the new function:
+
+```bash
+git add analysis.py
+git commit -m "Add median calculation function"
+```
+
+Now for the magic. Switch back to your main branch:
+
+```bash
+git checkout main
+cat analysis.py
+```
+
+Notice the median function disappeared! It's not gone, it's just on the `add-median` branch. Your main branch remains exactly as you left it. This is the power of branches.
+
+### Merging Branches
+
+Your median function works perfectly. Time to bring it into the main branch. This process is called merging.
+
+Make sure you're on the main branch:
+
+```bash
+git checkout main
+```
+
+Merge the `add-median` branch:
+
+```bash
+git merge add-median
+```
+
+Git automatically combines the work from both branches. Check your file:
+
+```bash
+cat analysis.py
+```
+
+The median function is now in main. Your experiment succeeded and you've integrated it into your stable code. This merge was smooth because no conflicts existed.
+
+### Understanding Merge Conflicts
+
+Real collaboration isn't always this smooth. Sometimes two branches modify the same lines of code in different ways. When this happens, Git can't automatically decide which version to keep. You must resolve the conflict manually.
+
+Let's create a merge conflict deliberately so you know how to handle it. Create two branches that modify the same function in different ways.
+
+First, create a branch that changes the mean function to use NumPy:
+
+```bash
+git checkout -b use-numpy-mean
+echo 'import numpy as np
+
+def calculate_mean(data):
+    if len(data) == 0:
+        return 0
+    return np.mean(data)
+
+def calculate_median(data):
+    if len(data) == 0:
+        return 0
+    sorted_data = sorted(data)
+    n = len(sorted_data)
+    if n % 2 == 0:
+        return (sorted_data[n//2 - 1] + sorted_data[n//2]) / 2
+    return sorted_data[n//2]' > analysis.py
+git add analysis.py
+git commit -m "Use NumPy for mean calculation"
+```
+
+Now switch back to main and create a different branch that also modifies the mean function:
+
+```bash
+git checkout main
+git checkout -b add-mean-docstring
+echo 'def calculate_mean(data):
+    """Calculate the arithmetic mean of a dataset.
+
+    Returns 0 for empty datasets."""
+    if len(data) == 0:
+        return 0
+    total = sum(data)
+    return total / len(data)
+
+def calculate_median(data):
+    if len(data) == 0:
+        return 0
+    sorted_data = sorted(data)
+    n = len(sorted_data)
+    if n % 2 == 0:
+        return (sorted_data[n//2 - 1] + sorted_data[n//2]) / 2
+    return sorted_data[n//2]' > analysis.py
+git add analysis.py
+git commit -m "Add docstring to mean function"
+```
+
+Now merge the first branch into main:
+
+```bash
+git checkout main
+git merge use-numpy-mean
+```
+
+This succeeds because main hasn't changed since we branched. Now try to merge the second branch:
+
+```bash
+git merge add-mean-docstring
+```
+
+Conflict! Git displays a message like "CONFLICT (content): Merge conflict in analysis.py." Git tried to merge both changes but couldn't decide which version of the mean function to keep.
+
+### Resolving the Conflict
+
+Open `analysis.py` in a text editor. You'll see conflict markers:
+
+```
+<<<<<<< HEAD
+import numpy as np
+
+def calculate_mean(data):
+    if len(data) == 0:
+        return 0
+    return np.mean(data)
+=======
+def calculate_mean(data):
+    """Calculate the arithmetic mean of a dataset.
+
+    Returns 0 for empty datasets."""
+    if len(data) == 0:
+        return 0
+    total = sum(data)
+    return total / len(data)
+>>>>>>> add-mean-docstring
+```
+
+Everything between `<<<<<<< HEAD` and `=======` is the current version (from main). Everything between `=======` and `>>>>>>> add-mean-docstring` is the incoming version (from the branch you're merging).
+
+You must manually edit the file to keep what you want. Let's combine the best of both: use NumPy and add the docstring:
+
+```bash
+echo 'import numpy as np
+
+def calculate_mean(data):
+    """Calculate the arithmetic mean of a dataset using NumPy.
+
+    Returns 0 for empty datasets."""
+    if len(data) == 0:
+        return 0
+    return np.mean(data)
+
+def calculate_median(data):
+    if len(data) == 0:
+        return 0
+    sorted_data = sorted(data)
+    n = len(sorted_data)
+    if n % 2 == 0:
+        return (sorted_data[n//2 - 1] + sorted_data[n//2]) / 2
+    return sorted_data[n//2]' > analysis.py
+```
+
+After resolving the conflict, stage the resolved file:
+
+```bash
+git add analysis.py
+```
+
+Complete the merge by creating a commit:
+
+```bash
+git commit -m "Merge add-mean-docstring, combining NumPy and documentation"
+```
+
+Check your history:
+
+```bash
+git log --oneline --graph --all
+```
+
+The `--graph` flag shows your branch structure visually. You can see where branches diverged and where they merged back together.
+
+::: {.callout-tip title="Try it yourself"}
+Practice the complete workflow on your own:
+
+1. Create a new repository for a small project
+2. Make several commits as you develop
+3. Create a branch to experiment with a new feature
+4. Deliberately create a merge conflict by editing the same lines on two different branches
+5. Practice resolving the conflict
+
+The more you practice, the more natural Git becomes. Soon you'll be branching and merging without thinking twice.
+:::
+
+### Why This Matters
+
+Version control transforms how you work. You can experiment fearlessly knowing you can always return to a working state. You can try multiple approaches in parallel. You can collaborate with teammates without coordination headaches. You can review your project's evolution to understand how you got here.
+
+Every professional software project uses version control. Data science projects benefit just as much. When your analysis depends on dozens of interdependent scripts and notebooks, version control becomes essential for reproducibility and collaboration.
+
+Throughout this course, we'll use Git to track our work. You'll create commits after completing exercises, branch when experimenting with different approaches, and merge when you've found solutions that work. These workflows will become second nature.
 
 Let's get started.
