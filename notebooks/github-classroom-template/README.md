@@ -12,6 +12,20 @@ Complete all Git exercises from the **01-toolkit.qmd** notebook in the course ma
 - Resolving merge conflicts
 - Pushing your work to GitHub
 
+> [!IMPORTANT]
+> **Windows Users:** This course uses Unix-based command line tools. You must install Windows Subsystem for Linux (WSL) before starting.
+>
+> **To install WSL:**
+> 1. Open PowerShell as Administrator
+> 2. Run: `wsl --install`
+> 3. Restart your computer
+> 4. Ubuntu will open automatically after restart
+> 5. Create a username and password when prompted
+>
+> Use the Ubuntu terminal (not PowerShell or Command Prompt) for all Git commands. Find it by searching "Ubuntu" in the Start menu.
+>
+> See [Microsoft's WSL installation guide](https://learn.microsoft.com/en-us/windows/wsl/install) for details.
+
 ## Getting Started
 
 ### Step 1: Accept the Assignment and Get Your Repository
