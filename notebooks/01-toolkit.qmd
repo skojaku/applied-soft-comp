@@ -113,19 +113,32 @@ Now that your environment is ready, let's master version control. Think of Git a
 
 The pen-and-paper exercise introduced you to Git's conceptual model. Now we'll put those concepts into practice with hands-on exercises that mirror real-world workflows.
 
-### Creating Your First Commits
+### Setting Up Your Repository
 
-Let's start by creating a simple Python script and tracking it with Git. We'll build everything from scratch so you see exactly how the pieces fit together.
+Before we start the Git exercises, you need to set up your repository through GitHub Classroom.
 
-First, create a new directory for this exercise and initialize a Git repository:
+**Step 1:** Accept the assignment invitation link provided on Brightspace. This creates a personal repository for you on GitHub.
 
-```bash
-mkdir git-practice
-cd git-practice
-git init
+**Step 2:** After accepting, you'll be redirected to your repository page. Click the green **"Code"** button, make sure **"HTTPS"** is selected, and copy the repository URL. It will look like:
+
+```
+https://github.com/sk-classroom/git-practice-assignment-YOUR-USERNAME.git
 ```
 
-The `git init` command creates a hidden `.git` folder that stores all version history. This folder is your local time machine database.
+**Step 3:** Clone the repository to your computer. Open your terminal and navigate to where you want to work (like your Documents folder or a projects directory):
+
+```bash
+git clone https://github.com/sk-classroom/git-practice-assignment-YOUR-USERNAME.git
+cd git-practice-assignment-YOUR-USERNAME
+```
+
+Replace `YOUR-USERNAME` with your actual GitHub username. This creates a local copy of your repository that's already connected to GitHub.
+
+Now you're ready to start the exercises. The repository is already initialized (GitHub did that for you), and it's already connected to a remote server. You can focus on learning Git commands without worrying about setup.
+
+### Creating Your First Commits
+
+Let's create a simple Python script and track it with Git.
 
 Now create a simple Python script called `analysis.py`:
 
@@ -416,42 +429,29 @@ The `--graph` flag shows your branch structure visually. You can see where branc
 
 ### Pushing to GitHub
 
-So far, your repository lives entirely on your local machine. That's fine for personal work, but collaboration requires sharing. GitHub provides a central location where you can store your repository, collaborate with others, and showcase your work.
+You've been making commits locally, but they only exist on your computer so far. Let's push them to GitHub so they're backed up and your instructor can see your work.
 
-Let's push your `git-practice` repository to GitHub. This connects your local Git repository to a remote server.
+Since you cloned your repository from GitHub Classroom, the connection to GitHub (called the "remote") is already set up. The remote is named `origin` by convention. You can verify this:
 
-**For this course, you'll use GitHub Classroom.** Your instructor will provide you with an assignment invitation link through Brightspace. When you click that link, GitHub Classroom automatically creates a personal repository just for you.
+```bash
+git remote -v
+```
+
+This shows you the URL of your GitHub repository. You should see your GitHub Classroom repository URL listed.
+
+Now push your commits to GitHub:
+
+```bash
+git push origin main
+```
+
+The `git push` command uploads your local commits to GitHub. The word `origin` refers to your GitHub repository, and `main` is the branch you're pushing.
 
 ::: {.column-margin}
-**GitHub Classroom:** Our classroom is [Applied Soft Computing Spring 2026](https://classroom.github.com/classrooms/146034511-applied-soft-computing-spring-2026). Assignment links will be distributed through Brightspace.
+**GitHub Classroom:** Our classroom is [Applied Soft Computing Spring 2026](https://classroom.github.com/classrooms/146034511-applied-soft-computing-spring-2026). Assignment links are distributed through Brightspace.
 :::
 
-After accepting the assignment, you'll have a repository URL that looks like:
-
-```
-https://github.com/sk-classroom/git-practice-assignment-yourname
-```
-
-Now connect your local `git-practice` repository to this GitHub Classroom repository. The `git remote add` command tells your local repository about a remote location. The name `origin` is conventional for your primary remote server.
-
-Navigate to your `git-practice` directory and run (replace `yourname` with your GitHub username):
-
-```bash
-git remote add origin https://github.com/sk-classroom/git-practice-assignment-yourname.git
-git branch -M main
-git push -u origin main
-```
-
-The `git branch -M main` command renames your default branch to `main` if it isn't already (older Git versions use `master`). The `git push -u origin main` command uploads your commits to GitHub. The `-u` flag sets `origin/main` as the upstream branch, so future pushes and pulls know where to go.
-
-If you get an error about the remote already existing, remove it first:
-
-```bash
-git remote remove origin
-git remote add origin https://github.com/sk-classroom/git-practice-assignment-yourname.git
-```
-
-Refresh your GitHub repository page. Your code is now online! You can see your commits, browse your files, and the instructor can review your work.
+Visit your repository page on GitHub and refresh it. You should now see your `analysis.py` file and all your commits! Click on "commits" to see your commit history. This is incredibly useful for reviewing what changed and when.
 
 Now push your other branches:
 
@@ -463,18 +463,20 @@ git push origin add-mean-docstring
 
 Visit your repository on GitHub and click the "branches" dropdown. You'll see all your branches listed. GitHub provides a visual interface for viewing diffs, commit history, and branch structure.
 
-### Cloning and Pulling
+### Working from Multiple Computers
 
-GitHub serves as a backup and collaboration hub. If you're working on multiple computers, you can clone your GitHub Classroom repository anywhere:
+GitHub serves as a central backup and collaboration hub. Because your work is on GitHub, you can work from any computer.
+
+If you want to work from a different computer, just clone your repository there:
 
 ```bash
 git clone https://github.com/sk-classroom/git-practice-assignment-yourname.git
 cd git-practice-assignment-yourname
 ```
 
-This downloads the entire repository, including all history and branches. You can make changes, commit them, and push back to GitHub.
+This downloads the entire repository, including all history and branches.
 
-If you need to pull the latest changes (for example, if you made edits on GitHub's website), use:
+If you've been working on one computer and want to get the latest changes on another (or if you made edits directly on GitHub's website), use:
 
 ```bash
 git pull origin main
@@ -485,33 +487,36 @@ This fetches and merges changes from the remote repository into your local branc
 ::: {.callout-note title="Assignment Submission"}
 **Submit your work on Brightspace:**
 
-After completing all the Git exercises above (creating commits, working with branches, resolving merge conflicts, and pushing to GitHub Classroom), submit the following on Brightspace:
+After completing all the Git exercises, make sure you've pushed everything to GitHub, then submit on Brightspace.
 
-1. **GitHub Classroom repository URL** - Submit the link to your repository (e.g., `https://github.com/sk-classroom/git-practice-assignment-yourname`)
+**Pre-submission checklist:**
 
-2. **Verification checklist** - Your repository should contain:
-   - The `analysis.py` file with both `calculate_mean()` and `calculate_median()` functions
-   - At least 5 commits showing your progression through the exercises
-   - Multiple branches: `add-median`, `use-numpy-mean`, `add-mean-docstring`
-   - A merge commit demonstrating conflict resolution
-   - All branches pushed to GitHub (verify by clicking "branches" on GitHub)
+Visit your repository on GitHub and verify you see:
 
-Your instructor will review your repository to verify you've completed the hands-on Git exercises. This ensures you're ready to use version control throughout the course.
+- [ ] The `analysis.py` file with both `calculate_mean()` and `calculate_median()` functions
+- [ ] At least 5 commits in your commit history
+- [ ] Multiple branches visible in the branches dropdown: `main`, `add-median`, `use-numpy-mean`, `add-mean-docstring`
+- [ ] A merge commit showing conflict resolution (check the commit history)
 
-**Tip:** Before submitting, visit your repository on GitHub and verify everything is visible. Check the commit history, branches, and files.
+**To submit:**
+
+1. Copy your repository URL from the browser address bar (it looks like: `https://github.com/sk-classroom/git-practice-assignment-yourname`)
+2. Submit this URL on Brightspace in the toolkit assignment
+
+Your instructor will review your repository to verify you've completed all exercises. This demonstrates you're ready to use version control throughout the course.
 :::
 
 ::: {.callout-tip title="Try it yourself"}
 Practice the complete workflow on your own:
 
-1. Create a new repository for a small project
-2. Make several commits as you develop
-3. Create a branch to experiment with a new feature
-4. Deliberately create a merge conflict by editing the same lines on two different branches
-5. Practice resolving the conflict
-6. Push everything to GitHub
+1. Accept the assignment and clone your repository
+2. Work through all the exercises, making commits as you go
+3. Push your commits regularly to back up your work
+4. Create branches to experiment with different approaches
+5. Deliberately create merge conflicts to practice resolving them
+6. Use `git log --oneline --graph --all` to visualize your work
 
-The more you practice, the more natural Git becomes. Soon you'll be branching and merging without thinking twice.
+The more you practice, the more natural Git becomes. Soon you'll be branching and merging without thinking twice. Remember: you can push as often as you want, so don't wait until the end!
 :::
 
 ### Why This Matters

@@ -4,118 +4,118 @@ Welcome to your Git practice assignment! This repository is where you'll submit 
 
 ## Your Task
 
-Complete all exercises from the **01-toolkit.qmd** notebook in the course materials. This includes:
+Complete all Git exercises from the **01-toolkit.qmd** notebook in the course materials. You'll practice:
 
-1. **Environment Setup**
-   - Create a virtual environment using `uv`
-   - Install all required packages
-   - Verify installation by running the import test
-
-2. **Git Fundamentals**
-   - Create a local `git-practice` repository
-   - Make your first commits
-   - Work with branches
-   - Practice merging
-   - Resolve merge conflicts
-
-3. **Push to GitHub**
-   - Connect your local repository to this GitHub Classroom repository
-   - Push all your work, including branches and merge commits
+- Making your first commits with `git add` and `git commit`
+- Working with branches using `git branch` and `git checkout`
+- Merging branches with `git merge`
+- Resolving merge conflicts
+- Pushing your work to GitHub
 
 ## Getting Started
 
-You have two options for working with this repository:
+### Step 1: Get Your Repository URL
 
-### Option 1: Start Fresh (Recommended if you haven't started yet)
+After accepting the GitHub Classroom assignment invitation, you'll be redirected to your personal repository page. It will look like this:
 
-Clone this repository and work directly in it:
-
-```bash
-git clone <YOUR-REPO-URL>
-cd git-practice-assignment-<your-username>
-git init  # Initialize as a git repository if needed
+```
+https://github.com/sk-classroom/git-practice-assignment-YOUR-USERNAME
 ```
 
-Then follow all the exercises from the notebook, creating your `analysis.py` file and making commits as instructed.
+**To copy the repository URL:**
 
-### Option 2: Connect Your Existing Work (If you already completed exercises locally)
+1. On your repository page, click the green **"Code"** button
+2. Make sure **"HTTPS"** is selected (not SSH)
+3. Click the copy icon to copy the URL to your clipboard
 
-If you've already completed the exercises in a local `git-practice` directory, you can connect that repository to this GitHub Classroom repository:
+The URL will look like: `https://github.com/sk-classroom/git-practice-assignment-YOUR-USERNAME.git`
 
-**Step 1:** Navigate to your local `git-practice` directory:
+### Step 2: Clone This Repository
+
+Open your terminal and navigate to where you want to work (e.g., your Documents folder or a projects directory). Then clone this repository:
 
 ```bash
-cd git-practice
+git clone https://github.com/sk-classroom/git-practice-assignment-YOUR-USERNAME.git
+cd git-practice-assignment-YOUR-USERNAME
 ```
 
-**Step 2:** Add this GitHub Classroom repository as your remote:
+Replace `YOUR-USERNAME` with your actual GitHub username. This creates a local copy of the repository on your computer.
+
+### Step 3: Complete the Exercises
+
+Now follow the Git exercises in the **01-toolkit.qmd** notebook. You'll create an `analysis.py` file and make commits as you work through:
+
+1. Creating your first commits
+2. Fixing a bug and committing the fix
+3. Creating a branch called `add-median`
+4. Adding a median function and committing
+5. Merging the branch
+6. Creating merge conflicts with `use-numpy-mean` and `add-mean-docstring` branches
+7. Resolving the conflicts
+
+Work directly in this cloned directory. All your commits are already connected to GitHub!
+
+### Step 4: Push Your Work
+
+After completing each major step, push your commits to GitHub:
 
 ```bash
-git remote add origin <YOUR-REPO-URL>
-```
+# Push main branch
+git push origin main
 
-If you get an error that `origin` already exists, remove the old remote first:
-
-```bash
-git remote remove origin
-git remote add origin <YOUR-REPO-URL>
-```
-
-**Step 3:** Push your main branch:
-
-```bash
-git branch -M main
-git push -u origin main
-```
-
-**Step 4:** Push all your other branches:
-
-```bash
+# Push other branches as you create them
 git push origin add-median
 git push origin use-numpy-mean
 git push origin add-mean-docstring
 ```
 
-**Step 5:** Verify everything is uploaded:
+You can push as many times as you want. Each push updates your GitHub repository.
 
-Visit this repository on GitHub and check that you see:
-- Your `analysis.py` file
-- All your commits
-- All your branches
+### Step 5: Verify and Submit
 
-## What Should Be in Your Repository
+Before submitting, visit your repository on GitHub and verify you see:
 
-Your instructor will verify that your repository contains:
-
-- [ ] An `analysis.py` file with both `calculate_mean()` and `calculate_median()` functions
+- [ ] The `analysis.py` file with both `calculate_mean()` and `calculate_median()` functions
 - [ ] At least 5 commits showing your progression
 - [ ] Multiple branches: `add-median`, `use-numpy-mean`, `add-mean-docstring`
 - [ ] A merge commit demonstrating conflict resolution
-- [ ] All branches pushed to GitHub
 
-## Submission
+Then submit your repository URL on Brightspace.
 
-Once you've pushed all your work to this repository:
+## Checking Your Work
 
-1. Verify everything is visible on GitHub
-2. Copy the URL of this repository
-3. Submit the URL on Brightspace
+Use these commands to check your progress:
+
+```bash
+# See all your commits
+git log --oneline --graph --all
+
+# See all your branches
+git branch -a
+
+# Check current status
+git status
+
+# See what branches exist on GitHub
+git branch -r
+```
 
 ## Getting Help
 
 If you encounter issues:
 
-- **Git errors:** Review the Git section in the 01-toolkit notebook
-- **Push rejected:** Make sure you're in the correct directory and have added the right remote URL
-- **Merge conflicts:** Follow the conflict resolution steps in the notebook
+- **Can't find repository URL:** Click the green "Code" button on your repository page
+- **Clone failed:** Make sure you copied the complete URL including the `.git` at the end
+- **Push rejected:** Make sure you're inside the cloned directory (`cd git-practice-assignment-YOUR-USERNAME`)
+- **Merge conflicts:** Follow the conflict resolution steps in the notebook carefully
 - **General questions:** Post on the course discussion board or attend office hours
 
 ## Tips for Success
 
 - Commit early and commit often
 - Write clear, descriptive commit messages
-- Don't be afraid to experiment with branches
-- Use `git status` frequently to understand what's happening
-- Use `git log --oneline --graph --all` to visualize your branch structure
+- Push frequently so your work is backed up on GitHub
+- Use `git status` often to understand what's happening
+- Don't be afraid to experiment with branches—that's what they're for!
 
 Good luck! Version control is a skill that gets easier with practice.
