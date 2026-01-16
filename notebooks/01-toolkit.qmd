@@ -112,52 +112,12 @@ Now that your environment is ready, let's master version control. Think of Git a
 
 The pen-and-paper exercise introduced you to Git's conceptual model. Now we'll put those concepts into practice with hands-on exercises that mirror real-world workflows.
 
-### Setting Up Your Repository
-
-Before we start the Git exercises, you need to set up your repository through GitHub Classroom.
-
-**Step 1: Accept the assignment**
-
-Your instructor will provide an assignment invitation link on Brightspace. Click this link. You may need to sign in to GitHub if you haven't already. Then click "Accept this assignment."
-
-GitHub Classroom will create a personal repository just for you. After a few moments, you'll see a confirmation message with a link to your repository. Click that link.
-
-**Step 2: Find your repository clone URL**
-
-You're now on your repository page on GitHub. The URL in your browser will look like:
-
-```
-https://github.com/sk-classroom/01-toolkit-YOUR-USERNAME
-```
-
-This is your repository's home page. To get your code onto your computer, you need to clone it. Look for the green **"<> Code"** button near the top right of the page (below the repository name and above the file list). Click it.
-
-A dropdown appears showing three tabs: HTTPS, SSH, and GitHub CLI. Make sure **HTTPS** is selected (it should be underlined). You'll see a URL ending in `.git`:
-
-```
-https://github.com/sk-classroom/01-toolkit-YOUR-USERNAME.git
-```
-
-Click the copy icon (📋) next to the URL to copy it to your clipboard.
-
-**Step 3: Clone the repository**
-
-Open your terminal and navigate to where you want to work (like your Documents folder or a projects directory):
-
-```bash
-# If you copied the URL, paste it after 'git clone'
-git clone https://github.com/sk-classroom/01-toolkit-YOUR-USERNAME.git
-cd 01-toolkit-YOUR-USERNAME
-```
-
-This creates a local copy of your repository that's already connected to GitHub. The repository is already initialized, and the remote connection is already set up. You can focus entirely on learning Git commands.
-
-> [!TIP]
-> Make sure you're inside the cloned directory (`cd 01-toolkit-YOUR-USERNAME`) before running any git commands in the exercises below.
+> [!NOTE]
+> **Before you start:** You should already have this repository cloned on your computer. If you're reading this file locally, you're in the right place! If not, check the GitHub Classroom assignment link on Brightspace to get your repository.
 
 ### Creating Your First Commits
 
-Let's create a simple Python script and track it with Git.
+Let's create a simple Python script and track it with Git. Make sure you're in your repository directory (the folder containing this notebook).
 
 Now create a simple Python script called `analysis.py`:
 
@@ -450,17 +410,16 @@ The `--graph` flag shows your branch structure visually. You can see where branc
 
 You've been making commits locally, but they only exist on your computer so far. Let's push them to GitHub so they're backed up and your instructor can see your work.
 
-**This is critical:** Your instructor will review your work directly on GitHub. Work that exists only on your local computer cannot be seen or graded. You must push your commits to make them visible.
+> [!IMPORTANT]
+> Your instructor will review your work directly on GitHub. Work that exists only on your local computer cannot be seen or graded. You must push your commits to make them visible.
 
-Since you cloned your repository from GitHub Classroom, the connection to GitHub (called the "remote") is already set up. The remote is named `origin` by convention. You can verify this:
+Since you cloned this repository, the connection to GitHub (called the "remote") is already set up. The remote is named `origin`. You can verify this:
 
 ```bash
 git remote -v
 ```
 
-This shows you the URL of your GitHub repository. You should see your GitHub Classroom repository URL listed.
-
-Now push your commits to GitHub:
+This shows you the URL of your GitHub repository. Now push your commits:
 
 ```bash
 git push origin main
@@ -468,10 +427,7 @@ git push origin main
 
 The `git push` command uploads your local commits to GitHub. The word `origin` refers to your GitHub repository, and `main` is the branch you're pushing.
 
-> [!NOTE]
-> **GitHub Classroom:** Our classroom is [Applied Soft Computing Spring 2026](https://classroom.github.com/classrooms/146034511-applied-soft-computing-spring-2026). Assignment links are distributed through Brightspace.
-
-Visit your repository page on GitHub and refresh it. You should now see your `analysis.py` file and all your commits! Click on "commits" to see your commit history. This is incredibly useful for reviewing what changed and when.
+Visit your repository page on GitHub and refresh it. You should now see your `analysis.py` file and all your commits! Click on "commits" to see your commit history.
 
 **Develop a habit of pushing frequently.** After completing each exercise section, push your work. This keeps your local repository and GitHub in sync.
 
@@ -483,84 +439,58 @@ git push origin use-numpy-mean
 git push origin add-mean-docstring
 ```
 
-Visit your repository on GitHub (go back to the repository page from Step 2 in the setup section, or find it at `https://github.com/sk-classroom/01-toolkit-YOUR-USERNAME`). Click the "branches" dropdown near the top left (next to the branch icon). You'll see all your branches listed. GitHub provides a visual interface for viewing diffs, commit history, and branch structure.
+Visit your repository on GitHub. Click the "branches" dropdown near the top left (next to the branch icon). You'll see all your branches listed. GitHub provides a visual interface for viewing diffs, commit history, and branch structure.
 
-### Working from Multiple Computers
+### Syncing Your Work
 
-GitHub serves as a central backup and collaboration hub. Because your work is on GitHub, you can work from any computer.
-
-If you want to work from a different computer, just clone your repository there:
-
-```bash
-git clone https://github.com/sk-classroom/01-toolkit-yourname.git
-cd 01-toolkit-yourname
-```
-
-This downloads the entire repository, including all history and branches.
-
-If you've been working on one computer and want to get the latest changes on another (or if you made edits directly on GitHub's website), use:
+If you've been working on another computer or if someone else pushed changes to GitHub, you can pull those changes:
 
 ```bash
 git pull origin main
 ```
 
-This fetches and merges changes from the remote repository into your local branch.
+This fetches and merges changes from GitHub into your local branch. Always pull before you start working and push when you're done to keep everything synchronized.
 
 > [!IMPORTANT]
 > **Verify Your Work is Pushed**
 >
-> Your instructor will review your work directly on GitHub Classroom.
+> Your instructor will review your work directly on GitHub. Before you finish, ensure everything is pushed.
 >
-> Before you finish, you must ensure everything is pushed to GitHub. Work that only exists on your local computer cannot be seen or graded.
->
-> **Check synchronization status:**
->
-> Run this command in your repository directory:
+> **Check synchronization:**
 >
 > ```bash
 > git status
 > ```
 >
-> You should see:
-> - `"Your branch is up to date with 'origin/main'"`
-> - `"nothing to commit, working tree clean"`
->
-> If you see messages about unpushed commits or uncommitted changes, commit and push them now!
+> You should see: `"Your branch is up to date with 'origin/main'"` and `"nothing to commit, working tree clean"`
 >
 > **Verify on GitHub:**
 >
-> Visit your repository page on GitHub (you can always find it at `https://github.com/sk-classroom/01-toolkit-YOUR-USERNAME`). Check that you see:
+> Visit your repository page on GitHub and check that you see:
 >
 > - [ ] The `analysis.py` file with both `calculate_mean()` and `calculate_median()` functions
-> - [ ] At least 5 commits in your commit history (click "commits" to view)
-> - [ ] Multiple branches visible in the branches dropdown: `main`, `add-median`, `use-numpy-mean`, `add-mean-docstring`
-> - [ ] A merge commit showing conflict resolution in your history
+> - [ ] At least 5 commits in your history
+> - [ ] Multiple branches: `main`, `add-median`, `use-numpy-mean`, `add-mean-docstring`
+> - [ ] A merge commit showing conflict resolution
 >
-> **If anything is missing from GitHub, you need to push it!** Use the commands you learned:
+> **If anything is missing, push it:**
 >
 > ```bash
-> # Push main branch
 > git push origin main
->
-> # Push any missing branches
 > git push origin branch-name
 > ```
->
-> Your instructor will review your GitHub repository directly—there's no need to submit a URL. Just make sure everything is pushed and visible on GitHub.
 
 > [!TIP]
-> **Try it yourself**
+> **Practice makes perfect**
 >
-> Practice the complete workflow on your own:
+> The more you use Git, the more natural it becomes:
 >
-> 1. Accept the assignment and clone your repository
-> 2. Work through all the exercises, making commits as you go
-> 3. Push your commits regularly to back up your work
-> 4. Create branches to experiment with different approaches
-> 5. Deliberately create merge conflicts to practice resolving them
-> 6. Use `git log --oneline --graph --all` to visualize your work
+> - Make commits as you work, not just at the end
+> - Push frequently to back up your progress
+> - Experiment with branches for different approaches
+> - Use `git log --oneline --graph --all` to visualize your history
 >
-> The more you practice, the more natural Git becomes. Soon you'll be branching and merging without thinking twice. Remember: you can push as often as you want, so don't wait until the end!
+> Soon branching and merging will be second nature!
 
 ### Why This Matters
 
