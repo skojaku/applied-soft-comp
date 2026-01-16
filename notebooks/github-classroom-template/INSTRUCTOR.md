@@ -35,14 +35,14 @@ git add .
 git commit -m "Initial commit: Add Git practice assignment template"
 
 # Create repository on GitHub (in your organization)
-gh repo create sk-classroom/git-practice-assignment \
+gh repo create sk-classroom/01-toolkit \
   --public \
   --source=. \
   --remote=origin \
   --push
 
 # Mark as template repository
-gh api repos/sk-classroom/git-practice-assignment \
+gh api repos/sk-classroom/01-toolkit \
   -X PATCH \
   -f is_template=true
 ```
@@ -50,7 +50,7 @@ gh api repos/sk-classroom/git-practice-assignment \
 Verify it's set as a template:
 
 ```bash
-gh repo view sk-classroom/git-practice-assignment
+gh repo view sk-classroom/01-toolkit
 ```
 
 You should see "Template: true" in the output.
@@ -61,7 +61,7 @@ You should see "Template: true" in the output.
 2. Click "New Assignment"
 3. Configure the assignment:
    - **Assignment title:** Git Practice Assignment
-   - **Repository prefix:** git-practice-assignment
+   - **Repository prefix:** 01-toolkit
    - **Repository visibility:** Private (recommended) or Public
    - **Grant students admin access:** Yes (allows them to manage branches)
    - **Template repository:** Select the template you created above
@@ -113,8 +113,8 @@ When reviewing student submissions, verify:
 To clone and review a student's repository:
 
 ```bash
-git clone https://github.com/sk-classroom/git-practice-assignment-STUDENT-USERNAME.git
-cd git-practice-assignment-STUDENT-USERNAME
+git clone https://github.com/sk-classroom/01-toolkit-STUDENT-USERNAME.git
+cd 01-toolkit-STUDENT-USERNAME
 git log --oneline --graph --all  # View complete history
 git branch -a  # See all branches
 ```

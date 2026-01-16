@@ -25,7 +25,7 @@ Your instructor will provide an assignment invitation link on Brightspace. When 
 Click the link to your repository. You'll be taken to your repository page on GitHub. The URL in your browser will look like:
 
 ```
-https://github.com/sk-classroom/git-practice-assignment-YOUR-USERNAME
+https://github.com/sk-classroom/01-toolkit-YOUR-USERNAME
 ```
 
 This is your personal repository page. Keep this page open—you'll need to copy the clone URL from here.
@@ -38,7 +38,7 @@ In the dropdown:
 
 1. You'll see three tabs: **HTTPS**, **SSH**, and **GitHub CLI**
 2. Make sure **HTTPS** is selected (it should be underlined)
-3. You'll see a URL that looks like: `https://github.com/sk-classroom/git-practice-assignment-YOUR-USERNAME.git`
+3. You'll see a URL that looks like: `https://github.com/sk-classroom/01-toolkit-YOUR-USERNAME.git`
 4. Click the copy icon (📋) next to the URL to copy it to your clipboard
 
 Now you have your repository's clone URL!
@@ -48,8 +48,8 @@ Now you have your repository's clone URL!
 Open your terminal and navigate to where you want to work (e.g., your Documents folder or a projects directory). Then clone your repository using the URL you just copied:
 
 ```bash
-git clone https://github.com/sk-classroom/git-practice-assignment-YOUR-USERNAME.git
-cd git-practice-assignment-YOUR-USERNAME
+git clone https://github.com/sk-classroom/01-toolkit-YOUR-USERNAME.git
+cd 01-toolkit-YOUR-USERNAME
 ```
 
 You can also just paste the URL if you copied it in Step 2. This command creates a local copy of the repository on your computer.
@@ -138,7 +138,7 @@ If you encounter issues:
 
 - **Can't find repository URL:** Click the green "Code" button on your repository page
 - **Clone failed:** Make sure you copied the complete URL including the `.git` at the end
-- **Push rejected:** Make sure you're inside the cloned directory (`cd git-practice-assignment-YOUR-USERNAME`)
+- **Push rejected:** Make sure you're inside the cloned directory (`cd 01-toolkit-YOUR-USERNAME`)
 - **Not sure if everything is pushed:** Run `git status` and look for "Your branch is up to date with 'origin/main'"
 - **Changes not appearing on GitHub:** Make sure you ran `git push origin main` and check that you're viewing the correct branch on GitHub
 - **Merge conflicts:** Follow the conflict resolution steps in the notebook carefully
