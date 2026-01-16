@@ -35,14 +35,6 @@ The best part? It works seamlessly with the `pyproject.toml` file that defines a
 
 Let's walk through the setup process. Open your terminal (macOS/Linux: Terminal app, Windows: Ubuntu from WSL) and navigate to the project directory.
 
-The first step is creating a virtual environment:
-
-```bash
-uv venv
-```
-
-This creates an isolated Python environment in a `.venv` directory. Virtual environments keep project dependencies separate from your system Python, preventing conflicts between different projects.
-
 > [!NOTE]
 > If you don't have `uv` installed yet, install it with:
 > ```bash
@@ -50,27 +42,31 @@ This creates an isolated Python environment in a `.venv` directory. Virtual envi
 > ```
 > This command works on macOS, Linux, and WSL on Windows.
 
-The second step is activating the environment:
+The first step is installing Marimo, the reactive notebook interface we'll use throughout this course:
 
 ```bash
-source .venv/bin/activate
+uv add marimo
 ```
 
-You'll notice your terminal prompt changes to show `(.venv)` at the beginning. This indicates the environment is active.
+This single command handles everything. It creates a virtual environment (if one doesn't exist), adds Marimo to your project dependencies, and installs it along with all other required packages from `pyproject.toml`. The installation might take a few minutes since we're installing many powerful libraries for data science, machine learning, and network analysis.
 
-The third step is installing all course dependencies. Since this project uses a `pyproject.toml` file, one command installs everything:
+Marimo notebooks are reactive. When you change a cell, all dependent cells automatically update. This makes experimentation faster and helps you catch errors immediately. Unlike traditional notebooks, Marimo stores notebooks as pure Python files, making them easy to version control with Git.
+
+## Running Marimo Notebooks
+
+To run a Marimo notebook, use this command:
 
 ```bash
-uv pip install -e .
+uv run marimo edit notebook_name.py
 ```
 
-The `-e` flag installs the project in "editable" mode, which is useful if you're developing or modifying code. The installation might take a few minutes since we're installing many powerful libraries for data science, machine learning, and network analysis.
+The `uv run` prefix ensures the notebook runs with all your project dependencies available, without needing to manually activate a virtual environment. Marimo will open in your web browser, providing an interactive interface where you can edit and run code cells.
 
 ## Verifying Your Installation
 
 Now comes the moment of truth. Let's verify that all required libraries are properly installed. The code cell below imports every major library we'll use in this course.
 
-If everything is set up correctly, this cell will run without errors. If you encounter import errors, double check that you activated your virtual environment and ran the installation command.
+If everything is set up correctly, this cell will run without errors. If you encounter import errors, double check that you ran `uv add marimo` to install all dependencies.
 
 ```{python}
 # Core data science libraries
@@ -133,7 +129,7 @@ Let's create a simple Python script and track it with Git. Make sure you're in y
 
 Create a new file called `analysis.py` in your repository directory with the following code:
 
-```python
+```{python}
 def calculate_mean(data):
     total = sum(data)
     return total / len(data)
@@ -198,7 +194,7 @@ The function above has a critical bug. It crashes when given an empty list. Let'
 
 Open `analysis.py` in your text editor and replace its contents with this improved version:
 
-```python
+```{python}
 def calculate_mean(data):
     if len(data) == 0:
         return 0
@@ -260,7 +256,7 @@ Both branches point to the same commit. The `HEAD` pointer shows which branch yo
 
 Now open `analysis.py` in your text editor and add this new function at the end of the file:
 
-```python
+```{python}
 def calculate_median(data):
     if len(data) == 0:
         return 0
@@ -333,7 +329,7 @@ git checkout -b use-numpy-mean
 
 Now open `analysis.py` and replace its entire contents with this version that uses NumPy:
 
-```python
+```{python}
 import numpy as np
 
 def calculate_mean(data):
@@ -367,7 +363,7 @@ git checkout -b add-mean-docstring
 
 Open `analysis.py` and replace its entire contents with this version that adds a docstring:
 
-```python
+```{python}
 def calculate_mean(data):
     """Calculate the arithmetic mean of a dataset.
 
@@ -439,7 +435,7 @@ You must manually edit the file to keep what you want. Let's combine the best of
 
 Open `analysis.py` in your text editor. Delete all the conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`) and replace the entire file contents with this resolved version:
 
-```python
+```{python}
 import numpy as np
 
 def calculate_mean(data):
