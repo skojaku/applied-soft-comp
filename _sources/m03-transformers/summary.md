@@ -1,5 +1,0 @@
-# Summary
-
-We began by exploring the fundamental architecture of transformers, learning about their key components including multi-head attention mechanisms, layer normalization, and position embeddings. We then studied BERT's bidirectional encoder architecture, which revolutionized NLP by introducing masked language modeling and next sentence prediction for pre-training, demonstrating strong performance across various tasks.
-
-We then examined GPT's decoder-only architecture, which employs causal attention for powerful text generation, and explored various inference strategies including greedy search, beam search, and sophisticated sampling techniques like nucleus sampling. Finally, we studied T5, which unified various NLP tasks into a text-to-text framework, demonstrating the effectiveness of different pre-training objectives and the importance of dataset quality. Throughout our exploration, we saw how each model builds upon its predecessors, introducing innovations that advance the field of natural language processing, ultimately laying the groundwork for modern large language models.

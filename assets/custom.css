@@ -1,0 +1,436 @@
+/* Minimal code styling */
+:root {
+  --code-bg: #fafafa;
+  --code-text: #1a1a1a;
+  --code-border: #f0f0f0;
+  --mono-font: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, monospace;
+}
+
+/* Hide margin sidebar and footer, but show navbar */
+#quarto-margin-sidebar,
+.page-footer {
+  display: none;
+}
+
+/* Hide author and date metadata */
+.author,
+.date,
+.quarto-title-meta,
+#title-block-header .author,
+#title-block-header .date,
+.quarto-title-author-name,
+.quarto-title-author-orcid,
+header#title-block-header .description {
+  display: none;
+}
+
+/* Minimal sidebar styling - no border */
+#quarto-sidebar {
+  background: white;
+  border-right: none;
+  padding: 1.5em 0 1em 1em;
+  font-size: 0.65em;
+  display: block !important;
+}
+
+/* Clean sidebar navigation with tree structure */
+.sidebar-navigation {
+  padding: 0;
+  display: block !important;
+}
+
+/* Hide sub-items (lectures) but keep sections visible */
+.sidebar-item:not(.sidebar-section) {
+  display: none !important;
+}
+
+.sidebar-item {
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+/* Vertical connecting line */
+.sidebar-item::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #ddd;
+}
+
+/* Last item in a section shouldn't have line extending down */
+.sidebar-item:last-child::before {
+  bottom: 50%;
+}
+
+.sidebar-item a {
+  display: block;
+  padding: 0.35em 0.5em 0.35em 1.8em;
+  color: var(--code-text);
+  text-decoration: none;
+  position: relative;
+}
+
+/* Circle bullet */
+.sidebar-item a::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid #ddd;
+  background: white;
+  z-index: 1;
+}
+
+.sidebar-item a:hover {
+  color: #0066cc;
+}
+
+.sidebar-item a:hover::before {
+  border-color: #0066cc;
+  background: #0066cc;
+}
+
+.sidebar-item.active a,
+.sidebar-item a.active {
+  font-weight: 600;
+  color: var(--code-text);
+}
+
+.sidebar-item.active a::before,
+.sidebar-item a.active::before {
+  border-color: var(--code-text);
+  background: var(--code-text);
+}
+
+/* Module section headers in sidebar */
+.sidebar-section,
+.sidebar-item.sidebar-section {
+  display: block !important; /* Show sections */
+  font-weight: 600;
+  font-size: 1em;
+  color: #666;
+  padding: 0.8em 0.5em 0.3em 0.5em;
+  margin-top: 0.5em;
+  position: relative;
+}
+
+.sidebar-section:first-child,
+.sidebar-item.sidebar-section:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* Circle for section headers - larger */
+.sidebar-section::before {
+  content: '';
+  position: absolute;
+  left: 2.5px;
+  top: 1.1em;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid #999;
+  background: white;
+  z-index: 1;
+}
+
+.sidebar-section:first-child::before {
+  top: 0.25em;
+}
+
+/* Vertical line connecting sections */
+.sidebar-section::after {
+  content: '';
+  position: absolute;
+  left: 6.5px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #ddd;
+}
+
+.sidebar-section:first-child::after {
+  top: 9px;
+}
+
+/* Hide sidebar title */
+.sidebar-title {
+  display: none;
+}
+
+/* Simplify sidebar menu structure */
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-menu .chapter {
+  margin: 0;
+}
+
+.sidebar-menu .chapter-number {
+  display: none;
+}
+
+/* Breadcrumb navigation - minimal */
+.nav-page {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1em 0;
+  margin: 2em 0 0 0;
+  border-top: 1px solid var(--code-border);
+  font-size: 0.9em;
+}
+
+.nav-page a {
+  color: var(--code-text);
+  text-decoration: none;
+}
+
+.nav-page a:hover {
+  text-decoration: underline;
+}
+
+/* Simple prev/next indicators */
+.nav-page-previous::before {
+  content: "← ";
+}
+
+.nav-page-next::after {
+  content: " →";
+}
+
+
+/* Code output - minimal styling */
+.cell-output {
+  font-family: var(--mono-font);
+  font-size: 0.9em;
+  line-height: 1.5;
+  margin: 0.5em 0;
+}
+
+/* stdout - clean output style */
+.cell-output-stdout {
+  background-color: var(--code-bg);
+  border-left: none;
+  padding: 0.5em 0.75em;
+  margin: 0.25em 0;
+  white-space: pre-wrap;
+  color: var(--code-text);
+  font-family: var(--mono-font);
+  overflow-x: auto;
+}
+
+.cell-output-stdout::before {
+  display: none;
+}
+
+/* stderr - error output style */
+.cell-output-stderr {
+  background-color: #fff5f5;
+  border-left: 2px solid #ff6b6b;
+  padding: 0.5em 0.75em;
+  margin: 0.5em 0;
+  white-space: pre-wrap;
+  color: #d63031;
+  font-family: var(--mono-font);
+  overflow-x: auto;
+}
+
+.cell-output-stderr::before {
+  display: none;
+}
+
+/* Output text blocks */
+.cell-output pre,
+.cell-output-stdout pre,
+.cell-output-stderr pre {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  font-family: var(--mono-font);
+  white-space: pre-wrap;
+}
+
+.cell-output code {
+  font-family: var(--mono-font);
+  background: transparent;
+}
+
+/* Scrollable outputs */
+.cell-output-stdout,
+.cell-output-stderr {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.cell-output-display {
+  margin: 1em 0;
+}
+
+/* Code blocks - minimal style */
+.sourceCode,
+div.sourceCode {
+  background-color: var(--code-bg);
+  border: none;
+  overflow: auto;
+  margin: 0.5em 0;
+}
+
+.sourceCode pre,
+pre.sourceCode {
+  background: var(--code-bg);
+  padding: 0.5em 0.75em;
+  margin: 0;
+  font-family: var(--mono-font);
+  font-size: 0.9em;
+  line-height: 1.5;
+  overflow-x: auto;
+}
+
+.sourceCode pre code {
+  background: transparent;
+  font-family: var(--mono-font);
+}
+
+/* Tables - minimal styling */
+.cell-output table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+.cell-output table th,
+.cell-output table td {
+  padding: 0.5em;
+  border: 1px solid var(--code-border);
+  text-align: left;
+}
+
+.cell-output table th {
+  font-weight: 600;
+  background-color: var(--code-bg);
+}
+
+/* Inline code - minimal styling */
+code {
+  font-family: var(--mono-font);
+  font-size: 0.9em;
+  background: var(--code-bg);
+  padding: 0.15em 0.35em;
+  border-radius: 0;
+}
+
+/* Math equations */
+.katex,
+.MathJax {
+  font-size: 1em;
+}
+
+/* Ensure margin column maintains its width */
+.column-margin {
+  min-width: 300px !important;
+}
+
+/* Breadcrumb styling - keep it minimal and inline at top of content */
+.quarto-page-breadcrumbs {
+  font-size: 0.8em;
+  margin-bottom: 1.5em;
+  padding-bottom: 0.5em;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.quarto-page-breadcrumbs .breadcrumb {
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.quarto-page-breadcrumbs .breadcrumb-item {
+  display: inline;
+}
+
+.quarto-page-breadcrumbs .breadcrumb-item + .breadcrumb-item::before {
+  content: " > ";
+  padding: 0 0.5em;
+  color: #999;
+}
+
+.quarto-page-breadcrumbs a {
+  color: #666;
+  text-decoration: none;
+}
+
+.quarto-page-breadcrumbs a:hover {
+  text-decoration: underline;
+  color: #0066cc;
+}
+
+/* Minimalistic navbar styling */
+.navbar {
+  background: white !important;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: none;
+  padding: 0.5rem 1rem;
+}
+
+.navbar-brand {
+  color: #1a1a1a !important;
+}
+
+.navbar-brand:hover {
+  color: #0066cc !important;
+}
+
+.navbar-nav .nav-link {
+  color: #1a1a1a !important;
+  font-weight: 400;
+  padding: 0.5rem 1rem;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #0066cc !important;
+}
+
+.navbar-nav .dropdown-menu {
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 0;
+}
+
+.navbar-nav .dropdown-item {
+  color: #1a1a1a;
+  padding: 0.5rem 1rem;
+}
+
+.navbar-nav .dropdown-item:hover {
+  background-color: #f5f5f5;
+  color: #0066cc;
+}
+
+/* Search button in navbar */
+.navbar .aa-DetachedSearchButton {
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  color: #666;
+}
+
+.navbar .aa-DetachedSearchButton:hover {
+  border-color: #0066cc;
+  background: #fafafa;
+}
