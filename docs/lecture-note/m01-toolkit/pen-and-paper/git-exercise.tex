@@ -219,7 +219,7 @@ Your current snapshot history represents your stable, working code. This is the 
 
 \end{enumerate}
 
-\subsection{Combining Work}
+\section{Part 3: Collaboration}
 
 You and a colleague are both working on the project. You're working on different paths:
 
@@ -243,115 +243,18 @@ You and a colleague are both working on the project. You're working on different
 \end{tikzpicture}
 \end{center}
 
-In S4 and S5, you modified \texttt{analysis.py} to add feature X.\\
-In S6, your colleague modified \texttt{README.md} to add documentation.
+In S4 and S5, you modified \texttt{analysis.py} to add feature X. In S6, your colleague modified \texttt{README.md} to add documentation.
 
 \begin{enumerate}[resume]
-    \item You want to combine both sets of work into a single snapshot. Draw what the snapshot history should look like after combining:
-
-    \vspace{5cm}
-
-    \item Now imagine both you and your colleague modified the same line in \texttt{analysis.py}. You changed line 5 to:
-
-    \texttt{result = data * 2}
-
-    Your colleague changed line 5 to:
-
-    \texttt{result = data * 3}
-
-    When you try to combine the work, what problem occurs?
+    \item You both want to combine your work. You changed line 5 in \texttt{analysis.py} to \texttt{result = data * 2}. Your colleague also changed line 5 to \texttt{result = data * 3}. What problem occurs when you try to combine the work?
 
     \vspace{3cm}
 
-\end{enumerate}
-
-\clearpage
-
-\section{Part 3: Collaboration}
-
-\subsection{The Remote Backup Problem}
-
-Your computer crashed last night. Luckily, your friend has been keeping backups of your snapshots on their server. But they only have up to S3. You had made it to S5 on your computer before the crash.
-
-\begin{center}
-\textbf{Your Computer (before crash):}
-\begin{tikzpicture}[node distance=2cm]
-    \node[draw, circle, fill=pltgreen!20, minimum size=0.8cm] (S1) {S1};
-    \node[draw, circle, fill=pltgreen!20, minimum size=0.8cm, right of=S1] (S2) {S2};
-    \node[draw, circle, fill=pltgreen!20, minimum size=0.8cm, right of=S2] (S3) {S3};
-    \node[draw, circle, fill=pltgreen!20, minimum size=0.8cm, right of=S3] (S4) {S4};
-    \node[draw, circle, fill=pltgreen!20, minimum size=0.8cm, right of=S4] (S5) {S5};
-    \draw[->, thick] (S1) -- (S2);
-    \draw[->, thick] (S2) -- (S3);
-    \draw[->, thick] (S3) -- (S4);
-    \draw[->, thick] (S4) -- (S5);
-\end{tikzpicture}
-
-\vspace{1cm}
-
-\textbf{Backup Server:}
-\begin{tikzpicture}[node distance=2cm]
-    \node[draw, circle, fill=gray!20, minimum size=0.8cm] (S1) {S1};
-    \node[draw, circle, fill=gray!20, minimum size=0.8cm, right of=S1] (S2) {S2};
-    \node[draw, circle, fill=gray!20, minimum size=0.8cm, right of=S2] (S3) {S3};
-    \draw[->, thick] (S1) -- (S2);
-    \draw[->, thick] (S2) -- (S3);
-\end{tikzpicture}
-\end{center}
-
-\begin{enumerate}[resume]
-    \item The backup server has S1, S2, and S3. Your computer (before crashing) had S1 through S5. If you restore from the backup server, how much work will you need to redo? What specific changes from the scenario above would be lost?
-
-    \vspace{2cm}
-
-    \item What operation are you doing when you send snapshots to the backup server?
-
-    \vspace{2cm}
-
-    \item What operation are you doing when you retrieve snapshots from the backup server?
-
-    \vspace{2cm}
-
-\end{enumerate}
-
-\subsection{Code Review}
-
-You're working with a team. You've created a new feature on your path:
-
-\begin{center}
-\textbf{Backup Server:}
-\begin{tikzpicture}[node distance=2.5cm]
-    \node[draw, circle, fill=gray!20, minimum size=0.8cm] (S1) {S1};
-    \node[draw, circle, fill=gray!20, minimum size=0.8cm, right of=S1] (S2) {S2};
-    \node[draw, circle, fill=gray!20, minimum size=0.8cm, right of=S2] (S3) {S3};
-    \node[draw, circle, fill=pltblue!20, minimum size=0.8cm, above right of=S3, node distance=1.8cm] (S4) {S4};
-    \node[draw, circle, fill=pltblue!20, minimum size=0.8cm, right of=S4, node distance=1.8cm] (S5) {S5};
-
-    \draw[->, thick] (S1) -- (S2);
-    \draw[->, thick] (S2) -- (S3);
-    \draw[->, thick] (S3) -- (S4);
-    \draw[->, thick] (S4) -- (S5);
-
-    \node[below of=S2, node distance=1.2cm] {\textbf{main path}};
-    \node[above of=S5, node distance=1cm, color=pltblue] {\textbf{your-feature}};
-\end{tikzpicture}
-\end{center}
-
-Your team has a rule: before combining work into the main path, someone else must review your code.
-
-\begin{enumerate}[resume]
-    \item Why might it be useful to have someone review your code before combining it?
+    \item Your team keeps snapshots on a backup server. When you want to send your snapshots to the server, what would you call this operation? When you want to retrieve snapshots from the server, what would you call that operation?
 
     \vspace{3cm}
 
-    \item Your teammate reviews S4 and S5. They leave comments on specific lines:
-
-    \begin{tcolorbox}[colback=yellow!10, colframe=pltorange]
-    \textbf{S5, analysis.py, line 12:}\\
-    "This will crash if the input is negative. Can you add a check?"
-    \end{tcolorbox}
-
-    What are the specific steps you should take to address this feedback? Consider: Do you need to create a new snapshot? Should the new work go on the same path or a different one? How will your teammate know you've addressed their concern?
+    \item Before combining work into the main path, someone else on your team reviews your code. Why might this code review step be useful?
 
     \vspace{3cm}
 
