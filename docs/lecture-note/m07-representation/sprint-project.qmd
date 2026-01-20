@@ -1,0 +1,83 @@
+---
+title: "Sprint Project: The Les Misérables Identity Crisis"
+---
+
+::: {.callout-note title="Your mission"}
+You have 90 minutes to contrast two forms of meaning using *Les Misérables*. We provide both the raw text and a network constructed from character co-occurrences on the same pages. Your task: generate two rival embeddings for the cast. Create one semantic space using text-based methods like Word2Vec or Sentence-BERT. Create a second structural space using Node2Vec on the co-occurrence graph. Compare these spaces to find identity crises. Who is Jean Valjean close to in the story versus in the network structure? The team that finds the biggest "reputation gap" wins.
+:::
+
+## The Challenge
+
+Let's talk about the philosophical tension this sprint explores. Structuralism argues that meaning comes from relationships and differences within a system. A character's identity emerges from their position in the social network. But narrative meaning comes from actions, dialogue, and descriptions in the text. These two forms of meaning can conflict.
+
+Jean Valjean might frequently appear with Javert in the story, creating narrative association. But structurally, Valjean might occupy a network position more similar to other central figures like Marius or Cosette. His textual vibe versus his structural role may diverge.
+
+Your task is to measure this divergence. You will create two embedding spaces. The semantic space captures who is described similarly or appears in similar narrative contexts. The structural space captures who occupies similar positions in the co-occurrence network.
+
+Then you compare. Project both spaces to 2D using PCA or t-SNE. For each character, compute their nearest neighbors in both spaces. Find characters whose textual friends differ drastically from their structural friends. These are the identity crises.
+
+## The Rules
+
+**Data Provided:** You receive the full text of *Les Misérables* and a co-occurrence network where edges connect characters who appear together in the same chapters or pages.
+
+**Two Embeddings Required:** You must generate both semantic embeddings (from text) and structural embeddings (from the network). Document which methods you used.
+
+**Semantic Embedding Options:** Use Word2Vec, GloVe, BERT, Sentence-BERT, or similar methods to embed character names based on their textual context.
+
+**Structural Embedding Options:** Use Node2Vec, DeepWalk, or graph neural network methods to embed characters based on their network positions.
+
+**Identity Crisis Discovery:** Identify at least three characters whose textual embedding neighborhood differs significantly from their structural embedding neighborhood. Quantify the difference.
+
+**Time Limit:** 90 minutes from data receipt to presentation.
+
+**Team Structure:** Work in pairs with Driver-Navigator switching every 15 minutes.
+
+## The Workflow
+
+Begin by examining the data. Read excerpts of the text to refresh your memory of the plot. Visualize the co-occurrence network. Identify major characters who should appear in both data sources.
+
+Now create your semantic embeddings. If using Word2Vec, train on the text corpus treating character names as single tokens. If using BERT or Sentence-BERT, collect all sentences mentioning each character and compute average embeddings. Verify that you have embeddings for major characters.
+
+Next, create your structural embeddings. Load the co-occurrence network. Run Node2Vec or another graph embedding algorithm. Extract the embedding vectors for the same set of characters you embedded semantically.
+
+Now comes the comparison. For each character, compute their k-nearest neighbors in semantic space (based on textual embedding similarity). Compute their k-nearest neighbors in structural space (based on network embedding similarity). Compare these two neighborhoods.
+
+Quantify the discrepancy. You might measure the Jaccard distance between the two neighbor sets. Or compute the correlation between semantic and structural similarity rankings. Characters with low correlation have the biggest identity gaps.
+
+Select your most interesting findings. Look for characters where the discrepancy makes sense given the plot. Perhaps Javert is textually similar to other authority figures but structurally central like main characters. Perhaps Thénardier appears in similar contexts as criminal associates but has a network position similar to comic relief characters.
+
+Visualize your findings. Create a 2D projection showing characters in both semantic and structural spaces. Draw lines connecting each character's positions in the two spaces. Long lines indicate big identity gaps.
+
+## What Makes You Win
+
+The class votes on the most compelling reputation gap. Judges look for several qualities.
+
+**Magnitude:** How large is the discrepancy? Characters with completely non-overlapping neighborhoods in the two spaces score higher than characters with partially different neighbors.
+
+**Interpretability:** Does the gap make sense given the story? The best findings illuminate something true about the character's role. Perhaps a character is described like a hero but structurally positioned like a villain.
+
+**Presentation:** Can you clearly explain the gap? Do your visualizations effectively communicate the difference?
+
+Strong entries often find characters who play multiple roles. Perhaps someone is textually associated with the rebellion but structurally connected to the established order. Perhaps someone speaks like upper class characters but occupies a network position among the poor.
+
+## Common Pitfalls
+
+The first mistake is using inconsistent character sets. Teams sometimes embed 30 characters textually but only 20 structurally. Use the same characters in both spaces to enable comparison.
+
+Another trap is poor semantic embeddings. If you do not pre-process character names correctly (e.g., treating "Jean Valjean" as two separate words), your embeddings will be noisy. Ensure character names are treated as single tokens.
+
+The third pitfall is not interpreting your findings. Teams sometimes report that "Character X has a 0.3 correlation between spaces" without explaining what this means for the story. Connect your quantitative findings back to narrative understanding.
+
+## The Takeaway
+
+This sprint demonstrates that meaning is multifaceted. The same entity can have different identities in different representational systems. This matters beyond literature analysis.
+
+In social networks, people present themselves one way (semantic) but occupy structural positions that suggest different roles. In citation networks, papers describe themselves with certain keywords (semantic) but get cited in contexts that reveal different influence (structural).
+
+Understanding the relationship between semantic and structural representations is crucial for representation learning. When you embed entities, which information should dominate? Textual descriptions? Network topology? Both? This sprint makes that question concrete.
+
+You also practice integrating different data sources. Real-world analysis often requires combining text, networks, and other modalities. This project builds your ability to create comparable embeddings from heterogeneous data.
+
+By the end, you will have a richer understanding of how structuralism relates to semantic meaning. You will see that meaning comes from both internal descriptions and external relationships. The gap between these perspectives creates interesting analytical opportunities.
+
+Ready to explore some identity crises? Let's dive into *Les Misérables*.

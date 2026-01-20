@@ -1,0 +1,73 @@
+---
+title: "Sprint Project: Adversarial Art Attack"
+---
+
+::: {.callout-note title="Your mission"}
+You have 90 minutes to trick a state-of-the-art image classifier into spectacular failure. Given a pre-trained CNN like ResNet or VGG trained on ImageNet, you must take an ordinary image and modify it until the model confidently misclassifies it as something absurd. Perhaps you transform a banana into a toaster in the model's eyes. The challenge: make the smallest possible change that a human would barely notice. The team with the least visible modification that achieves confident misclassification wins.
+:::
+
+## The Challenge
+
+Let's talk about what this sprint reveals about deep learning. CNNs achieve superhuman accuracy on image classification. They recognize thousands of object categories. They handle variations in lighting, angle, and occlusion. Yet they remain fundamentally different from human vision.
+
+Humans perceive objects holistically. We recognize a banana by its shape, color, context. CNNs instead learn statistical patterns in pixel values. This difference creates vulnerabilities. Small perturbations that preserve human perception can completely fool the model.
+
+Your task is to exploit this vulnerability. You start with a correctly classified image. Perhaps the model confidently labels it as "banana" with 99% probability. You then modify pixels until the model's prediction flips. Maybe it now says "toaster" with 95% confidence. The art is making this change imperceptible to humans.
+
+You can approach this either algorithmically or manually. The algorithmic route involves implementing adversarial attack methods: adding noise, computing gradients, iteratively perturbing pixels. The manual route involves digital editing: adjusting colors, adding texture, drawing subtle patterns. Both paths are valid.
+
+## The Rules
+
+**Pre-trained Model Required:** Use a CNN trained on ImageNet. Popular choices include ResNet-50, VGG-16, or Inception. Do not retrain or fine-tune. Use the model as-is.
+
+**Target Misclassification:** Choose your starting image and target class. You might start with "banana" and target "toaster" or start with "cat" and target "ostrich." More absurd targets score extra points for humor.
+
+**Minimal Modification:** The victory goes to the team whose modification is least visible to humans. Judges will compare your original and modified images side-by-side. If they cannot spot the difference easily, you win.
+
+**Confident Misclassification:** Your modified image must produce high confidence in the wrong class. Aim for at least 80% probability on your target category.
+
+**Time Limit:** 90 minutes from receiving starter code to demonstrating the attack.
+
+**Team Structure:** Work in pairs as Driver and Navigator. Switch roles every 15 minutes.
+
+## The Workflow
+
+Start by selecting your image and loading your pre-trained model. Verify that the model correctly classifies your starting image with high confidence. Display the top-5 predictions to confirm.
+
+Decide on your target class. Consider both feasibility and humor. Some misclassifications are easier to achieve than others. Drastically different categories (banana to building) may require larger perturbations than somewhat similar categories (banana to corn).
+
+Now choose your attack strategy. If you prefer the algorithmic approach, implement a method like FGSM (Fast Gradient Sign Method) or PGD (Projected Gradient Descent). These techniques compute which pixels most influence the classification and perturb them optimally.
+
+If you prefer manual editing, open the image in a tool and experiment. Try adding subtle noise patterns. Try adjusting color channels slightly. Try overlaying faint textures. After each modification, run the image through the model and check predictions.
+
+Iterate until you achieve confident misclassification. Track both the model's confidence and the visual perceptibility of your changes. You want high model confidence but low human noticeability.
+
+Document your process. Save multiple versions showing progression. When you present, you will want to show the original, the modified image, and the model's predictions on each.
+
+## What Makes You Win
+
+Judges evaluate on two criteria.
+
+**Invisibility:** How hard is it for humans to spot your modification? If judges can instantly see the change, your attack is too crude. Ideal attacks look identical to the original at first glance. Only careful examination reveals subtle differences.
+
+**Confidence:** How certain is the model about the wrong classification? A 51% confidence misclassification is weak. A 95% confidence misclassification is impressive.
+
+Bonus points go to teams who create especially absurd or humorous misclassifications. Turning a stop sign into a banana is funny. Turning a cat into a toaster is hilarious.
+
+## Common Pitfalls
+
+The first mistake is making visible changes. Teams sometimes add obvious noise or color shifts that humans spot immediately. Remember that adversarial examples should fool the model while remaining imperceptible to people.
+
+Another trap is stopping at low-confidence misclassification. If your modified image produces 40% toaster and 35% banana, the model is confused but not decisively wrong. Push further until you get strong wrong predictions.
+
+The third pitfall is ignoring the algorithmic approach. Manually editing pixels can work but is inefficient. Gradient-based attacks find optimal perturbations much faster. If you know how to compute gradients, use them.
+
+## The Takeaway
+
+This sprint demystifies deep learning robustness. You learn that CNNs, despite their impressive accuracy, can be easily fooled. This has serious implications for real-world deployment. Autonomous vehicles use vision models. Medical imaging relies on classification networks. Security systems employ facial recognition. All are potentially vulnerable.
+
+You also develop intuition for how CNNs actually work. By finding the minimal perturbation that causes misclassification, you discover what features the model uses. Perhaps changing red-to-yellow pixels matters most for fooling banana classification. This reveals that the model relies on color more than shape.
+
+These insights make you a better practitioner. You will think more carefully about model robustness. You will test edge cases. You will not blindly trust high accuracy. And you will understand adversarial training as a potential defense.
+
+Now go fool some neural networks.
