@@ -676,7 +676,7 @@ What you’ll learn in this module
 <p>High-dimensional space is hostile territory. In our comfortable 3D world, we understand distance and density. But in 50 dimensions, your intuition betrays you: the volume of space explodes, points become lonely wanderers, and “distance” loses its meaning. This is the <strong>Curse of Dimensionality</strong>.</p>
 <p>You can’t plot 50 dimensions directly. Dimensionality reduction bridges this gap, projecting high-dimensional data into 2 or 3 seeable dimensions. But this projection always involves a trade-off. Some methods preserve global structure (the big picture), while others preserve local structure (the neighborhood relationships). Understanding this trade-off is the key to avoiding misleading visualizations.</p>
 <p>Consider this geometrical nightmare: In 1D, 10 points cover the unit interval nicely. To maintain that same density in 10 dimensions, you don’t need 100 points—you need 10 billion. Even stranger, as dimensions increase, all points become roughly equidistant from each other. The concept of “nearest neighbor” dissolves.</p>
-<div id="aaa779b3" class="cell" data-fig-height="5" data-fig-width="10" data-execution_count="1">
+<div id="37b6b198" class="cell" data-fig-height="5" data-fig-width="10" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -740,7 +740,7 @@ What you’ll learn in this module
 <section id="pairwise-scatter-plots-the-brute-force-approach" class="level2">
 <h2 class="anchored" data-anchor-id="pairwise-scatter-plots-the-brute-force-approach">Pairwise Scatter Plots: The Brute Force Approach</h2>
 <p>When you have a moderate number of dimensions (roughly 3 to 10), you can visualize all pairwise relationships using a scatter plot matrix, also called a pairs plot or SPLOM.</p>
-<div id="5ab5eca8" class="cell" data-fig-height="14" data-fig-width="14" data-execution_count="2">
+<div id="b2da6e18" class="cell" data-fig-height="14" data-fig-width="14" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load classic iris dataset (4 dimensions)</span></span>
@@ -760,7 +760,7 @@ What you’ll learn in this module
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>                 diag_kws<span class="op">=</span>{<span class="st">'alpha'</span>: <span class="fl">0.7</span>, <span class="st">'linewidth'</span>: <span class="dv">2</span>})</span>
 <span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>g.fig.suptitle(<span class="st">'Iris Dataset: All Pairwise Relationships'</span>, y<span class="op">=</span><span class="fl">1.01</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="177">
+<div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>Text(0.5, 1.01, 'Iris Dataset: All Pairwise Relationships')</code></pre>
 <p>Scatter plot matrix showing all pairwise relationships in the Iris dataset</p>
 </div>
@@ -782,7 +782,7 @@ What you’ll learn in this module
 <p>We want to find a vector <span class="math inline">v</span> that maximizes the variance of the projection <span class="math inline">Xv</span>. This turns out to be an eigenvalue problem:</p>
 <p><span class="math display"> C v = \lambda v </span></p>
 <p>The eigenvector <span class="math inline">v</span> with the largest eigenvalue <span class="math inline">\lambda</span> is the first principal component. The eigenvalue <span class="math inline">\lambda</span> represents the amount of variance captured by that component.</p>
-<div id="7c8eb013" class="cell" data-fig-height="6" data-fig-width="10" data-execution_count="3">
+<div id="e29a2019" class="cell" data-fig-height="6" data-fig-width="10" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
@@ -831,7 +831,7 @@ What you’ll learn in this module
 <section id="applying-pca-to-iris" class="level3">
 <h3 class="anchored" data-anchor-id="applying-pca-to-iris">Applying PCA to Iris</h3>
 <p>Let’s apply PCA to the 4-dimensional Iris dataset and see how much information we can preserve in just 2 dimensions.</p>
-<div id="5b9aa4cf" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="4">
+<div id="7f2fe18c" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare data</span></span>
@@ -895,7 +895,7 @@ What you’ll learn in this module
 <h2 class="anchored" data-anchor-id="non-linear-dimensionality-reduction-mds">Non-Linear Dimensionality Reduction: MDS</h2>
 <p>Shift your perspective from <em>variance</em> to <em>distances</em>. Multidimensional Scaling (MDS) tries to preserve the pairwise distances between points. Think of it like making a map from a mileage table: you know the distance between every pair of cities in a spreadsheet, but you don’t know where they are on a map. MDS works backward to find coordinates that satisfy those distances.</p>
 <p><strong>The Math</strong>: Given a high-dimensional distance matrix <span class="math inline">D</span> where <span class="math inline">d_{ij}</span> is the distance between points <span class="math inline">i</span> and <span class="math inline">j</span>, MDS seeks low-dimensional coordinates <span class="math inline">y_1, \dots, y_n</span> that minimize the <strong>Stress</strong> function: <span class="math display"> \text{Stress} = \sqrt{ \frac{\sum_{i&lt;j} (d_{ij} - \|y_i - y_j\|)^2}{\sum_{i&lt;j} d_{ij}^2} } </span> Minimizing this stress forces the Euclidean distances in the low-dimensional map <span class="math inline">\|y_i - y_j\|</span> to approximate the original distances <span class="math inline">d_{ij}</span>.</p>
-<div id="fa6574a0" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="5">
+<div id="9483cf2f" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.manifold <span class="im">import</span> MDS</span>
@@ -957,7 +957,7 @@ What you’ll learn in this module
 </figure>
 </div>
 <p><strong>The Math</strong>: Isomap transforms the problem into MDS by changing the distance metric to follow the data’s underlying manifold. It begins by constructing a neighborhood graph, where points <span class="math inline">i</span> and <span class="math inline">j</span> are connected if <span class="math inline">d_{ij} &lt; \epsilon</span> (epsilon-Isomap) or if <span class="math inline">j</span> is among the <span class="math inline">k</span>-nearest neighbors (k-Isomap). Next, it computes the geodesic distances <span class="math inline">d_G(i, j)</span> as the shortest path distance between nodes in the graph using algorithms like Dijkstra’s or Floyd-Warshall. Finally, classical MDS is applied to this matrix of geodesic distances <span class="math inline">D_G</span> to find the low-dimensional coordinates.</p>
-<div id="c0944b74" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="6">
+<div id="711e15cc" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.manifold <span class="im">import</span> Isomap</span>
@@ -1021,7 +1021,7 @@ What you’ll learn in this module
 <li><p><strong>Optimization</strong>: We minimize the <strong>Kullback-Leibler (KL) divergence</strong> between <span class="math inline">P</span> and <span class="math inline">Q</span> using gradient descent: <span class="math display"> C = KL(P||Q) = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}} </span></p></li>
 </ol>
 <p>The t-distribution’s heavy tails are clever. They let well-separated clusters spread out in 2D without overlapping, while keeping local neighborhoods tight.</p>
-<div id="2ee95df6" class="cell" data-fig-height="5" data-fig-width="15" data-execution_count="7">
+<div id="b96bf757" class="cell" data-fig-height="5" data-fig-width="15" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.manifold <span class="im">import</span> TSNE</span>
@@ -1091,7 +1091,7 @@ When t-SNE works and fails
 <section id="applying-t-sne-to-real-data" class="level3">
 <h3 class="anchored" data-anchor-id="applying-t-sne-to-real-data">Applying t-SNE to real data</h3>
 <p>Let’s apply t-SNE to a more realistic high-dimensional dataset: the digits dataset, which has 64 dimensions (8 by 8 pixel images).</p>
-<div id="8f89687b" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="8">
+<div id="878f50fc" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_digits</span>
@@ -1142,7 +1142,7 @@ When t-SNE works and fails
 <li><strong>Local Connectivity</strong>: It computes high-dimensional probabilities <span class="math inline">p_{ij}</span> using a specific local connectivity constraint: <span class="math display"> p_{j|i} = \exp\left(-\frac{d(x_i, x_j) - \rho_i}{\sigma_i}\right) </span> where <span class="math inline">\rho_i</span> is the distance to the nearest neighbor. This ensures every point is connected to at least one neighbor.</li>
 <li><strong>Binary Cross-Entropy</strong>: Instead of KL divergence, UMAP minimizes the fuzzy set cross-entropy: <span class="math display"> C = \sum_{i \neq j} \left[ p_{ij} \log \left(\frac{p_{ij}}{q_{ij}}\right) + (1 - p_{ij}) \log \left(\frac{1 - p_{ij}}{1 - q_{ij}}\right) \right] </span> The second term <span class="math inline">(1 - p_{ij}) \log (\dots)</span> forces points that are <em>far</em> in high dimensions to also be far in low dimensions, helping UMAP preserve more global structure than t-SNE.</li>
 </ol>
-<div id="fc973cfa" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="9">
+<div id="a230acc2" class="cell" data-fig-height="6" data-fig-width="14" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> umap</span>
@@ -1174,77 +1174,20 @@ When t-SNE works and fails
 <span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output cell-output-stderr">
+<pre><code>/Users/skojaku-admin/Documents/projects/applied-soft-comp/.venv/lib/python3.12/site-packages/umap/umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(</code></pre>
+</div>
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="highd-data_files/figure-html/cell-10-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="highd-data_files/figure-html/cell-10-output-2.png" class="img-fluid figure-img"></p>
 <figcaption>UMAP vs t-SNE on digits dataset. UMAP often preserves more global structure while being much faster.</figcaption>
 </figure>
 </div>
 </div>
 </div>
 <p>Both methods reveal similar cluster structure, but UMAP tends to space clusters more evenly and preserve more global topology (notice how UMAP places similar digits like 3, 5, 8 in a connected region, suggesting they share underlying structure).</p>
-</section>
-<section id="the-bigger-picture-choosing-the-right-method" class="level2">
-<h2 class="anchored" data-anchor-id="the-bigger-picture-choosing-the-right-method">The Bigger Picture: Choosing the Right Method</h2>
-<p>Let’s step back and see the full landscape. Dimensionality reduction is not a one-size-fits-all solution. Different methods make different trade-offs:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 15%">
-<col style="width: 21%">
-<col style="width: 13%">
-<col style="width: 25%">
-<col style="width: 25%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>Preserves</th>
-<th>Speed</th>
-<th>Scalability</th>
-<th>When to use</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Scatter plot matrix</strong></td>
-<td>Everything (2D projections)</td>
-<td>Fast</td>
-<td>3-10 dimensions</td>
-<td>Exploring moderate-dimensional data</td>
-</tr>
-<tr class="even">
-<td><strong>PCA</strong></td>
-<td>Global variance</td>
-<td>Very fast</td>
-<td>Excellent (1000s of dims)</td>
-<td>Linear structure, interpretability needed</td>
-</tr>
-<tr class="odd">
-<td><strong>MDS</strong></td>
-<td>All distances</td>
-<td>Slow</td>
-<td>Poor (100s of points)</td>
-<td>Distance preservation critical</td>
-</tr>
-<tr class="even">
-<td><strong>t-SNE</strong></td>
-<td>Local structure</td>
-<td>Slow</td>
-<td>Moderate (10,000s of points)</td>
-<td>Revealing clusters, local relationships</td>
-</tr>
-<tr class="odd">
-<td><strong>UMAP</strong></td>
-<td>Local plus some global</td>
-<td>Fast</td>
-<td>Excellent (millions of points)</td>
-<td>Large datasets, faster alternative to t-SNE</td>
-</tr>
-</tbody>
-</table>
-<p>A practical workflow begins with PCA: always run PCA first. It’s fast, deterministic, and interpretable. If the first few components capture enough variance, you’re done. If the data is nonlinear or you need to separate complex clusters, move to t-SNE or UMAP.</p>
-<p>Validate your findings. Don’t trust a single visualization: try different random seeds, vary the perplexity, and compare methods.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Try it yourself">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">

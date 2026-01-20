@@ -685,7 +685,7 @@ What you’ll learn in this module
 <p>Here is an interactive demo of GPT inference available online at https://static.marimo.app/static/gpt-ar61. You can try different sampling strategies and see the results.</p>
 <p>GPT generates text one token at a time, repeatedly sampling from the probability distribution. Let’s examine the strategies for sampling that balance quality and diversity.</p>
 <p>First, let’s set up our connection to Ollama:</p>
-<div id="642514e6" class="cell" data-execution_count="1">
+<div id="eb5f5c42" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ollama</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Make sure you have Ollama running and a model pulled</span></span>
@@ -703,7 +703,7 @@ What you’ll learn in this module
 </div>
 <p>GPT greedy search.</p>
 <p>Let’s see greedy sampling in action. We set temperature to 0 to make the sampling deterministic (always picking the highest probability token):</p>
-<div id="be5addf4" class="cell" data-execution_count="2">
+<div id="a392db5d" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>greedy_response <span class="op">=</span> ollama.generate(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>MODEL,</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    prompt<span class="op">=</span>PROMPT,</span>
@@ -737,7 +737,7 @@ The first thing I did was to make a list</code></pre>
 <h3 class="anchored" data-anchor-id="from-deterministic-to-stochastic-sampling">From Deterministic to Stochastic Sampling</h3>
 <p>Both greedy and beam search are deterministic. They pick the most likely token at each step, creating a loop where the model always predicts the same tokens repeatedly. What’s the solution? Sample a token from the distribution.</p>
 <p>Top-k sampling relaxes the deterministic nature of greedy sampling by selecting randomly from the k most likely next tokens at each generation step. While this introduces some diversity compared to greedy sampling, choosing a fixed k can be problematic. The value of k might be too large for some distribution tails (including many poor options) or too small for others (excluding reasonable options). In our jazz analogy, this is like saying “you can only improvise using these five specific notes”. Sometimes that’s perfect, sometimes it’s too limiting.</p>
-<div id="0a820cc2" class="cell" data-execution_count="3">
+<div id="4f81d218" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>top_k_response <span class="op">=</span> ollama.generate(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>MODEL,</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    prompt<span class="op">=</span>PROMPT,</span>
@@ -749,8 +749,7 @@ The first thing I did was to make a list</code></pre>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(top_k_response[<span class="st">'response'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&nbsp;You're welcome.
-And if you don't want to read that part, please skip ahead</code></pre>
+<pre><code>!!!</code></pre>
 </div>
 </div>
 <p>Try running this multiple times. You’ll get different outputs each time because the model samples randomly from the top-k tokens.</p>
@@ -761,7 +760,7 @@ And if you don't want to read that part, please skip ahead</code></pre>
 </figure>
 </div>
 <p>Nucleus sampling. The image is taken from <a href="https://zenn.dev/hellorusk/articles/1c0bef15057b1d">this blog</a>.</p>
-<div id="83b425b1" class="cell" data-execution_count="4">
+<div id="e83197c6" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>top_p_response <span class="op">=</span> ollama.generate(</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>MODEL,</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    prompt<span class="op">=</span>PROMPT,</span>
@@ -773,8 +772,8 @@ And if you don't want to read that part, please skip ahead</code></pre>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(top_p_response[<span class="st">'response'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&nbsp;Thank you for visiting!!!
-It's been a while since I've updated this blog. And</code></pre>
+<pre><code>&nbsp;I'm going to keep getting new ones here when I finally do my bit.
+As always</code></pre>
 </div>
 </div>
 <p>Nucleus sampling dynamically adjusts the number of candidate tokens based on the probability distribution, making it more adaptive than fixed top-k.</p>
@@ -794,7 +793,7 @@ p_i = \frac{\exp(z_i/\tau)}{\sum_j \exp(z_j/\tau)}
 </div>
 <p>Temperature controls the concentration of the probability distribution. Lower temperature makes the distribution more peaked, while higher temperature makes the distribution more flat.</p>
 <p>Let’s see how temperature affects generation:</p>
-<div id="2692fb65" class="cell" data-execution_count="5">
+<div id="5803fd26" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> tau <span class="kw">in</span> [<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="fl">5.0</span>]:</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> ollama.generate(</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span>MODEL,</span>
@@ -806,12 +805,16 @@ p_i = \frac{\exp(z_i/\tau)}{\sum_j \exp(z_j/\tau)}
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"τ = </span><span class="sc">{</span>tau<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>response[<span class="st">'response'</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>τ = 0.1: &nbsp;I'm so glad you're here.
-You can check out the full list of all my
-τ = 0.5: &nbsp;We are making a great game and we hope you enjoy it as much, if not more.
-τ = 1.0: &nbsp;As many of you know, I'm an avid and active supporter for the United Kingdom Independence Party
-τ = 2.0: &nbsp;What a brilliant post to share with your community. You really helped inspire the world and will be
-τ = 5.0: &nbsp;We're making the movie now because of an emergency. A guy died and it is getting very</code></pre>
+<pre><code>τ = 0.1: &nbsp;I'm so happy to be here. I hope you enjoy this post and feel free not only
+τ = 0.5: &nbsp;I am sorry for the delay, I hope you enjoyed this post.
+The next time around
+τ = 1.0: &nbsp;I'm not happy with the idea of having one in my apartment (no, I was thinking
+τ = 2.0: ~~~ Please follow me if you would like.
+After all of the stuff he wrote that happened
+τ = 5.0: !!!
+
+
+My Santa came up with my own awesome game that you must get and give. We</code></pre>
 </div>
 </div>
 <p>Notice the pattern: low temperature (τ = 0.1) produces conservative, focused output, medium temperature (τ = 1.0) provides balanced diversity, and high temperature (τ = 5.0) produces creative but potentially incoherent output.</p>
@@ -819,7 +822,7 @@ You can check out the full list of all my
 <section id="combining-all-strategies" class="level3">
 <h3 class="anchored" data-anchor-id="combining-all-strategies">Combining All Strategies</h3>
 <p>You can combine top-k, top-p, and temperature for fine-grained control:</p>
-<div id="824eeac7" class="cell" data-execution_count="6">
+<div id="97c71bf4" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>combined_response <span class="op">=</span> ollama.generate(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>MODEL,</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    prompt<span class="op">=</span>PROMPT,</span>
@@ -832,7 +835,7 @@ You can check out the full list of all my
 <span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(combined_response[<span class="st">'response'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&nbsp;I am not trying to be an expert at all. I know what you're thinking: "</code></pre>
+<pre><code>&nbsp;I hope you enjoy this post and that we'll see more of your stories from our archives.</code></pre>
 </div>
 </div>
 <p>What does this combination do? It restricts candidates to top-k tokens, then applies nucleus sampling, and finally uses temperature to control randomness. This gives you maximum control over the generation process.</p>

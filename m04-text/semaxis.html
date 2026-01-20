@@ -687,7 +687,7 @@ v_{\text{axis}} = \frac{v_{w_+} - v_{w_-}}{||v_{w_+} - v_{w_-}\||_2}
 \text{Position of w on axis } v_{\text{axis}} = \cos(v_{\text{axis}},v_{w})
 </span></p>
 <p>Let’s build a “Sentiment Compass” to measure the emotional charge of words that aren’t explicitly emotional. First, we load the standard GloVe embeddings.</p>
-<div id="951b1a55" class="cell" data-execution_count="1">
+<div id="05f4cb2a" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> gensim.downloader <span class="im">as</span> api</span>
@@ -699,7 +699,7 @@ v_{\text{axis}} = \frac{v_{w_+} - v_{w_-}}{||v_{w_+} - v_{w_-}\||_2}
 <section id="defining-the-axis" class="level2">
 <h2 class="anchored" data-anchor-id="defining-the-axis">Defining the Axis</h2>
 <p>We define the axis not as a point, but as the difference vector between two poles. This vector points from “bad” to “good”.</p>
-<div id="68596747" class="cell" data-execution_count="2">
+<div id="049029ff" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_axis(pos_word, neg_word, model):</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> model[pos_word] <span class="op">-</span> model[neg_word]</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -711,7 +711,7 @@ v_{\text{axis}} = \frac{v_{w_+} - v_{w_-}}{||v_{w_+} - v_{w_-}\||_2}
 <section id="measuring-alignment" class="level2">
 <h2 class="anchored" data-anchor-id="measuring-alignment">Measuring Alignment</h2>
 <p>How do we see where a word falls on this axis? We project it using the normalized dot product. If the vector points in the same direction, the score is positive; if it points away, it is negative.</p>
-<div id="310ede9a" class="cell" data-execution_count="3">
+<div id="2b15f31d" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_score(word, axis, model):</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    v_word <span class="op">=</span> model[word]</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Cosine similarity is just a normalized dot product</span></span>
@@ -733,7 +733,7 @@ flower: 0.204</code></pre>
 <section id="robustness-via-centroids" class="level2">
 <h2 class="anchored" data-anchor-id="robustness-via-centroids">Robustness via Centroids</h2>
 <p>Single words are noisy since “bad” might carry connotations of “naughty” or “poor quality”. The solution is to use the centroid of a cluster of synonyms, averaging out the noise to leave only the pure semantic signal.</p>
-<div id="24c3f403" class="cell" data-execution_count="4">
+<div id="bcb744a0" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_robust_axis(pos_word, neg_word, model, k<span class="op">=</span><span class="dv">5</span>):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get k nearest neighbors for both poles</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    pos_group <span class="op">=</span> [pos_word]</span>
@@ -759,7 +759,7 @@ flower: 0.204</code></pre>
 <section id="the-2d-semantic-space" class="level2">
 <h2 class="anchored" data-anchor-id="the-2d-semantic-space">The 2D Semantic Space</h2>
 <p>When does the real power emerge? When we cross two axes, plotting words against “Sentiment” and “Intensity” (Strong vs.&nbsp;Weak) to reveal relationships that a single list hides.</p>
-<div id="31175db1" class="cell" data-execution_count="5">
+<div id="eb396d20" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_2d(words, axis_x, axis_y, model):</span>
