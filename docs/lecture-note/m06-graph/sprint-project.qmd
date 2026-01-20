@@ -3,79 +3,31 @@ title: "Sprint Project: The Network Saboteur"
 ---
 
 ::: {.callout-note title="Your mission"}
-You have 90 minutes to think like an attacker targeting network infrastructure. Given a graph like the Karate Club network or an airline route map, you must identify the minimum number of edges to remove to severely degrade network efficiency. The challenge: predict the critical edges *before* computing centrality metrics. Your intuition about network structure competes against algorithmic approaches. The team that finds the most efficient attack wins.
+You have 60 minutes to identify critical edges whose removal will maximally degrade network efficiency. Predict vulnerable edges *before* computing centrality. Then present your attack strategy and results to the class.
 :::
 
 ## The Challenge
 
-Let's talk about what makes networks fragile. A graph with many nodes and edges can still collapse if you remove the right connections. Bridges between communities are vulnerable points. Hubs that connect distant clusters are load-bearing. The deletion of a few strategic edges can fragment a network or drastically increase path lengths.
-
-Your task is to identify these critical edges. You receive a network graph representing social connections, transportation routes, or another real system. You must remove the fewest possible edges to achieve one of two outcomes: either fragment the network into disconnected components or double the average shortest path length.
-
-The intellectual challenge is prediction. Before calculating any centrality measures, you must use your intuition about network structure to guess which edges are critical. Look at the visualization. Think about how information or resources flow. Identify bottlenecks and bridges. Mark your predictions.
-
-Then you test. Remove your predicted edges and measure the impact. Did the network fragment? Did path lengths increase significantly? Compare your intuition-based attack against an algorithmic baseline that removes edges by betweenness centrality.
+You receive a network graph (social, transportation, etc.). Remove the minimum number of edges (typically 3-5) to either fragment the network or double average shortest path length. The challenge: predict critical edges using only visual inspection before calculating any centrality metrics. Then test if your intuition beats algorithmic approaches.
 
 ## The Rules
 
-**Network Provided:** All teams work with the same graph. We provide an adjacency list or edge list. You may visualize the network but receive no pre-computed metrics.
+**Time:** 60 minutes of work, followed by presentations.
 
-**Prediction Phase:** Before calculating any centrality or metrics, you must predict which edges to remove. Write down your predictions and reasoning. This establishes that you used intuition rather than computation.
+**Prediction Phase:** Write down edge predictions and reasoning *before* computing any metrics.
 
-**Removal Strategy:** You may remove up to N edges where N is specified per network (typically 3–5 edges for graphs with 30–50 nodes). Your goal is maximum damage with minimum removals.
+**Removal Strategy:** Remove up to N edges (specified per network). Document your reasoning.
 
-**Impact Measurement:** After removal, compute network efficiency metrics: number of connected components, average shortest path length, largest component size. These quantify the damage.
+**Impact Measurement:** Compute number of components, average shortest path length, and largest component size.
 
-**Baseline Comparison:** Compare your intuition-based attack against removing the same number of edges ranked by betweenness centrality. If your intuitive picks beat the algorithm, you earn extra points.
+**Baseline Comparison:** Compare against removing edges by betweenness centrality.
 
-**Time Limit:** 90 minutes from receiving the network to presenting results.
+## Evaluation
 
-**Team Structure:** Work in pairs as Driver and Navigator. Switch every 15 minutes.
+Judges compare damage inflicted:
 
-## The Workflow
+**Fragmentation (30%):** How many components created?
 
-Start by visualizing the network. Use NetworkX, igraph, or Gephi to create a layout. Choose a layout algorithm that reveals structure: force-directed layouts often work well. Study the visualization carefully.
+**Path Length Increase (30%):** Percentage increase in average shortest path?
 
-Look for structural features. Are there obvious clusters? Do you see bridges connecting clusters? Are there hub nodes with many connections? Which edges appear to span long distances in the layout?
-
-Now predict. Based purely on visual inspection and structural reasoning, choose which edges to remove. Write down your predictions with brief justifications. For example: "Removing edge (5, 12) because it appears to bridge two dense clusters."
-
-Before removing anything, compute baseline metrics. Measure the original network's properties: number of components (should be 1), average shortest path length, diameter. These establish what you are trying to degrade.
-
-Now execute your attack. Remove your predicted edges from the graph. Recompute the metrics. Calculate the change: how many components now exist? How much did average path length increase? Did you succeed in fragmenting the network or significantly degrading efficiency?
-
-Compare against the algorithmic baseline. Compute betweenness centrality for all edges in the original network. Remove the top N edges by betweenness. Measure the impact. Did your intuition beat the algorithm?
-
-Document everything. Create before-and-after visualizations showing the network with removed edges highlighted. Prepare a clear explanation of your reasoning and results.
-
-## What Makes You Win
-
-Victory goes to the team that inflicts the most damage with their limited edge removals. Judges compare several metrics.
-
-**Fragmentation:** How many connected components did you create? More fragments mean more damage.
-
-**Path Length Increase:** By what percentage did you increase average shortest path length? Larger increases mean worse connectivity.
-
-**Efficiency Degradation:** Some networks do not fragment easily but lose efficiency. Doubling typical path lengths cripples the network even without disconnection.
-
-Bonus points if your intuitive attack beats the betweenness centrality baseline. This demonstrates genuine structural insight rather than just following a recipe.
-
-## Common Pitfalls
-
-The first mistake is removing edges randomly or focusing on high-degree nodes without considering edge importance. An edge connecting two hubs within a cluster matters less than an edge bridging separate clusters.
-
-Another trap is ignoring the prediction requirement. Teams sometimes calculate centrality immediately then claim they "predicted" those edges would be important. Follow the rules: predict first, compute later.
-
-The third pitfall is not comparing against baselines. Without comparison, you cannot know if your attack is effective or if you just got lucky. Always test the algorithmic approach to establish whether your intuition adds value.
-
-## The Takeaway
-
-This sprint develops your intuition for network topology. You learn to identify critical infrastructure by visual inspection. You discover why edge betweenness matters for network robustness. You understand the difference between local importance (degree) and global importance (bridging distant parts).
-
-These insights have real-world applications. Computer networks, power grids, supply chains, and social networks all face similar vulnerabilities. Identifying critical links helps both attackers and defenders. If you can spot bottlenecks, you can attack them or reinforce them depending on your goals.
-
-You also learn the relationship between structure and function in networks. Networks are not just collections of nodes and edges. Their topology determines how information, resources, or influence flow. Understanding this lets you predict behavior without simulation.
-
-This knowledge makes you a better network analyst. You will think about robustness when designing systems. You will identify vulnerabilities in existing networks. You will appreciate the trade-offs between efficiency and resilience.
-
-Ready to sabotage some networks? Start studying that graph.
+**Intuition vs. Algorithm (40%):** Did your intuitive picks beat betweenness centrality baseline?
