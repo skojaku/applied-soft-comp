@@ -8,16 +8,62 @@ This document lists the recommended datasets to provide for each sprint project.
 
 ## Module 1: The Tidy Data Escape Room
 
-**Dataset:** WHO Tuberculosis Data (messy version)
-- **Source:** World Health Organization Global Tuberculosis Report
-- **Download:** [WHO TB Data](https://www.who.int/teams/global-tuberculosis-programme/data)
-- **Why it works:** Contains merged header rows, country codes mixed with names, year columns that should be rows, age/sex encoded in column names, and summary statistics mixed with raw data
-- **Alternative:** Excel files from government statistical agencies often have similar issues
+**Dataset:** Gapminder World Data (intentionally messified)
+- **Source:** [Gapminder](https://www.gapminder.org/data/)
+- **Clean version variables:** `country`, `continent`, `year`, `lifeExp`, `pop`, `gdpPercap`
+- **Why it's the gold standard:** This dataset perfectly demonstrates tidy data's versatility. Students can create temporal views, correlation plots, and distribution comparisons just by changing which columns map to x, y, color, and size—without reshaping the data at all.
 
-**Preparation needed:**
-- Download the Excel file with embedded formatting
-- Keep the messy structure with merged cells and footnotes
-- Provide as-is without cleaning
+**The Messy Version You'll Provide:**
+
+Transform the clean Gapminder data into a nightmare by introducing these tidy data violations:
+
+1. **Wide format years:** Convert years to columns (`lifeExp_1952`, `lifeExp_1957`, etc.)
+2. **Merged headers:** Combine `continent` and `country` into single cells with formatting
+3. **Metadata in cells:** Add footnotes like "* estimated" directly in data cells
+4. **Summary rows:** Insert continental averages mixed with country data
+5. **Implicit missing values:** Leave some cells blank instead of explicit `NA`
+6. **Ambiguous column names:** Use `LE` instead of `lifeExp`, `Pop` and `population` interchangeably
+
+**Preparation script:**
+
+```python
+import pandas as pd
+import numpy as np
+
+# Load clean Gapminder
+df = pd.read_csv('gapminder.csv')
+
+# Create messy version
+# 1. Pivot to wide format for life expectancy
+messy = df.pivot_table(
+    values='lifeExp',
+    index=['country', 'continent'],
+    columns='year'
+)
+messy.columns = [f'lifeExp_{col}' for col in messy.columns]
+
+# 2. Add summary rows
+for continent in df['continent'].unique():
+    continent_data = df[df['continent'] == continent]
+    summary_row = {f'lifeExp_{year}': continent_data[continent_data['year'] == year]['lifeExp'].mean()
+                   for year in df['year'].unique()}
+    summary_row['country'] = f'AVERAGE - {continent}'
+    summary_row['continent'] = continent
+    # Insert summary rows
+
+# 3. Add metadata annotations (*, †, etc.)
+# 4. Merge header cells in Excel export
+# 5. Use inconsistent column naming
+
+messy.to_excel('gapminder_messy.xlsx')
+```
+
+**The Payoff:**
+
+Once students clean this into proper tidy format, they can demonstrate its power by creating:
+1. **Temporal view:** Life expectancy evolution over time (line chart)
+2. **Correlation view:** GDP vs. Life Expectancy (scatter with size=population)
+3. **Distribution view:** Life expectancy by continent (boxplot)
 
 ## Module 2: The Ugly Graph Makeover
 
