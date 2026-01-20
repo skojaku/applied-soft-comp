@@ -10,6 +10,46 @@ You have 60 minutes to fool a pre-trained CNN with imperceptible modifications. 
 
 Take a correctly classified image and modify it until a pre-trained ImageNet model confidently misclassifies it as something absurd. The art is making changes imperceptible to humans. Use either algorithmic methods (FGSM, PGD) or manual editing (subtle noise, color adjustments).
 
+## Kickstarter Code
+
+```python
+import torch
+import torchvision.models as models
+import torchvision.transforms as transforms
+from PIL import Image
+import numpy as np
+
+# Load pre-trained model
+model = models.resnet50(pretrained=True)
+model.eval()
+
+# Load and preprocess image
+transform = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                       std=[0.229, 0.224, 0.225])
+])
+
+img = Image.open('data/original.jpg')
+img_tensor = transform(img).unsqueeze(0)
+
+# Get original prediction
+output = model(img_tensor)
+probs = torch.nn.functional.softmax(output[0], dim=0)
+top5_prob, top5_catid = torch.topk(probs, 5)
+
+print("Original predictions:")
+for i in range(5):
+    print(f"{top5_catid[i].item()}: {top5_prob[i].item():.4f}")
+
+# Now create adversarial example
+# Option 1: FGSM
+# Option 2: Manual editing with PIL
+# ...
+```
+
 ## The Rules
 
 **Time:** 60 minutes of work, followed by presentations.

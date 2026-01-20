@@ -10,6 +10,49 @@ You have 60 minutes to identify critical edges whose removal will maximally degr
 
 You receive a network graph (social, transportation, etc.). Remove the minimum number of edges (typically 3-5) to either fragment the network or double average shortest path length. The challenge: predict critical edges using only visual inspection before calculating any centrality metrics. Then test if your intuition beats algorithmic approaches.
 
+## Kickstarter Code
+
+```python
+import networkx as nx
+import matplotlib.pyplot as plt
+
+# Load the network
+G = nx.read_edgelist('data/network.txt')
+
+# Visualize the network
+pos = nx.spring_layout(G)
+nx.draw(G, pos, with_labels=True, node_color='lightblue',
+        node_size=500, font_size=10)
+plt.show()
+
+# Baseline metrics
+print(f"Number of components: {nx.number_connected_components(G)}")
+print(f"Average shortest path: {nx.average_shortest_path_length(G):.3f}")
+
+# PREDICTION PHASE - Write down your edge predictions first!
+predicted_edges = [
+    # (node1, node2),  # Reason: ...
+    # (node3, node4),  # Reason: ...
+]
+
+# Test your predictions
+G_attacked = G.copy()
+G_attacked.remove_edges_from(predicted_edges)
+
+# Measure impact
+print(f"\nAfter attack:")
+print(f"Number of components: {nx.number_connected_components(G_attacked)}")
+if nx.is_connected(G_attacked):
+    print(f"Average shortest path: {nx.average_shortest_path_length(G_attacked):.3f}")
+
+# Compare with betweenness centrality
+edge_betweenness = nx.edge_betweenness_centrality(G)
+top_edges = sorted(edge_betweenness.items(), key=lambda x: x[1], reverse=True)[:5]
+print("\nTop edges by betweenness:")
+for edge, score in top_edges:
+    print(f"{edge}: {score:.3f}")
+```
+
 ## The Rules
 
 **Time:** 60 minutes of work, followed by presentations.

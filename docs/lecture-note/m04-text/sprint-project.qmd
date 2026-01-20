@@ -10,6 +10,43 @@ You have 60 minutes to create a custom Semaxis, project texts onto it, and find 
 
 You receive unlabeled text data (tweets, headlines, etc.). Define a custom semantic axis (e.g., "Technical vs. Emotional" or "Formal vs. Casual") using anchor terms. Generate embeddings and project all texts onto your axis. Hunt for texts that land in unexpected positions. Which tweet seems "Happy" but scores as "Sad"? Which technical term lands on the "Simple" end?
 
+## Kickstarter Code
+
+```python
+import pandas as pd
+from sentence_transformers import SentenceTransformer
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load texts
+df = pd.read_csv('data/texts.csv')
+texts = df['text'].tolist()
+
+# Load embedding model
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+# Define your semantic axis
+positive_anchors = ["technical", "formal", "professional"]
+negative_anchors = ["emotional", "casual", "personal"]
+
+# Compute embeddings
+text_embeddings = model.encode(texts)
+pos_embeddings = model.encode(positive_anchors)
+neg_embeddings = model.encode(negative_anchors)
+
+# Compute Semaxis projection
+pos_mean = np.mean(pos_embeddings, axis=0)
+neg_mean = np.mean(neg_embeddings, axis=0)
+axis = pos_mean - neg_mean
+
+scores = text_embeddings @ axis
+# Normalize scores
+scores = (scores - scores.min()) / (scores.max() - scores.min())
+
+# Find outliers
+# ...
+```
+
 ## The Rules
 
 **Time:** 60 minutes of work, followed by presentations.

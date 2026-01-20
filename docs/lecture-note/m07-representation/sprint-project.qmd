@@ -10,6 +10,46 @@ You have 60 minutes to create two rival embeddings of *Les Misérables* characte
 
 You receive the full text of *Les Misérables* and a character co-occurrence network. Create semantic embeddings using text-based methods (Word2Vec, BERT, etc.) and structural embeddings using graph methods (Node2Vec, DeepWalk). Compare nearest neighbors in both spaces. Find characters whose textual associations differ drastically from their network position. Who is Valjean close to in narrative versus structure?
 
+## Kickstarter Code
+
+```python
+import pandas as pd
+import networkx as nx
+from gensim.models import Word2Vec
+from node2vec import Node2Vec
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+
+# Load text and network
+with open('data/les_miserables.txt', 'r') as f:
+    text = f.read()
+
+G = nx.read_edgelist('data/character_network.txt')
+
+# Semantic embeddings (example: Word2Vec)
+# Preprocess text to treat character names as single tokens
+characters = list(G.nodes())
+# ... tokenize and train Word2Vec ...
+
+# Structural embeddings (Node2Vec)
+node2vec = Node2Vec(G, dimensions=64, walk_length=30, num_walks=200)
+structural_model = node2vec.fit(window=10, min_count=1)
+
+# Get embeddings for same characters
+semantic_embeds = {}  # character -> semantic embedding
+structural_embeds = {char: structural_model.wv[char] for char in characters}
+
+# Compare nearest neighbors
+for char in characters:
+    sem_neighbors = # ... find k nearest in semantic space
+    struct_neighbors = # ... find k nearest in structural space
+    overlap = len(set(sem_neighbors) & set(struct_neighbors))
+    print(f"{char}: {overlap}/{k} overlap")
+
+# Visualize with PCA
+# ...
+```
+
 ## The Rules
 
 **Time:** 60 minutes of work, followed by presentations.
