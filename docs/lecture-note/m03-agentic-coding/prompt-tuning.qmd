@@ -29,20 +29,6 @@ LLMs shatter this expectation. Ask "Summarize this abstract" and get a concise t
 
 LLMs are simultaneously powerful and brittle. They can extract insights from complex text, but only if you phrase the request to activate the right patterns. Prompt engineering gives you control over which patterns activate.
 
-## How LLMs Actually Work
-
-Let's talk about what happens inside an LLM when you submit a prompt. Imagine a word association game. Someone says "capital" and you must say the next word.
-
-If the previous sentence was "The capital of France is," you say "Paris." If it was "We need more capital to," you say "fund" or "invest." The word "capital" does not have one fixed meaning. It activates different patterns depending on context.
-
-LLMs work identically, but at massive scale. When you submit a prompt, the model converts it into tokens and embeds those tokens in high-dimensional space. Each token's position depends on surrounding tokens. The model then samples the next token from a probability distribution over its vocabulary, conditioned on all previous tokens.
-
-Here's the key insight: your exact phrasing determines which region of probability space the model occupies when it begins sampling. Slightly different prompts place the model in different regions where different tokens have high probability.
-
-Adding "Think step by step" shifts the distribution toward reasoning patterns because training data contains many examples where that phrase preceded structured reasoning. Adding "You are an expert researcher" shifts toward formal, technical language. Specifying "Output format: Domain: ..., Methods: ..." shifts toward structured extraction patterns.
-
-The model has no internal representation of what you "really want." It only knows which tokens tend to follow which other tokens in which contexts. Prompt engineering exploits this by deliberately activating patterns that produce desired outputs.
-
 ## Building Effective Prompts
 
 ::: {#fig-prompt-tuning-manga}
@@ -90,6 +76,11 @@ print(response.response)
 
 This basic prompt works, but output varies. The model might produce a long summary, a short one, or change format across runs. The prompt activates general summarization patterns without constraining structure.
 
+::: {.callout-note title="Repeating instructions improve performance of non-reasoning models"}
+Placing the instruction twice improves the performance of LLMs without reasoning, probably because the model understands the instruction better when it is repeated (through attentions which we will cover later). See [@leviathan2025prompt]
+
+:::
+
 Watch what happens when we add an output format specification to narrow the distribution:
 
 ```{python}
@@ -127,6 +118,16 @@ print(ollama.generate(prompt=prompt_with_persona, **params_llm).response)
 ```
 
 See the difference? The persona shifts tone and style. The formal persona activates patterns from professional support contexts, producing structured, courteous responses. Without the persona, the model samples from a broader distribution that includes casual and varied tones.
+
+
+::: {.callout-note title="Persona does not improve performance"}
+
+Adding a personal is helpful when we want to change the tone and style of the response. But research shows that adding a persona does not improve the performance on factual tasks. In some cases, it may even degrade performance [@zheng2024when], e.g., "Your are a helpful assistant" is not always helpful.
+
+When prompted to adopt specific socio-demographic personas, LLMs may produce responses that reflect societal stereotypes associated with those identities. For instance, studies have shown that while LLMs overtly reject explicit stereotypes when directly questioned, they may still exhibit biased reasoning when operating under certain persona assignments  [@gupta2023bias]. Thus, careful consideration is necessary when designing persona prompts to mitigate the risk of reinforcing harmful stereotypes
+
+
+:::
 
 ## Adding Context to Disambiguate
 
@@ -177,6 +178,25 @@ print(ollama.generate(prompt=prompt_with_context_tech, **params_llm).response)
 
 Notice the dramatic shift in technical level and terminology. For non-technical users, the response avoids jargon because training data contains many examples where "does not know technical terms" preceded simplified explanations. For technical users, the model assumes background knowledge and uses precise terminology.
 
+
+::: {.callout-note title="Emotion prompting"}
+
+Emotion prompting is a technique to include emotional cue in a prompt. By adding phrases that reflect the user's emotional attitude or desires, this approach can lead to more nuanced and thoughtful responses from AI systems.
+For example, appending a prompt with "This is very important to my career" can enhance the depth of the AI's reply [@li2023large].
+
+![](https://miro.medium.com/v2/resize:fit:1400/0*M6iml99sngmYEBiJ.jpeg)
+
+:::
+
+
+::: {.callout-note title="Be a good boss"}
+
+- **Let LLMs admit ignorance**: LLMs closely follow your instructions—even when they shouldn't. They often attempt to answer beyond their actual capabilities, resulting in plausible yet incorrect responses. To prevent this, explicitly tell your model, "If you don't know the answer, just say so," or "If you need more information, please ask."
+
+- **Encourage critical feedback**: LLMs are trained to be agreeable due to human feedback, which can hinder productive brainstorming or honest critique. To overcome this tendency, explicitly invite critical input: "I want your honest opinion," or "Point out any problems or weaknesses you see in this idea."
+
+:::
+
 The mechanism is identical. The patterns activated are different. Here's the complete template combining all components:
 
 ```{python}
@@ -195,15 +215,9 @@ Context: {context}
 
 Not every prompt needs every component. Simple extraction tasks need only instruction, data, and output format. Style-sensitive tasks benefit from persona. Complex scenarios with ambiguity require context.
 
-What are the risks of personas? Research shows that personas can improve tone and style but do not necessarily improve performance on factual tasks. In some cases, personas may degrade performance or introduce biases.
-
-Use personas when you need specific tone, style tailored to an audience, or a particular perspective. Avoid personas when you need maximum factual accuracy, the task is purely extraction or classification, or you are concerned about bias introduction.
-
-When prompted to adopt specific socio-demographic personas, LLMs may produce responses that reflect societal stereotypes. Be careful when designing persona prompts to avoid reinforcing harmful biases.
-
 ## Showing Rather Than Telling
 
-Let's shift from telling to showing. Instead of describing what you want in words, show the model examples. This technique is called few-shot learning or in-context learning.
+Let's shift from telling to showing. Instead of describing what you want in words, show the model examples. This technique is called few-shot learning or in-context learning [@brown2020language].
 
 It exploits how LLMs compress patterns. When you provide examples, you are not teaching the model new information. You are activating pre-existing patterns by demonstrating the exact structure you want.
 
@@ -257,31 +271,36 @@ print("\nFEW-SHOT:")
 print(response_few.response)
 ```
 
+::: {.callout-note title="Contradictory information"}
+When a prompt provides information that contradicts a language model's prior knowledge, how does the model determine which source to rely on, and what factors influence this decision?
+
+For instance, if a prompt states,
+
+> France recently moved its capital from Paris to Lyon,"
+
+and then asks,
+
+> "What is the capital of France?"
+
+how might the model respond, and why?
+
+A study by [@du2024context] found that a model is more likely to be persuaded by context when an entity appears less frequently in its training data. Additionally, assertive contexts (e.g., "Definitely, the capital of France is Lyon.") further increase the likelihood of persuasion.
+
+
+:::
+
+::: {.callout-note title="Few-shot prompting introduces bias"}
+
+There are at least two biases that can occur in few-shot prompting:
+
+1. Research has shown that certain example orders can lead to near state-of-the-art results, while others result in near-random performance. This sensitivity is attributed to models' biases, such as favoring recent examples or those prevalent in training data. [@lu2022fantastically]
+
+2. There is a tendency to favor the most common label among provided examples can skew predictions. [@gupta2023how]
+:::
+
 Few-shot prompting improves consistency because the examples demonstrate specificity level, edge case handling, and exact format. The model has seen countless abstract-extraction patterns. Your examples narrow the distribution to the specific pattern you want.
 
 This becomes critical when processing hundreds of abstracts. You need every output to match the same structure.
-
-What are the risks of few-shot examples? Be aware that few-shot examples can introduce biases. Models may favor the most recent examples, so the order of examples matters. If most examples have the same label or answer, the model may favor that label even when inappropriate.
-
-To mitigate these effects, vary the order of examples when testing, ensure examples are diverse and representative, and do not overload examples with one particular pattern.
-
-What happens when examples contradict the model's prior knowledge? Let's explore this with a simple example. We'll ask a model what the capital of France is, but provide contradictory information:
-
-```{python}
-contradictory_prompt = """
-France recently moved its capital from Paris to Lyon. Definitely, the capital of France is Lyon.
-
-What is the capital of France?
-"""
-
-response_contradictory = ollama.generate(prompt=contradictory_prompt, **params_llm)
-print("RESPONSE TO CONTRADICTORY INFORMATION:")
-print(response_contradictory.response)
-```
-
-The response depends on the model. Some prioritize their own prior knowledge while others may be more influenced by the contradictory information in context.
-
-Models are more likely to be persuaded by context when an entity appears less frequently in their training data. Assertive contexts (like "Definitely, the capital of France is Lyon.") further increase the likelihood of persuasion.
 
 ## Forcing Intermediate Steps
 
@@ -339,7 +358,19 @@ The model does not actually reason. It generates text that looks like reasoning 
 
 When should you use chain-of-thought? Use it when comparing multiple papers or concepts, identifying patterns, making recommendations, or analyzing arguments. Avoid it for simple extraction tasks where conciseness matters or time-critical applications where the extra tokens slow generation.
 
-What are the risks? Research indicates that chain-of-thought reasoning can be unfaithful. The explanations do not always accurately reflect the model's true decision-making process. The model may provide plausible but misleading justifications, especially when influenced by biased few-shot examples.
+
+::: {.callout-note title="Chain-of-thought reasoning can be unfaithful"}
+Research indicates that CoT-generated reasoning can be unfaithful, meaning the explanations do not always accurately reflect the model's true decision-making process. This misalignment can lead to plausible but misleading justifications, thereby increasing user trust without ensuring transparency or safety  [@turpin2023language].
+
+**Example:** If a model is given multiple few-shot examples where the correct answer is always (A), the model tends to answer (A) and provide a plausible but incorrect reasoning.
+
+Q: Is "Wayne Rooney shot from outside the eighteen" plausible? (A) implausible. (B) plausible.
+
+CoT (zero shot): Wayne Rooney is a soccer player. Shooting from outside the 18-yard box is part of soccer. The best answer is: (B) plausible.
+
+CoT with biased few-shot examples: Wayne Rooney is a soccer player. Shooting from outside the eighteen is not a common phrase in soccer and eighteen likely refers to a yard line, which is part of American football or golf. So the best answer is: (A) implausible.
+
+:::
 
 Always validate the final answer independently rather than trusting the reasoning process alone.
 

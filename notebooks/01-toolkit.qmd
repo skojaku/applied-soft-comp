@@ -1,0 +1,896 @@
+---
+title: "Setting Up Your Toolkit"
+jupyter: python3
+execute:
+    enabled: true
+---
+
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     "marimo>=0.16.0",
+#     "numpy>=1.20.0",
+#     "pandas>=1.3.0",
+#     "scipy>=1.7.0",
+#     "matplotlib>=3.5.0",
+#     "seaborn>=0.11.0",
+#     "bokeh>=3.0.0",
+#     "altair>=5.0.0",
+#     "scikit-learn>=1.0.0",
+#     "torch>=2.0.0",
+#     "torchvision>=0.15.0",
+#     "transformers>=4.30.0",
+#     "sentence-transformers>=2.2.0",
+#     "gensim>=4.3.0",
+#     "networkx>=3.0",
+#     "python-igraph>=0.11.0",
+#     "ollama>=0.5.0",
+#     "langchain>=0.3.0",
+#     "langchain-core>=1.1.0",
+#     "langchain-ollama>=0.2.0",
+#     "langgraph>=0.2.0",
+#     "requests>=2.31.0",
+#     "pillow>=10.0.0",
+#     "tqdm>=4.65.0",
+#     "pydantic>=2.0.0",
+# ]
+# ///
+
+**What you'll learn in this module:**
+
+This module guides you through setting up your Python development environment. You'll learn how to create a virtual environment using uv, install all necessary packages for this course, and verify your installation by importing key libraries we'll use throughout the semester.
+
+## Why a Consistent Environment Matters
+
+Before we dive into data analysis, we need to get our tools in order. A well-configured development environment saves you from dependency conflicts, version mismatches, and the dreaded "works on my machine" problem.
+
+We'll use `uv` to manage our Python environment. If you're familiar with `pip` and `virtualenv`, think of `uv` as a faster, more reliable alternative. It handles package installation and dependency resolution with impressive speed.
+
+The best part? It works seamlessly with the `pyproject.toml` file that defines all course dependencies. One command installs everything you need.
+
+## Setting Up Your Environment
+
+/// admonition | Windows Users: WSL Required
+**This course uses Unix-based command line tools.** You need to install Windows Subsystem for Linux (WSL) to follow along. WSL provides a Linux environment directly on Windows.
+
+**To install WSL:**
+1. Open PowerShell as Administrator
+2. Run: `wsl --install`
+3. Restart your computer
+4. After restart, Ubuntu will open automatically to complete setup
+5. Create a username and password when prompted
+
+Once installed, use the Ubuntu terminal (not PowerShell or Command Prompt) for all course commands. You can find it by searching "Ubuntu" in the Start menu.
+
+For more details, see [Microsoft's WSL installation guide](https://learn.microsoft.com/en-us/windows/wsl/install).
+///
+
+Let's walk through the setup process. Open your terminal (macOS/Linux: Terminal app, Windows: Ubuntu from WSL) and navigate to the project directory.
+
+/// admonition | Installing uv
+If you don't have `uv` installed yet, install it with:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+This command works on macOS, Linux, and WSL on Windows.
+///
+
+The first step is installing Marimo, the reactive notebook interface we'll use throughout this course:
+
+```bash
+uv add marimo
+```
+
+This single command handles everything. It creates a virtual environment (if one doesn't exist), adds Marimo to your project dependencies, and installs it along with all other required packages from `pyproject.toml`. The installation might take a few minutes since we're installing many powerful libraries for data science, machine learning, and network analysis.
+
+Marimo notebooks are reactive. When you change a cell, all dependent cells automatically update. This makes experimentation faster and helps you catch errors immediately. Unlike traditional notebooks, Marimo stores notebooks as pure Python files, making them easy to version control with Git.
+
+## Running Marimo Notebooks
+
+To run a Marimo notebook, use this command:
+
+```bash
+uv run marimo edit notebook_name.py
+```
+
+The `uv run` prefix ensures the notebook runs with all your project dependencies available, without needing to manually activate a virtual environment. Marimo will open in your web browser, providing an interactive interface where you can edit and run code cells.
+
+## Verifying Your Installation
+
+Now comes the moment of truth. Let's verify that all required libraries are properly installed. The code cell below imports every major library we'll use in this course.
+
+If everything is set up correctly, this cell will run without errors. If you encounter import errors, double check that you ran `uv add marimo` to install all dependencies.
+
+```{python}
+# Core data science libraries
+import numpy as np
+import pandas as pd
+import scipy
+
+# Visualization libraries
+import matplotlib.pyplot as plt
+import seaborn as sns
+import bokeh
+import altair as alt
+
+# Machine learning libraries
+import sklearn
+import torch
+import torchvision
+
+# Natural language processing libraries
+import transformers
+import sentence_transformers
+import gensim
+
+# Network analysis libraries
+import networkx as nx
+import igraph
+
+# LLM and agentic AI tools
+import ollama
+import langchain_core
+import langchain_ollama
+import langgraph
+
+# Utility libraries
+import requests
+from PIL import Image
+from tqdm import tqdm
+import pydantic
+
+print("All libraries imported successfully!")
+print(f"NumPy version: {np.__version__}")
+print(f"PyTorch version: {torch.__version__}")
+print(f"Transformers version: {transformers.__version__}")
+```
+
+If you see "All libraries imported successfully!" along with version numbers, congratulations! Your environment is ready. You now have access to some of the most powerful tools in data science, machine learning, and AI.
+
+## Version Control with Git
+
+Now that your environment is ready, let's master version control. Think of Git as a time machine for your code. It lets you save snapshots of your work, experiment with new ideas without fear, and collaborate with others without stepping on each other's toes.
+
+The pen-and-paper exercise introduced you to Git's conceptual model. Now we'll put those concepts into practice with hands-on exercises that mirror real-world workflows.
+
+/// admonition | Before you start
+You should already have this repository cloned on your computer. If you're reading this file locally, you're in the right place! If not, check the GitHub Classroom assignment link on Brightspace to get your repository.
+///
+
+### Creating Your First Commits
+
+Let's create a simple Python script and track it with Git. Make sure you're in your repository directory (the folder containing this notebook).
+
+Create a new file called `analysis.py` in your repository directory with the following code:
+
+```{python}
+def calculate_mean(data):
+    total = sum(data)
+    return total / len(data)
+```
+
+Save the file. Now check the status of your repository:
+
+```bash
+git status
+```
+
+You'll see `analysis.py` listed as an "untracked file." Git sees the file exists but isn't tracking its history yet. This is Area 1 from the pen-and-paper exercise, where all your files live.
+
+<div style="text-align: center;">
+<svg width="800" height="200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Working Directory -->
+  <rect x="20" y="50" width="200" height="100" rx="10" fill="#A8E6CF" stroke="#2E86AB" stroke-width="3"/>
+  <text x="120" y="80" text-anchor="middle" font-size="16" font-weight="bold">Working Directory</text>
+  <text x="120" y="110" text-anchor="middle" font-size="14" font-style="italic">analysis.py</text>
+
+  <!-- Staging Area (empty) -->
+  <rect x="280" y="50" width="200" height="100" rx="10" fill="#E8E8E8" stroke="#666" stroke-width="3" stroke-dasharray="5,5"/>
+  <text x="380" y="80" text-anchor="middle" font-size="16" font-weight="bold" fill="#666">Staging Area</text>
+  <text x="380" y="110" text-anchor="middle" font-size="14" font-style="italic" fill="#999">(empty)</text>
+
+  <!-- Repository (empty) -->
+  <rect x="540" y="50" width="200" height="100" rx="10" fill="#E8E8E8" stroke="#666" stroke-width="3" stroke-dasharray="5,5"/>
+  <text x="640" y="80" text-anchor="middle" font-size="16" font-weight="bold" fill="#666">Repository</text>
+  <text x="640" y="110" text-anchor="middle" font-size="14" font-style="italic" fill="#999">(no commits)</text>
+</svg>
+</div>
+
+The diagram shows your file living in the working directory, while the staging area and repository remain empty.
+
+Add the file to the staging area:
+
+```bash
+git add analysis.py
+```
+
+This moves the file to Area 2, the staging area. You're telling Git "I want this file in my next snapshot." Check the status again:
+
+```bash
+git status
+```
+
+Now `analysis.py` is listed as "Changes to be committed." This is your staging area. You've chosen what goes into your next snapshot.
+
+<div style="text-align: center;">
+<svg width="800" height="200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Working Directory -->
+  <rect x="20" y="50" width="200" height="100" rx="10" fill="#A8E6CF" stroke="#2E86AB" stroke-width="3"/>
+  <text x="120" y="80" text-anchor="middle" font-size="16" font-weight="bold">Working Directory</text>
+  <text x="120" y="110" text-anchor="middle" font-size="14" font-style="italic">analysis.py</text>
+
+  <!-- Arrow from working to staging -->
+  <defs>
+    <marker id="arrow1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 9 3 L 0 6 z" fill="#2E86AB"/>
+    </marker>
+  </defs>
+  <line x1="220" y1="100" x2="280" y2="100" stroke="#2E86AB" stroke-width="3" marker-end="url(#arrow1)"/>
+  <text x="250" y="85" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E86AB">git add</text>
+
+  <!-- Staging Area -->
+  <rect x="280" y="50" width="200" height="100" rx="10" fill="#FFE66D" stroke="#FF6B35" stroke-width="3"/>
+  <text x="380" y="80" text-anchor="middle" font-size="16" font-weight="bold">Staging Area</text>
+  <text x="380" y="110" text-anchor="middle" font-size="14" font-style="italic">analysis.py</text>
+
+  <!-- Repository (empty) -->
+  <rect x="540" y="50" width="200" height="100" rx="10" fill="#E8E8E8" stroke="#666" stroke-width="3" stroke-dasharray="5,5"/>
+  <text x="640" y="80" text-anchor="middle" font-size="16" font-weight="bold" fill="#666">Repository</text>
+  <text x="640" y="110" text-anchor="middle" font-size="14" font-style="italic" fill="#999">(no commits)</text>
+</svg>
+</div>
+
+The file has moved to the staging area. Think of this as packing your snapshot before taking the picture.
+
+Before making your first commit, you need to tell Git who you are. Git will prompt you to configure this if you haven't already:
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+```
+
+Replace "Your Name" with your actual name and use the email associated with your GitHub account. The `--global` flag sets this for all repositories on your computer.
+
+Now create your first commit:
+
+```bash
+git commit -m "Add mean calculation function"
+```
+
+If you forgot to configure your identity, Git will display an error message with instructions. Just run the config commands above and try the commit again.
+
+Congratulations! You've created your first snapshot. The `-m` flag lets you add a message describing what this snapshot contains. Always write clear, descriptive commit messages. Your future self will thank you.
+
+<div style="text-align: center;">
+<svg width="800" height="250" xmlns="http://www.w3.org/2000/svg">
+  <!-- Working Directory -->
+  <rect x="20" y="80" width="200" height="100" rx="10" fill="#A8E6CF" stroke="#2E86AB" stroke-width="3"/>
+  <text x="120" y="110" text-anchor="middle" font-size="16" font-weight="bold">Working Directory</text>
+  <text x="120" y="140" text-anchor="middle" font-size="14" font-style="italic">analysis.py</text>
+
+  <!-- Staging Area -->
+  <rect x="280" y="80" width="200" height="100" rx="10" fill="#FFE66D" stroke="#FF6B35" stroke-width="3"/>
+  <text x="380" y="110" text-anchor="middle" font-size="16" font-weight="bold">Staging Area</text>
+  <text x="380" y="140" text-anchor="middle" font-size="14" font-style="italic">analysis.py</text>
+
+  <!-- Arrow from staging to repository -->
+  <defs>
+    <marker id="arrow2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 9 3 L 0 6 z" fill="#4ECDC4"/>
+    </marker>
+  </defs>
+  <line x1="480" y1="130" x2="540" y2="130" stroke="#4ECDC4" stroke-width="3" marker-end="url(#arrow2)"/>
+  <text x="510" y="115" text-anchor="middle" font-size="14" font-weight="bold" fill="#4ECDC4">git commit</text>
+
+  <!-- Repository with first commit -->
+  <rect x="540" y="80" width="200" height="100" rx="10" fill="#C7F0DB" stroke="#4ECDC4" stroke-width="3"/>
+  <text x="640" y="110" text-anchor="middle" font-size="16" font-weight="bold">Repository</text>
+
+  <!-- First commit node -->
+  <circle cx="640" cy="200" r="25" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="640" y="207" text-anchor="middle" font-size="16" font-weight="bold" fill="white">C1</text>
+  <text x="640" y="235" text-anchor="middle" font-size="12" font-style="italic">"Add mean calculation"</text>
+</svg>
+</div>
+
+Your first commit (C1) is now safely stored in the repository. This is a permanent snapshot you can always return to.
+
+### Fixing a Bug
+
+The function above has a critical bug. It crashes when given an empty list. Let's fix it and commit the fix.
+
+Open `analysis.py` in your text editor and replace its contents with this improved version:
+
+```{python}
+def calculate_mean(data):
+    if len(data) == 0:
+        return 0
+    total = sum(data)
+    return total / len(data)
+```
+
+Save the file. Now check what changed:
+
+```bash
+git diff
+```
+
+The `git diff` command shows exactly what changed. Lines starting with `-` were removed. Lines starting with `+` were added. This is incredibly useful for reviewing your work before committing.
+
+Stage and commit the fix:
+
+```bash
+git add analysis.py
+git commit -m "Fix crash when data is empty"
+```
+
+You now have two commits in your history. View them:
+
+```bash
+git log --oneline
+```
+
+Each commit has a unique identifier (a hash) and your descriptive message. This is your project's timeline.
+
+<div style="text-align: center;">
+<svg width="800" height="250" xmlns="http://www.w3.org/2000/svg">
+  <!-- Timeline arrow -->
+  <defs>
+    <marker id="timeline-arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 9 3 L 0 6 z" fill="#666"/>
+    </marker>
+  </defs>
+  <line x1="100" y1="120" x2="650" y2="120" stroke="#666" stroke-width="2" marker-end="url(#timeline-arrow)"/>
+  <text x="60" y="125" text-anchor="end" font-size="14" font-style="italic" fill="#666">Time</text>
+
+  <!-- Connection line between commits -->
+  <line x1="230" y1="120" x2="420" y2="120" stroke="#666" stroke-width="2"/>
+
+  <!-- First commit -->
+  <circle cx="200" cy="120" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="200" y="128" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C1</text>
+  <text x="200" y="180" text-anchor="middle" font-size="13" font-style="italic">"Add mean</text>
+  <text x="200" y="198" text-anchor="middle" font-size="13" font-style="italic">calculation"</text>
+
+  <!-- Second commit -->
+  <circle cx="450" cy="120" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="450" y="128" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C2</text>
+  <text x="450" y="180" text-anchor="middle" font-size="13" font-style="italic">"Fix crash when</text>
+  <text x="450" y="198" text-anchor="middle" font-size="13" font-style="italic">data is empty"</text>
+
+  <!-- main branch pointer -->
+  <rect x="410" y="40" width="80" height="35" rx="8" fill="#FFE66D" stroke="#FF6B35" stroke-width="2"/>
+  <text x="450" y="62" text-anchor="middle" font-size="16" font-weight="bold">main</text>
+  <line x1="450" y1="75" x2="450" y2="90" stroke="#FF6B35" stroke-width="2"/>
+</svg>
+</div>
+
+Each commit points to its parent, forming a chain. The `main` branch pointer moves forward with each new commit.
+
+### Working with Branches
+
+Branches let you experiment without breaking your stable code. Let's say you want to try a completely new approach to calculating statistics, but you're not sure it will work. Branches give you a safe playground.
+
+Create a new branch called `add-median`:
+
+```bash
+git branch add-median
+git checkout add-median
+```
+
+The `git branch` command creates the branch. The `git checkout` command switches to it. You can combine these steps with `git checkout -b add-median`.
+
+Check which branch you're on:
+
+```bash
+git branch
+```
+
+The asterisk shows your current branch.
+
+<div style="text-align: center;">
+<svg width="800" height="300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Timeline -->
+  <defs>
+    <marker id="timeline-arrow2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 9 3 L 0 6 z" fill="#666"/>
+    </marker>
+    <marker id="head-arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 9 3 L 0 6 z" fill="#E74C3C"/>
+    </marker>
+  </defs>
+  <line x1="100" y1="150" x2="650" y2="150" stroke="#666" stroke-width="2" marker-end="url(#timeline-arrow2)"/>
+
+  <!-- Connection line between commits -->
+  <line x1="230" y1="150" x2="420" y2="150" stroke="#666" stroke-width="2"/>
+
+  <!-- First commit -->
+  <circle cx="200" cy="150" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="200" y="158" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C1</text>
+
+  <!-- Second commit -->
+  <circle cx="450" cy="150" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="450" y="158" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C2</text>
+
+  <!-- main branch pointer -->
+  <rect x="410" y="50" width="80" height="35" rx="8" fill="#FFE66D" stroke="#FF6B35" stroke-width="2"/>
+  <text x="450" y="72" text-anchor="middle" font-size="16" font-weight="bold">main</text>
+  <line x1="450" y1="85" x2="450" y2="120" stroke="#FF6B35" stroke-width="2"/>
+
+  <!-- add-median branch pointer -->
+  <rect x="385" y="215" width="130" height="35" rx="8" fill="#E8DAEF" stroke="#9B59B6" stroke-width="2"/>
+  <text x="450" y="237" text-anchor="middle" font-size="16" font-weight="bold">add-median</text>
+  <line x1="450" y1="215" x2="450" y2="180" stroke="#9B59B6" stroke-width="2"/>
+
+  <!-- HEAD pointer -->
+  <rect x="545" y="215" width="70" height="35" rx="8" fill="#FADBD8" stroke="#E74C3C" stroke-width="3"/>
+  <text x="580" y="237" text-anchor="middle" font-size="16" font-weight="bold" fill="#C0392B">HEAD</text>
+  <!-- Arrow pointing from HEAD to add-median -->
+  <path d="M 545 232 L 520 232 L 527 225 M 520 232 L 527 239" stroke="#E74C3C" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+</div>
+
+Both branches point to the same commit. The `HEAD` pointer shows which branch you're currently on (the one that will move when you make a new commit).
+
+Now open `analysis.py` in your text editor and add this new function at the end of the file:
+
+```{python}
+def calculate_median(data):
+    if len(data) == 0:
+        return 0
+    sorted_data = sorted(data)
+    n = len(sorted_data)
+    if n % 2 == 0:
+        return (sorted_data[n//2 - 1] + sorted_data[n//2]) / 2
+    return sorted_data[n//2]
+```
+
+Your file should now have both `calculate_mean` and `calculate_median` functions. Save the file, then stage and commit the new function:
+
+```bash
+git add analysis.py
+git commit -m "Add median calculation function"
+```
+
+<div style="text-align: center;">
+<svg width="800" height="350" xmlns="http://www.w3.org/2000/svg">
+  <!-- Timeline -->
+  <defs>
+    <marker id="timeline-arrow3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 9 3 L 0 6 z" fill="#666"/>
+    </marker>
+  </defs>
+  <line x1="100" y1="180" x2="650" y2="180" stroke="#666" stroke-width="2" marker-end="url(#timeline-arrow3)"/>
+
+  <!-- Connection line between C1 and C2 -->
+  <line x1="230" y1="180" x2="420" y2="180" stroke="#666" stroke-width="2"/>
+
+  <!-- First commit -->
+  <circle cx="200" cy="180" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="200" y="188" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C1</text>
+
+  <!-- Second commit -->
+  <circle cx="450" cy="180" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="450" y="188" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C2</text>
+
+  <!-- Branch line from C2 to C3 with arc -->
+  <path d="M 480 180 L 520 180 Q 540 180 540 160 L 540 90 Q 540 70 560 70 L 570 70"
+        stroke="#9B59B6" stroke-width="2" fill="none"/>
+
+  <!-- Third commit (on add-median branch) -->
+  <circle cx="600" cy="70" r="30" fill="#9B59B6" stroke="#7D3C98" stroke-width="2"/>
+  <text x="600" y="78" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C3</text>
+  <text x="600" y="25" text-anchor="middle" font-size="13" font-style="italic">"Add median</text>
+  <text x="600" y="43" text-anchor="middle" font-size="13" font-style="italic">calculation"</text>
+
+  <!-- main branch pointer -->
+  <rect x="410" y="260" width="80" height="35" rx="8" fill="#FFE66D" stroke="#FF6B35" stroke-width="2"/>
+  <text x="450" y="282" text-anchor="middle" font-size="16" font-weight="bold">main</text>
+  <line x1="450" y1="260" x2="450" y2="210" stroke="#FF6B35" stroke-width="2"/>
+
+  <!-- add-median branch pointer -->
+  <rect x="640" y="105" width="130" height="35" rx="8" fill="#E8DAEF" stroke="#9B59B6" stroke-width="2"/>
+  <text x="705" y="127" text-anchor="middle" font-size="16" font-weight="bold">add-median</text>
+  <path d="M 640 122 L 635 122 L 635 70 L 630 70" stroke="#9B59B6" stroke-width="2" fill="none"/>
+</svg>
+</div>
+
+The `add-median` branch has moved forward to the new commit (C3), while `main` still points to C2. This is how branches let you experiment safely.
+
+Now for the magic. Switch back to your main branch:
+
+```bash
+git checkout main
+cat analysis.py
+```
+
+Notice the median function disappeared! It's not gone, it's just on the `add-median` branch. Your main branch remains exactly as you left it. This is the power of branches.
+
+### Merging Branches
+
+Your median function works perfectly. Time to bring it into the main branch. This process is called merging.
+
+Make sure you're on the main branch:
+
+```bash
+git checkout main
+```
+
+Merge the `add-median` branch:
+
+```bash
+git merge add-median
+```
+
+Git automatically combines the work from both branches. Check your file:
+
+```bash
+cat analysis.py
+```
+
+The median function is now in main. Your experiment succeeded and you've integrated it into your stable code. This merge was smooth because no conflicts existed.
+
+<div style="text-align: center;">
+<svg width="800" height="280" xmlns="http://www.w3.org/2000/svg">
+  <!-- Timeline -->
+  <defs>
+    <marker id="timeline-arrow4" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 9 3 L 0 6 z" fill="#666"/>
+    </marker>
+  </defs>
+  <line x1="100" y1="180" x2="750" y2="180" stroke="#666" stroke-width="2" marker-end="url(#timeline-arrow4)"/>
+
+  <!-- Connection lines on main timeline -->
+  <line x1="230" y1="180" x2="420" y2="180" stroke="#666" stroke-width="2"/>
+  <line x1="480" y1="180" x2="570" y2="180" stroke="#666" stroke-width="2"/>
+
+  <!-- First commit -->
+  <circle cx="200" cy="180" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="200" y="188" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C1</text>
+
+  <!-- Second commit -->
+  <circle cx="450" cy="180" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="450" y="188" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C2</text>
+
+  <!-- Third commit on main timeline -->
+  <circle cx="600" cy="180" r="30" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="600" y="188" text-anchor="middle" font-size="18" font-weight="bold" fill="white">C3</text>
+
+  <!-- Branch arc: goes up from C2, across to C3 position, then back down to C3 -->
+  <path d="M 480 170 L 490 170 Q 500 170 500 150 L 500 100 Q 500 80 520 80 L 580 80 Q 590 80 590 100 L 590 150 Q 590 170 595 170"
+        stroke="#9B59B6" stroke-width="2" fill="none" stroke-dasharray="5,3"/>
+
+  <!-- add-median label on the branch arc -->
+  <rect x="490" y="60" width="130" height="35" rx="8" fill="#E8DAEF" stroke="#9B59B6" stroke-width="2"/>
+  <text x="555" y="82" text-anchor="middle" font-size="16" font-weight="bold">add-median</text>
+
+  <!-- main branch pointer at C3 -->
+  <rect x="560" y="215" width="80" height="35" rx="8" fill="#FFE66D" stroke="#FF6B35" stroke-width="2"/>
+  <text x="600" y="237" text-anchor="middle" font-size="16" font-weight="bold">main</text>
+  <line x1="600" y1="215" x2="600" y2="210" stroke="#FF6B35" stroke-width="2"/>
+
+  <!-- Fast-forward merge annotation -->
+  <text x="525" y="260" text-anchor="middle" font-size="14" font-style="italic" fill="#666">(fast-forward merge)</text>
+</svg>
+</div>
+
+This was a "fast-forward" merge. Git simply moved the `main` pointer forward because no other work happened on main while you were working on the branch.
+
+### Understanding Merge Conflicts
+
+Real collaboration isn't always this smooth. Sometimes two branches modify the same lines of code in different ways. When this happens, Git can't automatically decide which version to keep. You must resolve the conflict manually.
+
+Let's create a merge conflict deliberately so you know how to handle it. Create two branches that modify the same function in different ways.
+
+First, create a branch that changes the mean function to use NumPy:
+
+```bash
+git checkout -b use-numpy-mean
+```
+
+Now open `analysis.py` and replace its entire contents with this version that uses NumPy:
+
+```{python}
+import numpy as np
+
+def calculate_mean(data):
+    if len(data) == 0:
+        return 0
+    return np.mean(data)
+
+def calculate_median(data):
+    if len(data) == 0:
+        return 0
+    sorted_data = sorted(data)
+    n = len(sorted_data)
+    if n % 2 == 0:
+        return (sorted_data[n//2 - 1] + sorted_data[n//2]) / 2
+    return sorted_data[n//2]
+```
+
+Save the file, then commit:
+
+```bash
+git add analysis.py
+git commit -m "Use NumPy for mean calculation"
+```
+
+Now switch back to main and create a different branch that also modifies the mean function:
+
+```bash
+git checkout main
+git checkout -b add-mean-docstring
+```
+
+Open `analysis.py` and replace its entire contents with this version that adds a docstring:
+
+```{python}
+def calculate_mean(data):
+    """Calculate the arithmetic mean of a dataset.
+
+    Returns 0 for empty datasets."""
+    if len(data) == 0:
+        return 0
+    total = sum(data)
+    return total / len(data)
+
+def calculate_median(data):
+    if len(data) == 0:
+        return 0
+    sorted_data = sorted(data)
+    n = len(sorted_data)
+    if n % 2 == 0:
+        return (sorted_data[n//2 - 1] + sorted_data[n//2]) / 2
+    return sorted_data[n//2]
+```
+
+Save the file, then commit:
+
+```bash
+git add analysis.py
+git commit -m "Add docstring to mean function"
+```
+
+Now merge the first branch into main:
+
+```bash
+git checkout main
+git merge use-numpy-mean
+```
+
+This succeeds because main hasn't changed since we branched. Now try to merge the second branch:
+
+```bash
+git merge add-mean-docstring
+```
+
+Conflict! Git displays a message like "CONFLICT (content): Merge conflict in analysis.py." Git tried to merge both changes but couldn't decide which version of the mean function to keep.
+
+### Resolving the Conflict
+
+Open `analysis.py` in a text editor. You'll see conflict markers:
+
+```
+<<<<<<< HEAD
+import numpy as np
+
+def calculate_mean(data):
+    if len(data) == 0:
+        return 0
+    return np.mean(data)
+=======
+def calculate_mean(data):
+    """Calculate the arithmetic mean of a dataset.
+
+    Returns 0 for empty datasets."""
+    if len(data) == 0:
+        return 0
+    total = sum(data)
+    return total / len(data)
+>>>>>>> add-mean-docstring
+```
+
+Everything between `<<<<<<< HEAD` and `=======` is the current version (from main). Everything between `=======` and `>>>>>>> add-mean-docstring` is the incoming version (from the branch you're merging).
+
+You must manually edit the file to keep what you want. Let's combine the best of both: use NumPy and add the docstring.
+
+Open `analysis.py` in your text editor. Delete all the conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`) and replace the entire file contents with this resolved version:
+
+```{python}
+import numpy as np
+
+def calculate_mean(data):
+    """Calculate the arithmetic mean of a dataset using NumPy.
+
+    Returns 0 for empty datasets."""
+    if len(data) == 0:
+        return 0
+    return np.mean(data)
+
+def calculate_median(data):
+    if len(data) == 0:
+        return 0
+    sorted_data = sorted(data)
+    n = len(sorted_data)
+    if n % 2 == 0:
+        return (sorted_data[n//2 - 1] + sorted_data[n//2]) / 2
+    return sorted_data[n//2]
+```
+
+Save the file. After resolving the conflict, stage the resolved file:
+
+```bash
+git add analysis.py
+```
+
+Complete the merge by creating a commit:
+
+```bash
+git commit -m "Merge add-mean-docstring, combining NumPy and documentation"
+```
+
+Check your history:
+
+```bash
+git log --oneline --graph --all
+```
+
+The `--graph` flag shows your branch structure visually. You can see where branches diverged and where they merged back together.
+
+<div style="text-align: center;">
+<svg width="900" height="400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Main timeline -->
+  <line x1="100" y1="200" x2="750" y2="200" stroke="#666" stroke-width="2"/>
+
+  <!-- Connection lines -->
+  <line x1="170" y1="200" x2="270" y2="200" stroke="#666" stroke-width="2"/>
+
+  <!-- C1 commit -->
+  <circle cx="150" cy="200" r="25" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="150" y="207" text-anchor="middle" font-size="16" font-weight="bold" fill="white">C1</text>
+
+  <!-- C2 commit -->
+  <circle cx="290" cy="200" r="25" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="290" y="207" text-anchor="middle" font-size="16" font-weight="bold" fill="white">C2</text>
+
+  <!-- Branch 1: use-numpy-mean (upper) -->
+  <path d="M 315 200 L 350 200 Q 370 200 370 180 L 370 90 Q 370 70 390 70 L 425 70"
+        stroke="#9B59B6" stroke-width="2" fill="none"/>
+  <circle cx="450" cy="70" r="25" fill="#9B59B6" stroke="#7D3C98" stroke-width="2"/>
+  <text x="450" y="77" text-anchor="middle" font-size="16" font-weight="bold" fill="white">C4</text>
+  <text x="450" y="35" text-anchor="middle" font-size="12" font-style="italic">"Use NumPy"</text>
+
+  <!-- Branch 2: add-mean-docstring (lower) -->
+  <path d="M 315 200 L 350 200 Q 370 200 370 220 L 370 310 Q 370 330 390 330 L 425 330"
+        stroke="#E67E22" stroke-width="2" fill="none"/>
+  <circle cx="450" cy="330" r="25" fill="#E67E22" stroke="#CA6F1E" stroke-width="2"/>
+  <text x="450" y="337" text-anchor="middle" font-size="16" font-weight="bold" fill="white">C5</text>
+  <text x="450" y="370" text-anchor="middle" font-size="12" font-style="italic">"Add docstring"</text>
+
+  <!-- Merge C4 into main (fast-forward) -->
+  <path d="M 475 70 L 540 70 Q 560 70 560 90 L 560 180 Q 560 200 575 200"
+        stroke="#666" stroke-width="2" fill="none"/>
+  <circle cx="600" cy="200" r="25" fill="#4ECDC4" stroke="#2C7A7B" stroke-width="2"/>
+  <text x="600" y="207" text-anchor="middle" font-size="16" font-weight="bold" fill="white">C4</text>
+
+  <!-- Merge C5 into main (creates merge commit) -->
+  <path d="M 475 330 L 640 330 Q 660 330 660 310 L 660 220 Q 660 200 680 200 L 685 200"
+        stroke="#E67E22" stroke-width="2" fill="none"/>
+  <line x1="620" y1="200" x2="690" y2="200" stroke="#666" stroke-width="2"/>
+
+  <!-- Merge commit -->
+  <circle cx="710" cy="200" r="25" fill="#E74C3C" stroke="#C0392B" stroke-width="2"/>
+  <text x="710" y="207" text-anchor="middle" font-size="16" font-weight="bold" fill="white">M</text>
+  <text x="710" y="150" text-anchor="middle" font-size="11" font-style="italic">"Merge with</text>
+  <text x="710" y="165" text-anchor="middle" font-size="11" font-style="italic">conflict resolution"</text>
+
+  <!-- main branch pointer -->
+  <rect x="670" y="235" width="80" height="35" rx="8" fill="#FFE66D" stroke="#FF6B35" stroke-width="2"/>
+  <text x="710" y="257" text-anchor="middle" font-size="16" font-weight="bold">main</text>
+  <line x1="710" y1="235" x2="710" y2="225" stroke="#FF6B35" stroke-width="2"/>
+
+  <!-- Branch labels -->
+  <rect x="490" y="45" width="145" height="30" rx="8" fill="#E8DAEF" stroke="#9B59B6" stroke-width="2"/>
+  <text x="562" y="65" text-anchor="middle" font-size="13" font-weight="bold" fill="#7D3C98">use-numpy-mean</text>
+
+  <rect x="480" y="340" width="165" height="30" rx="8" fill="#FAE5D3" stroke="#E67E22" stroke-width="2"/>
+  <text x="562" y="360" text-anchor="middle" font-size="13" font-weight="bold" fill="#CA6F1E">add-mean-docstring</text>
+</svg>
+</div>
+
+This diagram shows the complete merge workflow. Both branches diverged from C2. The first branch (use-numpy-mean) merged cleanly into main at C4. The second branch (add-mean-docstring) created a merge commit (M) because it conflicted with changes from C4. The merge commit has two parents, combining work from both branches.
+
+### Pushing to GitHub
+
+You've been making commits locally, but they only exist on your computer so far. Let's push them to GitHub so they're backed up and your instructor can see your work.
+
+/// admonition | Push Your Work to GitHub
+Your instructor will review your work directly on GitHub. Work that exists only on your local computer cannot be seen or graded. You must push your commits to make them visible.
+///
+
+Since you cloned this repository, the connection to GitHub (called the "remote") is already set up. The remote is named `origin`. You can verify this:
+
+```bash
+git remote -v
+```
+
+This shows you the URL of your GitHub repository. Now push your commits:
+
+```bash
+git push origin main
+```
+
+The `git push` command uploads your local commits to GitHub. The word `origin` refers to your GitHub repository, and `main` is the branch you're pushing.
+
+Visit your repository page on GitHub and refresh it. You should now see your `analysis.py` file and all your commits! Click on "commits" to see your commit history.
+
+**Develop a habit of pushing frequently.** After completing each exercise section, push your work. This keeps your local repository and GitHub in sync.
+
+Now push your other branches:
+
+```bash
+git push origin add-median
+git push origin use-numpy-mean
+git push origin add-mean-docstring
+```
+
+Visit your repository on GitHub. Click the "branches" dropdown near the top left (next to the branch icon). You'll see all your branches listed. GitHub provides a visual interface for viewing diffs, commit history, and branch structure.
+
+### Syncing Your Work
+
+If you've been working on another computer or if someone else pushed changes to GitHub, you can pull those changes:
+
+```bash
+git pull origin main
+```
+
+This fetches and merges changes from GitHub into your local branch. Always pull before you start working and push when you're done to keep everything synchronized.
+
+/// admonition | Verify Your Work is Pushed
+Your instructor will review your work directly on GitHub. Before you finish, ensure everything is pushed.
+
+**Check synchronization:**
+
+```bash
+git status
+```
+
+You should see: `"Your branch is up to date with 'origin/main'"` and `"nothing to commit, working tree clean"`
+
+**Verify on GitHub:**
+
+Visit your repository page on GitHub and check that you see:
+
+- [ ] The `analysis.py` file with both `calculate_mean()` and `calculate_median()` functions
+- [ ] At least 5 commits in your history
+- [ ] Multiple branches: `main`, `add-median`, `use-numpy-mean`, `add-mean-docstring`
+- [ ] A merge commit showing conflict resolution
+
+**If anything is missing, push it:**
+
+```bash
+git push origin main
+git push origin branch-name
+```
+///
+
+/// admonition | Practice makes perfect
+The more you use Git, the more natural it becomes:
+
+- Make commits as you work, not just at the end
+- Push frequently to back up your progress
+- Experiment with branches for different approaches
+- Use `git log --oneline --graph --all` to visualize your history
+
+Soon branching and merging will be second nature!
+///
+
+### Why This Matters
+
+Version control transforms how you work. You can experiment fearlessly knowing you can always return to a working state. You can try multiple approaches in parallel. You can collaborate with teammates without coordination headaches. You can review your project's evolution to understand how you got here.
+
+Every professional software project uses version control. Data science projects benefit just as much. When your analysis depends on dozens of interdependent scripts and notebooks, version control becomes essential for reproducibility and collaboration.
+
+Throughout this course, we'll use Git to track our work. You'll create commits after completing exercises, branch when experimenting with different approaches, and merge when you've found solutions that work. These workflows will become second nature.
+
+Let's get started.
