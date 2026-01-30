@@ -712,7 +712,7 @@ Figure&nbsp;1
 <p>Install LangGraph and LangChain first:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install langgraph langchain langchain-ollama</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Now let’s build an agent that can explore and analyze a real dataset. We’ll use the Fish Market dataset from Hugging Face, a collection of measurements from different fish species. The agent will read this data, run queries, and answer questions about it.</p>
-<div id="b5b44b17" class="cell" data-execution_count="1">
+<div id="83552747" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the Fish dataset</span></span>
@@ -793,7 +793,7 @@ Figure&nbsp;1
 </div>
 </div>
 <p>Now we’ll create tools that let the agent query this data. In LangGraph, tools are standard Python functions decorated with <code>@tool</code>. The function signature and docstring tell the LLM everything it needs.</p>
-<div id="114c6615" class="cell" data-execution_count="2">
+<div id="18e1ed04" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> io</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_core.tools <span class="im">import</span> tool</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pandasql <span class="im">import</span> sqldf</span>
@@ -807,7 +807,7 @@ Figure&nbsp;1
 </div>
 <p>The structure is minimal because LangGraph infers everything from the function definition. The function name becomes the tool name, the docstring becomes the description, and type hints define the schema. This particular tool takes no inputs and returns the dataset schema so the agent can discover column names and types before writing queries.</p>
 <p>Let’s add three more tools to give the agent more analytical capabilities:</p>
-<div id="0be7633f" class="cell" data-execution_count="3">
+<div id="63825748" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="at">@tool</span></span>
@@ -851,7 +851,7 @@ Figure&nbsp;1
 </details>
 </div>
 <p>Now we’ll create the agent using LangGraph. At its core, LangGraph is a state graph: a directed graph where nodes are functions and edges define transitions. This gives you explicit control over the ReAct loop.</p>
-<div id="c40a5860" class="cell" data-execution_count="4">
+<div id="3422cd5a" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_ollama <span class="im">import</span> ChatOllama</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langgraph.prebuilt <span class="im">import</span> create_react_agent</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -869,19 +869,19 @@ Figure&nbsp;1
 <span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>agent <span class="op">=</span> create_react_agent(model, tools)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/var/folders/j7/9dgqq5g53vnbsbmvh2yqtckr0000gr/T/ipykernel_9851/1378947355.py:16: LangGraphDeprecatedSinceV10: create_react_agent has been moved to `langchain.agents`. Please update your import to `from langchain.agents import create_agent`. Deprecated in LangGraph V1.0 to be removed in V2.0.
+<pre><code>/var/folders/j7/9dgqq5g53vnbsbmvh2yqtckr0000gr/T/ipykernel_73620/1378947355.py:16: LangGraphDeprecatedSinceV10: create_react_agent has been moved to `langchain.agents`. Please update your import to `from langchain.agents import create_agent`. Deprecated in LangGraph V1.0 to be removed in V2.0.
   agent = create_react_agent(model, tools)</code></pre>
 </div>
 </div>
 <p>The <code>create_react_agent</code> function builds a standard ReAct graph. It defines three nodes: call the LLM, execute tools, and check if done. The <code>recursion_limit</code> parameter sets the maximum iterations.</p>
 <p>Now let’s run the agent and watch it autonomously choose which tools to use.</p>
-<div id="daee4b5f" class="cell" data-execution_count="5">
+<div id="d6d04e17" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> <span class="st">"Which fish species has the highest average weight?"</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> {<span class="st">"messages"</span>: [(<span class="st">"user"</span>, query)]}</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> agent.invoke(inputs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="7daee95f" class="cell" data-execution_count="6">
+<div id="2a6aa5d8" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> message <span class="kw">in</span> result[<span class="st">"messages"</span>]:</span>
@@ -906,20 +906,20 @@ dtypes: float64(6), object(1)
 memory usage: 8.8+ KB
 
 
-  Species  AverageWeight
-0    Pike     718.705882
+  Species  avg_weight
+0    Pike  718.705882
 The fish species with the highest average weight is **Pike**, with an average weight of approximately **718.7 grams**.</code></pre>
 </div>
 </div>
 <p>The agent executes a ReAct loop. It reads your question, realizes it needs to use SQL to group by species and calculate averages, then LangGraph streams each step. You see the LLM’s reasoning, the tool calls, and the observations in real time.</p>
 <p>Let’s try another query that requires multiple steps:</p>
-<div id="3b0067c2" class="cell" data-execution_count="7">
+<div id="51b5ca68" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> <span class="st">"What distinctive physical characteristics stand out to identify Pike?"</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> {<span class="st">"messages"</span>: [(<span class="st">"user"</span>, query)]}</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> agent.invoke(inputs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="5208e206" class="cell" data-execution_count="8">
+<div id="83ac40c9" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> message <span class="kw">in</span> result[<span class="st">"messages"</span>]:</span>
@@ -927,40 +927,44 @@ The fish species with the highest average weight is **Pike**, with an average we
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>What distinctive physical characteristics stand out to identify Pike?
-Pike (*Esox lucius*) can be identified by several distinctive physical characteristics. Here are some key features:
 
-1. **Body Shape**:
-   - Elongated and cylindrical body, which is typical of predatory fish.
+&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 159 entries, 0 to 158
+Data columns (total 7 columns):
+ #   Column   Non-Null Count  Dtype  
+---  ------   --------------  -----  
+ 0   Species  159 non-null    object 
+ 1   Weight   159 non-null    float64
+ 2   Length1  159 non-null    float64
+ 3   Length2  159 non-null    float64
+ 4   Length3  159 non-null    float64
+ 5   Height   159 non-null    float64
+ 6   Width    159 non-null    float64
+dtypes: float64(6), object(1)
+memory usage: 8.8+ KB
 
-2. **Coloration**:
-   - **Back**: Olive green or brown, often with darker vertical bars or stripes.
-   - **Sides**: Light green or silver with faint vertical stripes.
-   - **Belly**: Pale or white.
-   - The coloration helps them blend into aquatic vegetation.
+Pike, based on the dataset's columns, can be identified using the following **distinctive physical characteristics**:
 
-3. **Head and Jaw**:
-   - Long, flat head with a large mouth filled with sharp teeth.
-   - The lower jaw protrudes slightly beyond the upper jaw.
-   - Pike have a reputation for their aggressive feeding behavior, often striking at prey with a quick lunge.
+1. **Length**:
+   - Pike typically have a **longer body** compared to other fish species. The columns **Length1**, **Length2**, and **Length3** can be used to measure this.
+   - Pike are known for their **torpedo-shaped bodies**, which are elongated and streamlined.
 
-4. **Fins**:
-   - **Dorsal Fin**: Two separate dorsal fins, with the first fin positioned far back on the body.
-   - **Anal Fin**: Also positioned far back, close to the tail.
-   - **Pectoral and Pelvic Fins**: Moderately sized and positioned low on the body.
+2. **Weight**:
+   - Pike are generally **heavier** than many other fish species. The **Weight** column can help distinguish them based on their mass.
 
-5. **Eyes**:
-   - Large and positioned high on the head, giving them excellent vision above and below the water.
+3. **Height and Width**:
+   - Pike have a **slender and tall body**, which can be inferred from the **Height** column.
+   - Their **Width** is usually narrower compared to their height, contributing to their streamlined appearance.
 
-6. **Tail**:
-   - Forked tail fin, which aids in their swift and powerful swimming.
+4. **Species Identification**:
+   - The **Species** column directly identifies Pike as one of the entries.
 
-7. **Size**:
-   - Pike can grow quite large, often reaching lengths of 3 to 5 feet (up to 1.5 meters), though they can exceed this size in ideal conditions.
+### Key Characteristics to Look For:
+- **Elongated body** (Length1, Length2, Length3).
+- **Moderate to high weight** for their size.
+- **Tall and narrow profile** (Height &gt; Width).
 
-8. **Habitat**:
-   - Typically found in freshwater environments like lakes, ponds, and slow-moving rivers with abundant vegetation.
-
-These features make Pike easily distinguishable from other fish species, especially in their natural habitats.</code></pre>
+Would you like me to retrieve specific statistical data (e.g., average length, weight) for Pike to further highlight these characteristics?</code></pre>
 </div>
 </div>
 <p>This demonstrates the power of the ReAct loop. The agent chains multiple observations together, building a solution step-by-step rather than attempting everything in one shot. Unlike opaque loops, LangGraph exposes every state transition, making debugging straightforward.</p>

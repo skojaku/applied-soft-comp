@@ -861,7 +861,7 @@ P(v_{t+1} = x | v_t = v, v_{t-1} = t) \propto
 <p>Let’s implement these methods on the Karate Club network.</p>
 <section id="data-preparation" class="level3">
 <h3 class="anchored" data-anchor-id="data-preparation">Data Preparation</h3>
-<div id="034e0134" class="cell" data-execution_count="2">
+<div id="d733dfd7" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the karate club network</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> igraph.Graph.Famous(<span class="st">"Zachary"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>A <span class="op">=</span> g.get_adjacency_sparse()</span>
@@ -884,7 +884,7 @@ P(v_{t+1} = x | v_t = v, v_{t-1} = t) \propto
 </section>
 <section id="spectral-embedding-example" class="level3">
 <h3 class="anchored" data-anchor-id="spectral-embedding-example">Spectral Embedding Example</h3>
-<div id="7a767352" class="cell" data-execution_count="3">
+<div id="64ce5af4" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute the spectral decomposition</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>A_dense <span class="op">=</span> A.toarray()</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>eigvals, eigvecs <span class="op">=</span> np.linalg.eig(A_dense)</span>
@@ -894,7 +894,7 @@ P(v_{t+1} = x | v_t = v, v_{t-1} = t) \propto
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>sorted_indices <span class="op">=</span> np.argsort(eigvals)[::<span class="op">-</span><span class="dv">1</span>][:d]</span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>eigvecs_top <span class="op">=</span> eigvecs[:, sorted_indices]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="2f5f89cb" class="cell" data-execution_count="4">
+<div id="65b91c53" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Show visualization code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the results</span></span>
@@ -927,7 +927,7 @@ P(v_{t+1} = x | v_t = v, v_{t-1} = t) \propto
 </section>
 <section id="laplacian-eigenmap-example" class="level3">
 <h3 class="anchored" data-anchor-id="laplacian-eigenmap-example">Laplacian Eigenmap Example</h3>
-<div id="ee46b6e7" class="cell" data-execution_count="5">
+<div id="10a09829" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute the Laplacian</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>D <span class="op">=</span> np.diag(np.<span class="bu">sum</span>(A_dense, axis<span class="op">=</span><span class="dv">1</span>))</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>L <span class="op">=</span> D <span class="op">-</span> A_dense</span>
@@ -938,7 +938,7 @@ P(v_{t+1} = x | v_t = v, v_{t-1} = t) \propto
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>sorted_indices_L <span class="op">=</span> np.argsort(eigvals_L)[<span class="dv">1</span>:d<span class="op">+</span><span class="dv">1</span>]</span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>eigvecs_L_top <span class="op">=</span> eigvecs_L[:, sorted_indices_L]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="a01ed2ec" class="cell" data-execution_count="6">
+<div id="31c9797c" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Show visualization code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the results</span></span>
@@ -960,7 +960,7 @@ P(v_{t+1} = x | v_t = v, v_{t-1} = t) \propto
 </section>
 <section id="deepwalk-example" class="level3">
 <h3 class="anchored" data-anchor-id="deepwalk-example">DeepWalk Example</h3>
-<div id="2c898716" class="cell" data-execution_count="7">
+<div id="dc73ebf1" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Show random walk implementation</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> random_walk(net, start_node, walk_length):</span>
@@ -990,10 +990,10 @@ P(v_{t+1} = x | v_t = v, v_{t-1} = t) \propto
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generated 340 random walks
-Example walk: [0, 5, 10, 4, 6, 0, 13, 3, 12, 3]...</code></pre>
+Example walk: [0, 13, 2, 0, 3, 13, 3, 12, 3, 12]...</code></pre>
 </div>
 </div>
-<div id="6b4dcb86" class="cell" data-execution_count="9">
+<div id="de38fd89" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Train word2vec on the walks</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Word2Vec(</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    walks,</span>
@@ -1012,7 +1012,7 @@ Example walk: [0, 5, 10, 4, 6, 0, 13, 3, 12, 3]...</code></pre>
 <pre><code>Embedding matrix shape: (34, 32)</code></pre>
 </div>
 </div>
-<div id="603da20e" class="cell" data-execution_count="10">
+<div id="8c432222" class="cell" data-execution_count="10">
 <div class="cell-output cell-output-stderr">
 <pre><code>/Users/skojaku-admin/miniforge3/envs/advnetsci/lib/python3.11/site-packages/umap/umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
   warn(
@@ -1029,7 +1029,7 @@ OMP: Info #276: omp_set_nested routine deprecated, please use omp_set_max_active
     </style>
     <div>
         <a href="https://bokeh.org" target="_blank" class="bk-notebook-logo"></a>
-        <span id="e2b69ba0-00cb-4549-9390-8faf560ec953">Loading BokehJS ...</span>
+        <span id="d1f35edd-63c6-4a67-998f-94df322b8777">Loading BokehJS ...</span>
     </div>
 </div>
 <div class="cell-output cell-output-display">
@@ -1197,7 +1197,7 @@ const JS_MIME_TYPE = 'application/javascript';
      "</div>"}};
 
   function display_loaded(error = null) {
-    const el = document.getElementById("e2b69ba0-00cb-4549-9390-8faf560ec953");
+    const el = document.getElementById("d1f35edd-63c6-4a67-998f-94df322b8777");
     if (el != null) {
       const html = (() => {
         if (typeof root.Bokeh === "undefined") {
@@ -1331,7 +1331,7 @@ function(Bokeh) {
       console.log("Bokeh: BokehJS failed to load within specified timeout.");
       root._bokeh_failed_load = true;
     } else if (force !== true) {
-      const cell = $(document.getElementById("e2b69ba0-00cb-4549-9390-8faf560ec953")).parents('.cell').data().cell;
+      const cell = $(document.getElementById("d1f35edd-63c6-4a67-998f-94df322b8777")).parents('.cell').data().cell;
       cell.output_area.append_execute_result(NB_LOAD_WARNING)
     }
   }
@@ -1350,14 +1350,14 @@ function(Bokeh) {
 </div>
 <div class="cell-output cell-output-display">
 
-  <div id="b35ebec8-22d8-421b-a284-199353729779" data-root-id="p1011" style="display: contents;"></div>
+  <div id="c76482bf-adc9-436c-8a60-5c8186c0611e" data-root-id="p1011" style="display: contents;"></div>
 </div>
 <div class="cell-output cell-output-display">
 <script type="application/javascript">
 (function(root) {
   function embed_document(root) {
-  const docs_json = {"0e126239-4f54-477a-a2c7-435c2e195443":{"version":"3.8.0","title":"Bokeh Application","config":{"type":"object","name":"DocumentConfig","id":"p1055","attributes":{"notifications":{"type":"object","name":"Notifications","id":"p1056"}}},"roots":[{"type":"object","name":"Figure","id":"p1011","attributes":{"x_range":{"type":"object","name":"DataRange1d","id":"p1012"},"y_range":{"type":"object","name":"DataRange1d","id":"p1013"},"x_scale":{"type":"object","name":"LinearScale","id":"p1021"},"y_scale":{"type":"object","name":"LinearScale","id":"p1022"},"title":{"type":"object","name":"Title","id":"p1014","attributes":{"text":"DeepWalk Node Embeddings (UMAP projection)"}},"renderers":[{"type":"object","name":"GlyphRenderer","id":"p1052","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1008","attributes":{"selected":{"type":"object","name":"Selection","id":"p1009","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1010"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"H4sIAAEAAAAC/wGIAHf/A58JQcyqF0HpmCdBBRMbQYrYAEEoWPBAe6r6QPRiFUH+YLtA6kPFQI59+0BvcwtBkjESQQD6H0EUbtVAGvvVQAbZ8kAsKRBBw6y5QKrYGkGG5c5Ay+0TQZqZxED9ReFA1IXgQGGD2UDhm8xAEDrlQFKO0ED8ud5AWKC2QM8L4kATq95AAeTBQFkf5nKIAAAA"},"shape":[34],"dtype":"float32","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"H4sIAAEAAAAC/wGIAHf/dl08vz5TnL8TL7i/6XrFv40SAr6J8aa+IRnHvlVR0L+ZeaFB/12YQTeEkT7KG5++A7Krv3hFsr+Rt6hB7YehQdpvoD2XaJC/i6SkQaYjYr9weKRBc2gjv/ZxoUFJHJ1BbJeWQfSFlUE/ZqdBPKSXQff0k0F3P6dBu2WeQaUxlEFdpKNBK76oQc+JFwCIAAAA"},"shape":[34],"dtype":"float32","order":"little"}],["size",{"type":"ndarray","array":{"type":"bytes","data":"H4sIAAEAAAAC/9NqcT2yUcrWQUHZJJj1iqmDhXdFmxeTuUNOyuyJMy8ZOsi375tZa6LpoAVWp4tBHzknOk3A1cChYd3pA/lTVNDUy8LF0dURomHm4JKHmQdTh64e5j5c7kf1n6UDAxjYOQAA2QugHBABAAA="},"shape":[34],"dtype":"float64","order":"little"}],["community",["#1f77b4","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#ff7f0e","#ff7f0e","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#ff7f0e","#ff7f0e","#1f77b4","#1f77b4","#ff7f0e","#1f77b4","#ff7f0e","#1f77b4","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e"]]]}}},"view":{"type":"object","name":"CDSView","id":"p1053","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1054"}}},"glyph":{"type":"object","name":"Scatter","id":"p1049","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"size":{"type":"field","field":"size"},"fill_color":{"type":"field","field":"community"},"hatch_color":{"type":"field","field":"community"}}},"nonselection_glyph":{"type":"object","name":"Scatter","id":"p1050","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"size":{"type":"field","field":"size"},"line_alpha":{"type":"value","value":0.1},"fill_color":{"type":"field","field":"community"},"fill_alpha":{"type":"value","value":0.1},"hatch_color":{"type":"field","field":"community"},"hatch_alpha":{"type":"value","value":0.1}}},"muted_glyph":{"type":"object","name":"Scatter","id":"p1051","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"size":{"type":"field","field":"size"},"line_alpha":{"type":"value","value":0.2},"fill_color":{"type":"field","field":"community"},"fill_alpha":{"type":"value","value":0.2},"hatch_color":{"type":"field","field":"community"},"hatch_alpha":{"type":"value","value":0.2}}}}}],"toolbar":{"type":"object","name":"Toolbar","id":"p1020","attributes":{"tools":[{"type":"object","name":"PanTool","id":"p1033"},{"type":"object","name":"WheelZoomTool","id":"p1034","attributes":{"renderers":"auto"}},{"type":"object","name":"BoxZoomTool","id":"p1035","attributes":{"dimensions":"both","overlay":{"type":"object","name":"BoxAnnotation","id":"p1036","attributes":{"syncable":false,"line_color":"black","line_alpha":1.0,"line_width":2,"line_dash":[4,4],"fill_color":"lightgrey","fill_alpha":0.5,"level":"overlay","visible":false,"left":{"type":"number","value":"nan"},"right":{"type":"number","value":"nan"},"top":{"type":"number","value":"nan"},"bottom":{"type":"number","value":"nan"},"left_units":"canvas","right_units":"canvas","top_units":"canvas","bottom_units":"canvas","handles":{"type":"object","name":"BoxInteractionHandles","id":"p1042","attributes":{"all":{"type":"object","name":"AreaVisuals","id":"p1041","attributes":{"fill_color":"white","hover_fill_color":"lightgray"}}}}}}}},{"type":"object","name":"SaveTool","id":"p1043"},{"type":"object","name":"ResetTool","id":"p1044"},{"type":"object","name":"HelpTool","id":"p1045"}]}},"left":[{"type":"object","name":"LinearAxis","id":"p1028","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1029","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1030"},"axis_label":"UMAP 2","major_label_policy":{"type":"object","name":"AllLabels","id":"p1031"}}}],"below":[{"type":"object","name":"LinearAxis","id":"p1023","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1024","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1025"},"axis_label":"UMAP 1","major_label_policy":{"type":"object","name":"AllLabels","id":"p1026"}}}],"center":[{"type":"object","name":"Grid","id":"p1027","attributes":{"axis":{"id":"p1023"}}},{"type":"object","name":"Grid","id":"p1032","attributes":{"dimension":1,"axis":{"id":"p1028"}}}]}}]}};
-  const render_items = [{"docid":"0e126239-4f54-477a-a2c7-435c2e195443","roots":{"p1011":"b35ebec8-22d8-421b-a284-199353729779"},"root_ids":["p1011"]}];
+  const docs_json = {"8172991c-4f97-4dd1-b52a-07e9890acf60":{"version":"3.8.0","title":"Bokeh Application","config":{"type":"object","name":"DocumentConfig","id":"p1055","attributes":{"notifications":{"type":"object","name":"Notifications","id":"p1056"}}},"roots":[{"type":"object","name":"Figure","id":"p1011","attributes":{"x_range":{"type":"object","name":"DataRange1d","id":"p1012"},"y_range":{"type":"object","name":"DataRange1d","id":"p1013"},"x_scale":{"type":"object","name":"LinearScale","id":"p1021"},"y_scale":{"type":"object","name":"LinearScale","id":"p1022"},"title":{"type":"object","name":"Title","id":"p1014","attributes":{"text":"DeepWalk Node Embeddings (UMAP projection)"}},"renderers":[{"type":"object","name":"GlyphRenderer","id":"p1052","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1008","attributes":{"selected":{"type":"object","name":"Selection","id":"p1009","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1010"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"H4sIAAEAAAAC/wGIAHf/id/dQFMIAUFdegxBeaIHQX5X2kAgKdFAFKzJQJCJAEEUC1q/wpmVvz2RwkC05uxAdDLpQLBnB0GuegvAwuYkwDhFy0CYBfVAy3fzv51QAEFOuBzAQc74QES8HcDnfgLAArUewJnLNMAt8tK/ifkTwBhiJcD9L/m/kUCWv8l+JsC2GP2/jsALwH7HXhiIAAAA"},"shape":[34],"dtype":"float32","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"H4sIAAEAAAAC/wGIAHf/bd7xQCAQA0HnXPhADysHQYMI4kBqB9pAz2DjQKE1C0HnSPhA5usGQXHC2EAu3/NAaa8BQcnT/UBf1PNAULvhQFzgz0Ai2QlBQcL4QGr/80D3m+tAfWH9QEQy90BAwhBBf58SQYwqFUGlQdhAZQAZQS3tDUFG+c5AZ9YAQZdOGEHAu+hAyALWQMVFPw2IAAAA"},"shape":[34],"dtype":"float32","order":"little"}],["size",{"type":"ndarray","array":{"type":"bytes","data":"H4sIAAEAAAAC/9NqcT2yUcrWQUHZJJj1iqmDhXdFmxeTuUNOyuyJMy8ZOsi375tZa6LpoAVWp4tBHzknOk3A1cChYd3pA/lTVNDUy8LF0dURomHm4JKHmQdTh64e5j5c7kf1n6UDAxjYOQAA2QugHBABAAA="},"shape":[34],"dtype":"float64","order":"little"}],["community",["#1f77b4","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#ff7f0e","#ff7f0e","#1f77b4","#1f77b4","#1f77b4","#1f77b4","#ff7f0e","#ff7f0e","#1f77b4","#1f77b4","#ff7f0e","#1f77b4","#ff7f0e","#1f77b4","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e","#ff7f0e"]]]}}},"view":{"type":"object","name":"CDSView","id":"p1053","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1054"}}},"glyph":{"type":"object","name":"Scatter","id":"p1049","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"size":{"type":"field","field":"size"},"fill_color":{"type":"field","field":"community"},"hatch_color":{"type":"field","field":"community"}}},"nonselection_glyph":{"type":"object","name":"Scatter","id":"p1050","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"size":{"type":"field","field":"size"},"line_alpha":{"type":"value","value":0.1},"fill_color":{"type":"field","field":"community"},"fill_alpha":{"type":"value","value":0.1},"hatch_color":{"type":"field","field":"community"},"hatch_alpha":{"type":"value","value":0.1}}},"muted_glyph":{"type":"object","name":"Scatter","id":"p1051","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"size":{"type":"field","field":"size"},"line_alpha":{"type":"value","value":0.2},"fill_color":{"type":"field","field":"community"},"fill_alpha":{"type":"value","value":0.2},"hatch_color":{"type":"field","field":"community"},"hatch_alpha":{"type":"value","value":0.2}}}}}],"toolbar":{"type":"object","name":"Toolbar","id":"p1020","attributes":{"tools":[{"type":"object","name":"PanTool","id":"p1033"},{"type":"object","name":"WheelZoomTool","id":"p1034","attributes":{"renderers":"auto"}},{"type":"object","name":"BoxZoomTool","id":"p1035","attributes":{"dimensions":"both","overlay":{"type":"object","name":"BoxAnnotation","id":"p1036","attributes":{"syncable":false,"line_color":"black","line_alpha":1.0,"line_width":2,"line_dash":[4,4],"fill_color":"lightgrey","fill_alpha":0.5,"level":"overlay","visible":false,"left":{"type":"number","value":"nan"},"right":{"type":"number","value":"nan"},"top":{"type":"number","value":"nan"},"bottom":{"type":"number","value":"nan"},"left_units":"canvas","right_units":"canvas","top_units":"canvas","bottom_units":"canvas","handles":{"type":"object","name":"BoxInteractionHandles","id":"p1042","attributes":{"all":{"type":"object","name":"AreaVisuals","id":"p1041","attributes":{"fill_color":"white","hover_fill_color":"lightgray"}}}}}}}},{"type":"object","name":"SaveTool","id":"p1043"},{"type":"object","name":"ResetTool","id":"p1044"},{"type":"object","name":"HelpTool","id":"p1045"}]}},"left":[{"type":"object","name":"LinearAxis","id":"p1028","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1029","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1030"},"axis_label":"UMAP 2","major_label_policy":{"type":"object","name":"AllLabels","id":"p1031"}}}],"below":[{"type":"object","name":"LinearAxis","id":"p1023","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1024","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1025"},"axis_label":"UMAP 1","major_label_policy":{"type":"object","name":"AllLabels","id":"p1026"}}}],"center":[{"type":"object","name":"Grid","id":"p1027","attributes":{"axis":{"id":"p1023"}}},{"type":"object","name":"Grid","id":"p1032","attributes":{"dimension":1,"axis":{"id":"p1028"}}}]}}]}};
+  const render_items = [{"docid":"8172991c-4f97-4dd1-b52a-07e9890acf60","roots":{"p1011":"c76482bf-adc9-436c-8a60-5c8186c0611e"},"root_ids":["p1011"]}];
   void root.Bokeh.embed.embed_items_notebook(docs_json, render_items);
   }
   if (root.Bokeh !== undefined) {
@@ -1385,7 +1385,7 @@ function(Bokeh) {
 </section>
 <section id="clustering-with-k-means" class="level3">
 <h3 class="anchored" data-anchor-id="clustering-with-k-means">Clustering with K-means</h3>
-<div id="ff64d7d8" class="cell" data-execution_count="12">
+<div id="8b9398b9" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Show clustering implementation</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> find_optimal_clusters(embedding, n_clusters_range<span class="op">=</span>(<span class="dv">2</span>, <span class="dv">10</span>)):</span>
@@ -1408,19 +1408,19 @@ function(Bokeh) {
 <span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>cluster_labels <span class="op">=</span> find_optimal_clusters(embedding)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>k=2: silhouette score = 0.474
-k=3: silhouette score = 0.510
-k=4: silhouette score = 0.499
-k=5: silhouette score = 0.452
-k=6: silhouette score = 0.392
-k=7: silhouette score = 0.289
-k=8: silhouette score = 0.291
-k=9: silhouette score = 0.300
+<pre><code>k=2: silhouette score = 0.444
+k=3: silhouette score = 0.466
+k=4: silhouette score = 0.518
+k=5: silhouette score = 0.453
+k=6: silhouette score = 0.359
+k=7: silhouette score = 0.397
+k=8: silhouette score = 0.359
+k=9: silhouette score = 0.350
 
-Optimal number of clusters: 3</code></pre>
+Optimal number of clusters: 4</code></pre>
 </div>
 </div>
-<div id="eb208d8a" class="cell" data-execution_count="13">
+<div id="bc007cf5" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Show clustering visualization</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize clustering</span></span>
