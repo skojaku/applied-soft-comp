@@ -2,7 +2,7 @@
 """
 🚀 Space Rocket Fuel Calculator Game 🚀
 
-A simple terminal game where a rocket travels across the screen
+A simple terminal game where a rocket launches upward into space
 and you need to calculate fuel consumption.
 
 Educational game for learning basic math operations.
@@ -28,8 +28,8 @@ def clear_screen():
     os.system('clear' if os.name != 'nt' else 'cls')
 
 
-def draw_rocket(position):
-    """Draw the rocket at a given position."""
+def draw_rocket(vertical_position):
+    """Draw the rocket at a given vertical position."""
     rocket = """
        /\\
       /  \\
@@ -42,9 +42,13 @@ def draw_rocket(position):
 """
     lines = rocket.strip().split('\n')
 
-    screen = []
-    for line in lines:
-        screen.append(' ' * position + line)
+    # Calculate how many lines from bottom (invert so rocket starts at bottom)
+    screen_height = 20
+    lines_from_top = screen_height - vertical_position
+
+    # Add blank lines above rocket to position it vertically
+    screen = [' ' * 40 for _ in range(max(0, lines_from_top))]
+    screen.extend([' ' * 15 + line for line in lines])
 
     return '\n'.join(screen)
 
@@ -55,7 +59,7 @@ def play_game():
     print("🚀 SPACE ROCKET FUEL CALCULATOR 🚀")
     print("=" * 50)
     print("\nYour rocket is launching!")
-    print("Watch it travel across space...\n")
+    print("Watch it climb upward into space...\n")
 
     # Game parameters
     starting_fuel = 100
