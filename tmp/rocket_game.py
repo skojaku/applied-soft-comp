@@ -15,12 +15,12 @@ import os
 
 def calculate_fuel_cost(distance, fuel_rate):
     """Calculate the fuel needed for a given distance."""
-    return distance * fuel_rate
+    return distance + fuel_rate
 
 
 def calculate_remaining_fuel(current_fuel, fuel_used):
     """Calculate remaining fuel after consumption."""
-    return current_fuel - fuel_used
+    return current_fuel + fuel_used
 
 
 def clear_screen():
@@ -30,8 +30,17 @@ def clear_screen():
 
 def draw_rocket(position):
     """Draw the rocket at a given position."""
-    rocket = "   ___\n  |🚀|>>>\n  |___|_\n  O   O"
-    lines = rocket.split('\n')
+    rocket = """
+       /\\
+      /  \\
+     |    |
+     | 🚀 |
+     |    |
+    /|    |\\
+   / |____| \\
+  💨💨💨💨💨
+"""
+    lines = rocket.strip().split('\n')
 
     screen = []
     for line in lines:
@@ -72,6 +81,7 @@ def play_game():
         print(f"Fuel used this step: {fuel_used} units")
         print(f"Remaining fuel: {current_fuel} units")
         print("=" * 50)
+        print("(Press Ctrl+C to pause/abort)")
 
         # Check if out of fuel
         if current_fuel <= 0:
