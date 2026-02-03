@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """
-Space Rocket Fuel Calculator Game
-A simple terminal game where a rocket travels across the screen.
+🚀 Space Rocket Fuel Calculator Game 🚀
+
+A simple terminal game where a rocket travels across the screen
+and you need to calculate fuel consumption.
+
+Educational game for learning basic math operations.
 """
 
 import time
