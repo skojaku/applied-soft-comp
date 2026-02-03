@@ -43,8 +43,8 @@ def draw_rocket(vertical_position):
     rocket_height = len(lines)
 
     # Fixed screen height for rocket display area
-    # Must be large enough to show rocket at max position (30) plus rocket height (8)
-    screen_height = 45
+    # Sized to fit in typical terminal along with fuel panel below
+    screen_height = 25
 
     # Calculate how many blank lines above rocket (starts at bottom, moves up)
     # At position 0: rocket at bottom (many blank lines above)
@@ -79,7 +79,7 @@ def play_game():
     # Game parameters
     starting_fuel = 100
     fuel_rate = 2  # fuel units per position
-    max_position = 30
+    max_position = 15  # Reduced to fit display in typical terminal
 
     current_fuel = starting_fuel
 
