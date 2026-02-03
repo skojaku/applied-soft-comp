@@ -30,14 +30,14 @@ def clear_screen():
 
 def draw_rocket(vertical_position):
     """Draw the rocket at a given vertical position."""
-    rocket = """       /\\
-      /  \\
-     |    |
-     | 🚀 |
-     |    |
-    /|    |\\
-   / |____| \\
-  💨💨💨💨💨
+    rocket = """    /\\
+   /  \\
+  |    |
+  | 🚀 |
+  |    |
+ /|    |\\
+/ |____| \\
+ 💨💨💨💨💨
 """
     lines = rocket.strip().split('\n')
     rocket_height = len(lines)
