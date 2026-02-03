@@ -37,9 +37,8 @@ def draw_rocket(vertical_position):
   |    |
  /|    |\\
 / |____| \\
- 💨💨💨💨💨
-"""
-    lines = rocket.strip().split('\n')
+ 💨💨💨💨💨"""
+    lines = rocket.split('\n')
     rocket_height = len(lines)
 
     # Fixed screen height for rocket display area
