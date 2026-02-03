@@ -68,20 +68,20 @@ def play_game():
 
     current_fuel = starting_fuel
 
-    # Animate rocket moving across screen
+    # Animate rocket moving upward
     for position in range(max_position):
         clear_screen()
 
-        # Draw rocket
+        # Draw rocket at current height
         print(draw_rocket(position))
-        print("\n" + "=" * 50)
 
         # Calculate fuel consumption
         fuel_used = calculate_fuel_cost(1, fuel_rate)
         current_fuel = calculate_remaining_fuel(current_fuel, fuel_used)
 
-        # Display fuel info
-        print(f"Position: {position + 1}/{max_position}")
+        # Display fuel info panel at bottom (always visible)
+        print("\n" + "=" * 50)
+        print(f"Altitude: {position + 1}/{max_position}")
         print(f"Fuel used this step: {fuel_used} units")
         print(f"Remaining fuel: {current_fuel} units")
         print("=" * 50)
