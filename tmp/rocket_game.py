@@ -43,8 +43,8 @@ def draw_rocket(vertical_position):
     lines = rocket.strip().split('\n')
     rocket_height = len(lines)
 
-    # Fixed screen height for rocket display area
-    screen_height = 20
+    # Fixed screen height for rocket display area (needs to fit max position + rocket height)
+    screen_height = 40
 
     # Calculate how many blank lines above rocket (starts at bottom, moves up)
     blank_lines_above = max(0, screen_height - vertical_position - rocket_height)
