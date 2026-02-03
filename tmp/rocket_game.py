@@ -30,8 +30,7 @@ def clear_screen():
 
 def draw_rocket(vertical_position):
     """Draw the rocket at a given vertical position."""
-    rocket = """
-       /\\
+    rocket = """       /\\
       /  \\
      |    |
      | 🚀 |
