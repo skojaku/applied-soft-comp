@@ -41,16 +41,29 @@ def draw_rocket(vertical_position):
   💨💨💨💨💨
 """
     lines = rocket.strip().split('\n')
+    rocket_height = len(lines)
 
-    # Calculate how many lines from bottom (invert so rocket starts at bottom)
+    # Fixed screen height for rocket display area
     screen_height = 20
-    lines_from_top = screen_height - vertical_position
 
-    # Add blank lines above rocket to position it vertically
-    screen = [' ' * 40 for _ in range(max(0, lines_from_top))]
+    # Calculate how many blank lines above rocket (starts at bottom, moves up)
+    blank_lines_above = max(0, screen_height - vertical_position - rocket_height)
+
+    # Build the screen with fixed height
+    screen = []
+
+    # Add blank lines above
+    screen.extend([' ' * 40 for _ in range(blank_lines_above)])
+
+    # Add rocket
     screen.extend([' ' * 15 + line for line in lines])
 
-    return '\n'.join(screen)
+    # Add blank lines below to maintain fixed height
+    blank_lines_below = screen_height - len(screen)
+    if blank_lines_below > 0:
+        screen.extend([' ' * 40 for _ in range(blank_lines_below)])
+
+    return '\n'.join(screen[:screen_height])
 
 
 def play_game():
