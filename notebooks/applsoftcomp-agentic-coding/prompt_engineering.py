@@ -452,11 +452,11 @@ def _(mo):
     This is order bias: the most recently seen label often has outsized influence on
     what the model predicts next.
 
-    ::: {.callout-warn title="Few-shot prompts are brittle in production"}
+    /// warning | Few-shot prompts are brittle in production
     Small changes in example order can flip the output entirely. A few-shot prompt that
     works reliably in testing may behave differently in production when examples are
     reordered or replaced. Always test multiple orderings before deploying.
-    :::
+    ///
     """)
     return
 
