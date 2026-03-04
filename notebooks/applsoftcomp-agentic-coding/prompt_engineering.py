@@ -485,7 +485,26 @@ def _(mo):
         rows=2,
     )
 
-    mo.vstack([fewshot_slider, fewshot_test, mo.hstack([run_fewshot_btn, shuffle_btn])])
+    n_selected = fewshot_slider.value
+    _example_rows = []
+    for _i, (_text, _label) in enumerate(SENTIMENT_EXAMPLES):
+        if _i < n_selected:
+            _example_rows.append(f"| ✅ **{_i+1}** | {_text} | **{_label}** |")
+        else:
+            _example_rows.append(f"| ⬜ {_i+1} | {_text} | {_label} |")
+    _examples_table = mo.md(
+        "**Example pool** (✅ = fed into the prompt, ⬜ = excluded)\n\n"
+        "| # | Text | Label |\n"
+        "|---|------|-------|\n"
+        + "\n".join(_example_rows)
+    )
+
+    mo.vstack([
+        fewshot_slider,
+        _examples_table,
+        fewshot_test,
+        mo.hstack([run_fewshot_btn, shuffle_btn]),
+    ])
     return (
         SENTIMENT_EXAMPLES,
         fewshot_slider,
