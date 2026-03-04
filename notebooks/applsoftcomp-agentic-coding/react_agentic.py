@@ -24,6 +24,13 @@ def _():
 
 
 @app.cell
+def _():
+    import re
+    import matplotlib.pyplot as plt
+    return plt, re
+
+
+@app.cell
 def _(mo):
     mo.md(
         r"""
@@ -351,10 +358,10 @@ def _(
     evaluate_math,
     get_current_date,
     mo,
+    re,
     run_agent_btn,
 ):
     import json
-    import re as _re
 
     TOOLS = {
         "get_current_date": get_current_date,
@@ -400,9 +407,9 @@ def _(
                 trace.append({"type": "final", "content": text[_fa_idx + len("Final Answer:"):].strip()})
                 break
 
-            action_match = _re.search(r"Action:\s*(.+)", text)
-            input_match = _re.search(r"Action Input:\s*(.+)", text)
-            thought_match = _re.search(r"Thought:\s*(.+?)(?:\nAction|$)", text, _re.DOTALL)
+            action_match = re.search(r"Action:\s*(.+)", text)
+            input_match = re.search(r"Action Input:\s*(.+)", text)
+            thought_match = re.search(r"Thought:\s*(.+?)(?:\nAction|$)", text, re.DOTALL)
 
             if thought_match:
                 trace.append({"type": "thought", "content": thought_match.group(1).strip()})
@@ -606,7 +613,7 @@ def _(
     preset_q1,
     preset_q2,
     preset_q3,
-    _re,
+    re,
     run_titanic_btn,
     titanic_question,
 ):
@@ -633,9 +640,9 @@ def _(
                 trace.append({"type": "final", "content": text[fa_idx + 13:].strip()})
                 break
 
-            action_m = _re.search(r"Action:\s*(.+)", text)
-            input_m = _re.search(r"Action Input:\s*(.+)", text, _re.DOTALL)
-            thought_m = _re.search(r"Thought:\s*(.+?)(?:\nAction|$)", text, _re.DOTALL)
+            action_m = re.search(r"Action:\s*(.+)", text)
+            input_m = re.search(r"Action Input:\s*(.+)", text, re.DOTALL)
+            thought_m = re.search(r"Thought:\s*(.+?)(?:\nAction|$)", text, re.DOTALL)
 
             if thought_m:
                 trace.append({"type": "thought", "content": thought_m.group(1).strip()})
@@ -850,7 +857,7 @@ def _(mo):
 
 
 @app.cell
-def _(mo, titanic_df):
+def _(mo, pd, titanic_df):
     mo.md("### Your tools go here — edit this cell to add cross_tabulation and filter_and_count")
 
     def cross_tabulation(col1_col2: str) -> str:
@@ -885,12 +892,6 @@ def _(mo, titanic_df):
 
 
 @app.cell
-def _(mo):
-    import pandas as pd  # noqa: F811 — needed for cross_tabulation cell
-    return (pd,)
-
-
-@app.cell
 def _(
     TITANIC_SYSTEM_PROMPT,
     TITANIC_TOOLS,
@@ -901,7 +902,7 @@ def _(
     get_summary_stats,
     inspect_schema,
     mo,
-    _re,
+    re,
     run_sql_query,
     run_titanic_agent,
     titanic_df,
@@ -927,7 +928,7 @@ def _(
     TARGET_QUESTION,
     call_llm,
     mo,
-    _re,
+    re,
     run_extended_btn,
     titanic_df,
 ):
@@ -957,9 +958,9 @@ def _(
                 trace.append({"type": "final", "content": text[fa_idx + 13:].strip()})
                 break
 
-            action_m = _re.search(r"Action:\s*(.+)", text)
-            input_m = _re.search(r"Action Input:\s*(.+)", text, _re.DOTALL)
-            thought_m = _re.search(r"Thought:\s*(.+?)(?:\nAction|$)", text, _re.DOTALL)
+            action_m = re.search(r"Action:\s*(.+)", text)
+            input_m = re.search(r"Action Input:\s*(.+)", text, re.DOTALL)
+            thought_m = re.search(r"Thought:\s*(.+?)(?:\nAction|$)", text, re.DOTALL)
 
             if thought_m:
                 trace.append({"type": "thought", "content": thought_m.group(1).strip()})
@@ -1062,7 +1063,7 @@ def _(
     TITANIC_TOOLS,
     call_llm,
     mo,
-    _re,
+    re,
     titanic_df,
 ):
     def broken_query_tool(query: str) -> str:
@@ -1103,9 +1104,9 @@ def _(
                 trace.append({"type": "final", "content": text[fa_idx + 13:].strip()})
                 break
 
-            action_m = _re.search(r"Action:\s*(.+)", text)
-            input_m = _re.search(r"Action Input:\s*(.+)", text, _re.DOTALL)
-            thought_m = _re.search(r"Thought:\s*(.+?)(?:\nAction|$)", text, _re.DOTALL)
+            action_m = re.search(r"Action:\s*(.+)", text)
+            input_m = re.search(r"Action Input:\s*(.+)", text, re.DOTALL)
+            thought_m = re.search(r"Thought:\s*(.+?)(?:\nAction|$)", text, re.DOTALL)
 
             if thought_m:
                 trace.append({"type": "thought", "content": thought_m.group(1).strip()})
@@ -1167,12 +1168,6 @@ def _(BROKEN_QUESTION, mo, run_broken_agent, run_broken_btn):
     else:
         mo.md("*Click **Run agent with broken tool** to watch what happens.*")
     return
-
-
-@app.cell
-def _(mo):
-    import matplotlib.pyplot as plt
-    return (plt,)
 
 
 if __name__ == "__main__":
