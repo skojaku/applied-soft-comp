@@ -485,7 +485,18 @@ def _(mo):
         full_width=True,
         rows=2,
     )
+    return (
+        SENTIMENT_EXAMPLES,
+        fewshot_slider,
+        fewshot_test,
+        run_fewshot_btn,
+        shuffle_btn,
+        with_replacement_toggle,
+    )
 
+
+@app.cell(hide_code=True)
+def _(SENTIMENT_EXAMPLES, fewshot_slider, fewshot_test, mo, run_fewshot_btn, shuffle_btn, with_replacement_toggle):
     n_selected = fewshot_slider.value
     use_replacement = with_replacement_toggle.value
     _example_rows = []
@@ -507,7 +518,6 @@ def _(mo):
         "|---|------|-------|\n"
         + "\n".join(_example_rows)
     )
-
     mo.vstack([
         fewshot_slider,
         with_replacement_toggle,
@@ -515,14 +525,6 @@ def _(mo):
         fewshot_test,
         mo.hstack([run_fewshot_btn, shuffle_btn]),
     ])
-    return (
-        SENTIMENT_EXAMPLES,
-        fewshot_slider,
-        fewshot_test,
-        run_fewshot_btn,
-        shuffle_btn,
-        with_replacement_toggle,
-    )
 
 
 @app.cell(hide_code=True)
