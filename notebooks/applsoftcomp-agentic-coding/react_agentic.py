@@ -780,7 +780,7 @@ def _(mo):
 
 @app.cell
 def _(REFERENCES, call_llm, mo, re, run_monolithic_btn, run_multiagent_btn):
-    import asyncio
+    from concurrent.futures import ThreadPoolExecutor
 
     VERIFY_SYSTEM = (
         "You are a fact-checker for academic references. "
@@ -804,8 +804,8 @@ def _(REFERENCES, call_llm, mo, re, run_monolithic_btn, run_multiagent_btn):
                 verdicts[rid] = None  # could not parse
         return verdicts
 
-    async def verify_single(ref: dict) -> dict:
-        """Verify one reference in isolation."""
+    def verify_single(ref: dict) -> dict:
+        """Verify one reference in isolation — a separate sub-agent with its own clean context."""
         messages = [
             {"role": "system", "content": VERIFY_SYSTEM},
             {"role": "user", "content": f"Verify this reference: {ref['citation']}"},
@@ -881,9 +881,10 @@ def _(REFERENCES, call_llm, mo, re, run_monolithic_btn, run_multiagent_btn):
 
     elif run_multiagent_btn.value:
         try:
-            _results = asyncio.get_event_loop().run_until_complete(
-                asyncio.gather(*[verify_single(r) for r in REFERENCES])
-            )
+            # Run five isolated sub-agents in parallel — each gets its own clean context window
+            with ThreadPoolExecutor(max_workers=5) as executor:
+                _futures = [executor.submit(verify_single, r) for r in REFERENCES]
+                _results = [f.result() for f in _futures]
             _total_tokens = sum(r["tokens"] for r in _results if r["tokens"] is not None)
             _token_note = f"Total tokens across all sub-agents: **{_total_tokens}**" if _total_tokens else ""
 
@@ -918,7 +919,7 @@ def _(REFERENCES, call_llm, mo, re, run_monolithic_btn, run_multiagent_btn):
             mo.callout(mo.md(f"**Error:** {_e}"), kind="danger")
     else:
         mo.md("*Click a button above to run the monolithic or multi-agent demo.*")
-    return VERIFY_SYSTEM, _parse_verdicts, asyncio, verify_single
+    return VERIFY_SYSTEM, ThreadPoolExecutor, _parse_verdicts, verify_single
 
 
 @app.cell
