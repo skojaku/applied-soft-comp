@@ -688,71 +688,46 @@ def _(mo):
 
 
 @app.cell
-def _(
-    INVOICE_TEXT,
-    call_llm,
-    litellm,
-    llm_api_base,
-    llm_api_key,
-    llm_model,
-    mo,
-    run_structured_btn,
-    structured_toggle,
-):
+def _(mo):
     import json
     from pydantic import BaseModel
 
+    # The schema below is the contract. The LLM must produce JSON matching these exact fields.
     class InvoiceData(BaseModel):
         client_name: str
         date: str
         total_amount: str
 
+    mo.md("*`InvoiceData` schema defined. The model cannot generate output that violates these fields.*")
+    return BaseModel, InvoiceData, json
+
+
+@app.cell
+def _(INVOICE_TEXT, InvoiceData, call_llm, json, litellm, llm_api_base, llm_api_key, llm_model, mo, run_structured_btn, structured_toggle):
     if run_structured_btn.value:
         if structured_toggle.value:
             try:
-                _kwargs = {
-                    "model": llm_model,
-                    "messages": [
-                        {"role": "user", "content": f"Extract the client name, date, and total amount from this invoice:\n\n{INVOICE_TEXT}"},
-                    ],
-                    "response_format": InvoiceData,
-                }
-                if llm_api_key:
-                    _kwargs["api_key"] = llm_api_key
-                if llm_api_base:
-                    _kwargs["api_base"] = llm_api_base
-                _resp = litellm.completion(**_kwargs)
-                _raw = _resp.choices[0].message.content
-                _parsed = InvoiceData.model_validate_json(_raw)
-                mo.vstack([
-                    mo.md("### Structured output (schema-constrained)"),
-                    mo.callout(
-                        mo.md(f"```json\n{_parsed.model_dump_json(indent=2)}\n```"),
-                        kind="success",
-                    ),
-                    mo.md("**Valid JSON: ✅**"),
-                ])
+                _kwargs = {"model": llm_model, "response_format": InvoiceData,
+                           "messages": [{"role": "user", "content": f"Extract client name, date, and total amount:\n\n{INVOICE_TEXT}"}]}
+                if llm_api_key: _kwargs["api_key"] = llm_api_key
+                if llm_api_base: _kwargs["api_base"] = llm_api_base
+                _parsed = InvoiceData.model_validate_json(litellm.completion(**_kwargs).choices[0].message.content)
+                mo.vstack([mo.md("### Structured output (schema-constrained)"),
+                           mo.callout(mo.md(f"```json\n{_parsed.model_dump_json(indent=2)}\n```"), kind="success"),
+                           mo.md("**Valid JSON: ✅**")])
             except Exception as _e:
                 mo.callout(mo.md(f"**Error:** {_e}"), kind="danger")
         else:
-            _resp_text = call_llm(
-                f"Extract the client name, date, and total amount from this invoice and respond in JSON:\n\n{INVOICE_TEXT}"
-            )
+            _resp_text = call_llm(f"Extract client name, date, and total amount in JSON:\n\n{INVOICE_TEXT}")
             try:
-                _start = _resp_text.find("{")
-                _end = _resp_text.rfind("}") + 1
-                _json_str = _resp_text[_start:_end] if _start >= 0 else _resp_text
-                json.loads(_json_str)
-                _valid = "✅"
-                _kind = "success"
+                _s = _resp_text.find("{"); _e2 = _resp_text.rfind("}") + 1
+                json.loads(_resp_text[_s:_e2] if _s >= 0 else _resp_text)
+                _valid, _kind = "✅", "success"
             except Exception:
-                _valid = "❌"
-                _kind = "danger"
-            mo.vstack([
-                mo.md("### Free-text JSON response"),
-                mo.callout(mo.md(f"```\n{_resp_text}\n```"), kind="info"),
-                mo.md(f"**Valid JSON: {_valid}**"),
-            ])
+                _valid, _kind = "❌", "danger"
+            mo.vstack([mo.md("### Free-text JSON response"),
+                       mo.callout(mo.md(f"```\n{_resp_text}\n```"), kind="info"),
+                       mo.md(f"**Valid JSON: {_valid}**")])
     else:
         mo.md("*Click **Extract invoice data** to run the demo.*")
     return

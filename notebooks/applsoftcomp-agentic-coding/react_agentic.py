@@ -250,42 +250,26 @@ def _(mo, plt):
     import matplotlib.patches as mpatches
     from matplotlib.patches import FancyArrowPatch
 
-    _fig, (_ax1, _ax2) = plt.subplots(1, 2, figsize=(10, 4))
+    def _make_diagram():
+        _fig, (_ax1, _ax2) = plt.subplots(1, 2, figsize=(10, 4))
+        _ax1.set_xlim(0, 10); _ax1.set_ylim(0, 6); _ax1.axis("off")
+        _ax1.set_title("Chatbot: Input → Output", fontsize=12, fontweight="bold")
+        _ax1.add_patch(plt.Rectangle((0.5, 2.5), 2.5, 1.5, facecolor="#e3f2fd", edgecolor="#1565c0", linewidth=2))
+        _ax1.text(1.75, 3.25, "Input", ha="center", va="center", fontsize=11)
+        _ax1.annotate("", xy=(6.5, 3.25), xytext=(3.5, 3.25), arrowprops=dict(arrowstyle="->", color="#1565c0", lw=2))
+        _ax1.add_patch(plt.Rectangle((6.5, 2.5), 2.5, 1.5, facecolor="#e8f5e9", edgecolor="#2e7d32", linewidth=2))
+        _ax1.text(7.75, 3.25, "Output", ha="center", va="center", fontsize=11)
+        _ax2.set_xlim(0, 10); _ax2.set_ylim(0, 8); _ax2.axis("off")
+        _ax2.set_title("Agent: Observe → Think → Act → Observe", fontsize=12, fontweight="bold")
+        for _lbl, _x, _y, _fc, _ec in [("Observe",5,6.5,"#fff9c4","#f9a825"),("Think",8,4,"#fce4ec","#c62828"),("Act",5,1.5,"#e8f5e9","#2e7d32"),("Observe",2,4,"#e3f2fd","#1565c0")]:
+            _ax2.add_patch(plt.Rectangle((_x-1.2,_y-0.6),2.4,1.2,facecolor=_fc,edgecolor=_ec,linewidth=2))
+            _ax2.text(_x, _y, _lbl, ha="center", va="center", fontsize=10, fontweight="bold")
+        for _x1,_y1,_x2,_y2 in [(5,5.9,8,4.6),(8,3.4,5,2.1),(5,0.9,2,3.4),(2,4.6,5,5.9)]:
+            _ax2.annotate("", xy=(_x2,_y2), xytext=(_x1,_y1), arrowprops=dict(arrowstyle="->", color="#333333", lw=1.5))
+        plt.tight_layout()
+        return _fig
 
-    # Chatbot diagram
-    _ax1.set_xlim(0, 10)
-    _ax1.set_ylim(0, 6)
-    _ax1.axis("off")
-    _ax1.set_title("Chatbot: Input → Output", fontsize=12, fontweight="bold")
-    _ax1.add_patch(plt.Rectangle((0.5, 2.5), 2.5, 1.5, fill=True, facecolor="#e3f2fd", edgecolor="#1565c0", linewidth=2))
-    _ax1.text(1.75, 3.25, "Input", ha="center", va="center", fontsize=11)
-    _ax1.annotate("", xy=(6.5, 3.25), xytext=(3.5, 3.25),
-                  arrowprops=dict(arrowstyle="->", color="#1565c0", lw=2))
-    _ax1.add_patch(plt.Rectangle((6.5, 2.5), 2.5, 1.5, fill=True, facecolor="#e8f5e9", edgecolor="#2e7d32", linewidth=2))
-    _ax1.text(7.75, 3.25, "Output", ha="center", va="center", fontsize=11)
-
-    # Agent diagram
-    _ax2.set_xlim(0, 10)
-    _ax2.set_ylim(0, 8)
-    _ax2.axis("off")
-    _ax2.set_title("Agent: Observe → Think → Act → Observe", fontsize=12, fontweight="bold")
-    stages = [("Observe", 5, 6.5, "#fff9c4", "#f9a825"),
-              ("Think", 8, 4, "#fce4ec", "#c62828"),
-              ("Act", 5, 1.5, "#e8f5e9", "#2e7d32"),
-              ("Observe", 2, 4, "#e3f2fd", "#1565c0")]
-    for _label, _x, _y, _fc, _ec in stages:
-        _ax2.add_patch(plt.Rectangle((_x - 1.2, _y - 0.6), 2.4, 1.2,
-                                      fill=True, facecolor=_fc, edgecolor=_ec, linewidth=2))
-        _ax2.text(_x, _y, _label, ha="center", va="center", fontsize=10, fontweight="bold")
-
-    arrows = [(5, 6.5 - 0.6, 8, 4 + 0.6), (8, 4 - 0.6, 5, 1.5 + 0.6),
-              (5, 1.5 - 0.6, 2, 4 - 0.6), (2, 4 + 0.6, 5, 6.5 - 0.6)]
-    for _x1, _y1, _x2, _y2 in arrows:
-        _ax2.annotate("", xy=(_x2, _y2), xytext=(_x1, _y1),
-                      arrowprops=dict(arrowstyle="->", color="#333333", lw=1.5))
-
-    plt.tight_layout()
-    mo.as_html(_fig)
+    mo.accordion({"Chatbot vs. Agent diagram — click to view": mo.as_html(_make_diagram())})
     return FancyArrowPatch, mpatches
 
 
@@ -362,51 +346,41 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
+def _():
     import datetime
-
     def get_current_date() -> str:
         """Return today's date as a string in YYYY-MM-DD format.
-        Use this tool when the user asks what today's date is or needs the current date for a calculation."""
+        Use this tool when the user asks what today's date is."""
         return datetime.date.today().isoformat()
+    return datetime, get_current_date
 
+
+@app.cell
+def _():
     def evaluate_math(expression: str) -> str:
         """Evaluate a mathematical expression and return the result as a string.
-        The expression must be a valid Python arithmetic expression (e.g., '2 + 2', '3 * (4 + 5)', '10 / 3').
-        Do not use this tool for symbolic algebra. Use it only for numeric calculations."""
+        The expression must be a valid Python arithmetic expression (e.g., '2 + 2').
+        Do not use this for symbolic algebra — only numeric calculations."""
         try:
             allowed = set("0123456789+-*/(). ")
-            if not all(c in allowed for c in expression):
-                return "Error: expression contains disallowed characters."
-            result = eval(expression, {"__builtins__": {}})  # noqa: S307
-            return str(result)
-        except Exception as e:
-            return f"Error: {e}"
+            if not all(c in allowed for c in expression): return "Error: disallowed characters."
+            return str(eval(expression, {"__builtins__": {}}))  # noqa: S307
+        except Exception as e: return f"Error: {e}"
+    return (evaluate_math,)
 
+
+@app.cell
+def _():
     def define_word(word: str) -> str:
-        """Look up the definition of a common English word.
-        Returns a brief one-sentence definition. Use this when the user asks what a word means.
-        This tool covers only common dictionary words; it cannot look up technical jargon or proper nouns."""
-        definitions = {
-            "serendipity": "The occurrence of fortunate events by chance rather than design.",
-            "ephemeral": "Lasting for a very short time; transitory.",
-            "algorithm": "A step-by-step procedure for solving a problem or accomplishing a task.",
-            "entropy": "A measure of disorder or randomness in a system.",
-            "heuristic": "A practical problem-solving approach that is not guaranteed to be perfect but is sufficient for the immediate goal.",
-        }
-        return definitions.get(word.lower(), f"Definition not found for '{word}'.")
-
-    mo.accordion({
-        "Tool implementations — click to see full source": mo.md(
-            "```python\n"
-            "def get_current_date() -> str: ...\n"
-            "def evaluate_math(expression: str) -> str: ...\n"
-            "def define_word(word: str) -> str: ...\n"
-            "```\n"
-            "These functions are the tool implementations. The LLM never sees this code — only the docstrings above."
-        ),
-    })
-    return datetime, define_word, evaluate_math, get_current_date
+        """Look up the definition of a common English word. Returns one sentence.
+        Use this when the user asks what a word means. Cannot look up jargon."""
+        _d = {"serendipity": "The occurrence of fortunate events by chance.",
+              "ephemeral": "Lasting for a very short time; transitory.",
+              "algorithm": "A step-by-step procedure for solving a problem.",
+              "entropy": "A measure of disorder or randomness in a system.",
+              "heuristic": "A practical approach that is good enough for the goal."}
+        return _d.get(word.lower(), f"Definition not found for '{word}'.")
+    return (define_word,)
 
 
 @app.cell
@@ -464,115 +438,56 @@ def _(mo):
 
 
 @app.cell
-def _(
-    agent_question,
-    call_llm,
-    define_word,
-    evaluate_math,
-    get_current_date,
-    mo,
-    re,
-    run_agent_btn,
-):
+def _(define_word, evaluate_math, get_current_date):
     import json
+    TOOLS = {"get_current_date": get_current_date, "evaluate_math": evaluate_math, "define_word": define_word}
+    TOOL_DESC = "Tools: get_current_date(), evaluate_math(expr), define_word(word).\nFormat: Thought/Action/Action Input/Final Answer"
+    return TOOL_DESC, TOOLS, json
 
-    TOOLS = {
-        "get_current_date": get_current_date,
-        "evaluate_math": evaluate_math,
-        "define_word": define_word,
-    }
 
-    TOOL_DESCRIPTIONS = (
-        "You have access to three tools:\n"
-        "1. get_current_date() — Return today's date in YYYY-MM-DD format.\n"
-        "2. evaluate_math(expression: str) — Evaluate a Python arithmetic expression.\n"
-        "3. define_word(word: str) — Look up the definition of a common English word.\n\n"
-        "Use this format:\n"
-        "Thought: [your reasoning]\n"
-        "Action: [tool name]\n"
-        "Action Input: [input as a plain string]\n"
-        "Observation: [tool result — filled in by the system]\n"
-        "... repeat as needed ...\n"
-        "Thought: I now have the answer.\n"
-        "Final Answer: [your final answer]"
-    )
-
-    def run_react_agent(question: str, max_steps: int = 8) -> list:
-        """Run a simple ReAct loop and return the trace as a list of dicts."""
-        trace = []
-        messages = [
-            {"role": "system", "content": TOOL_DESCRIPTIONS},
-            {"role": "user", "content": question},
-        ]
-
-        for _step in range(max_steps):
-            try:
-                response = call_llm(messages)
-                text = response.choices[0].message.content
-            except Exception as e:
-                trace.append({"type": "error", "content": str(e)})
-                break
-
-            messages.append({"role": "assistant", "content": text})
-
-            if "Final Answer:" in text:
-                _fa_idx = text.index("Final Answer:")
-                trace.append({"type": "final", "content": text[_fa_idx + len("Final Answer:"):].strip()})
-                break
-
-            action_match = re.search(r"Action:\s*(.+)", text)
-            input_match = re.search(r"Action Input:\s*(.+)", text)
-            thought_match = re.search(r"Thought:\s*(.+?)(?:\nAction|$)", text, re.DOTALL)
-
-            if thought_match:
-                trace.append({"type": "thought", "content": thought_match.group(1).strip()})
-
-            if action_match and input_match:
-                tool_name = action_match.group(1).strip()
-                tool_input = input_match.group(1).strip()
-
-                trace.append({"type": "action", "tool": tool_name, "input": tool_input})
-
-                if tool_name in TOOLS:
-                    try:
-                        obs = TOOLS[tool_name](tool_input) if tool_input else TOOLS[tool_name]()
-                    except TypeError:
-                        try:
-                            obs = TOOLS[tool_name]()
-                        except Exception as e:
-                            obs = f"Error: {e}"
-                else:
-                    obs = f"Tool '{tool_name}' not found. Available: {list(TOOLS.keys())}"
-
-                trace.append({"type": "observation", "content": obs})
-                messages.append({"role": "user", "content": f"Observation: {obs}"})
-            else:
-                trace.append({"type": "thought", "content": text})
-                break
-
+@app.cell
+def _(TOOL_DESC, TOOLS, call_llm, re):
+    def run_react_agent(question, max_steps=8):
+        # ReAct loop: Thought → Action → Observation → repeat until Final Answer
+        trace, msgs = [], [{"role": "system", "content": TOOL_DESC}, {"role": "user", "content": question}]
+        for _ in range(max_steps):
+            try: text = call_llm(msgs).choices[0].message.content
+            except Exception as e: trace.append({"type": "error", "content": str(e)}); break
+            msgs.append({"role": "assistant", "content": text})
+            if "Final Answer:" in text: trace.append({"type": "final", "content": text[text.index("Final Answer:")+13:].strip()}); break
+            am, im = re.search(r"Action:\s*(.+)", text), re.search(r"Action Input:\s*(.+)", text)
+            if tm := re.search(r"Thought:\s*(.+?)(?:\nAction|$)", text, re.DOTALL): trace.append({"type": "thought", "content": tm.group(1).strip()})
+            if am and im:
+                tn, ti = am.group(1).strip(), im.group(1).strip()
+                try: obs = TOOLS[tn](ti) if tn in TOOLS else f"Tool '{tn}' not found."
+                except Exception as e: obs = f"Error: {e}"
+                trace += [{"type": "action", "tool": tn, "input": ti}, {"type": "observation", "content": obs}]
+                msgs.append({"role": "user", "content": f"Observation: {obs}"})
+            else: trace.append({"type": "thought", "content": text}); break
         return trace
+    return (run_react_agent,)
 
+
+@app.cell
+def _(agent_question, mo, run_agent_btn, run_react_agent):
     if run_agent_btn.value:
         _trace = run_react_agent(agent_question.value)
-        _trace_parts = [mo.md(f"### ReAct Trace ({len(_trace)} steps)")]
-        for _step_item in _trace:
-            if _step_item["type"] == "thought":
-                _trace_parts.append(mo.callout(mo.md(f"**Thought:** {_step_item['content']}"), kind="info"))
-            elif _step_item["type"] == "action":
-                _trace_parts.append(mo.callout(
-                    mo.md(f"**Action:** `{_step_item['tool']}`\n\n**Input:** `{_step_item['input']}`"),
-                    kind="warn",
-                ))
-            elif _step_item["type"] == "observation":
-                _trace_parts.append(mo.callout(mo.md(f"**Observation:** {_step_item['content']}"), kind="neutral"))
-            elif _step_item["type"] == "final":
-                _trace_parts.append(mo.callout(mo.md(f"**Final Answer:** {_step_item['content']}"), kind="success"))
-            elif _step_item["type"] == "error":
-                _trace_parts.append(mo.callout(mo.md(f"**Error:** {_step_item['content']}"), kind="danger"))
-        mo.vstack(_trace_parts)
+        _parts = [mo.md(f"### ReAct Trace ({len(_trace)} steps)")]
+        for _s in _trace:
+            if _s["type"] == "thought":
+                _parts.append(mo.callout(mo.md(f"**Thought:** {_s['content']}"), kind="info"))
+            elif _s["type"] == "action":
+                _parts.append(mo.callout(mo.md(f"**Action:** `{_s['tool']}`\n\n**Input:** `{_s['input']}`"), kind="warn"))
+            elif _s["type"] == "observation":
+                _parts.append(mo.callout(mo.md(f"**Observation:** {_s['content']}"), kind="neutral"))
+            elif _s["type"] == "final":
+                _parts.append(mo.callout(mo.md(f"**Final Answer:** {_s['content']}"), kind="success"))
+            elif _s["type"] == "error":
+                _parts.append(mo.callout(mo.md(f"**Error:** {_s['content']}"), kind="danger"))
+        mo.vstack(_parts)
     else:
         mo.md("*Click **Run agent** to watch the ReAct loop unfold.*")
-    return TOOL_DESCRIPTIONS, TOOLS, json, run_react_agent
+    return
 
 
 @app.cell
@@ -657,150 +572,77 @@ def _(mo):
 @app.cell
 def _(duckdb, mo, titanic_df):
     def inspect_schema() -> str:
-        """Return the column names and data types of the Titanic dataset.
-        Use this tool first to understand what columns are available before running any query."""
+        """Return column names and data types. Use this first before any query."""
         return titanic_df.dtypes.to_string()
 
     def get_sample_rows(n: str = "5") -> str:
-        """Return the first n rows of the Titanic dataset as a string.
-        Use this to get a concrete sense of what the data looks like.
-        The parameter n must be a string representation of an integer (e.g., '5', '10')."""
-        try:
-            return titanic_df.head(int(n)).to_string()
-        except Exception as e:
-            return f"Error: {e}"
+        """Return the first n rows as a string. n must be a string integer (e.g., '5')."""
+        try: return titanic_df.head(int(n)).to_string()
+        except Exception as e: return f"Error: {e}"
 
     def run_sql_query(query: str) -> str:
-        """Run a SQL query against the Titanic dataset and return the result as a string.
-        The table is named 'titanic_df'. Write standard SQL (SELECT, WHERE, GROUP BY, ORDER BY).
+        """Run SQL against the Titanic dataset (table: titanic_df). Standard SQL only.
         Example: SELECT AVG(Age) FROM titanic_df WHERE Survived = 1
         Always check inspect_schema first to confirm column names."""
-        try:
-            result = duckdb.query(query).df()
-            return result.to_string(index=False)
-        except Exception as e:
-            return f"SQL Error: {e}. Available columns: {list(titanic_df.columns)}"
+        try: return duckdb.query(query).df().to_string(index=False)
+        except Exception as e: return f"SQL Error: {e}. Available columns: {list(titanic_df.columns)}"
 
     def get_summary_stats(column: str) -> str:
-        """Return descriptive statistics (mean, std, min, max, quartiles) for a numeric column.
-        The column parameter must be an exact column name from the Titanic dataset (case-sensitive).
+        """Return descriptive statistics for a numeric column (case-sensitive column name).
         Use inspect_schema first to confirm the exact column name."""
         if column not in titanic_df.columns:
-            return f"Column '{column}' not found. Available columns: {list(titanic_df.columns)}"
+            return f"Column '{column}' not found. Available: {list(titanic_df.columns)}"
         return titanic_df[column].describe().to_string()
 
-    TITANIC_TOOLS = {
-        "inspect_schema": lambda _: inspect_schema(),
-        "get_sample_rows": get_sample_rows,
-        "run_sql_query": run_sql_query,
-        "get_summary_stats": get_summary_stats,
-    }
-
+    TITANIC_TOOLS = {"inspect_schema": lambda _: inspect_schema(), "get_sample_rows": get_sample_rows,
+                     "run_sql_query": run_sql_query, "get_summary_stats": get_summary_stats}
     TITANIC_SYSTEM_PROMPT = (
         "You are a data detective analyzing the Titanic dataset. "
         "You MUST verify every claim with at least one tool call before giving your Final Answer. "
         "Never guess — always query the data.\n\n"
-        "Available tools:\n"
-        "1. inspect_schema() — Get column names and types.\n"
-        "2. get_sample_rows(n) — Get the first n rows.\n"
-        "3. run_sql_query(query) — Run SQL against the Titanic dataset (table: titanic_df).\n"
-        "4. get_summary_stats(column) — Get descriptive statistics for a column.\n\n"
-        "Use this format:\n"
-        "Thought: [reasoning]\nAction: [tool name]\nAction Input: [input]\n"
-        "Observation: [filled by system]\n... repeat ...\nFinal Answer: [answer]"
+        "Available tools: inspect_schema(), get_sample_rows(n), run_sql_query(query), get_summary_stats(column)\n\n"
+        "Format:\nThought: [reasoning]\nAction: [tool]\nAction Input: [input]\n"
+        "Observation: [system fills this]\n...\nFinal Answer: [answer]"
     )
-
-    mo.accordion({
-        "Titanic agent tools — click to see docstrings": mo.md(
-            "**`inspect_schema()`** — Return column names and data types. Use this first before any query.\n\n"
-            "**`get_sample_rows(n)`** — Return the first n rows as a string.\n\n"
-            "**`run_sql_query(query)`** — Run SQL against the Titanic dataset (table: `titanic_df`).\n\n"
-            "**`get_summary_stats(column)`** — Return descriptive statistics for a numeric column."
-        ),
-    })
-    return (
-        TITANIC_SYSTEM_PROMPT,
-        TITANIC_TOOLS,
-        get_sample_rows,
-        get_summary_stats,
-        inspect_schema,
-        run_sql_query,
-    )
+    mo.md("*Four Titanic tools are ready: `inspect_schema`, `get_sample_rows`, `run_sql_query`, `get_summary_stats`.*")
+    return TITANIC_SYSTEM_PROMPT, TITANIC_TOOLS, get_sample_rows, get_summary_stats, inspect_schema, run_sql_query
 
 
 @app.cell
-def _(
-    TITANIC_SYSTEM_PROMPT,
-    TITANIC_TOOLS,
-    call_llm,
-    mo,
-    preset_q1,
-    preset_q2,
-    preset_q3,
-    re,
-    run_titanic_btn,
-    titanic_question,
-):
+def _(TITANIC_SYSTEM_PROMPT, TITANIC_TOOLS, call_llm, mo, re):
     def run_titanic_agent(question: str, max_steps: int = 10) -> list:
-        """Run the Titanic data detective agent."""
         trace = []
-        messages = [
-            {"role": "system", "content": TITANIC_SYSTEM_PROMPT},
-            {"role": "user", "content": question},
-        ]
-
+        messages = [{"role": "system", "content": TITANIC_SYSTEM_PROMPT}, {"role": "user", "content": question}]
         for _ in range(max_steps):
-            try:
-                resp = call_llm(messages)
-                text = resp.choices[0].message.content
-            except Exception as e:
-                trace.append({"type": "error", "content": str(e)})
-                break
-
+            try: text = call_llm(messages).choices[0].message.content
+            except Exception as e: trace.append({"type": "error", "content": str(e)}); break
             messages.append({"role": "assistant", "content": text})
-
             if "Final Answer:" in text:
-                fa_idx = text.index("Final Answer:")
-                trace.append({"type": "final", "content": text[fa_idx + 13:].strip()})
-                break
-
-            action_m = re.search(r"Action:\s*(.+)", text)
-            input_m = re.search(r"Action Input:\s*(.+)", text, re.DOTALL)
-            thought_m = re.search(r"Thought:\s*(.+?)(?:\nAction|$)", text, re.DOTALL)
-
-            if thought_m:
-                trace.append({"type": "thought", "content": thought_m.group(1).strip()})
-
-            if action_m and input_m:
-                tool_name = action_m.group(1).strip()
-                tool_input = input_m.group(1).strip().split("\n")[0].strip()
+                trace.append({"type": "final", "content": text[text.index("Final Answer:")+13:].strip()}); break
+            am = re.search(r"Action:\s*(.+)", text); im = re.search(r"Action Input:\s*(.+)", text, re.DOTALL)
+            tm = re.search(r"Thought:\s*(.+?)(?:\nAction|$)", text, re.DOTALL)
+            if tm: trace.append({"type": "thought", "content": tm.group(1).strip()})
+            if am and im:
+                tool_name = am.group(1).strip(); tool_input = im.group(1).strip().split("\n")[0].strip()
                 trace.append({"type": "action", "tool": tool_name, "input": tool_input})
-
-                if tool_name in TITANIC_TOOLS:
-                    try:
-                        obs = TITANIC_TOOLS[tool_name](tool_input)
-                    except Exception as e:
-                        obs = f"Error: {e}"
-                else:
-                    obs = f"Tool '{tool_name}' not found. Available: {list(TITANIC_TOOLS.keys())}"
-
+                try: obs = TITANIC_TOOLS[tool_name](tool_input) if tool_name in TITANIC_TOOLS else f"Tool '{tool_name}' not found."
+                except Exception as e: obs = f"Error: {e}"
                 trace.append({"type": "observation", "content": obs})
                 messages.append({"role": "user", "content": f"Observation: {obs}"})
-            else:
-                trace.append({"type": "thought", "content": text})
-                break
-
+            else: trace.append({"type": "thought", "content": text}); break
         return trace
 
+    mo.md("*`run_titanic_agent` is ready — implements the same Thought → Action → Observation loop.*")
+    return run_titanic_agent,
+
+
+@app.cell
+def _(mo, preset_q1, preset_q2, preset_q3, run_titanic_agent, run_titanic_btn, titanic_question):
     _q = None
-    if preset_q1.value:
-        _q = "What was the overall survival rate?"
-    elif preset_q2.value:
-        _q = "What is the average age of survivors vs. non-survivors?"
-    elif preset_q3.value:
-        _q = "Which embarkation port had the highest survival rate?"
-    elif run_titanic_btn.value:
-        _q = titanic_question.value
+    if preset_q1.value: _q = "What was the overall survival rate?"
+    elif preset_q2.value: _q = "What is the average age of survivors vs. non-survivors?"
+    elif preset_q3.value: _q = "Which embarkation port had the highest survival rate?"
+    elif run_titanic_btn.value: _q = titanic_question.value
 
     if _q:
         _trace = run_titanic_agent(_q)
@@ -809,10 +651,7 @@ def _(
             if _item["type"] == "thought":
                 _parts.append(mo.callout(mo.md(f"**Thought:** {_item['content']}"), kind="info"))
             elif _item["type"] == "action":
-                _parts.append(mo.callout(
-                    mo.md(f"**Action:** `{_item['tool']}`\n\n**Input:** `{_item['input']}`"),
-                    kind="warn",
-                ))
+                _parts.append(mo.callout(mo.md(f"**Action:** `{_item['tool']}`\n\n**Input:** `{_item['input']}`"), kind="warn"))
             elif _item["type"] == "observation":
                 _parts.append(mo.callout(mo.md(f"**Observation:**\n```\n{_item['content']}\n```"), kind="neutral"))
             elif _item["type"] == "final":
@@ -822,7 +661,7 @@ def _(
         mo.vstack(_parts)
     else:
         mo.md("*Select a preset question or type your own and click **Run data detective**.*")
-    return run_titanic_agent,
+    return
 
 
 @app.cell
@@ -1096,154 +935,78 @@ first answer and run one additional verification tool call. Does this improve ac
 
 @app.cell
 def _(mo, pd, titanic_df):
+    # ✏️ Edit the docstrings below — the LLM only sees these, not the function body.
     def cross_tabulation(col1_col2: str) -> str:
-        """Return a cross-tabulation of two columns in the Titanic dataset as a string.
-        The input must be two column names separated by a comma, e.g., 'Sex,Survived'.
-        The first column becomes the rows, the second becomes the columns.
+        """Return a cross-tabulation of two columns as a string.
+        Input: two column names separated by a comma, e.g., 'Sex,Survived'.
         Use this to compare counts across two categorical variables."""
         try:
             cols = [c.strip() for c in col1_col2.split(",")]
-            if len(cols) != 2:
-                return "Error: provide exactly two column names separated by a comma."
             return pd.crosstab(titanic_df[cols[0]], titanic_df[cols[1]]).to_string()
         except Exception as e:
             return f"Error: {e}. Available columns: {list(titanic_df.columns)}"
 
     def filter_and_count(condition: str) -> str:
-        """Filter the Titanic dataset by a condition and return the count of matching rows.
-        The condition must be a valid pandas query string, e.g., 'Sex == \"female\" and Age > 30'.
-        Use this to answer 'how many passengers' questions with specific criteria.
-        Always check inspect_schema first to confirm column names and data types."""
+        """Filter the Titanic dataset and return the count of matching rows.
+        Input: a pandas query string, e.g., 'Sex == "female" and Age > 30'.
+        Always check inspect_schema first to confirm column names."""
         try:
-            count = len(titanic_df.query(condition))
-            return f"{count} rows match the condition: {condition}"
+            return f"{len(titanic_df.query(condition))} rows match: {condition}"
         except Exception as e:
             return f"Error: {e}. Available columns: {list(titanic_df.columns)}"
 
-    mo.accordion({
-        "Your tools: cross_tabulation and filter_and_count — click to view and edit": mo.md(
-            "Edit the cell above to improve these tools. The docstring is what the LLM reads — be precise.\n\n"
-            "**`cross_tabulation(col1_col2)`** — input: two column names separated by comma (e.g. `'Sex,Survived'`)\n\n"
-            "**`filter_and_count(condition)`** — input: pandas query string (e.g. `'Sex == \"female\" and Age > 30'`)"
-        ),
-    })
+    mo.md("*`cross_tabulation` and `filter_and_count` are ready. Edit the docstrings above to guide the agent.*")
     return cross_tabulation, filter_and_count
 
 
 @app.cell
-def _(
-    TITANIC_SYSTEM_PROMPT,
-    TITANIC_TOOLS,
-    call_llm,
-    cross_tabulation,
-    filter_and_count,
-    get_sample_rows,
-    get_summary_stats,
-    inspect_schema,
-    mo,
-    re,
-    run_sql_query,
-    run_titanic_agent,
-    titanic_df,
-):
+def _(TITANIC_SYSTEM_PROMPT, TITANIC_TOOLS, call_llm, cross_tabulation, filter_and_count, mo, re, titanic_df):
     EXTENDED_TOOLS = dict(TITANIC_TOOLS)
     EXTENDED_TOOLS["cross_tabulation"] = cross_tabulation
     EXTENDED_TOOLS["filter_and_count"] = filter_and_count
-
     TARGET_QUESTION = (
         "Among female passengers over 30 years old, which ticket class had the highest survival rate, "
         "and how does it compare to males in the same age group?"
     )
 
+    def run_extended_agent(question: str, max_steps: int = 12) -> list:
+        trace = []
+        ext_system = TITANIC_SYSTEM_PROMPT + "\n5. cross_tabulation(col1,col2) — Cross-tabulate two columns.\n6. filter_and_count(condition) — Count rows matching a pandas query condition."
+        messages = [{"role": "system", "content": ext_system}, {"role": "user", "content": question}]
+        for _ in range(max_steps):
+            try: text = call_llm(messages).choices[0].message.content
+            except Exception as e: trace.append({"type": "error", "content": str(e)}); break
+            messages.append({"role": "assistant", "content": text})
+            if "Final Answer:" in text:
+                trace.append({"type": "final", "content": text[text.index("Final Answer:")+13:].strip()}); break
+            am = re.search(r"Action:\s*(.+)", text); im = re.search(r"Action Input:\s*(.+)", text, re.DOTALL)
+            tm = re.search(r"Thought:\s*(.+?)(?:\nAction|$)", text, re.DOTALL)
+            if tm: trace.append({"type": "thought", "content": tm.group(1).strip()})
+            if am and im:
+                tn = am.group(1).strip(); ti = im.group(1).strip().split("\n")[0].strip()
+                trace.append({"type": "action", "tool": tn, "input": ti})
+                try: obs = EXTENDED_TOOLS[tn](ti) if tn in EXTENDED_TOOLS else f"Tool '{tn}' not found."
+                except Exception as e: obs = f"Error: {e}"
+                trace.append({"type": "observation", "content": obs})
+                messages.append({"role": "user", "content": f"Observation: {obs}"})
+            else: trace.append({"type": "thought", "content": text}); break
+        return trace
+
+    # Ground truth
+    _f30 = titanic_df[(titanic_df["Sex"] == "female") & (titanic_df["Age"] > 30)]
+    _m30 = titanic_df[(titanic_df["Sex"] == "male") & (titanic_df["Age"] > 30)]
+    best_f_class = int(_f30.groupby("Pclass")["Survived"].mean().idxmax())
+    best_f_rate = float(_f30.groupby("Pclass")["Survived"].mean().max())
+    best_m_class = int(_m30.groupby("Pclass")["Survived"].mean().idxmax())
+    best_m_rate = float(_m30.groupby("Pclass")["Survived"].mean().max())
+
     run_extended_btn = mo.ui.run_button(label="Run extended agent with target question")
     run_extended_btn
-    return EXTENDED_TOOLS, TARGET_QUESTION, run_extended_btn
+    return EXTENDED_TOOLS, TARGET_QUESTION, best_f_class, best_f_rate, best_m_class, best_m_rate, run_extended_agent, run_extended_btn
 
 
 @app.cell
-def _(
-    EXTENDED_TOOLS,
-    TITANIC_SYSTEM_PROMPT,
-    TARGET_QUESTION,
-    call_llm,
-    mo,
-    re,
-    run_extended_btn,
-    titanic_df,
-):
-    def run_extended_agent(question: str, max_steps: int = 12) -> list:
-        trace = []
-        ext_system = (
-            TITANIC_SYSTEM_PROMPT +
-            "\n5. cross_tabulation(col1,col2) — Cross-tabulate two columns.\n"
-            "6. filter_and_count(condition) — Count rows matching a pandas query condition."
-        )
-        messages = [
-            {"role": "system", "content": ext_system},
-            {"role": "user", "content": question},
-        ]
-        for _ in range(max_steps):
-            try:
-                resp = call_llm(messages)
-                text = resp.choices[0].message.content
-            except Exception as e:
-                trace.append({"type": "error", "content": str(e)})
-                break
-
-            messages.append({"role": "assistant", "content": text})
-
-            if "Final Answer:" in text:
-                fa_idx = text.index("Final Answer:")
-                trace.append({"type": "final", "content": text[fa_idx + 13:].strip()})
-                break
-
-            action_m = re.search(r"Action:\s*(.+)", text)
-            input_m = re.search(r"Action Input:\s*(.+)", text, re.DOTALL)
-            thought_m = re.search(r"Thought:\s*(.+?)(?:\nAction|$)", text, re.DOTALL)
-
-            if thought_m:
-                trace.append({"type": "thought", "content": thought_m.group(1).strip()})
-
-            if action_m and input_m:
-                tool_name = action_m.group(1).strip()
-                tool_input = input_m.group(1).strip().split("\n")[0].strip()
-                trace.append({"type": "action", "tool": tool_name, "input": tool_input})
-
-                if tool_name in EXTENDED_TOOLS:
-                    try:
-                        obs = EXTENDED_TOOLS[tool_name](tool_input)
-                    except Exception as e:
-                        obs = f"Error: {e}"
-                else:
-                    obs = f"Tool '{tool_name}' not found. Available: {list(EXTENDED_TOOLS.keys())}"
-
-                trace.append({"type": "observation", "content": obs})
-                messages.append({"role": "user", "content": f"Observation: {obs}"})
-            else:
-                trace.append({"type": "thought", "content": text})
-                break
-
-        return trace
-
-    # Ground truth computation
-    _female_over30 = titanic_df[(titanic_df["Sex"] == "female") & (titanic_df["Age"] > 30)]
-    _male_over30 = titanic_df[(titanic_df["Sex"] == "male") & (titanic_df["Age"] > 30)]
-    _f_rates = _female_over30.groupby("Pclass")["Survived"].mean()
-    _m_rates = _male_over30.groupby("Pclass")["Survived"].mean()
-    _best_f_class = int(_f_rates.idxmax())
-    _best_f_rate = float(_f_rates.max())
-    _best_m_class = int(_m_rates.idxmax())
-    _best_m_rate = float(_m_rates.max())
-
-    def _verify_agent_answer(final_answer: str, best_f_class: int, best_m_class: int) -> dict:
-        """Check if the agent's final answer mentions the correct class numbers."""
-        fa_lower = final_answer.lower()
-        # Check that the correct female class is mentioned
-        f_class_mentioned = f"class {best_f_class}" in fa_lower or f"pclass {best_f_class}" in fa_lower or f" {best_f_class} " in fa_lower
-        # Check that the correct male class is mentioned
-        m_class_mentioned = f"class {best_m_class}" in fa_lower or f"pclass {best_m_class}" in fa_lower or f" {best_m_class} " in fa_lower
-        return {"female_correct": f_class_mentioned, "male_correct": m_class_mentioned}
-
+def _(TARGET_QUESTION, best_f_class, best_f_rate, best_m_class, best_m_rate, mo, run_extended_agent, run_extended_btn):
     if run_extended_btn.value:
         _etrace = run_extended_agent(TARGET_QUESTION)
         _eparts = [mo.md("### Extended Agent Trace")]
@@ -1252,10 +1015,7 @@ def _(
             if _item["type"] == "thought":
                 _eparts.append(mo.callout(mo.md(f"**Thought:** {_item['content']}"), kind="info"))
             elif _item["type"] == "action":
-                _eparts.append(mo.callout(
-                    mo.md(f"**Action:** `{_item['tool']}`\n\n**Input:** `{_item['input']}`"),
-                    kind="warn",
-                ))
+                _eparts.append(mo.callout(mo.md(f"**Action:** `{_item['tool']}`\n\n**Input:** `{_item['input']}`"), kind="warn"))
             elif _item["type"] == "observation":
                 _eparts.append(mo.callout(mo.md(f"**Observation:**\n```\n{_item['content']}\n```"), kind="neutral"))
             elif _item["type"] == "final":
@@ -1263,34 +1023,18 @@ def _(
                 _eparts.append(mo.callout(mo.md(f"**Final Answer:** {_item['content']}"), kind="success"))
             elif _item["type"] == "error":
                 _eparts.append(mo.callout(mo.md(f"**Error:** {_item['content']}"), kind="danger"))
-
-        # Programmatic ground-truth verification
-        _gt_md = (
-            f"**Ground truth:**\n\n"
-            f"Female passengers over 30: **Class {_best_f_class}** had the highest survival rate ({_best_f_rate:.1%}).\n\n"
-            f"Male passengers over 30: **Class {_best_m_class}** had the highest survival rate ({_best_m_rate:.1%})."
-        )
-        _eparts.append(mo.callout(mo.md(_gt_md), kind="neutral"))
-
+        _gt = f"Ground truth: Female → **Class {best_f_class}** ({best_f_rate:.1%}), Male → **Class {best_m_class}** ({best_m_rate:.1%})"
+        _eparts.append(mo.callout(mo.md(_gt), kind="neutral"))
         if _final_answer:
-            _check = _verify_agent_answer(_final_answer, _best_f_class, _best_m_class)
-            _f_icon = "✅" if _check["female_correct"] else "❌"
-            _m_icon = "✅" if _check["male_correct"] else "❌"
-            _pass = _check["female_correct"] and _check["male_correct"]
-            _verdict = "PASS — agent identified both correct classes." if _pass else "FAIL — agent missed one or both correct classes. Check the trace and refine your tools."
-            _eparts.append(mo.callout(
-                mo.md(
-                    f"**Verification:**\n\n"
-                    f"{_f_icon} Female best class (expected: Class {_best_f_class})\n\n"
-                    f"{_m_icon} Male best class (expected: Class {_best_m_class})\n\n"
-                    f"**Result: {_verdict}**"
-                ),
-                kind="success" if _pass else "danger",
-            ))
+            _fl = _final_answer.lower()
+            _fi = "✅" if any(s in _fl for s in [f"class {best_f_class}", f" {best_f_class} "]) else "❌"
+            _mi = "✅" if any(s in _fl for s in [f"class {best_m_class}", f" {best_m_class} "]) else "❌"
+            _pass = _fi == "✅" and _mi == "✅"
+            _eparts.append(mo.callout(mo.md(f"{_fi} Female Class {best_f_class}  {_mi} Male Class {best_m_class}\n\n**{'PASS' if _pass else 'FAIL'}**"), kind="success" if _pass else "danger"))
         mo.vstack(_eparts)
     else:
         mo.md("*Click **Run extended agent with target question** to run the agent and see the ground-truth verification.*")
-    return run_extended_agent,
+    return
 
 
 @app.cell
@@ -1335,91 +1079,57 @@ explain what went wrong. Run the agent again and compare.
 
 
 @app.cell
-def _(
-    TITANIC_TOOLS,
-    call_llm,
-    mo,
-    re,
-    titanic_df,
-):
+def _(TITANIC_TOOLS, mo):
+    # ✏️ Edit the error message below — the agent learns from what your tool tells it.
     def broken_query_tool(query: str) -> str:
         """Run a SQL query against the Titanic dataset.
-        IMPORTANT: Edit the error message below to make it more informative."""
+        Edit the error message below to make it more informative."""
         raise ValueError("Error")  # TODO: make this error message more helpful
 
     BROKEN_TOOLS = dict(TITANIC_TOOLS)
     BROKEN_TOOLS["run_sql_query"] = broken_query_tool
-
     BROKEN_QUESTION = "What is the average fare paid by first-class passengers?"
-
-    run_broken_btn = mo.ui.run_button(label="Run agent with broken tool")
-
-    def run_broken_agent(question: str, max_steps: int = 6) -> list:
-        trace = []
-        messages = [
-            {"role": "system", "content": (
-                "You are a data analyst. Use run_sql_query(query) to answer questions about "
-                "the Titanic dataset (table: titanic_df). Always query before answering.\n\n"
-                "Format:\nThought: [reason]\nAction: run_sql_query\nAction Input: [SQL]\n"
-                "Observation: [result]\n...\nFinal Answer: [answer]"
-            )},
-            {"role": "user", "content": question},
-        ]
-        for _ in range(max_steps):
-            try:
-                resp = call_llm(messages)
-                text = resp.choices[0].message.content
-            except Exception as e:
-                trace.append({"type": "error", "content": str(e)})
-                break
-
-            messages.append({"role": "assistant", "content": text})
-
-            if "Final Answer:" in text:
-                fa_idx = text.index("Final Answer:")
-                trace.append({"type": "final", "content": text[fa_idx + 13:].strip()})
-                break
-
-            action_m = re.search(r"Action:\s*(.+)", text)
-            input_m = re.search(r"Action Input:\s*(.+)", text, re.DOTALL)
-            thought_m = re.search(r"Thought:\s*(.+?)(?:\nAction|$)", text, re.DOTALL)
-
-            if thought_m:
-                trace.append({"type": "thought", "content": thought_m.group(1).strip()})
-
-            if action_m and input_m:
-                tool_name = action_m.group(1).strip()
-                tool_input = input_m.group(1).strip().split("\n")[0]
-                trace.append({"type": "action", "tool": tool_name, "input": tool_input})
-
-                fn = BROKEN_TOOLS.get(tool_name)
-                if fn:
-                    try:
-                        obs = fn(tool_input)
-                    except Exception as e:
-                        obs = str(e)
-                else:
-                    obs = f"Tool '{tool_name}' not found."
-
-                trace.append({"type": "observation", "content": obs})
-                messages.append({"role": "user", "content": f"Observation: {obs}"})
-            else:
-                trace.append({"type": "thought", "content": text})
-                break
-
-        return trace
-
-    mo.vstack([
-        mo.callout(mo.md(f"**Question:** {BROKEN_QUESTION}"), kind="info"),
-        run_broken_btn,
-    ])
-    return BROKEN_QUESTION, BROKEN_TOOLS, run_broken_agent, run_broken_btn, broken_query_tool
+    mo.md("*`broken_query_tool` is the tool to edit. Change the `ValueError` message to be informative.*")
+    return BROKEN_QUESTION, BROKEN_TOOLS, broken_query_tool
 
 
 @app.cell
-def _(BROKEN_QUESTION, mo, run_broken_agent, run_broken_btn):
+def _(BROKEN_TOOLS, call_llm, mo, re):
+    def run_broken_agent(question: str, max_steps: int = 6) -> list:
+        trace = []
+        sys_prompt = ("You are a data analyst. Use run_sql_query(query) to answer about titanic_df.\n"
+                      "Format:\nThought: ...\nAction: run_sql_query\nAction Input: [SQL]\nFinal Answer: ...")
+        messages = [{"role": "system", "content": sys_prompt}, {"role": "user", "content": question}]
+        for _ in range(max_steps):
+            try: text = call_llm(messages).choices[0].message.content
+            except Exception as e: trace.append({"type": "error", "content": str(e)}); break
+            messages.append({"role": "assistant", "content": text})
+            if "Final Answer:" in text:
+                trace.append({"type": "final", "content": text[text.index("Final Answer:")+13:].strip()}); break
+            am, im = re.search(r"Action:\s*(.+)", text), re.search(r"Action Input:\s*(.+)", text, re.DOTALL)
+            if tm := re.search(r"Thought:\s*(.+?)(?:\nAction|$)", text, re.DOTALL):
+                trace.append({"type": "thought", "content": tm.group(1).strip()})
+            if am and im:
+                tn, ti = am.group(1).strip(), im.group(1).strip().split("\n")[0]
+                trace.append({"type": "action", "tool": tn, "input": ti})
+                fn = BROKEN_TOOLS.get(tn)
+                try: obs = fn(ti) if fn else f"Tool '{tn}' not found."
+                except Exception as e: obs = str(e)
+                trace.append({"type": "observation", "content": obs})
+                messages.append({"role": "user", "content": f"Observation: {obs}"})
+            else: trace.append({"type": "thought", "content": text}); break
+        return trace
+
+    run_broken_btn = mo.ui.run_button(label="Run agent with broken tool")
+    mo.vstack([mo.callout(mo.md("**Question:** What is the average fare paid by first-class passengers?"), kind="info"), run_broken_btn])
+    return run_broken_agent, run_broken_btn
+
+
+@app.cell
+def _(mo, run_broken_agent, run_broken_btn):
+    _BQ = "What is the average fare paid by first-class passengers?"
     if run_broken_btn.value:
-        _btrace = run_broken_agent(BROKEN_QUESTION)
+        _btrace = run_broken_agent(_BQ)
         _bparts = [mo.md("### Broken-tool agent trace")]
         for _item in _btrace:
             if _item["type"] == "thought":
