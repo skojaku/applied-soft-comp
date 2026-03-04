@@ -587,6 +587,36 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    titanic_question = mo.ui.text_area(
+        value="What was the survival rate for each passenger class?",
+        label="Ask the Titanic data detective",
+        full_width=True,
+        rows=3,
+    )
+
+    preset_q1 = mo.ui.run_button(label="What was the overall survival rate?")
+    preset_q2 = mo.ui.run_button(label="What is the average age of survivors vs. non-survivors?")
+    preset_q3 = mo.ui.run_button(label="Which embarkation port had the highest survival rate?")
+
+    run_titanic_btn = mo.ui.run_button(label="Run data detective")
+
+    mo.vstack([
+        mo.md("**Quick questions:**"),
+        mo.hstack([preset_q1, preset_q2, preset_q3]),
+        titanic_question,
+        run_titanic_btn,
+    ])
+    return (
+        preset_q1,
+        preset_q2,
+        preset_q3,
+        run_titanic_btn,
+        titanic_question,
+    )
+
+
+@app.cell
+def _(mo):
     import pandas as pd
     import duckdb
 
@@ -674,36 +704,6 @@ def _(duckdb, mo, titanic_df):
         get_summary_stats,
         inspect_schema,
         run_sql_query,
-    )
-
-
-@app.cell
-def _(mo):
-    titanic_question = mo.ui.text_area(
-        value="What was the survival rate for each passenger class?",
-        label="Ask the Titanic data detective",
-        full_width=True,
-        rows=3,
-    )
-
-    preset_q1 = mo.ui.run_button(label="What was the overall survival rate?")
-    preset_q2 = mo.ui.run_button(label="What is the average age of survivors vs. non-survivors?")
-    preset_q3 = mo.ui.run_button(label="Which embarkation port had the highest survival rate?")
-
-    run_titanic_btn = mo.ui.run_button(label="Run data detective")
-
-    mo.vstack([
-        mo.md("**Quick questions:**"),
-        mo.hstack([preset_q1, preset_q2, preset_q3]),
-        titanic_question,
-        run_titanic_btn,
-    ])
-    return (
-        preset_q1,
-        preset_q2,
-        preset_q3,
-        run_titanic_btn,
-        titanic_question,
     )
 
 
