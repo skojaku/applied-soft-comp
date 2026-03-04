@@ -91,6 +91,48 @@ def _(mo):
 
 
 @app.cell
+def _(mo):
+    import subprocess as _subprocess
+    try:
+        _result = _subprocess.run(
+            ["ollama", "list"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        _ollama_output = _result.stdout.strip() if _result.returncode == 0 else _result.stderr.strip()
+        _ollama_available = _result.returncode == 0
+    except FileNotFoundError:
+        _ollama_output = "ollama not found. Install it from https://ollama.com or use a cloud model string (e.g. openai/gpt-4o)."
+        _ollama_available = False
+    except Exception as _e:
+        _ollama_output = f"Could not run ollama list: {_e}"
+        _ollama_available = False
+
+    if _ollama_available and _ollama_output:
+        _display = mo.callout(
+            mo.vstack([
+                mo.md("**Available ollama models** (from `ollama list`):"),
+                mo.md(f"```\n{_ollama_output}\n```"),
+                mo.md("Use the model name above in the config panel as `ollama/<model-name>` (e.g. `ollama/llama3.2`)."),
+            ]),
+            kind="success",
+        )
+    elif _ollama_available:
+        _display = mo.callout(
+            mo.md("No local ollama models found. Run `ollama pull <model-name>` to download one, or use a cloud model string."),
+            kind="warn",
+        )
+    else:
+        _display = mo.callout(
+            mo.md(f"**ollama not available:** {_ollama_output}"),
+            kind="warn",
+        )
+    _display
+    return
+
+
+@app.cell
 def _(api_base_input, api_key_input, model_input):
     llm_model = model_input.value
     llm_api_key = api_key_input.value or None
