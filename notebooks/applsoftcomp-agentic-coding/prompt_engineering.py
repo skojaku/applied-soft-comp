@@ -977,6 +977,42 @@ def _(mo):
 
 
 @app.cell
+def _(COT_PUZZLES, get_cot2_results, mo):
+    # Success criterion: student must run both Direct and Chain-of-thought for all 3 puzzles.
+    _results = get_cot2_results()
+    _puzzle_ids = {p["id"] for p in COT_PUZZLES}
+    _direct_puzzles = {r["puzzle"] for r in _results if r["mode"] == "Direct"}
+    _cot_puzzles = {r["puzzle"] for r in _results if r["mode"] == "Chain-of-thought"}
+    _covered_direct = _direct_puzzles >= _puzzle_ids
+    _covered_cot = _cot_puzzles >= _puzzle_ids
+    _correct_any = any(r["correct"] == "✅" for r in _results)
+
+    if _covered_direct and _covered_cot:
+        _status = "success"
+        _msg = (
+            "**✅ Task 2 complete.** You have run both Direct and Chain-of-thought modes "
+            "across all three puzzles. Check the Correct? column to identify where CoT helped "
+            "and where it failed."
+        )
+    elif _results:
+        _missing_d = _puzzle_ids - _direct_puzzles
+        _missing_c = _puzzle_ids - _cot_puzzles
+        _lines = ["**Progress so far:**"]
+        if _missing_d:
+            _lines.append(f"Still need Direct mode for: {', '.join(_missing_d)}")
+        if _missing_c:
+            _lines.append(f"Still need Chain-of-thought mode for: {', '.join(_missing_c)}")
+        _msg = "\n\n".join(_lines)
+        _status = "warn"
+    else:
+        _msg = "**No runs yet.** Select a puzzle, choose a mode, and click **Run** to begin."
+        _status = "neutral"
+
+    mo.callout(mo.md(_msg), kind=_status)
+    return
+
+
+@app.cell
 def _(mo):
     mo.vstack([
         mo.md("## Student Task 3: Few-Shot Order Sensitivity"),
@@ -1036,6 +1072,12 @@ def _(mo):
 
 
 @app.cell
+def _(mo):
+    get_bias_predictions, set_bias_predictions = mo.state([])
+    return get_bias_predictions, set_bias_predictions
+
+
+@app.cell
 def _(
     FEWSHOT_BIAS_EXAMPLES,
     FEWSHOT_BIAS_TEST,
@@ -1044,6 +1086,7 @@ def _(
     plt,
     random,
     run_bias_btn,
+    set_bias_predictions,
 ):
     if run_bias_btn.value:
         _predictions = []
@@ -1057,6 +1100,8 @@ def _(
             _prompt_str = "\n".join(_p_parts)
             _pred = call_llm(_prompt_str).strip().split("\n")[0]
             _predictions.append(_pred)
+
+        set_bias_predictions(_predictions)
 
         _counts = {"Positive": 0, "Negative": 0, "Neutral": 0, "Other": 0}
         for _p in _predictions:
@@ -1085,6 +1130,46 @@ def _(
         ])
     else:
         mo.md("*Click **Run 10 shuffled trials** to see the distribution.*")
+    return
+
+
+@app.cell
+def _(get_bias_predictions, mo):
+    # Success criterion: student must run the 10 trials and observe variance in predictions.
+    # Pass = at least 2 different class labels appear across the 10 runs.
+    _preds = get_bias_predictions()
+    if not _preds:
+        mo.callout(
+            mo.md("**No trials run yet.** Click **Run 10 shuffled trials** to begin."),
+            kind="neutral",
+        )
+    else:
+        _unique = set()
+        for _p in _preds:
+            for _k in ["Positive", "Negative", "Neutral"]:
+                if _k.lower() in _p.lower():
+                    _unique.add(_k)
+                    break
+        if len(_unique) >= 2:
+            mo.callout(
+                mo.md(
+                    f"**✅ Task 3 complete.** You observed {len(_unique)} different prediction "
+                    f"classes across 10 shuffled orderings ({', '.join(sorted(_unique))}). "
+                    "This variance is the key insight: a few-shot prompt is not stable across "
+                    "example orderings."
+                ),
+                kind="success",
+            )
+        else:
+            _label = list(_unique)[0] if _unique else "Unknown"
+            mo.callout(
+                mo.md(
+                    f"**⚠️ All 10 trials returned '{_label}'.** This model may be too confident "
+                    "on this test sentence. Try re-running to get more shuffled orderings, or "
+                    "consider whether the sentence is ambiguous enough to trigger variance."
+                ),
+                kind="warn",
+            )
     return
 
 

@@ -1326,5 +1326,63 @@ def _(BROKEN_QUESTION, mo, run_broken_agent, run_broken_btn):
     return
 
 
+@app.cell
+def _(broken_query_tool, mo):
+    # Success criterion: the student must edit broken_query_tool so its error message
+    # is more informative. Pass = the raised ValueError message is longer than 10
+    # characters AND mentions at least one Titanic column name.
+    _TITANIC_COLS = {"survived", "pclass", "name", "sex", "age", "sibsp", "parch",
+                     "ticket", "fare", "cabin", "embarked"}
+    try:
+        broken_query_tool("SELECT 1")
+        _err_msg = ""
+    except ValueError as _e:
+        _err_msg = str(_e)
+    except Exception as _e:
+        _err_msg = str(_e)
+
+    _is_default = _err_msg.strip().lower() == "error"
+    _is_long = len(_err_msg.strip()) > 10
+    _mentions_col = any(col in _err_msg.lower() for col in _TITANIC_COLS)
+
+    if _is_default:
+        mo.callout(
+            mo.md(
+                "**❌ Error message not yet improved.** The tool still raises `ValueError('Error')`. "
+                "Edit the `raise ValueError(...)` line above to include a helpful description: "
+                "name the available columns and explain what went wrong."
+            ),
+            kind="danger",
+        )
+    elif _is_long and _mentions_col:
+        mo.callout(
+            mo.md(
+                "**✅ Task 5 complete.** Your error message is informative: it is long enough "
+                "and mentions at least one Titanic column name. Run the agent again to see "
+                "whether it can now self-correct using your improved error message."
+            ),
+            kind="success",
+        )
+    elif _is_long:
+        mo.callout(
+            mo.md(
+                "**⚠️ Better, but not quite.** Your error message is longer than the default, "
+                "but it does not name any Titanic column (Survived, Pclass, Name, Sex, Age, "
+                "SibSp, Parch, Ticket, Fare, Cabin, Embarked). Add the column list so the "
+                "agent knows what to query."
+            ),
+            kind="warn",
+        )
+    else:
+        mo.callout(
+            mo.md(
+                "**⚠️ Error message too short.** Try to write a message that explains what "
+                "went wrong and lists the available columns."
+            ),
+            kind="warn",
+        )
+    return
+
+
 if __name__ == "__main__":
     app.run()
