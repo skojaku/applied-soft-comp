@@ -259,5 +259,61 @@
     "The literature verification demo references should be chosen carefully: the real papers should be well-known enough that a cloud model can verify them, and the fake papers should be plausible enough to be challenging.",
     "Consider adding a 'Reset to defaults' button in the ollama config panel so students who accidentally misconfigure the endpoint can recover without restarting the notebook.",
     "The CoT vs. direct answer comparison task should use a puzzle that is genuinely hard enough that the model sometimes gets it wrong without CoT. A good candidate is a riddle involving non-obvious constraint propagation or a math problem that requires two or more intermediate steps."
+  ],
+  "sprint_projects": [
+    {
+      "id": "sprint-principled-engineering",
+      "title": "Beyond Vibe-Coding: Build an ArXiv Paper Recommender the Right Way",
+      "format": "open-ended sprint assignment (no marimo notebook required)",
+      "tool": "Gemini CLI (gemini) or any agentic LLM CLI",
+      "duration": "60-90 minutes in-class sprint",
+      "problem_statement": "Vibe-coding — sending a single prompt and hoping for a working result — collapses on multi-step engineering tasks. Students experience this failure mode firsthand and apply one or more principled engineering practices to recover and succeed.",
+      "task_description": "Build a command-line Python tool that: (1) fetches today's new submissions from the ArXiv RSS feed for one or more categories (e.g., cs.AI, cs.LG), (2) filters papers whose title or abstract matches a student-provided interest profile (a short paragraph describing their research interests), (3) ranks the filtered papers by relevance using an LLM rating (the LLM scores each paper abstract against the interest profile on a 1-10 scale), and (4) outputs a ranked list with title, authors, score, and a one-sentence justification. The tool must handle network errors, empty feeds, and malformed XML gracefully.",
+      "why_this_task": "The task has enough moving parts — HTTP fetch, XML parsing, multi-step LLM calls, ranking logic, error handling — that naive vibe-coding produces incomplete or brittle code. Students who plan upfront and use principled practices finish in time; students who vibe-code hit repeated roadblocks and cannot finish.",
+      "principled_practices": [
+        {
+          "name": "Ralph Wiggum Loop",
+          "abbreviation": "RALPH",
+          "description": "Before writing any code or sending any prompt to the LLM, students work through five phases: Read (understand the full task requirements), Analyze (identify the hardest sub-problems), List (enumerate all components needed), Plan (sequence the components with interfaces defined), Hypothesize (predict where failures will occur and how to handle them). Only after all five phases are complete does the student issue the first coding prompt.",
+          "tool_integration": "Use 'gemini -p' (plan mode) to generate a structured plan. Review and refine the plan before implementation begins.",
+          "pedagogical_note": "Named after Ralph Wiggum as a reminder that even simple-sounding tasks require structured thinking. Students who skip this phase inevitably ask the LLM for 'the whole thing at once' and get stuck."
+        },
+        {
+          "name": "80/20 Plan Rule",
+          "description": "Students should spend 80% of their total time budget planning and specifying (writing the RALPH plan, defining interfaces, writing acceptance tests) and only 20% on actual LLM-assisted implementation. For a 60-minute sprint, this means ~48 minutes of planning and ~12 minutes of implementation. The insight is that implementation goes very fast when the plan is precise — and very slowly when it is vague.",
+          "tool_integration": "Use Gemini CLI's context file feature (--context or GEMINI.md) to write the plan into a persistent context file. The LLM implementation prompts then reference this plan rather than re-explaining everything each time.",
+          "pedagogical_note": "Students almost always underestimate how much planning reduces total effort. The 80/20 ratio feels counterintuitive until they experience a 12-minute implementation of a previously planned feature vs. a 45-minute vibe-coding struggle."
+        },
+        {
+          "name": "Test-Driven Prompting",
+          "description": "Before asking the LLM to implement any function, the student writes the acceptance test for that function. The test defines the contract: what inputs, what outputs, what edge cases. The LLM is then prompted to implement the function until the test passes. If the test fails, the student sends the failure message back to the LLM without manual debugging.",
+          "tool_integration": "Write tests in a 'tests/' directory. Use 'gemini' to generate the implementation, then run 'python -m pytest tests/' and feed failures back to gemini.",
+          "pedagogical_note": "This practice grounds the LLM in a concrete success criterion and prevents the 'looks right but is wrong' failure mode. Students often discover that writing the test clarifies their own understanding of the requirement."
+        }
+      ],
+      "student_choice": "Students may apply any combination of the three practices — or none at all (vibe-coding is explicitly allowed as a control). They are asked to track which approach they used and reflect on its effectiveness. There is no penalty for vibe-coding; the pedagogical goal is for students to experience the difference firsthand.",
+      "deliverables": [
+        "Working command-line tool (python arxiv_recommender.py --interests 'your interest paragraph' --categories cs.AI,cs.LG)",
+        "A prompting log: the key prompts sent to the LLM, in order, annotated with whether they succeeded on the first attempt",
+        "A one-paragraph reflection: which principled practice(s) did you use? What would have happened if you had vibe-coded instead? What was the hardest part of the task?"
+      ],
+      "evaluation": {
+        "correctness": "40% — does the tool fetch, filter, rank, and output correctly?",
+        "robustness": "20% — does it handle network errors and malformed input gracefully?",
+        "reflection": "40% — does the reflection demonstrate genuine insight into the tradeoffs between vibe-coding and principled engineering?"
+      },
+      "gemini_cli_notes": [
+        "Use 'gemini' command (Google's Gemini CLI) as the primary tool. It supports GEMINI.md context files analogous to CLAUDE.md, making it ideal for demonstrating persistent context.",
+        "Students write their RALPH plan into GEMINI.md at the project root. Every subsequent gemini invocation inherits this context, demonstrating the 'Write' strategy from the context engineering module.",
+        "Recommended model: gemini-2.0-flash for speed during the sprint.",
+        "The gemini CLI supports piping test output directly: 'python -m pytest 2>&1 | gemini fix the failing test'."
+      ],
+      "connections_to_lecture": [
+        "The RALPH loop is an application of the ReAct pattern at the meta-level: students reason about the task before acting on it.",
+        "The 80/20 rule operationalizes context engineering: a well-written plan is a high-quality context injection that reduces LLM drift.",
+        "Test-driven prompting is a form of output constraint (from prompt engineering module): the test is the format specification for the LLM's implementation.",
+        "GEMINI.md is a direct demonstration of the 'Write' strategy from the context engineering module: procedural memory injected at session start."
+      ]
+    }
   ]
 }
