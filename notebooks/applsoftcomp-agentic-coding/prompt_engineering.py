@@ -1158,9 +1158,10 @@ def _(mo):
         },
     ]
 
+    _puzzle_options = {p["question"][:60] + "...": p["id"] for p in COT_PUZZLES}
     puzzle_selector = mo.ui.dropdown(
-        options={p["question"][:60] + "...": p["id"] for p in COT_PUZZLES},
-        value="arithmetic",
+        options=_puzzle_options,
+        value=next(iter(_puzzle_options)),
         label="Select puzzle",
     )
     cot2_toggle = mo.ui.switch(label="Enable chain-of-thought", value=False)
