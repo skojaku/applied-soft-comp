@@ -1337,6 +1337,8 @@ def _(mo):
         ("The delivery was late and the packaging was damaged.", "Negative"),
         ("It is an average product. Does what it says on the box.", "Neutral"),
         ("I have never been so disappointed. Complete failure.", "Negative"),
+        ("Five stars. I would recommend this to everyone I know.", "Positive"),
+        ("Outstanding quality. Far exceeded my expectations.", "Positive"),
     ]
 
     FEWSHOT_BIAS_TEST = "The interface is clean but the performance could be better."
