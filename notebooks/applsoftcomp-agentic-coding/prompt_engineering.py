@@ -135,6 +135,46 @@ def _(api_base_input, api_key_input, model_input):
 
 
 @app.cell
+def _(llm_model, mo):
+    import subprocess as _sp
+
+    def _check_model_available(model_str: str) -> tuple:
+        """Return (is_ok, warning_message). Warns if an ollama/local model is not in `ollama list`."""
+        if not model_str.startswith("ollama/"):
+            return True, ""  # non-ollama providers are not checked here
+        model_name = model_str.split("ollama/", 1)[1]
+        try:
+            _r = _sp.run(["ollama", "list"], capture_output=True, text=True, timeout=5)
+            if _r.returncode != 0:
+                return True, ""  # can't check — assume OK
+            installed = [line.split()[0] for line in _r.stdout.strip().splitlines()[1:] if line.strip()]
+            if not any(model_name == m or model_name in m for m in installed):
+                return False, (
+                    f"Model `{model_name}` was not found in your local ollama registry.\n\n"
+                    f"**To fix this, run one of the following in your terminal:**\n\n"
+                    f"```\nollama pull {model_name}\n```\n\n"
+                    f"Or switch to a cloud model string (e.g. `ollama/glm-4.7:cloud`, `openai/gpt-4o`) "
+                    f"in the configuration panel above.\n\n"
+                    f"**Currently installed models:** {', '.join(installed) if installed else 'none'}"
+                )
+        except FileNotFoundError:
+            pass  # ollama not installed — not a local model issue
+        except Exception:
+            pass
+        return True, ""
+
+    _model_ok, _model_warning = _check_model_available(llm_model)
+    if not _model_ok:
+        mo.callout(
+            mo.md(f"**Model not found — {_model_warning}"),
+            kind="danger",
+        )
+    else:
+        mo.md(f"*Model `{llm_model}` looks available.*")
+    return
+
+
+@app.cell
 def _(llm_api_base, llm_api_key, llm_model, mo):
     import litellm
 
