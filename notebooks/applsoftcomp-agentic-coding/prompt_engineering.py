@@ -363,7 +363,7 @@ def _(mo):
     ]
 
     fewshot_slider = mo.ui.slider(
-        start=0, stop=5, step=1, value=0, label="Number of few-shot examples"
+        steps=[0, 1, 2, 5], value=0, label="Number of few-shot examples (0 = zero-shot, 1 = one-shot, 2 = two-shot, 5 = five-shot)"
     )
     shuffle_btn = mo.ui.run_button(label="Shuffle examples and run")
     run_fewshot_btn = mo.ui.run_button(label="Run with current settings")
@@ -386,20 +386,25 @@ def _(mo):
 
 
 @app.cell
+def _(mo):
+    import random
+    get_fewshot_results, set_fewshot_results = mo.state([])
+    return get_fewshot_results, random, set_fewshot_results
+
+
+@app.cell
 def _(
     SENTIMENT_EXAMPLES,
     call_llm,
     fewshot_slider,
     fewshot_test,
+    get_fewshot_results,
     mo,
+    random,
     run_fewshot_btn,
+    set_fewshot_results,
     shuffle_btn,
 ):
-    import random
-
-    fewshot_results = mo.state([])
-    _get_results, _set_results = fewshot_results
-
     def _build_fewshot_prompt(examples, n, test_sentence, shuffled=False):
         selected = examples[:n]
         if shuffled:
@@ -418,23 +423,23 @@ def _(
         )
         _resp = call_llm(_prompt)
         _prediction = _resp.strip().split("\n")[0]
-        _current = _get_results()
-        _set_results(_current + [{
+        _current = get_fewshot_results()
+        set_fewshot_results(_current + [{
             "n_examples": fewshot_slider.value,
             "shuffled": is_shuffled,
             "prediction": _prediction,
         }])
 
-    _rows = _get_results()
+    _rows = get_fewshot_results()
     if _rows:
-        table_data = {
+        _table_data = {
             "Examples": [r["n_examples"] for r in _rows],
             "Shuffled": [str(r["shuffled"]) for r in _rows],
             "Prediction": [r["prediction"] for r in _rows],
         }
         mo.vstack([
             mo.md("### Results table"),
-            mo.ui.table(table_data),
+            mo.ui.table(_table_data),
             mo.md(
                 "*Reflection: Did the order of examples change the prediction? "
                 "What does this tell you about using few-shot prompts in production?*"
@@ -442,7 +447,6 @@ def _(
         ])
     else:
         mo.md("*Run the model to see results appear here.*")
-    return fewshot_results, random
 
 
 @app.cell
