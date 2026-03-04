@@ -62,7 +62,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     model_input = mo.ui.text(
-        value="ollama/glm-4.7:cloud",
+        value="ollama/ministral-3b:14b-cloud",
         label="Model (litellm format, e.g. ollama/glm-4.7:cloud, openai/gpt-4o, anthropic/claude-3-5-sonnet-20241022)",
         full_width=True,
     )
@@ -84,7 +84,7 @@ def _(mo):
         api_base_input,
         mo.md(
             "*Change any field above and all cells that call the LLM will update automatically.*\n\n"
-            "**Default model:** `ollama/glm-4.7:cloud` — a free cloud model served through your local ollama installation. "
+            "**Default model:** `ollama/ministral-3b:14b-cloud` — a free cloud model served through your local ollama installation. "
             "No API key is required. Run `ollama list` in your terminal to see all available models. "
             "To use a different local model, first run `ollama pull <model-name>` in your terminal, "
             "then update the model string above (e.g., `ollama/llama3.2`)."
@@ -477,6 +477,7 @@ def _(mo):
     )
     shuffle_btn = mo.ui.run_button(label="Shuffle examples and run")
     run_fewshot_btn = mo.ui.run_button(label="Run with current settings")
+    with_replacement_toggle = mo.ui.switch(label="Sample with replacement", value=False)
 
     fewshot_test = mo.ui.text_area(
         value="The app crashes every time I open it, but customer support was surprisingly helpful.",
@@ -486,14 +487,22 @@ def _(mo):
     )
 
     n_selected = fewshot_slider.value
+    use_replacement = with_replacement_toggle.value
     _example_rows = []
     for _i, (_text, _label) in enumerate(SENTIMENT_EXAMPLES):
-        if _i < n_selected:
+        if use_replacement and n_selected > 0:
+            _example_rows.append(f"| 🎲 {_i+1} | {_text} | {_label} |")
+        elif _i < n_selected:
             _example_rows.append(f"| ✅ **{_i+1}** | {_text} | **{_label}** |")
         else:
             _example_rows.append(f"| ⬜ {_i+1} | {_text} | {_label} |")
+    _pool_note = (
+        "**Example pool** (🎲 = all in pool, sampled randomly with replacement)"
+        if use_replacement and n_selected > 0
+        else "**Example pool** (✅ = fed into the prompt, ⬜ = excluded)"
+    )
     _examples_table = mo.md(
-        "**Example pool** (✅ = fed into the prompt, ⬜ = excluded)\n\n"
+        _pool_note + "\n\n"
         "| # | Text | Label |\n"
         "|---|------|-------|\n"
         + "\n".join(_example_rows)
@@ -501,6 +510,7 @@ def _(mo):
 
     mo.vstack([
         fewshot_slider,
+        with_replacement_toggle,
         _examples_table,
         fewshot_test,
         mo.hstack([run_fewshot_btn, shuffle_btn]),
@@ -511,6 +521,7 @@ def _(mo):
         fewshot_test,
         run_fewshot_btn,
         shuffle_btn,
+        with_replacement_toggle,
     )
 
 
@@ -533,9 +544,15 @@ def _(
     run_fewshot_btn,
     set_fewshot_results,
     shuffle_btn,
+    with_replacement_toggle,
 ):
-    def _build_fewshot_prompt(examples, n, test_sentence, shuffled=False):
-        selected = list(examples[:n])
+    def _build_fewshot_prompt(examples, n, test_sentence, shuffled=False, with_replacement=False):
+        if n == 0:
+            selected = []
+        elif with_replacement:
+            selected = random.choices(examples, k=n)
+        else:
+            selected = list(examples[:n])
         if shuffled and n > 0:
             random.shuffle(selected)
         order_str = " → ".join(label for _, label in selected) if selected else "none"
@@ -548,6 +565,7 @@ def _(
     _output = None
     if run_fewshot_btn.value or shuffle_btn.value:
         is_shuffled = bool(shuffle_btn.value)
+        is_replacement = bool(with_replacement_toggle.value)
         n = fewshot_slider.value
         if is_shuffled and n == 0:
             _output = mo.callout(
@@ -556,7 +574,7 @@ def _(
             )
         else:
             _prompt, _order = _build_fewshot_prompt(
-                SENTIMENT_EXAMPLES, n, fewshot_test.value, is_shuffled
+                SENTIMENT_EXAMPLES, n, fewshot_test.value, is_shuffled, is_replacement
             )
             _resp = call_llm(_prompt)
             _prediction = _resp.strip().split("\n")[0]
@@ -564,6 +582,7 @@ def _(
             set_fewshot_results(_current + [{
                 "n_examples": n,
                 "shuffled": "Yes" if is_shuffled else "No",
+                "replacement": "Yes" if is_replacement else "No",
                 "order": _order,
                 "prediction": _prediction,
             }])
@@ -574,6 +593,7 @@ def _(
             _table_data = {
                 "Examples": [r["n_examples"] for r in _rows],
                 "Shuffled": [r["shuffled"] for r in _rows],
+                "With replacement": [r.get("replacement", "No") for r in _rows],
                 "Example order (labels)": [r["order"] for r in _rows],
                 "Prediction": [r["prediction"] for r in _rows],
             }
