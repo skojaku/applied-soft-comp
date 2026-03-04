@@ -317,14 +317,15 @@ def _(
     blocks_response = None
     if run_blocks_btn.value and parts:
         blocks_response = call_llm(assembled)
-        mo.vstack([
+        _display = mo.vstack([
             _preview,
             mo.md("### Model response"),
             mo.callout(mo.md(blocks_response), kind="success"),
             mo.md("*Reflection: Which component changed the response the most when you toggled it?*"),
         ])
     else:
-        _preview
+        _display = _preview
+    _display
     return assembled, blocks_response, parts
 
 
