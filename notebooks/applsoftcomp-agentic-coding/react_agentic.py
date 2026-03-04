@@ -68,7 +68,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     model_input = mo.ui.text(
-        value="ollama/ministral-3:14b-cloud",
+        value="ollama/gemma3:27b-cloud",
         label="Model (litellm format, e.g. ollama/glm-4.7:cloud, openai/gpt-4o, anthropic/claude-3-5-sonnet-20241022)",
         full_width=True,
     )
@@ -90,7 +90,7 @@ def _(mo):
         api_base_input,
         mo.md(
             "*Change any field above and all cells that use the agent will update automatically.*\n\n"
-            "**Default model:** `ollama/ministral-3:14b-cloud` — a free cloud model served through your local ollama installation. "
+            "**Default model:** `ollama/gemma3:27b-cloud` — a free cloud model served through your local ollama installation. "
             "No API key is required. Run `ollama list` in your terminal to see all available models. "
             "To use a different local model, first run `ollama pull <model-name>` in your terminal, "
             "then update the model string above (e.g., `ollama/llama3.2`)."
