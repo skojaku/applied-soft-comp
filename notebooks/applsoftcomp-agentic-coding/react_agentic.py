@@ -482,9 +482,10 @@ def _(agent_question, mo, run_agent_btn, run_react_agent):
                 _parts.append(mo.callout(mo.md(f"**Final Answer:** {_s['content']}"), kind="success"))
             elif _s["type"] == "error":
                 _parts.append(mo.callout(mo.md(f"**Error:** {_s['content']}"), kind="danger"))
-        mo.vstack(_parts)
+        _output = mo.vstack(_parts)
     else:
-        mo.md("*Click **Run agent** to watch the ReAct loop unfold.*")
+        _output = mo.md("*Click **Run agent** to watch the ReAct loop unfold.*")
+    _output
     return
 
 
@@ -678,9 +679,10 @@ def _(mo, preset_q1, preset_q2, preset_q3, run_titanic_agent, run_titanic_btn, t
                 _parts.append(mo.callout(mo.md(f"**Final Answer:** {_item['content']}"), kind="success"))
             elif _item["type"] == "error":
                 _parts.append(mo.callout(mo.md(f"**Error:** {_item['content']}"), kind="danger"))
-        mo.vstack(_parts)
+        _output = mo.vstack(_parts)
     else:
-        mo.md("*Select a preset question or type your own and click **Run data detective**.*")
+        _output = mo.md("*Select a preset question or type your own and click **Run data detective**.*")
+    _output
     return
 
 
@@ -858,9 +860,9 @@ def _(REFERENCES, call_llm, mo, re, run_monolithic_btn, run_multiagent_btn):
                 mo.md("**Ground truth:**"),
                 mo.md("\n\n".join(f"**{r['id']}:** {r['verdict']}" for r in REFERENCES)),
             ]
-            mo.vstack(_parts)
+            _output = mo.vstack(_parts)
         except Exception as _e:
-            mo.callout(mo.md(f"**Error:** {_e}"), kind="danger")
+            _output = mo.callout(mo.md(f"**Error:** {_e}"), kind="danger")
 
     elif run_multiagent_btn.value:
         try:
@@ -897,11 +899,12 @@ def _(REFERENCES, call_llm, mo, re, run_monolithic_btn, run_multiagent_btn):
             ))
             _parts.append(mo.md("**Ground truth:**"))
             _parts.append(mo.md("\n\n".join(f"**{r['id']}:** {r['verdict']}" for r in REFERENCES)))
-            mo.vstack(_parts)
+            _output = mo.vstack(_parts)
         except Exception as _e:
-            mo.callout(mo.md(f"**Error:** {_e}"), kind="danger")
+            _output = mo.callout(mo.md(f"**Error:** {_e}"), kind="danger")
     else:
-        mo.md("*Click a button above to run the monolithic or multi-agent demo.*")
+        _output = mo.md("*Click a button above to run the monolithic or multi-agent demo.*")
+    _output
     return VERIFY_SYSTEM, ThreadPoolExecutor, _parse_verdicts, verify_single
 
 
@@ -1069,9 +1072,10 @@ def _(TARGET_QUESTION, best_f_class, best_f_rate, best_m_class, best_m_rate, mo,
             _mi = "✅" if any(s in _fl for s in [f"class {best_m_class}", f" {best_m_class} "]) else "❌"
             _pass = _fi == "✅" and _mi == "✅"
             _eparts.append(mo.callout(mo.md(f"{_fi} Female Class {best_f_class}  {_mi} Male Class {best_m_class}\n\n**{'PASS' if _pass else 'FAIL'}**"), kind="success" if _pass else "danger"))
-        mo.vstack(_eparts)
+        _output = mo.vstack(_eparts)
     else:
-        mo.md("*Click **Run extended agent with target question** to run the agent and see the ground-truth verification.*")
+        _output = mo.md("*Click **Run extended agent with target question** to run the agent and see the ground-truth verification.*")
+    _output
     return
 
 
@@ -1200,9 +1204,10 @@ def _(mo, run_broken_agent, run_broken_btn):
             "*Reflection: Did the agent retry? Did it hallucinate an answer? "
             "Now edit the error message in `broken_query_tool` above to be more informative and run again.*"
         ))
-        mo.vstack(_bparts)
+        _output = mo.vstack(_bparts)
     else:
-        mo.md("*Click **Run agent with broken tool** to watch what happens.*")
+        _output = mo.md("*Click **Run agent with broken tool** to watch what happens.*")
+    _output
     return
 
 
@@ -1226,7 +1231,7 @@ def _(broken_query_tool, mo):
     _mentions_col = any(col in _err_msg.lower() for col in _TITANIC_COLS)
 
     if _is_default:
-        mo.callout(
+        _output = mo.callout(
             mo.md(
                 "**❌ Error message not yet improved.** The tool still raises `ValueError('Error')`. "
                 "Edit the `raise ValueError(...)` line above to include a helpful description: "
@@ -1235,7 +1240,7 @@ def _(broken_query_tool, mo):
             kind="danger",
         )
     elif _is_long and _mentions_col:
-        mo.callout(
+        _output = mo.callout(
             mo.md(
                 "**✅ Task 5 complete.** Your error message is informative: it is long enough "
                 "and mentions at least one Titanic column name. Run the agent again to see "
@@ -1244,7 +1249,7 @@ def _(broken_query_tool, mo):
             kind="success",
         )
     elif _is_long:
-        mo.callout(
+        _output = mo.callout(
             mo.md(
                 "**⚠️ Better, but not quite.** Your error message is longer than the default, "
                 "but it does not name any Titanic column (Survived, Pclass, Name, Sex, Age, "
@@ -1254,13 +1259,14 @@ def _(broken_query_tool, mo):
             kind="warn",
         )
     else:
-        mo.callout(
+        _output = mo.callout(
             mo.md(
                 "**⚠️ Error message too short.** Try to write a message that explains what "
                 "went wrong and lists the available columns."
             ),
             kind="warn",
         )
+    _output
     return
 
 

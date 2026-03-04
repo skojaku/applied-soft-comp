@@ -271,7 +271,7 @@ def _(call_llm, mo, precise_prompt, run_comparison_btn, vague_prompt):
     if run_comparison_btn.value:
         vague_response = call_llm(vague_prompt.value)
         precise_response = call_llm(precise_prompt.value)
-        mo.vstack([
+        _output = mo.vstack([
             mo.md("### Vague prompt response"),
             mo.callout(mo.md(vague_response), kind="warn"),
             mo.md("### Precise prompt response"),
@@ -282,7 +282,8 @@ def _(call_llm, mo, precise_prompt, run_comparison_btn, vague_prompt):
             ),
         ])
     else:
-        mo.md("*Click **Run both prompts** to see the comparison.*")
+        _output = mo.md("*Click **Run both prompts** to see the comparison.*")
+    _output
     return
 
 
@@ -549,25 +550,25 @@ def _(
             }])
 
     _rows = get_fewshot_results()
-    if _output is not None:
-        _output
-    elif _rows:
-        _table_data = {
-            "Examples": [r["n_examples"] for r in _rows],
-            "Shuffled": [r["shuffled"] for r in _rows],
-            "Example order (labels)": [r["order"] for r in _rows],
-            "Prediction": [r["prediction"] for r in _rows],
-        }
-        mo.vstack([
-            mo.md("### Results table"),
-            mo.ui.table(_table_data),
-            mo.md(
-                "*Reflection: Did the order of examples change the prediction? "
-                "What does this tell you about using few-shot prompts in production?*"
-            ),
-        ])
-    else:
-        mo.md("*Run the model to see results appear here.*")
+    if _output is None:
+        if _rows:
+            _table_data = {
+                "Examples": [r["n_examples"] for r in _rows],
+                "Shuffled": [r["shuffled"] for r in _rows],
+                "Example order (labels)": [r["order"] for r in _rows],
+                "Prediction": [r["prediction"] for r in _rows],
+            }
+            _output = mo.vstack([
+                mo.md("### Results table"),
+                mo.ui.table(_table_data),
+                mo.md(
+                    "*Reflection: Did the order of examples change the prediction? "
+                    "What does this tell you about using few-shot prompts in production?*"
+                ),
+            ])
+        else:
+            _output = mo.md("*Run the model to see results appear here.*")
+    _output
     return
 
 
@@ -620,7 +621,7 @@ def _(COT_PUZZLE, call_llm, mo, run_both_btn, run_cot_btn, run_direct_btn):
     if run_both_btn.value:
         _direct_resp = call_llm(COT_PUZZLE, system=_direct_sys)
         _cot_resp = call_llm(COT_PUZZLE, system=_cot_sys)
-        mo.vstack([
+        _output = mo.vstack([
             mo.md("### Side-by-side comparison"),
             mo.hstack([
                 mo.vstack([
@@ -639,7 +640,7 @@ def _(COT_PUZZLE, call_llm, mo, run_both_btn, run_cot_btn, run_direct_btn):
         ])
     elif run_direct_btn.value:
         _direct_resp = call_llm(COT_PUZZLE, system=_direct_sys)
-        mo.vstack([
+        _output = mo.vstack([
             mo.md("### Response (direct-answer baseline)"),
             mo.callout(mo.md(_direct_resp), kind="warn"),
             mo.md(
@@ -648,7 +649,7 @@ def _(COT_PUZZLE, call_llm, mo, run_both_btn, run_cot_btn, run_direct_btn):
         ])
     elif run_cot_btn.value:
         _cot_resp = call_llm(COT_PUZZLE, system=_cot_sys)
-        mo.vstack([
+        _output = mo.vstack([
             mo.md("### Response (chain-of-thought)"),
             mo.callout(mo.md(_cot_resp), kind="success"),
             mo.md(
@@ -657,7 +658,8 @@ def _(COT_PUZZLE, call_llm, mo, run_both_btn, run_cot_btn, run_direct_btn):
             ),
         ])
     else:
-        mo.md("*Click **Run direct-answer (baseline)**, **Run chain-of-thought**, or **Run both modes** to see responses.*")
+        _output = mo.md("*Click **Run direct-answer (baseline)**, **Run chain-of-thought**, or **Run both modes** to see responses.*")
+    _output
     return
 
 
@@ -722,11 +724,11 @@ def _(INVOICE_TEXT, InvoiceData, call_llm, json, litellm, llm_api_base, llm_api_
                 if llm_api_key: _kwargs["api_key"] = llm_api_key
                 if llm_api_base: _kwargs["api_base"] = llm_api_base
                 _parsed = InvoiceData.model_validate_json(litellm.completion(**_kwargs).choices[0].message.content)
-                mo.vstack([mo.md("### Structured output (schema-constrained)"),
+                _output = mo.vstack([mo.md("### Structured output (schema-constrained)"),
                            mo.callout(mo.md(f"```json\n{_parsed.model_dump_json(indent=2)}\n```"), kind="success"),
                            mo.md("**Valid JSON: ✅**")])
             except Exception as _e:
-                mo.callout(mo.md(f"**Error:** {_e}"), kind="danger")
+                _output = mo.callout(mo.md(f"**Error:** {_e}"), kind="danger")
         else:
             _resp_text = call_llm(f"Extract client name, date, and total amount in JSON:\n\n{INVOICE_TEXT}")
             try:
@@ -735,11 +737,12 @@ def _(INVOICE_TEXT, InvoiceData, call_llm, json, litellm, llm_api_base, llm_api_
                 _valid, _kind = "✅", "success"
             except Exception:
                 _valid, _kind = "❌", "danger"
-            mo.vstack([mo.md("### Free-text JSON response"),
+            _output = mo.vstack([mo.md("### Free-text JSON response"),
                        mo.callout(mo.md(f"```\n{_resp_text}\n```"), kind="info"),
                        mo.md(f"**Valid JSON: {_valid}**")])
     else:
-        mo.md("*Click **Extract invoice data** to run the demo.*")
+        _output = mo.md("*Click **Extract invoice data** to run the demo.*")
+    _output
     return
 
 
@@ -790,7 +793,7 @@ def _(
         else:
             _sys = "You are a helpful assistant."
         _h_resp = call_llm(HALLUCINATION_QUERY, system=_sys)
-        mo.vstack([
+        _output = mo.vstack([
             mo.md(f"### Response ({'uncertainty permitted' if uncertainty_toggle.value else 'no uncertainty permission'})"),
             mo.callout(mo.md(_h_resp), kind="success" if uncertainty_toggle.value else "warn"),
             mo.md(
@@ -799,7 +802,8 @@ def _(
             ),
         ])
     else:
-        mo.md("*Click **Ask about the paper** to see what happens.*")
+        _output = mo.md("*Click **Ask about the paper** to see what happens.*")
+    _output
     return
 
 
@@ -1065,7 +1069,7 @@ def _(
 
     _rows2 = get_cot2_results()
     if _rows2:
-        mo.vstack([
+        _output = mo.vstack([
             mo.ui.table({
                 "Puzzle": [r["puzzle"] for r in _rows2],
                 "Mode": [r["mode"] for r in _rows2],
@@ -1079,7 +1083,8 @@ def _(
             ),
         ])
     else:
-        mo.md("*Select a puzzle, choose a mode, and click **Run** to add rows to the table.*")
+        _output = mo.md("*Select a puzzle, choose a mode, and click **Run** to add rows to the table.*")
+    _output
     return
 
 
@@ -1126,7 +1131,8 @@ def _(COT_PUZZLES, get_cot2_results, mo):
         _msg = "**No runs yet.** Select a puzzle, choose a mode, and click **Run** to begin."
         _status = "neutral"
 
-    mo.callout(mo.md(_msg), kind=_status)
+    _output = mo.callout(mo.md(_msg), kind=_status)
+    _output
     return
 
 
@@ -1238,7 +1244,7 @@ def _(
         _ax2.set_title("Few-shot prediction distribution across 10 shuffled orderings")
         plt.tight_layout()
 
-        mo.vstack([
+        _output = mo.vstack([
             mo.as_html(_fig2),
             mo.md(f"**Predictions:** {', '.join(_predictions)}"),
             mo.md(
@@ -1247,7 +1253,8 @@ def _(
             ),
         ])
     else:
-        mo.md("*Click **Run 10 shuffled trials** to see the distribution.*")
+        _output = mo.md("*Click **Run 10 shuffled trials** to see the distribution.*")
+    _output
     return
 
 
@@ -1257,7 +1264,7 @@ def _(get_bias_predictions, mo):
     # Pass = at least 2 different class labels appear across the 10 runs.
     _preds = get_bias_predictions()
     if not _preds:
-        mo.callout(
+        _output = mo.callout(
             mo.md("**No trials run yet.** Click **Run 10 shuffled trials** to begin."),
             kind="neutral",
         )
@@ -1269,7 +1276,7 @@ def _(get_bias_predictions, mo):
                     _unique.add(_k)
                     break
         if len(_unique) >= 2:
-            mo.callout(
+            _output = mo.callout(
                 mo.md(
                     f"**✅ Task 3 complete.** You observed {len(_unique)} different prediction "
                     f"classes across 10 shuffled orderings ({', '.join(sorted(_unique))}). "
@@ -1280,7 +1287,7 @@ def _(get_bias_predictions, mo):
             )
         else:
             _label = list(_unique)[0] if _unique else "Unknown"
-            mo.callout(
+            _output = mo.callout(
                 mo.md(
                     f"**⚠️ All 10 trials returned '{_label}'.** This model may be too confident "
                     "on this test sentence. Try re-running to get more shuffled orderings, or "
@@ -1288,6 +1295,7 @@ def _(get_bias_predictions, mo):
                 ),
                 kind="warn",
             )
+    _output
     return
 
 
