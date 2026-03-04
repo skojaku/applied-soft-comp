@@ -58,8 +58,8 @@ def _(mo):
 @app.cell
 def _(mo):
     model_input = mo.ui.text(
-        value="ollama/glm4:9b",
-        label="Model (litellm format, e.g. ollama/glm4:9b, openai/gpt-4o, anthropic/claude-3-5-sonnet-20241022)",
+        value="ollama/glm-4.7:cloud",
+        label="Model (litellm format, e.g. ollama/glm-4.7:cloud, openai/gpt-4o, anthropic/claude-3-5-sonnet-20241022)",
         full_width=True,
     )
     api_key_input = mo.ui.text(
@@ -78,7 +78,13 @@ def _(mo):
         model_input,
         api_key_input,
         api_base_input,
-        mo.md("*Change any field above and all cells that use the agent will update automatically.*"),
+        mo.md(
+            "*Change any field above and all cells that use the agent will update automatically.*\n\n"
+            "**Default model:** `ollama/glm-4.7:cloud` — a free cloud model served through your local ollama installation. "
+            "No API key is required. Run `ollama list` in your terminal to see all available models. "
+            "To use a different local model, first run `ollama pull <model-name>` in your terminal, "
+            "then update the model string above (e.g., `ollama/llama3.2`)."
+        ),
     ])
     config_panel
     return api_base_input, api_key_input, model_input, config_panel
