@@ -876,38 +876,53 @@ def _(mo):
 
 
 @app.cell
-def _(COT_PUZZLES, call_llm, cot2_toggle, mo, puzzle_selector, run_cot2_btn):
-    cot2_results = mo.state([])
-    _get_r2, _set_r2 = cot2_results
+def _(mo):
+    get_cot2_results, set_cot2_results = mo.state([])
+    return get_cot2_results, set_cot2_results
 
+
+@app.cell
+def _(COT_PUZZLES, call_llm, cot2_toggle, get_cot2_results, mo, puzzle_selector, run_cot2_btn, set_cot2_results):
     if run_cot2_btn.value:
         _puzzle = next(p for p in COT_PUZZLES if p["id"] == puzzle_selector.value)
         if cot2_toggle.value:
-            _sys2 = "Think step by step before giving your final answer."
+            _sys2 = "Think step by step before giving your final answer. Show all intermediate reasoning steps."
             _mode2 = "Chain-of-thought"
         else:
-            _sys2 = "Answer directly and concisely."
+            _sys2 = "Answer directly and concisely. Give only the final answer."
             _mode2 = "Direct"
         _resp2 = call_llm(_puzzle["question"], system=_sys2)
-        _current2 = _get_r2()
-        _set_r2(_current2 + [{
+        _expected_lower = _puzzle["expected"].lower()
+        _resp_lower = _resp2.lower()
+        # Check if key digits or words from the expected answer appear in the response
+        _correct = any(token in _resp_lower for token in _expected_lower.replace(",", "").split()[:3])
+        _current2 = get_cot2_results()
+        set_cot2_results(_current2 + [{
             "puzzle": _puzzle["id"],
             "mode": _mode2,
             "expected": _puzzle["expected"],
-            "response": _resp2[:80] + "..." if len(_resp2) > 80 else _resp2,
+            "response": _resp2[:100] + "..." if len(_resp2) > 100 else _resp2,
+            "correct": "✅" if _correct else "❌",
         }])
 
-    _rows2 = _get_r2()
+    _rows2 = get_cot2_results()
     if _rows2:
-        mo.ui.table({
-            "Puzzle": [r["puzzle"] for r in _rows2],
-            "Mode": [r["mode"] for r in _rows2],
-            "Expected": [r["expected"] for r in _rows2],
-            "Response (truncated)": [r["response"] for r in _rows2],
-        })
+        mo.vstack([
+            mo.ui.table({
+                "Puzzle": [r["puzzle"] for r in _rows2],
+                "Mode": [r["mode"] for r in _rows2],
+                "Expected": [r["expected"] for r in _rows2],
+                "Response (truncated)": [r["response"] for r in _rows2],
+                "Correct?": [r["correct"] for r in _rows2],
+            }),
+            mo.md(
+                "*Tip: Run each puzzle in both Direct and Chain-of-thought mode to compare. "
+                "Look at the Correct? column to see where CoT helped and where it hurt.*"
+            ),
+        ])
     else:
         mo.md("*Select a puzzle, choose a mode, and click **Run** to add rows to the table.*")
-    return cot2_results,
+    return
 
 
 @app.cell
