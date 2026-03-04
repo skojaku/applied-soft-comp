@@ -6,20 +6,32 @@
   "solution": "Two marimo notebooks, each executable via `uvx`, that connect to ollama (local or remote). Notebook 1 teaches prompt engineering through live component toggling and structured student tasks. Notebook 2 teaches the ReAct pattern and context engineering via a working LangChain agent over the Titanic dataset and a multi-agent literature verification demo.",
   "user_stories": [
     "As a student, I want to run the notebook with a single `uvx` command so that I do not need to set up a Python environment manually.",
-    "As a student, I want to enter my ollama base URL and API key in a UI config panel so that the notebook connects to my local or remote ollama instance without editing code.",
-    "As a student, I want to toggle prompt components (instruction, data, format, persona, context) on and off and see the LLM response update live so that I develop intuition for how each component shapes the output.",
-    "As a student, I want to compare zero-shot, one-shot, two-shot, and five-shot responses side-by-side so that I understand how the number of examples affects the model's behavior.",
-    "As a student, I want to shuffle the order of few-shot examples and see how the output changes so that I understand output instability and order bias.",
-    "As a student, I want to compare chain-of-thought reasoning against a direct answer on a logic puzzle so that I can see when CoT helps and when it introduces incorrect reasoning steps.",
-    "As a student, I want to complete the Gaussian distribution task, crafting a prompt that makes the LLM generate numbers following a Gaussian distribution, and verify the result with a histogram so that I practice precise, specification-driven prompting.",
-    "As a student, I want to see a clear, running ReAct loop with logged thoughts and actions so that I understand how an agent reasons and acts step by step.",
-    "As a student, I want to interact with a pre-built Titanic data detective agent by asking natural language questions so that I see how tools and observations chain together.",
-    "As a student, I want to add two new tools to the Titanic agent and answer a multi-hop question so that I practice agent design from first principles.",
-    "As a student, I want to watch a multi-agent literature verification demo where five sub-agents check five references in parallel so that I understand how isolating context across agents prevents confusion.",
-    "As an instructor, I want each notebook section to be a self-contained marimo cell block with explanatory text so that students can read and run incrementally.",
-    "As an instructor, I want each student task to have a clearly marked callout block with a hint and a success criterion so that students know when they have achieved the goal.",
-    "As an instructor, I want the notebooks to use only ollama-compatible models so that students do not need paid API keys for the core demos.",
-    "As an instructor, I want the ollama configuration (base URL, API key, model name) to be set once in a top-level UI panel and automatically propagate to all cells so that students do not need to re-enter credentials."
+    "As a student, I want to type a litellm model string (e.g. `ollama/llama3.2` or `openai/gpt-4o`) in a UI config panel so that I can switch providers without editing code.",
+    "As a student, I want to enter an optional API key and base URL in the config panel so that I can connect to remote or self-hosted endpoints.",
+    "As a student, I want the config panel values to propagate automatically to all cells so that I only need to configure the model once per session.",
+    "As a student, I want to toggle each prompt component (instruction, data, format, persona, context) on and off individually so that I can isolate the effect of each component.",
+    "As a student, I want to see the assembled prompt update in real time as I toggle components so that I understand exactly what is being sent to the model.",
+    "As a student, I want to send the assembled prompt and see the model response so that I can observe how each component changes the output.",
+    "As a student, I want to control the number of few-shot examples with a slider so that I can compare zero-shot, one-shot, two-shot, and five-shot behavior on the same task.",
+    "As a student, I want to shuffle the order of few-shot examples and re-run so that I observe output instability caused by example ordering.",
+    "As a student, I want to run a logic puzzle in direct-answer mode so that I get a baseline response to compare against.",
+    "As a student, I want to run the same puzzle with chain-of-thought enabled so that I can see whether intermediate reasoning steps improve or hurt the final answer.",
+    "As a student, I want to write a prompt that instructs the LLM to generate 200 numbers following N(0,1) so that I practice specification-driven prompting.",
+    "As a student, I want the notebook to extract numbers from the LLM response automatically so that I can focus on crafting the prompt rather than parsing.",
+    "As a student, I want to see a histogram of the extracted numbers overlaid with the true Gaussian PDF so that I can visually verify whether my prompt succeeded.",
+    "As a student, I want to see a KS-test p-value with a pass/fail indicator so that I have an objective measure of my prompt's effectiveness.",
+    "As a student, I want to see the full ReAct trace (Thought, Action, Observation) printed step by step so that I understand how the agent reasons before acting.",
+    "As a student, I want to ask natural language questions to the pre-built Titanic data detective agent so that I see how tools chain together across multiple observations.",
+    "As a student, I want to add a cross-tabulation tool to the Titanic agent so that I practice writing tool docstrings that guide the LLM accurately.",
+    "As a student, I want to add a filter-and-count tool to the Titanic agent so that I extend the agent's capability for conditional queries.",
+    "As a student, I want to pose a multi-hop question to the extended agent and verify its answer against a ground-truth cell so that I know whether my tool design was correct.",
+    "As a student, I want to watch a single monolithic agent attempt to verify five references at once so that I see where context confusion causes errors.",
+    "As a student, I want to watch five isolated sub-agents each verify one reference in parallel so that I see how context isolation improves accuracy.",
+    "As an instructor, I want each notebook section to be a self-contained marimo cell block with explanatory prose so that students can read and run the notebook incrementally.",
+    "As an instructor, I want each student task to have a clearly marked callout block so that students can identify where the exercise begins.",
+    "As an instructor, I want each student task to include a visible first hint so that students are not stuck without any guidance.",
+    "As an instructor, I want each student task to have a programmatic success criterion so that students receive immediate objective feedback.",
+    "As an instructor, I want the default model to work with a local ollama installation so that students without paid API keys can complete all exercises."
   ],
   "notebooks": [
     {
@@ -41,20 +53,21 @@
         "python_version": ">=3.10",
         "dependencies": [
           "marimo",
-          "openai",
+          "litellm",
           "pydantic",
           "matplotlib",
-          "numpy"
+          "numpy",
+          "scipy"
         ],
-        "notes": "Use `openai` Python client pointed at ollama base URL. This avoids a separate `ollama` package and works with any OpenAI-compatible endpoint."
+        "notes": "Use `litellm` for all LLM calls. litellm provides a unified interface across ollama, OpenAI, Anthropic, and any other provider via a single `litellm.completion()` call. The model string (e.g. `ollama/llama3.2`, `openai/gpt-4o`) determines the provider; no other configuration is required."
       },
-      "ollama_config": {
+      "llm_config": {
         "method": "ui_panel",
-        "description": "A marimo UI panel at the top of the notebook with text inputs for base_url, api_key (optional), and a model name dropdown. Default base_url is http://localhost:11434/v1. Default model is llama3.2. The config state is a marimo reactive variable that all subsequent cells depend on, so changing it re-runs the affected cells automatically.",
+        "description": "A marimo UI panel at the top of the notebook with three fields. The model string uses litellm's provider/model format, which determines the backend without any additional routing code. The config state is a marimo reactive variable; all subsequent cells depend on it and re-run automatically when it changes.",
         "fields": [
-          {"name": "base_url", "default": "http://localhost:11434/v1", "label": "Ollama base URL"},
-          {"name": "api_key", "default": "", "label": "API key (leave blank for local)"},
-          {"name": "model", "default": "llama3.2", "label": "Model name"}
+          {"name": "model", "default": "ollama/llama3.2", "label": "Model (litellm format, e.g. ollama/llama3.2, openai/gpt-4o, anthropic/claude-3-5-sonnet-20241022)"},
+          {"name": "api_key", "default": "", "label": "API key (leave blank for local ollama)"},
+          {"name": "api_base", "default": "http://localhost:11434", "label": "API base URL (only needed for custom endpoints)"}
         ]
       },
       "sections": [
@@ -140,18 +153,19 @@
         "python_version": ">=3.10",
         "dependencies": [
           "marimo",
+          "litellm",
           "langchain",
-          "langchain-ollama",
           "langchain-community",
           "pandas",
-          "matplotlib"
+          "matplotlib",
+          "duckdb"
         ],
-        "default_model": "glm-4.7:cloud",
-        "notes": "glm-4.7:cloud is accessed via the ollama cloud relay. The model name is passed to langchain-ollama's ChatOllama class. Students need to have ollama running with the cloud model pulled."
+        "default_model": "ollama/glm4:9b",
+        "notes": "Use litellm's LangChain integration (ChatLiteLLM from langchain-community) so agent code is provider-agnostic. The model string follows litellm format: `ollama/glm4:9b` for local, `ollama_chat/glm-4.7:cloud` for the ollama cloud relay. Students with API access to other providers can substitute any litellm-supported model string."
       },
-      "ollama_config": {
+      "llm_config": {
         "method": "ui_panel",
-        "description": "Same UI panel pattern as Notebook 1: base_url, api_key, model name. Default model is glm-4.7:cloud. Reactive marimo state propagates to all agent instantiations in the notebook."
+        "description": "Same UI panel pattern as Notebook 1: litellm model string, optional api_key, optional api_base. Default model is ollama/glm4:9b. Reactive marimo state propagates to all agent instantiations in the notebook."
       },
       "sections": [
         {
@@ -228,8 +242,8 @@
     ]
   },
   "implementation_decisions": [
-    "Both notebooks use the `openai` Python client configured with a custom base_url pointing to the ollama server. This is preferred over the `ollama` package because it supports any OpenAI-compatible endpoint including remote cloud relays.",
-    "Notebook 2 uses `langchain-ollama`'s ChatOllama class to integrate with LangChain's tool-calling and agent executor interfaces. The ReAct agent is built with langchain's `create_react_agent` and `AgentExecutor`.",
+    "Both notebooks use `litellm` for all LLM calls. litellm's unified `completion()` API accepts a model string in `provider/model` format and routes to the correct backend automatically. This means students can switch from local ollama to any cloud provider by changing a single string in the config panel.",
+    "Notebook 2 uses `ChatLiteLLM` from `langchain-community` to integrate litellm with LangChain's tool-calling and agent executor interfaces. The ReAct agent is built with langchain's `create_react_agent` and `AgentExecutor`. This keeps agent code provider-agnostic while retaining full LangChain tooling.",
     "The Titanic dataset is loaded from a bundled CSV file (or fetched from a known public URL at notebook startup) and stored in a pandas DataFrame. DuckDB-in-process is used for the SQL query tool to avoid requiring a database server.",
     "The multi-agent literature verification demo uses `asyncio.gather` to run sub-agents in parallel. Since marimo runs in an async context, this integrates naturally without additional threading.",
     "The five references in the literature verification demo are hardcoded in the notebook. Three are real (with real DOIs), two are fabricated. Ground truth is a hardcoded dictionary. This ensures the demo is reproducible without internet access if needed.",
@@ -242,7 +256,7 @@
       "Number extractor function (regex parser for the Gaussian task): test that it correctly extracts floats from various response formats.",
       "JSON schema validator: test that valid and invalid model responses are correctly accepted or rejected.",
       "Tool functions (inspect_schema, query, get_summary_stats, cross_tabulation, filter_and_count): test with the Titanic DataFrame that correct SQL/queries return expected results.",
-      "Ollama config panel: test that changing base_url produces a new client with the updated configuration."
+      "LLM config panel: test that changing the model string produces a litellm call with the correct model and api_base parameters."
     ]
   },
   "out_of_scope": [
@@ -250,12 +264,11 @@
     "Fine-tuning or training of any model.",
     "Persistent memory or databases beyond the in-notebook session state.",
     "Authentication or user management.",
-    "Integration with any service other than ollama (no OpenAI, Anthropic, or Google APIs required).",
     "Automatic grading or LMS integration.",
-    "Supporting models other than those compatible with the ollama OpenAI-compatible API."
+    "Supporting providers beyond what litellm already handles out of the box."
   ],
   "further_notes": [
-    "The glm-4.7:cloud model requires ollama cloud access. The notebook should display a clear warning and fallback suggestion (e.g., llama3.2) if the model is not available.",
+    "The default model ollama/glm4:9b requires ollama running locally with the glm4 model pulled. The notebook should display a clear warning and fallback suggestion (e.g., ollama/llama3.2) if the model is unavailable. For cloud access use ollama_chat/glm-4.7:cloud.",
     "The literature verification demo references should be chosen carefully: the real papers should be well-known enough that a cloud model can verify them, and the fake papers should be plausible enough to be challenging.",
     "Consider adding a 'Reset to defaults' button in the ollama config panel so students who accidentally misconfigure the endpoint can recover without restarting the notebook.",
     "The CoT vs. direct answer comparison task should use a puzzle that is genuinely hard enough that the model sometimes gets it wrong without CoT. A good candidate is a riddle involving non-obvious constraint propagation or a math problem that requires two or more intermediate steps."
