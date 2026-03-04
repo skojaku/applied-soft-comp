@@ -716,27 +716,31 @@ def _(HALLUCINATION_QUERY, call_llm, mo, run_hallucination_btn, uncertainty_togg
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Student Task 1: Gaussian by Prompt
+    mo.vstack([
+        mo.md("## Student Task 1: Gaussian by Prompt"),
+        mo.callout(
+            mo.md(
+                r"""
+**Try it yourself**
 
-        ::: {.callout-tip title="Try it yourself"}
-        Your goal is to craft a prompt that makes the LLM output 200 numbers following a
-        standard normal distribution N(0,1). Write your prompt in the editor below and click
-        **Run**. The notebook will extract numbers from the response automatically and plot a
-        histogram overlaid with the true Gaussian PDF. A KS-test p-value tells you whether
-        your prompt succeeded.
+Your goal is to craft a prompt that makes the LLM output 200 numbers following a
+standard normal distribution N(0,1). Write your prompt in the editor below and click
+**Run**. The notebook will extract numbers from the response automatically and plot a
+histogram overlaid with the true Gaussian PDF. A KS-test p-value tells you whether
+your prompt succeeded.
 
-        **Hint:** The LLM has no random number generator. It approximates from its training
-        distribution. Be extremely specific: tell it exactly how many numbers should fall in
-        each bin. For N(0,1) with 200 samples, roughly 68 should fall between -1 and 1.
-        The more precise your specification, the more the output looks Gaussian.
+**Hint:** The LLM has no random number generator. It approximates from its training
+distribution. Be extremely specific: tell it exactly how many numbers should fall in
+each bin. For N(0,1) with 200 samples, roughly 68 should fall between -1 and 1.
+The more precise your specification, the more the output looks Gaussian.
 
-        **Extension:** Try changing the target distribution to N(2, 0.5). How does your prompt
-        need to change?
-        :::
-        """
-    )
+**Extension:** Try changing the target distribution to N(2, 0.5). How does your prompt
+need to change?
+                """
+            ),
+            kind="info",
+        ),
+    ])
     return
 
 
@@ -819,22 +823,26 @@ def _(call_llm, extract_numbers, gaussian_prompt, mo, np, plt, run_gaussian_btn,
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Student Task 2: When Does Chain-of-Thought Fail?
+    mo.vstack([
+        mo.md("## Student Task 2: When Does Chain-of-Thought Fail?"),
+        mo.callout(
+            mo.md(
+                r"""
+**Try it yourself**
 
-        ::: {.callout-tip title="Try it yourself"}
-        Three puzzles are provided below, ranging from trivial arithmetic to a harder logic
-        problem. Run each puzzle twice: once in direct-answer mode and once with chain-of-thought.
-        The notebook records results in a table. After filling the table, write one short paragraph
-        in the text area: for which puzzle type did CoT help, and when did it produce a wrong answer
-        with convincing-looking reasoning?
+Three puzzles are provided below, ranging from trivial arithmetic to a harder logic
+problem. Run each puzzle twice: once in direct-answer mode and once with chain-of-thought.
+The notebook records results in a table. After filling the table, write one short paragraph
+in the text area: for which puzzle type did CoT help, and when did it produce a wrong answer
+with convincing-looking reasoning?
 
-        **Hint:** Pay attention to whether the intermediate reasoning steps are actually used to
-        reach the final answer, or whether the final answer appears before the reasoning is complete.
-        :::
-        """
-    )
+**Hint:** Pay attention to whether the intermediate reasoning steps are actually used to
+reach the final answer, or whether the final answer appears before the reasoning is complete.
+                """
+            ),
+            kind="info",
+        ),
+    ])
     return
 
 
@@ -942,22 +950,26 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Student Task 3: Few-Shot Order Sensitivity
+    mo.vstack([
+        mo.md("## Student Task 3: Few-Shot Order Sensitivity"),
+        mo.callout(
+            mo.md(
+                r"""
+**Try it yourself**
 
-        ::: {.callout-tip title="Try it yourself"}
-        Four labeled sentiment examples are provided below. The notebook will run the model 10
-        times with the same examples but in a different random order each time, recording the
-        prediction for a fixed test sentence. A bar chart shows how often each class was predicted.
-        Compare this distribution to a zero-shot baseline. What does the variance tell you about
-        using few-shot prompts in a real application?
+Four labeled sentiment examples are provided below. The notebook will run the model 10
+times with the same examples but in a different random order each time, recording the
+prediction for a fixed test sentence. A bar chart shows how often each class was predicted.
+Compare this distribution to a zero-shot baseline. What does the variance tell you about
+using few-shot prompts in a real application?
 
-        **Hint:** The most recently seen example label often has outsized influence. This is
-        called the recency bias in few-shot prompting.
-        :::
-        """
-    )
+**Hint:** The most recently seen example label often has outsized influence. This is
+called the recency bias in few-shot prompting.
+                """
+            ),
+            kind="info",
+        ),
+    ])
     return
 
 

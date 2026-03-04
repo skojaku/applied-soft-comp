@@ -929,30 +929,34 @@ def _(REFERENCES, call_llm, mo, re, run_monolithic_btn, run_multiagent_btn):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Student Task: Extend the Data Detective
+    mo.vstack([
+        mo.md("## Student Task: Extend the Data Detective"),
+        mo.callout(
+            mo.md(
+                r"""
+**Try it yourself**
 
-        ::: {.callout-tip title="Try it yourself"}
-        Add two new tools to the Titanic agent. The first returns a cross-tabulation (pivot table)
-        of two columns. The second filters rows by a column value and returns a count.
+Add two new tools to the Titanic agent. The first returns a cross-tabulation (pivot table)
+of two columns. The second filters rows by a column value and returns a count.
 
-        After adding both tools, pose this question to the agent: "Among female passengers over
-        30 years old, which ticket class had the highest survival rate, and how does it compare
-        to males in the same age group?"
+After adding both tools, pose this question to the agent: "Among female passengers over
+30 years old, which ticket class had the highest survival rate, and how does it compare
+to males in the same age group?"
 
-        The agent must chain at least three tool calls to answer correctly. A ground-truth cell
-        verifies the numerical answer.
+The agent must chain at least three tool calls to answer correctly. A ground-truth cell
+verifies the numerical answer.
 
-        **Hint:** Write the docstring first. Describe exactly what the function returns, what
-        the parameters mean, and what format the output is in. The LLM will call your tool
-        exactly as described — be precise.
+**Hint:** Write the docstring first. Describe exactly what the function returns, what
+the parameters mean, and what format the output is in. The LLM will call your tool
+exactly as described — be precise.
 
-        **Extension:** Modify the system prompt to instruct the agent to always question its
-        first answer and run one additional verification tool call. Does this improve accuracy?
-        :::
-        """
-    )
+**Extension:** Modify the system prompt to instruct the agent to always question its
+first answer and run one additional verification tool call. Does this improve accuracy?
+                """
+            ),
+            kind="info",
+        ),
+    ])
     return
 
 
@@ -1156,24 +1160,28 @@ def _(
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Thought Experiment: When Does the Loop Break?
+    mo.vstack([
+        mo.md("## Thought Experiment: When Does the Loop Break?"),
+        mo.callout(
+            mo.md(
+                r"""
+**Try it yourself**
 
-        ::: {.callout-tip title="Try it yourself"}
-        A broken query tool is defined below that always raises a ValueError with a vague
-        error message. Run the agent on a simple question and watch what happens. Does the
-        agent retry? Does it give up? Does it hallucinate an answer after failing?
+A broken query tool is defined below that always raises a ValueError with a vague
+error message. Run the agent on a simple question and watch what happens. Does the
+agent retry? Does it give up? Does it hallucinate an answer after failing?
 
-        Then edit the error message to be more informative: name the available columns and
-        explain what went wrong. Run the agent again and compare.
+Then edit the error message to be more informative: name the available columns and
+explain what went wrong. Run the agent again and compare.
 
-        **Hint:** Agents learn from their observations. A tool that says "Error" is less
-        useful than a tool that says "ValueError: column 'Age' not found. Available columns:
-        Survived, Pclass, Name, Sex, Age, SibSp, Parch, Ticket, Fare, Cabin, Embarked."
-        :::
-        """
-    )
+**Hint:** Agents learn from their observations. A tool that says "Error" is less
+useful than a tool that says "ValueError: column 'Age' not found. Available columns:
+Survived, Pclass, Name, Sex, Age, SibSp, Parch, Ticket, Fare, Cabin, Embarked."
+                """
+            ),
+            kind="info",
+        ),
+    ])
     return
 
 
