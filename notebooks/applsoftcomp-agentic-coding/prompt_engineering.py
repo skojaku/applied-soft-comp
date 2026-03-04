@@ -1342,8 +1342,20 @@ def _(mo):
 
     run_bias_btn = mo.ui.run_button(label="Run 10 shuffled trials")
 
+    _example_rows = "\n".join(
+        f"| {_i+1} | {_text} | {_label} |"
+        for _i, (_text, _label) in enumerate(FEWSHOT_BIAS_EXAMPLES)
+    )
+    _examples_table = mo.md(
+        "**Example pool** (all four are shuffled into a random order for each trial)\n\n"
+        "| # | Text | Label |\n"
+        "|---|------|-------|\n"
+        + _example_rows
+    )
+
     mo.vstack(
         [
+            _examples_table,
             mo.md(f"**Test sentence:** *{FEWSHOT_BIAS_TEST}*"),
             mo.md("Click the button to run 10 trials with shuffled example orders."),
             run_bias_btn,
