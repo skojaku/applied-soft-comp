@@ -1,0 +1,263 @@
+{
+  "project": "Agentic Coding: Interactive Marimo Notebooks",
+  "version": "1.0",
+  "description": "Two pedagogical marimo notebooks for Module 3 of Applied Soft Computing. Students interact with LLMs directly to build intuition for prompt engineering and agentic AI systems.",
+  "problem_statement": "Students learning agentic coding need hands-on, interactive experiences that show how prompt structure and agent architecture affect LLM behavior. Static lecture notes do not let students experiment in real time. We need executable notebooks where students can toggle prompt components on/off, see output change live, and build progressively more complex agents.",
+  "solution": "Two marimo notebooks, each executable via `uvx`, that connect to ollama (local or remote). Notebook 1 teaches prompt engineering through live component toggling and structured student tasks. Notebook 2 teaches the ReAct pattern and context engineering via a working LangChain agent over the Titanic dataset and a multi-agent literature verification demo.",
+  "user_stories": [
+    "As a student, I want to run the notebook with a single `uvx` command so that I do not need to set up a Python environment manually.",
+    "As a student, I want to enter my ollama base URL and API key in a UI config panel so that the notebook connects to my local or remote ollama instance without editing code.",
+    "As a student, I want to toggle prompt components (instruction, data, format, persona, context) on and off and see the LLM response update live so that I develop intuition for how each component shapes the output.",
+    "As a student, I want to compare zero-shot, one-shot, two-shot, and five-shot responses side-by-side so that I understand how the number of examples affects the model's behavior.",
+    "As a student, I want to shuffle the order of few-shot examples and see how the output changes so that I understand output instability and order bias.",
+    "As a student, I want to compare chain-of-thought reasoning against a direct answer on a logic puzzle so that I can see when CoT helps and when it introduces incorrect reasoning steps.",
+    "As a student, I want to complete the Gaussian distribution task, crafting a prompt that makes the LLM generate numbers following a Gaussian distribution, and verify the result with a histogram so that I practice precise, specification-driven prompting.",
+    "As a student, I want to see a clear, running ReAct loop with logged thoughts and actions so that I understand how an agent reasons and acts step by step.",
+    "As a student, I want to interact with a pre-built Titanic data detective agent by asking natural language questions so that I see how tools and observations chain together.",
+    "As a student, I want to add two new tools to the Titanic agent and answer a multi-hop question so that I practice agent design from first principles.",
+    "As a student, I want to watch a multi-agent literature verification demo where five sub-agents check five references in parallel so that I understand how isolating context across agents prevents confusion.",
+    "As an instructor, I want each notebook section to be a self-contained marimo cell block with explanatory text so that students can read and run incrementally.",
+    "As an instructor, I want each student task to have a clearly marked callout block with a hint and a success criterion so that students know when they have achieved the goal.",
+    "As an instructor, I want the notebooks to use only ollama-compatible models so that students do not need paid API keys for the core demos.",
+    "As an instructor, I want the ollama configuration (base URL, API key, model name) to be set once in a top-level UI panel and automatically propagate to all cells so that students do not need to re-enter credentials."
+  ],
+  "notebooks": [
+    {
+      "id": "nb1-prompt-engineering",
+      "filename": "prompt_engineering.py",
+      "title": "Prompt Engineering: The Art of Talking to LLMs",
+      "subtitle": "How phrasing shapes probability — and what you can do about it",
+      "learning_goals": [
+        "LLMs sample from probability distributions; phrasing shapes the distribution.",
+        "A well-structured prompt has five components: Instruction, Data, Format, Persona, and Context.",
+        "Few-shot examples activate patterns but are sensitive to example order.",
+        "Chain-of-thought reasoning forces intermediate steps and improves complex task performance.",
+        "JSON schema constraints are more reliable than asking for structured output in plain text.",
+        "Uncertainty permission reduces hallucination by allowing the model to say 'I don't know'."
+      ],
+      "runtime": {
+        "executable_via": "uvx marimo run prompt_engineering.py",
+        "edit_mode": "uvx marimo edit prompt_engineering.py",
+        "python_version": ">=3.10",
+        "dependencies": [
+          "marimo",
+          "openai",
+          "pydantic",
+          "matplotlib",
+          "numpy"
+        ],
+        "notes": "Use `openai` Python client pointed at ollama base URL. This avoids a separate `ollama` package and works with any OpenAI-compatible endpoint."
+      },
+      "ollama_config": {
+        "method": "ui_panel",
+        "description": "A marimo UI panel at the top of the notebook with text inputs for base_url, api_key (optional), and a model name dropdown. Default base_url is http://localhost:11434/v1. Default model is llama3.2. The config state is a marimo reactive variable that all subsequent cells depend on, so changing it re-runs the affected cells automatically.",
+        "fields": [
+          {"name": "base_url", "default": "http://localhost:11434/v1", "label": "Ollama base URL"},
+          {"name": "api_key", "default": "", "label": "API key (leave blank for local)"},
+          {"name": "model", "default": "llama3.2", "label": "Model name"}
+        ]
+      },
+      "sections": [
+        {
+          "id": "s1-intro",
+          "title": "Why Prompts Matter: LLMs as Probability Samplers",
+          "type": "explanation",
+          "content": "Short conceptual intro: LLMs predict the next token from a probability distribution. Phrasing shifts the distribution. A different word can open or close entire branches of the output space. Interactive cell: two text boxes, identical task, one poorly phrased and one well phrased. Student runs both and compares."
+        },
+        {
+          "id": "s2-building-blocks",
+          "title": "The Five Building Blocks",
+          "type": "interactive_demo",
+          "content": "Five toggle switches (marimo checkboxes): Instruction, Data, Format, Persona, Context. A text preview panel shows the assembled prompt in real time. A 'Send' button submits to the model. The response renders below. Students toggle components on and off, press Send each time, and observe the response shift. Each component has a default text that populates when toggled on. The section ends with a reflection question: which component had the largest effect on the response?"
+        },
+        {
+          "id": "s3-fewshot",
+          "title": "Few-Shot Learning: Examples as Activators",
+          "type": "interactive_demo",
+          "content": "Task: sentiment classification (positive/negative). A slider controls the number of examples shown (0, 1, 2, 5). A 'Shuffle order' button randomizes the order of the examples. The model's classification is shown after each run. A live table records each run's (n_examples, order_seed, prediction) so students build up a small dataset showing order sensitivity. Ends with a callout warning about using few-shot examples in production."
+        },
+        {
+          "id": "s4-cot",
+          "title": "Chain-of-Thought: Thinking Out Loud",
+          "type": "interactive_demo",
+          "content": "A moderately hard logic puzzle (e.g., a multi-step river crossing or a simple arithmetical word problem that requires intermediate steps). A toggle switches between direct-answer mode and chain-of-thought mode. Both modes show the full response. Students compare: does CoT give the right answer? Are the reasoning steps always faithful? Ends with a caveat callout: CoT reasoning can be plausible but unfaithful."
+        },
+        {
+          "id": "s5-structured-output",
+          "title": "Structured Output: JSON Schema Constraints",
+          "type": "interactive_demo",
+          "content": "Two modes: (1) ask for JSON in the prompt text only; (2) pass a Pydantic model as the response_format schema. Students run a data extraction task (extract name, date, and amount from a fake invoice string) in both modes and observe parse reliability. The cell validates the JSON and shows a green/red success indicator."
+        },
+        {
+          "id": "s6-uncertainty",
+          "title": "Hallucination and Uncertainty Permission",
+          "type": "interactive_demo",
+          "content": "A toggle adds the phrase 'If you are not certain, say so' to the system prompt. The task asks about a fabricated academic paper title and author. Students compare the response with and without uncertainty permission and observe whether the model fabricates a plausible-sounding abstract or admits uncertainty."
+        },
+        {
+          "id": "s7-task-gaussian",
+          "title": "Student Task 1: Gaussian by Prompt",
+          "type": "student_task",
+          "callout_style": "callout-tip",
+          "description": "Students craft a prompt that makes the LLM generate exactly 200 numbers sampled from a standard normal distribution N(0,1). The notebook provides an empty prompt editor, a 'Run' button, a parser that extracts numbers from the LLM response (strips non-numeric text), and a matplotlib histogram overlaid with the true Gaussian PDF. Success criterion: the histogram visually matches the bell curve and the Kolmogorov-Smirnov test p-value is above 0.05.",
+          "hint": "The LLM has no random number generator. It will approximate from its training distribution. Be extremely specific: tell it exactly how many numbers should fall in each bin (e.g., for N(0,1) with bins [-3,-2,-1,0,1,2,3], the expected counts for 200 samples are approximately [1, 5, 27, 68, 54, 27, 5, 1, ...] — adjust to your binning). The more precise your specification, the more the output looks Gaussian.",
+          "extension": "Try changing the target distribution to N(2, 0.5). How does your prompt need to change?"
+        },
+        {
+          "id": "s8-task-cot-comparison",
+          "title": "Student Task 2: When Does Chain-of-Thought Fail?",
+          "type": "student_task",
+          "callout_style": "callout-tip",
+          "description": "Students are given three puzzles of increasing difficulty (a trivial arithmetic problem, a medium logic problem, and a hard combinatorics problem). They run each with and without CoT and record in a table: (puzzle, mode, correct_answer, model_answer, is_correct). Students write a one-paragraph interpretation: for which puzzle types does CoT help most? When does it introduce errors?",
+          "hint": "Pay attention to whether the intermediate reasoning steps are actually used to reach the final answer, or whether the final answer appears before the reasoning is complete."
+        },
+        {
+          "id": "s9-task-fewshot-bias",
+          "title": "Student Task 3: Few-Shot Order Sensitivity",
+          "type": "student_task",
+          "callout_style": "callout-tip",
+          "description": "Students are given four labeled sentiment examples (two positive, two negative). They run the model 10 times with the same 4 examples but in randomized order, recording the prediction for the same test sentence each time. They compute the fraction of runs that predicted each class and compare to a baseline of zero-shot. The notebook provides the shuffling logic and a bar chart of prediction frequency.",
+          "hint": "The most recently seen example label often has outsized influence. This is called the recency bias in few-shot prompting."
+        }
+      ]
+    },
+    {
+      "id": "nb2-react-agentic",
+      "filename": "react_agentic.py",
+      "title": "Agentic AI: From Reasoning to Action",
+      "subtitle": "The ReAct loop, LangChain tools, and context engineering through multi-agent isolation",
+      "learning_goals": [
+        "An agent differs from a chatbot: it operates in a feedback loop, not a one-shot function.",
+        "The ReAct pattern (Reason + Act) structures this loop: observe, think, act, observe.",
+        "Tools are plain Python functions decorated with @tool; the docstring is the LLM's API contract.",
+        "Intelligence emerges from the feedback loop, not just the model's reasoning.",
+        "Context window is working memory: too much context causes degradation.",
+        "Multi-agent isolation assigns each sub-agent a clean, focused context window."
+      ],
+      "runtime": {
+        "executable_via": "uvx marimo run react_agentic.py",
+        "edit_mode": "uvx marimo edit react_agentic.py",
+        "python_version": ">=3.10",
+        "dependencies": [
+          "marimo",
+          "langchain",
+          "langchain-ollama",
+          "langchain-community",
+          "pandas",
+          "matplotlib"
+        ],
+        "default_model": "glm-4.7:cloud",
+        "notes": "glm-4.7:cloud is accessed via the ollama cloud relay. The model name is passed to langchain-ollama's ChatOllama class. Students need to have ollama running with the cloud model pulled."
+      },
+      "ollama_config": {
+        "method": "ui_panel",
+        "description": "Same UI panel pattern as Notebook 1: base_url, api_key, model name. Default model is glm-4.7:cloud. Reactive marimo state propagates to all agent instantiations in the notebook."
+      },
+      "sections": [
+        {
+          "id": "s1-agent-vs-chatbot",
+          "title": "Agent vs. Chatbot: A State Machine, Not a Function",
+          "type": "explanation",
+          "content": "Side-by-side diagram (ASCII or matplotlib figure): chatbot as input→output function; agent as a state machine loop. Concrete analogy: a chatbot answers 'What is the capital of France?'; an agent figures out what the question even means, fetches the data, and double-checks the answer. Key insight: the feedback loop is where intelligence lives."
+        },
+        {
+          "id": "s2-react-pattern",
+          "title": "The ReAct Pattern: Reason, Then Act",
+          "type": "explanation",
+          "content": "Walk through the pseudocode loop. Annotate each phase: (1) Observation — what the agent sees, (2) Thought — the chain-of-thought reasoning, (3) Action — a tool call with parameters, (4) Result — what the tool returns, which becomes the next observation. Show that the loop terminates when the agent emits a 'Final Answer' action. Reference the original ReAct paper (Yao et al., 2022) in a margin note."
+        },
+        {
+          "id": "s3-tool-definition",
+          "title": "Defining Tools: The @tool Decorator",
+          "type": "interactive_demo",
+          "content": "Show three simple tools: get_current_date(), calculate(expression: str), and look_up_word(word: str). Each is a plain Python function. The @tool decorator is applied and the docstring is highlighted as the sole interface the LLM sees. An interactive cell lets students modify the docstring and observe how the agent uses the tool differently. Key point: a vague docstring produces unpredictable tool calls."
+        },
+        {
+          "id": "s4-react-demo",
+          "title": "A ReAct Agent in Action: Live Trace",
+          "type": "interactive_demo",
+          "content": "A pre-built agent with date, calculator, and word-lookup tools. A text input lets students ask any question. The notebook streams the full ReAct trace below: each Thought, Action, Action Input, and Observation on separate labeled lines with visual indentation. Students can watch the loop unfold step by step. A step counter shows how many iterations the agent took."
+        },
+        {
+          "id": "s5-titanic-agent",
+          "title": "Data Detective: Interrogating the Titanic Dataset",
+          "type": "interactive_demo",
+          "content": "Tools: inspect_schema() returns column names and types; sample_rows(n) returns n sample rows; query(sql: str) runs a SQL query on the DataFrame via DuckDB or pandas eval; get_summary_stats(column: str) returns mean, std, min, max, quartiles. The agent is initialized with these tools and a system prompt: 'You are a data analyst. Answer questions about the Titanic dataset by calling tools. Always verify your answer with at least one tool call.' Three pre-written question buttons seed the input: 'What was the overall survival rate?', 'Which passenger class survived at the highest rate?', 'What was the average age of survivors vs. non-survivors?'. The full ReAct trace streams below."
+        },
+        {
+          "id": "s6-context-engineering",
+          "title": "Context Engineering: Multi-Agent Isolation for Literature Verification",
+          "type": "demo",
+          "content": "Five academic references are displayed (a mix of real and fabricated citations, e.g., real papers from arxiv alongside made-up DOIs and author combinations). A single monolithic agent is given all five references at once and asked to verify each. Its response is shown, including where it confuses references or fabricates verification details. Then a multi-agent architecture is demonstrated: a lead agent spawns five sub-agents, each receiving only one reference. Each sub-agent independently assesses authenticity. The lead agent collects the five assessments and produces a final report. The notebook shows the number of tokens used in each approach and the accuracy of verdicts (ground truth is provided). Key insight: isolation prevents one fabricated reference from poisoning the verification of another.",
+          "implementation_notes": "Use LangChain's RunnableParallel or asyncio.gather to run sub-agents concurrently. Each sub-agent has its own ChatOllama instance. The lead agent assembles a summary from the sub-agents' string outputs. The five references should be hardcoded in the notebook for reproducibility."
+        },
+        {
+          "id": "s7-task-data-detective",
+          "title": "Student Task: Extend the Data Detective",
+          "type": "student_task",
+          "callout_style": "callout-tip",
+          "description": "Students add two new tools to the Titanic agent: (1) a cross_tabulation(row_col, col_col) tool that returns a pivot table, and (2) a filter_and_count(column, value) tool. They then prompt the agent with the multi-hop question: 'Among female passengers over 30 years old, which ticket class had the highest survival rate, and how does it compare to males in the same age group?' The agent must chain at least three tool calls to answer correctly. Success criterion: the agent produces a numerically correct answer verified by a provided ground-truth cell.",
+          "hint": "Write the docstring first. Describe exactly what the function returns, what the parameters mean, and what format the output is in. The LLM will call your tool exactly as described — be precise.",
+          "extension": "Modify the system prompt to instruct the agent to always question its first answer and run one additional verification tool call. Does this improve accuracy?"
+        },
+        {
+          "id": "s8-thought-experiment",
+          "title": "Thought Experiment: When Does the Loop Break?",
+          "type": "student_task",
+          "callout_style": "callout-tip",
+          "description": "Students deliberately give the agent a broken tool (a query function that always raises a ValueError with a vague error message). They observe how many iterations the agent attempts before giving up or hallucinating an answer. Then they improve the error message in the tool's exception to be more informative and run again. Students write a reflection: how does the quality of error messages in tool outputs affect agent behavior? This is a thought-provoking exercise connecting tool design to agent reliability.",
+          "hint": "Agents learn from their observations. A tool that says 'Error' is less useful than a tool that says 'ValueError: column \"Age\" not found. Available columns: Survived, Pclass, Name, Sex, Age, SibSp, Parch, Ticket, Fare, Cabin, Embarked.'"
+        }
+      ]
+    }
+  ],
+  "shared_requirements": {
+    "marimo_conventions": [
+      "Each notebook must have an inline script metadata block at the top with `# /// script` format listing all dependencies so that `uvx marimo run <file>.py` installs them automatically.",
+      "Reactive marimo state (mo.state) is used for the ollama config panel so that changing credentials reruns all dependent cells without a manual restart.",
+      "Explanatory prose lives in marimo markdown cells (mo.md), not in code comments.",
+      "Student task sections use mo.callout with kind='info' or mo.md with a custom header matching the course's callout-tip style.",
+      "All LLM calls must be wrapped in try/except blocks that display a friendly error message in the notebook if the ollama endpoint is unreachable.",
+      "Streaming responses are used where possible (stream=True) so students see output appear incrementally rather than waiting for a full response."
+    ],
+    "pedagogical_conventions": [
+      "Each section follows the pattern: conceptual explanation → interactive demo → reflection question.",
+      "Reflection questions are non-graded and embedded as mo.md prompts, not input widgets.",
+      "Success criteria for student tasks must be verifiable programmatically (e.g., KS test, ground-truth comparison) so students get immediate feedback.",
+      "Hints are progressive: a first hint is visible by default, and a 'reveal more' button shows a deeper hint."
+    ]
+  },
+  "implementation_decisions": [
+    "Both notebooks use the `openai` Python client configured with a custom base_url pointing to the ollama server. This is preferred over the `ollama` package because it supports any OpenAI-compatible endpoint including remote cloud relays.",
+    "Notebook 2 uses `langchain-ollama`'s ChatOllama class to integrate with LangChain's tool-calling and agent executor interfaces. The ReAct agent is built with langchain's `create_react_agent` and `AgentExecutor`.",
+    "The Titanic dataset is loaded from a bundled CSV file (or fetched from a known public URL at notebook startup) and stored in a pandas DataFrame. DuckDB-in-process is used for the SQL query tool to avoid requiring a database server.",
+    "The multi-agent literature verification demo uses `asyncio.gather` to run sub-agents in parallel. Since marimo runs in an async context, this integrates naturally without additional threading.",
+    "The five references in the literature verification demo are hardcoded in the notebook. Three are real (with real DOIs), two are fabricated. Ground truth is a hardcoded dictionary. This ensures the demo is reproducible without internet access if needed.",
+    "All model responses that should produce numeric data (Gaussian task) are parsed with a regex that extracts all floating-point numbers from the response text, so students do not need to format the output as a list explicitly unless they choose to.",
+    "The KS test for the Gaussian task uses `scipy.stats.kstest` with `cdf='norm'`. This is displayed as a p-value with a green/red indicator."
+  ],
+  "testing_decisions": {
+    "what_makes_a_good_test": "Tests should verify the external behavior of helper functions (parsers, tool wrappers) without mocking internal LLM calls. LLM responses are non-deterministic; tests should cover parsing and validation logic, not the LLM output itself.",
+    "modules_to_test": [
+      "Number extractor function (regex parser for the Gaussian task): test that it correctly extracts floats from various response formats.",
+      "JSON schema validator: test that valid and invalid model responses are correctly accepted or rejected.",
+      "Tool functions (inspect_schema, query, get_summary_stats, cross_tabulation, filter_and_count): test with the Titanic DataFrame that correct SQL/queries return expected results.",
+      "Ollama config panel: test that changing base_url produces a new client with the updated configuration."
+    ]
+  },
+  "out_of_scope": [
+    "Deployment or hosting of the notebooks on a server. Students run locally with uvx.",
+    "Fine-tuning or training of any model.",
+    "Persistent memory or databases beyond the in-notebook session state.",
+    "Authentication or user management.",
+    "Integration with any service other than ollama (no OpenAI, Anthropic, or Google APIs required).",
+    "Automatic grading or LMS integration.",
+    "Supporting models other than those compatible with the ollama OpenAI-compatible API."
+  ],
+  "further_notes": [
+    "The glm-4.7:cloud model requires ollama cloud access. The notebook should display a clear warning and fallback suggestion (e.g., llama3.2) if the model is not available.",
+    "The literature verification demo references should be chosen carefully: the real papers should be well-known enough that a cloud model can verify them, and the fake papers should be plausible enough to be challenging.",
+    "Consider adding a 'Reset to defaults' button in the ollama config panel so students who accidentally misconfigure the endpoint can recover without restarting the notebook.",
+    "The CoT vs. direct answer comparison task should use a puzzle that is genuinely hard enough that the model sometimes gets it wrong without CoT. A good candidate is a riddle involving non-obvious constraint propagation or a math problem that requires two or more intermediate steps."
+  ]
+}
