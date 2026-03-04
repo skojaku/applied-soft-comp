@@ -729,17 +729,30 @@ standard normal distribution N(0,1). Write your prompt in the editor below and c
 histogram overlaid with the true Gaussian PDF. A KS-test p-value tells you whether
 your prompt succeeded.
 
-**Hint:** The LLM has no random number generator. It approximates from its training
-distribution. Be extremely specific: tell it exactly how many numbers should fall in
-each bin. For N(0,1) with 200 samples, roughly 68 should fall between -1 and 1.
-The more precise your specification, the more the output looks Gaussian.
-
 **Extension:** Try changing the target distribution to N(2, 0.5). How does your prompt
 need to change?
                 """
             ),
             kind="info",
         ),
+        mo.callout(
+            mo.md(
+                "**Hint:** The LLM has no random number generator. It approximates from its "
+                "training distribution. Be extremely specific about the count: ask for exactly "
+                "200 numbers and output only the numbers, nothing else."
+            ),
+            kind="neutral",
+        ),
+        mo.accordion({
+            "Show more (detailed hint)": mo.md(
+                "For N(0,1) with 200 samples, tell the model exactly how many numbers should "
+                "fall in each bin. Roughly 68 numbers should fall between -1 and 1, about 27 "
+                "between 1 and 2 (and symmetrically -2 to -1), and only about 5 beyond ±2. "
+                "The more precisely you specify the bin counts, the more the output looks "
+                "Gaussian. You can even list expected counts: '[-3,-2]: 1, [-2,-1]: 5, "
+                "[-1,0]: 34, [0,1]: 34, [1,2]: 5, [2,3]: 1' and ask the model to match them."
+            ),
+        }),
     ])
     return
 
@@ -835,13 +848,28 @@ problem. Run each puzzle twice: once in direct-answer mode and once with chain-o
 The notebook records results in a table. After filling the table, write one short paragraph
 in the text area: for which puzzle type did CoT help, and when did it produce a wrong answer
 with convincing-looking reasoning?
-
-**Hint:** Pay attention to whether the intermediate reasoning steps are actually used to
-reach the final answer, or whether the final answer appears before the reasoning is complete.
                 """
             ),
             kind="info",
         ),
+        mo.callout(
+            mo.md(
+                "**Hint:** Pay attention to whether the intermediate reasoning steps are "
+                "actually used to reach the final answer, or whether the final answer "
+                "appears before the reasoning is complete."
+            ),
+            kind="neutral",
+        ),
+        mo.accordion({
+            "Show more (detailed hint)": mo.md(
+                "Chain-of-thought helps most on multi-step problems where each step builds "
+                "on the last, such as the logic puzzle. It tends to hurt on simple arithmetic "
+                "where the model already 'knows' the answer and the extra steps just add "
+                "opportunities for error. Watch for the model writing a final answer at the "
+                "top of its response and then 'reasoning' backward to justify it. That is a "
+                "sign that CoT is decorative, not causal."
+            ),
+        }),
     ])
     return
 
@@ -962,13 +990,26 @@ times with the same examples but in a different random order each time, recordin
 prediction for a fixed test sentence. A bar chart shows how often each class was predicted.
 Compare this distribution to a zero-shot baseline. What does the variance tell you about
 using few-shot prompts in a real application?
-
-**Hint:** The most recently seen example label often has outsized influence. This is
-called the recency bias in few-shot prompting.
                 """
             ),
             kind="info",
         ),
+        mo.callout(
+            mo.md(
+                "**Hint:** The most recently seen example label often has outsized influence "
+                "on the model's prediction. This is called the recency bias in few-shot prompting."
+            ),
+            kind="neutral",
+        ),
+        mo.accordion({
+            "Show more (detailed hint)": mo.md(
+                "To see recency bias clearly, look at which label appears last in each shuffled "
+                "ordering and check whether the prediction matches it. If you see a strong "
+                "correlation, the model is not reasoning about all examples equally. It is "
+                "weighting the most recent label disproportionately. In production, this means "
+                "the order in which you write your examples can matter as much as their content."
+            ),
+        }),
     ])
     return
 

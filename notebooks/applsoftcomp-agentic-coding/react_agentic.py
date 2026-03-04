@@ -946,16 +946,31 @@ to males in the same age group?"
 The agent must chain at least three tool calls to answer correctly. A ground-truth cell
 verifies the numerical answer.
 
-**Hint:** Write the docstring first. Describe exactly what the function returns, what
-the parameters mean, and what format the output is in. The LLM will call your tool
-exactly as described — be precise.
-
 **Extension:** Modify the system prompt to instruct the agent to always question its
 first answer and run one additional verification tool call. Does this improve accuracy?
                 """
             ),
             kind="info",
         ),
+        mo.callout(
+            mo.md(
+                "**Hint:** Write the docstring first. Describe exactly what the function "
+                "returns, what the parameters mean, and what format the output is in. "
+                "The LLM will call your tool exactly as described — be precise."
+            ),
+            kind="neutral",
+        ),
+        mo.accordion({
+            "Show more (detailed hint)": mo.md(
+                "For `cross_tabulation`, the input should be two column names. Specify in "
+                "the docstring that the input is a comma-separated string (e.g., 'Sex,Survived') "
+                "and that the output is a formatted table. For `filter_and_count`, the input "
+                "should be a pandas query string (e.g., 'Sex == \"female\" and Age > 30'). "
+                "Mention in the docstring that the user should check `inspect_schema` first "
+                "to confirm available column names and their exact spelling. A tool with a "
+                "vague docstring will be called incorrectly or skipped entirely."
+            ),
+        }),
     ])
     return
 
@@ -1173,14 +1188,28 @@ agent retry? Does it give up? Does it hallucinate an answer after failing?
 
 Then edit the error message to be more informative: name the available columns and
 explain what went wrong. Run the agent again and compare.
-
-**Hint:** Agents learn from their observations. A tool that says "Error" is less
-useful than a tool that says "ValueError: column 'Age' not found. Available columns:
-Survived, Pclass, Name, Sex, Age, SibSp, Parch, Ticket, Fare, Cabin, Embarked."
                 """
             ),
             kind="info",
         ),
+        mo.callout(
+            mo.md(
+                "**Hint:** Agents learn from their observations. A tool that says \"Error\" "
+                "gives the agent nothing to work with. A more informative message lets the "
+                "agent self-correct and try a different approach."
+            ),
+            kind="neutral",
+        ),
+        mo.accordion({
+            "Show more (detailed hint)": mo.md(
+                "Change the error message from `raise ValueError(\"Error\")` to something like: "
+                "`raise ValueError(\"column 'Age' not found. Available columns: Survived, Pclass, "
+                "Name, Sex, Age, SibSp, Parch, Ticket, Fare, Cabin, Embarked.\")`. "
+                "Then re-run the agent and watch whether it uses that information to try a "
+                "corrected query. The reflection question is: what does this tell you about "
+                "the relationship between tool design and agent reliability?"
+            ),
+        }),
     ])
     return
 
