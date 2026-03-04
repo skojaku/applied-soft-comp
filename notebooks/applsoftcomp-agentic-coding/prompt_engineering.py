@@ -132,7 +132,7 @@ def _(mo):
             mo.md(f"**ollama not available:** {_ollama_output}"),
             kind="warn",
         )
-    _display
+    mo.accordion({"Available ollama models (click to expand)": _display})
     return
 
 
@@ -878,7 +878,7 @@ def _(mo):
 
 
 @app.cell
-def _():
+def _(mo):
     import re
     import numpy as np
     from scipy import stats
@@ -889,6 +889,16 @@ def _():
         pattern = r"-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?"
         return [float(m) for m in re.findall(pattern, text)]
 
+    mo.accordion({
+        "Helper: extract_numbers() — click to see source": mo.md(
+            "```python\n"
+            "def extract_numbers(text: str) -> list:\n"
+            '    """Extract all floating-point numbers from a string."""\n'
+            "    pattern = r\"-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?\"\n"
+            "    return [float(m) for m in re.findall(pattern, text)]\n"
+            "```"
+        ),
+    })
     return extract_numbers, np, plt, stats
 
 

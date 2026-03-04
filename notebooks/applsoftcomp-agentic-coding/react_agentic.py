@@ -138,7 +138,7 @@ def _(mo):
             mo.md(f"**ollama not available:** {_ollama_output}"),
             kind="warn",
         )
-    _display
+    mo.accordion({"Available ollama models (click to expand)": _display})
     return
 
 
@@ -362,7 +362,7 @@ def _(mo):
 
 
 @app.cell
-def _():
+def _(mo):
     import datetime
 
     def get_current_date() -> str:
@@ -396,6 +396,16 @@ def _():
         }
         return definitions.get(word.lower(), f"Definition not found for '{word}'.")
 
+    mo.accordion({
+        "Tool implementations — click to see full source": mo.md(
+            "```python\n"
+            "def get_current_date() -> str: ...\n"
+            "def evaluate_math(expression: str) -> str: ...\n"
+            "def define_word(word: str) -> str: ...\n"
+            "```\n"
+            "These functions are the tool implementations. The LLM never sees this code — only the docstrings above."
+        ),
+    })
     return datetime, define_word, evaluate_math, get_current_date
 
 
@@ -636,7 +646,11 @@ def _(mo):
         )
         titanic_df = pd.read_csv(io.StringIO(_csv))
 
-    mo.md(f"*Titanic dataset loaded: {len(titanic_df)} rows, {len(titanic_df.columns)} columns.*")
+    mo.accordion({
+        f"Dataset loaded: {len(titanic_df)} rows × {len(titanic_df.columns)} columns — click to preview": mo.md(
+            f"```\n{titanic_df.head(3).to_string()}\n```"
+        ),
+    })
     return duckdb, pd, titanic_df
 
 
@@ -696,7 +710,14 @@ def _(duckdb, mo, titanic_df):
         "Observation: [filled by system]\n... repeat ...\nFinal Answer: [answer]"
     )
 
-    mo.md("*Titanic tools defined and ready.*")
+    mo.accordion({
+        "Titanic agent tools — click to see docstrings": mo.md(
+            "**`inspect_schema()`** — Return column names and data types. Use this first before any query.\n\n"
+            "**`get_sample_rows(n)`** — Return the first n rows as a string.\n\n"
+            "**`run_sql_query(query)`** — Run SQL against the Titanic dataset (table: `titanic_df`).\n\n"
+            "**`get_summary_stats(column)`** — Return descriptive statistics for a numeric column."
+        ),
+    })
     return (
         TITANIC_SYSTEM_PROMPT,
         TITANIC_TOOLS,
@@ -1075,8 +1096,6 @@ first answer and run one additional verification tool call. Does this improve ac
 
 @app.cell
 def _(mo, pd, titanic_df):
-    mo.md("### Your tools go here — edit this cell to add cross_tabulation and filter_and_count")
-
     def cross_tabulation(col1_col2: str) -> str:
         """Return a cross-tabulation of two columns in the Titanic dataset as a string.
         The input must be two column names separated by a comma, e.g., 'Sex,Survived'.
@@ -1101,10 +1120,13 @@ def _(mo, pd, titanic_df):
         except Exception as e:
             return f"Error: {e}. Available columns: {list(titanic_df.columns)}"
 
-    mo.md(
-        "Two starter tools are provided above (`cross_tabulation` and `filter_and_count`). "
-        "Review their docstrings, then run the agent below with the target question."
-    )
+    mo.accordion({
+        "Your tools: cross_tabulation and filter_and_count — click to view and edit": mo.md(
+            "Edit the cell above to improve these tools. The docstring is what the LLM reads — be precise.\n\n"
+            "**`cross_tabulation(col1_col2)`** — input: two column names separated by comma (e.g. `'Sex,Survived'`)\n\n"
+            "**`filter_and_count(condition)`** — input: pandas query string (e.g. `'Sex == \"female\" and Age > 30'`)"
+        ),
+    })
     return cross_tabulation, filter_and_count
 
 
