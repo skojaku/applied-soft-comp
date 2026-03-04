@@ -308,20 +308,23 @@ def _(
 
     assembled = "\n\n".join(parts) if parts else "(No components selected — toggle at least one above.)"
 
+    _preview = mo.vstack([
+        mo.md("### Assembled prompt (live preview)"),
+        mo.callout(mo.md(f"```\n{assembled}\n```"), kind="info"),
+        mo.md("*This preview updates in real time as you toggle components above.*"),
+    ])
+
+    blocks_response = None
     if run_blocks_btn.value and parts:
         blocks_response = call_llm(assembled)
         mo.vstack([
-            mo.md("### Assembled prompt"),
-            mo.callout(mo.md(f"```\n{assembled}\n```"), kind="info"),
+            _preview,
             mo.md("### Model response"),
             mo.callout(mo.md(blocks_response), kind="success"),
             mo.md("*Reflection: Which component changed the response the most when you toggled it?*"),
         ])
     else:
-        mo.vstack([
-            mo.md("### Assembled prompt (live preview)"),
-            mo.callout(mo.md(f"```\n{assembled}\n```"), kind="info"),
-        ])
+        _preview
     return assembled, blocks_response, parts
 
 
