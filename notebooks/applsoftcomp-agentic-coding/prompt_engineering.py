@@ -1,0 +1,966 @@
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#   "marimo",
+#   "litellm",
+#   "pydantic",
+#   "matplotlib",
+#   "numpy",
+#   "scipy",
+# ]
+# ///
+
+import marimo
+
+__generated_with = "0.10.0"
+app = marimo.App(width="medium", title="Prompt Engineering: The Art of Talking to LLMs")
+
+
+@app.cell
+def _():
+    import marimo as mo
+    return (mo,)
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        # Prompt Engineering: The Art of Talking to LLMs
+
+        *How phrasing shapes probability — and what you can do about it*
+
+        ::: {.callout-note title="What you'll learn in this module"}
+        This module introduces the art and science of prompt engineering. We will explore
+        how LLMs generate text as probability samplers, examine the five building blocks of
+        a well-structured prompt, and understand how few-shot examples, chain-of-thought
+        reasoning, and structured output constraints apply to real tasks.
+        :::
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    # LLM Configuration Panel
+    mo.md("## Configuration")
+    return
+
+
+@app.cell
+def _(mo):
+    model_input = mo.ui.text(
+        value="ollama/llama3.2",
+        label="Model (litellm format, e.g. ollama/llama3.2, openai/gpt-4o, anthropic/claude-3-5-sonnet-20241022)",
+        full_width=True,
+    )
+    api_key_input = mo.ui.text(
+        value="",
+        label="API key (leave blank for local ollama)",
+        full_width=True,
+    )
+    api_base_input = mo.ui.text(
+        value="http://localhost:11434",
+        label="API base URL (only needed for custom endpoints)",
+        full_width=True,
+    )
+    config_panel = mo.vstack([
+        mo.md("### LLM Configuration"),
+        model_input,
+        api_key_input,
+        api_base_input,
+        mo.md("*Change any field above and all cells that call the LLM will update automatically.*"),
+    ])
+    config_panel
+    return api_base_input, api_key_input, model_input, config_panel
+
+
+@app.cell
+def _(api_base_input, api_key_input, model_input):
+    # Reactive config state — all downstream cells depend on these variables
+    llm_model = model_input.value
+    llm_api_key = api_key_input.value or None
+    llm_api_base = api_base_input.value or None
+    return llm_api_base, llm_api_key, llm_model
+
+
+@app.cell
+def _(llm_api_base, llm_api_key, llm_model, mo):
+    import litellm
+
+    def call_llm(prompt: str, system: str = "") -> str:
+        """Call the configured LLM and return the response text."""
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": prompt})
+        try:
+            kwargs = {"model": llm_model, "messages": messages}
+            if llm_api_key:
+                kwargs["api_key"] = llm_api_key
+            if llm_api_base:
+                kwargs["api_base"] = llm_api_base
+            response = litellm.completion(**kwargs)
+            return response.choices[0].message.content
+        except Exception as e:
+            error_msg = str(e)
+            if "not found" in error_msg.lower() or "model" in error_msg.lower():
+                return (
+                    f"**Error:** Model `{llm_model}` was not found. "
+                    "Please run `ollama pull <model>` to download it locally, "
+                    "or switch to a cloud model in the configuration panel above."
+                )
+            return f"**Error calling LLM:** {error_msg}"
+
+    mo.md(f"*Using model: `{llm_model}`*")
+    return call_llm, litellm
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## Section 1: Why Prompts Matter — LLMs as Probability Samplers
+
+        Every LLM response is a sample from a probability distribution. The model does not
+        retrieve a fixed answer stored somewhere in its weights. It generates the most likely
+        continuation of your exact input, token by token. Change a single word, and you shift
+        the distribution. Change the structure of your request, and you can shift it dramatically.
+
+        Let us see this in action. Below are two prompts for the same task. One is vague; the
+        other is precise. Run both and compare what you get.
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    vague_prompt = mo.ui.text_area(
+        value="Tell me about climate change.",
+        label="Vague prompt",
+        full_width=True,
+        rows=3,
+    )
+    precise_prompt = mo.ui.text_area(
+        value=(
+            "You are an environmental scientist writing for a general audience. "
+            "Summarize the three most important human-caused drivers of climate change "
+            "in exactly three sentences, one sentence per driver."
+        ),
+        label="Precise prompt",
+        full_width=True,
+        rows=4,
+    )
+    run_comparison_btn = mo.ui.run_button(label="Run both prompts")
+    mo.vstack([vague_prompt, precise_prompt, run_comparison_btn])
+    return precise_prompt, run_comparison_btn, vague_prompt
+
+
+@app.cell
+def _(call_llm, mo, precise_prompt, run_comparison_btn, vague_prompt):
+    if run_comparison_btn.value:
+        vague_response = call_llm(vague_prompt.value)
+        precise_response = call_llm(precise_prompt.value)
+        mo.vstack([
+            mo.md("### Vague prompt response"),
+            mo.callout(mo.md(vague_response), kind="warn"),
+            mo.md("### Precise prompt response"),
+            mo.callout(mo.md(precise_response), kind="success"),
+            mo.md(
+                "*Reflection: What was different about the two responses? "
+                "Which was more useful, and why did phrasing produce that difference?*"
+            ),
+        ])
+    else:
+        mo.md("*Click **Run both prompts** to see the comparison.*")
+    return precise_response, vague_response
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## Section 2: The Five Building Blocks of a Prompt
+
+        A well-structured prompt is not just a question. It has up to five components, each
+        doing a different job. Let us meet them one at a time.
+
+        **Instruction** tells the model what task to perform. Without it, the model guesses.
+        A clear instruction anchors the response to the right task type.
+
+        **Data** is the material the model should work on. Separating data from the instruction
+        keeps the prompt readable and makes it easy to swap the data without rewriting everything else.
+
+        **Format** constrains the shape of the output. Asking for a numbered list, a JSON object,
+        or exactly three sentences each changes what the model generates, because format constraints
+        shift the probability mass toward tokens that fit the required structure.
+
+        **Persona** assigns a role to the model. Telling the model it is a pediatric nurse versus a
+        software engineer versus a poet changes its vocabulary, tone, and depth of technical detail.
+
+        **Context** provides background the model needs but does not have from the instruction alone.
+        A date, a domain, a prior conversation, or a constraint about the audience all belong here.
+
+        Now toggle each component on and off. Watch how the assembled prompt changes in real time,
+        then send it and compare the responses.
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    use_instruction = mo.ui.checkbox(value=True, label="Instruction")
+    use_data = mo.ui.checkbox(value=False, label="Data")
+    use_format = mo.ui.checkbox(value=False, label="Format")
+    use_persona = mo.ui.checkbox(value=False, label="Persona")
+    use_context = mo.ui.checkbox(value=False, label="Context")
+
+    instruction_text = mo.ui.text_area(
+        value="Classify the sentiment of the following review as Positive, Negative, or Neutral.",
+        label="Instruction text",
+        full_width=True,
+        rows=2,
+    )
+    data_text = mo.ui.text_area(
+        value='Review: "The battery lasts all day and the screen is gorgeous, but the price is absurd."',
+        label="Data text",
+        full_width=True,
+        rows=2,
+    )
+    format_text = mo.ui.text_area(
+        value="Respond with exactly one word: Positive, Negative, or Neutral.",
+        label="Format text",
+        full_width=True,
+        rows=2,
+    )
+    persona_text = mo.ui.text_area(
+        value="You are a professional product reviewer with 10 years of experience in consumer electronics.",
+        label="Persona text",
+        full_width=True,
+        rows=2,
+    )
+    context_text = mo.ui.text_area(
+        value="This review was posted on a budget-focused tech forum where readers care primarily about value for money.",
+        label="Context text",
+        full_width=True,
+        rows=2,
+    )
+
+    run_blocks_btn = mo.ui.run_button(label="Send assembled prompt")
+
+    mo.vstack([
+        mo.md("### Toggle components"),
+        mo.hstack([use_instruction, use_data, use_format, use_persona, use_context]),
+        mo.md("### Edit component text"),
+        instruction_text,
+        data_text,
+        format_text,
+        persona_text,
+        context_text,
+        run_blocks_btn,
+    ])
+    return (
+        context_text,
+        data_text,
+        format_text,
+        instruction_text,
+        persona_text,
+        run_blocks_btn,
+        use_context,
+        use_data,
+        use_format,
+        use_instruction,
+        use_persona,
+    )
+
+
+@app.cell
+def _(
+    call_llm,
+    context_text,
+    data_text,
+    format_text,
+    instruction_text,
+    mo,
+    persona_text,
+    run_blocks_btn,
+    use_context,
+    use_data,
+    use_format,
+    use_instruction,
+    use_persona,
+):
+    parts = []
+    if use_persona.value:
+        parts.append(persona_text.value)
+    if use_context.value:
+        parts.append(f"Context: {context_text.value}")
+    if use_instruction.value:
+        parts.append(instruction_text.value)
+    if use_data.value:
+        parts.append(data_text.value)
+    if use_format.value:
+        parts.append(f"Format: {format_text.value}")
+
+    assembled = "\n\n".join(parts) if parts else "(No components selected — toggle at least one above.)"
+
+    if run_blocks_btn.value and parts:
+        blocks_response = call_llm(assembled)
+        mo.vstack([
+            mo.md("### Assembled prompt"),
+            mo.callout(mo.md(f"```\n{assembled}\n```"), kind="info"),
+            mo.md("### Model response"),
+            mo.callout(mo.md(blocks_response), kind="success"),
+            mo.md("*Reflection: Which component changed the response the most when you toggled it?*"),
+        ])
+    else:
+        mo.vstack([
+            mo.md("### Assembled prompt (live preview)"),
+            mo.callout(mo.md(f"```\n{assembled}\n```"), kind="info"),
+        ])
+    return assembled, blocks_response, parts
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## Section 3: Few-Shot Learning — Examples as Activators
+
+        When you show a model an example of the task alongside the instruction, you activate
+        a much more specific pattern in its probability distribution. Two or three examples
+        are usually enough. More than five rarely helps.
+
+        The demo below uses sentiment classification. Use the slider to choose how many
+        examples to include (0, 1, 2, or 5), then run the model. A table records each
+        configuration so you can compare across runs.
+
+        After trying several slider positions, hit **Shuffle examples** to randomize the
+        order of the same examples and run again. Watch whether the prediction changes.
+        This is order bias: the most recently seen label often has outsized influence on
+        what the model predicts next.
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    SENTIMENT_EXAMPLES = [
+        ("The food was incredible and the service was friendly.", "Positive"),
+        ("I waited 45 minutes and my order was completely wrong.", "Negative"),
+        ("The product works as described, nothing special.", "Neutral"),
+        ("Absolutely love this! Best purchase I've made all year.", "Positive"),
+        ("Broke after two days. Total waste of money.", "Negative"),
+    ]
+
+    fewshot_slider = mo.ui.slider(
+        start=0, stop=5, step=1, value=0, label="Number of few-shot examples"
+    )
+    shuffle_btn = mo.ui.run_button(label="Shuffle examples and run")
+    run_fewshot_btn = mo.ui.run_button(label="Run with current settings")
+
+    fewshot_test = mo.ui.text_area(
+        value="The app crashes every time I open it, but customer support was surprisingly helpful.",
+        label="Test sentence (classify this)",
+        full_width=True,
+        rows=2,
+    )
+
+    mo.vstack([fewshot_slider, fewshot_test, mo.hstack([run_fewshot_btn, shuffle_btn])])
+    return (
+        SENTIMENT_EXAMPLES,
+        fewshot_slider,
+        fewshot_test,
+        run_fewshot_btn,
+        shuffle_btn,
+    )
+
+
+@app.cell
+def _(
+    SENTIMENT_EXAMPLES,
+    call_llm,
+    fewshot_slider,
+    fewshot_test,
+    mo,
+    run_fewshot_btn,
+    shuffle_btn,
+):
+    import random
+
+    fewshot_results = mo.state([])
+    _get_results, _set_results = fewshot_results
+
+    def _build_fewshot_prompt(examples, n, test_sentence, shuffled=False):
+        selected = examples[:n]
+        if shuffled:
+            selected = list(selected)
+            random.shuffle(selected)
+        prompt_parts = ["Classify the sentiment as Positive, Negative, or Neutral.\n"]
+        for text, label in selected:
+            prompt_parts.append(f'Text: "{text}"\nSentiment: {label}\n')
+        prompt_parts.append(f'Text: "{test_sentence}"\nSentiment:')
+        return "\n".join(prompt_parts), selected
+
+    if run_fewshot_btn.value or shuffle_btn.value:
+        is_shuffled = bool(shuffle_btn.value)
+        _prompt, _used = _build_fewshot_prompt(
+            SENTIMENT_EXAMPLES, fewshot_slider.value, fewshot_test.value, is_shuffled
+        )
+        _resp = call_llm(_prompt)
+        _prediction = _resp.strip().split("\n")[0]
+        _current = _get_results()
+        _set_results(_current + [{
+            "n_examples": fewshot_slider.value,
+            "shuffled": is_shuffled,
+            "prediction": _prediction,
+        }])
+
+    _rows = _get_results()
+    if _rows:
+        table_data = {
+            "Examples": [r["n_examples"] for r in _rows],
+            "Shuffled": [str(r["shuffled"]) for r in _rows],
+            "Prediction": [r["prediction"] for r in _rows],
+        }
+        mo.vstack([
+            mo.md("### Results table"),
+            mo.ui.table(table_data),
+            mo.md(
+                "*Reflection: Did the order of examples change the prediction? "
+                "What does this tell you about using few-shot prompts in production?*"
+            ),
+        ])
+    else:
+        mo.md("*Run the model to see results appear here.*")
+    return fewshot_results, random
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## Section 4: Chain-of-Thought — Thinking Out Loud
+
+        Sometimes asking the model to think out loud, step by step, leads to better answers.
+        This technique is called chain-of-thought prompting.
+
+        The puzzle below requires two or more intermediate steps to solve correctly. Toggle
+        between direct-answer mode and chain-of-thought mode. Read both responses in full.
+
+        One important caveat: the reasoning steps can sound completely plausible but still lead
+        to a wrong answer. The final answer may even appear before the reasoning is finished.
+        Chain-of-thought is a tool, not a guarantee.
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    COT_PUZZLE = (
+        "A farmer has 17 sheep. All but 9 die. How many sheep does the farmer have left? "
+        "Now, if he sells half of the remaining sheep and buys 3 more, how many does he have?"
+    )
+
+    cot_toggle = mo.ui.switch(label="Enable chain-of-thought", value=False)
+    run_cot_btn = mo.ui.run_button(label="Run puzzle")
+
+    mo.vstack([
+        mo.callout(mo.md(f"**Puzzle:** {COT_PUZZLE}"), kind="info"),
+        cot_toggle,
+        run_cot_btn,
+    ])
+    return COT_PUZZLE, cot_toggle, run_cot_btn
+
+
+@app.cell
+def _(COT_PUZZLE, call_llm, cot_toggle, mo, run_cot_btn):
+    if run_cot_btn.value:
+        if cot_toggle.value:
+            _system = (
+                "Think through this step by step before giving your final answer. "
+                "Show all intermediate reasoning."
+            )
+            _mode_label = "Chain-of-thought mode"
+        else:
+            _system = "Answer directly and concisely."
+            _mode_label = "Direct-answer mode"
+
+        _cot_resp = call_llm(COT_PUZZLE, system=_system)
+        mo.vstack([
+            mo.md(f"### Response ({_mode_label})"),
+            mo.callout(mo.md(_cot_resp), kind="success"),
+            mo.md(
+                "*Reflection: Did the reasoning steps actually lead to the correct answer? "
+                "Did chain-of-thought help, hurt, or make no difference here?*"
+            ),
+        ])
+    else:
+        mo.md("*Click **Run puzzle** to see the response.*")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## Section 5: Structured Output — JSON Schema Constraints
+
+        Asking the model to "respond in JSON" in plain text does not guarantee valid JSON.
+        The model is still sampling tokens freely and can produce a malformed structure.
+
+        The alternative is to pass a Pydantic schema as a `response_format` constraint.
+        This works at the token level: the model cannot generate a response that violates
+        the schema. Toggle between the two approaches below and count how often each produces
+        valid output.
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    INVOICE_TEXT = (
+        "Invoice #4821 — Billed to: Acme Corp. "
+        "Date: March 15, 2025. "
+        "Services rendered: Strategic consulting (40 hrs @ $150/hr). "
+        "Total amount due: $6,000.00."
+    )
+
+    structured_toggle = mo.ui.switch(label="Use Pydantic schema constraint", value=False)
+    run_structured_btn = mo.ui.run_button(label="Extract invoice data")
+
+    mo.vstack([
+        mo.callout(mo.md(f"**Invoice text:**\n\n{INVOICE_TEXT}"), kind="info"),
+        structured_toggle,
+        run_structured_btn,
+    ])
+    return INVOICE_TEXT, run_structured_btn, structured_toggle
+
+
+@app.cell
+def _(INVOICE_TEXT, call_llm, litellm, llm_api_base, llm_api_key, llm_model, mo, run_structured_btn, structured_toggle):
+    import json
+    from pydantic import BaseModel
+
+    class InvoiceData(BaseModel):
+        client_name: str
+        date: str
+        total_amount: str
+
+    if run_structured_btn.value:
+        if structured_toggle.value:
+            try:
+                _kwargs = {
+                    "model": llm_model,
+                    "messages": [
+                        {"role": "user", "content": f"Extract the client name, date, and total amount from this invoice:\n\n{INVOICE_TEXT}"},
+                    ],
+                    "response_format": InvoiceData,
+                }
+                if llm_api_key:
+                    _kwargs["api_key"] = llm_api_key
+                if llm_api_base:
+                    _kwargs["api_base"] = llm_api_base
+                _resp = litellm.completion(**_kwargs)
+                _raw = _resp.choices[0].message.content
+                _parsed = InvoiceData.model_validate_json(_raw)
+                mo.vstack([
+                    mo.md("### Structured output (schema-constrained)"),
+                    mo.callout(
+                        mo.md(f"```json\n{_parsed.model_dump_json(indent=2)}\n```"),
+                        kind="success",
+                    ),
+                    mo.md("**Valid JSON: ✅**"),
+                ])
+            except Exception as _e:
+                mo.callout(mo.md(f"**Error:** {_e}"), kind="danger")
+        else:
+            _resp_text = call_llm(
+                f"Extract the client name, date, and total amount from this invoice and respond in JSON:\n\n{INVOICE_TEXT}"
+            )
+            try:
+                _start = _resp_text.find("{")
+                _end = _resp_text.rfind("}") + 1
+                _json_str = _resp_text[_start:_end] if _start >= 0 else _resp_text
+                json.loads(_json_str)
+                _valid = "✅"
+                _kind = "success"
+            except Exception:
+                _valid = "❌"
+                _kind = "danger"
+            mo.vstack([
+                mo.md("### Free-text JSON response"),
+                mo.callout(mo.md(f"```\n{_resp_text}\n```"), kind="info"),
+                mo.md(f"**Valid JSON: {_valid}**"),
+            ])
+    else:
+        mo.md("*Click **Extract invoice data** to run the demo.*")
+    return BaseModel, InvoiceData, json
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## Section 6: Hallucination and Uncertainty Permission
+
+        LLMs are trained to be helpful. This means they often produce a confident-sounding
+        answer even when they have no reliable information. This is hallucination.
+
+        One simple intervention is uncertainty permission: telling the model it is acceptable
+        to say "I do not know." Toggle this below and ask the model about a fabricated paper.
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    HALLUCINATION_QUERY = (
+        "Summarize the key findings of the 2019 paper by Dr. Elara Voss titled "
+        "'Quantum Resonance Patterns in Migratory Bird Navigation: A Unified Framework.' "
+        "What were the main conclusions and how were they validated?"
+    )
+
+    uncertainty_toggle = mo.ui.switch(label="Allow 'I don't know' response", value=False)
+    run_hallucination_btn = mo.ui.run_button(label="Ask about the paper")
+
+    mo.vstack([
+        mo.callout(mo.md(f"**Question:** {HALLUCINATION_QUERY}"), kind="info"),
+        uncertainty_toggle,
+        run_hallucination_btn,
+    ])
+    return HALLUCINATION_QUERY, run_hallucination_btn, uncertainty_toggle
+
+
+@app.cell
+def _(HALLUCINATION_QUERY, call_llm, mo, run_hallucination_btn, uncertainty_toggle):
+    if run_hallucination_btn.value:
+        if uncertainty_toggle.value:
+            _sys = "You are a helpful assistant. If you are not certain about something, say so clearly. It is perfectly acceptable to say 'I do not know.'"
+        else:
+            _sys = "You are a helpful assistant."
+        _h_resp = call_llm(HALLUCINATION_QUERY, system=_sys)
+        mo.vstack([
+            mo.md(f"### Response ({'uncertainty permitted' if uncertainty_toggle.value else 'no uncertainty permission'})"),
+            mo.callout(mo.md(_h_resp), kind="success" if uncertainty_toggle.value else "warn"),
+            mo.md(
+                "*Reflection: Did the uncertainty permission change the model's confidence? "
+                "Should it always be included in production prompts?*"
+            ),
+        ])
+    else:
+        mo.md("*Click **Ask about the paper** to see what happens.*")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## Student Task 1: Gaussian by Prompt
+
+        ::: {.callout-tip title="Try it yourself"}
+        Your goal is to craft a prompt that makes the LLM output 200 numbers following a
+        standard normal distribution N(0,1). Write your prompt in the editor below and click
+        **Run**. The notebook will extract numbers from the response automatically and plot a
+        histogram overlaid with the true Gaussian PDF. A KS-test p-value tells you whether
+        your prompt succeeded.
+
+        **Hint:** The LLM has no random number generator. It approximates from its training
+        distribution. Be extremely specific: tell it exactly how many numbers should fall in
+        each bin. For N(0,1) with 200 samples, roughly 68 should fall between -1 and 1.
+        The more precise your specification, the more the output looks Gaussian.
+
+        **Extension:** Try changing the target distribution to N(2, 0.5). How does your prompt
+        need to change?
+        :::
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    gaussian_prompt = mo.ui.text_area(
+        value=(
+            "Generate exactly 200 numbers that follow a standard normal distribution N(0,1). "
+            "Output only the numbers separated by spaces, nothing else."
+        ),
+        label="Your prompt",
+        full_width=True,
+        rows=5,
+    )
+    run_gaussian_btn = mo.ui.run_button(label="Run and evaluate")
+    mo.vstack([gaussian_prompt, run_gaussian_btn])
+    return gaussian_prompt, run_gaussian_btn
+
+
+@app.cell
+def _(call_llm, gaussian_prompt, mo, run_gaussian_btn):
+    import re
+    import numpy as np
+    from scipy import stats
+    import matplotlib.pyplot as plt
+
+    def extract_numbers(text: str) -> list:
+        """Extract all floating-point numbers from a string."""
+        pattern = r"-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?"
+        return [float(m) for m in re.findall(pattern, text)]
+
+    if run_gaussian_btn.value:
+        _g_resp = call_llm(gaussian_prompt.value)
+        _numbers = extract_numbers(_g_resp)
+
+        if len(_numbers) < 10:
+            mo.callout(
+                mo.md(
+                    f"Only {len(_numbers)} numbers were extracted. "
+                    "Try refining your prompt to produce more numeric output."
+                ),
+                kind="warn",
+            )
+        else:
+            _ks_stat, _ks_p = stats.kstest(_numbers, "norm")
+            _passed = _ks_p > 0.05
+
+            _fig, _ax = plt.subplots(figsize=(8, 4))
+            _ax.hist(_numbers, bins=30, density=True, alpha=0.6, label=f"LLM output (n={len(_numbers)})")
+            _x = np.linspace(-4, 4, 200)
+            _ax.plot(_x, stats.norm.pdf(_x), "r-", lw=2, label="True N(0,1) PDF")
+            _ax.set_xlabel("Value")
+            _ax.set_ylabel("Density")
+            _ax.set_title("LLM-generated numbers vs. N(0,1)")
+            _ax.legend()
+            plt.tight_layout()
+
+            _indicator = "✅ PASS" if _passed else "❌ FAIL"
+            _kind = "success" if _passed else "danger"
+
+            mo.vstack([
+                mo.as_html(_fig),
+                mo.callout(
+                    mo.md(
+                        f"**KS-test p-value:** {_ks_p:.4f} — **{_indicator}**\n\n"
+                        f"Extracted {len(_numbers)} numbers. "
+                        f"{'The distribution matches N(0,1) at the 5% significance level.' if _passed else 'The distribution does not match N(0,1). Refine your prompt and try again.'}"
+                    ),
+                    kind=_kind,
+                ),
+            ])
+    else:
+        mo.md("*Write your prompt above and click **Run and evaluate** to see the histogram.*")
+    return extract_numbers, np, plt, re, stats
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## Student Task 2: When Does Chain-of-Thought Fail?
+
+        ::: {.callout-tip title="Try it yourself"}
+        Three puzzles are provided below, ranging from trivial arithmetic to a harder logic
+        problem. Run each puzzle twice: once in direct-answer mode and once with chain-of-thought.
+        The notebook records results in a table. After filling the table, write one short paragraph
+        in the text area: for which puzzle type did CoT help, and when did it produce a wrong answer
+        with convincing-looking reasoning?
+
+        **Hint:** Pay attention to whether the intermediate reasoning steps are actually used to
+        reach the final answer, or whether the final answer appears before the reasoning is complete.
+        :::
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    COT_PUZZLES = [
+        {
+            "id": "arithmetic",
+            "question": "What is 17 × 23?",
+            "expected": "391",
+        },
+        {
+            "id": "logic",
+            "question": (
+                "There are three boxes. One contains only apples, one contains only oranges, "
+                "and one contains both apples and oranges. All three boxes are mislabeled. "
+                "You may pick one fruit from one box. Which box do you pick from to correctly "
+                "label all three boxes?"
+            ),
+            "expected": "The box labeled 'Apples and Oranges'",
+        },
+        {
+            "id": "combinatorics",
+            "question": (
+                "A password must be exactly 4 characters long. Each character is either a digit (0-9) "
+                "or an uppercase letter (A-Z). How many passwords are possible if the first character "
+                "must be a letter and no character may repeat?"
+            ),
+            "expected": "26 × 35 × 34 × 33 = 1,021,020",
+        },
+    ]
+
+    puzzle_selector = mo.ui.dropdown(
+        options={p["id"]: p["question"][:60] + "..." for p in COT_PUZZLES},
+        value="arithmetic",
+        label="Select puzzle",
+    )
+    cot2_toggle = mo.ui.switch(label="Enable chain-of-thought", value=False)
+    run_cot2_btn = mo.ui.run_button(label="Run selected puzzle")
+
+    mo.vstack([puzzle_selector, cot2_toggle, run_cot2_btn])
+    return COT_PUZZLES, cot2_toggle, puzzle_selector, run_cot2_btn
+
+
+@app.cell
+def _(COT_PUZZLES, call_llm, cot2_toggle, mo, puzzle_selector, run_cot2_btn):
+    cot2_results = mo.state([])
+    _get_r2, _set_r2 = cot2_results
+
+    if run_cot2_btn.value:
+        _puzzle = next(p for p in COT_PUZZLES if p["id"] == puzzle_selector.value)
+        if cot2_toggle.value:
+            _sys2 = "Think step by step before giving your final answer."
+            _mode2 = "Chain-of-thought"
+        else:
+            _sys2 = "Answer directly and concisely."
+            _mode2 = "Direct"
+        _resp2 = call_llm(_puzzle["question"], system=_sys2)
+        _current2 = _get_r2()
+        _set_r2(_current2 + [{
+            "puzzle": _puzzle["id"],
+            "mode": _mode2,
+            "expected": _puzzle["expected"],
+            "response": _resp2[:80] + "..." if len(_resp2) > 80 else _resp2,
+        }])
+
+    _rows2 = _get_r2()
+    if _rows2:
+        mo.ui.table({
+            "Puzzle": [r["puzzle"] for r in _rows2],
+            "Mode": [r["mode"] for r in _rows2],
+            "Expected": [r["expected"] for r in _rows2],
+            "Response (truncated)": [r["response"] for r in _rows2],
+        })
+    else:
+        mo.md("*Select a puzzle, choose a mode, and click **Run** to add rows to the table.*")
+    return cot2_results,
+
+
+@app.cell
+def _(mo):
+    reflection_cot = mo.ui.text_area(
+        label="Your reflection: For which puzzle type did CoT help? When did it produce wrong but convincing reasoning?",
+        full_width=True,
+        rows=5,
+    )
+    reflection_cot
+    return (reflection_cot,)
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## Student Task 3: Few-Shot Order Sensitivity
+
+        ::: {.callout-tip title="Try it yourself"}
+        Four labeled sentiment examples are provided below. The notebook will run the model 10
+        times with the same examples but in a different random order each time, recording the
+        prediction for a fixed test sentence. A bar chart shows how often each class was predicted.
+        Compare this distribution to a zero-shot baseline. What does the variance tell you about
+        using few-shot prompts in a real application?
+
+        **Hint:** The most recently seen example label often has outsized influence. This is
+        called the recency bias in few-shot prompting.
+        :::
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    FEWSHOT_BIAS_EXAMPLES = [
+        ("The concert was unforgettable. Every song was perfect.", "Positive"),
+        ("The delivery was late and the packaging was damaged.", "Negative"),
+        ("It is an average product. Does what it says on the box.", "Neutral"),
+        ("I have never been so disappointed. Complete failure.", "Negative"),
+    ]
+
+    FEWSHOT_BIAS_TEST = "The interface is clean but the performance could be better."
+
+    run_bias_btn = mo.ui.run_button(label="Run 10 shuffled trials")
+
+    mo.vstack([
+        mo.md(f"**Test sentence:** *{FEWSHOT_BIAS_TEST}*"),
+        mo.md("Click the button to run 10 trials with shuffled example orders."),
+        run_bias_btn,
+    ])
+    return FEWSHOT_BIAS_EXAMPLES, FEWSHOT_BIAS_TEST, run_bias_btn
+
+
+@app.cell
+def _(
+    FEWSHOT_BIAS_EXAMPLES,
+    FEWSHOT_BIAS_TEST,
+    call_llm,
+    mo,
+    plt,
+    random,
+    run_bias_btn,
+):
+    if run_bias_btn.value:
+        _predictions = []
+        for _trial in range(10):
+            _shuffled = list(FEWSHOT_BIAS_EXAMPLES)
+            random.shuffle(_shuffled)
+            _p_parts = ["Classify the sentiment as Positive, Negative, or Neutral.\n"]
+            for _text, _label in _shuffled:
+                _p_parts.append(f'Text: "{_text}"\nSentiment: {_label}\n')
+            _p_parts.append(f'Text: "{FEWSHOT_BIAS_TEST}"\nSentiment:')
+            _prompt_str = "\n".join(_p_parts)
+            _pred = call_llm(_prompt_str).strip().split("\n")[0]
+            _predictions.append(_pred)
+
+        _counts = {"Positive": 0, "Negative": 0, "Neutral": 0, "Other": 0}
+        for _p in _predictions:
+            _matched = False
+            for _k in ["Positive", "Negative", "Neutral"]:
+                if _k.lower() in _p.lower():
+                    _counts[_k] += 1
+                    _matched = True
+                    break
+            if not _matched:
+                _counts["Other"] += 1
+
+        _fig2, _ax2 = plt.subplots(figsize=(6, 4))
+        _ax2.bar(_counts.keys(), _counts.values(), color=["#4caf50", "#f44336", "#2196f3", "#9e9e9e"])
+        _ax2.set_ylabel("Count (out of 10 trials)")
+        _ax2.set_title("Few-shot prediction distribution across 10 shuffled orderings")
+        plt.tight_layout()
+
+        mo.vstack([
+            mo.as_html(_fig2),
+            mo.md(f"**Predictions:** {', '.join(_predictions)}"),
+            mo.md(
+                "*Reflection: How stable is the prediction across orderings? "
+                "What does this imply for deploying few-shot prompts in production?*"
+            ),
+        ])
+    else:
+        mo.md("*Click **Run 10 shuffled trials** to see the distribution.*")
+    return
+
+
+if __name__ == "__main__":
+    app.run()
