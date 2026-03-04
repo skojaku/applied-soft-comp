@@ -343,10 +343,16 @@ def _(mo):
         examples to include (0, 1, 2, or 5), then run the model. A table records each
         configuration so you can compare across runs.
 
-        After trying several slider positions, hit **Shuffle examples** to randomize the
-        order of the same examples and run again. Watch whether the prediction changes.
+        After trying several slider positions, hit **Shuffle examples and run** to randomize
+        the order of the same examples and run again. Watch whether the prediction changes.
         This is order bias: the most recently seen label often has outsized influence on
         what the model predicts next.
+
+        ::: {.callout-warn title="Few-shot prompts are brittle in production"}
+        Small changes in example order can flip the output entirely. A few-shot prompt that
+        works reliably in testing may behave differently in production when examples are
+        reordered or replaced. Always test multiple orderings before deploying.
+        :::
         """
     )
     return
@@ -406,35 +412,47 @@ def _(
     shuffle_btn,
 ):
     def _build_fewshot_prompt(examples, n, test_sentence, shuffled=False):
-        selected = examples[:n]
-        if shuffled:
-            selected = list(selected)
+        selected = list(examples[:n])
+        if shuffled and n > 0:
             random.shuffle(selected)
+        order_str = " → ".join(label for _, label in selected) if selected else "none"
         prompt_parts = ["Classify the sentiment as Positive, Negative, or Neutral.\n"]
         for text, label in selected:
             prompt_parts.append(f'Text: "{text}"\nSentiment: {label}\n')
         prompt_parts.append(f'Text: "{test_sentence}"\nSentiment:')
-        return "\n".join(prompt_parts), selected
+        return "\n".join(prompt_parts), order_str
 
+    _output = None
     if run_fewshot_btn.value or shuffle_btn.value:
         is_shuffled = bool(shuffle_btn.value)
-        _prompt, _used = _build_fewshot_prompt(
-            SENTIMENT_EXAMPLES, fewshot_slider.value, fewshot_test.value, is_shuffled
-        )
-        _resp = call_llm(_prompt)
-        _prediction = _resp.strip().split("\n")[0]
-        _current = get_fewshot_results()
-        set_fewshot_results(_current + [{
-            "n_examples": fewshot_slider.value,
-            "shuffled": is_shuffled,
-            "prediction": _prediction,
-        }])
+        n = fewshot_slider.value
+        if is_shuffled and n == 0:
+            _output = mo.callout(
+                mo.md("**Note:** Shuffling has no effect in zero-shot mode. Set the slider to at least 1."),
+                kind="warn",
+            )
+        else:
+            _prompt, _order = _build_fewshot_prompt(
+                SENTIMENT_EXAMPLES, n, fewshot_test.value, is_shuffled
+            )
+            _resp = call_llm(_prompt)
+            _prediction = _resp.strip().split("\n")[0]
+            _current = get_fewshot_results()
+            set_fewshot_results(_current + [{
+                "n_examples": n,
+                "shuffled": "Yes" if is_shuffled else "No",
+                "order": _order,
+                "prediction": _prediction,
+            }])
 
     _rows = get_fewshot_results()
-    if _rows:
+    if _output is not None:
+        _output
+    elif _rows:
         _table_data = {
             "Examples": [r["n_examples"] for r in _rows],
-            "Shuffled": [str(r["shuffled"]) for r in _rows],
+            "Shuffled": [r["shuffled"] for r in _rows],
+            "Example order (labels)": [r["order"] for r in _rows],
             "Prediction": [r["prediction"] for r in _rows],
         }
         mo.vstack([
