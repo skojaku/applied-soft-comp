@@ -16,14 +16,14 @@ __generated_with = "0.20.4"
 app = marimo.App(width="medium")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
     import marimo as mo
 
     return (mo,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
     # Prompt Engineering: The Art of Talking to LLMs
@@ -50,7 +50,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     # LLM Configuration Panel
     mo.md("""
@@ -59,7 +59,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     model_input = mo.ui.text(
         value="ollama/glm-4.7:cloud",
@@ -94,7 +94,7 @@ def _(mo):
     return api_base_input, api_key_input, model_input
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     import subprocess as _subprocess
     try:
@@ -136,7 +136,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(api_base_input, api_key_input, model_input):
     # Reactive config state — all downstream cells depend on these variables
     llm_model = model_input.value
@@ -145,7 +145,7 @@ def _(api_base_input, api_key_input, model_input):
     return llm_api_base, llm_api_key, llm_model
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(llm_model, mo):
     import subprocess as _sp
 
@@ -185,7 +185,7 @@ def _(llm_model, mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(llm_api_base, llm_api_key, llm_model, mo):
     import litellm
 
@@ -227,7 +227,7 @@ def _(llm_api_base, llm_api_key, llm_model, mo):
     return call_llm, litellm
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
     ## Section 1: Why Prompts Matter — LLMs as Probability Samplers
@@ -243,7 +243,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     vague_prompt = mo.ui.text_area(
         value="Tell me about climate change.",
@@ -266,7 +266,7 @@ def _(mo):
     return precise_prompt, run_comparison_btn, vague_prompt
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(call_llm, mo, precise_prompt, run_comparison_btn, vague_prompt):
     if run_comparison_btn.value:
         vague_response = call_llm(vague_prompt.value)
@@ -286,7 +286,7 @@ def _(call_llm, mo, precise_prompt, run_comparison_btn, vague_prompt):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
     ## Section 2: The Five Building Blocks of a Prompt
@@ -316,7 +316,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     use_instruction = mo.ui.checkbox(value=True, label="Instruction")
     use_data = mo.ui.checkbox(value=False, label="Data")
@@ -383,7 +383,7 @@ def _(mo):
     )
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(
     call_llm,
     context_text,
@@ -434,7 +434,7 @@ def _(
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
     ## Section 3: Few-Shot Learning — Examples as Activators
@@ -461,7 +461,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     SENTIMENT_EXAMPLES = [
         ("The food was incredible and the service was friendly.", "Positive"),
@@ -494,14 +494,14 @@ def _(mo):
     )
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     import random
     get_fewshot_results, set_fewshot_results = mo.state([])
     return get_fewshot_results, random, set_fewshot_results
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(
     SENTIMENT_EXAMPLES,
     call_llm,
@@ -571,7 +571,7 @@ def _(
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
     ## Section 4: Chain-of-Thought — Thinking Out Loud
@@ -590,7 +590,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     COT_PUZZLE = (
         "A farmer has 17 sheep. All but 9 die. How many sheep does the farmer have left? "
@@ -609,7 +609,7 @@ def _(mo):
     return COT_PUZZLE, run_both_btn, run_cot_btn, run_direct_btn
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(COT_PUZZLE, call_llm, mo, run_both_btn, run_cot_btn, run_direct_btn):
     _direct_sys = "Answer directly and concisely."
     _cot_sys = (
@@ -661,7 +661,7 @@ def _(COT_PUZZLE, call_llm, mo, run_both_btn, run_cot_btn, run_direct_btn):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
     ## Section 5: Structured Output — JSON Schema Constraints
@@ -677,7 +677,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     INVOICE_TEXT = (
         "Invoice #4821 — Billed to: Acme Corp. "
@@ -697,32 +697,22 @@ def _(mo):
     return INVOICE_TEXT, run_structured_btn, structured_toggle
 
 
-@app.cell
-def _(mo):
+@app.cell(hide_code=False)
+def _():
     import json
     from pydantic import BaseModel
 
-    # The schema below is the contract. The LLM must produce JSON matching these exact fields.
+    # The schema below is the contract passed to the LLM as response_format.
+    # The model cannot generate output that violates these fields.
     class InvoiceData(BaseModel):
         client_name: str
         date: str
         total_amount: str
 
-    mo.accordion({
-        "InvoiceData schema — click to view": mo.md(
-            "```python\n"
-            "class InvoiceData(BaseModel):\n"
-            "    client_name: str\n"
-            "    date: str\n"
-            "    total_amount: str\n"
-            "```\n\n"
-            "*The model cannot generate output that violates these fields.*"
-        )
-    })
     return BaseModel, InvoiceData, json
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(INVOICE_TEXT, InvoiceData, call_llm, json, litellm, llm_api_base, llm_api_key, llm_model, mo, run_structured_btn, structured_toggle):
     if run_structured_btn.value:
         if structured_toggle.value:
@@ -753,7 +743,7 @@ def _(INVOICE_TEXT, InvoiceData, call_llm, json, litellm, llm_api_base, llm_api_
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
     ## Section 6: Hallucination and Uncertainty Permission
@@ -767,7 +757,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     HALLUCINATION_QUERY = (
         "Summarize the key findings of the 2019 paper by Dr. Elara Voss titled "
@@ -786,7 +776,7 @@ def _(mo):
     return HALLUCINATION_QUERY, run_hallucination_btn, uncertainty_toggle
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(
     HALLUCINATION_QUERY,
     call_llm,
@@ -813,7 +803,7 @@ def _(
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.vstack([
         mo.md("## Student Task 1: Gaussian by Prompt"),
@@ -856,7 +846,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     gaussian_prompt = mo.ui.text_area(
         value=(
@@ -872,7 +862,7 @@ def _(mo):
     return gaussian_prompt, run_gaussian_btn
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     import re
     import numpy as np
@@ -897,7 +887,7 @@ def _(mo):
     return extract_numbers, np, plt, stats
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(
     call_llm,
     extract_numbers,
@@ -953,7 +943,7 @@ def _(
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.vstack([
         mo.md("## Student Task 2: When Does Chain-of-Thought Fail?"),
@@ -993,7 +983,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     COT_PUZZLES = [
         {
@@ -1034,13 +1024,13 @@ def _(mo):
     return COT_PUZZLES, cot2_toggle, puzzle_selector, run_cot2_btn
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     get_cot2_results, set_cot2_results = mo.state([])
     return get_cot2_results, set_cot2_results
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(
     COT_PUZZLES,
     call_llm,
@@ -1093,7 +1083,7 @@ def _(
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     reflection_cot = mo.ui.text_area(
         label="Your reflection: For which puzzle type did CoT help? When did it produce wrong but convincing reasoning?",
@@ -1104,7 +1094,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(COT_PUZZLES, get_cot2_results, mo):
     # Success criterion: student must run both Direct and Chain-of-thought for all 3 puzzles.
     _results = get_cot2_results()
@@ -1140,7 +1130,7 @@ def _(COT_PUZZLES, get_cot2_results, mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.vstack([
         mo.md("## Student Task 3: Few-Shot Order Sensitivity"),
@@ -1178,7 +1168,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     FEWSHOT_BIAS_EXAMPLES = [
         ("The concert was unforgettable. Every song was perfect.", "Positive"),
@@ -1199,13 +1189,13 @@ def _(mo):
     return FEWSHOT_BIAS_EXAMPLES, FEWSHOT_BIAS_TEST, run_bias_btn
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     get_bias_predictions, set_bias_predictions = mo.state([])
     return get_bias_predictions, set_bias_predictions
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(
     FEWSHOT_BIAS_EXAMPLES,
     FEWSHOT_BIAS_TEST,
@@ -1261,7 +1251,7 @@ def _(
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(get_bias_predictions, mo):
     # Success criterion: student must run the 10 trials and observe variance in predictions.
     # Pass = at least 2 different class labels appear across the 10 runs.

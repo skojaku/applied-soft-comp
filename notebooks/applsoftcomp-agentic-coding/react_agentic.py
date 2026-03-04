@@ -17,20 +17,20 @@ __generated_with = "0.10.0"
 app = marimo.App(width="medium", title="Agentic AI: From Reasoning to Action")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
     import marimo as mo
     return (mo,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
     import re
     import matplotlib.pyplot as plt
     return plt, re
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
@@ -59,13 +59,13 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md("## Configuration")
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     model_input = mo.ui.text(
         value="ollama/glm-4.7:cloud",
@@ -100,7 +100,7 @@ def _(mo):
     return api_base_input, api_key_input, model_input, config_panel
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     import subprocess as _subprocess
     try:
@@ -142,7 +142,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(api_base_input, api_key_input, model_input):
     llm_model = model_input.value
     llm_api_key = api_key_input.value or None
@@ -150,7 +150,7 @@ def _(api_base_input, api_key_input, model_input):
     return llm_api_base, llm_api_key, llm_model
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(llm_model, mo):
     import subprocess as _sp
 
@@ -190,7 +190,7 @@ def _(llm_model, mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(llm_api_base, llm_api_key, llm_model, mo):
     import litellm
 
@@ -229,7 +229,7 @@ def _(llm_api_base, llm_api_key, llm_model, mo):
     return call_llm, litellm
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
@@ -255,7 +255,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo, plt):
     import matplotlib.patches as mpatches
     from matplotlib.patches import FancyArrowPatch
@@ -283,7 +283,7 @@ def _(mo, plt):
     return FancyArrowPatch, mpatches
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
@@ -304,12 +304,10 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=False)
 def _(mo):
-    mo.vstack([
-        mo.callout(
-            mo.md(
-                """```
+    # ReAct loop: the four labels the agent alternates between each iteration.
+    mo.callout(mo.md("""```
 Observation: [initial question or tool result]
 Thought:     [chain-of-thought reasoning step]
 Action:      [tool_name]
@@ -319,22 +317,12 @@ Thought:     [reasoning based on observation]
 ... (repeat until done)
 Thought:     I now have enough information to answer.
 Final Answer: [the answer to the original question]
-```"""
-            ),
-            kind="info",
-        ),
-        mo.md(
-            "::: {.column-margin}\n"
-            "**Reference:** Yao et al. (2022). *ReAct: Synergizing Reasoning and Acting in Language Models.* "
-            "ICLR 2023. The paper showed that interleaving reasoning traces with actions outperforms "
-            "reasoning-only (CoT) and acting-only (tool use) baselines on knowledge-intensive tasks.\n"
-            ":::"
-        ),
-    ])
-    return
+```
+*Yao et al. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. ICLR 2023.*
+"""), kind="info")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
@@ -355,7 +343,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=False)
 def _():
     import datetime
     def get_current_date() -> str:
@@ -365,7 +353,7 @@ def _():
     return datetime, get_current_date
 
 
-@app.cell
+@app.cell(hide_code=False)
 def _():
     def evaluate_math(expression: str) -> str:
         """Evaluate a mathematical expression and return the result as a string.
@@ -379,7 +367,7 @@ def _():
     return (evaluate_math,)
 
 
-@app.cell
+@app.cell(hide_code=False)
 def _():
     def define_word(word: str) -> str:
         """Look up the definition of a common English word. Returns one sentence.
@@ -393,7 +381,7 @@ def _():
     return (define_word,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         "```python\n"
@@ -414,7 +402,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
@@ -434,7 +422,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     agent_question = mo.ui.text_area(
         value="What is today's date, and what is the definition of serendipity?",
@@ -447,7 +435,7 @@ def _(mo):
     return agent_question, run_agent_btn
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(define_word, evaluate_math, get_current_date):
     import json
     TOOLS = {"get_current_date": get_current_date, "evaluate_math": evaluate_math, "define_word": define_word}
@@ -455,7 +443,7 @@ def _(define_word, evaluate_math, get_current_date):
     return TOOL_DESC, TOOLS, json
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(TOOL_DESC, TOOLS, call_llm, re):
     def run_react_agent(question, max_steps=8):
         # ReAct loop: Thought → Action → Observation → repeat until Final Answer
@@ -478,7 +466,7 @@ def _(TOOL_DESC, TOOLS, call_llm, re):
     return (run_react_agent,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(agent_question, mo, run_agent_btn, run_react_agent):
     if run_agent_btn.value:
         _trace = run_react_agent(agent_question.value)
@@ -500,7 +488,7 @@ def _(agent_question, mo, run_agent_btn, run_react_agent):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
@@ -520,7 +508,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     titanic_question = mo.ui.text_area(
         value="What was the survival rate for each passenger class?",
@@ -550,7 +538,7 @@ def _(mo):
     )
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     import pandas as pd
     import duckdb
@@ -579,7 +567,7 @@ def _(mo):
     return duckdb, pd, titanic_df
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(duckdb, mo, titanic_df):
     def inspect_schema() -> str:
         """Return column names and data types. Use this first before any query."""
@@ -630,7 +618,7 @@ def _(duckdb, mo, titanic_df):
     return TITANIC_SYSTEM_PROMPT, TITANIC_TOOLS, get_sample_rows, get_summary_stats, inspect_schema, run_sql_query
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(TITANIC_SYSTEM_PROMPT, TITANIC_TOOLS, call_llm, mo, re):
     def run_titanic_agent(question: str, max_steps: int = 10) -> list:
         trace = []
@@ -668,7 +656,7 @@ def _(TITANIC_SYSTEM_PROMPT, TITANIC_TOOLS, call_llm, mo, re):
     return run_titanic_agent,
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo, preset_q1, preset_q2, preset_q3, run_titanic_agent, run_titanic_btn, titanic_question):
     _q = None
     if preset_q1.value: _q = "What was the overall survival rate?"
@@ -696,7 +684,7 @@ def _(mo, preset_q1, preset_q2, preset_q3, run_titanic_agent, run_titanic_btn, t
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
@@ -727,7 +715,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     REFERENCES = [
         {
@@ -773,7 +761,7 @@ def _(mo):
     return REFERENCES, run_monolithic_btn, run_multiagent_btn
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(REFERENCES, call_llm, mo, re, run_monolithic_btn, run_multiagent_btn):
     from concurrent.futures import ThreadPoolExecutor
 
@@ -917,7 +905,7 @@ def _(REFERENCES, call_llm, mo, re, run_monolithic_btn, run_multiagent_btn):
     return VERIFY_SYSTEM, ThreadPoolExecutor, _parse_verdicts, verify_single
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.vstack([
         mo.md("## Student Task: Extend the Data Detective"),
@@ -965,9 +953,8 @@ first answer and run one additional verification tool call. Does this improve ac
     return
 
 
-@app.cell
-def _(mo, pd, titanic_df):
-    # ✏️ Edit the docstrings below — the LLM only sees these, not the function body.
+@app.cell(hide_code=False)
+def _(pd, titanic_df):
     def cross_tabulation(col1_col2: str) -> str:
         """Return a cross-tabulation of two columns as a string.
         Input: two column names separated by a comma, e.g., 'Sex,Survived'.
@@ -987,23 +974,10 @@ def _(mo, pd, titanic_df):
         except Exception as e:
             return f"Error: {e}. Available columns: {list(titanic_df.columns)}"
 
-    mo.accordion({
-        "cross_tabulation & filter_and_count — click to view/edit": mo.md(
-            "*Edit the docstrings in the cell above to guide the agent. The LLM only sees the docstring, not the function body.*\n\n"
-            "```python\n"
-            "def cross_tabulation(col1_col2: str) -> str:\n"
-            '    """Return a cross-tabulation of two columns..."""\n'
-            "    ...\n\n"
-            "def filter_and_count(condition: str) -> str:\n"
-            '    """Filter the Titanic dataset and return count..."""\n'
-            "    ...\n"
-            "```"
-        )
-    })
     return cross_tabulation, filter_and_count
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     run_extended_btn = mo.ui.run_button(label="Run extended agent with target question")
     mo.vstack([
@@ -1019,7 +993,7 @@ def _(mo):
     return (run_extended_btn,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(TITANIC_SYSTEM_PROMPT, TITANIC_TOOLS, call_llm, cross_tabulation, filter_and_count, mo, re, titanic_df):
     EXTENDED_TOOLS = dict(TITANIC_TOOLS)
     EXTENDED_TOOLS["cross_tabulation"] = cross_tabulation
@@ -1069,7 +1043,7 @@ def _(TITANIC_SYSTEM_PROMPT, TITANIC_TOOLS, call_llm, cross_tabulation, filter_a
     return EXTENDED_TOOLS, TARGET_QUESTION, best_f_class, best_f_rate, best_m_class, best_m_rate, run_extended_agent
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(TARGET_QUESTION, best_f_class, best_f_rate, best_m_class, best_m_rate, mo, run_extended_agent, run_extended_btn):
     if run_extended_btn.value:
         _etrace = run_extended_agent(TARGET_QUESTION)
@@ -1101,7 +1075,7 @@ def _(TARGET_QUESTION, best_f_class, best_f_rate, best_m_class, best_m_rate, mo,
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.vstack([
         mo.md("## Thought Experiment: When Does the Loop Break?"),
@@ -1142,8 +1116,8 @@ explain what went wrong. Run the agent again and compare.
     return
 
 
-@app.cell
-def _(TITANIC_TOOLS, mo):
+@app.cell(hide_code=False)
+def _(TITANIC_TOOLS):
     # ✏️ Edit the error message below — the agent learns from what your tool tells it.
     def broken_query_tool(query: str) -> str:
         """Run a SQL query against the Titanic dataset.
@@ -1153,11 +1127,10 @@ def _(TITANIC_TOOLS, mo):
     BROKEN_TOOLS = dict(TITANIC_TOOLS)
     BROKEN_TOOLS["run_sql_query"] = broken_query_tool
     BROKEN_QUESTION = "What is the average fare paid by first-class passengers?"
-    mo.md("*`broken_query_tool` is the tool to edit. Change the `ValueError` message to be informative.*")
     return BROKEN_QUESTION, BROKEN_TOOLS, broken_query_tool
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     run_broken_btn = mo.ui.run_button(label="Run agent with broken tool")
     mo.vstack([
@@ -1167,7 +1140,7 @@ def _(mo):
     return (run_broken_btn,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(BROKEN_TOOLS, call_llm, mo, re):
     def run_broken_agent(question: str, max_steps: int = 6) -> list:
         trace = []
@@ -1202,7 +1175,7 @@ def _(BROKEN_TOOLS, call_llm, mo, re):
     return (run_broken_agent,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo, run_broken_agent, run_broken_btn):
     _BQ = "What is the average fare paid by first-class passengers?"
     if run_broken_btn.value:
@@ -1233,7 +1206,7 @@ def _(mo, run_broken_agent, run_broken_btn):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(broken_query_tool, mo):
     # Success criterion: the student must edit broken_query_tool so its error message
     # is more informative. Pass = the raised ValueError message is longer than 10
