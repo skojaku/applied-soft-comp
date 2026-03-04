@@ -264,7 +264,7 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
+def _():
     import datetime
 
     def get_current_date() -> str:
@@ -298,6 +298,11 @@ def _(mo):
         }
         return definitions.get(word.lower(), f"Definition not found for '{word}'.")
 
+    return datetime, define_word, evaluate_math, get_current_date
+
+
+@app.cell
+def _(mo):
     mo.md(
         "```python\n"
         "def get_current_date() -> str:\n"
@@ -314,7 +319,7 @@ def _(mo):
         "    ...\n"
         "```"
     )
-    return datetime, define_word, evaluate_math, get_current_date
+    return
 
 
 @app.cell
