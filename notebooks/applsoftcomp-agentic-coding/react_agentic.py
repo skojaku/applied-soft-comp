@@ -48,12 +48,12 @@ def _(mo):
         If you do not have marimo installed, install it first with `pip install marimo` or run it without installation using `uvx marimo edit --sandbox react_agentic.py`. The `--sandbox` flag creates an isolated environment and installs all dependencies automatically.
         ///
 
-        ::: {.callout-note title="What you'll learn in this module"}
+        /// note | What you'll learn in this module
         This module introduces agentic AI systems. We will explore how an agent differs from
         a chatbot by operating in a feedback loop, examine the ReAct pattern (Reason and Act)
         that structures this loop, and understand how context engineering through multi-agent
         isolation improves accuracy on complex tasks.
-        :::
+        ///
         """
     )
     return

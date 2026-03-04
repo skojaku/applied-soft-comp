@@ -40,12 +40,12 @@ def _(mo):
     If you do not have marimo installed, install it first with `pip install marimo` or run it without installation using `uvx marimo edit --sandbox prompt_engineering.py`. The `--sandbox` flag creates an isolated environment and installs all dependencies automatically.
     ///
 
-    ::: {.callout-note title="What you'll learn in this module"}
+    /// note | What you'll learn in this module
     This module introduces the art and science of prompt engineering. We will explore
     how LLMs generate text as probability samplers, examine the five building blocks of
     a well-structured prompt, and understand how few-shot examples, chain-of-thought
     reasoning, and structured output constraints apply to real tasks.
-    :::
+    ///
     """)
     return
 
