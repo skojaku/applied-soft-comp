@@ -5,45 +5,173 @@
   "problem_statement": "Students learning agentic coding need hands-on, interactive experiences that show how prompt structure and agent architecture affect LLM behavior. Static lecture notes do not let students experiment in real time. We need executable notebooks where students can toggle prompt components on/off, see output change live, and build progressively more complex agents.",
   "solution": "Two marimo notebooks, each executable via `uvx`, that connect to ollama (local or remote). Notebook 1 teaches prompt engineering through live component toggling and structured student tasks. Notebook 2 teaches the ReAct pattern and context engineering via a working LangChain agent over the Titanic dataset and a multi-agent literature verification demo.",
   "user_stories": [
-    "As a student, I want to run the notebook with a single `uvx` command so that I do not need to set up a Python environment manually.",
-    "As a student, I want to type a litellm model string (e.g. `ollama/llama3.2` or `openai/gpt-4o`) in a UI config panel so that I can switch providers without editing code.",
-    "As a student, I want to enter an optional API key and base URL in the config panel so that I can connect to remote or self-hosted endpoints.",
-    "As a student, I want the config panel values to propagate automatically to all cells so that I only need to configure the model once per session.",
-    "As a student, I want to toggle each prompt component (instruction, data, format, persona, context) on and off individually so that I can isolate the effect of each component.",
-    "As a student, I want to see the assembled prompt update in real time as I toggle components so that I understand exactly what is being sent to the model.",
-    "As a student, I want to send the assembled prompt and see the model response so that I can observe how each component changes the output.",
-    "As a student, I want to control the number of few-shot examples with a slider so that I can compare zero-shot, one-shot, two-shot, and five-shot behavior on the same task.",
-    "As a student, I want to shuffle the order of few-shot examples and re-run so that I observe output instability caused by example ordering.",
-    "As a student, I want to run a logic puzzle in direct-answer mode so that I get a baseline response to compare against.",
-    "As a student, I want to run the same puzzle with chain-of-thought enabled so that I can see whether intermediate reasoning steps improve or hurt the final answer.",
-    "As a student, I want to write a prompt that instructs the LLM to generate 200 numbers following N(0,1) so that I practice specification-driven prompting.",
-    "As a student, I want the notebook to extract numbers from the LLM response automatically so that I can focus on crafting the prompt rather than parsing.",
-    "As a student, I want to see a histogram of the extracted numbers overlaid with the true Gaussian PDF so that I can visually verify whether my prompt succeeded.",
-    "As a student, I want to see a KS-test p-value with a pass/fail indicator so that I have an objective measure of my prompt's effectiveness.",
-    "As a student, I want to see the full ReAct trace (Thought, Action, Observation) printed step by step so that I understand how the agent reasons before acting.",
-    "As a student, I want to ask natural language questions to the pre-built Titanic data detective agent so that I see how tools chain together across multiple observations.",
-    "As a student, I want to add a cross-tabulation tool to the Titanic agent so that I practice writing tool docstrings that guide the LLM accurately.",
-    "As a student, I want to add a filter-and-count tool to the Titanic agent so that I extend the agent's capability for conditional queries.",
-    "As a student, I want to pose a multi-hop question to the extended agent and verify its answer against a ground-truth cell so that I know whether my tool design was correct.",
-    "As a student, I want to watch a single monolithic agent attempt to verify five references at once so that I see where context confusion causes errors.",
-    "As a student, I want to watch five isolated sub-agents each verify one reference in parallel so that I see how context isolation improves accuracy.",
-    "As an instructor, I want each notebook section to be a self-contained marimo cell block with explanatory prose so that students can read and run the notebook incrementally.",
-    "As an instructor, I want each student task to have a clearly marked callout block so that students can identify where the exercise begins.",
-    "As an instructor, I want each student task to include a visible first hint so that students are not stuck without any guidance.",
-    "As an instructor, I want each student task to have a programmatic success criterion so that students receive immediate objective feedback.",
-    "As an instructor, I want the default model to work with a local ollama installation so that students without paid API keys can complete all exercises.",
-    "As a developer, I want to run `ollama list` before launching the notebook so that I can confirm which models are available and pick the right litellm model string.",
-    "As a developer, I want to test Notebook 1 end-to-end using the `glm-4.7:cloud` ollama cloud model so that all interactive demos produce real responses before the notebook is shared with students.",
-    "As a developer, I want to test Notebook 2 end-to-end using the `glm-4.7:cloud` ollama cloud model so that the ReAct trace, Titanic agent, and multi-agent isolation demo all complete without errors.",
-    "As a developer, I want the notebooks to display a clear error message when the selected model is not found in the local ollama registry so that students know to run `ollama pull` or switch to a cloud model.",
-    "As a developer, I want to verify that switching the model string from `ollama/glm-4.7:cloud` to `glm-5:cloud` in the config panel reruns all affected cells with the new model so that the reactive config is working correctly."
+    {
+      "id": "US-001",
+      "story": "As a student, I want to run the notebook with a single `uvx` command so that I do not need to set up a Python environment manually.",
+      "passes": false
+    },
+    {
+      "id": "US-002",
+      "story": "As a student, I want to type a litellm model string (e.g. `ollama/llama3.2` or `openai/gpt-4o`) in a UI config panel so that I can switch providers without editing code.",
+      "passes": false
+    },
+    {
+      "id": "US-003",
+      "story": "As a student, I want to enter an optional API key and base URL in the config panel so that I can connect to remote or self-hosted endpoints.",
+      "passes": false
+    },
+    {
+      "id": "US-004",
+      "story": "As a student, I want the config panel values to propagate automatically to all cells so that I only need to configure the model once per session.",
+      "passes": false
+    },
+    {
+      "id": "US-005",
+      "story": "As a student, I want to toggle each prompt component (instruction, data, format, persona, context) on and off individually so that I can isolate the effect of each component.",
+      "passes": false
+    },
+    {
+      "id": "US-006",
+      "story": "As a student, I want to see the assembled prompt update in real time as I toggle components so that I understand exactly what is being sent to the model.",
+      "passes": false
+    },
+    {
+      "id": "US-007",
+      "story": "As a student, I want to send the assembled prompt and see the model response so that I can observe how each component changes the output.",
+      "passes": false
+    },
+    {
+      "id": "US-008",
+      "story": "As a student, I want to control the number of few-shot examples with a slider so that I can compare zero-shot, one-shot, two-shot, and five-shot behavior on the same task.",
+      "passes": false
+    },
+    {
+      "id": "US-009",
+      "story": "As a student, I want to shuffle the order of few-shot examples and re-run so that I observe output instability caused by example ordering.",
+      "passes": false
+    },
+    {
+      "id": "US-010",
+      "story": "As a student, I want to run a logic puzzle in direct-answer mode so that I get a baseline response to compare against.",
+      "passes": false
+    },
+    {
+      "id": "US-011",
+      "story": "As a student, I want to run the same puzzle with chain-of-thought enabled so that I can see whether intermediate reasoning steps improve or hurt the final answer.",
+      "passes": false
+    },
+    {
+      "id": "US-012",
+      "story": "As a student, I want to write a prompt that instructs the LLM to generate 200 numbers following N(0,1) so that I practice specification-driven prompting.",
+      "passes": false
+    },
+    {
+      "id": "US-013",
+      "story": "As a student, I want the notebook to extract numbers from the LLM response automatically so that I can focus on crafting the prompt rather than parsing.",
+      "passes": false
+    },
+    {
+      "id": "US-014",
+      "story": "As a student, I want to see a histogram of the extracted numbers overlaid with the true Gaussian PDF so that I can visually verify whether my prompt succeeded.",
+      "passes": false
+    },
+    {
+      "id": "US-015",
+      "story": "As a student, I want to see a KS-test p-value with a pass/fail indicator so that I have an objective measure of my prompt's effectiveness.",
+      "passes": false
+    },
+    {
+      "id": "US-016",
+      "story": "As a student, I want to see the full ReAct trace (Thought, Action, Observation) printed step by step so that I understand how the agent reasons before acting.",
+      "passes": false
+    },
+    {
+      "id": "US-017",
+      "story": "As a student, I want to ask natural language questions to the pre-built Titanic data detective agent so that I see how tools chain together across multiple observations.",
+      "passes": false
+    },
+    {
+      "id": "US-018",
+      "story": "As a student, I want to add a cross-tabulation tool to the Titanic agent so that I practice writing tool docstrings that guide the LLM accurately.",
+      "passes": false
+    },
+    {
+      "id": "US-019",
+      "story": "As a student, I want to add a filter-and-count tool to the Titanic agent so that I extend the agent's capability for conditional queries.",
+      "passes": false
+    },
+    {
+      "id": "US-020",
+      "story": "As a student, I want to pose a multi-hop question to the extended agent and verify its answer against a ground-truth cell so that I know whether my tool design was correct.",
+      "passes": false
+    },
+    {
+      "id": "US-021",
+      "story": "As a student, I want to watch a single monolithic agent attempt to verify five references at once so that I see where context confusion causes errors.",
+      "passes": false
+    },
+    {
+      "id": "US-022",
+      "story": "As a student, I want to watch five isolated sub-agents each verify one reference in parallel so that I see how context isolation improves accuracy.",
+      "passes": false
+    },
+    {
+      "id": "US-023",
+      "story": "As an instructor, I want each notebook section to be a self-contained marimo cell block with explanatory prose so that students can read and run the notebook incrementally.",
+      "passes": false
+    },
+    {
+      "id": "US-024",
+      "story": "As an instructor, I want each student task to have a clearly marked callout block so that students can identify where the exercise begins.",
+      "passes": false
+    },
+    {
+      "id": "US-025",
+      "story": "As an instructor, I want each student task to include a visible first hint so that students are not stuck without any guidance.",
+      "passes": false
+    },
+    {
+      "id": "US-026",
+      "story": "As an instructor, I want each student task to have a programmatic success criterion so that students receive immediate objective feedback.",
+      "passes": false
+    },
+    {
+      "id": "US-027",
+      "story": "As an instructor, I want the default model to work with a local ollama installation so that students without paid API keys can complete all exercises.",
+      "passes": false
+    },
+    {
+      "id": "US-028",
+      "story": "As a developer, I want to run `ollama list` before launching the notebook so that I can confirm which models are available and pick the right litellm model string.",
+      "passes": false
+    },
+    {
+      "id": "US-029",
+      "story": "As a developer, I want to test Notebook 1 end-to-end using the `glm-4.7:cloud` ollama cloud model so that all interactive demos produce real responses before the notebook is shared with students.",
+      "passes": false
+    },
+    {
+      "id": "US-030",
+      "story": "As a developer, I want to test Notebook 2 end-to-end using the `glm-4.7:cloud` ollama cloud model so that the ReAct trace, Titanic agent, and multi-agent isolation demo all complete without errors.",
+      "passes": false
+    },
+    {
+      "id": "US-031",
+      "story": "As a developer, I want the notebooks to display a clear error message when the selected model is not found in the local ollama registry so that students know to run `ollama pull` or switch to a cloud model.",
+      "passes": false
+    },
+    {
+      "id": "US-032",
+      "story": "As a developer, I want to verify that switching the model string from `ollama/glm-4.7:cloud` to `glm-5:cloud` in the config panel reruns all affected cells with the new model so that the reactive config is working correctly.",
+      "passes": false
+    }
   ],
   "notebooks": [
     {
       "id": "nb1-prompt-engineering",
       "filename": "prompt_engineering.py",
       "title": "Prompt Engineering: The Art of Talking to LLMs",
-      "subtitle": "How phrasing shapes probability — and what you can do about it",
+      "subtitle": "How phrasing shapes probability \u2014 and what you can do about it",
       "learning_goals": [
         "LLMs sample from probability distributions; phrasing shapes the distribution.",
         "A well-structured prompt has five components: Instruction, Data, Format, Persona, and Context.",
@@ -70,9 +198,21 @@
         "method": "ui_panel",
         "description": "A marimo UI panel at the top of the notebook with three fields. The model string uses litellm's provider/model format, which determines the backend without any additional routing code. The config state is a marimo reactive variable; all subsequent cells depend on it and re-run automatically when it changes.",
         "fields": [
-          {"name": "model", "default": "ollama/llama3.2", "label": "Model (litellm format, e.g. ollama/llama3.2, openai/gpt-4o, anthropic/claude-3-5-sonnet-20241022)"},
-          {"name": "api_key", "default": "", "label": "API key (leave blank for local ollama)"},
-          {"name": "api_base", "default": "http://localhost:11434", "label": "API base URL (only needed for custom endpoints)"}
+          {
+            "name": "model",
+            "default": "ollama/llama3.2",
+            "label": "Model (litellm format, e.g. ollama/llama3.2, openai/gpt-4o, anthropic/claude-3-5-sonnet-20241022)"
+          },
+          {
+            "name": "api_key",
+            "default": "",
+            "label": "API key (leave blank for local ollama)"
+          },
+          {
+            "name": "api_base",
+            "default": "http://localhost:11434",
+            "label": "API base URL (only needed for custom endpoints)"
+          }
         ]
       },
       "sections": [
@@ -118,7 +258,7 @@
           "type": "student_task",
           "callout_style": "callout-tip",
           "description": "The student's goal is to craft a prompt that makes the LLM output 200 numbers following a standard normal distribution N(0,1). The notebook provides a prompt editor and a Run button. After the model responds, the notebook extracts numbers automatically and plots a histogram overlaid with the true Gaussian PDF. A KS-test p-value appears with a green pass or red fail indicator. The student iterates on the prompt until the test passes.",
-          "hint": "The LLM has no random number generator. It will approximate from its training distribution. Be extremely specific: tell it exactly how many numbers should fall in each bin (e.g., for N(0,1) with bins [-3,-2,-1,0,1,2,3], the expected counts for 200 samples are approximately [1, 5, 27, 68, 54, 27, 5, 1, ...] — adjust to your binning). The more precise your specification, the more the output looks Gaussian.",
+          "hint": "The LLM has no random number generator. It will approximate from its training distribution. Be extremely specific: tell it exactly how many numbers should fall in each bin (e.g., for N(0,1) with bins [-3,-2,-1,0,1,2,3], the expected counts for 200 samples are approximately [1, 5, 27, 68, 54, 27, 5, 1, ...] \u2014 adjust to your binning). The more precise your specification, the more the output looks Gaussian.",
           "extension": "Try changing the target distribution to N(2, 0.5). How does your prompt need to change?"
         },
         {
@@ -216,7 +356,7 @@
           "type": "student_task",
           "callout_style": "callout-tip",
           "description": "The student adds two new tools to the Titanic agent. The first returns a cross-tabulation (pivot table) of two columns. The second filters rows by a column value and returns a count. After adding the tools, the student poses this question to the agent: 'Among female passengers over 30 years old, which ticket class had the highest survival rate, and how does it compare to males in the same age group?' The agent must chain at least three tool calls to answer correctly. A ground-truth cell verifies the numerical answer.",
-          "hint": "Write the docstring first. Describe exactly what the function returns, what the parameters mean, and what format the output is in. The LLM will call your tool exactly as described — be precise.",
+          "hint": "Write the docstring first. Describe exactly what the function returns, what the parameters mean, and what format the output is in. The LLM will call your tool exactly as described \u2014 be precise.",
           "extension": "Modify the system prompt to instruct the agent to always question its first answer and run one additional verification tool call. Does this improve accuracy?"
         },
         {
@@ -301,9 +441,9 @@
       "format": "open-ended sprint assignment (no marimo notebook required)",
       "tool": "Gemini CLI (gemini) or any agentic LLM CLI",
       "duration": "60-90 minutes in-class sprint",
-      "problem_statement": "Vibe-coding — sending a single prompt and hoping for a working result — collapses on multi-step engineering tasks. Students experience this failure mode firsthand and apply one or more principled engineering practices to recover and succeed.",
+      "problem_statement": "Vibe-coding \u2014 sending a single prompt and hoping for a working result \u2014 collapses on multi-step engineering tasks. Students experience this failure mode firsthand and apply one or more principled engineering practices to recover and succeed.",
       "task_description": "Build a command-line Python tool that: (1) fetches today's new submissions from the ArXiv RSS feed for one or more categories (e.g., cs.AI, cs.LG), (2) filters papers whose title or abstract matches a student-provided interest profile (a short paragraph describing their research interests), (3) ranks the filtered papers by relevance using an LLM rating (the LLM scores each paper abstract against the interest profile on a 1-10 scale), and (4) outputs a ranked list with title, authors, score, and a one-sentence justification. The tool must handle network errors, empty feeds, and malformed XML gracefully.",
-      "why_this_task": "The task has enough moving parts — HTTP fetch, XML parsing, multi-step LLM calls, ranking logic, error handling — that naive vibe-coding produces incomplete or brittle code. Students who plan upfront and use principled practices finish in time; students who vibe-code hit repeated roadblocks and cannot finish.",
+      "why_this_task": "The task has enough moving parts \u2014 HTTP fetch, XML parsing, multi-step LLM calls, ranking logic, error handling \u2014 that naive vibe-coding produces incomplete or brittle code. Students who plan upfront and use principled practices finish in time; students who vibe-code hit repeated roadblocks and cannot finish.",
       "principled_practices": [
         {
           "name": "Ralph Wiggum Loop",
@@ -314,7 +454,7 @@
         },
         {
           "name": "80/20 Plan Rule",
-          "description": "Students should spend 80% of their total time budget planning and specifying (writing the RALPH plan, defining interfaces, writing acceptance tests) and only 20% on actual LLM-assisted implementation. For a 60-minute sprint, this means ~48 minutes of planning and ~12 minutes of implementation. The insight is that implementation goes very fast when the plan is precise — and very slowly when it is vague.",
+          "description": "Students should spend 80% of their total time budget planning and specifying (writing the RALPH plan, defining interfaces, writing acceptance tests) and only 20% on actual LLM-assisted implementation. For a 60-minute sprint, this means ~48 minutes of planning and ~12 minutes of implementation. The insight is that implementation goes very fast when the plan is precise \u2014 and very slowly when it is vague.",
           "tool_integration": "Use Gemini CLI's context file feature (--context or GEMINI.md) to write the plan into a persistent context file. The LLM implementation prompts then reference this plan rather than re-explaining everything each time.",
           "pedagogical_note": "Students almost always underestimate how much planning reduces total effort. The 80/20 ratio feels counterintuitive until they experience a 12-minute implementation of a previously planned feature vs. a 45-minute vibe-coding struggle."
         },
@@ -325,16 +465,16 @@
           "pedagogical_note": "This practice grounds the LLM in a concrete success criterion and prevents the 'looks right but is wrong' failure mode. Students often discover that writing the test clarifies their own understanding of the requirement."
         }
       ],
-      "student_choice": "Students may apply any combination of the three practices — or none at all (vibe-coding is explicitly allowed as a control). They are asked to track which approach they used and reflect on its effectiveness. There is no penalty for vibe-coding; the pedagogical goal is for students to experience the difference firsthand.",
+      "student_choice": "Students may apply any combination of the three practices \u2014 or none at all (vibe-coding is explicitly allowed as a control). They are asked to track which approach they used and reflect on its effectiveness. There is no penalty for vibe-coding; the pedagogical goal is for students to experience the difference firsthand.",
       "deliverables": [
         "Working command-line tool (python arxiv_recommender.py --interests 'your interest paragraph' --categories cs.AI,cs.LG)",
         "A prompting log: the key prompts sent to the LLM, in order, annotated with whether they succeeded on the first attempt",
         "A one-paragraph reflection: which principled practice(s) did you use? What would have happened if you had vibe-coded instead? What was the hardest part of the task?"
       ],
       "evaluation": {
-        "correctness": "40% — does the tool fetch, filter, rank, and output correctly?",
-        "robustness": "20% — does it handle network errors and malformed input gracefully?",
-        "reflection": "40% — does the reflection demonstrate genuine insight into the tradeoffs between vibe-coding and principled engineering?"
+        "correctness": "40% \u2014 does the tool fetch, filter, rank, and output correctly?",
+        "robustness": "20% \u2014 does it handle network errors and malformed input gracefully?",
+        "reflection": "40% \u2014 does the reflection demonstrate genuine insight into the tradeoffs between vibe-coding and principled engineering?"
       },
       "gemini_cli_notes": [
         "Use 'gemini' command (Google's Gemini CLI) as the primary tool. It supports GEMINI.md context files analogous to CLAUDE.md, making it ideal for demonstrating persistent context.",
