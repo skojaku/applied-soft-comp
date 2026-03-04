@@ -57,6 +57,7 @@ def _(mo):
     )
     api_key_input = mo.ui.text(
         value="",
+        kind="password",
         label="API key (leave blank for local ollama)",
         full_width=True,
     )
