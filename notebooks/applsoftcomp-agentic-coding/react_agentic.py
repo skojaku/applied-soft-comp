@@ -215,7 +215,17 @@ def _(llm_api_base, llm_api_key, llm_model, mo):
                 )
             raise
 
-    mo.md(f"*Using model: `{llm_model}`*")
+    mo.accordion({
+        "call_llm() helper — click to view": mo.md(
+            f"*Using model: `{llm_model}`*\n\n"
+            "```python\n"
+            "def call_llm(messages: list, stream: bool = False):\n"
+            "    # Calls the configured LLM via litellm.completion()\n"
+            "    # Handles api_key, api_base, and friendly error messages\n"
+            "    ...\n"
+            "```"
+        )
+    })
     return call_llm, litellm
 
 
@@ -604,7 +614,19 @@ def _(duckdb, mo, titanic_df):
         "Format:\nThought: [reasoning]\nAction: [tool]\nAction Input: [input]\n"
         "Observation: [system fills this]\n...\nFinal Answer: [answer]"
     )
-    mo.md("*Four Titanic tools are ready: `inspect_schema`, `get_sample_rows`, `run_sql_query`, `get_summary_stats`.*")
+    mo.accordion({
+        "Titanic tool definitions — click to view": mo.md(
+            "*Four tools ready: `inspect_schema`, `get_sample_rows`, `run_sql_query`, `get_summary_stats`.*\n\n"
+            "```python\n"
+            "def inspect_schema() -> str:\n"
+            '    """Return column names and data types. Use this first."""\n'
+            "    ...\n\n"
+            "def run_sql_query(query: str) -> str:\n"
+            '    """Run SQL against titanic_df (DuckDB). Check schema first."""\n'
+            "    ...\n"
+            "```"
+        )
+    })
     return TITANIC_SYSTEM_PROMPT, TITANIC_TOOLS, get_sample_rows, get_summary_stats, inspect_schema, run_sql_query
 
 
@@ -632,7 +654,17 @@ def _(TITANIC_SYSTEM_PROMPT, TITANIC_TOOLS, call_llm, mo, re):
             else: trace.append({"type": "thought", "content": text}); break
         return trace
 
-    mo.md("*`run_titanic_agent` is ready — implements the same Thought → Action → Observation loop.*")
+    mo.accordion({
+        "run_titanic_agent() implementation — click to view": mo.md(
+            "*Implements the same Thought → Action → Observation loop as the ReAct demo.*\n\n"
+            "```python\n"
+            "def run_titanic_agent(question: str, max_steps: int = 10) -> list:\n"
+            "    # Builds messages, calls LLM, parses Thought/Action/Observation\n"
+            "    # Returns a trace list with typed dicts\n"
+            "    ...\n"
+            "```"
+        )
+    })
     return run_titanic_agent,
 
 
@@ -955,8 +987,36 @@ def _(mo, pd, titanic_df):
         except Exception as e:
             return f"Error: {e}. Available columns: {list(titanic_df.columns)}"
 
-    mo.md("*`cross_tabulation` and `filter_and_count` are ready. Edit the docstrings above to guide the agent.*")
+    mo.accordion({
+        "cross_tabulation & filter_and_count — click to view/edit": mo.md(
+            "*Edit the docstrings in the cell above to guide the agent. The LLM only sees the docstring, not the function body.*\n\n"
+            "```python\n"
+            "def cross_tabulation(col1_col2: str) -> str:\n"
+            '    """Return a cross-tabulation of two columns..."""\n'
+            "    ...\n\n"
+            "def filter_and_count(condition: str) -> str:\n"
+            '    """Filter the Titanic dataset and return count..."""\n'
+            "    ...\n"
+            "```"
+        )
+    })
     return cross_tabulation, filter_and_count
+
+
+@app.cell
+def _(mo):
+    run_extended_btn = mo.ui.run_button(label="Run extended agent with target question")
+    mo.vstack([
+        mo.callout(
+            mo.md(
+                "**Target question:** Among female passengers over 30 years old, which ticket "
+                "class had the highest survival rate, and how does it compare to males in the same age group?"
+            ),
+            kind="info",
+        ),
+        run_extended_btn,
+    ])
+    return (run_extended_btn,)
 
 
 @app.cell
@@ -1000,9 +1060,13 @@ def _(TITANIC_SYSTEM_PROMPT, TITANIC_TOOLS, call_llm, cross_tabulation, filter_a
     best_m_class = int(_m30.groupby("Pclass")["Survived"].mean().idxmax())
     best_m_rate = float(_m30.groupby("Pclass")["Survived"].mean().max())
 
-    run_extended_btn = mo.ui.run_button(label="Run extended agent with target question")
-    run_extended_btn
-    return EXTENDED_TOOLS, TARGET_QUESTION, best_f_class, best_f_rate, best_m_class, best_m_rate, run_extended_agent, run_extended_btn
+    mo.accordion({
+        "run_extended_agent() implementation & ground truth — click to view": mo.md(
+            "*Agent uses all 6 tools including cross_tabulation and filter_and_count.*\n\n"
+            f"Ground truth: Female → Class {best_f_class} ({best_f_rate:.1%}), Male → Class {best_m_class} ({best_m_rate:.1%})"
+        )
+    })
+    return EXTENDED_TOOLS, TARGET_QUESTION, best_f_class, best_f_rate, best_m_class, best_m_rate, run_extended_agent
 
 
 @app.cell
@@ -1094,6 +1158,16 @@ def _(TITANIC_TOOLS, mo):
 
 
 @app.cell
+def _(mo):
+    run_broken_btn = mo.ui.run_button(label="Run agent with broken tool")
+    mo.vstack([
+        mo.callout(mo.md("**Question:** What is the average fare paid by first-class passengers?"), kind="info"),
+        run_broken_btn,
+    ])
+    return (run_broken_btn,)
+
+
+@app.cell
 def _(BROKEN_TOOLS, call_llm, mo, re):
     def run_broken_agent(question: str, max_steps: int = 6) -> list:
         trace = []
@@ -1120,9 +1194,12 @@ def _(BROKEN_TOOLS, call_llm, mo, re):
             else: trace.append({"type": "thought", "content": text}); break
         return trace
 
-    run_broken_btn = mo.ui.run_button(label="Run agent with broken tool")
-    mo.vstack([mo.callout(mo.md("**Question:** What is the average fare paid by first-class passengers?"), kind="info"), run_broken_btn])
-    return run_broken_agent, run_broken_btn
+    mo.accordion({
+        "run_broken_agent() implementation — click to view": mo.md(
+            "*Runs the same ReAct loop but with the broken tool in place of the working SQL tool.*"
+        )
+    })
+    return (run_broken_agent,)
 
 
 @app.cell

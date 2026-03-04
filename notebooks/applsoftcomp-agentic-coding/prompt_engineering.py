@@ -213,7 +213,17 @@ def _(llm_api_base, llm_api_key, llm_model, mo):
                 )
             return f"**Error calling LLM:** {error_msg}"
 
-    mo.md(f"*Using model: `{llm_model}`*")
+    mo.accordion({
+        "call_llm() helper — click to view": mo.md(
+            f"*Using model: `{llm_model}`*\n\n"
+            "```python\n"
+            "def call_llm(prompt: str, system: str = '') -> str:\n"
+            "    # Calls the configured LLM via litellm.completion()\n"
+            "    # Handles api_key, api_base, and friendly error messages\n"
+            "    ...\n"
+            "```"
+        )
+    })
     return call_llm, litellm
 
 
@@ -698,7 +708,17 @@ def _(mo):
         date: str
         total_amount: str
 
-    mo.md("*`InvoiceData` schema defined. The model cannot generate output that violates these fields.*")
+    mo.accordion({
+        "InvoiceData schema — click to view": mo.md(
+            "```python\n"
+            "class InvoiceData(BaseModel):\n"
+            "    client_name: str\n"
+            "    date: str\n"
+            "    total_amount: str\n"
+            "```\n\n"
+            "*The model cannot generate output that violates these fields.*"
+        )
+    })
     return BaseModel, InvoiceData, json
 
 
