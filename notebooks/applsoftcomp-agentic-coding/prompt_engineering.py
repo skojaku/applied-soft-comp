@@ -757,7 +757,7 @@ def _(mo):
 
 
 @app.cell
-def _(call_llm, gaussian_prompt, mo, run_gaussian_btn):
+def _():
     import re
     import numpy as np
     from scipy import stats
@@ -768,12 +768,18 @@ def _(call_llm, gaussian_prompt, mo, run_gaussian_btn):
         pattern = r"-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?"
         return [float(m) for m in re.findall(pattern, text)]
 
+    return extract_numbers, np, plt, re, stats
+
+
+@app.cell
+def _(call_llm, extract_numbers, gaussian_prompt, mo, np, plt, run_gaussian_btn, stats):
+    _gauss_display = mo.md("*Write your prompt above and click **Run and evaluate** to see the histogram.*")
     if run_gaussian_btn.value:
         _g_resp = call_llm(gaussian_prompt.value)
         _numbers = extract_numbers(_g_resp)
 
         if len(_numbers) < 10:
-            mo.callout(
+            _gauss_display = mo.callout(
                 mo.md(
                     f"Only {len(_numbers)} numbers were extracted. "
                     "Try refining your prompt to produce more numeric output."
@@ -797,7 +803,7 @@ def _(call_llm, gaussian_prompt, mo, run_gaussian_btn):
             _indicator = "✅ PASS" if _passed else "❌ FAIL"
             _kind = "success" if _passed else "danger"
 
-            mo.vstack([
+            _gauss_display = mo.vstack([
                 mo.as_html(_fig),
                 mo.callout(
                     mo.md(
@@ -808,9 +814,7 @@ def _(call_llm, gaussian_prompt, mo, run_gaussian_btn):
                     kind=_kind,
                 ),
             ])
-    else:
-        mo.md("*Write your prompt above and click **Run and evaluate** to see the histogram.*")
-    return extract_numbers, np, plt, re, stats
+    _gauss_display
 
 
 @app.cell
