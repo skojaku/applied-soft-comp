@@ -711,9 +711,22 @@ def _(mo):
         bleed into each other. The agent may use a detail from one paper to justify a claim
         about another. This is context confusion, and it grows worse as the context window fills.
 
-        Below are five academic references: three real, two fabricated. First, watch a monolithic
-        agent receive all five at once and assess each one. Then watch five isolated sub-agents,
-        each receiving only its single reference. Compare the accuracy and the token counts.
+        Below are five academic references: three real, two fabricated. The real papers are
+        well-known landmarks in machine learning. The fabricated papers use plausible-sounding
+        author names, venues, and titles. A real LLM can be fooled by the surface plausibility.
+
+        First, run the monolithic agent. It receives all five references in a single prompt and
+        is asked to assess each one. Watch whether it makes confident but incorrect statements,
+        and pay attention to where its verdicts bleed across references. The token counter shows
+        how much of the context window this single call consumes.
+
+        Then run the five isolated sub-agents. Each sub-agent receives only one reference. The
+        token count per sub-agent is much lower, and the verdicts are more reliable. The key
+        insight is not just accuracy but the reason for accuracy: a clean context window gives
+        the model no opportunity to confuse one paper with another.
+
+        *Reflection: Did the monolithic agent make any wrong verdicts? Did it mix up authors
+        or venues? Which approach was more accurate, and why?*
         """
     )
     return
@@ -766,14 +779,30 @@ def _(mo):
 
 
 @app.cell
-def _(REFERENCES, call_llm, mo, run_monolithic_btn, run_multiagent_btn):
+def _(REFERENCES, call_llm, mo, re, run_monolithic_btn, run_multiagent_btn):
     import asyncio
 
     VERIFY_SYSTEM = (
         "You are a fact-checker for academic references. "
         "For each reference, state whether it is REAL or FABRICATED and give a brief reason. "
-        "Be concise."
+        "Be concise. Label each verdict clearly with the reference ID, e.g.: "
+        "[ref1] REAL — ... [ref2] FABRICATED — ..."
     )
+
+    def _parse_verdicts(text: str, refs: list) -> dict:
+        """Extract per-reference verdicts from a monolithic response."""
+        verdicts = {}
+        for ref in refs:
+            rid = ref["id"]
+            # Look for patterns like [ref1] REAL or ref1: FABRICATED
+            pattern = rf"\[?{rid}\]?\s*[:\-]?\s*(REAL|FABRICATED|real|fabricated|Real|Fabricated)"
+            m = re.search(pattern, text, re.IGNORECASE)
+            if m:
+                label = m.group(1).upper()
+                verdicts[rid] = label == "REAL"
+            else:
+                verdicts[rid] = None  # could not parse
+        return verdicts
 
     async def verify_single(ref: dict) -> dict:
         """Verify one reference in isolation."""
@@ -783,25 +812,70 @@ def _(REFERENCES, call_llm, mo, run_monolithic_btn, run_multiagent_btn):
         ]
         try:
             resp = call_llm(messages)
-            return {"id": ref["id"], "verdict": resp.choices[0].message.content, "real": ref["real"]}
+            content = resp.choices[0].message.content
+            tokens_used = getattr(resp.usage, "total_tokens", None)
+            return {
+                "id": ref["id"],
+                "verdict": content,
+                "real": ref["real"],
+                "tokens": tokens_used,
+            }
         except Exception as e:
-            return {"id": ref["id"], "verdict": f"Error: {e}", "real": ref["real"]}
+            return {"id": ref["id"], "verdict": f"Error: {e}", "real": ref["real"], "tokens": None}
 
     if run_monolithic_btn.value:
         _all_refs = "\n".join(f"[{r['id']}] {r['citation']}" for r in REFERENCES)
         _messages = [
             {"role": "system", "content": VERIFY_SYSTEM},
-            {"role": "user", "content": f"Verify each of these five references:\n\n{_all_refs}"},
+            {"role": "user", "content": (
+                "Verify each of the following five references. "
+                "For each one, state REAL or FABRICATED and give a brief reason. "
+                "Label each verdict with its reference ID.\n\n" + _all_refs
+            )},
         ]
         try:
             _resp = call_llm(_messages)
             _mono_text = _resp.choices[0].message.content
-            mo.vstack([
-                mo.md("### Monolithic agent response"),
+            _mono_tokens = getattr(_resp.usage, "total_tokens", "unknown")
+
+            # Parse verdicts and compare to ground truth
+            _parsed = _parse_verdicts(_mono_text, REFERENCES)
+            _verdict_rows = []
+            _correct_count = 0
+            for _ref in REFERENCES:
+                _rid = _ref["id"]
+                _gt_real = _ref["real"]
+                _predicted_real = _parsed.get(_rid)
+                if _predicted_real is None:
+                    _icon = "❓"
+                    _note = "Could not parse verdict"
+                elif _predicted_real == _gt_real:
+                    _icon = "✅"
+                    _correct_count += 1
+                    _note = "Correct"
+                else:
+                    _icon = "❌"
+                    _note = "Wrong — context confusion?"
+                _gt_label = "REAL" if _gt_real else "FABRICATED"
+                _verdict_rows.append(f"{_icon} **{_rid}** (ground truth: {_gt_label}) — {_note}")
+
+            _accuracy = f"{_correct_count}/{len(REFERENCES)}"
+            _parts = [
+                mo.md("### Monolithic agent — all five references in one prompt"),
+                mo.md(f"*Token count for this call: **{_mono_tokens}***"),
                 mo.callout(mo.md(_mono_text), kind="info"),
+                mo.md("**Verdict check against ground truth:**"),
+                mo.callout(
+                    mo.md(
+                        "\n\n".join(_verdict_rows)
+                        + f"\n\n**Accuracy: {_accuracy}**"
+                    ),
+                    kind="neutral",
+                ),
                 mo.md("**Ground truth:**"),
                 mo.md("\n\n".join(f"**{r['id']}:** {r['verdict']}" for r in REFERENCES)),
-            ])
+            ]
+            mo.vstack(_parts)
         except Exception as _e:
             mo.callout(mo.md(f"**Error:** {_e}"), kind="danger")
 
@@ -810,13 +884,33 @@ def _(REFERENCES, call_llm, mo, run_monolithic_btn, run_multiagent_btn):
             _results = asyncio.get_event_loop().run_until_complete(
                 asyncio.gather(*[verify_single(r) for r in REFERENCES])
             )
-            _parts = [mo.md("### Multi-agent results (one agent per reference)")]
+            _total_tokens = sum(r["tokens"] for r in _results if r["tokens"] is not None)
+            _token_note = f"Total tokens across all sub-agents: **{_total_tokens}**" if _total_tokens else ""
+
+            _parts = [
+                mo.md("### Multi-agent results — one isolated sub-agent per reference"),
+                mo.md(f"*{_token_note}*") if _token_note else mo.md(""),
+            ]
+            _correct_count = 0
             for _r in _results:
                 _gt = next(ref for ref in REFERENCES if ref["id"] == _r["id"])
+                # Parse the single-reference verdict
+                _is_real_predicted = "REAL" in _r["verdict"].upper() and "FABRICATED" not in _r["verdict"].upper()
+                _correct = _is_real_predicted == _gt["real"]
+                if _correct:
+                    _correct_count += 1
+                _icon = "✅" if _correct else "❌"
+                _gt_label = "Real" if _gt["real"] else "Fabricated"
+                _tok = f"({_r['tokens']} tokens)" if _r.get("tokens") else ""
                 _parts.append(mo.vstack([
-                    mo.md(f"**{_r['id']}** ({'✅ Real' if _gt['real'] else '❌ Fabricated'} — ground truth)"),
+                    mo.md(f"**{_r['id']}** — Ground truth: {_gt_label} {_icon} {_tok}"),
                     mo.callout(mo.md(_r["verdict"]), kind="info"),
                 ]))
+            _accuracy = f"{_correct_count}/{len(REFERENCES)}"
+            _parts.append(mo.callout(
+                mo.md(f"**Multi-agent accuracy: {_accuracy}** (compare to monolithic above)"),
+                kind="neutral",
+            ))
             _parts.append(mo.md("**Ground truth:**"))
             _parts.append(mo.md("\n\n".join(f"**{r['id']}:** {r['verdict']}" for r in REFERENCES)))
             mo.vstack(_parts)
@@ -824,7 +918,7 @@ def _(REFERENCES, call_llm, mo, run_monolithic_btn, run_multiagent_btn):
             mo.callout(mo.md(f"**Error:** {_e}"), kind="danger")
     else:
         mo.md("*Click a button above to run the monolithic or multi-agent demo.*")
-    return VERIFY_SYSTEM, asyncio, verify_single
+    return VERIFY_SYSTEM, _parse_verdicts, asyncio, verify_single
 
 
 @app.cell
