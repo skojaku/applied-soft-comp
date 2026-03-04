@@ -38,6 +38,16 @@ def _(mo):
 
         *The ReAct loop, LangChain tools, and context engineering through multi-agent isolation*
 
+        /// tip | How to run this notebook
+        Download this file, then open a terminal and run:
+
+        ```
+        marimo edit --sandbox react_agentic.py
+        ```
+
+        If you do not have marimo installed, install it first with `pip install marimo` or run it without installation using `uvx marimo edit --sandbox react_agentic.py`. The `--sandbox` flag creates an isolated environment and installs all dependencies automatically.
+        ///
+
         ::: {.callout-note title="What you'll learn in this module"}
         This module introduces agentic AI systems. We will explore how an agent differs from
         a chatbot by operating in a feedback loop, examine the ReAct pattern (Reason and Act)

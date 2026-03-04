@@ -2,49 +2,60 @@
 # requires-python = ">=3.10"
 # dependencies = [
 #   "marimo",
-#   "litellm",
-#   "pydantic",
-#   "matplotlib",
-#   "numpy",
-#   "scipy",
+#   "litellm==1.82.0",
+#   "pydantic==2.12.5",
+#   "matplotlib==3.10.8",
+#   "numpy==2.4.2",
+#   "scipy==1.17.1",
 # ]
 # ///
 
 import marimo
 
-__generated_with = "0.10.0"
-app = marimo.App(width="medium", title="Prompt Engineering: The Art of Talking to LLMs")
+__generated_with = "0.20.4"
+app = marimo.App(width="medium")
 
 
 @app.cell
 def _():
     import marimo as mo
+
     return (mo,)
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        # Prompt Engineering: The Art of Talking to LLMs
+    mo.md(r"""
+    # Prompt Engineering: The Art of Talking to LLMs
 
-        *How phrasing shapes probability — and what you can do about it*
+    *How phrasing shapes probability — and what you can do about it*
 
-        ::: {.callout-note title="What you'll learn in this module"}
-        This module introduces the art and science of prompt engineering. We will explore
-        how LLMs generate text as probability samplers, examine the five building blocks of
-        a well-structured prompt, and understand how few-shot examples, chain-of-thought
-        reasoning, and structured output constraints apply to real tasks.
-        :::
-        """
-    )
+    /// tip | How to run this notebook
+    Download this file, then open a terminal and run:
+
+    ```
+    marimo edit --sandbox prompt_engineering.py
+    ```
+
+    If you do not have marimo installed, install it first with `pip install marimo` or run it without installation using `uvx marimo edit --sandbox prompt_engineering.py`. The `--sandbox` flag creates an isolated environment and installs all dependencies automatically.
+    ///
+
+    ::: {.callout-note title="What you'll learn in this module"}
+    This module introduces the art and science of prompt engineering. We will explore
+    how LLMs generate text as probability samplers, examine the five building blocks of
+    a well-structured prompt, and understand how few-shot examples, chain-of-thought
+    reasoning, and structured output constraints apply to real tasks.
+    :::
+    """)
     return
 
 
 @app.cell
 def _(mo):
     # LLM Configuration Panel
-    mo.md("## Configuration")
+    mo.md("""
+    ## Configuration
+    """)
     return
 
 
@@ -80,7 +91,7 @@ def _(mo):
         ),
     ])
     config_panel
-    return api_base_input, api_key_input, model_input, config_panel
+    return api_base_input, api_key_input, model_input
 
 
 @app.cell
@@ -208,19 +219,17 @@ def _(llm_api_base, llm_api_key, llm_model, mo):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Section 1: Why Prompts Matter — LLMs as Probability Samplers
+    mo.md(r"""
+    ## Section 1: Why Prompts Matter — LLMs as Probability Samplers
 
-        Every LLM response is a sample from a probability distribution. The model does not
-        retrieve a fixed answer stored somewhere in its weights. It generates the most likely
-        continuation of your exact input, token by token. Change a single word, and you shift
-        the distribution. Change the structure of your request, and you can shift it dramatically.
+    Every LLM response is a sample from a probability distribution. The model does not
+    retrieve a fixed answer stored somewhere in its weights. It generates the most likely
+    continuation of your exact input, token by token. Change a single word, and you shift
+    the distribution. Change the structure of your request, and you can shift it dramatically.
 
-        Let us see this in action. Below are two prompts for the same task. One is vague; the
-        other is precise. Run both and compare what you get.
-        """
-    )
+    Let us see this in action. Below are two prompts for the same task. One is vague; the
+    other is precise. Run both and compare what you get.
+    """)
     return
 
 
@@ -264,38 +273,36 @@ def _(call_llm, mo, precise_prompt, run_comparison_btn, vague_prompt):
         ])
     else:
         mo.md("*Click **Run both prompts** to see the comparison.*")
-    return precise_response, vague_response
+    return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Section 2: The Five Building Blocks of a Prompt
+    mo.md(r"""
+    ## Section 2: The Five Building Blocks of a Prompt
 
-        A well-structured prompt is not just a question. It has up to five components, each
-        doing a different job. Let us meet them one at a time.
+    A well-structured prompt is not just a question. It has up to five components, each
+    doing a different job. Let us meet them one at a time.
 
-        **Instruction** tells the model what task to perform. Without it, the model guesses.
-        A clear instruction anchors the response to the right task type.
+    **Instruction** tells the model what task to perform. Without it, the model guesses.
+    A clear instruction anchors the response to the right task type.
 
-        **Data** is the material the model should work on. Separating data from the instruction
-        keeps the prompt readable and makes it easy to swap the data without rewriting everything else.
+    **Data** is the material the model should work on. Separating data from the instruction
+    keeps the prompt readable and makes it easy to swap the data without rewriting everything else.
 
-        **Format** constrains the shape of the output. Asking for a numbered list, a JSON object,
-        or exactly three sentences each changes what the model generates, because format constraints
-        shift the probability mass toward tokens that fit the required structure.
+    **Format** constrains the shape of the output. Asking for a numbered list, a JSON object,
+    or exactly three sentences each changes what the model generates, because format constraints
+    shift the probability mass toward tokens that fit the required structure.
 
-        **Persona** assigns a role to the model. Telling the model it is a pediatric nurse versus a
-        software engineer versus a poet changes its vocabulary, tone, and depth of technical detail.
+    **Persona** assigns a role to the model. Telling the model it is a pediatric nurse versus a
+    software engineer versus a poet changes its vocabulary, tone, and depth of technical detail.
 
-        **Context** provides background the model needs but does not have from the instruction alone.
-        A date, a domain, a prior conversation, or a constraint about the audience all belong here.
+    **Context** provides background the model needs but does not have from the instruction alone.
+    A date, a domain, a prior conversation, or a constraint about the audience all belong here.
 
-        Now toggle each component on and off. Watch how the assembled prompt changes in real time,
-        then send it and compare the responses.
-        """
-    )
+    Now toggle each component on and off. Watch how the assembled prompt changes in real time,
+    then send it and compare the responses.
+    """)
     return
 
 
@@ -414,35 +421,33 @@ def _(
     else:
         _display = _preview
     _display
-    return assembled, blocks_response, parts
+    return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Section 3: Few-Shot Learning — Examples as Activators
+    mo.md(r"""
+    ## Section 3: Few-Shot Learning — Examples as Activators
 
-        When you show a model an example of the task alongside the instruction, you activate
-        a much more specific pattern in its probability distribution. Two or three examples
-        are usually enough. More than five rarely helps.
+    When you show a model an example of the task alongside the instruction, you activate
+    a much more specific pattern in its probability distribution. Two or three examples
+    are usually enough. More than five rarely helps.
 
-        The demo below uses sentiment classification. Use the slider to choose how many
-        examples to include (0, 1, 2, or 5), then run the model. A table records each
-        configuration so you can compare across runs.
+    The demo below uses sentiment classification. Use the slider to choose how many
+    examples to include (0, 1, 2, or 5), then run the model. A table records each
+    configuration so you can compare across runs.
 
-        After trying several slider positions, hit **Shuffle examples and run** to randomize
-        the order of the same examples and run again. Watch whether the prediction changes.
-        This is order bias: the most recently seen label often has outsized influence on
-        what the model predicts next.
+    After trying several slider positions, hit **Shuffle examples and run** to randomize
+    the order of the same examples and run again. Watch whether the prediction changes.
+    This is order bias: the most recently seen label often has outsized influence on
+    what the model predicts next.
 
-        ::: {.callout-warn title="Few-shot prompts are brittle in production"}
-        Small changes in example order can flip the output entirely. A few-shot prompt that
-        works reliably in testing may behave differently in production when examples are
-        reordered or replaced. Always test multiple orderings before deploying.
-        :::
-        """
-    )
+    ::: {.callout-warn title="Few-shot prompts are brittle in production"}
+    Small changes in example order can flip the output entirely. A few-shot prompt that
+    works reliably in testing may behave differently in production when examples are
+    reordered or replaced. Always test multiple orderings before deploying.
+    :::
+    """)
     return
 
 
@@ -553,26 +558,25 @@ def _(
         ])
     else:
         mo.md("*Run the model to see results appear here.*")
+    return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Section 4: Chain-of-Thought — Thinking Out Loud
+    mo.md(r"""
+    ## Section 4: Chain-of-Thought — Thinking Out Loud
 
-        Sometimes asking the model to think out loud, step by step, leads to better answers.
-        This technique is called chain-of-thought prompting.
+    Sometimes asking the model to think out loud, step by step, leads to better answers.
+    This technique is called chain-of-thought prompting.
 
-        The puzzle below requires two or more intermediate steps to solve correctly. Click
-        **Run both modes** to run the puzzle twice: first in direct-answer mode to establish
-        a baseline, then in chain-of-thought mode so you can compare the two responses side by side.
+    The puzzle below requires two or more intermediate steps to solve correctly. Click
+    **Run both modes** to run the puzzle twice: first in direct-answer mode to establish
+    a baseline, then in chain-of-thought mode so you can compare the two responses side by side.
 
-        One important caveat: the reasoning steps can sound completely plausible but still lead
-        to a wrong answer. The final answer may even appear before the reasoning is finished.
-        Chain-of-thought is a tool, not a guarantee.
-        """
-    )
+    One important caveat: the reasoning steps can sound completely plausible but still lead
+    to a wrong answer. The final answer may even appear before the reasoning is finished.
+    Chain-of-thought is a tool, not a guarantee.
+    """)
     return
 
 
@@ -649,19 +653,17 @@ def _(COT_PUZZLE, call_llm, mo, run_both_btn, run_cot_btn, run_direct_btn):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Section 5: Structured Output — JSON Schema Constraints
+    mo.md(r"""
+    ## Section 5: Structured Output — JSON Schema Constraints
 
-        Asking the model to "respond in JSON" in plain text does not guarantee valid JSON.
-        The model is still sampling tokens freely and can produce a malformed structure.
+    Asking the model to "respond in JSON" in plain text does not guarantee valid JSON.
+    The model is still sampling tokens freely and can produce a malformed structure.
 
-        The alternative is to pass a Pydantic schema as a `response_format` constraint.
-        This works at the token level: the model cannot generate a response that violates
-        the schema. Toggle between the two approaches below and count how often each produces
-        valid output.
-        """
-    )
+    The alternative is to pass a Pydantic schema as a `response_format` constraint.
+    This works at the token level: the model cannot generate a response that violates
+    the schema. Toggle between the two approaches below and count how often each produces
+    valid output.
+    """)
     return
 
 
@@ -686,7 +688,17 @@ def _(mo):
 
 
 @app.cell
-def _(INVOICE_TEXT, call_llm, litellm, llm_api_base, llm_api_key, llm_model, mo, run_structured_btn, structured_toggle):
+def _(
+    INVOICE_TEXT,
+    call_llm,
+    litellm,
+    llm_api_base,
+    llm_api_key,
+    llm_model,
+    mo,
+    run_structured_btn,
+    structured_toggle,
+):
     import json
     from pydantic import BaseModel
 
@@ -743,22 +755,20 @@ def _(INVOICE_TEXT, call_llm, litellm, llm_api_base, llm_api_key, llm_model, mo,
             ])
     else:
         mo.md("*Click **Extract invoice data** to run the demo.*")
-    return BaseModel, InvoiceData, json
+    return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Section 6: Hallucination and Uncertainty Permission
+    mo.md(r"""
+    ## Section 6: Hallucination and Uncertainty Permission
 
-        LLMs are trained to be helpful. This means they often produce a confident-sounding
-        answer even when they have no reliable information. This is hallucination.
+    LLMs are trained to be helpful. This means they often produce a confident-sounding
+    answer even when they have no reliable information. This is hallucination.
 
-        One simple intervention is uncertainty permission: telling the model it is acceptable
-        to say "I do not know." Toggle this below and ask the model about a fabricated paper.
-        """
-    )
+    One simple intervention is uncertainty permission: telling the model it is acceptable
+    to say "I do not know." Toggle this below and ask the model about a fabricated paper.
+    """)
     return
 
 
@@ -782,7 +792,13 @@ def _(mo):
 
 
 @app.cell
-def _(HALLUCINATION_QUERY, call_llm, mo, run_hallucination_btn, uncertainty_toggle):
+def _(
+    HALLUCINATION_QUERY,
+    call_llm,
+    mo,
+    run_hallucination_btn,
+    uncertainty_toggle,
+):
     if run_hallucination_btn.value:
         if uncertainty_toggle.value:
             _sys = "You are a helpful assistant. If you are not certain about something, say so clearly. It is perfectly acceptable to say 'I do not know.'"
@@ -809,16 +825,16 @@ def _(mo):
         mo.callout(
             mo.md(
                 r"""
-**Try it yourself**
+    **Try it yourself**
 
-Your goal is to craft a prompt that makes the LLM output 200 numbers following a
-standard normal distribution N(0,1). Write your prompt in the editor below and click
-**Run**. The notebook will extract numbers from the response automatically and plot a
-histogram overlaid with the true Gaussian PDF. A KS-test p-value tells you whether
-your prompt succeeded.
+    Your goal is to craft a prompt that makes the LLM output 200 numbers following a
+    standard normal distribution N(0,1). Write your prompt in the editor below and click
+    **Run**. The notebook will extract numbers from the response automatically and plot a
+    histogram overlaid with the true Gaussian PDF. A KS-test p-value tells you whether
+    your prompt succeeded.
 
-**Extension:** Try changing the target distribution to N(2, 0.5). How does your prompt
-need to change?
+    **Extension:** Try changing the target distribution to N(2, 0.5). How does your prompt
+    need to change?
                 """
             ),
             kind="info",
@@ -873,11 +889,20 @@ def _():
         pattern = r"-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?"
         return [float(m) for m in re.findall(pattern, text)]
 
-    return extract_numbers, np, plt, re, stats
+    return extract_numbers, np, plt, stats
 
 
 @app.cell
-def _(call_llm, extract_numbers, gaussian_prompt, mo, np, plt, run_gaussian_btn, stats):
+def _(
+    call_llm,
+    extract_numbers,
+    gaussian_prompt,
+    mo,
+    np,
+    plt,
+    run_gaussian_btn,
+    stats,
+):
     _gauss_display = mo.md("*Write your prompt above and click **Run and evaluate** to see the histogram.*")
     if run_gaussian_btn.value:
         _g_resp = call_llm(gaussian_prompt.value)
@@ -920,6 +945,7 @@ def _(call_llm, extract_numbers, gaussian_prompt, mo, np, plt, run_gaussian_btn,
                 ),
             ])
     _gauss_display
+    return
 
 
 @app.cell
@@ -929,13 +955,13 @@ def _(mo):
         mo.callout(
             mo.md(
                 r"""
-**Try it yourself**
+    **Try it yourself**
 
-Three puzzles are provided below, ranging from trivial arithmetic to a harder logic
-problem. Run each puzzle twice: once in direct-answer mode and once with chain-of-thought.
-The notebook records results in a table. After filling the table, write one short paragraph
-in the text area: for which puzzle type did CoT help, and when did it produce a wrong answer
-with convincing-looking reasoning?
+    Three puzzles are provided below, ranging from trivial arithmetic to a harder logic
+    problem. Run each puzzle twice: once in direct-answer mode and once with chain-of-thought.
+    The notebook records results in a table. After filling the table, write one short paragraph
+    in the text area: for which puzzle type did CoT help, and when did it produce a wrong answer
+    with convincing-looking reasoning?
                 """
             ),
             kind="info",
@@ -1010,7 +1036,16 @@ def _(mo):
 
 
 @app.cell
-def _(COT_PUZZLES, call_llm, cot2_toggle, get_cot2_results, mo, puzzle_selector, run_cot2_btn, set_cot2_results):
+def _(
+    COT_PUZZLES,
+    call_llm,
+    cot2_toggle,
+    get_cot2_results,
+    mo,
+    puzzle_selector,
+    run_cot2_btn,
+    set_cot2_results,
+):
     if run_cot2_btn.value:
         _puzzle = next(p for p in COT_PUZZLES if p["id"] == puzzle_selector.value)
         if cot2_toggle.value:
@@ -1061,7 +1096,7 @@ def _(mo):
         rows=5,
     )
     reflection_cot
-    return (reflection_cot,)
+    return
 
 
 @app.cell
@@ -1107,13 +1142,13 @@ def _(mo):
         mo.callout(
             mo.md(
                 r"""
-**Try it yourself**
+    **Try it yourself**
 
-Four labeled sentiment examples are provided below. The notebook will run the model 10
-times with the same examples but in a different random order each time, recording the
-prediction for a fixed test sentence. A bar chart shows how often each class was predicted.
-Compare this distribution to a zero-shot baseline. What does the variance tell you about
-using few-shot prompts in a real application?
+    Four labeled sentiment examples are provided below. The notebook will run the model 10
+    times with the same examples but in a different random order each time, recording the
+    prediction for a fixed test sentence. A bar chart shows how often each class was predicted.
+    Compare this distribution to a zero-shot baseline. What does the variance tell you about
+    using few-shot prompts in a real application?
                 """
             ),
             kind="info",
