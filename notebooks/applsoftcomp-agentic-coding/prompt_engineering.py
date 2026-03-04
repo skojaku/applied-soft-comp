@@ -476,8 +476,9 @@ def _(mo):
         Sometimes asking the model to think out loud, step by step, leads to better answers.
         This technique is called chain-of-thought prompting.
 
-        The puzzle below requires two or more intermediate steps to solve correctly. Toggle
-        between direct-answer mode and chain-of-thought mode. Read both responses in full.
+        The puzzle below requires two or more intermediate steps to solve correctly. Click
+        **Run both modes** to run the puzzle twice: first in direct-answer mode to establish
+        a baseline, then in chain-of-thought mode so you can compare the two responses side by side.
 
         One important caveat: the reasoning steps can sound completely plausible but still lead
         to a wrong answer. The final answer may even appear before the reasoning is finished.
@@ -494,33 +495,59 @@ def _(mo):
         "Now, if he sells half of the remaining sheep and buys 3 more, how many does he have?"
     )
 
-    cot_toggle = mo.ui.switch(label="Enable chain-of-thought", value=False)
-    run_cot_btn = mo.ui.run_button(label="Run puzzle")
+    run_direct_btn = mo.ui.run_button(label="Run direct-answer (baseline)")
+    run_cot_btn = mo.ui.run_button(label="Run chain-of-thought")
+    run_both_btn = mo.ui.run_button(label="Run both modes")
 
     mo.vstack([
         mo.callout(mo.md(f"**Puzzle:** {COT_PUZZLE}"), kind="info"),
-        cot_toggle,
-        run_cot_btn,
+        mo.hstack([run_direct_btn, run_cot_btn, run_both_btn]),
+        mo.md("*Use **Run both modes** for a side-by-side comparison, or run each mode individually.*"),
     ])
-    return COT_PUZZLE, cot_toggle, run_cot_btn
+    return COT_PUZZLE, run_both_btn, run_cot_btn, run_direct_btn
 
 
 @app.cell
-def _(COT_PUZZLE, call_llm, cot_toggle, mo, run_cot_btn):
-    if run_cot_btn.value:
-        if cot_toggle.value:
-            _system = (
-                "Think through this step by step before giving your final answer. "
-                "Show all intermediate reasoning."
-            )
-            _mode_label = "Chain-of-thought mode"
-        else:
-            _system = "Answer directly and concisely."
-            _mode_label = "Direct-answer mode"
+def _(COT_PUZZLE, call_llm, mo, run_both_btn, run_cot_btn, run_direct_btn):
+    _direct_sys = "Answer directly and concisely."
+    _cot_sys = (
+        "Think through this step by step before giving your final answer. "
+        "Show all intermediate reasoning."
+    )
 
-        _cot_resp = call_llm(COT_PUZZLE, system=_system)
+    if run_both_btn.value:
+        _direct_resp = call_llm(COT_PUZZLE, system=_direct_sys)
+        _cot_resp = call_llm(COT_PUZZLE, system=_cot_sys)
         mo.vstack([
-            mo.md(f"### Response ({_mode_label})"),
+            mo.md("### Side-by-side comparison"),
+            mo.hstack([
+                mo.vstack([
+                    mo.md("**Direct-answer (baseline)**"),
+                    mo.callout(mo.md(_direct_resp), kind="warn"),
+                ]),
+                mo.vstack([
+                    mo.md("**Chain-of-thought**"),
+                    mo.callout(mo.md(_cot_resp), kind="success"),
+                ]),
+            ]),
+            mo.md(
+                "*Reflection: Did the reasoning steps actually lead to the correct answer? "
+                "Did chain-of-thought help, hurt, or make no difference here?*"
+            ),
+        ])
+    elif run_direct_btn.value:
+        _direct_resp = call_llm(COT_PUZZLE, system=_direct_sys)
+        mo.vstack([
+            mo.md("### Response (direct-answer baseline)"),
+            mo.callout(mo.md(_direct_resp), kind="warn"),
+            mo.md(
+                "*This is your baseline. Now click **Run chain-of-thought** to compare.*"
+            ),
+        ])
+    elif run_cot_btn.value:
+        _cot_resp = call_llm(COT_PUZZLE, system=_cot_sys)
+        mo.vstack([
+            mo.md("### Response (chain-of-thought)"),
             mo.callout(mo.md(_cot_resp), kind="success"),
             mo.md(
                 "*Reflection: Did the reasoning steps actually lead to the correct answer? "
@@ -528,7 +555,7 @@ def _(COT_PUZZLE, call_llm, cot_toggle, mo, run_cot_btn):
             ),
         ])
     else:
-        mo.md("*Click **Run puzzle** to see the response.*")
+        mo.md("*Click **Run direct-answer (baseline)**, **Run chain-of-thought**, or **Run both modes** to see responses.*")
     return
 
 
