@@ -996,9 +996,19 @@ def _(
     _best_m_class = int(_m_rates.idxmax())
     _best_m_rate = float(_m_rates.max())
 
+    def _verify_agent_answer(final_answer: str, best_f_class: int, best_m_class: int) -> dict:
+        """Check if the agent's final answer mentions the correct class numbers."""
+        fa_lower = final_answer.lower()
+        # Check that the correct female class is mentioned
+        f_class_mentioned = f"class {best_f_class}" in fa_lower or f"pclass {best_f_class}" in fa_lower or f" {best_f_class} " in fa_lower
+        # Check that the correct male class is mentioned
+        m_class_mentioned = f"class {best_m_class}" in fa_lower or f"pclass {best_m_class}" in fa_lower or f" {best_m_class} " in fa_lower
+        return {"female_correct": f_class_mentioned, "male_correct": m_class_mentioned}
+
     if run_extended_btn.value:
         _etrace = run_extended_agent(TARGET_QUESTION)
         _eparts = [mo.md("### Extended Agent Trace")]
+        _final_answer = ""
         for _item in _etrace:
             if _item["type"] == "thought":
                 _eparts.append(mo.callout(mo.md(f"**Thought:** {_item['content']}"), kind="info"))
@@ -1010,28 +1020,37 @@ def _(
             elif _item["type"] == "observation":
                 _eparts.append(mo.callout(mo.md(f"**Observation:**\n```\n{_item['content']}\n```"), kind="neutral"))
             elif _item["type"] == "final":
+                _final_answer = _item["content"]
                 _eparts.append(mo.callout(mo.md(f"**Final Answer:** {_item['content']}"), kind="success"))
             elif _item["type"] == "error":
                 _eparts.append(mo.callout(mo.md(f"**Error:** {_item['content']}"), kind="danger"))
 
-        _eparts.append(mo.callout(
-            mo.md(
-                f"**Ground truth:**\n\n"
-                f"Female passengers over 30: Class {_best_f_class} had highest survival rate ({_best_f_rate:.1%}).\n\n"
-                f"Male passengers over 30: Class {_best_m_class} had highest survival rate ({_best_m_rate:.1%})."
-            ),
-            kind="neutral",
-        ))
+        # Programmatic ground-truth verification
+        _gt_md = (
+            f"**Ground truth:**\n\n"
+            f"Female passengers over 30: **Class {_best_f_class}** had the highest survival rate ({_best_f_rate:.1%}).\n\n"
+            f"Male passengers over 30: **Class {_best_m_class}** had the highest survival rate ({_best_m_rate:.1%})."
+        )
+        _eparts.append(mo.callout(mo.md(_gt_md), kind="neutral"))
+
+        if _final_answer:
+            _check = _verify_agent_answer(_final_answer, _best_f_class, _best_m_class)
+            _f_icon = "✅" if _check["female_correct"] else "❌"
+            _m_icon = "✅" if _check["male_correct"] else "❌"
+            _pass = _check["female_correct"] and _check["male_correct"]
+            _verdict = "PASS — agent identified both correct classes." if _pass else "FAIL — agent missed one or both correct classes. Check the trace and refine your tools."
+            _eparts.append(mo.callout(
+                mo.md(
+                    f"**Verification:**\n\n"
+                    f"{_f_icon} Female best class (expected: Class {_best_f_class})\n\n"
+                    f"{_m_icon} Male best class (expected: Class {_best_m_class})\n\n"
+                    f"**Result: {_verdict}**"
+                ),
+                kind="success" if _pass else "danger",
+            ))
         mo.vstack(_eparts)
     else:
-        mo.callout(
-            mo.md(
-                f"**Ground truth (revealed after you run):**\n\n"
-                f"Female passengers over 30: Class {_best_f_class} had highest survival rate ({_best_f_rate:.1%}).\n\n"
-                f"Male passengers over 30: Class {_best_m_class} had highest survival rate ({_best_m_rate:.1%})."
-            ),
-            kind="neutral",
-        )
+        mo.md("*Click **Run extended agent with target question** to run the agent and see the ground-truth verification.*")
     return run_extended_agent,
 
 
