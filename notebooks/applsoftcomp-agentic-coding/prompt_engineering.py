@@ -139,7 +139,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(api_base_input, api_key_input, model_input):
     # Reactive config state — all downstream cells depend on these variables
-    llm_model = model_input.value
+    llm_model = model_input.value.strip()
     llm_api_key = api_key_input.value or None
     llm_api_base = api_base_input.value or None
     return llm_api_base, llm_api_key, llm_model
