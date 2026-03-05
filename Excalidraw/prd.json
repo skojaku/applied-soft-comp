@@ -1,0 +1,103 @@
+{
+  "project": "Context Engineering Diagram",
+  "version": "1.0",
+  "description": "A teaching diagram explaining context engineering — what fills the LLM context window, why it causes problems, and the four strategies to manage it — for students learning about LLM-based agents.",
+  "problem_statement": "Students learning about LLM agents need a clear mental model of what 'context engineering' means: what goes into the context window, why unmanaged context degrades agent performance, and what practical strategies exist to fix it.",
+  "solution": "Create an Excalidraw diagram with three visual zones: (1) three context types feeding into the LLM context window, (2) a context poisoning problem box, and (3) four strategy boxes (WRITE, SELECT, COMPRESS, ISOLATE). Export to PNG, review for clarity and teaching effectiveness, refine until clean.",
+  "user_stories": [
+    {
+      "id": "US-001",
+      "story": "As a user, I want a narrative outline saved as `outline.md` that lists every diagram element with its text label, approximate position (x, y grid coordinates), size (width x height), shape type, color group, and relationships to other elements — so that the full structure is specified in plain text before any Excalidraw JSON is written.",
+      "passes": false,
+      "hints": [
+        "Layout has 3 vertical zones: (top) title + context types feeding into context window, (middle) context poisoning problem box, (bottom) 4 strategy boxes in a dashed group",
+        "Context types: Instructions (purple #d0bfff/#7048e8), Knowledge (green #b2f2bb/#2f9e44), Tools (yellow #ffec99/#f08c00) — each on the LEFT, arrows pointing RIGHT into the context window",
+        "LLM Context Window: large blue rectangle (#a5d8ff/#1971c2), center of the diagram, labeled 'LLM Context Window / ≈ RAM for Agents'",
+        "Problem box: red rectangle (#ffc9c9/#e03131), below context window, labeled with context poisoning warning",
+        "4 strategy boxes: all teal (#99e9f2/#0c8599), arranged horizontally: WRITE, SELECT, COMPRESS, ISOLATE",
+        "Arrows: colored to match their source (purple for instructions, green for knowledge, orange for tools); red arrow from context window to problem; gray arrow from problem to strategies group"
+      ]
+    },
+    {
+      "id": "US-002",
+      "story": "As a user, I want `diagram_v1.excalidraw` generated from `outline.md` — with all labeled shapes as correct shape+text element pairs (boundElements/containerId, never the label property), elbow arrows positioned from shape edges, color-coded by component type, and a dashed grouping rectangle around the 4 strategy boxes — so that I have a complete working first draft.",
+      "passes": false,
+      "hints": [
+        "Every labeled shape needs TWO elements: shape with boundElements + text with containerId",
+        "Arrow x,y starts at source shape edge (right edge for context types, bottom edge for context window/problem)",
+        "The 3 context-type arrows are different colors (purple, green, orange) matching their source box color",
+        "Use elbowed:true, roundness:null, roughness:0 for all arrows",
+        "Strategy group rect uses strokeStyle:dashed, roughness:0, roundness:null, backgroundColor:transparent",
+        "Section labels ('CONTEXT TYPES', '4 STRATEGIES TO ENGINEER CONTEXT') are standalone text elements (containerId:null)"
+      ]
+    },
+    {
+      "id": "US-003",
+      "story": "As a user, I want `diagram_v1.excalidraw` exported to `diagram_v1.png` and reviewed for: overlapping text, disconnected arrows, inconsistent narrative flow, text size issues, poor color usage, distracting elements, and simplification opportunities — with findings saved to `review_v1.md` — so that specific issues are documented before regeneration.",
+      "passes": false,
+      "hints": [
+        "Use Playwright MCP tools (browser_navigate, browser_run_code, browser_close) for PNG export",
+        "Teaching effectiveness check: can a student immediately grasp the 3-part story (what fills context → why it's a problem → how to manage it)?",
+        "Check that strategy box labels are legible — WRITE/SELECT/COMPRESS/ISOLATE should be visually prominent as titles within each box",
+        "Verify arrows are color-coded and visually connect to the correct shapes",
+        "If no issues: write 'No issues found. Diagram is ready.' and mark passes:true without adding US-004"
+      ]
+    },
+    {
+      "id": "US-004",
+      "story": "As a user, I want `diagram_v2.excalidraw` that fixes every issue in `review_v1.md`, then exported to `diagram_v2.png` and reviewed as `review_v2.md`. If `review_v2.md` lists no remaining issues, skip to US-FINAL. If issues remain, add US-005 with the same fix-export-review pattern for v3 — so the diagram iterates until it meets quality standards.",
+      "passes": false,
+      "hints": [
+        "Read review_v1.md carefully. Address every issue, not just cosmetic ones.",
+        "Teaching clarity is the main criterion: a new student should understand the concept from the diagram alone.",
+        "After fixing, re-export and re-review before marking passes:true."
+      ]
+    },
+    {
+      "id": "US-FINAL",
+      "story": "As a user, I want the final versioned diagram and PNG presented with exact file paths, instructions for opening in Excalidraw (https://excalidraw.com or VS Code extension), and a one-paragraph summary of what improved across iterations — so I can use the diagram immediately in teaching.",
+      "passes": false
+    }
+  ],
+  "shared_requirements": {
+    "diagram_content": {
+      "description": "Three-zone vertical layout. Zone 1 (top, y~150-480): title 'Context Engineering' with subtitle, then three context-type boxes on the left (Instructions in purple, Knowledge in green, Tools in orange/yellow) with colored elbow arrows flowing RIGHT into the central LLM Context Window box (large, blue, strokeWidth:3). Zone 2 (middle, y~395-490): Problem box (red) directly below the context window, connected by a red arrow straight down. Zone 3 (bottom, y~500-730): dashed teal grouping rect labeled '4 STRATEGIES TO ENGINEER CONTEXT', containing four equal-sized teal boxes side by side: WRITE (save outside context, scratchpad, memory), SELECT (pull in when needed, RAG, retrieval), COMPRESS (reduce tokens, summarize, prune), ISOLATE (split across agents, subagents). Gray arrow from problem box down into the strategies group.",
+      "target_audience": "Students learning about LLM-based agents and prompt engineering",
+      "key_message": "The LLM context window is finite RAM — three types of content fill it, unmanaged accumulation causes poisoning, and four engineering strategies address this.",
+      "style": "Clean, educational, colorful but consistent. Minimal roughness. Clear visual hierarchy with the context window as the central element."
+    },
+    "color_scheme": {
+      "Instructions": {"background": "#d0bfff", "stroke": "#7048e8"},
+      "Knowledge": {"background": "#b2f2bb", "stroke": "#2f9e44"},
+      "Tools": {"background": "#ffec99", "stroke": "#f08c00"},
+      "LLM Context Window": {"background": "#a5d8ff", "stroke": "#1971c2"},
+      "Problem / Context Poisoning": {"background": "#ffc9c9", "stroke": "#e03131"},
+      "Strategies (all 4)": {"background": "#99e9f2", "stroke": "#0c8599"}
+    },
+    "validation_checklist": [
+      "Every shape with a label has BOTH a shape element (with boundElements) AND a text element (with containerId)",
+      "No element uses the label property",
+      "No diamond shapes — use styled rectangles",
+      "Multi-point arrows have elbowed:true, roundness:null, roughness:0",
+      "Arrow x,y is calculated from shape edge, not center",
+      "Arrow bounding box (width/height) matches max absolute point offsets",
+      "No duplicate element IDs",
+      "File is valid JSON"
+    ],
+    "review_criteria": [
+      "Overlapping text: any text that visually overlaps another element",
+      "Disconnected arrows: arrows with visible gaps to shapes",
+      "Narrative clarity: can a student trace the story (inputs → context window → problem → strategies) without explanation?",
+      "Text size: strategy titles (WRITE/SELECT/COMPRESS/ISOLATE) should be visually dominant in their boxes",
+      "Color consistency: context-type arrows should match their source box colors",
+      "Teaching effectiveness: does the diagram stand alone as a teaching artifact?",
+      "Simplification: any element that adds clutter without adding meaning"
+    ],
+    "versioning": [
+      "Excalidraw files: diagram_v1.excalidraw, diagram_v2.excalidraw, ...",
+      "PNG exports: diagram_v1.png, diagram_v2.png, ...",
+      "Review files: review_v1.md, review_v2.md, ...",
+      "Never overwrite previous versions"
+    ]
+  }
+}
