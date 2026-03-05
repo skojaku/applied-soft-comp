@@ -521,12 +521,14 @@ def _(mo):
     mo.md(r"""
     ## Section 5: Chat with the Agent
 
-    The trace view above makes the mechanics visible.
-    Now let's interact with the same three-tool agent the way a user would:
-    through a natural conversation.
-    Type any question in the box below. The agent will reason, call tools if needed,
-    and reply. Its thinking steps are included in each reply so you can follow along.
+    The trace view above makes the mechanics visible. Now let us interact with the
+    same three-tool agent the way a user would: through a natural conversation.
+
+    Type any question in the box below, or pick one of the sample prompts. The agent
+    will reason, call tools if needed, and reply. Its thinking steps appear as
+    blockquotes in each reply, so you can follow along without reading a raw trace.
     """)
+    return
 
 
 @app.cell(hide_code=True)
