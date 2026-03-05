@@ -86,41 +86,6 @@
       "passes": true
     },
     {
-      "id": "US-016",
-      "story": "As a student, I want to see the full ReAct trace (Thought, Action, Observation) printed step by step so that I understand how the agent reasons before acting.",
-      "passes": true
-    },
-    {
-      "id": "US-017",
-      "story": "As a student, I want to ask natural language questions to the pre-built Titanic data detective agent so that I see how tools chain together across multiple observations.",
-      "passes": true
-    },
-    {
-      "id": "US-018",
-      "story": "As a student, I want to add a cross-tabulation tool to the Titanic agent so that I practice writing tool docstrings that guide the LLM accurately.",
-      "passes": true
-    },
-    {
-      "id": "US-019",
-      "story": "As a student, I want to add a filter-and-count tool to the Titanic agent so that I extend the agent's capability for conditional queries.",
-      "passes": true
-    },
-    {
-      "id": "US-020",
-      "story": "As a student, I want to pose a multi-hop question to the extended agent and verify its answer against a ground-truth cell so that I know whether my tool design was correct.",
-      "passes": true
-    },
-    {
-      "id": "US-021",
-      "story": "As a student, I want to watch a single monolithic agent attempt to verify five references at once so that I see where context confusion causes errors.",
-      "passes": true
-    },
-    {
-      "id": "US-022",
-      "story": "As a student, I want to watch five isolated sub-agents each verify one reference in parallel so that I see how context isolation improves accuracy.",
-      "passes": true
-    },
-    {
       "id": "US-023",
       "story": "As an instructor, I want each notebook section to be a self-contained marimo cell block with explanatory prose so that students can read and run the notebook incrementally.",
       "passes": true
@@ -153,11 +118,6 @@
     {
       "id": "US-029",
       "story": "As a developer, I want to test Notebook 1 end-to-end using the `glm-4.7:cloud` ollama cloud model so that all interactive demos produce real responses before the notebook is shared with students.",
-      "passes": true
-    },
-    {
-      "id": "US-030",
-      "story": "As a developer, I want to test Notebook 2 end-to-end using the `glm-4.7:cloud` ollama cloud model so that the ReAct trace, Titanic agent, and multi-agent isolation demo all complete without errors.",
       "passes": true
     },
     {
@@ -237,8 +197,18 @@
     },
     {
       "id": "US-046",
-      "story": "As a student, I want a Section 5 'Chat with the Agent' that presents the same three-tool ReAct agent as a mo.ui.chat interface with sample prompts — so that after seeing the trace mechanics I can interact with the agent naturally and still see its reasoning steps embedded in each reply.",
-      "passes": true
+      "story": "As a student, I want a Section 1 simple chat agent with date and math tools in a mo.ui.chat interface — so that I can see how an agent reasons through tool calls in a natural conversation, with each reply showing the Thought/Action/Observation trace as blockquotes.",
+      "passes": false
+    },
+    {
+      "id": "US-047",
+      "story": "As a student, I want a Section 2 visualization agent that pre-loads the Titanic dataset and exposes list_columns, plot_histogram, and plot_scatter as tools in a mo.ui.chat interface — so that I can ask plain-English data questions and see the agent draw charts directly in the chat reply.",
+      "passes": false
+    },
+    {
+      "id": "US-048",
+      "story": "As a student, I want a Section 3 'Add Your Own Tool' scaffold with an exposed editable cell containing my_tool — so that I can implement any Python function, write its docstring, and immediately chat with an agent that uses all four tools (the three Titanic tools plus mine).",
+      "passes": false
     }
   ],
   "notebooks": [
@@ -376,96 +346,52 @@
     {
       "id": "nb2-react-agentic",
       "filename": "react_agentic.py",
-      "title": "Agentic AI: From Reasoning to Action",
-      "subtitle": "The ReAct loop, LangChain tools, and context engineering through multi-agent isolation",
+      "title": "Agentic AI: Tools, Loops, and Conversations",
+      "subtitle": "Build agents that reason and act — then add your own tool",
       "learning_goals": [
         "An agent differs from a chatbot: it operates in a feedback loop, not a one-shot function.",
-        "The ReAct pattern (Reason + Act) structures this loop: observe, think, act, observe.",
-        "Tools are plain Python functions decorated with @tool; the docstring is the LLM's API contract.",
-        "Intelligence emerges from the feedback loop, not just the model's reasoning.",
-        "Context window is working memory: too much context causes degradation.",
-        "Multi-agent isolation assigns each sub-agent a clean, focused context window."
+        "Tools are plain Python functions; the docstring is the LLM's only window into what the function does.",
+        "The ReAct loop (Thought → Action → Observation) structures how the agent reasons before acting.",
+        "mo.ui.chat lets students interact with agents conversationally while still seeing the reasoning trace.",
+        "Writing a precise docstring is the difference between a tool that gets called correctly and one that gets ignored."
       ],
       "runtime": {
         "executable_via": "uvx marimo run react_agentic.py",
-        "edit_mode": "uvx marimo edit react_agentic.py",
+        "edit_mode": "uvx marimo edit --sandbox react_agentic.py",
         "python_version": ">=3.10",
         "dependencies": [
           "marimo",
           "litellm",
-          "langchain",
-          "langchain-community",
           "pandas",
-          "matplotlib",
-          "duckdb"
+          "matplotlib"
         ],
-        "default_model": "ollama/glm4:9b",
-        "notes": "Use litellm's LangChain integration (ChatLiteLLM from langchain-community) so agent code is provider-agnostic. The model string follows litellm format: `ollama/glm4:9b` for local, `ollama_chat/glm-4.7:cloud` for the ollama cloud relay. Students with API access to other providers can substitute any litellm-supported model string."
+        "default_model": "ollama/ministral-3:14b-cloud",
+        "notes": "All LLM calls go through litellm.completion() directly — no LangChain dependency. The ReAct loop is implemented as a plain Python function. mo.ui.chat is used for all agent interactions. Visualization tools return mo.as_html(fig) which is embedded directly in the chat reply as a marimo Html object."
       },
       "llm_config": {
         "method": "ui_panel",
-        "description": "Same UI panel pattern as Notebook 1: litellm model string, optional api_key, optional api_base. Default model is ollama/glm4:9b. Reactive marimo state propagates to all agent instantiations in the notebook."
+        "description": "Same UI panel pattern as Notebook 1: litellm model string, optional api_key, optional api_base. Default model is ollama/ministral-3:14b-cloud. Reactive marimo state propagates to all agent cells."
       },
       "sections": [
         {
-          "id": "s1-agent-vs-chatbot",
-          "title": "Agent vs. Chatbot: A State Machine, Not a Function",
-          "type": "explanation",
-          "content": "Start with the essential distinction. A chatbot is a function: one input, one output, done. An agent is a loop: it observes, decides, acts, and then observes again. Show a simple side-by-side figure illustrating this. The chatbot is a single arrow from input to output. The agent is a cycle with four labeled stages. Give a concrete example to make the difference tangible. Ask a factual question. A chatbot answers immediately from memory. An agent would pause, decide it needs to verify, call a search tool, read the result, and only then answer. The feedback loop is what makes that verification possible."
-        },
-        {
-          "id": "s2-react-pattern",
-          "title": "The ReAct Pattern: Reason, Then Act",
-          "type": "explanation",
-          "content": "Introduce the name first. ReAct stands for Reason and Act. The idea is that the model alternates between reasoning about the current situation and taking a concrete action. Walk through the loop one step at a time. The agent first reads an Observation, which is whatever the environment last told it. It then writes a Thought, which is a chain-of-thought reasoning step. From that Thought it selects an Action and provides the parameters. The tool runs and returns a Result. That Result becomes the next Observation. Show a short pseudocode block with these four labels clearly annotated. Explain that the loop ends when the agent's Thought concludes that a Final Answer is ready. Reference the original ReAct paper (Yao et al., 2022) in a margin note alongside the pseudocode."
-        },
-        {
-          "id": "s3-tool-definition",
-          "title": "Defining Tools: The @tool Decorator",
+          "id": "s1-simple-agent",
+          "title": "A Simple Agent — Date and Math",
           "type": "interactive_demo",
-          "content": "Start with the key idea in one sentence. A tool is just a Python function with a clear docstring. The LLM never sees the function body. It only sees the name, the parameter types, and what the docstring says. Show three simple tools: one that returns the current date, one that evaluates a math expression, and one that looks up a word definition. For each tool, highlight the docstring and explain why every word in it matters. Then show an interactive cell where the student edits the docstring of one tool and re-runs a question that would call it. A deliberately vague docstring is a good experiment: watch the agent call the tool with wrong parameters or skip it entirely."
+          "content": "Brief intro prose explains the agent loop (chatbot = function, agent = loop). Two tools are defined in an exposed pedagogical cell: get_current_date() and evaluate_math(expr). A hidden cell implements the ReAct loop. A mo.ui.chat interface exposes the agent with four sample prompts. Each reply shows the Thought/Action/Observation steps as blockquotes followed by the Final Answer."
         },
         {
-          "id": "s4-react-demo",
-          "title": "A ReAct Agent in Action: Live Trace",
+          "id": "s2-viz-agent",
+          "title": "A Visualization Agent",
           "type": "interactive_demo",
-          "content": "Now let the agent run. A text input accepts any question the student wants to ask. The three tools from the previous section are available. As the agent works, each step of the ReAct trace streams to the screen: Thought, Action, Action Input, and Observation on separate indented lines. The student watches the loop unfold in real time. A step counter at the bottom shows how many iterations were needed. Encourage the student to ask a question that requires at least two tool calls, then re-read the trace and identify where the agent changed direction based on what a tool returned."
+          "content": "The Titanic dataset is loaded in a hidden cell. Three visualization tools are defined in an exposed pedagogical cell: list_columns(), plot_histogram(column), plot_scatter(x_col, y_col). The latter two return mo.as_html(fig). A hidden cell implements the ReAct loop, handling both string and image (mo) observations. The chat model callable returns mo.vstack with blockquote trace steps and embedded images."
         },
         {
-          "id": "s4b-chat-interface",
-          "title": "Chat with the Agent",
-          "type": "interactive_demo",
-          "content": "After the trace view explains the mechanics, this section re-exposes the same three-tool agent through mo.ui.chat. The custom model callable receives messages[-1].content as the question, calls run_react_agent(), and formats the reasoning trace (Thought/Action/Observation steps as blockquotes) followed by the Final Answer. Sample prompts let students try the agent without typing. show_configuration_controls=False keeps the UI clean."
-        },
-        {
-          "id": "s5-titanic-agent",
-          "title": "Data Detective: Interrogating the Titanic Dataset",
-          "type": "interactive_demo",
-          "content": "Give the agent a harder job. The Titanic dataset is loaded and four tools are available: one that returns column names and types, one that returns sample rows, one that runs a SQL query via DuckDB, and one that returns summary statistics for a column. Before showing the demo, briefly explain each tool and its docstring. Then show the system prompt the agent was given: it instructs the agent to always verify its answer with at least one tool call. Three pre-written question buttons let the student pick a starting question without typing. After the agent answers, the full ReAct trace is visible below. The student reads the trace and checks whether the agent's reasoning matches the tool outputs it received."
-        },
-        {
-          "id": "s6-context-engineering",
-          "title": "Context Engineering: Multi-Agent Isolation for Literature Verification",
-          "type": "demo",
-          "content": "Introduce the problem in one paragraph. When you give a single agent a long list of things to verify, the references start to bleed into each other. The agent may use a detail from one paper to justify a claim about another. This is context confusion, a failure mode that grows worse as the context window fills. Show five academic references: three real, two fabricated. Run a monolithic agent that receives all five at once and is asked to assess each one. Show its full response, including where it makes confident but wrong statements. Then introduce the multi-agent design. A lead agent reads the five references and spawns five sub-agents, one per reference. Each sub-agent receives only its single reference and returns an assessment. The lead agent collects the five assessments and writes a final report. Show the token counts for both approaches and the accuracy of each verdict against a provided ground truth.",
-          "implementation_notes": "Use asyncio.gather to run sub-agents concurrently. Each sub-agent is a separate litellm.completion call with its own message list. The lead agent assembles the results from the sub-agents' string outputs. The five references are hardcoded for reproducibility."
-        },
-        {
-          "id": "s7-task-data-detective",
-          "title": "Student Task: Extend the Data Detective",
+          "id": "s3-student-tool",
+          "title": "Add Your Own Tool",
           "type": "student_task",
           "callout_style": "callout-tip",
-          "description": "The student adds two new tools to the Titanic agent. The first returns a cross-tabulation (pivot table) of two columns. The second filters rows by a column value and returns a count. After adding the tools, the student poses this question to the agent: 'Among female passengers over 30 years old, which ticket class had the highest survival rate, and how does it compare to males in the same age group?' The agent must chain at least three tool calls to answer correctly. A ground-truth cell verifies the numerical answer.",
-          "hint": "Write the docstring first. Describe exactly what the function returns, what the parameters mean, and what format the output is in. The LLM will call your tool exactly as described \u2014 be precise.",
-          "extension": "Modify the system prompt to instruct the agent to always question its first answer and run one additional verification tool call. Does this improve accuracy?"
-        },
-        {
-          "id": "s8-thought-experiment",
-          "title": "Thought Experiment: When Does the Loop Break?",
-          "type": "student_task",
-          "callout_style": "callout-tip",
-          "description": "A broken query tool is provided that always raises a ValueError with a vague error message. The student runs the agent on a simple question and watches what happens. Does the agent retry? Does it give up? Does it hallucinate an answer after failing? The student then edits the error message to be more informative, names the available columns, and explains what went wrong. They run the agent again and compare. The reflection question is short: what does this experiment tell you about the relationship between tool design and agent reliability?",
-          "hint": "Agents learn from their observations. A tool that says 'Error' is less useful than a tool that says 'ValueError: column \"Age\" not found. Available columns: Survived, Pclass, Name, Sex, Age, SibSp, Parch, Ticket, Fare, Cabin, Embarked.'"
+          "description": "An exposed editable cell defines my_tool(input_text) as a scaffold with placeholder body and docstring. A hidden chat cell creates an agent with all four tools (list_columns, plot_histogram, plot_scatter, my_tool). The system prompt reads my_tool.__doc__ dynamically. Students replace the body and docstring, then chat with the extended agent.",
+          "hint": "Write the docstring first. The agent reads it to decide when to call your function. A vague docstring means the agent will never call it — or will call it with wrong arguments."
         }
       ]
     }
