@@ -984,9 +984,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     TOT_PROBLEM = (
-        "Bob is in the living room. He walks to the kitchen, picks up an apple, "
-        "goes to the bedroom, puts the apple in the drawer, then goes back to the kitchen. "
-        "Where is the apple?"
+        "I want to wash my car. The car wash is 50 meters away. Should I walk or drive?"
     )
 
     tot_toggle = mo.ui.switch(label="Use Tree-of-Thought prompt", value=False)
@@ -1147,7 +1145,7 @@ def _(
             )
         else:
             _ks_stat, _ks_p = stats.kstest(_numbers, "norm")
-            _passed = _ks_p > 0.05
+            _passed = _ks_p > 0.8  # Using a high threshold to encourage strong Gaussian fit
 
             _fig, _ax = plt.subplots(figsize=(8, 4))
             _ax.hist(_numbers, bins=30, density=True, alpha=0.6, label=f"LLM output (n={len(_numbers)})")
@@ -1173,6 +1171,9 @@ def _(
                         ),
                         kind=_kind,
                     ),
+                    mo.accordion({
+                        "Show raw model output": mo.md(f"```\n{_g_resp}\n```")
+                    }),
                 ]
             )
     _gauss_display
