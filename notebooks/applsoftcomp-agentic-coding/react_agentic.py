@@ -444,7 +444,6 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(get_current_date):
-    import inspect as _inspect
     TOOLS = {"get_current_date": get_current_date, "evaluate_math": evaluate_math, "define_word": define_word}
     TOOL_DESC = (
         "You have access to exactly these three tools:\n"
@@ -458,11 +457,13 @@ def _(get_current_date):
         "After receiving an Observation, continue with another Thought/Action or write:\n"
         "Final Answer: <your final answer to the user>"
     )
-    return TOOLS, TOOL_DESC, _inspect
+    return TOOLS, TOOL_DESC
 
 
 @app.cell(hide_code=True)
-def _(TOOLS, TOOL_DESC, _inspect, call_llm, re):
+def _(TOOLS, TOOL_DESC, call_llm, re):
+    import inspect as _inspect
+
     def run_react_agent(question, max_steps=8):
         # ReAct loop: Thought → Action → Observation → repeat until Final Answer
         trace, msgs = [], [{"role": "system", "content": TOOL_DESC}, {"role": "user", "content": question}]
