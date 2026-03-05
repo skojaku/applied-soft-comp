@@ -2,24 +2,25 @@
 # requires-python = ">=3.10"
 # dependencies = [
 #   "marimo",
-#   "litellm",
+#   "litellm==1.82.0",
 #   "langchain",
 #   "langchain-community",
-#   "pandas",
-#   "matplotlib",
-#   "duckdb",
+#   "pandas==3.0.1",
+#   "matplotlib==3.10.8",
+#   "duckdb==1.4.4",
 # ]
 # ///
 
 import marimo
 
-__generated_with = "0.10.0"
-app = marimo.App(width="medium", title="Agentic AI: From Reasoning to Action")
+__generated_with = "0.20.4"
+app = marimo.App(width="medium")
 
 
 @app.cell(hide_code=True)
 def _():
     import marimo as mo
+
     return (mo,)
 
 
@@ -27,41 +28,42 @@ def _():
 def _():
     import re
     import matplotlib.pyplot as plt
+
     return plt, re
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        # Agentic AI: From Reasoning to Action
+    mo.md(r"""
+    # Agentic AI: From Reasoning to Action
 
-        *The ReAct loop, LangChain tools, and context engineering through multi-agent isolation*
+    *The ReAct loop, LangChain tools, and context engineering through multi-agent isolation*
 
-        /// tip | How to run this notebook
-        Download this file, then open a terminal and run:
+    /// tip | How to run this notebook
+    Download this file, then open a terminal and run:
 
-        ```
-        marimo edit --sandbox react_agentic.py
-        ```
+    ```
+    marimo edit --sandbox react_agentic.py
+    ```
 
-        If you do not have marimo installed, install it first with `pip install marimo` or run it without installation using `uvx marimo edit --sandbox react_agentic.py`. The `--sandbox` flag creates an isolated environment and installs all dependencies automatically.
-        ///
+    If you do not have marimo installed, install it first with `pip install marimo` or run it without installation using `uvx marimo edit --sandbox react_agentic.py`. The `--sandbox` flag creates an isolated environment and installs all dependencies automatically.
+    ///
 
-        /// note | What you'll learn in this module
-        This module introduces agentic AI systems. We will explore how an agent differs from
-        a chatbot by operating in a feedback loop, examine the ReAct pattern (Reason and Act)
-        that structures this loop, and understand how context engineering through multi-agent
-        isolation improves accuracy on complex tasks.
-        ///
-        """
-    )
+    /// note | What you'll learn in this module
+    This module introduces agentic AI systems. We will explore how an agent differs from
+    a chatbot by operating in a feedback loop, examine the ReAct pattern (Reason and Act)
+    that structures this loop, and understand how context engineering through multi-agent
+    isolation improves accuracy on complex tasks.
+    ///
+    """)
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md("## Configuration")
+    mo.md("""
+    ## Configuration
+    """)
     return
 
 
@@ -97,7 +99,7 @@ def _(mo):
         ),
     ])
     config_panel
-    return api_base_input, api_key_input, model_input, config_panel
+    return api_base_input, api_key_input, model_input
 
 
 @app.cell(hide_code=True)
@@ -226,32 +228,30 @@ def _(llm_api_base, llm_api_key, llm_model, mo):
             "```"
         )
     })
-    return call_llm, litellm
+    return (call_llm,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Section 1: Agent vs. Chatbot — A State Machine, Not a Function
+    mo.md(r"""
+    ## Section 1: Agent vs. Chatbot — A State Machine, Not a Function
 
-        A chatbot is a function: one input, one output, done. You send a message and receive
-        a reply. The interaction is stateless from the model's perspective.
+    A chatbot is a function: one input, one output, done. You send a message and receive
+    a reply. The interaction is stateless from the model's perspective.
 
-        An agent is a loop. It observes the current state of the world, decides what to do,
-        takes an action, and then observes the result. That new observation feeds into the
-        next decision. The loop continues until the agent decides it has a final answer.
+    An agent is a loop. It observes the current state of the world, decides what to do,
+    takes an action, and then observes the result. That new observation feeds into the
+    next decision. The loop continues until the agent decides it has a final answer.
 
-        Consider a concrete example. Ask both a chatbot and an agent: "What is the population
-        of the city with the longest name in Europe?" A chatbot answers immediately from memory,
-        which may be wrong or outdated. An agent pauses, decides it needs to search, calls a
-        search tool, reads the result, and only then answers. The feedback loop is what makes
-        verification possible.
+    Consider a concrete example. Ask both a chatbot and an agent: "What is the population
+    of the city with the longest name in Europe?" A chatbot answers immediately from memory,
+    which may be wrong or outdated. An agent pauses, decides it needs to search, calls a
+    search tool, reads the result, and only then answers. The feedback loop is what makes
+    verification possible.
 
-        The figure below illustrates the difference. The chatbot is a single arrow from input
-        to output. The agent is a cycle.
-        """
-    )
+    The figure below illustrates the difference. The chatbot is a single arrow from input
+    to output. The agent is a cycle.
+    """)
     return
 
 
@@ -280,145 +280,152 @@ def _(mo, plt):
         return _fig
 
     mo.accordion({"Chatbot vs. Agent diagram — click to view": mo.as_html(_make_diagram())})
-    return FancyArrowPatch, mpatches
+    return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Section 2: The ReAct Pattern — Reason, Then Act
+    mo.md(r"""
+    ## Section 2: The ReAct Pattern — Reason, Then Act
 
-        ReAct stands for Reason and Act. The idea is that the model alternates between
-        reasoning about the current situation and taking a concrete action.
+    ReAct stands for Reason and Act. The idea is that the model alternates between
+    reasoning about the current situation and taking a concrete action.
 
-        The loop works as follows. The agent first reads an **Observation**: whatever the
-        environment last told it. It then writes a **Thought**: a chain-of-thought reasoning
-        step. From that Thought, it selects an **Action** and provides the parameters. The
-        tool runs and returns a **Result**. That Result becomes the next Observation. The
-        loop ends when the agent's Thought concludes that a Final Answer is ready.
+    The loop works as follows. The agent first reads an **Observation**: whatever the
+    environment last told it. It then writes a **Thought**: a chain-of-thought reasoning
+    step. From that Thought, it selects an **Action** and provides the parameters. The
+    tool runs and returns a **Result**. That Result becomes the next Observation. The
+    loop ends when the agent's Thought concludes that a Final Answer is ready.
 
-        The pseudocode below shows this structure with the four labels clearly annotated.
-        """
-    )
+    The pseudocode below shows this structure with the four labels clearly annotated.
+    """)
     return
 
 
-@app.cell(hide_code=False)
+@app.cell
 def _(mo):
     # ReAct loop: the four labels the agent alternates between each iteration.
     mo.callout(mo.md("""```
-Observation: [initial question or tool result]
-Thought:     [chain-of-thought reasoning step]
-Action:      [tool_name]
-Action Input: [tool parameters as JSON]
-Observation: [tool return value]
-Thought:     [reasoning based on observation]
-... (repeat until done)
-Thought:     I now have enough information to answer.
-Final Answer: [the answer to the original question]
-```
-*Yao et al. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. ICLR 2023.*
-"""), kind="info")
+    Observation: [initial question or tool result]
+    Thought:     [chain-of-thought reasoning step]
+    Action:      [tool_name]
+    Action Input: [tool parameters as JSON]
+    Observation: [tool return value]
+    Thought:     [reasoning based on observation]
+    ... (repeat until done)
+    Thought:     I now have enough information to answer.
+    Final Answer: [the answer to the original question]
+    ```
+    *Yao et al. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. ICLR 2023.*
+    """), kind="info")
+    return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Section 3: Defining Tools — The @tool Decorator
+    mo.md(r"""
+    ## Section 3: Defining Tools — The @tool Decorator
 
-        A tool is just a Python function with a clear docstring. The LLM never sees the
-        function body. It only sees the name, the parameter types, and what the docstring says.
+    A tool is just a Python function with a clear docstring. The LLM never sees the
+    function body. It only sees the name, the parameter types, and what the docstring says.
 
-        Three simple tools are defined below. For each one, notice how the docstring describes
-        exactly what the function does, what its parameters mean, and what it returns. Every
-        word in the docstring shapes how the agent decides to call the tool.
+    Three simple tools are defined below. For each one, notice how the docstring describes
+    exactly what the function does, what its parameters mean, and what it returns. Every
+    word in the docstring shapes how the agent decides to call the tool.
 
-        Try editing the docstring of one tool, then run a question that would normally use it.
-        A vague or misleading docstring causes the agent to call the tool with wrong parameters
-        or skip it entirely.
-        """
-    )
+    Try editing the docstring of one tool, then run a question that would normally use it.
+    A vague or misleading docstring causes the agent to call the tool with wrong parameters
+    or skip it entirely.
+    """)
     return
 
 
-@app.cell(hide_code=False)
+@app.cell
 def _():
     import datetime
     def get_current_date() -> str:
         """Return today's date as a string in YYYY-MM-DD format.
         Use this tool when the user asks what today's date is."""
         return datetime.date.today().isoformat()
-    return datetime, get_current_date
+
+    return (get_current_date,)
 
 
-@app.cell(hide_code=False)
-def _():
-    def evaluate_math(expression: str) -> str:
-        """Evaluate a mathematical expression and return the result as a string.
-        The expression must be a valid Python arithmetic expression (e.g., '2 + 2').
-        Do not use this for symbolic algebra — only numeric calculations."""
-        try:
-            allowed = set("0123456789+-*/(). ")
-            if not all(c in allowed for c in expression): return "Error: disallowed characters."
-            return str(eval(expression, {"__builtins__": {}}))  # noqa: S307
-        except Exception as e: return f"Error: {e}"
-    return (evaluate_math,)
+@app.function
+def evaluate_math(expression: str) -> str:
+    """Evaluate a mathematical expression and return the result as a string.
+    The expression must be a valid Python arithmetic expression (e.g., '2 + 2').
+    Do not use this for symbolic algebra — only numeric calculations."""
+    try:
+        allowed = set("0123456789+-*/(). ")
+        if not all(c in allowed for c in expression): return "Error: disallowed characters."
+        return str(eval(expression, {"__builtins__": {}}))  # noqa: S307
+    except Exception as e: return f"Error: {e}"
 
 
-@app.cell(hide_code=False)
-def _():
-    def define_word(word: str) -> str:
-        """Look up the definition of a common English word. Returns one sentence.
-        Use this when the user asks what a word means. Cannot look up jargon."""
-        _d = {"serendipity": "The occurrence of fortunate events by chance.",
-              "ephemeral": "Lasting for a very short time; transitory.",
-              "algorithm": "A step-by-step procedure for solving a problem.",
-              "entropy": "A measure of disorder or randomness in a system.",
-              "heuristic": "A practical approach that is good enough for the goal."}
-        return _d.get(word.lower(), f"Definition not found for '{word}'.")
-    return (define_word,)
+@app.function
+def define_word(word: str) -> str:
+    """Look up the definition of a common English word. Returns one sentence.
+    Use this when the user asks what a word means. Cannot look up jargon."""
+    _d = {"serendipity": "The occurrence of fortunate events by chance.",
+          "ephemeral": "Lasting for a very short time; transitory.",
+          "algorithm": "A step-by-step procedure for solving a problem.",
+          "entropy": "A measure of disorder or randomness in a system.",
+          "heuristic": "A practical approach that is good enough for the goal."}
+    return _d.get(word.lower(), f"Definition not found for '{word}'.")
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        "```python\n"
-        "def get_current_date() -> str:\n"
-        '    """Return today\'s date as a string in YYYY-MM-DD format.\n'
-        "    Use this tool when the user asks what today's date is.\"\"\"\n"
-        "    ...\n\n"
-        "def evaluate_math(expression: str) -> str:\n"
-        '    """Evaluate a mathematical expression and return the result.\n'
-        "    The expression must be a valid Python arithmetic expression.\"\"\"\n"
-        "    ...\n\n"
-        "def define_word(word: str) -> str:\n"
-        '    """Look up the definition of a common English word.\n'
-        "    Returns a brief one-sentence definition.\"\"\"\n"
-        "    ...\n"
-        "```"
-    )
+    mo.md("""
+    ```python
+    "
+        "def get_current_date() -> str:
+    "
+        '    "\""Return today's date as a string in YYYY-MM-DD format.
+    '
+        "    Use this tool when the user asks what today's date is."\""
+    "
+        "    ...
+
+    "
+        "def evaluate_math(expression: str) -> str:
+    "
+        '    "\""Evaluate a mathematical expression and return the result.
+    '
+        "    The expression must be a valid Python arithmetic expression."\""
+    "
+        "    ...
+
+    "
+        "def define_word(word: str) -> str:
+    "
+        '    "\""Look up the definition of a common English word.
+    '
+        "    Returns a brief one-sentence definition."\""
+    "
+        "    ...
+    "
+        "```
+    """)
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Section 4: A ReAct Agent in Action — Live Trace
+    mo.md(r"""
+    ## Section 4: A ReAct Agent in Action — Live Trace
 
-        Let us watch the agent work. Type any question in the box below. The three tools
-        from the previous section are available. As the agent reasons through the problem,
-        each step of the ReAct trace appears on screen: Thought, Action, Action Input, and
-        Observation on separate lines.
+    Let us watch the agent work. Type any question in the box below. The three tools
+    from the previous section are available. As the agent reasons through the problem,
+    each step of the ReAct trace appears on screen: Thought, Action, Action Input, and
+    Observation on separate lines.
 
-        Try asking a question that requires at least two tool calls, for example: "What is
-        today's date and how many days until January 1st of next year?" Then re-read the
-        trace and identify exactly where the agent changed direction based on what a tool
-        returned.
-        """
-    )
+    Try asking a question that requires at least two tool calls, for example: "What is
+    today's date and how many days until January 1st of next year?" Then re-read the
+    trace and identify exactly where the agent changed direction based on what a tool
+    returned.
+    """)
     return
 
 
@@ -436,15 +443,26 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(define_word, evaluate_math, get_current_date):
-    import json
+def _(get_current_date):
+    import inspect as _inspect
     TOOLS = {"get_current_date": get_current_date, "evaluate_math": evaluate_math, "define_word": define_word}
-    TOOL_DESC = "Tools: get_current_date(), evaluate_math(expr), define_word(word).\nFormat: Thought/Action/Action Input/Final Answer"
-    return TOOL_DESC, TOOLS, json
+    TOOL_DESC = (
+        "You have access to exactly these three tools:\n"
+        "  1. get_current_date() — returns today's date as YYYY-MM-DD. Takes NO arguments.\n"
+        "  2. evaluate_math(expr) — evaluates a Python arithmetic expression, e.g. '2+2'.\n"
+        "  3. define_word(word) — returns the definition of a common English word.\n\n"
+        "Always respond in this exact format:\n"
+        "Thought: <your reasoning>\n"
+        "Action: <tool_name>\n"
+        "Action Input: <argument, or 'none' if the tool takes no arguments>\n\n"
+        "After receiving an Observation, continue with another Thought/Action or write:\n"
+        "Final Answer: <your final answer to the user>"
+    )
+    return TOOLS, TOOL_DESC, _inspect
 
 
 @app.cell(hide_code=True)
-def _(TOOL_DESC, TOOLS, call_llm, re):
+def _(TOOLS, TOOL_DESC, _inspect, call_llm, re):
     def run_react_agent(question, max_steps=8):
         # ReAct loop: Thought → Action → Observation → repeat until Final Answer
         trace, msgs = [], [{"role": "system", "content": TOOL_DESC}, {"role": "user", "content": question}]
@@ -455,14 +473,22 @@ def _(TOOL_DESC, TOOLS, call_llm, re):
             if "Final Answer:" in text: trace.append({"type": "final", "content": text[text.index("Final Answer:")+13:].strip()}); break
             am, im = re.search(r"Action:\s*(.+)", text), re.search(r"Action Input:\s*(.+)", text)
             if tm := re.search(r"Thought:\s*(.+?)(?:\nAction|$)", text, re.DOTALL): trace.append({"type": "thought", "content": tm.group(1).strip()})
-            if am and im:
-                tn, ti = am.group(1).strip(), im.group(1).strip()
-                try: obs = TOOLS[tn](ti) if tn in TOOLS else f"Tool '{tn}' not found."
-                except Exception as e: obs = f"Error: {e}"
+            if am:
+                tn = am.group(1).strip()
+                ti = im.group(1).strip() if im else "none"
+                if tn in TOOLS:
+                    try:
+                        # call with no args if the function takes no parameters
+                        _params = _inspect.signature(TOOLS[tn]).parameters
+                        obs = TOOLS[tn]() if not _params else TOOLS[tn](ti)
+                    except Exception as e: obs = f"Error: {e}"
+                else:
+                    obs = f"Tool '{tn}' not found. Available tools: {', '.join(TOOLS)}."
                 trace += [{"type": "action", "tool": tn, "input": ti}, {"type": "observation", "content": obs}]
                 msgs.append({"role": "user", "content": f"Observation: {obs}"})
             else: trace.append({"type": "thought", "content": text}); break
         return trace
+
     return (run_react_agent,)
 
 
@@ -491,21 +517,19 @@ def _(agent_question, mo, run_agent_btn, run_react_agent):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Section 5: Data Detective — Interrogating the Titanic Dataset
+    mo.md(r"""
+    ## Section 5: Data Detective — Interrogating the Titanic Dataset
 
-        Let us give the agent a harder job. The Titanic dataset is loaded below, and the agent
-        has four tools available: one that returns column names and types, one that returns sample
-        rows, one that runs a SQL query via DuckDB, and one that returns summary statistics for
-        a column.
+    Let us give the agent a harder job. The Titanic dataset is loaded below, and the agent
+    has four tools available: one that returns column names and types, one that returns sample
+    rows, one that runs a SQL query via DuckDB, and one that returns summary statistics for
+    a column.
 
-        Before running the agent, read each tool's docstring. The system prompt instructs the
-        agent to always verify its answer with at least one tool call. Pick a question from the
-        buttons below, or type your own. After the agent answers, read the trace and check whether
-        its reasoning actually matches the tool outputs it received.
-        """
-    )
+    Before running the agent, read each tool's docstring. The system prompt instructs the
+    agent to always verify its answer with at least one tool call. Pick a question from the
+    buttons below, or type your own. After the agent answers, read the trace and check whether
+    its reasoning actually matches the tool outputs it received.
+    """)
     return
 
 
@@ -530,13 +554,7 @@ def _(mo):
         titanic_question,
         run_titanic_btn,
     ])
-    return (
-        preset_q1,
-        preset_q2,
-        preset_q3,
-        run_titanic_btn,
-        titanic_question,
-    )
+    return preset_q1, preset_q2, preset_q3, run_titanic_btn, titanic_question
 
 
 @app.cell(hide_code=True)
@@ -616,7 +634,7 @@ def _(duckdb, mo, titanic_df):
             "```"
         )
     })
-    return TITANIC_SYSTEM_PROMPT, TITANIC_TOOLS, get_sample_rows, get_summary_stats, inspect_schema, run_sql_query
+    return TITANIC_SYSTEM_PROMPT, TITANIC_TOOLS
 
 
 @app.cell(hide_code=True)
@@ -654,11 +672,19 @@ def _(TITANIC_SYSTEM_PROMPT, TITANIC_TOOLS, call_llm, mo, re):
             "```"
         )
     })
-    return run_titanic_agent,
+    return (run_titanic_agent,)
 
 
 @app.cell(hide_code=True)
-def _(mo, preset_q1, preset_q2, preset_q3, run_titanic_agent, run_titanic_btn, titanic_question):
+def _(
+    mo,
+    preset_q1,
+    preset_q2,
+    preset_q3,
+    run_titanic_agent,
+    run_titanic_btn,
+    titanic_question,
+):
     _q = None
     if preset_q1.value: _q = "What was the overall survival rate?"
     elif preset_q2.value: _q = "What is the average age of survivors vs. non-survivors?"
@@ -688,32 +714,30 @@ def _(mo, preset_q1, preset_q2, preset_q3, run_titanic_agent, run_titanic_btn, t
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Section 6: Context Engineering — Multi-Agent Isolation for Literature Verification
+    mo.md(r"""
+    ## Section 6: Context Engineering — Multi-Agent Isolation for Literature Verification
 
-        When you give a single agent a long list of things to verify, the references start to
-        bleed into each other. The agent may use a detail from one paper to justify a claim
-        about another. This is context confusion, and it grows worse as the context window fills.
+    When you give a single agent a long list of things to verify, the references start to
+    bleed into each other. The agent may use a detail from one paper to justify a claim
+    about another. This is context confusion, and it grows worse as the context window fills.
 
-        Below are five academic references: three real, two fabricated. The real papers are
-        well-known landmarks in machine learning. The fabricated papers use plausible-sounding
-        author names, venues, and titles. A real LLM can be fooled by the surface plausibility.
+    Below are five academic references: three real, two fabricated. The real papers are
+    well-known landmarks in machine learning. The fabricated papers use plausible-sounding
+    author names, venues, and titles. A real LLM can be fooled by the surface plausibility.
 
-        First, run the monolithic agent. It receives all five references in a single prompt and
-        is asked to assess each one. Watch whether it makes confident but incorrect statements,
-        and pay attention to where its verdicts bleed across references. The token counter shows
-        how much of the context window this single call consumes.
+    First, run the monolithic agent. It receives all five references in a single prompt and
+    is asked to assess each one. Watch whether it makes confident but incorrect statements,
+    and pay attention to where its verdicts bleed across references. The token counter shows
+    how much of the context window this single call consumes.
 
-        Then run the five isolated sub-agents. Each sub-agent receives only one reference. The
-        token count per sub-agent is much lower, and the verdicts are more reliable. The key
-        insight is not just accuracy but the reason for accuracy: a clean context window gives
-        the model no opportunity to confuse one paper with another.
+    Then run the five isolated sub-agents. Each sub-agent receives only one reference. The
+    token count per sub-agent is much lower, and the verdicts are more reliable. The key
+    insight is not just accuracy but the reason for accuracy: a clean context window gives
+    the model no opportunity to confuse one paper with another.
 
-        *Reflection: Did the monolithic agent make any wrong verdicts? Did it mix up authors
-        or venues? Which approach was more accurate, and why?*
-        """
-    )
+    *Reflection: Did the monolithic agent make any wrong verdicts? Did it mix up authors
+    or venues? Which approach was more accurate, and why?*
+    """)
     return
 
 
@@ -905,7 +929,7 @@ def _(REFERENCES, call_llm, mo, re, run_monolithic_btn, run_multiagent_btn):
     else:
         _output = mo.md("*Click a button above to run the monolithic or multi-agent demo.*")
     _output
-    return VERIFY_SYSTEM, ThreadPoolExecutor, _parse_verdicts, verify_single
+    return
 
 
 @app.cell(hide_code=True)
@@ -915,20 +939,20 @@ def _(mo):
         mo.callout(
             mo.md(
                 r"""
-**Try it yourself**
+    **Try it yourself**
 
-Add two new tools to the Titanic agent. The first returns a cross-tabulation (pivot table)
-of two columns. The second filters rows by a column value and returns a count.
+    Add two new tools to the Titanic agent. The first returns a cross-tabulation (pivot table)
+    of two columns. The second filters rows by a column value and returns a count.
 
-After adding both tools, pose this question to the agent: "Among female passengers over
-30 years old, which ticket class had the highest survival rate, and how does it compare
-to males in the same age group?"
+    After adding both tools, pose this question to the agent: "Among female passengers over
+    30 years old, which ticket class had the highest survival rate, and how does it compare
+    to males in the same age group?"
 
-The agent must chain at least three tool calls to answer correctly. A ground-truth cell
-verifies the numerical answer.
+    The agent must chain at least three tool calls to answer correctly. A ground-truth cell
+    verifies the numerical answer.
 
-**Extension:** Modify the system prompt to instruct the agent to always question its
-first answer and run one additional verification tool call. Does this improve accuracy?
+    **Extension:** Modify the system prompt to instruct the agent to always question its
+    first answer and run one additional verification tool call. Does this improve accuracy?
                 """
             ),
             kind="info",
@@ -956,7 +980,7 @@ first answer and run one additional verification tool call. Does this improve ac
     return
 
 
-@app.cell(hide_code=False)
+@app.cell
 def _(pd, titanic_df):
     def cross_tabulation(col1_col2: str) -> str:
         """Return a cross-tabulation of two columns as a string.
@@ -997,7 +1021,16 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(TITANIC_SYSTEM_PROMPT, TITANIC_TOOLS, call_llm, cross_tabulation, filter_and_count, mo, re, titanic_df):
+def _(
+    TITANIC_SYSTEM_PROMPT,
+    TITANIC_TOOLS,
+    call_llm,
+    cross_tabulation,
+    filter_and_count,
+    mo,
+    re,
+    titanic_df,
+):
     EXTENDED_TOOLS = dict(TITANIC_TOOLS)
     EXTENDED_TOOLS["cross_tabulation"] = cross_tabulation
     EXTENDED_TOOLS["filter_and_count"] = filter_and_count
@@ -1043,11 +1076,27 @@ def _(TITANIC_SYSTEM_PROMPT, TITANIC_TOOLS, call_llm, cross_tabulation, filter_a
             f"Ground truth: Female → Class {best_f_class} ({best_f_rate:.1%}), Male → Class {best_m_class} ({best_m_rate:.1%})"
         )
     })
-    return EXTENDED_TOOLS, TARGET_QUESTION, best_f_class, best_f_rate, best_m_class, best_m_rate, run_extended_agent
+    return (
+        TARGET_QUESTION,
+        best_f_class,
+        best_f_rate,
+        best_m_class,
+        best_m_rate,
+        run_extended_agent,
+    )
 
 
 @app.cell(hide_code=True)
-def _(TARGET_QUESTION, best_f_class, best_f_rate, best_m_class, best_m_rate, mo, run_extended_agent, run_extended_btn):
+def _(
+    TARGET_QUESTION,
+    best_f_class,
+    best_f_rate,
+    best_m_class,
+    best_m_rate,
+    mo,
+    run_extended_agent,
+    run_extended_btn,
+):
     if run_extended_btn.value:
         _etrace = run_extended_agent(TARGET_QUESTION)
         _eparts = [mo.md("### Extended Agent Trace")]
@@ -1086,14 +1135,14 @@ def _(mo):
         mo.callout(
             mo.md(
                 r"""
-**Try it yourself**
+    **Try it yourself**
 
-A broken query tool is defined below that always raises a ValueError with a vague
-error message. Run the agent on a simple question and watch what happens. Does the
-agent retry? Does it give up? Does it hallucinate an answer after failing?
+    A broken query tool is defined below that always raises a ValueError with a vague
+    error message. Run the agent on a simple question and watch what happens. Does the
+    agent retry? Does it give up? Does it hallucinate an answer after failing?
 
-Then edit the error message to be more informative: name the available columns and
-explain what went wrong. Run the agent again and compare.
+    Then edit the error message to be more informative: name the available columns and
+    explain what went wrong. Run the agent again and compare.
                 """
             ),
             kind="info",
@@ -1120,7 +1169,7 @@ explain what went wrong. Run the agent again and compare.
     return
 
 
-@app.cell(hide_code=False)
+@app.cell
 def _(TITANIC_TOOLS):
     # ✏️ Edit the error message below — the agent learns from what your tool tells it.
     def broken_query_tool(query: str) -> str:
@@ -1131,7 +1180,7 @@ def _(TITANIC_TOOLS):
     BROKEN_TOOLS = dict(TITANIC_TOOLS)
     BROKEN_TOOLS["run_sql_query"] = broken_query_tool
     BROKEN_QUESTION = "What is the average fare paid by first-class passengers?"
-    return BROKEN_QUESTION, BROKEN_TOOLS, broken_query_tool
+    return BROKEN_TOOLS, broken_query_tool
 
 
 @app.cell(hide_code=True)
