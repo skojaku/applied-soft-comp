@@ -229,6 +229,11 @@
       "id": "US-044",
       "story": "As a student, I want a Section 7 'Tree of Thoughts' in prompt_engineering.py, placed after the hallucination section, that explains the three core ideas of Yao et al. 2023 (multi-path generation, self-evaluation, search-based pruning), shows Hulbert 2023's single-prompt approximation (the 'three experts' prompt), and provides an interactive toggle comparing a standard prompt against the ToT prompt on the same reasoning problem — so that I can see how structured exploration changes the model's reasoning style.",
       "passes": true
+    },
+    {
+      "id": "US-045",
+      "story": "As a student, I want a Section 7 'Self-Consistency' in prompt_engineering.py, placed between the hallucination section and the Tree of Thoughts section (which becomes Section 8), that explains Wang et al. 2022's insight that running the same chain-of-thought prompt multiple times and taking the majority vote over final answers improves reliability — so that I can see how aggregating reasoning paths reduces variance and corrects individual-run errors. The demo shows a slider to choose 3–9 runs, a run button, a per-run reasoning display, and a majority-vote result with agreement count.",
+      "passes": true
     }
   ],
   "notebooks": [
@@ -318,7 +323,16 @@
           "content": "Open with the problem. LLMs are trained to be helpful, which means they often produce a confident-sounding answer even when they have no reliable information. This is hallucination. One simple intervention is uncertainty permission: telling the model it is acceptable to say 'I do not know.' The demo asks the model about a fabricated academic paper. A toggle adds the phrase 'If you are not certain, say so' to the system prompt. The student runs both versions and reads the responses. The reflection question is: did permission change the model's confidence, and should it always be included?"
         },
         {
-          "id": "s7-tree-of-thoughts",
+          "id": "s7-self-consistency",
+          "title": "Self-Consistency — Majority Vote Over Many Reasoning Paths",
+          "type": "interactive_demo",
+          "content": "Open with the core insight from Wang et al. 2022: a single chain-of-thought run can go wrong, but if you sample the same prompt many times and take the majority vote over final answers, the noise cancels out and reliability improves. The analogy is scientific replication: one experiment can be wrong; the consensus of many is more trustworthy. The demo uses the bat-and-ball problem ($1.10 total, bat costs $1 more than ball; what does the ball cost?), a classic cognitive bias trap. A slider lets the student choose 3, 5, 7, or 9 independent runs. On click, the notebook calls the LLM once per run with the same CoT prompt, extracts the numeric answer with a regex, tallies with a Counter, and shows per-run reasoning plus a final majority-vote banner. The student sees whether all runs agree, or whether some diverge and the vote corrects them.",
+          "references": [
+            "Wang et al. (2022). Self-Consistency Improves Chain of Thought Reasoning in Language Models. ICLR 2023."
+          ]
+        },
+        {
+          "id": "s8-tree-of-thoughts",
           "title": "Tree of Thoughts — Exploring Many Paths at Once",
           "type": "interactive_demo",
           "content": "Explain the three core ideas from Yao et al. 2023: (1) generate multiple candidate thoughts at each reasoning step rather than committing to one; (2) evaluate each candidate for promise before expanding it; (3) use a search strategy (BFS or DFS) to prune unpromising branches. Contrast this with chain-of-thought, which follows a single linear path. Then introduce Hulbert 2023's single-prompt approximation: 'Imagine three different experts are answering this question. All experts will write down one step of their thinking, then share it with the group. Then all experts will go on to the next step, and so on. If any expert realises they are wrong at any point then they leave.' Show a toggle that switches between the standard prompt and the ToT prompt on the same fixed reasoning problem. The student runs both and reads the responses, noting whether the experts diverged, self-corrected, or reached a different answer than the standard prompt. Cite both papers in a margin note.",

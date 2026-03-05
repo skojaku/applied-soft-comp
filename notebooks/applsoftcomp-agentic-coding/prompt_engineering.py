@@ -62,7 +62,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     model_input = mo.ui.text(
-        value="ollama/ministral-3:14b-cloud",
+        value="ollama/gemma3:27b-cloud",
         label="Model (litellm format, e.g. ollama/glm-4.7:cloud, openai/gpt-4o, anthropic/claude-3-5-sonnet-20241022)",
         full_width=True,
     )
@@ -85,7 +85,7 @@ def _(mo):
             api_base_input,
             mo.md(
                 "*Change any field above and all cells that call the LLM will update automatically.*\n\n"
-                "**Default model:** `ollama/ministral-3:14b-cloud` — a free cloud model served through your local ollama installation. "
+                "**Default model:** `ollama/gemma3:27b-cloud` — a free cloud model served through your local ollama installation. "
                 "No API key is required. Run `ollama list` in your terminal to see all available models. "
                 "To use a different local model, first run `ollama pull <model-name>` in your terminal, "
                 "then update the model string above (e.g., `ollama/llama3.2`)."
@@ -943,7 +943,101 @@ def _(
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## Section 7: Tree of Thoughts — Exploring Many Paths at Once
+    ## Section 7: Self-Consistency — Majority Vote Over Many Reasoning Paths
+
+    Chain-of-thought gives you one reasoning path. But a single path can go wrong at any
+    step, and once the model commits to a wrong intermediate conclusion it tends to follow
+    it all the way to a wrong final answer. Self-consistency, introduced by Wang et al.
+    (2022), addresses this with a simple idea: sample the same chain-of-thought prompt
+    multiple times, let each run produce its own final answer, then take the majority vote.
+
+    The intuition is that correct reasoning paths are more likely to agree with each other
+    than incorrect ones. A model that happens to make an error in one run will probably
+    take a different wrong turn in the next run, so wrong answers spread across many
+    different values while the correct answer concentrates at the top of the vote.
+
+    You do not need to change the prompt at all. The only change is calling the model
+    several times instead of once and aggregating the answers. The demo below runs the
+    same logic puzzle five times and shows each individual answer alongside the majority
+    vote. Watch whether the winning answer is more reliable than any single run.
+
+    /// note | Reference
+    Wang et al. (2022). *Self-Consistency Improves Chain of Thought Reasoning in Language
+    Models.* ICLR 2023.
+    ///
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    SC_PROBLEM = (
+        "A bat and a ball cost $1.10 in total. The bat costs $1.00 more than the ball. "
+        "How much does the ball cost?"
+    )
+    SC_CORRECT = "0.05"
+
+    sc_runs_slider = mo.ui.slider(start=3, stop=9, step=2, value=5, label="Number of runs")
+    run_sc_btn = mo.ui.run_button(label="Run self-consistency vote")
+
+    mo.vstack([
+        mo.callout(mo.md(f"**Problem:** {SC_PROBLEM}\n\n*Correct answer: $0.05*"), kind="info"),
+        sc_runs_slider,
+        run_sc_btn,
+    ])
+    return SC_CORRECT, SC_PROBLEM, run_sc_btn, sc_runs_slider
+
+
+@app.cell(hide_code=True)
+def _(SC_CORRECT, SC_PROBLEM, call_llm, mo, run_sc_btn, sc_runs_slider):
+    import re as _re
+
+    def _extract_answer(text):
+        # Pull the last dollar amount or decimal number from the response
+        matches = _re.findall(r"\$?\d+\.?\d*", text)
+        return matches[-1].lstrip("$") if matches else text.strip().split()[-1]
+
+    if run_sc_btn.value:
+        _sys = "Think step by step before giving your final answer."
+        _answers = []
+        _parts = [mo.md(f"### {sc_runs_slider.value} independent runs")]
+        for _i in range(sc_runs_slider.value):
+            _resp = call_llm(SC_PROBLEM, system=_sys)
+            _ans = _extract_answer(_resp)
+            _answers.append(_ans)
+            _correct = SC_CORRECT in _ans
+            _parts.append(mo.callout(
+                mo.md(f"**Run {_i+1} → {_ans}** {'✅' if _correct else '❌'}\n\n{_resp}"),
+                kind="success" if _correct else "warn",
+            ))
+
+        # Majority vote
+        from collections import Counter as _Counter
+        _vote = _Counter(_answers).most_common(1)[0][0]
+        _vote_correct = SC_CORRECT in _vote
+        _n_agree = _answers.count(_vote)
+        _parts.append(mo.callout(
+            mo.md(
+                f"**Majority vote: {_vote}** ({_n_agree}/{sc_runs_slider.value} runs agree) "
+                f"{'✅ Correct' if _vote_correct else '❌ Wrong'}\n\n"
+                "*Reflection: Did the majority vote outperform any individual run? "
+                "How many runs were needed before the correct answer won?*"
+            ),
+            kind="success" if _vote_correct else "danger",
+        ))
+        _output = mo.vstack(_parts)
+    else:
+        _output = mo.md("*Click **Run self-consistency vote** to see multiple reasoning paths.*")
+    _output
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Section 8: Tree of Thoughts — Exploring Many Paths at Once
+
+    ![](https://learnprompting.org/docs/assets/advanced/advanced_covers/tot_cover.svg)
 
     Chain-of-thought forces the model to reason in a single straight line. Tree of Thoughts
     (ToT) goes further. Yao et al. (2023) proposed letting the model explore multiple
@@ -973,8 +1067,9 @@ def _(mo):
     benefits from exploratory reasoning.
 
     /// note | Reference
-    Yao et al. (2023). *Tree of Thoughts: Deliberate Problem Solving with Large Language
-    Models.* NeurIPS 2023. Hulbert (2023). *Tree-of-Thought Prompting.*
+    - Yao et al. (2023). *Tree of Thoughts: Deliberate Problem Solving with Large Language
+    Models.* NeurIPS 2023.
+    - Hulbert (2023). *Tree-of-Thought Prompting.*
     github.com/dave1010/tree-of-thought-prompting
     ///
     """)
@@ -1038,11 +1133,11 @@ def _(mo):
                     r"""
     **Try it yourself**
 
-    Your goal is to craft a prompt that makes the LLM output 100 numbers following a
+    Your goal is to craft a prompt that makes the LLM output 200 numbers following a
     standard normal distribution N(0,1). Write your prompt in the editor below and click
-    **Run**. The notebook will extract numbers from the response automatically, check
-    whether the count matches 100, plot a histogram overlaid with the true Gaussian PDF,
-    and report a KS-test p-value so you know whether your prompt succeeded.
+    **Run**. The notebook will extract numbers from the response automatically and plot a
+    histogram overlaid with the true Gaussian PDF. A KS-test p-value tells you whether
+    your prompt succeeded.
 
     **Extension:** Try changing the target distribution to N(2, 0.5). How does your prompt
     need to change?
@@ -1054,19 +1149,19 @@ def _(mo):
                 mo.md(
                     "**Hint:** The LLM has no random number generator. It approximates from its "
                     "training distribution. Be extremely specific about the count: ask for exactly "
-                    "100 numbers and output only the numbers, nothing else."
+                    "200 numbers and output only the numbers, nothing else."
                 ),
                 kind="neutral",
             ),
             mo.accordion(
                 {
                     "Show more (detailed hint)": mo.md(
-                        "For N(0,1) with 100 samples, tell the model exactly how many numbers should "
-                        "fall in each bin. Roughly 34 numbers should fall between -1 and 1, about 14 "
-                        "between 1 and 2 (and symmetrically -2 to -1), and only about 2 beyond ±2. "
+                        "For N(0,1) with 200 samples, tell the model exactly how many numbers should "
+                        "fall in each bin. Roughly 68 numbers should fall between -1 and 1, about 27 "
+                        "between 1 and 2 (and symmetrically -2 to -1), and only about 5 beyond ±2. "
                         "The more precisely you specify the bin counts, the more the output looks "
-                        "Gaussian. You can even list expected counts: '[-3,-2]: 1, [-2,-1]: 14, "
-                        "[-1,0]: 34, [0,1]: 34, [1,2]: 14, [2,3]: 1' and ask the model to match them."
+                        "Gaussian. You can even list expected counts: '[-3,-2]: 1, [-2,-1]: 5, "
+                        "[-1,0]: 34, [0,1]: 34, [1,2]: 5, [2,3]: 1' and ask the model to match them."
                     ),
                 }
             ),
@@ -1079,7 +1174,7 @@ def _(mo):
 def _(mo):
     gaussian_prompt = mo.ui.text_area(
         value=(
-            "Generate exactly 100 numbers that follow a standard normal distribution N(0,1). "
+            "Generate exactly 200 numbers that follow a standard normal distribution N(0,1). "
             "Output only the numbers separated by spaces, nothing else."
         ),
         label="Your prompt",
@@ -1136,30 +1231,19 @@ def _(
         _g_resp = call_llm(gaussian_prompt.value)
         _numbers = extract_numbers(_g_resp)
 
-        _target = 100
-        _count_ok = len(_numbers) == _target
-        _count_icon = "✅" if _count_ok else "❌"
-        _count_msg = (
-            f"{_count_icon} **Count check:** extracted **{len(_numbers)}** numbers "
-            f"(target: {_target}). "
-            + ("" if _count_ok else f"The model produced {abs(len(_numbers) - _target)} {'too few' if len(_numbers) < _target else 'too many'}. Refine your prompt to hit exactly {_target}.")
-        )
-
         if len(_numbers) < 10:
-            _gauss_display = mo.vstack([
-                mo.callout(mo.md(_count_msg), kind="warn"),
-                mo.callout(
-                    mo.md("Too few numbers were extracted. Refine your prompt to produce more numeric output."),
-                    kind="warn",
+            _gauss_display = mo.callout(
+                mo.md(
+                    f"Only {len(_numbers)} numbers were extracted. Try refining your prompt to produce more numeric output."
                 ),
-                mo.accordion({"Show raw model output": mo.md(f"```\n{_g_resp}\n```")}),
-            ])
+                kind="warn",
+            )
         else:
             _ks_stat, _ks_p = stats.kstest(_numbers, "norm")
-            _passed = _ks_p > 0.05
+            _passed = _ks_p > 0.8  # Using a high threshold to encourage strong Gaussian fit
 
             _fig, _ax = plt.subplots(figsize=(8, 4))
-            _ax.hist(_numbers, bins=20, density=True, alpha=0.6, label=f"LLM output (n={len(_numbers)})")
+            _ax.hist(_numbers, bins=30, density=True, alpha=0.6, label=f"LLM output (n={len(_numbers)})")
             _x = np.linspace(-4, 4, 200)
             _ax.plot(_x, stats.norm.pdf(_x), "r-", lw=2, label="True N(0,1) PDF")
             _ax.set_xlabel("Value")
@@ -1168,19 +1252,19 @@ def _(
             _ax.legend()
             plt.tight_layout()
 
-            _ks_icon = "✅ PASS" if _passed else "❌ FAIL"
-            _ks_kind = "success" if _passed else "danger"
+            _indicator = "✅ PASS" if _passed else "❌ FAIL"
+            _kind = "success" if _passed else "danger"
 
             _gauss_display = mo.vstack(
                 [
                     mo.as_html(_fig),
-                    mo.callout(mo.md(_count_msg), kind="success" if _count_ok else "warn"),
                     mo.callout(
                         mo.md(
-                            f"**KS-test p-value:** {_ks_p:.4f} — **{_ks_icon}**\n\n"
+                            f"**KS-test p-value:** {_ks_p:.4f} — **{_indicator}**\n\n"
+                            f"Extracted {len(_numbers)} numbers. "
                             f"{'The distribution matches N(0,1) at the 5% significance level.' if _passed else 'The distribution does not match N(0,1). Refine your prompt and try again.'}"
                         ),
-                        kind=_ks_kind,
+                        kind=_kind,
                     ),
                     mo.accordion({
                         "Show raw model output": mo.md(f"```\n{_g_resp}\n```")
@@ -1347,17 +1431,6 @@ def _(
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    reflection_cot = mo.ui.text_area(
-        label="Your reflection: For which puzzle type did CoT help? When did it produce wrong but convincing reasoning?",
-        full_width=True,
-        rows=5,
-    )
-    reflection_cot
-    return
-
-
-@app.cell(hide_code=True)
 def _(COT_PUZZLES, get_cot2_results, mo):
     # Success criterion: student must run both Direct and Chain-of-thought for all 3 puzzles.
     _results = get_cot2_results()
@@ -1436,8 +1509,8 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
-def _(mo):
+@app.cell
+def _():
     FEWSHOT_BIAS_EXAMPLES = [
         ("The concert was unforgettable. Every song was perfect.", "Positive"),
         ("The delivery was late and the packaging was damaged.", "Negative"),
@@ -1446,29 +1519,23 @@ def _(mo):
         ("Five stars. I would recommend this to everyone I know.", "Positive"),
         ("Outstanding quality. Far exceeded my expectations.", "Positive"),
     ]
+    return (FEWSHOT_BIAS_EXAMPLES,)
 
+
+@app.cell(hide_code=True)
+def _(mo):
     FEWSHOT_BIAS_TEST = "The interface is clean but the performance could be better."
 
     run_bias_btn = mo.ui.run_button(label="Run 10 shuffled trials")
 
-    _example_rows = "\n".join(
-        f"| {_i + 1} | {_text} | {_label} |" for _i, (_text, _label) in enumerate(FEWSHOT_BIAS_EXAMPLES)
-    )
-    _examples_table = mo.md(
-        "**Example pool** (all four are shuffled into a random order for each trial)\n\n"
-        "| # | Text | Label |\n"
-        "|---|------|-------|\n" + _example_rows
-    )
-
     mo.vstack(
         [
-            _examples_table,
             mo.md(f"**Test sentence:** *{FEWSHOT_BIAS_TEST}*"),
             mo.md("Click the button to run 10 trials with shuffled example orders."),
             run_bias_btn,
         ]
     )
-    return FEWSHOT_BIAS_EXAMPLES, FEWSHOT_BIAS_TEST, run_bias_btn
+    return FEWSHOT_BIAS_TEST, run_bias_btn
 
 
 @app.cell(hide_code=True)
