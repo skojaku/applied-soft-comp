@@ -592,7 +592,7 @@ def _(
         if shuffled and n > 0:
             random.shuffle(selected)
         order_str = " → ".join(label for _, label in selected) if selected else "none"
-        prompt_parts = ["Classify the sentiment as Positive, Negative, or Neutral.\n"]
+        prompt_parts = ["Classify the sentiment as Positive, Negative, or Neutral. Nothing else.\n"]
         for text, label in selected:
             prompt_parts.append(f'Text: "{text}"\nSentiment: {label}\n')
         prompt_parts.append(f'Text: "{test_sentence}"\nSentiment:')
@@ -837,7 +837,11 @@ def _(
                     _kwargs["api_key"] = llm_api_key
                 if llm_api_base:
                     _kwargs["api_base"] = llm_api_base
-                _parsed = InvoiceData.model_validate_json(litellm.completion(**_kwargs).choices[0].message.content)
+                _content = litellm.completion(**_kwargs).choices[0].message.content
+                # Some models wrap the JSON in markdown or prose — extract the first {...} block
+                _s = _content.find("{"); _e = _content.rfind("}") + 1
+                _json_str = _content[_s:_e] if _s >= 0 and _e > _s else _content
+                _parsed = InvoiceData.model_validate_json(_json_str)
                 _output = mo.vstack(
                     [
                         mo.md("### Structured output (schema-constrained)"),
@@ -1346,14 +1350,12 @@ def _(mo):
     run_bias_btn = mo.ui.run_button(label="Run 10 shuffled trials")
 
     _example_rows = "\n".join(
-        f"| {_i+1} | {_text} | {_label} |"
-        for _i, (_text, _label) in enumerate(FEWSHOT_BIAS_EXAMPLES)
+        f"| {_i + 1} | {_text} | {_label} |" for _i, (_text, _label) in enumerate(FEWSHOT_BIAS_EXAMPLES)
     )
     _examples_table = mo.md(
         "**Example pool** (all four are shuffled into a random order for each trial)\n\n"
         "| # | Text | Label |\n"
-        "|---|------|-------|\n"
-        + _example_rows
+        "|---|------|-------|\n" + _example_rows
     )
 
     mo.vstack(
