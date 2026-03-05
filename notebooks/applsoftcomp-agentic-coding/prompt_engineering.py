@@ -972,16 +972,15 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     SC_PROBLEM = (
-        "A bat and a ball cost $1.10 in total. The bat costs $1.00 more than the ball. "
-        "How much does the ball cost?"
+        "How many r character in Strawberry?"
     )
-    SC_CORRECT = "0.05"
+    SC_CORRECT = "3"
 
     sc_runs_slider = mo.ui.slider(start=3, stop=9, step=2, value=5, label="Number of runs")
     run_sc_btn = mo.ui.run_button(label="Run self-consistency vote")
 
     mo.vstack([
-        mo.callout(mo.md(f"**Problem:** {SC_PROBLEM}\n\n*Correct answer: $0.05*"), kind="info"),
+        mo.callout(mo.md(f"**Problem:** {SC_PROBLEM}\n\n*Correct answer: 3*"), kind="info"),
         sc_runs_slider,
         run_sc_btn,
     ])
@@ -1133,7 +1132,7 @@ def _(mo):
                     r"""
     **Try it yourself**
 
-    Your goal is to craft a prompt that makes the LLM output 200 numbers following a
+    Your goal is to craft a prompt that makes the LLM output 100 numbers following a
     standard normal distribution N(0,1). Write your prompt in the editor below and click
     **Run**. The notebook will extract numbers from the response automatically and plot a
     histogram overlaid with the true Gaussian PDF. A KS-test p-value tells you whether
@@ -1149,19 +1148,19 @@ def _(mo):
                 mo.md(
                     "**Hint:** The LLM has no random number generator. It approximates from its "
                     "training distribution. Be extremely specific about the count: ask for exactly "
-                    "200 numbers and output only the numbers, nothing else."
+                    "100 numbers and output only the numbers, nothing else."
                 ),
                 kind="neutral",
             ),
             mo.accordion(
                 {
                     "Show more (detailed hint)": mo.md(
-                        "For N(0,1) with 200 samples, tell the model exactly how many numbers should "
+                        "For N(0,1) with 100 samples, tell the model exactly how many numbers should "
                         "fall in each bin. Roughly 68 numbers should fall between -1 and 1, about 27 "
                         "between 1 and 2 (and symmetrically -2 to -1), and only about 5 beyond ±2. "
                         "The more precisely you specify the bin counts, the more the output looks "
-                        "Gaussian. You can even list expected counts: '[-3,-2]: 1, [-2,-1]: 5, "
-                        "[-1,0]: 34, [0,1]: 34, [1,2]: 5, [2,3]: 1' and ask the model to match them."
+                        "Gaussian. You can even list expected counts: '[-3,-2]: 1, [-2,-1]: 14, "
+                        "[-1,0]: 34, [0,1]: 34, [1,2]: 14, [2,3]: 1' and ask the model to match them."
                     ),
                 }
             ),
@@ -1174,7 +1173,7 @@ def _(mo):
 def _(mo):
     gaussian_prompt = mo.ui.text_area(
         value=(
-            "Generate exactly 200 numbers that follow a standard normal distribution N(0,1). "
+            "Generate exactly 100 numbers that follow a standard normal distribution N(0,1). "
             "Output only the numbers separated by spaces, nothing else."
         ),
         label="Your prompt",
@@ -1231,6 +1230,7 @@ def _(
         _g_resp = call_llm(gaussian_prompt.value)
         _numbers = extract_numbers(_g_resp)
 
+        _target_n = 100
         if len(_numbers) < 10:
             _gauss_display = mo.callout(
                 mo.md(
@@ -1240,7 +1240,9 @@ def _(
             )
         else:
             _ks_stat, _ks_p = stats.kstest(_numbers, "norm")
-            _passed = _ks_p > 0.8  # Using a high threshold to encourage strong Gaussian fit
+            _ks_passed = _ks_p > 0.8  # high threshold to encourage a strong Gaussian fit
+            _count_ok = len(_numbers) == _target_n
+            _passed = _ks_passed and _count_ok
 
             _fig, _ax = plt.subplots(figsize=(8, 4))
             _ax.hist(_numbers, bins=30, density=True, alpha=0.6, label=f"LLM output (n={len(_numbers)})")
@@ -1254,16 +1256,22 @@ def _(
 
             _indicator = "✅ PASS" if _passed else "❌ FAIL"
             _kind = "success" if _passed else "danger"
+            _count_msg = (
+                f"✅ Count: {len(_numbers)}/{_target_n} — correct number of values."
+                if _count_ok
+                else f"❌ Count: {len(_numbers)}/{_target_n} — prompt did not produce exactly {_target_n} numbers."
+            )
+            _ks_msg = (
+                f"✅ KS-test p-value: {_ks_p:.4f} — distribution matches N(0,1)."
+                if _ks_passed
+                else f"❌ KS-test p-value: {_ks_p:.4f} — distribution does not match N(0,1)."
+            )
 
             _gauss_display = mo.vstack(
                 [
                     mo.as_html(_fig),
                     mo.callout(
-                        mo.md(
-                            f"**KS-test p-value:** {_ks_p:.4f} — **{_indicator}**\n\n"
-                            f"Extracted {len(_numbers)} numbers. "
-                            f"{'The distribution matches N(0,1) at the 5% significance level.' if _passed else 'The distribution does not match N(0,1). Refine your prompt and try again.'}"
-                        ),
+                        mo.md(f"**{_indicator}**\n\n{_count_msg}\n\n{_ks_msg}"),
                         kind=_kind,
                     ),
                     mo.accordion({
