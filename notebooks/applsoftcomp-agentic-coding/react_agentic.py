@@ -519,7 +519,55 @@ def _(agent_question, mo, run_agent_btn, run_react_agent):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## Section 5: Data Detective — Interrogating the Titanic Dataset
+    ## Section 5: Chat with the Agent
+
+    The trace view above makes the mechanics visible.
+    Now let's interact with the same three-tool agent the way a user would:
+    through a natural conversation.
+    Type any question in the box below. The agent will reason, call tools if needed,
+    and reply. Its thinking steps are included in each reply so you can follow along.
+    """)
+
+
+@app.cell(hide_code=True)
+def _(mo, run_react_agent):
+    def _agent_model(messages, config):
+        question = messages[-1].content
+        trace = run_react_agent(str(question))
+
+        parts = []
+        for step in trace:
+            if step["type"] == "thought":
+                parts.append(f"> **Thought:** {step['content']}")
+            elif step["type"] == "action":
+                parts.append(f"> **Action:** `{step['tool']}` — input: `{step['input']}`")
+            elif step["type"] == "observation":
+                parts.append(f"> **Observation:** {step['content']}")
+            elif step["type"] == "error":
+                parts.append(f"> **Error:** {step['content']}")
+            elif step["type"] == "final":
+                parts.append(f"\n**Answer:** {step['content']}")
+
+        return "\n\n".join(parts) if parts else "*(No response — check the model config above.)*"
+
+    agent_chat = mo.ui.chat(
+        _agent_model,
+        prompts=[
+            "What is today's date?",
+            "What does the word 'serendipity' mean?",
+            "What is 17 * 42 + 8?",
+            "What is today's date, and what does 'ephemeral' mean?",
+        ],
+        show_configuration_controls=False,
+    )
+    agent_chat
+    return (agent_chat,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Section 6: Data Detective — Interrogating the Titanic Dataset
 
     Let us give the agent a harder job. The Titanic dataset is loaded below, and the agent
     has four tools available: one that returns column names and types, one that returns sample
@@ -716,7 +764,7 @@ def _(
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## Section 6: Context Engineering — Multi-Agent Isolation for Literature Verification
+    ## Section 7: Context Engineering — Multi-Agent Isolation for Literature Verification
 
     When you give a single agent a long list of things to verify, the references start to
     bleed into each other. The agent may use a detail from one paper to justify a claim

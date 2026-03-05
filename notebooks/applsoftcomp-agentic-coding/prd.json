@@ -234,6 +234,11 @@
       "id": "US-045",
       "story": "As a student, I want a Section 7 'Self-Consistency' in prompt_engineering.py, placed between the hallucination section and the Tree of Thoughts section (which becomes Section 8), that explains Wang et al. 2022's insight that running the same chain-of-thought prompt multiple times and taking the majority vote over final answers improves reliability — so that I can see how aggregating reasoning paths reduces variance and corrects individual-run errors. The demo shows a slider to choose 3–9 runs, a run button, a per-run reasoning display, and a majority-vote result with agreement count.",
       "passes": true
+    },
+    {
+      "id": "US-046",
+      "story": "As a student, I want a Section 5 'Chat with the Agent' that presents the same three-tool ReAct agent as a mo.ui.chat interface with sample prompts — so that after seeing the trace mechanics I can interact with the agent naturally and still see its reasoning steps embedded in each reply.",
+      "passes": false
     }
   ],
   "notebooks": [
@@ -425,6 +430,12 @@
           "title": "A ReAct Agent in Action: Live Trace",
           "type": "interactive_demo",
           "content": "Now let the agent run. A text input accepts any question the student wants to ask. The three tools from the previous section are available. As the agent works, each step of the ReAct trace streams to the screen: Thought, Action, Action Input, and Observation on separate indented lines. The student watches the loop unfold in real time. A step counter at the bottom shows how many iterations were needed. Encourage the student to ask a question that requires at least two tool calls, then re-read the trace and identify where the agent changed direction based on what a tool returned."
+        },
+        {
+          "id": "s4b-chat-interface",
+          "title": "Chat with the Agent",
+          "type": "interactive_demo",
+          "content": "After the trace view explains the mechanics, this section re-exposes the same three-tool agent through mo.ui.chat. The custom model callable receives messages[-1].content as the question, calls run_react_agent(), and formats the reasoning trace (Thought/Action/Observation steps as blockquotes) followed by the Final Answer. Sample prompts let students try the agent without typing. show_configuration_controls=False keeps the UI clean."
         },
         {
           "id": "s5-titanic-agent",
