@@ -1,78 +1,123 @@
 {
   "project": "Context Engineering Diagram",
-  "version": "1.0",
-  "description": "A teaching diagram explaining context engineering — what fills the LLM context window, why it causes problems, and the four strategies to manage it — for students learning about LLM-based agents.",
-  "problem_statement": "Students learning about LLM agents need a clear mental model of what 'context engineering' means: what goes into the context window, why unmanaged context degrades agent performance, and what practical strategies exist to fix it.",
-  "solution": "Create an Excalidraw diagram with three visual zones: (1) three context types feeding into the LLM context window, (2) a context poisoning problem box, and (3) four strategy boxes (WRITE, SELECT, COMPRESS, ISOLATE). Export to PNG, review for clarity and teaching effectiveness, refine until clean.",
+  "version": "2.0",
+  "description": "A teaching diagram explaining context engineering for LLM agents — starting from WHY it matters (two limitations of context windows), then covering the four strategies (WRITE, SELECT, COMPRESS, ISOLATE) with concrete examples from the Ralph Wiggum loop.",
+  "problem_statement": "Students need to understand context engineering from first principles: what are the fundamental limits of an LLM context window, why do those limits demand deliberate curation, and how do the four strategies address each limitation in practice.",
+  "solution": "Create a multi-panel horizontal-partition diagram. Each horizontal band tells one chapter of the story: (1) motivation — two hard limits of context windows, (2) what to WRITE outside context, (3) what to SELECT into context, (4) how to COMPRESS, (5) how to ISOLATE. Concrete examples from the Ralph Wiggum loop (progress.txt as scratchpad, sequential story isolation) ground each strategy. Export to PNG, review, refine until clean.",
   "user_stories": [
     {
       "id": "US-001",
-      "story": "As a user, I want a narrative outline saved as `outline.md` that lists every diagram element with its text label, approximate position (x, y grid coordinates), size (width x height), shape type, color group, and relationships to other elements — so that the full structure is specified in plain text before any Excalidraw JSON is written.",
+      "story": "As a user, I want a narrative outline saved as `outline.md` describing the full diagram structure — every horizontal band, every element (label, position, size, shape, color, relationships) — so the complete layout is planned in plain text before any Excalidraw JSON is written.",
       "passes": false,
       "hints": [
-        "Layout has 3 vertical zones: (top) title + context types feeding into context window, (middle) context poisoning problem box, (bottom) 4 strategy boxes in a dashed group",
-        "Context types: Instructions (purple #d0bfff/#7048e8), Knowledge (green #b2f2bb/#2f9e44), Tools (yellow #ffec99/#f08c00) — each on the LEFT, arrows pointing RIGHT into the context window",
-        "LLM Context Window: large blue rectangle (#a5d8ff/#1971c2), center of the diagram, labeled 'LLM Context Window / ≈ RAM for Agents'",
-        "Problem box: red rectangle (#ffc9c9/#e03131), below context window, labeled with context poisoning warning",
-        "4 strategy boxes: all teal (#99e9f2/#0c8599), arranged horizontally: WRITE, SELECT, COMPRESS, ISOLATE",
-        "Arrows: colored to match their source (purple for instructions, green for knowledge, orange for tools); red arrow from context window to problem; gray arrow from problem to strategies group"
+        "The diagram is organized into HORIZONTAL BANDS, each with a clear left-side label. Bands stack top to bottom reading like a story.",
+        "Band 0 — Title bar: 'Context Engineering' + subtitle 'Deliberate curation of what the LLM sees at each step'",
+        "Band 1 — WHY (motivation): Two side-by-side problem boxes inside a light-gray partition. Left: 'Long context degrades performance' (LLMs lose accuracy as context grows). Right: 'Lost in the middle' (attention weakens for information buried in the middle of a long context). A header label 'Why Context Engineering?' sits at the left edge of this band.",
+        "Band 2 — WRITE: One wide box explaining WRITE strategy. Left side: concept ('Save information OUTSIDE the context window before it's lost or too costly to keep'). Right side: two concrete examples — 'Scratchpad: progress.txt in Ralph loop stores iteration state' and 'Long-term memory: lessons learned persist across sessions'.",
+        "Band 3 — SELECT: One wide box. Left: concept ('Pull relevant information INTO the context window only when needed — don't preload everything'). Right: examples — 'RAG: retrieve only the relevant docs' and 'Tool results: only the output of the tool called this step'.",
+        "Band 4 — COMPRESS: One wide box. Left: concept ('Shrink what's already in the context to free up space'). Right: examples — 'Summarize conversation history' and 'Prune redundant tool call logs'.",
+        "Band 5 — ISOLATE: One wide box. Left: concept ('Split a long task across multiple agents, each with its own focused context window'). Right: examples — 'Ralph loop runs stories sequentially — each iteration sees only what it needs' and '80/20 rule: plan agent reads broadly, execute agent stays narrow'.",
+        "Band 6 — Summary row: small boxes for each strategy with one-line takeaway.",
+        "Use dashed horizontal lines to visually separate bands. Each band has a left-side colored tab/label strip.",
+        "Color scheme: WHY band = red/warning tones. WRITE = purple. SELECT = green. COMPRESS = orange. ISOLATE = teal. Summary = light gray."
       ]
     },
     {
       "id": "US-002",
-      "story": "As a user, I want `diagram_v1.excalidraw` generated from `outline.md` — with all labeled shapes as correct shape+text element pairs (boundElements/containerId, never the label property), elbow arrows positioned from shape edges, color-coded by component type, and a dashed grouping rectangle around the 4 strategy boxes — so that I have a complete working first draft.",
+      "story": "As a user, I want `diagram_v1.excalidraw` generated from `outline.md` with correct shape+text element pairs (boundElements/containerId), horizontal band separators as dashed lines or thin rectangles, and left-side band labels — so the multi-panel structure is clearly readable.",
       "passes": false,
       "hints": [
-        "Every labeled shape needs TWO elements: shape with boundElements + text with containerId",
-        "Arrow x,y starts at source shape edge (right edge for context types, bottom edge for context window/problem)",
-        "The 3 context-type arrows are different colors (purple, green, orange) matching their source box color",
-        "Use elbowed:true, roundness:null, roughness:0 for all arrows",
-        "Strategy group rect uses strokeStyle:dashed, roughness:0, roundness:null, backgroundColor:transparent",
-        "Section labels ('CONTEXT TYPES', '4 STRATEGIES TO ENGINEER CONTEXT') are standalone text elements (containerId:null)"
+        "Every labeled shape needs TWO elements: shape with boundElements + text with containerId. Never use the label property.",
+        "Band separators: use thin dashed rectangles (backgroundColor: transparent, strokeStyle: dashed, roughness: 0, roundness: null) spanning the full canvas width.",
+        "Left-side band labels: standalone text elements rotated 0 degrees, placed just inside the left edge of each band, using uppercase small text (fontSize 12) in the band's accent color.",
+        "Within each band: use a two-column layout — left column (~40% width) for the concept description, right column (~55% width) for concrete examples.",
+        "Example boxes inside bands: smaller rectangles with the band's accent color, each containing a short title + one-line explanation.",
+        "Arrows within bands connect concept (left) to examples (right) with short horizontal elbow arrows.",
+        "Use elbowed:true, roundness:null, roughness:0 for all arrows.",
+        "Arrow x,y starts at source shape edge — never center."
       ]
     },
     {
       "id": "US-003",
-      "story": "As a user, I want `diagram_v1.excalidraw` exported to `diagram_v1.png` and reviewed for: overlapping text, disconnected arrows, inconsistent narrative flow, text size issues, poor color usage, distracting elements, and simplification opportunities — with findings saved to `review_v1.md` — so that specific issues are documented before regeneration.",
+      "story": "As a user, I want `diagram_v1.excalidraw` exported to `diagram_v1.png` and reviewed — checking band separation clarity, readability of concept vs. example columns, arrow routing, text overlap, and whether a student could follow the narrative top-to-bottom without explanation — with findings in `review_v1.md`.",
       "passes": false,
       "hints": [
-        "Use Playwright MCP tools (browser_navigate, browser_run_code, browser_close) for PNG export",
-        "Teaching effectiveness check: can a student immediately grasp the 3-part story (what fills context → why it's a problem → how to manage it)?",
-        "Check that strategy box labels are legible — WRITE/SELECT/COMPRESS/ISOLATE should be visually prominent as titles within each box",
-        "Verify arrows are color-coded and visually connect to the correct shapes",
-        "If no issues: write 'No issues found. Diagram is ready.' and mark passes:true without adding US-004"
+        "Use Playwright MCP tools (browser_navigate, browser_run_code, browser_close) for PNG export.",
+        "Key teaching check: does each band's left column explain WHY/WHAT, and the right column show HOW with concrete examples?",
+        "Check that the two WHY problems in Band 1 are visually equal-weight — neither should dominate.",
+        "Verify Ralph loop examples appear in WRITE (progress.txt) and ISOLATE (sequential stories) bands.",
+        "Check that band labels on the left are legible and clearly identify each section.",
+        "If no issues: write 'No issues found. Diagram is ready.' and mark passes:true without adding US-004."
       ]
     },
     {
       "id": "US-004",
-      "story": "As a user, I want `diagram_v2.excalidraw` that fixes every issue in `review_v1.md`, then exported to `diagram_v2.png` and reviewed as `review_v2.md`. If `review_v2.md` lists no remaining issues, skip to US-FINAL. If issues remain, add US-005 with the same fix-export-review pattern for v3 — so the diagram iterates until it meets quality standards.",
+      "story": "As a user, I want `diagram_v2.excalidraw` fixing every issue in `review_v1.md`, exported to `diagram_v2.png`, reviewed as `review_v2.md`. If clean, skip to US-FINAL. If issues remain, add US-005 with the same pattern for v3.",
       "passes": false,
       "hints": [
-        "Read review_v1.md carefully. Address every issue, not just cosmetic ones.",
-        "Teaching clarity is the main criterion: a new student should understand the concept from the diagram alone.",
+        "Address every issue in review_v1.md, not just cosmetic ones.",
+        "If bands feel cramped, increase band height and redistribute text to avoid overlap.",
         "After fixing, re-export and re-review before marking passes:true."
       ]
     },
     {
       "id": "US-FINAL",
-      "story": "As a user, I want the final versioned diagram and PNG presented with exact file paths, instructions for opening in Excalidraw (https://excalidraw.com or VS Code extension), and a one-paragraph summary of what improved across iterations — so I can use the diagram immediately in teaching.",
+      "story": "As a user, I want the final versioned diagram and PNG presented with exact file paths, instructions for opening in Excalidraw (https://excalidraw.com or VS Code extension), and a one-paragraph summary of what improved across iterations — so I can use it immediately in teaching.",
       "passes": false
     }
   ],
   "shared_requirements": {
     "diagram_content": {
-      "description": "Three-zone vertical layout. Zone 1 (top, y~150-480): title 'Context Engineering' with subtitle, then three context-type boxes on the left (Instructions in purple, Knowledge in green, Tools in orange/yellow) with colored elbow arrows flowing RIGHT into the central LLM Context Window box (large, blue, strokeWidth:3). Zone 2 (middle, y~395-490): Problem box (red) directly below the context window, connected by a red arrow straight down. Zone 3 (bottom, y~500-730): dashed teal grouping rect labeled '4 STRATEGIES TO ENGINEER CONTEXT', containing four equal-sized teal boxes side by side: WRITE (save outside context, scratchpad, memory), SELECT (pull in when needed, RAG, retrieval), COMPRESS (reduce tokens, summarize, prune), ISOLATE (split across agents, subagents). Gray arrow from problem box down into the strategies group.",
-      "target_audience": "Students learning about LLM-based agents and prompt engineering",
-      "key_message": "The LLM context window is finite RAM — three types of content fill it, unmanaged accumulation causes poisoning, and four engineering strategies address this.",
-      "style": "Clean, educational, colorful but consistent. Minimal roughness. Clear visual hierarchy with the context window as the central element."
+      "narrative": "The diagram reads top-to-bottom like a story. Band 1 establishes WHY context engineering matters — two hard limits of LLMs. Bands 2-5 each address one engineering strategy, explaining the concept on the left and showing concrete examples (including the Ralph Wiggum loop) on the right. Band 6 summarizes all four strategies in a compact row.",
+      "target_audience": "Students learning to build LLM-based agents",
+      "key_message": "Context engineering is not optional tuning — it is a principled software engineering practice forced by fundamental limits of LLMs. The four strategies (WRITE, SELECT, COMPRESS, ISOLATE) directly address those limits.",
+      "style": "Multi-panel educational reference sheet. Clean horizontal bands with clear separation. Each band is self-contained but builds on the previous. Colorful but disciplined — one accent color per strategy.",
+      "band_details": {
+        "Band 1 — WHY": {
+          "header": "Why Context Engineering?",
+          "color": "#ffc9c9 / #e03131",
+          "left_problem": "Long context degrades performance: LLM accuracy and instruction-following decline as the context window fills. More tokens ≠ better results.",
+          "right_problem": "Lost in the middle: Attention weakens for information buried in the middle of a long context. Position matters — beginning and end are privileged.",
+          "takeaway": "You cannot just dump everything into the context and hope for the best. Deliberate curation is required."
+        },
+        "Band 2 — WRITE": {
+          "header": "WRITE — Save Outside the Window",
+          "color": "#d0bfff / #7048e8",
+          "concept": "Persist information outside the context window before it's lost or too expensive to keep. Read it back selectively later.",
+          "example_1": "Scratchpad: In the Ralph loop, progress.txt stores what each iteration accomplished. The next agent reads it at the start — it never needs to re-read all previous outputs.",
+          "example_2": "Long-term memory: Lessons learned, user preferences, and domain facts persist across sessions as external files or databases."
+        },
+        "Band 3 — SELECT": {
+          "header": "SELECT — Pull In What's Relevant",
+          "color": "#b2f2bb / #2f9e44",
+          "concept": "Don't preload everything. Retrieve only what this specific step needs — keeping the context lean and focused.",
+          "example_1": "RAG: Instead of giving the agent 50 documents, retrieve the 2-3 most relevant chunks at query time.",
+          "example_2": "Tool results: Only the output of the tool called right now enters the context — not the full history of all prior tool calls."
+        },
+        "Band 4 — COMPRESS": {
+          "header": "COMPRESS — Shrink What's Inside",
+          "color": "#ffec99 / #f08c00",
+          "concept": "Reduce the token footprint of content already in the context. Keep the meaning, discard the bulk.",
+          "example_1": "Summarize history: Replace a 10-turn conversation transcript with a 3-sentence summary before sending the next request.",
+          "example_2": "Prune tool logs: Remove intermediate reasoning steps and redundant tool call echoes that no longer inform the next action."
+        },
+        "Band 5 — ISOLATE": {
+          "header": "ISOLATE — Split Across Agents",
+          "color": "#99e9f2 / #0c8599",
+          "concept": "Decompose a long task into sub-tasks, each handled by a separate agent with its own focused context window. No single agent sees everything.",
+          "example_1": "Ralph loop: Each story runs in its own isolated agent call. The agent for US-003 only sees prompt.md + prd.json — not the full history of US-001 and US-002.",
+          "example_2": "80/20 rule (plan + execute): A planner agent reads broadly (all context) to produce a plan. An executor agent sees only the plan + the current task — keeping execution context tight."
+        }
+      }
     },
     "color_scheme": {
-      "Instructions": {"background": "#d0bfff", "stroke": "#7048e8"},
-      "Knowledge": {"background": "#b2f2bb", "stroke": "#2f9e44"},
-      "Tools": {"background": "#ffec99", "stroke": "#f08c00"},
-      "LLM Context Window": {"background": "#a5d8ff", "stroke": "#1971c2"},
-      "Problem / Context Poisoning": {"background": "#ffc9c9", "stroke": "#e03131"},
-      "Strategies (all 4)": {"background": "#99e9f2", "stroke": "#0c8599"}
+      "WHY / problems": {"background": "#ffc9c9", "stroke": "#e03131"},
+      "WRITE": {"background": "#d0bfff", "stroke": "#7048e8"},
+      "SELECT": {"background": "#b2f2bb", "stroke": "#2f9e44"},
+      "COMPRESS": {"background": "#ffec99", "stroke": "#f08c00"},
+      "ISOLATE": {"background": "#99e9f2", "stroke": "#0c8599"},
+      "Band separators / headers": {"background": "transparent", "stroke": "#aaaaaa"},
+      "Example sub-boxes": "Use a lighter tint of the band's accent color for example boxes inside each band"
     },
     "validation_checklist": [
       "Every shape with a label has BOTH a shape element (with boundElements) AND a text element (with containerId)",
@@ -85,13 +130,14 @@
       "File is valid JSON"
     ],
     "review_criteria": [
-      "Overlapping text: any text that visually overlaps another element",
-      "Disconnected arrows: arrows with visible gaps to shapes",
-      "Narrative clarity: can a student trace the story (inputs → context window → problem → strategies) without explanation?",
-      "Text size: strategy titles (WRITE/SELECT/COMPRESS/ISOLATE) should be visually dominant in their boxes",
-      "Color consistency: context-type arrows should match their source box colors",
-      "Teaching effectiveness: does the diagram stand alone as a teaching artifact?",
-      "Simplification: any element that adds clutter without adding meaning"
+      "Band separation: are horizontal bands clearly distinct and easy to scan?",
+      "Left/right column balance: does the concept (left) lead naturally to the examples (right) in each band?",
+      "WHY band parity: do both limitation boxes feel equal-weight?",
+      "Ralph loop specificity: do the WRITE and ISOLATE bands mention progress.txt and sequential story isolation explicitly?",
+      "80/20 rule: does the ISOLATE band mention the plan+execute pattern?",
+      "Text overlap: any text that visually overlaps another element",
+      "Disconnected arrows: any arrow with a visible gap to its target",
+      "Standalone readability: could a student understand each band independently?"
     ],
     "versioning": [
       "Excalidraw files: diagram_v1.excalidraw, diagram_v2.excalidraw, ...",
