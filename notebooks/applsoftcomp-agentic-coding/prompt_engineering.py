@@ -1038,11 +1038,11 @@ def _(mo):
                     r"""
     **Try it yourself**
 
-    Your goal is to craft a prompt that makes the LLM output 200 numbers following a
+    Your goal is to craft a prompt that makes the LLM output 100 numbers following a
     standard normal distribution N(0,1). Write your prompt in the editor below and click
-    **Run**. The notebook will extract numbers from the response automatically and plot a
-    histogram overlaid with the true Gaussian PDF. A KS-test p-value tells you whether
-    your prompt succeeded.
+    **Run**. The notebook will extract numbers from the response automatically, check
+    whether the count matches 100, plot a histogram overlaid with the true Gaussian PDF,
+    and report a KS-test p-value so you know whether your prompt succeeded.
 
     **Extension:** Try changing the target distribution to N(2, 0.5). How does your prompt
     need to change?
@@ -1054,19 +1054,19 @@ def _(mo):
                 mo.md(
                     "**Hint:** The LLM has no random number generator. It approximates from its "
                     "training distribution. Be extremely specific about the count: ask for exactly "
-                    "200 numbers and output only the numbers, nothing else."
+                    "100 numbers and output only the numbers, nothing else."
                 ),
                 kind="neutral",
             ),
             mo.accordion(
                 {
                     "Show more (detailed hint)": mo.md(
-                        "For N(0,1) with 200 samples, tell the model exactly how many numbers should "
-                        "fall in each bin. Roughly 68 numbers should fall between -1 and 1, about 27 "
-                        "between 1 and 2 (and symmetrically -2 to -1), and only about 5 beyond ±2. "
+                        "For N(0,1) with 100 samples, tell the model exactly how many numbers should "
+                        "fall in each bin. Roughly 34 numbers should fall between -1 and 1, about 14 "
+                        "between 1 and 2 (and symmetrically -2 to -1), and only about 2 beyond ±2. "
                         "The more precisely you specify the bin counts, the more the output looks "
-                        "Gaussian. You can even list expected counts: '[-3,-2]: 1, [-2,-1]: 5, "
-                        "[-1,0]: 34, [0,1]: 34, [1,2]: 5, [2,3]: 1' and ask the model to match them."
+                        "Gaussian. You can even list expected counts: '[-3,-2]: 1, [-2,-1]: 14, "
+                        "[-1,0]: 34, [0,1]: 34, [1,2]: 14, [2,3]: 1' and ask the model to match them."
                     ),
                 }
             ),
@@ -1079,7 +1079,7 @@ def _(mo):
 def _(mo):
     gaussian_prompt = mo.ui.text_area(
         value=(
-            "Generate exactly 200 numbers that follow a standard normal distribution N(0,1). "
+            "Generate exactly 100 numbers that follow a standard normal distribution N(0,1). "
             "Output only the numbers separated by spaces, nothing else."
         ),
         label="Your prompt",
@@ -1136,19 +1136,30 @@ def _(
         _g_resp = call_llm(gaussian_prompt.value)
         _numbers = extract_numbers(_g_resp)
 
+        _target = 100
+        _count_ok = len(_numbers) == _target
+        _count_icon = "✅" if _count_ok else "❌"
+        _count_msg = (
+            f"{_count_icon} **Count check:** extracted **{len(_numbers)}** numbers "
+            f"(target: {_target}). "
+            + ("" if _count_ok else f"The model produced {abs(len(_numbers) - _target)} {'too few' if len(_numbers) < _target else 'too many'}. Refine your prompt to hit exactly {_target}.")
+        )
+
         if len(_numbers) < 10:
-            _gauss_display = mo.callout(
-                mo.md(
-                    f"Only {len(_numbers)} numbers were extracted. Try refining your prompt to produce more numeric output."
+            _gauss_display = mo.vstack([
+                mo.callout(mo.md(_count_msg), kind="warn"),
+                mo.callout(
+                    mo.md("Too few numbers were extracted. Refine your prompt to produce more numeric output."),
+                    kind="warn",
                 ),
-                kind="warn",
-            )
+                mo.accordion({"Show raw model output": mo.md(f"```\n{_g_resp}\n```")}),
+            ])
         else:
             _ks_stat, _ks_p = stats.kstest(_numbers, "norm")
-            _passed = _ks_p > 0.8  # Using a high threshold to encourage strong Gaussian fit
+            _passed = _ks_p > 0.05
 
             _fig, _ax = plt.subplots(figsize=(8, 4))
-            _ax.hist(_numbers, bins=30, density=True, alpha=0.6, label=f"LLM output (n={len(_numbers)})")
+            _ax.hist(_numbers, bins=20, density=True, alpha=0.6, label=f"LLM output (n={len(_numbers)})")
             _x = np.linspace(-4, 4, 200)
             _ax.plot(_x, stats.norm.pdf(_x), "r-", lw=2, label="True N(0,1) PDF")
             _ax.set_xlabel("Value")
@@ -1157,19 +1168,19 @@ def _(
             _ax.legend()
             plt.tight_layout()
 
-            _indicator = "✅ PASS" if _passed else "❌ FAIL"
-            _kind = "success" if _passed else "danger"
+            _ks_icon = "✅ PASS" if _passed else "❌ FAIL"
+            _ks_kind = "success" if _passed else "danger"
 
             _gauss_display = mo.vstack(
                 [
                     mo.as_html(_fig),
+                    mo.callout(mo.md(_count_msg), kind="success" if _count_ok else "warn"),
                     mo.callout(
                         mo.md(
-                            f"**KS-test p-value:** {_ks_p:.4f} — **{_indicator}**\n\n"
-                            f"Extracted {len(_numbers)} numbers. "
+                            f"**KS-test p-value:** {_ks_p:.4f} — **{_ks_icon}**\n\n"
                             f"{'The distribution matches N(0,1) at the 5% significance level.' if _passed else 'The distribution does not match N(0,1). Refine your prompt and try again.'}"
                         ),
-                        kind=_kind,
+                        kind=_ks_kind,
                     ),
                     mo.accordion({
                         "Show raw model output": mo.md(f"```\n{_g_resp}\n```")
