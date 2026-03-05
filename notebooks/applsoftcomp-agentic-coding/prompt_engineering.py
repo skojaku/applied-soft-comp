@@ -942,6 +942,96 @@ def _(
 
 @app.cell(hide_code=True)
 def _(mo):
+    mo.md(r"""
+    ## Section 7: Tree of Thoughts — Exploring Many Paths at Once
+
+    Chain-of-thought forces the model to reason in a single straight line. Tree of Thoughts
+    (ToT) goes further. Yao et al. (2023) proposed letting the model explore multiple
+    reasoning paths simultaneously, evaluate each partial thought, and backtrack when a
+    path looks unpromising. Think of it as a search tree: each node is an intermediate
+    thought, and the model prunes branches that are unlikely to lead to a correct answer.
+
+    The key idea has three parts. First, the model generates several candidate thoughts at
+    each step rather than committing to one. Second, it evaluates each candidate — asking
+    itself whether this line of reasoning is promising. Third, it uses a search strategy
+    (breadth-first or depth-first) to decide which branches to expand next. The result is
+    deliberate, exploratory problem solving rather than a single confident guess.
+
+    In practice, full ToT requires orchestrating multiple LLM calls in a loop. Hulbert
+    (2023) showed that a single carefully worded prompt can approximate the same effect
+    by instructing the model to *simulate* multiple experts reasoning in parallel. The
+    prompt is simple:
+
+    > *Imagine three different experts are answering this question. All experts will write
+    > down one step of their thinking, then share it with the group. Then all experts will
+    > go on to the next step, and so on. If any expert realises they are wrong at any
+    > point then they leave. The question is...*
+
+    This works because it pushes the model to generate diverse candidate thoughts, compare
+    them internally, and self-correct before committing to an answer. Toggle between the
+    standard prompt and the ToT prompt below to see the difference on a problem that
+    benefits from exploratory reasoning.
+
+    /// note | Reference
+    Yao et al. (2023). *Tree of Thoughts: Deliberate Problem Solving with Large Language
+    Models.* NeurIPS 2023. Hulbert (2023). *Tree-of-Thought Prompting.*
+    github.com/dave1010/tree-of-thought-prompting
+    ///
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    TOT_PROBLEM = (
+        "Bob is in the living room. He walks to the kitchen, picks up an apple, "
+        "goes to the bedroom, puts the apple in the drawer, then goes back to the kitchen. "
+        "Where is the apple?"
+    )
+
+    tot_toggle = mo.ui.switch(label="Use Tree-of-Thought prompt", value=False)
+    run_tot_btn = mo.ui.run_button(label="Run")
+
+    mo.vstack([
+        mo.callout(mo.md(f"**Problem:** {TOT_PROBLEM}"), kind="info"),
+        tot_toggle,
+        run_tot_btn,
+    ])
+    return TOT_PROBLEM, run_tot_btn, tot_toggle
+
+
+@app.cell(hide_code=True)
+def _(TOT_PROBLEM, call_llm, mo, run_tot_btn, tot_toggle):
+    _STANDARD_PROMPT = TOT_PROBLEM
+    _TOT_PROMPT = (
+        "Imagine three different experts are answering this question. "
+        "All experts will write down one step of their thinking, then share it with the group. "
+        "Then all experts will go on to the next step, and so on. "
+        "If any expert realises they are wrong at any point then they leave.\n\n"
+        f"The question is: {TOT_PROBLEM}"
+    )
+
+    if run_tot_btn.value:
+        _prompt = _TOT_PROMPT if tot_toggle.value else _STANDARD_PROMPT
+        _label = "Tree-of-Thought prompt" if tot_toggle.value else "Standard prompt"
+        _kind = "success" if tot_toggle.value else "warn"
+        _resp = call_llm(_prompt)
+        _output = mo.vstack([
+            mo.md(f"### Response ({_label})"),
+            mo.callout(mo.md(_resp), kind=_kind),
+            mo.md(
+                "*Reflection: Did the ToT prompt produce more careful step-by-step reasoning? "
+                "Did the experts disagree at any point, and did that lead to a better answer?*"
+            ),
+        ])
+    else:
+        _output = mo.md("*Click **Run** to see the response.*")
+    _output
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
     mo.vstack(
         [
             mo.md("## Student Task 1: Gaussian by Prompt"),
