@@ -189,30 +189,43 @@ def _(A, d_slider, mo, np, plt, sns):
 
 @app.cell(hide_code=True)
 def _(mo):
-    _eigenmap = mo.md(r"""
-    ## Laplacian Eigenmap — Topology as Geometry
+    _step1 = mo.md(r"""
+    ## Laplacian Eigenmap — Derivation
 
-    The **graph Laplacian** is $\mathbf{L} = \mathbf{D} - \mathbf{A}$, where $\mathbf{D}$ is the diagonal degree matrix.
-    It has a key identity: for any vector $\mathbf{x} \in \mathbb{R}^n$,
+    **Setup.** The graph Laplacian is $\mathbf{L} = \mathbf{D} - \mathbf{A}$. We want to embed each node $i$ into
+    a coordinate $\mathbf{y}_i \in \mathbb{R}^d$ such that neighbors in the graph are also neighbors in space.
 
-    $$\mathbf{x}^\top \mathbf{L} \mathbf{x} = \sum_{(i,j)\in E}(x_i - x_j)^2$$
+    **Step 1 — write down the cost.** For a single coordinate $x \in \mathbb{R}^n$, penalize
+    every connected pair by the square of their distance:
 
-    Every edge contributes the *squared difference* of its endpoints' coordinates.
-    Minimizing this objective forces connected nodes to land close together in embedding space.
+    $$\Phi(\mathbf{x}) = \frac{1}{2}\sum_{i,j} A_{ij}(x_i - x_j)^2$$
 
-    **The embedding problem:** find $d$-dimensional coordinates $\mathbf{Y} \in \mathbb{R}^{n \times d}$ that respect the topology:
+    **Step 2 — rewrite in matrix form.** Expand $(x_i - x_j)^2 = x_i^2 - 2x_ix_j + x_j^2$ and collect:
 
-    $$\min_{\mathbf{Y}} \,\mathrm{tr}(\mathbf{Y}^\top \mathbf{L} \mathbf{Y}), \quad \text{subject to} \quad \mathbf{Y}^\top \mathbf{D} \mathbf{Y} = \mathbf{I}$$
+    $$\Phi(\mathbf{x}) = \mathbf{x}^\top \mathbf{D}\mathbf{x} - \mathbf{x}^\top \mathbf{A}\mathbf{x} = \mathbf{x}^\top(\mathbf{D}-\mathbf{A})\mathbf{x} = \mathbf{x}^\top \mathbf{L} \mathbf{x}$$
 
-    The constraint $\mathbf{Y}^\top \mathbf{D} \mathbf{Y} = \mathbf{I}$ prevents the trivial solution $\mathbf{Y}=\mathbf{0}$ and removes arbitrary scaling.
+    So minimizing $\mathbf{x}^\top \mathbf{L} \mathbf{x}$ is exactly minimizing the sum of squared distances over all edges.
 
-    **Solution:** the eigenvectors of $\mathbf{L}$ with the $d$ *smallest non-zero* eigenvalues.
-    We skip $\mathbf{x}_1 = \mathbf{1}/\sqrt{N}$ (eigenvalue 0 — the trivial constant embedding).
-    The next eigenvectors, starting from the **Fiedler vector** $\mathbf{x}_2$, capture the most informative structure.
+    **Step 3 — add a constraint.** Without it, $\mathbf{x} = \mathbf{0}$ wins trivially. We normalize by node degree:
 
-    The interactive plot below confirms this directly: nodes that are close in the *graph* end up close in the *plane*.
+    $$\min_{\mathbf{x}} \mathbf{x}^\top \mathbf{L} \mathbf{x}, \quad \text{subject to} \quad \mathbf{x}^\top \mathbf{D} \mathbf{x} = 1, \quad \mathbf{x} \perp \mathbf{D}\mathbf{1}$$
+
+    The $\mathbf{x} \perp \mathbf{D}\mathbf{1}$ condition removes the trivial constant solution $\mathbf{x} \propto \mathbf{1}$.
+
+    **Step 4 — apply Lagrange multipliers.** Differentiate $\mathbf{x}^\top\mathbf{L}\mathbf{x} - \lambda(\mathbf{x}^\top\mathbf{D}\mathbf{x}-1)$
+    with respect to $\mathbf{x}$ and set to zero:
+
+    $$\mathbf{L}\mathbf{x} = \lambda\,\mathbf{D}\mathbf{x} \quad \Longrightarrow \quad \mathbf{D}^{-1/2}\mathbf{L}\mathbf{D}^{-1/2}\,\tilde{\mathbf{x}} = \lambda\,\tilde{\mathbf{x}}$$
+
+    This is the **generalized eigenvalue problem**. The substitution $\tilde{\mathbf{x}} = \mathbf{D}^{1/2}\mathbf{x}$ converts it
+    into a standard eigenproblem for the **normalized Laplacian** $\tilde{\mathbf{L}} = \mathbf{D}^{-1/2}\mathbf{L}\mathbf{D}^{-1/2}$.
+
+    **Step 5 — read off the solution.** The minimum cost is $\lambda_2$ (the smallest *non-zero* eigenvalue),
+    achieved at the **Fiedler vector** $\mathbf{x}_2$. For $d$ dimensions use eigenvectors $\mathbf{x}_2, \ldots, \mathbf{x}_{d+1}$.
+    We skip $\mathbf{x}_1 \propto \mathbf{1}$ because $\lambda_1 = 0$ and it encodes no structure.
     """)
-    mo.vstack([_eigenmap])
+
+    mo.vstack([_step1])
     return
 
 
@@ -266,37 +279,35 @@ def _(A, G, k_slider, mo, n, np, plt):
 
 @app.cell(hide_code=True)
 def _(mo):
-    _n2v_header = mo.md(r"""
+    _n2v_text = mo.vstack(
+        [
+            mo.md(r"""
     ## node2vec — Neural Embeddings
 
     **word2vec (skip-gram):** given a word $w_t$, predict its neighbors within window $c$:
     $$\mathcal{L}=\sum_t\sum_{0<|j|\le c}\log P(w_{t+j}\mid w_t), \qquad P(w_O\mid w_I)=\frac{\exp(\mathbf{v}_{w_O}^\top\mathbf{v}_{w_I})}{\sum_w\exp(\mathbf{v}_w^\top\mathbf{v}_{w_I})}$$
+    Each word gets a vector $\mathbf{v}_w\in\mathbb{R}^d$. Co-occurring words end up close in space.
+    **node2vec** replaces words with nodes and sentences with biased random walks, then runs skip-gram.
+    """),
+            mo.md(r"""
+    **Biased transition** (walk at $v$, came from $t$):
+    $$P(\text{next}=x\mid v,t)\propto\begin{cases}1/p & d(t,x)=0\;\text{(backtrack)}\\1 & d(t,x)=1\;\text{(shared neighbor)}\\1/q & d(t,x)=2\;\text{(explore further)}\end{cases}$$
 
-    Each word gets an embedding $\mathbf{v}_w\in\mathbb{R}^d$. Co-occurring words end up close in embedding space.
-    **node2vec:** replace words with nodes and sentences with random walks, then apply skip-gram.
-    """)
-
-    _walk_col = mo.md(r"""
-    **Biased transition probability** (walk is at $v$, came from $t$):
-    $$P(\text{next}=x\mid v,t)\;\propto\;\begin{cases}1/p & d(t,x)=0 \;\text{(backtrack to } t\text{)}\\1 & d(t,x)=1 \;\text{(move to neighbor of } t\text{)}\\1/q & d(t,x)=2 \;\text{(explore further)}\end{cases}$$
-    """)
-
-    _pq_col = mo.md(r"""
-    **Interpreting $p$ and $q$:**
-
-    $p$ controls **return**. Low $p$ ($<1$) makes the walk backtrack to $t$ more often, sampling the *local* neighborhood repeatedly (BFS-like).
-
-    $q$ controls **explore**. Low $q$ ($<1$) pushes the walk away from $t$, discovering *distant* parts of the graph (DFS-like).
-
-    Together they let you trade off between **community membership** (low $q$, homophily) and **structural role** (low $p$, structural equivalence).
-    """)
-
-    mo.vstack(
-        [
-            _n2v_header,
-            mo.hstack([_walk_col, _pq_col], gap=40),
+    Low $p$ → BFS-like, stays local → captures **structural role**.
+    Low $q$ → DFS-like, ventures far → captures **community membership**.
+    """),
         ]
     )
+
+    _walk_img_url = "https://snap.stanford.edu/node2vec/walk.png"
+    _walk_fig = mo.vstack(
+        [
+            mo.Html(f'<img src="{_walk_img_url}" style="max-width:100%; border-radius:6px;" />'),
+            mo.md("*Grover & Leskovec (2016), Fig. 1 — biased walk at node $v$ after visiting $t$.*"),
+        ]
+    )
+
+    mo.hstack([_n2v_text, _walk_fig], widths=[3, 2], gap=40)
     return
 
 
@@ -399,36 +410,76 @@ def _(G, biased_rw, mo, n, plt, rw_coords, rw_p, rw_q, rw_start, rw_steps):
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    _fig_caption = mo.md(r"""
-    ### node2vec in Action: Homophily vs. Structural Equivalence
+def _(G, biased_rw, mo, n, plt):
+    import random as _plxj_rnd
+    import numpy as _np2
 
-    Depending on $p$ and $q$, node2vec discovers fundamentally different patterns.
-    With low $q$ (DFS-like walks), nodes in the *same community* land close together.
-    With low $p$ (BFS-like walks), nodes with the *same structural role* land close — even if they belong to different communities.
-    The figures below, from the original paper, show this on the Les Misérables character network.
-    """)
 
-    _walk_img = mo.vstack(
-        [
-            mo.Html("""<img src="https://snap.stanford.edu/node2vec/walk.png"
-             style="max-width:100%; border-radius:6px;" />"""),
-            mo.md("*Figure 1 from Grover & Leskovec (2016): biased walk transitions controlled by p and q.*"),
-        ]
+    def _ppmi_embed(graph, n_nodes, p, q, n_walks=40, walk_len=40, window=5, d=2, seed=42):
+        """PPMI + truncated SVD: the matrix that word2vec skip-gram implicitly factorizes."""
+        _plxj_rnd.seed(seed)
+        _walks = [biased_rw(graph, v, walk_len, p, q) for v in range(n_nodes) for _ in range(n_walks)]
+        _cooc = _np2.zeros((n_nodes, n_nodes))
+        for _walk in _walks:
+            for _i, _u in enumerate(_walk):
+                for _j in range(max(0, _i - window), min(len(_walk), _i + window + 1)):
+                    if _i != _j:
+                        _cooc[_u, _walk[_j]] += 1
+        _N = _cooc.sum() + 1e-10
+        _rs = _cooc.sum(axis=1, keepdims=True)
+        _rs[_rs == 0] = 1
+        _cs = _cooc.sum(axis=0, keepdims=True)
+        _cs[_cs == 0] = 1
+        _ppmi = _np2.maximum(_np2.log(_cooc * _N / (_rs * _cs) + 1e-10), 0)
+        _U, _s, _ = _np2.linalg.svd(_ppmi, full_matrices=False)
+        return _U[:, :d] * _np2.sqrt(_s[:d])
+
+
+    _configs = [
+        (0.25, 4.0, "p=0.25, q=4\n(BFS-like → structural role)"),
+        (1.0, 1.0, "p=1, q=1\n(unbiased walk)"),
+        (4.0, 0.25, "p=4, q=0.25\n(DFS-like → community)"),
+    ]
+    _gt = [0 if v <= 16 else 1 for v in range(n)]
+    _node_colors = ["#4a6fa5" if c == 0 else "#b55a5a" for c in _gt]
+
+    fig_n2v, _axes = plt.subplots(1, 3, figsize=(13, 4))
+    fig_n2v.patch.set_facecolor("#f8f8f6")
+    for _ax, (_p, _q, _label) in zip(_axes, _configs):
+        _emb = _ppmi_embed(G, n, _p, _q)
+        _ax.set_facecolor("#f8f8f6")
+        _ax.scatter(_emb[:, 0], _emb[:, 1], c=_node_colors, s=70, zorder=3, edgecolors="none")
+        for _v in range(n):
+            _ax.annotate(str(_v), _emb[_v], fontsize=6, alpha=0.5, ha="center", va="center")
+        _ax.set_title(_label, fontsize=10)
+        _ax.axis("off")
+
+    from matplotlib.patches import Patch as _Patch
+
+    _legend_handles = [_Patch(color="#4a6fa5", label="Mr. Hi"), _Patch(color="#b55a5a", label="Officer")]
+    _axes[1].legend(
+        handles=_legend_handles,
+        loc="lower center",
+        bbox_to_anchor=(0.5, -0.14),
+        ncol=2,
+        frameon=False,
+        fontsize=9,
     )
-
-    _embed_img = mo.vstack(
-        [
-            mo.Html("""<img src="https://snap.stanford.edu/node2vec/homo.png"
-             style="max-width:100%; border-radius:6px;" />"""),
-            mo.md("*Figure 3: node2vec embedding on Les Misérables network. Colors = community membership.*"),
-        ]
-    )
+    plt.tight_layout()
 
     mo.vstack(
         [
-            _fig_caption,
-            mo.hstack([_walk_img, _embed_img], gap=32),
+            mo.md(
+                r"""### How p and q Shape the Embedding
+
+    With **DFS-like walks** (high $p$, low $q$) the walk roams freely through the graph and collects distant context.
+    Nodes in the same *community* encounter each other often — so they cluster together.
+    With **BFS-like walks** (low $p$, high $q$) the walk stays near its origin and repeatedly samples the local neighborhood.
+    Nodes that play the same *structural role* — similar degree, similar local structure — end up close, even across different communities.
+    """
+            ),
+            fig_n2v,
+            mo.md("*Karate club network (Zachary 1977). Color marks faction membership.*"),
         ]
     )
     return
