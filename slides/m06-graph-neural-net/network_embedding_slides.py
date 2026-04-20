@@ -52,7 +52,9 @@ def _(mo):
     ## What is a Network?
 
     A **network** is nodes + edges. Nodes are entities (people, proteins, pages). Edges are relationships.
-    The adjacency matrix $\mathbf{A}$ encodes it: $A_{ij}=1$ if $i$ and $j$ are connected, else 0.
+    We encode it as an **adjacency matrix** $\mathbf{A}$:
+
+    $$A_{ij} = \begin{cases}1 & \text{if } i \text{ and } j \text{ are connected}\\0 & \text{otherwise}\end{cases}$$
     """)
     return
 
@@ -119,7 +121,13 @@ def _(ig, np):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
+    d_slider = mo.ui.slider(1, 20, value=5, label="d (eigenvectors)")
+    return (d_slider,)
+
+
+@app.cell(hide_code=True)
+def _(A, d_slider, mo, np, plt, sns):
+    _spec_header = mo.md(r"""
     ## Spectral Reconstruction
 
     Compress $\mathbf{A}$ into $\mathbf{U} \in \mathbb{R}^{n \times d}$ minimizing:
@@ -129,17 +137,7 @@ def _(mo):
     **Result:** the optimal $\mathbf{U}$ is the top-$d$ eigenvectors of $\mathbf{A}$.
     Move the slider to see reconstruction quality improve with $d$.
     """)
-    return
 
-
-@app.cell(hide_code=True)
-def _(mo):
-    d_slider = mo.ui.slider(1, 20, value=5, label="d (eigenvectors)")
-    return (d_slider,)
-
-
-@app.cell(hide_code=True)
-def _(A, d_slider, mo, np, plt, sns):
     d = d_slider.value
 
     eigvals_full, eigvecs_full = np.linalg.eigh(A)
@@ -150,40 +148,54 @@ def _(A, d_slider, mo, np, plt, sns):
     A_recon = sum(eigvals_sorted[i] * np.outer(eigvecs_sorted[:, i], eigvecs_sorted[:, i]) for i in range(d))
     error = 0.5 * np.linalg.norm(A - A_recon, "fro") ** 2
 
-    # ---- row 1: heatmaps ----
-    fig_r, axes_r = plt.subplots(1, 3, figsize=(13, 3.5))
-    vmax = np.abs(A).max()
-    for ax, mat, title in zip(
-        axes_r,
-        [A, A_recon, A - A_recon],
-        [r"Original $\mathbf{A}$", f"Reconstructed (d={d})", f"Residual (err={error:.0f})"],
-    ):
-        sns.heatmap(
-            mat, ax=ax, cmap="coolwarm", center=0, vmin=-vmax, vmax=vmax, cbar=False, xticklabels=False, yticklabels=False
-        )
-        ax.set_title(title, fontsize=11)
-    plt.tight_layout()
+    # Single combined figure: heatmaps (top) + error curve (bottom)
+    from matplotlib.gridspec import GridSpec as _GS
 
-    # ---- row 2: error curve ----
+    fig_combined = plt.figure(figsize=(13, 6.5))
+    _gs = _GS(2, 3, figure=fig_combined, height_ratios=[3, 2], hspace=0.45, wspace=0.15)
+
+    vmax = np.abs(A).max()
+    for _col, (mat, title) in enumerate(
+        zip(
+            [A, A_recon, A - A_recon],
+            [r"Original $\mathbf{A}$", f"Reconstructed (d={d})", f"Residual (err={error:.0f})"],
+        )
+    ):
+        _ax = fig_combined.add_subplot(_gs[0, _col])
+        sns.heatmap(
+            mat,
+            ax=_ax,
+            cmap="coolwarm",
+            center=0,
+            vmin=-vmax,
+            vmax=vmax,
+            cbar=False,
+            xticklabels=False,
+            yticklabels=False,
+        )
+        _ax.set_title(title, fontsize=11)
+
+    _ax_e = fig_combined.add_subplot(_gs[1, :])
     _d_vals = list(range(1, 25))
     _errs = [
         0.5
         * np.linalg.norm(
-            A - sum(eigvals_sorted[i] * np.outer(eigvecs_sorted[:, i], eigvecs_sorted[:, i]) for i in range(dv)), "fro"
+            A - sum(eigvals_sorted[i] * np.outer(eigvecs_sorted[:, i], eigvecs_sorted[:, i]) for i in range(dv)),
+            "fro",
         )
         ** 2
         for dv in _d_vals
     ]
-    fig_e, ax_e = plt.subplots(figsize=(9, 2.5))
-    ax_e.plot(_d_vals, _errs, marker="o", ms=4, color="steelblue")
-    ax_e.axvline(d, color="crimson", linestyle="--", label=f"d={d}")
-    ax_e.set_xlabel("d")
-    ax_e.set_ylabel("Frobenius error")
-    ax_e.legend()
-    ax_e.set_title("Reconstruction error vs d")
-    plt.tight_layout()
+    _ax_e.plot(_d_vals, _errs, marker="o", ms=4, color="steelblue")
+    _ax_e.axvline(d, color="crimson", linestyle="--", label=f"d={d}")
+    _ax_e.set_xlabel("d")
+    _ax_e.set_ylabel("Frobenius error")
+    _ax_e.legend(fontsize=9)
+    _ax_e.set_title("Reconstruction error vs d", fontsize=11)
 
-    mo.vstack([d_slider, fig_r, fig_e])
+    fig_combined.subplots_adjust(top=0.92, bottom=0.10, left=0.06, right=0.98, hspace=0.45, wspace=0.15)
+
+    mo.vstack([_spec_header, d_slider, fig_combined])
     return
 
 

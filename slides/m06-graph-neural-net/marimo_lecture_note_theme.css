@@ -1,0 +1,118 @@
+/*
+ * Typography aligned with Applied Soft Computing lecture notes:
+ *   applied-soft-comp/docs/lecture-note/scss/style.scss
+ *   applied-soft-comp/docs/lecture-note/assets/custom.css
+ *
+ * Marimo public theming API: https://docs.marimo.io/guides/configuration/theming/
+ */
+
+:root {
+  --marimo-text-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
+    Arial, sans-serif;
+  --marimo-heading-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
+    Arial, sans-serif;
+  --marimo-monospace-font: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono",
+    Consolas, monospace;
+}
+
+h2, h3 {
+  font-weight: 700 !important;
+}
+
+/* Lecture body: 1.1rem @ 1.6 — bump slightly for live demo readability */
+.paragraph {
+  font-family: var(--marimo-text-font);
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: #1a1a1a;
+}
+
+/* Display-mode LaTeX ($$...$$  or  \[...\]).
+   Marimo uses KaTeX; it hard-codes font-size:110% on .katex, so we must
+   override that inner element directly. Inline math (.katex not inside
+   .katex-display) is left at the default size. */
+.katex-display .katex {
+  font-size: 150% !important;
+}
+
+.katex-display {
+  margin: 1em 0 !important;
+  overflow-x: auto;
+}
+
+/*
+ * Button color palette
+ *
+ * Red   (danger)  : #e03131  #fa5252  #ff8787  #ffc9c9  #fff5f5
+ * Blue  (warn)    : #1971c2  #228be6  #4dabf7  #a5d8ff
+ * Teal  (success) : #0c8599  #15aabf  #3bc9db  #99e9f2  #e3fafc
+ *
+ * Marimo kind → variant → CSS variable
+ *   kind="warn"    → --yellow-*  → blue
+ *   kind="danger"  → --red-*     → red
+ *   kind="success" → --grass-*   → teal
+ *   kind="neutral" → secondary   → unchanged (grey)
+ *
+ * Scoped to <button> so callouts / charts are unaffected.
+ */
+/* ── Print / PDF export ──────────────────────────────────────────────────
+   Hide the marimo app chrome (search bar, breadcrumb, status indicator)
+   and tighten cell spacing so pages aren't wasted on padding.
+   Playwright uses @media print when calling page.pdf().
+*/
+@media print {
+  /* Hide marimo navigation / header chrome */
+  [data-testid="app-chrome"],
+  [data-testid="app-header"],
+  .status-bar,
+  .header,
+  nav,
+  footer {
+    display: none !important;
+  }
+
+  /* Remove excessive top padding that appears in exported pages */
+  body > div:first-child {
+    padding-top: 0 !important;
+  }
+
+  /* Prevent page breaks inside a cell's output box */
+  .output-area,
+  .cell-output {
+    page-break-inside: avoid;
+  }
+
+  /* Reduce outer margin so content gets more room */
+  .app-container,
+  .notebook-container {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+}
+
+button {
+  /* warn → blue: light bg, dark text */
+  --yellow-9:  #a5d8ff !important;  /* bg  */
+  --yellow-10: #4dabf7 !important;  /* hover bg */
+  --yellow-11: #228be6 !important;  /* border */
+  --yellow-12: #1864ab !important;  /* text */
+
+  /* danger → red: light bg, dark text */
+  --red-9:  #ffc9c9 !important;     /* bg */
+  --red-10: #ff8787 !important;     /* hover bg */
+  --red-11: #fa5252 !important;     /* border */
+  --red-1:  #c92a2a !important;     /* text */
+
+  /* success → teal: light bg, dark text */
+  --grass-9:  #99e9f2 !important;   /* bg */
+  --grass-10: #3bc9db !important;   /* hover bg */
+  --grass-11: #15aabf !important;   /* border */
+  --grass-1:  #0b7285 !important;   /* text */
+
+  /* neutral → light grey bg, charcoal text */
+  --secondary:             #dee2e6 !important;
+  --secondary-foreground:  #343a40 !important;
+
+  font-weight: 500 !important;
+  font-family: var(--marimo-text-font) !important;
+}
