@@ -1,0 +1,494 @@
+---
+title: "Network Embedding"
+subtitle: "Lecture 08: Advanced Topics in Network Science"
+author: "Sadamori Kojaku"
+format:
+  revealjs:
+    theme: dark
+    slide-number: true
+    code-line-numbers: true
+    highlight-style: github-dark
+    fig-align: center
+    smaller: false
+    scrollable: false
+---
+
+# Network Embedding 🌐
+
+**Task**: Embed a network into a low-dimensional vector space such that:
+
+1. The embedding can recover the network with high accuracy.
+2. The embedding should be low-dimensional.
+
+**Question**: How would you do that? What approaches would be viable?
+
+![](figs/graph-embedding-viz.png){fig-align="center" width="80%"}
+
+---
+
+# Pen and Paper ✍️
+
+[Link to exercise](https://tinyurl.com/3ckp36n5)
+
+---
+
+## Idea 1: Network Reconstruction
+
+Compress adjacency matrix $\mathbf{A}$ into a low-dim representation $\mathbf{U}$ that minimizes **the reconstruction error**:
+
+$$
+\min \frac{1}{2}||\mathbf{A} - \lambda \mathbf{U}\mathbf{U}^\top||_F^2
+$$
+
+where
+
+$$
+U = \begin{bmatrix}
+| & | & & | \\
+\mathbf{u}_1 & \mathbf{u}_2 & \cdots & \mathbf{u}_d \\
+| & | & & |
+\end{bmatrix} \in \mathbb{R}^{n \times d}, \quad
+\mathbf{u}^\top_i \mathbf{u}_j = 0 \quad \forall i \neq j, \text{ and} \quad \sum_i u_i^2 = 1
+$$
+
+**Q**: Try solving this for the 1d case (only $\mathbf{u}_1$).
+
+---
+
+## Proof Sketch
+
+$$
+\frac{1}{2}||\mathbf{A} - \lambda \mathbf{U}\mathbf{U}^\top||_F^2 = \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N (A_{ij} - \lambda u_i u_j)^2
+$$
+
+This is a convex function of $u_i$. The gradient is 0 at the minimum. By taking the derivative with respect to $u_i$:
+
+$$
+\frac{\partial}{\partial u_i}\left[ \frac{1}{2}\sum_{i=1}^N \sum_{j=1}^N (A_{ij} - \lambda u_i u_j)^2 \right] = 0
+$$
+
+---
+
+## Setting the Derivative to Zero
+
+$$
+\begin{align}
+&2 \times \left[ \sum_{j=1, j\neq i}^N (A_{ij} - \lambda u_i u_j)(-\lambda u_j)\right] +
+(A_{ii} - \lambda u_i^2) (-2\lambda u_i) = 0 \\
+&\iff -2 \lambda \left[ \sum_{j=1, j\neq i}^N A_{ij}u_j - \lambda^2 u_i u_j^2 \right] - 2 \lambda A_{ii}u_i + 2\lambda^2 u_i^3 \\
+&\iff \sum_{j=1}^N A_{ij}u_j - \lambda u_i \underbrace{\sum_{j=1}^N u_j^2}_{=1 \text{ (our constraint)}}\\
+&\iff \sum_{j=1}^N A_{ij}u_j  = \lambda u_i
+\end{align}
+$$
+
+This is the **eigenvalue problem** of $\mathbf{A}$:
+
+$$\mathbf{A} \mathbf{u} = \lambda \mathbf{u}$$
+
+**Q**: But we have $N$ eigenvectors with zero gradient. Which one should we choose?
+
+---
+
+## Which Eigenvector Should We Choose?
+
+A guiding criterion is the *reconstruction error*. Choose the eigenvector with eigenvalue $\lambda$ that minimizes:
+
+$$
+\frac{1}{2}||\mathbf{A} - \lambda \mathbf{u}\mathbf{u}^\top||_F^2 = \text{Tr}((\mathbf{A} - \lambda \mathbf{u}\mathbf{u}^\top)^\top (\mathbf{A} - \lambda \mathbf{u}\mathbf{u}^\top))
+$$
+
+Hint: use the matrix Frobenius norm $||\mathbf{M}||_F^2 = \text{Tr}(\mathbf{M}^\top\mathbf{M})$ and see how it relates to the eigenvalue.
+
+---
+
+## Expanding the Reconstruction Error
+
+$$
+\begin{align}
+&\text{Tr}((\mathbf{A} - \lambda \mathbf{u}\mathbf{u}^\top)^\top (\mathbf{A} - \lambda \mathbf{u}\mathbf{u}^\top)) \\
+&= \underbrace{\text{Tr}(\mathbf{A}^\top\mathbf{A})}_{\text{const.}} - 2\lambda \text{Tr}(\mathbf{u}^\top\mathbf{A}\mathbf{u}) + \lambda^2 \underbrace{\text{Tr}(\mathbf{u}^\top\mathbf{u}\mathbf{u}^\top\mathbf{u})}_{\text{const. (why? 🤔)}} \\
+&\propto -2 \lambda \underbrace{\text{Tr}(\mathbf{u}^\top\mathbf{A}\mathbf{u})}_{\text{$=\lambda$ (why? 🤔)}}
+\end{align}
+$$
+
+Altogether, the reconstruction error is:
+
+$$
+\frac{1}{2}||\mathbf{A} - \lambda \mathbf{u}\mathbf{u}^\top||_F^2 = - \lambda^2 + \text{const.}
+$$
+
+It is minimized when $\lambda$ is **the largest eigenvalue**. So the best $\mathbf{u}$ is the eigenvector corresponding to the largest eigenvalue.
+
+---
+
+## Why Eigenvectors?
+
+![](figs/spectral-decomposition.jpg){fig-align="center"}
+
+---
+
+## Code: Spectral Decomposition
+
+```{python}
+#| eval: false
+#| code-line-numbers: "6,7,8"
+import igraph as ig
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+A = ig.Graph.Famous("Zachary").get_adjacency_sparse()  # Load the karate club network
+eigvals, eigvecs = np.linalg.eig(A.toarray())           # Eigenvalues and eigenvectors
+eigvals, eigvecs = np.real(eigvals), np.real(eigvecs)
+
+fig, axes = plt.subplots(1, 4, figsize=(15, 3))
+
+for i in range(3):
+    u = eigvecs[:, i].reshape((-1, 1))
+    lam = eigvals[i]
+    basisMatrix = u @ u.T
+    sns.heatmap(basisMatrix, ax=axes[i+1], cmap="coolwarm", center=0)
+    axes[i+1].set_title(f"Lambda={lam:.2f}")
+
+sns.heatmap(A.toarray(), ax=axes[0], cmap="coolwarm", center=0)
+axes[0].set_title("Adjacency Matrix")
+plt.show()
+```
+
+---
+
+## Solution for General $d$-Dimensional Case
+
+The $d$ eigenvectors associated with the **largest $d$ eigenvalues** give the optimal solution that minimizes the reconstruction error for the $d$-dimensional case.
+
+---
+
+## Coding Exercise 🧑‍💻
+
+```python
+import numpy as np
+import igraph as ig
+A = ig.Graph.Famous("Zachary").get_adjacency_sparse()  # Load the karate club network
+```
+
+**Task 1**: Compute the eigenvectors and eigenvalues of $\mathbf{A}$.
+
+**Task 2**: Compute the sum of reconstructed matrices using the first $d$ eigenvectors for $d = 1, 2, 3, 4, 5$ and compare with the original $\mathbf{A}$:
+
+$$
+\frac{1}{2}\left|\left|\mathbf{A} - \sum_{i=1}^d \lambda_i \mathbf{u}_i \mathbf{u}_i^\top\right|\right|_F^2
+$$
+
+where $\mathbf{u}_i$ is the eigenvector corresponding to the $i$-th largest eigenvalue $\lambda_i$.
+
+---
+
+## Idea 2: Graph Cut ✂️
+
+**Graph Cut Problem**: Disconnect a graph into two components by cutting the minimum number of edges:
+
+$$
+\min_{Q,S} \text{cut}(Q,S) = \sum_{i \in Q} \sum_{j \in S} A_{ij}, \quad \text{where } Q \cup S \approx N, \quad Q \cap S = \emptyset
+$$
+
+::: {.columns}
+::: {.column width="50%"}
+This has a close relationship with the **spectra** of the network.
+:::
+::: {.column width="50%"}
+![](figs/GraphMinCut2-ConductanceHERO.width-1250.png)
+:::
+:::
+
+---
+
+## Ratio Cut
+
+::: {.columns}
+::: {.column width="55%"}
+The Ratio Cut penalizes unbalanced partitions:
+
+$$
+\sum_{i \in Q} \sum_{j \in S} A_{ij} \left( \frac{1}{|Q|} + \frac{1}{|S|} \right)
+$$
+
+**Challenge**: The RatioCut objective can be expressed as:
+
+$$
+\mathbf{x}^\top \mathbf{L} \mathbf{x}
+$$
+
+where $\mathbf{L} = \mathbf{D} - \mathbf{A}$ is the combinatorial Laplacian and $\mathbf{x}$ is an indicator vector:
+
+$$
+x_i = \begin{cases}
+\sqrt{|S|/|Q|} & \text{if } i \in Q \\
+-\sqrt{|Q|/|S|} & \text{if } i \in S
+\end{cases}
+$$
+
+Prove this!
+:::
+::: {.column width="45%"}
+::: {.callout-note}
+**Note**: $x_i$ has convenient properties: **zero mean** and **normalization**:
+$$\sum_i x_i = 0, \quad \sum_i x_i^2 = N$$
+:::
+
+I'll challenge you with a similar problem (normalized cut) later. Form a group, try to solve it together. Bonus points for solving it during the lecture!
+:::
+:::
+
+---
+
+## Deriving the Ratio Cut Formula
+
+Consider the distance between points $x_i$ and $x_j$:
+
+$$
+(x_i - x_j)^2 = \left(\sqrt{\frac{|S|}{|Q|}} + \sqrt{\frac{|Q|}{|S|}}\right)^2 = \frac{N^2}{|Q||S|}
+$$
+
+$$
+\begin{align}
+\text{RatioCut}(Q,S) &= \sum_{i \in Q} \sum_{j \in S} A_{ij} \left( \frac{|Q| + |S|}{|Q||S|} \right) \\
+&= \frac{1}{N}\sum_{i \in Q} \sum_{j \in S} A_{ij}  \left( x_i - x_j \right)^2 \\
+&= \frac{1}{2N}\sum_{i=1}^N  \sum_{j=1}^N A_{ij}  \left( x_i - x_j \right)^2
+\end{align}
+$$
+
+(The last equality holds because $(x_i - x_j)^2 = 0$ for $i,j \in Q$ or $i,j \in S$.)
+
+---
+
+## Completing the Derivation
+
+By expanding the square term:
+
+$$
+\begin{align}
+\text{RatioCut}(Q,S) &= \frac{1}{2N}\sum_{i=1}^N  \sum_{j=1}^N A_{ij}  \left( x_i - x_j \right)^2 \\
+&= \frac{1}{N}\sum_{i=1}^N x^2_i \underbrace{\sum_{j=1}^N A_{ij}}_{\text{degree } k_i}  - \frac{1}{N}\sum_{i=1}^N \sum_{j=1}^N A_{ij} x_i x_j \\
+&= \frac{1}{N}\sum_{i=1}^N \sum_{j=1}^N L_{ij} x_i x_j
+\end{align}
+$$
+
+where $\mathbf{L}$ is the **Combinatorial Laplacian**:
+
+$$
+\mathbf{L} = \begin{bmatrix}
+k_1 & -A_{12} & \cdots & -A_{1n} \\
+-A_{21} & k_2 & \cdots & -A_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+-A_{n1} & -A_{n2} & \cdots & k_n
+\end{bmatrix}
+$$
+
+---
+
+## The Optimization Problem
+
+$$
+\min_{\mathbf{x}} \mathbf{x}^\top \mathbf{L} \mathbf{x}
+$$
+
+subject to $\mathbf{x}^\top \mathbf{1} = 0$, $\mathbf{x}^\top \mathbf{x} = N$, and $x_i \in \left\{\sqrt{|S|/|Q|},\, -\sqrt{|Q|/|S|}\right\}$.
+
+This is an **NP-hard** problem 😿. But there is a way to get a good suboptimal solution using spectral embedding!
+
+**Core idea**: Relax the discrete constraint by allowing $x_i$ to be any real number, keeping the normalization:
+
+$$
+\mathbf{x}^\top \mathbf{1} = 0, \quad \mathbf{x}^\top \mathbf{x} = 1, \quad x_i \in [-1,1]
+$$
+
+**Q**: What is the solution to this relaxed problem?
+
+---
+
+## Solution via Eigenvalue Problem
+
+Consider the eigenvalue problem $\mathbf{L} \mathbf{x} = \lambda \mathbf{x}$. By multiplying both sides by $\mathbf{x}^\top$:
+
+$$
+\mathbf{x}^\top \mathbf{L} \mathbf{x} = \lambda \mathbf{x}^\top \mathbf{x} = \lambda
+$$
+
+(using $||\mathbf{x}|| = 1$). The left-hand side is exactly the objective we want to minimize!
+
+The solution is the eigenvector corresponding to the **smallest eigenvalue** 😉...
+
+---
+
+## Confirmation Exercise
+
+> The solution is the eigenvector corresponding to the smallest eigenvalue 😉...
+
+```python
+import numpy as np
+import igraph as ig
+A = ig.Graph.Famous("Zachary").get_adjacency_sparse()  # Load
+```
+
+Compute the combinatorial Laplacian $\mathbf{L} = \mathbf{D} - \mathbf{A}$ where $\mathbf{D}$ is the degree matrix.
+
+**Task 1**: Compute the smallest eigenvalues and eigenvectors of $\mathbf{L}$ and plot the eigenvector.
+
+**Task 2**: Compute the second smallest eigenvector and plot it.
+
+---
+
+## Issue with the "Best" Solution
+
+> ~~The solution is the eigenvector corresponding to the smallest eigenvalue 😉~~
+
+The eigenvector corresponding to the smallest eigenvalue is parallel to the all-ones vector:
+
+$$
+\mathbf{x}_1 = \frac{1}{\sqrt{N}} \begin{bmatrix} 1 & 1 & \cdots & 1 \end{bmatrix}^\top
+$$
+
+This **violates** the zero mean constraint $\mathbf{x}^\top \mathbf{1} = 0$.
+
+The second smallest eigenvector is orthogonal to $\mathbf{x}_1$ (eigenvectors are orthogonal to each other). So the true solution is the eigenvector corresponding to the **second smallest eigenvalue**!
+
+The second, third, ... smallest eigenvectors can be used to get a $k$-way partition of the network.
+
+---
+
+## Normalized Cut
+
+::: {.columns}
+::: {.column width="55%"}
+Let us derive another spectral embedding method based on the normalized cut:
+
+$$
+\text{NC}(Q,S) = \frac{\text{cut}(Q,S)}{\text{vol}(Q)} + \frac{\text{cut}(Q,S)}{\text{vol}(S)}
+$$
+
+where $\text{vol}(Q) = \sum_{i \in Q} k_{i}$ and $\text{vol}(S) = \sum_{i \in S} k_{i}$.
+
+The objective is expressed as $\mathbf{z}^\top \mathbf{L}_n \mathbf{z}$ where $\mathbf{z}$ is:
+
+$$
+z_i = \begin{cases} \sqrt{\frac{\text{vol}(S)}{\text{vol}(Q)}} & \text{if } i \in Q \\
+-\sqrt{\frac{\text{vol}(Q)}{\text{vol}(S)}} & \text{if } i \in S
+\end{cases}
+$$
+:::
+::: {.column width="45%"}
+And $\mathbf{L}_n$ is the **normalized Laplacian**:
+
+$$
+\mathbf{L}_n = \mathbf{I} - \mathbf{D}^{-1/2} \mathbf{A}\mathbf{D}^{-1/2}
+$$
+
+Prove it!
+:::
+:::
+
+---
+
+## Laplacian Eigenmap 🔄
+
+**Objective**: Position connected nodes close together:
+
+$$
+\min_{\mathbf{u}} \sum_{i,j} A_{ij} (\mathbf{u}_i - \mathbf{u}_j)^2
+$$
+
+**Q**: What is the solution to this optimization problem?
+
+---
+
+# Neural Embedding Methods
+
+![](figs/neural-net.png){fig-align="center"}
+
+---
+
+## How to Apply Neural Networks to Embedding?
+
+1. Run random walks on the graph.
+2. Treat the walks as sentences.
+3. Apply neural networks to predict temporal correlations between "words" (nodes).
+
+![](figs/random-walk-idea.png){fig-align="center" width="80%"}
+
+**DeepWalk & node2vec**: Use *word2vec* to learn node embeddings from random walks.
+
+::: {.callout-note}
+This is one way. Another popular approach is to use *convolution* inspired from image processing.
+:::
+
+---
+
+## Pen and Paper Exercise
+
+[Pen and Paper Exercise](https://skojaku.github.io/adv-net-sci/_downloads/bda4489e6c047dd517f24d5dbdbcae89/exercise.pdf)
+
+---
+
+## CBOW Model
+
+![](figs/word2vec-cbow.png){fig-align="center"}
+
+---
+
+## Skipgram
+
+![](figs/word2vec-skipgram.png){fig-align="center"}
+
+---
+
+## node2vec 📝
+
+![](figs/node2vec.png){fig-align="center" width="80%"}
+
+node2vec learns multi-step transition probabilities of random walks. High probability of co-occurrence corresponds to closeness in the embedding space.
+
+::: {.callout-note}
+Precisely speaking, this is not an accurate model description. node2vec is trained on a biased algorithm. Consequently, two frequently co-visited nodes are *not* always embedded closely. See [this paper](https://dl.acm.org/doi/10.5555/3540261.3542110).
+:::
+
+---
+
+## node2vec Random Walks
+
+**Biased Random Walk**:
+
+$$
+P(\text{next}|\text{current}, \text{previous})
+\propto\begin{cases}
+\frac{1}{p} & \text{Return to previous} \\
+1 & \text{Move to neighbor} \\
+\frac{1}{q} & \text{Explore further}
+\end{cases}
+$$
+
+::: {.columns}
+::: {.column width="40%"}
+**Parameters**:
+
+- $p$: Return parameter (lower = more backtracking)
+- $q$: Out-degree parameter (lower = more exploration)
+
+These control whether the walker moves *away* from the previous node or *stays locally*.
+:::
+::: {.column width="60%"}
+![](figs/node2vec-random-walk.png)
+:::
+:::
+
+---
+
+## Example: Les Misérables Network 📚
+
+::: {.columns}
+::: {.column width="30%"}
+Complementary visualizations of the Les Misérables co-appearance network generated by node2vec. Label colors reflect homophily (top) and structural equivalence (bottom).
+:::
+::: {.column width="70%"}
+![](figs/node2vec-cp-coms.png)
+:::
+:::
