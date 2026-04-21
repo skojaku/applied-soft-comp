@@ -29,15 +29,21 @@ h2, h3 {
 
 /* Display-mode LaTeX ($$...$$  or  \[...\]).
    Marimo uses KaTeX; it hard-codes font-size:110% on .katex, so we must
-   override that inner element directly. Inline math (.katex not inside
-   .katex-display) is left at the default size. */
+   override that inner element directly. 115% is large enough to stand out
+   from body text while staying within slide/column width. */
 .katex-display .katex {
-  font-size: 150% !important;
+  font-size: 115% !important;
 }
 
 .katex-display {
-  margin: 1em 0 !important;
+  margin: 0.6em 0 !important;
   overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Inline math: match surrounding text exactly */
+:not(.katex-display) > .katex {
+  font-size: 100% !important;
 }
 
 /*
