@@ -1,494 +1,719 @@
 ---
 title: "Network Embedding"
-subtitle: "Lecture 08: Advanced Topics in Network Science"
+subtitle: "Lecture 08 · Advanced Topics in Network Science"
 author: "Sadamori Kojaku"
 format:
   revealjs:
     theme: dark
+    width: 1280
+    height: 720
     slide-number: true
-    code-line-numbers: true
     highlight-style: github-dark
     fig-align: center
-    smaller: false
-    scrollable: false
+    margin: 0.06
+    transition: slide
+    smaller: true
+jupyter: advnetsci
+execute:
+  echo: false
+  warning: false
 ---
 
-# Network Embedding 🌐
+```{=html}
+<style>
+/* ── Typography ─────────────────────────────────────── */
+.reveal .slides section {
+  font-size: 0.82em;
+  line-height: 1.45;
+}
+.reveal h1 { font-size: 1.7em; margin-bottom: 0.3em; }
+.reveal h2 { font-size: 1.25em; margin-bottom: 0.25em; }
+.reveal h3 { font-size: 1.05em; margin-bottom: 0.15em; }
 
-**Task**: Embed a network into a low-dimensional vector space such that:
+/* ── Math overflow ─────────────────────────────────── */
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.1em 0; }
+.katex-display .katex { font-size: 0.88em !important; }
+.katex { font-size: 0.9em !important; }
 
-1. The embedding can recover the network with high accuracy.
-2. The embedding should be low-dimensional.
+/* ── Code blocks ───────────────────────────────────── */
+.reveal pre code { font-size: 0.75em; max-height: 320px; }
+.reveal pre { margin: 0.3em 0; }
 
-**Question**: How would you do that? What approaches would be viable?
+/* ── Callouts ──────────────────────────────────────── */
+.callout { font-size: 0.88em; margin: 0.4em 0; }
 
-![](figs/graph-embedding-viz.png){fig-align="center" width="80%"}
+/* ── OJS interactive slides ────────────────────────── */
+.ojs-viz {
+  background: #161b2e;
+  border-radius: 8px;
+  padding: 8px;
+  display: inline-block;
+}
+.viz-row { display: flex; gap: 12px; align-items: flex-start; justify-content: center; }
+.viz-controls { display: flex; flex-direction: column; gap: 6px; min-width: 160px; }
+label { color: #ccc; font-size: 0.8em; }
+input[type=range] { width: 140px; accent-color: #4ecdc4; }
 
----
+/* ── Columns spacing ───────────────────────────────── */
+.reveal .columns { gap: 1.5em; }
+</style>
+```
 
-# Pen and Paper ✍️
+```{python}
+#| label: py-setup
+import numpy as np
+import networkx as nx
+from sklearn.cluster import KMeans
 
-[Link to exercise](https://tinyurl.com/3ckp36n5)
+# ── Karate club ────────────────────────────────────────
+G   = nx.karate_club_graph()
+A   = nx.to_numpy_array(G)
+n   = int(A.shape[0])
+
+# ── Adjacency eigen (descending) ──────────────────────
+ev_a, U_a = np.linalg.eigh(A)
+idx  = np.argsort(ev_a)[::-1]
+ev_a = ev_a[idx];  U_a = U_a[:, idx]
+
+# ── Reconstruction errors d = 1..20 ───────────────────
+def recon_err(d):
+    Ar = sum(float(ev_a[k]) * np.outer(U_a[:,k], U_a[:,k]) for k in range(d))
+    return float(0.5 * np.linalg.norm(A - Ar, "fro")**2)
+
+recon_errors = [recon_err(d) for d in range(1, 21)]
+
+# ── Laplacian eigen (ascending) ───────────────────────
+D_mat = np.diag(A.sum(1))
+L     = D_mat - A
+ev_l, U_l = np.linalg.eigh(L)
+
+# ── Spring layout (fixed seed) ────────────────────────
+pos   = nx.spring_layout(G, seed=42)
+npos  = [[float(pos[i][0]), float(pos[i][1])] for i in range(n)]
+
+# ── Graph topology ────────────────────────────────────
+edges_js = [{"s": int(u), "t": int(v)} for u, v in G.edges()]
+faction  = [0 if G.nodes[i]["club"] == "Mr. Hi" else 1 for i in range(n)]
+
+ojs_define(
+    A_mat        = A.tolist(),
+    n_nodes      = n,
+    ev_adj       = ev_a.tolist(),
+    U_adj        = U_a.tolist(),
+    recon_errors = recon_errors,
+    ev_lap       = ev_l.tolist(),
+    U_lap        = U_l.tolist(),
+    npos         = npos,
+    edges_js     = edges_js,
+    faction      = faction,
+)
+```
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- TITLE                                               -->
+<!-- ════════════════════════════════════════════════════ -->
+
+## Network Embedding 🌐 {.center}
+
+**Task**: Map each node of a graph into a low-dimensional vector such that:
+
+1. The embedding can *reconstruct* the network with high accuracy.
+2. The embedding should be *low-dimensional* ($d \ll N$).
+
+::: {.columns}
+::: {.column width="55%"}
+Formally, we want $\mathbf{U} \in \mathbb{R}^{N \times d}$ where each row $\mathbf{u}_i$ is the embedding of node $i$, and nodes with similar roles in the network end up close in $\mathbb{R}^d$.
+
+**Why does this matter?** Standard ML algorithms work on vectors. Embedding lets us apply them to graphs.
+:::
+::: {.column width="45%"}
+$$
+\underbrace{\mathbf{A}}_{\text{graph}} \;\longrightarrow\; \underbrace{\mathbf{U} \in \mathbb{R}^{N \times d}}_{\text{embedding}}
+$$
+
+**Q**: How would you go about finding such $\mathbf{U}$?
+:::
+:::
 
 ---
 
 ## Idea 1: Network Reconstruction
 
-Compress adjacency matrix $\mathbf{A}$ into a low-dim representation $\mathbf{U}$ that minimizes **the reconstruction error**:
+Compress adjacency matrix $\mathbf{A}$ into $\mathbf{U} \in \mathbb{R}^{N \times d}$ by minimizing the **reconstruction error**:
 
 $$
-\min \frac{1}{2}||\mathbf{A} - \lambda \mathbf{U}\mathbf{U}^\top||_F^2
+\min_{\mathbf{U}} \;\frac{1}{2}\|\mathbf{A} - \mathbf{U}\mathbf{U}^\top\|_F^2
 $$
 
-where
+with orthonormal columns: $\mathbf{u}_i^\top \mathbf{u}_j = 0 \;(\forall i \neq j)$ and $\|\mathbf{u}_k\|^2 = 1$.
 
-$$
-U = \begin{bmatrix}
-| & | & & | \\
-\mathbf{u}_1 & \mathbf{u}_2 & \cdots & \mathbf{u}_d \\
-| & | & & |
-\end{bmatrix} \in \mathbb{R}^{n \times d}, \quad
-\mathbf{u}^\top_i \mathbf{u}_j = 0 \quad \forall i \neq j, \text{ and} \quad \sum_i u_i^2 = 1
-$$
+::: {.columns}
+::: {.column width="50%"}
+For the 1-d case ($\mathbf{U} = \lambda^{1/2}\mathbf{u}$), this becomes:
 
-**Q**: Try solving this for the 1d case (only $\mathbf{u}_1$).
+$$\min_{\mathbf{u},\lambda} \; \frac{1}{2}\|\mathbf{A} - \lambda\,\mathbf{u}\mathbf{u}^\top\|_F^2$$
+
+Setting the gradient $\partial/\partial u_i = 0$ gives...
+:::
+::: {.column width="50%"}
+**Q**: Try solving this. Expand the Frobenius norm and differentiate w.r.t. $u_i$.
+
+*Hint*: Treat $\lambda$ and all $u_j$ ($j \neq i$) as constants.
+:::
+:::
 
 ---
 
-## Proof Sketch
+## Proof: Gradient → Eigenvalue Problem {.scrollable}
+
+Expanding the objective and differentiating w.r.t. $u_i$:
 
 $$
-\frac{1}{2}||\mathbf{A} - \lambda \mathbf{U}\mathbf{U}^\top||_F^2 = \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N (A_{ij} - \lambda u_i u_j)^2
+\frac{\partial}{\partial u_i}\left[\frac{1}{2}\sum_{i,j}(A_{ij} - \lambda u_i u_j)^2\right]
+= -2\lambda\left[\sum_{j \neq i} A_{ij}u_j - \lambda u_i \sum_{j \neq i}u_j^2\right] - 2\lambda A_{ii}u_i + 2\lambda^2 u_i^3 = 0
 $$
 
-This is a convex function of $u_i$. The gradient is 0 at the minimum. By taking the derivative with respect to $u_i$:
+Collecting terms (using $\sum_j u_j^2 = 1$):
 
 $$
-\frac{\partial}{\partial u_i}\left[ \frac{1}{2}\sum_{i=1}^N \sum_{j=1}^N (A_{ij} - \lambda u_i u_j)^2 \right] = 0
+\sum_{j=1}^N A_{ij}\,u_j \;=\; \lambda\,u_i \quad\Longrightarrow\quad \boxed{\mathbf{A}\mathbf{u} = \lambda\mathbf{u}}
 $$
+
+This is the **eigenvalue problem** of $\mathbf{A}$. There are $N$ solutions $(\\lambda_k, \mathbf{u}_k)$. Which eigenvector gives the smallest reconstruction error?
 
 ---
 
-## Setting the Derivative to Zero
+## Which Eigenvector to Choose?
+
+Expand the Frobenius norm using $\|\mathbf{M}\|_F^2 = \text{Tr}(\mathbf{M}^\top\mathbf{M})$:
 
 $$
-\begin{align}
-&2 \times \left[ \sum_{j=1, j\neq i}^N (A_{ij} - \lambda u_i u_j)(-\lambda u_j)\right] +
-(A_{ii} - \lambda u_i^2) (-2\lambda u_i) = 0 \\
-&\iff -2 \lambda \left[ \sum_{j=1, j\neq i}^N A_{ij}u_j - \lambda^2 u_i u_j^2 \right] - 2 \lambda A_{ii}u_i + 2\lambda^2 u_i^3 \\
-&\iff \sum_{j=1}^N A_{ij}u_j - \lambda u_i \underbrace{\sum_{j=1}^N u_j^2}_{=1 \text{ (our constraint)}}\\
-&\iff \sum_{j=1}^N A_{ij}u_j  = \lambda u_i
-\end{align}
+\tfrac{1}{2}\|\mathbf{A} - \lambda\mathbf{u}\mathbf{u}^\top\|_F^2
+= \underbrace{\tfrac{1}{2}\text{Tr}(\mathbf{A}^\top\mathbf{A})}_{\text{const.}}
+- \lambda\underbrace{\text{Tr}(\mathbf{u}^\top\mathbf{A}\mathbf{u})}_{=\,\lambda}
++ \tfrac{\lambda^2}{2}\underbrace{\text{Tr}(\mathbf{u}^\top\mathbf{u}\mathbf{u}^\top\mathbf{u})}_{=\,1}
+= -\lambda^2 + \text{const.}
 $$
 
-This is the **eigenvalue problem** of $\mathbf{A}$:
+The error is $-\lambda^2 + C$, which is **minimized when $\lambda$ is the largest eigenvalue**.
 
-$$\mathbf{A} \mathbf{u} = \lambda \mathbf{u}$$
-
-**Q**: But we have $N$ eigenvectors with zero gradient. Which one should we choose?
+**For $d$ dimensions**: the optimal $\mathbf{U}$ is formed from the $d$ eigenvectors of $\mathbf{A}$ corresponding to the **top-$d$ eigenvalues**.
 
 ---
 
-## Which Eigenvector Should We Choose?
+## 🔬 Interactive: Spectral Reconstruction
 
-A guiding criterion is the *reconstruction error*. Choose the eigenvector with eigenvalue $\lambda$ that minimizes:
+```{ojs}
+//| label: ojs-recon-setup
+d3   = require("d3@7")
+N    = n_nodes
 
-$$
-\frac{1}{2}||\mathbf{A} - \lambda \mathbf{u}\mathbf{u}^\top||_F^2 = \text{Tr}((\mathbf{A} - \lambda \mathbf{u}\mathbf{u}^\top)^\top (\mathbf{A} - \lambda \mathbf{u}\mathbf{u}^\top))
-$$
+// ── helpers ───────────────────────────────────────────────
+function buildRecon(d) {
+  const Ar = Array.from({length: N}, () => new Float64Array(N));
+  for (let k = 0; k < d; k++) {
+    const lam = ev_adj[k];
+    for (let i = 0; i < N; i++)
+      for (let j = 0; j < N; j++)
+        Ar[i][j] += lam * U_adj[i][k] * U_adj[j][k];
+  }
+  return Ar;
+}
 
-Hint: use the matrix Frobenius norm $||\mathbf{M}||_F^2 = \text{Tr}(\mathbf{M}^\top\mathbf{M})$ and see how it relates to the eigenvalue.
+function heatSVG(mat, {title="", sz=6, div=true, clamp=[-1,1]} = {}) {
+  const n  = mat.length;
+  const W  = n * sz, H = n * sz;
+  const cs = div
+    ? d3.scaleDiverging(t => d3.interpolateRdBu(1-t)).domain([clamp[0], 0, clamp[1]])
+    : d3.scaleSequential(d3.interpolateBlues).domain([0, 1]);
+  const svg = d3.create("svg").attr("width", W).attr("height", H + 18)
+    .style("border-radius","4px").style("background","#0d1117");
+  if (title)
+    svg.append("text").attr("x", W/2).attr("y", 13)
+      .attr("text-anchor","middle").attr("fill","#aaa")
+      .attr("font-size","11px").text(title);
+  const g = svg.append("g").attr("transform","translate(0,18)");
+  for (let i = 0; i < n; i++)
+    for (let j = 0; j < n; j++)
+      g.append("rect").attr("x", j*sz).attr("y", i*sz)
+        .attr("width", sz).attr("height", sz)
+        .attr("fill", cs(mat instanceof Float64Array ? mat[i*n+j] : mat[i][j]));
+  return svg.node();
+}
 
----
-
-## Expanding the Reconstruction Error
-
-$$
-\begin{align}
-&\text{Tr}((\mathbf{A} - \lambda \mathbf{u}\mathbf{u}^\top)^\top (\mathbf{A} - \lambda \mathbf{u}\mathbf{u}^\top)) \\
-&= \underbrace{\text{Tr}(\mathbf{A}^\top\mathbf{A})}_{\text{const.}} - 2\lambda \text{Tr}(\mathbf{u}^\top\mathbf{A}\mathbf{u}) + \lambda^2 \underbrace{\text{Tr}(\mathbf{u}^\top\mathbf{u}\mathbf{u}^\top\mathbf{u})}_{\text{const. (why? 🤔)}} \\
-&\propto -2 \lambda \underbrace{\text{Tr}(\mathbf{u}^\top\mathbf{A}\mathbf{u})}_{\text{$=\lambda$ (why? 🤔)}}
-\end{align}
-$$
-
-Altogether, the reconstruction error is:
-
-$$
-\frac{1}{2}||\mathbf{A} - \lambda \mathbf{u}\mathbf{u}^\top||_F^2 = - \lambda^2 + \text{const.}
-$$
-
-It is minimized when $\lambda$ is **the largest eigenvalue**. So the best $\mathbf{u}$ is the eigenvector corresponding to the largest eigenvalue.
-
----
-
-## Why Eigenvectors?
-
-![](figs/spectral-decomposition.jpg){fig-align="center"}
-
----
-
-## Code: Spectral Decomposition
-
-```{python}
-#| eval: false
-#| code-line-numbers: "6,7,8"
-import igraph as ig
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-A = ig.Graph.Famous("Zachary").get_adjacency_sparse()  # Load the karate club network
-eigvals, eigvecs = np.linalg.eig(A.toarray())           # Eigenvalues and eigenvectors
-eigvals, eigvecs = np.real(eigvals), np.real(eigvecs)
-
-fig, axes = plt.subplots(1, 4, figsize=(15, 3))
-
-for i in range(3):
-    u = eigvecs[:, i].reshape((-1, 1))
-    lam = eigvals[i]
-    basisMatrix = u @ u.T
-    sns.heatmap(basisMatrix, ax=axes[i+1], cmap="coolwarm", center=0)
-    axes[i+1].set_title(f"Lambda={lam:.2f}")
-
-sns.heatmap(A.toarray(), ax=axes[0], cmap="coolwarm", center=0)
-axes[0].set_title("Adjacency Matrix")
-plt.show()
+function curveSVG(errors, currentD, {W=460, H=150} = {}) {
+  const m = {top:10, right:20, bottom:32, left:50};
+  const iw = W - m.left - m.right, ih = H - m.top - m.bottom;
+  const x  = d3.scaleLinear().domain([1, errors.length]).range([0, iw]);
+  const y  = d3.scaleLinear().domain([0, d3.max(errors)]).range([ih, 0]);
+  const svg = d3.create("svg").attr("width", W).attr("height", H)
+    .style("background","#0d1117").style("border-radius","4px");
+  const g = svg.append("g").attr("transform",`translate(${m.left},${m.top})`);
+  // line
+  g.append("path").datum(errors)
+    .attr("fill","none").attr("stroke","#4ecdc4").attr("stroke-width",2)
+    .attr("d", d3.line().x((_,i)=>x(i+1)).y(d=>y(d)));
+  // dots
+  g.selectAll("circle").data(errors).join("circle")
+    .attr("cx",(_,i)=>x(i+1)).attr("cy",d=>y(d)).attr("r",3)
+    .attr("fill", (_,i) => i+1 === currentD ? "#ff6b6b" : "#4ecdc4");
+  // current vertical line
+  g.append("line")
+    .attr("x1", x(currentD)).attr("x2", x(currentD))
+    .attr("y1", 0).attr("y2", ih)
+    .attr("stroke","#ff6b6b").attr("stroke-dasharray","4,3").attr("stroke-width",1.5);
+  // axes
+  g.append("g").attr("transform",`translate(0,${ih})`)
+    .call(d3.axisBottom(x).ticks(10).tickFormat(d3.format("d")))
+    .selectAll("text,line,path").style("stroke","#666").style("fill","#888").style("font-size","10px");
+  g.append("g").call(d3.axisLeft(y).ticks(4))
+    .selectAll("text,line,path").style("stroke","#666").style("fill","#888").style("font-size","10px");
+  g.append("text").attr("x", iw/2).attr("y", ih+28)
+    .attr("text-anchor","middle").attr("fill","#888").attr("font-size","11px").text("d");
+  g.append("text").attr("transform","rotate(-90)").attr("x",-ih/2).attr("y",-40)
+    .attr("text-anchor","middle").attr("fill","#888").attr("font-size","11px").text("Reconstruction error");
+  return svg.node();
+}
 ```
 
----
+```{ojs}
+//| label: ojs-recon-vis
+viewof d_val = Inputs.range([1, 20], {value: 5, step: 1, label: "d (eigenvectors)"})
 
-## Solution for General $d$-Dimensional Case
+Ar = buildRecon(d_val)
+residual = Array.from({length: N}, (_,i) => Array.from({length: N}, (_,j) => A_mat[i][j] - Ar[i][j]))
+maxAr    = d3.max(Array.from({length:N*N}, (_,k) => Math.abs(Ar[Math.floor(k/N)][k%N])))
+curErr   = recon_errors[d_val - 1]
 
-The $d$ eigenvectors associated with the **largest $d$ eigenvalues** give the optimal solution that minimizes the reconstruction error for the $d$-dimensional case.
+htA   = heatSVG(A_mat,   {title:"Original A",         sz:6, div:false})
+htAr  = heatSVG(Ar,      {title:`Reconstructed (d=${d_val})`, sz:6, div:true, clamp:[-maxAr, maxAr]})
+htRes = heatSVG(residual,{title:`Residual (err=${curErr.toFixed(0)})`, sz:6, div:true, clamp:[-0.6,0.6]})
+cv    = curveSVG(recon_errors, d_val)
 
----
-
-## Coding Exercise 🧑‍💻
-
-```python
-import numpy as np
-import igraph as ig
-A = ig.Graph.Famous("Zachary").get_adjacency_sparse()  # Load the karate club network
+html`<div style="display:flex;gap:10px;align-items:flex-start;justify-content:center;flex-wrap:wrap">
+  ${htA}${htAr}${htRes}
+  <div>${cv}</div>
+</div>`
 ```
-
-**Task 1**: Compute the eigenvectors and eigenvalues of $\mathbf{A}$.
-
-**Task 2**: Compute the sum of reconstructed matrices using the first $d$ eigenvectors for $d = 1, 2, 3, 4, 5$ and compare with the original $\mathbf{A}$:
-
-$$
-\frac{1}{2}\left|\left|\mathbf{A} - \sum_{i=1}^d \lambda_i \mathbf{u}_i \mathbf{u}_i^\top\right|\right|_F^2
-$$
-
-where $\mathbf{u}_i$ is the eigenvector corresponding to the $i$-th largest eigenvalue $\lambda_i$.
 
 ---
 
 ## Idea 2: Graph Cut ✂️
 
-**Graph Cut Problem**: Disconnect a graph into two components by cutting the minimum number of edges:
+**Graph Cut Problem**: Partition nodes into two disjoint sets $Q$ and $S$ by cutting the fewest edges:
 
 $$
-\min_{Q,S} \text{cut}(Q,S) = \sum_{i \in Q} \sum_{j \in S} A_{ij}, \quad \text{where } Q \cup S \approx N, \quad Q \cap S = \emptyset
+\min_{Q,S} \;\text{cut}(Q,S) = \sum_{i \in Q}\sum_{j \in S} A_{ij}
 $$
 
 ::: {.columns}
-::: {.column width="50%"}
-This has a close relationship with the **spectra** of the network.
+::: {.column width="60%"}
+Minimizing raw cut is bad — it tends to isolate a single node. We need a **balanced** cut.
+
+**Ratio Cut** penalizes imbalanced partitions:
+
+$$
+\text{RatioCut}(Q,S) = \sum_{i \in Q}\sum_{j \in S} A_{ij}\left(\frac{1}{|Q|}+\frac{1}{|S|}\right)
+$$
 :::
-::: {.column width="50%"}
-![](figs/GraphMinCut2-ConductanceHERO.width-1250.png)
-:::
-:::
-
----
-
-## Ratio Cut
-
-::: {.columns}
-::: {.column width="55%"}
-The Ratio Cut penalizes unbalanced partitions:
-
-$$
-\sum_{i \in Q} \sum_{j \in S} A_{ij} \left( \frac{1}{|Q|} + \frac{1}{|S|} \right)
-$$
-
-**Challenge**: The RatioCut objective can be expressed as:
-
-$$
-\mathbf{x}^\top \mathbf{L} \mathbf{x}
-$$
-
-where $\mathbf{L} = \mathbf{D} - \mathbf{A}$ is the combinatorial Laplacian and $\mathbf{x}$ is an indicator vector:
-
-$$
-x_i = \begin{cases}
-\sqrt{|S|/|Q|} & \text{if } i \in Q \\
--\sqrt{|Q|/|S|} & \text{if } i \in S
-\end{cases}
-$$
-
-Prove this!
-:::
-::: {.column width="45%"}
-::: {.callout-note}
-**Note**: $x_i$ has convenient properties: **zero mean** and **normalization**:
-$$\sum_i x_i = 0, \quad \sum_i x_i^2 = N$$
-:::
-
-I'll challenge you with a similar problem (normalized cut) later. Form a group, try to solve it together. Bonus points for solving it during the lecture!
-:::
-:::
-
----
-
-## Deriving the Ratio Cut Formula
-
-Consider the distance between points $x_i$ and $x_j$:
-
-$$
-(x_i - x_j)^2 = \left(\sqrt{\frac{|S|}{|Q|}} + \sqrt{\frac{|Q|}{|S|}}\right)^2 = \frac{N^2}{|Q||S|}
-$$
-
-$$
-\begin{align}
-\text{RatioCut}(Q,S) &= \sum_{i \in Q} \sum_{j \in S} A_{ij} \left( \frac{|Q| + |S|}{|Q||S|} \right) \\
-&= \frac{1}{N}\sum_{i \in Q} \sum_{j \in S} A_{ij}  \left( x_i - x_j \right)^2 \\
-&= \frac{1}{2N}\sum_{i=1}^N  \sum_{j=1}^N A_{ij}  \left( x_i - x_j \right)^2
-\end{align}
-$$
-
-(The last equality holds because $(x_i - x_j)^2 = 0$ for $i,j \in Q$ or $i,j \in S$.)
-
----
-
-## Completing the Derivation
-
-By expanding the square term:
-
-$$
-\begin{align}
-\text{RatioCut}(Q,S) &= \frac{1}{2N}\sum_{i=1}^N  \sum_{j=1}^N A_{ij}  \left( x_i - x_j \right)^2 \\
-&= \frac{1}{N}\sum_{i=1}^N x^2_i \underbrace{\sum_{j=1}^N A_{ij}}_{\text{degree } k_i}  - \frac{1}{N}\sum_{i=1}^N \sum_{j=1}^N A_{ij} x_i x_j \\
-&= \frac{1}{N}\sum_{i=1}^N \sum_{j=1}^N L_{ij} x_i x_j
-\end{align}
-$$
-
-where $\mathbf{L}$ is the **Combinatorial Laplacian**:
-
-$$
-\mathbf{L} = \begin{bmatrix}
-k_1 & -A_{12} & \cdots & -A_{1n} \\
--A_{21} & k_2 & \cdots & -A_{2n} \\
-\vdots & \vdots & \ddots & \vdots \\
--A_{n1} & -A_{n2} & \cdots & k_n
-\end{bmatrix}
-$$
-
----
-
-## The Optimization Problem
-
-$$
-\min_{\mathbf{x}} \mathbf{x}^\top \mathbf{L} \mathbf{x}
-$$
-
-subject to $\mathbf{x}^\top \mathbf{1} = 0$, $\mathbf{x}^\top \mathbf{x} = N$, and $x_i \in \left\{\sqrt{|S|/|Q|},\, -\sqrt{|Q|/|S|}\right\}$.
-
-This is an **NP-hard** problem 😿. But there is a way to get a good suboptimal solution using spectral embedding!
-
-**Core idea**: Relax the discrete constraint by allowing $x_i$ to be any real number, keeping the normalization:
-
-$$
-\mathbf{x}^\top \mathbf{1} = 0, \quad \mathbf{x}^\top \mathbf{x} = 1, \quad x_i \in [-1,1]
-$$
-
-**Q**: What is the solution to this relaxed problem?
-
----
-
-## Solution via Eigenvalue Problem
-
-Consider the eigenvalue problem $\mathbf{L} \mathbf{x} = \lambda \mathbf{x}$. By multiplying both sides by $\mathbf{x}^\top$:
-
-$$
-\mathbf{x}^\top \mathbf{L} \mathbf{x} = \lambda \mathbf{x}^\top \mathbf{x} = \lambda
-$$
-
-(using $||\mathbf{x}|| = 1$). The left-hand side is exactly the objective we want to minimize!
-
-The solution is the eigenvector corresponding to the **smallest eigenvalue** 😉...
-
----
-
-## Confirmation Exercise
-
-> The solution is the eigenvector corresponding to the smallest eigenvalue 😉...
-
-```python
-import numpy as np
-import igraph as ig
-A = ig.Graph.Famous("Zachary").get_adjacency_sparse()  # Load
-```
-
-Compute the combinatorial Laplacian $\mathbf{L} = \mathbf{D} - \mathbf{A}$ where $\mathbf{D}$ is the degree matrix.
-
-**Task 1**: Compute the smallest eigenvalues and eigenvectors of $\mathbf{L}$ and plot the eigenvector.
-
-**Task 2**: Compute the second smallest eigenvector and plot it.
-
----
-
-## Issue with the "Best" Solution
-
-> ~~The solution is the eigenvector corresponding to the smallest eigenvalue 😉~~
-
-The eigenvector corresponding to the smallest eigenvalue is parallel to the all-ones vector:
-
-$$
-\mathbf{x}_1 = \frac{1}{\sqrt{N}} \begin{bmatrix} 1 & 1 & \cdots & 1 \end{bmatrix}^\top
-$$
-
-This **violates** the zero mean constraint $\mathbf{x}^\top \mathbf{1} = 0$.
-
-The second smallest eigenvector is orthogonal to $\mathbf{x}_1$ (eigenvectors are orthogonal to each other). So the true solution is the eigenvector corresponding to the **second smallest eigenvalue**!
-
-The second, third, ... smallest eigenvectors can be used to get a $k$-way partition of the network.
-
----
-
-## Normalized Cut
-
-::: {.columns}
-::: {.column width="55%"}
-Let us derive another spectral embedding method based on the normalized cut:
+::: {.column width="40%"}
+**Normalized Cut** uses volume instead of size:
 
 $$
 \text{NC}(Q,S) = \frac{\text{cut}(Q,S)}{\text{vol}(Q)} + \frac{\text{cut}(Q,S)}{\text{vol}(S)}
 $$
 
-where $\text{vol}(Q) = \sum_{i \in Q} k_{i}$ and $\text{vol}(S) = \sum_{i \in S} k_{i}$.
-
-The objective is expressed as $\mathbf{z}^\top \mathbf{L}_n \mathbf{z}$ where $\mathbf{z}$ is:
-
-$$
-z_i = \begin{cases} \sqrt{\frac{\text{vol}(S)}{\text{vol}(Q)}} & \text{if } i \in Q \\
--\sqrt{\frac{\text{vol}(Q)}{\text{vol}(S)}} & \text{if } i \in S
-\end{cases}
-$$
-:::
-::: {.column width="45%"}
-And $\mathbf{L}_n$ is the **normalized Laplacian**:
-
-$$
-\mathbf{L}_n = \mathbf{I} - \mathbf{D}^{-1/2} \mathbf{A}\mathbf{D}^{-1/2}
-$$
-
-Prove it!
+where $\text{vol}(Q) = \sum_{i \in Q} k_i$.
 :::
 :::
+
+---
+
+## Ratio Cut → Laplacian Form {.scrollable}
+
+Define the indicator vector:
+$$
+x_i = \begin{cases}\sqrt{|S|/|Q|} & i \in Q \\ -\sqrt{|Q|/|S|} & i \in S\end{cases}
+\qquad\Rightarrow\qquad \sum_i x_i = 0,\quad \sum_i x_i^2 = N
+$$
+
+Note $(x_i - x_j)^2 = 0$ when $i,j$ are in the same partition, and $(x_i-x_j)^2 = N^2/(|Q||S|)$ otherwise. Then:
+
+$$
+\begin{aligned}
+\text{RatioCut}(Q,S)
+&= \frac{1}{2N}\sum_{i,j}A_{ij}(x_i-x_j)^2
+= \frac{1}{N}\sum_{i,j}L_{ij}\,x_i x_j
+= \frac{1}{N}\,\mathbf{x}^\top\mathbf{L}\mathbf{x}
+\end{aligned}
+$$
+
+where the **combinatorial Laplacian** is $\mathbf{L} = \mathbf{D} - \mathbf{A}$.
+
+So minimizing RatioCut is equivalent to:
+
+$$
+\min_{\mathbf{x}}\;\mathbf{x}^\top\mathbf{L}\mathbf{x}
+\quad\text{s.t.}\quad \mathbf{x}^\top\mathbf{1}=0,\;\mathbf{x}^\top\mathbf{x}=N,\;x_i\in\left\{\sqrt{|S|/|Q|},-\sqrt{|Q|/|S|}\right\}
+$$
+
+This is **NP-hard**. Let's relax the discrete constraint.
+
+---
+
+## Spectral Relaxation
+
+Relax $x_i \in \mathbb{R}$ with normalization $\mathbf{x}^\top\mathbf{x}=1$ and $\mathbf{x}^\top\mathbf{1}=0$:
+
+$$\min_{\mathbf{x}}\;\mathbf{x}^\top\mathbf{L}\mathbf{x} \quad\text{s.t.}\quad \mathbf{x}^\top\mathbf{x}=1,\;\mathbf{x}\perp\mathbf{1}$$
+
+From the eigenvalue equation $\mathbf{L}\mathbf{x}=\lambda\mathbf{x}$:
+
+$$\mathbf{x}^\top\mathbf{L}\mathbf{x} = \lambda\,\mathbf{x}^\top\mathbf{x} = \lambda$$
+
+So the minimum is achieved at the **smallest eigenvalue**... but wait:
+
+::: {.callout-warning}
+The smallest eigenvalue $\lambda_1 = 0$ of $\mathbf{L}$ has eigenvector $\mathbf{x}_1 \propto \mathbf{1}$, which violates $\mathbf{x}\perp\mathbf{1}$.
+The **second smallest** eigenvector $\mathbf{x}_2$ (the **Fiedler vector**) is the true solution.
+For $k$-way partitioning, use eigenvectors $\mathbf{x}_2, \ldots, \mathbf{x}_{k}$.
+:::
+
+---
+
+## 🔬 Interactive: Spectral Clustering
+
+```{ojs}
+//| label: ojs-clust-setup
+function graphSVG(positions, edges, colors, walkPath, {W=420, H=380, rNode=5} = {}) {
+  // Scale positions from [-1,1] to SVG coords
+  const xs = positions.map(p=>p[0]), ys = positions.map(p=>p[1]);
+  const xExt = d3.extent(xs), yExt = d3.extent(ys);
+  const pad = 30;
+  const scX = d3.scaleLinear().domain(xExt).range([pad, W-pad]);
+  const scY = d3.scaleLinear().domain(yExt).range([H-pad, pad]);
+
+  const svg = d3.create("svg").attr("width",W).attr("height",H)
+    .style("background","#0d1117").style("border-radius","6px");
+
+  // Edges
+  svg.selectAll("line").data(edges).join("line")
+    .attr("x1",d=>scX(positions[d.s][0])).attr("y1",d=>scY(positions[d.s][1]))
+    .attr("x2",d=>scX(positions[d.t][0])).attr("y2",d=>scY(positions[d.t][1]))
+    .attr("stroke",d => {
+      if (!walkPath) return "#444";
+      const inWalk = walkPath.some(([a,b])=>(a===d.s&&b===d.t)||(a===d.t&&b===d.s));
+      return inWalk ? "#ff6b6b" : "#333";
+    })
+    .attr("stroke-width", d => {
+      if (!walkPath) return 0.8;
+      const inWalk = walkPath.some(([a,b])=>(a===d.s&&b===d.t)||(a===d.t&&b===d.s));
+      return inWalk ? 2.5 : 0.6;
+    })
+    .attr("opacity", d => {
+      if (!walkPath) return 0.6;
+      const inWalk = walkPath.some(([a,b])=>(a===d.s&&b===d.t)||(a===d.t&&b===d.s));
+      return inWalk ? 1 : 0.25;
+    });
+
+  // Nodes
+  svg.selectAll("circle").data(colors).join("circle")
+    .attr("cx", (_,i)=>scX(positions[i][0]))
+    .attr("cy", (_,i)=>scY(positions[i][1]))
+    .attr("r", (_,i) => {
+      if (!walkPath) return rNode;
+      const inWalk = walkPath.flat().includes(i);
+      return inWalk ? rNode + 2 : rNode;
+    })
+    .attr("fill", d => d)
+    .attr("stroke", (_,i) => {
+      if (!walkPath) return "#222";
+      if (walkPath.length && walkPath[0][0]===i) return "#fff";
+      if (walkPath.length && walkPath[walkPath.length-1][1]===i) return "#ffd700";
+      return "#222";
+    })
+    .attr("stroke-width", (_,i) => {
+      if (!walkPath) return 0.8;
+      if (walkPath.length && (walkPath[0][0]===i || walkPath[walkPath.length-1][1]===i)) return 2;
+      return 0.5;
+    });
+
+  // Node labels (small)
+  svg.selectAll("text").data(colors).join("text")
+    .attr("x", (_,i)=>scX(positions[i][0]))
+    .attr("y", (_,i)=>scY(positions[i][1])+3.5)
+    .attr("text-anchor","middle").attr("font-size","6.5px")
+    .attr("fill","#fff").attr("pointer-events","none")
+    .text((_,i)=>i);
+
+  return svg.node();
+}
+
+function scatterSVG(xs, ys, colors, {W=330, H=310, xlabel="x₂", ylabel="x₃"} = {}) {
+  const m = {top:15, right:15, bottom:35, left:45};
+  const iw = W-m.left-m.right, ih = H-m.top-m.bottom;
+  const sx = d3.scaleLinear().domain(d3.extent(xs)).nice().range([0, iw]);
+  const sy = d3.scaleLinear().domain(d3.extent(ys)).nice().range([ih, 0]);
+  const svg = d3.create("svg").attr("width",W).attr("height",H)
+    .style("background","#0d1117").style("border-radius","6px");
+  const g = svg.append("g").attr("transform",`translate(${m.left},${m.top})`);
+  // grid
+  g.selectAll(".gx").data(sx.ticks(5)).join("line")
+    .attr("x1",d=>sx(d)).attr("x2",d=>sx(d)).attr("y1",0).attr("y2",ih)
+    .attr("stroke","#1e2535").attr("stroke-width",1);
+  g.selectAll(".gy").data(sy.ticks(5)).join("line")
+    .attr("x1",0).attr("x2",iw).attr("y1",d=>sy(d)).attr("y2",d=>sy(d))
+    .attr("stroke","#1e2535").attr("stroke-width",1);
+  // points
+  g.selectAll("circle").data(colors).join("circle")
+    .attr("cx",(_,i)=>sx(xs[i])).attr("cy",(_,i)=>sy(ys[i]))
+    .attr("r",4).attr("fill",d=>d).attr("opacity",0.85);
+  // labels
+  g.selectAll("text.lbl").data(colors).join("text").attr("class","lbl")
+    .attr("x",(_,i)=>sx(xs[i])+5).attr("y",(_,i)=>sy(ys[i])+3)
+    .attr("font-size","6px").attr("fill","#888").text((_,i)=>i);
+  // axes
+  g.append("g").attr("transform",`translate(0,${ih})`)
+    .call(d3.axisBottom(sx).ticks(4))
+    .selectAll("text,path,line").style("fill","#888").style("stroke","#555").style("font-size","10px");
+  g.append("g").call(d3.axisLeft(sy).ticks(4))
+    .selectAll("text,path,line").style("fill","#888").style("stroke","#555").style("font-size","10px");
+  g.append("text").attr("x",iw/2).attr("y",ih+30)
+    .attr("text-anchor","middle").attr("fill","#aaa").attr("font-size","11px").text(xlabel);
+  g.append("text").attr("transform","rotate(-90)").attr("x",-ih/2).attr("y",-35)
+    .attr("text-anchor","middle").attr("fill","#aaa").attr("font-size","11px").text(ylabel);
+  return svg.node();
+}
+```
+
+```{ojs}
+//| label: ojs-clust-vis
+viewof k_val = Inputs.range([2, 5], {value: 2, step: 1, label: "k (clusters)"})
+
+TAB10 = ["#4c78a8","#f58518","#e45756","#72b7b2","#54a24b","#eeca3b","#b279a2","#ff9da6","#9d755d","#bab0ac"]
+
+clust_labels = {
+  // Use Fiedler eigenvectors (skip eigvec 0 = const)
+  const vecs = Array.from({length: N}, (_,i) => Array.from({length: k_val-1}, (_,k) => U_lap[i][k+1]));
+  if (k_val === 2) return vecs.map(v => v[0] >= 0 ? 0 : 1);
+  // Simple k-means
+  let cents = vecs.slice(0, k_val).map(v => [...v]);
+  let labs   = new Array(N).fill(0);
+  for (let iter = 0; iter < 80; iter++) {
+    for (let i = 0; i < N; i++) {
+      let best = 0, bestD = Infinity;
+      for (let c = 0; c < k_val; c++) {
+        const d2 = vecs[i].reduce((s,v,j)=>s+(v-cents[c][j])**2, 0);
+        if (d2 < bestD) { bestD=d2; best=c; }
+      }
+      labs[i] = best;
+    }
+    for (let c = 0; c < k_val; c++) {
+      const members = vecs.filter((_,i)=>labs[i]===c);
+      if (members.length) cents[c] = cents[c].map((_,j)=>d3.mean(members, v=>v[j]));
+    }
+  }
+  return labs;
+}
+
+node_colors_clust = clust_labels.map(c => TAB10[c])
+
+g_clust  = graphSVG(npos, edges_js, node_colors_clust, null, {W:420, H:360})
+scatter  = scatterSVG(
+  Array.from({length:N},(_,i)=>U_lap[i][1]),
+  Array.from({length:N},(_,i)=>k_val > 2 ? U_lap[i][2] : U_lap[i][1] * 0 + (Math.random()-0.5)*0.01),
+  node_colors_clust,
+  {W:330, H:360, xlabel:"Fiedler vector x₂", ylabel: k_val > 2 ? "x₃" : "(jitter)"}
+)
+
+html`<div style="display:flex;gap:16px;align-items:flex-start;justify-content:center">
+  <div>
+    <div style="color:#aaa;font-size:11px;text-align:center;margin-bottom:4px">Graph (Karate Club)</div>
+    ${g_clust}
+  </div>
+  <div>
+    <div style="color:#aaa;font-size:11px;text-align:center;margin-bottom:4px">Laplacian Eigenmap</div>
+    ${scatter}
+  </div>
+</div>`
+```
 
 ---
 
 ## Laplacian Eigenmap 🔄
 
-**Objective**: Position connected nodes close together:
+A closely related embedding: position connected nodes **close together** in Euclidean space.
 
+**Objective**:
 $$
-\min_{\mathbf{u}} \sum_{i,j} A_{ij} (\mathbf{u}_i - \mathbf{u}_j)^2
+\min_{\mathbf{u}}\;\sum_{i,j}A_{ij}\|\mathbf{u}_i - \mathbf{u}_j\|^2
+= \min_{\mathbf{U}}\;\text{tr}(\mathbf{U}^\top\mathbf{L}\mathbf{U})
+\quad\text{s.t.}\quad \mathbf{U}^\top\mathbf{D}\mathbf{U} = \mathbf{I}
 $$
 
-**Q**: What is the solution to this optimization problem?
+**Solution**: The columns of $\mathbf{U}$ are the eigenvectors $\mathbf{x}_2, \ldots, \mathbf{x}_{d+1}$ of the generalized eigenvalue problem:
+
+$$\mathbf{L}\mathbf{x} = \lambda\,\mathbf{D}\mathbf{x}$$
+
+The **interactive spectral clustering** demo above shows these eigenvectors directly. The Laplacian eigenmap is exactly the coordinate system where graph structure becomes geometry.
 
 ---
 
-# Neural Embedding Methods
+## Neural Embedding: The Key Idea
 
-![](figs/neural-net.png){fig-align="center"}
+Spectral methods require eigendecomposition ($\mathcal{O}(N^3)$). For large networks, we need something faster.
 
----
+**Insight from NLP**: *word2vec* learns word vectors by predicting which words appear near each other in sentences. If two words appear in similar contexts, they get similar vectors.
 
-## How to Apply Neural Networks to Embedding?
+**The translation to graphs**:
 
-1. Run random walks on the graph.
-2. Treat the walks as sentences.
-3. Apply neural networks to predict temporal correlations between "words" (nodes).
+1. Run **random walks** on the graph → sequences of nodes ("sentences")
+2. Treat node sequences like word sequences
+3. Train **word2vec (skip-gram)** to predict which nodes co-occur in walks
 
-![](figs/random-walk-idea.png){fig-align="center" width="80%"}
+$$\mathcal{L} = \sum_t \sum_{0 < |j| \le c} \log P(v_{t+j} \mid v_t), \qquad P(v_O \mid v_I) = \frac{\exp(\mathbf{u}_{v_O}^\top \mathbf{u}_{v_I})}{\sum_v \exp(\mathbf{u}_v^\top \mathbf{u}_{v_I})}$$
 
-**DeepWalk & node2vec**: Use *word2vec* to learn node embeddings from random walks.
-
-::: {.callout-note}
-This is one way. Another popular approach is to use *convolution* inspired from image processing.
-:::
+**DeepWalk** (Perozzi et al., 2014) does exactly this with uniform random walks.
 
 ---
 
-## Pen and Paper Exercise
+## node2vec: Biased Random Walks
 
-[Pen and Paper Exercise](https://skojaku.github.io/adv-net-sci/_downloads/bda4489e6c047dd517f24d5dbdbcae89/exercise.pdf)
+**node2vec** (Grover & Leskovec, 2016) extends DeepWalk with a *biased* walk controlled by two parameters:
 
----
-
-## CBOW Model
-
-![](figs/word2vec-cbow.png){fig-align="center"}
-
----
-
-## Skipgram
-
-![](figs/word2vec-skipgram.png){fig-align="center"}
-
----
-
-## node2vec 📝
-
-![](figs/node2vec.png){fig-align="center" width="80%"}
-
-node2vec learns multi-step transition probabilities of random walks. High probability of co-occurrence corresponds to closeness in the embedding space.
-
-::: {.callout-note}
-Precisely speaking, this is not an accurate model description. node2vec is trained on a biased algorithm. Consequently, two frequently co-visited nodes are *not* always embedded closely. See [this paper](https://dl.acm.org/doi/10.5555/3540261.3542110).
-:::
-
----
-
-## node2vec Random Walks
-
-**Biased Random Walk**:
-
+::: {.columns}
+::: {.column width="55%"}
 $$
-P(\text{next}|\text{current}, \text{previous})
-\propto\begin{cases}
-\frac{1}{p} & \text{Return to previous} \\
-1 & \text{Move to neighbor} \\
-\frac{1}{q} & \text{Explore further}
+P(\text{next}=x \mid v, t) \propto
+\begin{cases}
+1/p & d(t,x) = 0 \text{ (backtrack to } t)\\
+1   & d(t,x) = 1 \text{ (shared neighbor)}\\
+1/q & d(t,x) = 2 \text{ (explore further)}
 \end{cases}
 $$
 
-::: {.columns}
-::: {.column width="40%"}
-**Parameters**:
-
-- $p$: Return parameter (lower = more backtracking)
-- $q$: Out-degree parameter (lower = more exploration)
-
-These control whether the walker moves *away* from the previous node or *stays locally*.
+- **Low $p$**: frequent backtracking → **BFS-like**, explores local neighborhood → captures *structural equivalence*
+- **Low $q$**: frequent exploration → **DFS-like**, ventures far → captures *community membership*
 :::
-::: {.column width="60%"}
-![](figs/node2vec-random-walk.png)
+::: {.column width="45%"}
+The walk at node $v$ (came from $t$) assigns unnormalized weights to neighbors $x$:
+
+```
+x == t      →  weight 1/p
+x ~ t       →  weight 1
+otherwise   →  weight 1/q
+```
+
+Then normalize and sample. The walk is **second-order Markov** (depends on both current and previous node).
 :::
 :::
 
 ---
 
-## Example: Les Misérables Network 📚
+## 🔬 Interactive: node2vec Random Walk
+
+```{ojs}
+//| label: ojs-n2v
+viewof rw_start = Inputs.range([0, N-1], {value: 0, step: 1, label: "Start node"})
+viewof rw_steps = Inputs.range([3, 30],  {value: 12, step: 1, label: "Steps"})
+viewof rw_p     = Inputs.range([0.1, 4], {value: 1.0, step: 0.1, label: "p (return)"})
+viewof rw_q     = Inputs.range([0.1, 4], {value: 1.0, step: 0.1, label: "q (explore)"})
+
+// ── Build adjacency list ───────────────────────────────
+adj_list = {
+  const al = Array.from({length: N}, () => []);
+  for (const e of edges_js) { al[e.s].push(e.t); al[e.t].push(e.s); }
+  return al;
+}
+
+// ── Biased random walk ────────────────────────────────
+walk = {
+  const seed_val = rw_start * 31 + rw_steps;  // pseudo-seed for stability
+  const rng = (() => { let s = seed_val; return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 4294967296; }; })();
+  const w = [rw_start];
+  let prev = null;
+  for (let step = 0; step < rw_steps - 1; step++) {
+    const cur   = w[w.length - 1];
+    const nbrs  = adj_list[cur];
+    if (!nbrs.length) break;
+    if (prev === null) {
+      w.push(nbrs[Math.floor(rng() * nbrs.length)]);
+    } else {
+      const wts = nbrs.map(x => {
+        if (x === prev) return 1 / rw_p;
+        if (A_mat[prev][x] > 0) return 1.0;
+        return 1 / rw_q;
+      });
+      const total = wts.reduce((a,b)=>a+b, 0);
+      let r = rng() * total, chosen = nbrs[nbrs.length-1];
+      for (let i = 0; i < nbrs.length; i++) { r -= wts[i]; if (r <= 0) { chosen = nbrs[i]; break; } }
+      w.push(chosen);
+    }
+    prev = cur;
+  }
+  return w;
+}
+
+walk_edges = Array.from({length: walk.length-1}, (_,i) => [walk[i], walk[i+1]])
+walk_colors = faction.map((f,i) => {
+  if (i === walk[0]) return "#ffffff";
+  if (i === walk[walk.length-1]) return "#ffd700";
+  if (walk.includes(i)) return "#ff8c00";
+  return f === 0 ? "#4c78a8" : "#e45756";
+})
+
+g_walk = graphSVG(npos, edges_js, walk_colors, walk_edges, {W:520, H:400})
+
+walk_str = walk.join(" → ")
+
+html`<div style="display:flex;gap:20px;align-items:flex-start;justify-content:center">
+  <div>
+    ${g_walk}
+    <div style="color:#888;font-size:10px;margin-top:4px;text-align:center">
+      ⬜ start &nbsp; 🟡 end &nbsp; 🟠 visited &nbsp; 🔵/🔴 faction
+    </div>
+  </div>
+  <div style="max-width:340px">
+    <div style="color:#aaa;font-size:11px;margin-bottom:8px"><b>Walk sequence:</b></div>
+    <div style="color:#4ecdc4;font-size:10px;word-break:break-all;line-height:1.6;background:#0d1117;padding:8px;border-radius:4px">${walk_str}</div>
+    <div style="color:#888;font-size:10.5px;margin-top:10px;line-height:1.7">
+      <b style="color:#aaa">p = ${rw_p.toFixed(1)}</b> — ${rw_p < 1 ? "Low p: frequent backtracking (BFS-like)" : rw_p > 2 ? "High p: rarely returns (DFS-like)" : "Balanced return"}<br>
+      <b style="color:#aaa">q = ${rw_q.toFixed(1)}</b> — ${rw_q < 1 ? "Low q: stays local (BFS-like, structural roles)" : rw_q > 2 ? "High q: explores far (DFS-like, community)" : "Balanced exploration"}
+    </div>
+  </div>
+</div>`
+```
+
+---
+
+## Summary
 
 ::: {.columns}
-::: {.column width="30%"}
-Complementary visualizations of the Les Misérables co-appearance network generated by node2vec. Label colors reflect homophily (top) and structural equivalence (bottom).
+::: {.column width="50%"}
+**Spectral methods** — minimize reconstruction or cut objectives; solution = eigenvectors
+
+| Method | Matrix | Eigenvectors |
+|---|---|---|
+| Spectral emb. | $\mathbf{A}$ | Top-$d$ (largest $\lambda$) |
+| Ratio Cut | $\mathbf{L}$ | 2nd–$(k+1)$th smallest |
+| Norm. Cut | $\mathbf{L}_n$ | 2nd–$(k+1)$th smallest |
+| Lap. Eigenmap | $\mathbf{L}$ | Same as Ratio Cut |
+
+Pros: principled, interpretable.
+Cons: $\mathcal{O}(N^3)$ eigendecomposition.
 :::
-::: {.column width="70%"}
-![](figs/node2vec-cp-coms.png)
+::: {.column width="50%"}
+**Neural methods** — sample random walks, train word2vec
+
+| Model | Walk | Captures |
+|---|---|---|
+| DeepWalk | Uniform | Community |
+| node2vec (low $q$) | DFS-like | Community |
+| node2vec (low $p$) | BFS-like | Structural roles |
+
+Pros: scalable, flexible.
+Cons: hyperparameter tuning, less interpretable.
+
+Both families embed nodes into $\mathbb{R}^d$ — downstream tasks (clustering, classification, link prediction) then use standard ML on the vectors.
 :::
 :::
