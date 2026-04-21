@@ -96,6 +96,22 @@
     code span.wa { color: #ff5555; } /* Warning */
   </style>
   <link rel="stylesheet" href="slide08_files/libs/revealjs/dist/theme/quarto-108d9316e08c8bb7fa8a9109f3f6a9a1.css">
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
   <link href="slide08_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="slide08_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="slide08_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -222,10 +238,17 @@ Sadamori Kojaku
 .reveal h2 { font-size: 1.25em; margin-bottom: 0.25em; }
 .reveal h3 { font-size: 1.05em; margin-bottom: 0.15em; }
 
-/* ── Math overflow ─────────────────────────────────── */
-.katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.1em 0; }
-.katex-display .katex { font-size: 0.88em !important; }
-.katex { font-size: 0.9em !important; }
+/* ── Math (KaTeX) ──────────────────────────────────── */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.2em 0;
+  margin: 0.4em 0 !important;
+}
+/* Keep display math readable but not oversized */
+.katex-display > .katex { font-size: 1em !important; }
+/* Inline math matches surrounding text */
+.katex { font-size: 1em !important; }
 
 /* ── Code blocks ───────────────────────────────────── */
 .reveal pre code { font-size: 0.75em; max-height: 320px; }
@@ -263,134 +286,134 @@ input[type=range] { width: 140px; accent-color: #4ecdc4; }
 <p><strong>Task</strong>: Map each node of a graph into a low-dimensional vector such that:</p>
 <ol type="1">
 <li>The embedding can <em>reconstruct</em> the network with high accuracy.</li>
-<li>The embedding should be <em>low-dimensional</em> (<span class="math inline">\(d \ll N\)</span>).</li>
+<li>The embedding should be <em>low-dimensional</em> (<span class="math inline">d \ll N</span>).</li>
 </ol>
 <div class="columns">
 <div class="column" style="width:55%;">
-<p>Formally, we want <span class="math inline">\(\mathbf{U} \in \mathbb{R}^{N \times d}\)</span> where each row <span class="math inline">\(\mathbf{u}_i\)</span> is the embedding of node <span class="math inline">\(i\)</span>, and nodes with similar roles in the network end up close in <span class="math inline">\(\mathbb{R}^d\)</span>.</p>
+<p>Formally, we want <span class="math inline">\mathbf{U} \in \mathbb{R}^{N \times d}</span> where each row <span class="math inline">\mathbf{u}_i</span> is the embedding of node <span class="math inline">i</span>, and nodes with similar roles in the network end up close in <span class="math inline">\mathbb{R}^d</span>.</p>
 <p><strong>Why does this matter?</strong> Standard ML algorithms work on vectors. Embedding lets us apply them to graphs.</p>
 </div><div class="column" style="width:45%;">
-<p><span class="math display">\[
+<p><span class="math display">
 \underbrace{\mathbf{A}}_{\text{graph}} \;\longrightarrow\; \underbrace{\mathbf{U} \in \mathbb{R}^{N \times d}}_{\text{embedding}}
-\]</span></p>
-<p><strong>Q</strong>: How would you go about finding such <span class="math inline">\(\mathbf{U}\)</span>?</p>
+</span></p>
+<p><strong>Q</strong>: How would you go about finding such <span class="math inline">\mathbf{U}</span>?</p>
 </div></div>
 </section>
 <section id="idea-1-network-reconstruction" class="slide level2">
 <h2>Idea 1: Network Reconstruction</h2>
-<p>Compress adjacency matrix <span class="math inline">\(\mathbf{A}\)</span> into <span class="math inline">\(\mathbf{U} \in \mathbb{R}^{N \times d}\)</span> by minimizing the <strong>reconstruction error</strong>:</p>
-<p><span class="math display">\[
+<p>Compress adjacency matrix <span class="math inline">\mathbf{A}</span> into <span class="math inline">\mathbf{U} \in \mathbb{R}^{N \times d}</span> by minimizing the <strong>reconstruction error</strong>:</p>
+<p><span class="math display">
 \min_{\mathbf{U}} \;\frac{1}{2}\|\mathbf{A} - \mathbf{U}\mathbf{U}^\top\|_F^2
-\]</span></p>
-<p>with orthonormal columns: <span class="math inline">\(\mathbf{u}_i^\top \mathbf{u}_j = 0 \;(\forall i \neq j)\)</span> and <span class="math inline">\(\|\mathbf{u}_k\|^2 = 1\)</span>.</p>
+</span></p>
+<p>with orthonormal columns: <span class="math inline">\mathbf{u}_i^\top \mathbf{u}_j = 0 \;(\forall i \neq j)</span> and <span class="math inline">\|\mathbf{u}_k\|^2 = 1</span>.</p>
 <div class="columns">
 <div class="column" style="width:50%;">
-<p>For the 1-d case (<span class="math inline">\(\mathbf{U} = \lambda^{1/2}\mathbf{u}\)</span>), this becomes:</p>
-<p><span class="math display">\[\min_{\mathbf{u},\lambda} \; \frac{1}{2}\|\mathbf{A} - \lambda\,\mathbf{u}\mathbf{u}^\top\|_F^2\]</span></p>
-<p>Setting the gradient <span class="math inline">\(\partial/\partial u_i = 0\)</span> gives…</p>
+<p>For the 1-d case (<span class="math inline">\mathbf{U} = \lambda^{1/2}\mathbf{u}</span>), this becomes:</p>
+<p><span class="math display">\min_{\mathbf{u},\lambda} \; \frac{1}{2}\|\mathbf{A} - \lambda\,\mathbf{u}\mathbf{u}^\top\|_F^2</span></p>
+<p>Setting the gradient <span class="math inline">\partial/\partial u_i = 0</span> gives…</p>
 </div><div class="column" style="width:50%;">
-<p><strong>Q</strong>: Try solving this. Expand the Frobenius norm and differentiate w.r.t. <span class="math inline">\(u_i\)</span>.</p>
-<p><em>Hint</em>: Treat <span class="math inline">\(\lambda\)</span> and all <span class="math inline">\(u_j\)</span> (<span class="math inline">\(j \neq i\)</span>) as constants.</p>
+<p><strong>Q</strong>: Try solving this. Expand the Frobenius norm and differentiate w.r.t. <span class="math inline">u_i</span>.</p>
+<p><em>Hint</em>: Treat <span class="math inline">\lambda</span> and all <span class="math inline">u_j</span> (<span class="math inline">j \neq i</span>) as constants.</p>
 </div></div>
 </section>
 <section id="proof-gradient-eigenvalue-problem" class="slide level2 scrollable">
 <h2>Proof: Gradient → Eigenvalue Problem</h2>
-<p>Expanding the objective and differentiating w.r.t. <span class="math inline">\(u_i\)</span>:</p>
-<p><span class="math display">\[
+<p>Expanding the objective and differentiating w.r.t. <span class="math inline">u_i</span>:</p>
+<p><span class="math display">
 \frac{\partial}{\partial u_i}\left[\frac{1}{2}\sum_{i,j}(A_{ij} - \lambda u_i u_j)^2\right]
 = -2\lambda\left[\sum_{j \neq i} A_{ij}u_j - \lambda u_i \sum_{j \neq i}u_j^2\right] - 2\lambda A_{ii}u_i + 2\lambda^2 u_i^3 = 0
-\]</span></p>
-<p>Collecting terms (using <span class="math inline">\(\sum_j u_j^2 = 1\)</span>):</p>
-<p><span class="math display">\[
+</span></p>
+<p>Collecting terms (using <span class="math inline">\sum_j u_j^2 = 1</span>):</p>
+<p><span class="math display">
 \sum_{j=1}^N A_{ij}\,u_j \;=\; \lambda\,u_i \quad\Longrightarrow\quad \boxed{\mathbf{A}\mathbf{u} = \lambda\mathbf{u}}
-\]</span></p>
-<p>This is the <strong>eigenvalue problem</strong> of <span class="math inline">\(\mathbf{A}\)</span>. There are <span class="math inline">\(N\)</span> solutions <span class="math inline">\((\\lambda_k, \mathbf{u}_k)\)</span>. Which eigenvector gives the smallest reconstruction error?</p>
+</span></p>
+<p>This is the <strong>eigenvalue problem</strong> of <span class="math inline">\mathbf{A}</span>. There are <span class="math inline">N</span> solutions <span class="math inline">(\\lambda_k, \mathbf{u}_k)</span>. Which eigenvector gives the smallest reconstruction error?</p>
 </section>
 <section id="which-eigenvector-to-choose" class="slide level2">
 <h2>Which Eigenvector to Choose?</h2>
-<p>Expand the Frobenius norm using <span class="math inline">\(\|\mathbf{M}\|_F^2 = \text{Tr}(\mathbf{M}^\top\mathbf{M})\)</span>:</p>
-<p><span class="math display">\[
+<p>Expand the Frobenius norm using <span class="math inline">\|\mathbf{M}\|_F^2 = \text{Tr}(\mathbf{M}^\top\mathbf{M})</span>:</p>
+<p><span class="math display">
 \tfrac{1}{2}\|\mathbf{A} - \lambda\mathbf{u}\mathbf{u}^\top\|_F^2
 = \underbrace{\tfrac{1}{2}\text{Tr}(\mathbf{A}^\top\mathbf{A})}_{\text{const.}}
 - \lambda\underbrace{\text{Tr}(\mathbf{u}^\top\mathbf{A}\mathbf{u})}_{=\,\lambda}
 + \tfrac{\lambda^2}{2}\underbrace{\text{Tr}(\mathbf{u}^\top\mathbf{u}\mathbf{u}^\top\mathbf{u})}_{=\,1}
 = -\lambda^2 + \text{const.}
-\]</span></p>
-<p>The error is <span class="math inline">\(-\lambda^2 + C\)</span>, which is <strong>minimized when <span class="math inline">\(\lambda\)</span> is the largest eigenvalue</strong>.</p>
-<p><strong>For <span class="math inline">\(d\)</span> dimensions</strong>: the optimal <span class="math inline">\(\mathbf{U}\)</span> is formed from the <span class="math inline">\(d\)</span> eigenvectors of <span class="math inline">\(\mathbf{A}\)</span> corresponding to the <strong>top-<span class="math inline">\(d\)</span> eigenvalues</strong>.</p>
+</span></p>
+<p>The error is <span class="math inline">-\lambda^2 + C</span>, which is <strong>minimized when <span class="math inline">\lambda</span> is the largest eigenvalue</strong>.</p>
+<p><strong>For <span class="math inline">d</span> dimensions</strong>: the optimal <span class="math inline">\mathbf{U}</span> is formed from the <span class="math inline">d</span> eigenvectors of <span class="math inline">\mathbf{A}</span> corresponding to the <strong>top-<span class="math inline">d</span> eigenvalues</strong>.</p>
 </section>
 <section id="interactive-spectral-reconstruction" class="slide level2">
 <h2>🔬 Interactive: Spectral Reconstruction</h2>
 <div id="ojs-recon-setup" class="cell">
-<div class="sourceCode cell-code hidden" id="cb1" data-startfrom="208" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 207;"><span id="cb1-208"><a href=""></a>d3   <span class="op">=</span> <span class="pp">require</span>(<span class="st">"d3@7"</span>)</span>
-<span id="cb1-209"><a href=""></a>N    <span class="op">=</span> n_nodes</span>
-<span id="cb1-210"><a href=""></a></span>
-<span id="cb1-211"><a href=""></a><span class="co">// ── helpers ───────────────────────────────────────────────</span></span>
-<span id="cb1-212"><a href=""></a><span class="kw">function</span> <span class="fu">buildRecon</span>(d) {</span>
-<span id="cb1-213"><a href=""></a>  <span class="kw">const</span> Ar <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> N}<span class="op">,</span> () <span class="kw">=&gt;</span> <span class="kw">new</span> <span class="bu">Float64Array</span>(N))<span class="op">;</span></span>
-<span id="cb1-214"><a href=""></a>  <span class="cf">for</span> (<span class="kw">let</span> k <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> k <span class="op">&lt;</span> d<span class="op">;</span> k<span class="op">++</span>) {</span>
-<span id="cb1-215"><a href=""></a>    <span class="kw">const</span> lam <span class="op">=</span> ev_adj[k]<span class="op">;</span></span>
-<span id="cb1-216"><a href=""></a>    <span class="cf">for</span> (<span class="kw">let</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> N<span class="op">;</span> i<span class="op">++</span>)</span>
-<span id="cb1-217"><a href=""></a>      <span class="cf">for</span> (<span class="kw">let</span> j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> N<span class="op">;</span> j<span class="op">++</span>)</span>
-<span id="cb1-218"><a href=""></a>        Ar[i][j] <span class="op">+=</span> lam <span class="op">*</span> U_adj[i][k] <span class="op">*</span> U_adj[j][k]<span class="op">;</span></span>
-<span id="cb1-219"><a href=""></a>  }</span>
-<span id="cb1-220"><a href=""></a>  <span class="cf">return</span> Ar<span class="op">;</span></span>
-<span id="cb1-221"><a href=""></a>}</span>
-<span id="cb1-222"><a href=""></a></span>
-<span id="cb1-223"><a href=""></a><span class="kw">function</span> <span class="fu">heatSVG</span>(mat<span class="op">,</span> {title<span class="op">=</span><span class="st">""</span><span class="op">,</span> sz<span class="op">=</span><span class="dv">6</span><span class="op">,</span> div<span class="op">=</span><span class="kw">true</span><span class="op">,</span> clamp<span class="op">=</span>[<span class="op">-</span><span class="dv">1</span><span class="op">,</span><span class="dv">1</span>]} <span class="op">=</span> {}) {</span>
-<span id="cb1-224"><a href=""></a>  <span class="kw">const</span> n  <span class="op">=</span> mat<span class="op">.</span><span class="at">length</span><span class="op">;</span></span>
-<span id="cb1-225"><a href=""></a>  <span class="kw">const</span> W  <span class="op">=</span> n <span class="op">*</span> sz<span class="op">,</span> H <span class="op">=</span> n <span class="op">*</span> sz<span class="op">;</span></span>
-<span id="cb1-226"><a href=""></a>  <span class="kw">const</span> cs <span class="op">=</span> div</span>
-<span id="cb1-227"><a href=""></a>    <span class="op">?</span> d3<span class="op">.</span><span class="fu">scaleDiverging</span>(t <span class="kw">=&gt;</span> d3<span class="op">.</span><span class="fu">interpolateRdBu</span>(<span class="dv">1</span><span class="op">-</span>t))<span class="op">.</span><span class="fu">domain</span>([clamp[<span class="dv">0</span>]<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> clamp[<span class="dv">1</span>]])</span>
-<span id="cb1-228"><a href=""></a>    <span class="op">:</span> d3<span class="op">.</span><span class="fu">scaleSequential</span>(d3<span class="op">.</span><span class="at">interpolateBlues</span>)<span class="op">.</span><span class="fu">domain</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>])<span class="op">;</span></span>
-<span id="cb1-229"><a href=""></a>  <span class="kw">const</span> svg <span class="op">=</span> d3<span class="op">.</span><span class="fu">create</span>(<span class="st">"svg"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"width"</span><span class="op">,</span> W)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"height"</span><span class="op">,</span> H <span class="op">+</span> <span class="dv">18</span>)</span>
-<span id="cb1-230"><a href=""></a>    <span class="op">.</span><span class="fu">style</span>(<span class="st">"border-radius"</span><span class="op">,</span><span class="st">"4px"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"background"</span><span class="op">,</span><span class="st">"#0d1117"</span>)<span class="op">;</span></span>
-<span id="cb1-231"><a href=""></a>  <span class="cf">if</span> (title)</span>
-<span id="cb1-232"><a href=""></a>    svg<span class="op">.</span><span class="fu">append</span>(<span class="st">"text"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,</span> W<span class="op">/</span><span class="dv">2</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,</span> <span class="dv">13</span>)</span>
-<span id="cb1-233"><a href=""></a>      <span class="op">.</span><span class="fu">attr</span>(<span class="st">"text-anchor"</span><span class="op">,</span><span class="st">"middle"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#aaa"</span>)</span>
-<span id="cb1-234"><a href=""></a>      <span class="op">.</span><span class="fu">attr</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"11px"</span>)<span class="op">.</span><span class="fu">text</span>(title)<span class="op">;</span></span>
-<span id="cb1-235"><a href=""></a>  <span class="kw">const</span> g <span class="op">=</span> svg<span class="op">.</span><span class="fu">append</span>(<span class="st">"g"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"transform"</span><span class="op">,</span><span class="st">"translate(0,18)"</span>)<span class="op">;</span></span>
-<span id="cb1-236"><a href=""></a>  <span class="cf">for</span> (<span class="kw">let</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> n<span class="op">;</span> i<span class="op">++</span>)</span>
-<span id="cb1-237"><a href=""></a>    <span class="cf">for</span> (<span class="kw">let</span> j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> n<span class="op">;</span> j<span class="op">++</span>)</span>
-<span id="cb1-238"><a href=""></a>      g<span class="op">.</span><span class="fu">append</span>(<span class="st">"rect"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,</span> j<span class="op">*</span>sz)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,</span> i<span class="op">*</span>sz)</span>
-<span id="cb1-239"><a href=""></a>        <span class="op">.</span><span class="fu">attr</span>(<span class="st">"width"</span><span class="op">,</span> sz)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"height"</span><span class="op">,</span> sz)</span>
-<span id="cb1-240"><a href=""></a>        <span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span> <span class="fu">cs</span>(mat <span class="kw">instanceof</span> <span class="bu">Float64Array</span> <span class="op">?</span> mat[i<span class="op">*</span>n<span class="op">+</span>j] <span class="op">:</span> mat[i][j]))<span class="op">;</span></span>
-<span id="cb1-241"><a href=""></a>  <span class="cf">return</span> svg<span class="op">.</span><span class="fu">node</span>()<span class="op">;</span></span>
-<span id="cb1-242"><a href=""></a>}</span>
-<span id="cb1-243"><a href=""></a></span>
-<span id="cb1-244"><a href=""></a><span class="kw">function</span> <span class="fu">curveSVG</span>(errors<span class="op">,</span> currentD<span class="op">,</span> {W<span class="op">=</span><span class="dv">460</span><span class="op">,</span> H<span class="op">=</span><span class="dv">150</span>} <span class="op">=</span> {}) {</span>
-<span id="cb1-245"><a href=""></a>  <span class="kw">const</span> m <span class="op">=</span> {<span class="dt">top</span><span class="op">:</span><span class="dv">10</span><span class="op">,</span> <span class="dt">right</span><span class="op">:</span><span class="dv">20</span><span class="op">,</span> <span class="dt">bottom</span><span class="op">:</span><span class="dv">32</span><span class="op">,</span> <span class="dt">left</span><span class="op">:</span><span class="dv">50</span>}<span class="op">;</span></span>
-<span id="cb1-246"><a href=""></a>  <span class="kw">const</span> iw <span class="op">=</span> W <span class="op">-</span> m<span class="op">.</span><span class="at">left</span> <span class="op">-</span> m<span class="op">.</span><span class="at">right</span><span class="op">,</span> ih <span class="op">=</span> H <span class="op">-</span> m<span class="op">.</span><span class="at">top</span> <span class="op">-</span> m<span class="op">.</span><span class="at">bottom</span><span class="op">;</span></span>
-<span id="cb1-247"><a href=""></a>  <span class="kw">const</span> x  <span class="op">=</span> d3<span class="op">.</span><span class="fu">scaleLinear</span>()<span class="op">.</span><span class="fu">domain</span>([<span class="dv">1</span><span class="op">,</span> errors<span class="op">.</span><span class="at">length</span>])<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> iw])<span class="op">;</span></span>
-<span id="cb1-248"><a href=""></a>  <span class="kw">const</span> y  <span class="op">=</span> d3<span class="op">.</span><span class="fu">scaleLinear</span>()<span class="op">.</span><span class="fu">domain</span>([<span class="dv">0</span><span class="op">,</span> d3<span class="op">.</span><span class="fu">max</span>(errors)])<span class="op">.</span><span class="fu">range</span>([ih<span class="op">,</span> <span class="dv">0</span>])<span class="op">;</span></span>
-<span id="cb1-249"><a href=""></a>  <span class="kw">const</span> svg <span class="op">=</span> d3<span class="op">.</span><span class="fu">create</span>(<span class="st">"svg"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"width"</span><span class="op">,</span> W)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"height"</span><span class="op">,</span> H)</span>
-<span id="cb1-250"><a href=""></a>    <span class="op">.</span><span class="fu">style</span>(<span class="st">"background"</span><span class="op">,</span><span class="st">"#0d1117"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"border-radius"</span><span class="op">,</span><span class="st">"4px"</span>)<span class="op">;</span></span>
-<span id="cb1-251"><a href=""></a>  <span class="kw">const</span> g <span class="op">=</span> svg<span class="op">.</span><span class="fu">append</span>(<span class="st">"g"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"transform"</span><span class="op">,</span><span class="vs">`translate(</span><span class="sc">${</span>m<span class="op">.</span><span class="at">left</span><span class="sc">}</span><span class="vs">,</span><span class="sc">${</span>m<span class="op">.</span><span class="at">top</span><span class="sc">}</span><span class="vs">)`</span>)<span class="op">;</span></span>
-<span id="cb1-252"><a href=""></a>  <span class="co">// line</span></span>
-<span id="cb1-253"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"path"</span>)<span class="op">.</span><span class="fu">datum</span>(errors)</span>
-<span id="cb1-254"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"none"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke"</span><span class="op">,</span><span class="st">"#4ecdc4"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke-width"</span><span class="op">,</span><span class="dv">2</span>)</span>
-<span id="cb1-255"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"d"</span><span class="op">,</span> d3<span class="op">.</span><span class="fu">line</span>()<span class="op">.</span><span class="fu">x</span>((_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">x</span>(i<span class="op">+</span><span class="dv">1</span>))<span class="op">.</span><span class="fu">y</span>(d<span class="kw">=&gt;</span><span class="fu">y</span>(d)))<span class="op">;</span></span>
-<span id="cb1-256"><a href=""></a>  <span class="co">// dots</span></span>
-<span id="cb1-257"><a href=""></a>  g<span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"circle"</span>)<span class="op">.</span><span class="fu">data</span>(errors)<span class="op">.</span><span class="fu">join</span>(<span class="st">"circle"</span>)</span>
-<span id="cb1-258"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"cx"</span><span class="op">,</span>(_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">x</span>(i<span class="op">+</span><span class="dv">1</span>))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"cy"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">y</span>(d))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"r"</span><span class="op">,</span><span class="dv">3</span>)</span>
-<span id="cb1-259"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> i<span class="op">+</span><span class="dv">1</span> <span class="op">===</span> currentD <span class="op">?</span> <span class="st">"#ff6b6b"</span> <span class="op">:</span> <span class="st">"#4ecdc4"</span>)<span class="op">;</span></span>
-<span id="cb1-260"><a href=""></a>  <span class="co">// current vertical line</span></span>
-<span id="cb1-261"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"line"</span>)</span>
-<span id="cb1-262"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x1"</span><span class="op">,</span> <span class="fu">x</span>(currentD))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x2"</span><span class="op">,</span> <span class="fu">x</span>(currentD))</span>
-<span id="cb1-263"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"y1"</span><span class="op">,</span> <span class="dv">0</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y2"</span><span class="op">,</span> ih)</span>
-<span id="cb1-264"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke"</span><span class="op">,</span><span class="st">"#ff6b6b"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke-dasharray"</span><span class="op">,</span><span class="st">"4,3"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke-width"</span><span class="op">,</span><span class="fl">1.5</span>)<span class="op">;</span></span>
-<span id="cb1-265"><a href=""></a>  <span class="co">// axes</span></span>
-<span id="cb1-266"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"g"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"transform"</span><span class="op">,</span><span class="vs">`translate(0,</span><span class="sc">${</span>ih<span class="sc">}</span><span class="vs">)`</span>)</span>
-<span id="cb1-267"><a href=""></a>    <span class="op">.</span><span class="fu">call</span>(d3<span class="op">.</span><span class="fu">axisBottom</span>(x)<span class="op">.</span><span class="fu">ticks</span>(<span class="dv">10</span>)<span class="op">.</span><span class="fu">tickFormat</span>(d3<span class="op">.</span><span class="fu">format</span>(<span class="st">"d"</span>)))</span>
-<span id="cb1-268"><a href=""></a>    <span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"text,line,path"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"stroke"</span><span class="op">,</span><span class="st">"#666"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#888"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"10px"</span>)<span class="op">;</span></span>
-<span id="cb1-269"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"g"</span>)<span class="op">.</span><span class="fu">call</span>(d3<span class="op">.</span><span class="fu">axisLeft</span>(y)<span class="op">.</span><span class="fu">ticks</span>(<span class="dv">4</span>))</span>
-<span id="cb1-270"><a href=""></a>    <span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"text,line,path"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"stroke"</span><span class="op">,</span><span class="st">"#666"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#888"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"10px"</span>)<span class="op">;</span></span>
-<span id="cb1-271"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"text"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,</span> iw<span class="op">/</span><span class="dv">2</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,</span> ih<span class="op">+</span><span class="dv">28</span>)</span>
-<span id="cb1-272"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"text-anchor"</span><span class="op">,</span><span class="st">"middle"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#888"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"11px"</span>)<span class="op">.</span><span class="fu">text</span>(<span class="st">"d"</span>)<span class="op">;</span></span>
-<span id="cb1-273"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"text"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"transform"</span><span class="op">,</span><span class="st">"rotate(-90)"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,-</span>ih<span class="op">/</span><span class="dv">2</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,-</span><span class="dv">40</span>)</span>
-<span id="cb1-274"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"text-anchor"</span><span class="op">,</span><span class="st">"middle"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#888"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"11px"</span>)<span class="op">.</span><span class="fu">text</span>(<span class="st">"Reconstruction error"</span>)<span class="op">;</span></span>
-<span id="cb1-275"><a href=""></a>  <span class="cf">return</span> svg<span class="op">.</span><span class="fu">node</span>()<span class="op">;</span></span>
-<span id="cb1-276"><a href=""></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb1" data-startfrom="216" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 215;"><span id="cb1-216"><a href=""></a>d3   <span class="op">=</span> <span class="pp">require</span>(<span class="st">"d3@7"</span>)</span>
+<span id="cb1-217"><a href=""></a>N    <span class="op">=</span> n_nodes</span>
+<span id="cb1-218"><a href=""></a></span>
+<span id="cb1-219"><a href=""></a><span class="co">// ── helpers ───────────────────────────────────────────────</span></span>
+<span id="cb1-220"><a href=""></a><span class="kw">function</span> <span class="fu">buildRecon</span>(d) {</span>
+<span id="cb1-221"><a href=""></a>  <span class="kw">const</span> Ar <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> N}<span class="op">,</span> () <span class="kw">=&gt;</span> <span class="kw">new</span> <span class="bu">Float64Array</span>(N))<span class="op">;</span></span>
+<span id="cb1-222"><a href=""></a>  <span class="cf">for</span> (<span class="kw">let</span> k <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> k <span class="op">&lt;</span> d<span class="op">;</span> k<span class="op">++</span>) {</span>
+<span id="cb1-223"><a href=""></a>    <span class="kw">const</span> lam <span class="op">=</span> ev_adj[k]<span class="op">;</span></span>
+<span id="cb1-224"><a href=""></a>    <span class="cf">for</span> (<span class="kw">let</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> N<span class="op">;</span> i<span class="op">++</span>)</span>
+<span id="cb1-225"><a href=""></a>      <span class="cf">for</span> (<span class="kw">let</span> j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> N<span class="op">;</span> j<span class="op">++</span>)</span>
+<span id="cb1-226"><a href=""></a>        Ar[i][j] <span class="op">+=</span> lam <span class="op">*</span> U_adj[i][k] <span class="op">*</span> U_adj[j][k]<span class="op">;</span></span>
+<span id="cb1-227"><a href=""></a>  }</span>
+<span id="cb1-228"><a href=""></a>  <span class="cf">return</span> Ar<span class="op">;</span></span>
+<span id="cb1-229"><a href=""></a>}</span>
+<span id="cb1-230"><a href=""></a></span>
+<span id="cb1-231"><a href=""></a><span class="kw">function</span> <span class="fu">heatSVG</span>(mat<span class="op">,</span> {title<span class="op">=</span><span class="st">""</span><span class="op">,</span> sz<span class="op">=</span><span class="dv">6</span><span class="op">,</span> div<span class="op">=</span><span class="kw">true</span><span class="op">,</span> clamp<span class="op">=</span>[<span class="op">-</span><span class="dv">1</span><span class="op">,</span><span class="dv">1</span>]} <span class="op">=</span> {}) {</span>
+<span id="cb1-232"><a href=""></a>  <span class="kw">const</span> n  <span class="op">=</span> mat<span class="op">.</span><span class="at">length</span><span class="op">;</span></span>
+<span id="cb1-233"><a href=""></a>  <span class="kw">const</span> W  <span class="op">=</span> n <span class="op">*</span> sz<span class="op">,</span> H <span class="op">=</span> n <span class="op">*</span> sz<span class="op">;</span></span>
+<span id="cb1-234"><a href=""></a>  <span class="kw">const</span> cs <span class="op">=</span> div</span>
+<span id="cb1-235"><a href=""></a>    <span class="op">?</span> d3<span class="op">.</span><span class="fu">scaleDiverging</span>(t <span class="kw">=&gt;</span> d3<span class="op">.</span><span class="fu">interpolateRdBu</span>(<span class="dv">1</span><span class="op">-</span>t))<span class="op">.</span><span class="fu">domain</span>([clamp[<span class="dv">0</span>]<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> clamp[<span class="dv">1</span>]])</span>
+<span id="cb1-236"><a href=""></a>    <span class="op">:</span> d3<span class="op">.</span><span class="fu">scaleSequential</span>(d3<span class="op">.</span><span class="at">interpolateBlues</span>)<span class="op">.</span><span class="fu">domain</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>])<span class="op">;</span></span>
+<span id="cb1-237"><a href=""></a>  <span class="kw">const</span> svg <span class="op">=</span> d3<span class="op">.</span><span class="fu">create</span>(<span class="st">"svg"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"width"</span><span class="op">,</span> W)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"height"</span><span class="op">,</span> H <span class="op">+</span> <span class="dv">18</span>)</span>
+<span id="cb1-238"><a href=""></a>    <span class="op">.</span><span class="fu">style</span>(<span class="st">"border-radius"</span><span class="op">,</span><span class="st">"4px"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"background"</span><span class="op">,</span><span class="st">"#0d1117"</span>)<span class="op">;</span></span>
+<span id="cb1-239"><a href=""></a>  <span class="cf">if</span> (title)</span>
+<span id="cb1-240"><a href=""></a>    svg<span class="op">.</span><span class="fu">append</span>(<span class="st">"text"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,</span> W<span class="op">/</span><span class="dv">2</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,</span> <span class="dv">13</span>)</span>
+<span id="cb1-241"><a href=""></a>      <span class="op">.</span><span class="fu">attr</span>(<span class="st">"text-anchor"</span><span class="op">,</span><span class="st">"middle"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#aaa"</span>)</span>
+<span id="cb1-242"><a href=""></a>      <span class="op">.</span><span class="fu">attr</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"11px"</span>)<span class="op">.</span><span class="fu">text</span>(title)<span class="op">;</span></span>
+<span id="cb1-243"><a href=""></a>  <span class="kw">const</span> g <span class="op">=</span> svg<span class="op">.</span><span class="fu">append</span>(<span class="st">"g"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"transform"</span><span class="op">,</span><span class="st">"translate(0,18)"</span>)<span class="op">;</span></span>
+<span id="cb1-244"><a href=""></a>  <span class="cf">for</span> (<span class="kw">let</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> n<span class="op">;</span> i<span class="op">++</span>)</span>
+<span id="cb1-245"><a href=""></a>    <span class="cf">for</span> (<span class="kw">let</span> j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> n<span class="op">;</span> j<span class="op">++</span>)</span>
+<span id="cb1-246"><a href=""></a>      g<span class="op">.</span><span class="fu">append</span>(<span class="st">"rect"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,</span> j<span class="op">*</span>sz)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,</span> i<span class="op">*</span>sz)</span>
+<span id="cb1-247"><a href=""></a>        <span class="op">.</span><span class="fu">attr</span>(<span class="st">"width"</span><span class="op">,</span> sz)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"height"</span><span class="op">,</span> sz)</span>
+<span id="cb1-248"><a href=""></a>        <span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span> <span class="fu">cs</span>(mat <span class="kw">instanceof</span> <span class="bu">Float64Array</span> <span class="op">?</span> mat[i<span class="op">*</span>n<span class="op">+</span>j] <span class="op">:</span> mat[i][j]))<span class="op">;</span></span>
+<span id="cb1-249"><a href=""></a>  <span class="cf">return</span> svg<span class="op">.</span><span class="fu">node</span>()<span class="op">;</span></span>
+<span id="cb1-250"><a href=""></a>}</span>
+<span id="cb1-251"><a href=""></a></span>
+<span id="cb1-252"><a href=""></a><span class="kw">function</span> <span class="fu">curveSVG</span>(errors<span class="op">,</span> currentD<span class="op">,</span> {W<span class="op">=</span><span class="dv">460</span><span class="op">,</span> H<span class="op">=</span><span class="dv">150</span>} <span class="op">=</span> {}) {</span>
+<span id="cb1-253"><a href=""></a>  <span class="kw">const</span> m <span class="op">=</span> {<span class="dt">top</span><span class="op">:</span><span class="dv">10</span><span class="op">,</span> <span class="dt">right</span><span class="op">:</span><span class="dv">20</span><span class="op">,</span> <span class="dt">bottom</span><span class="op">:</span><span class="dv">32</span><span class="op">,</span> <span class="dt">left</span><span class="op">:</span><span class="dv">50</span>}<span class="op">;</span></span>
+<span id="cb1-254"><a href=""></a>  <span class="kw">const</span> iw <span class="op">=</span> W <span class="op">-</span> m<span class="op">.</span><span class="at">left</span> <span class="op">-</span> m<span class="op">.</span><span class="at">right</span><span class="op">,</span> ih <span class="op">=</span> H <span class="op">-</span> m<span class="op">.</span><span class="at">top</span> <span class="op">-</span> m<span class="op">.</span><span class="at">bottom</span><span class="op">;</span></span>
+<span id="cb1-255"><a href=""></a>  <span class="kw">const</span> x  <span class="op">=</span> d3<span class="op">.</span><span class="fu">scaleLinear</span>()<span class="op">.</span><span class="fu">domain</span>([<span class="dv">1</span><span class="op">,</span> errors<span class="op">.</span><span class="at">length</span>])<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> iw])<span class="op">;</span></span>
+<span id="cb1-256"><a href=""></a>  <span class="kw">const</span> y  <span class="op">=</span> d3<span class="op">.</span><span class="fu">scaleLinear</span>()<span class="op">.</span><span class="fu">domain</span>([<span class="dv">0</span><span class="op">,</span> d3<span class="op">.</span><span class="fu">max</span>(errors)])<span class="op">.</span><span class="fu">range</span>([ih<span class="op">,</span> <span class="dv">0</span>])<span class="op">;</span></span>
+<span id="cb1-257"><a href=""></a>  <span class="kw">const</span> svg <span class="op">=</span> d3<span class="op">.</span><span class="fu">create</span>(<span class="st">"svg"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"width"</span><span class="op">,</span> W)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"height"</span><span class="op">,</span> H)</span>
+<span id="cb1-258"><a href=""></a>    <span class="op">.</span><span class="fu">style</span>(<span class="st">"background"</span><span class="op">,</span><span class="st">"#0d1117"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"border-radius"</span><span class="op">,</span><span class="st">"4px"</span>)<span class="op">;</span></span>
+<span id="cb1-259"><a href=""></a>  <span class="kw">const</span> g <span class="op">=</span> svg<span class="op">.</span><span class="fu">append</span>(<span class="st">"g"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"transform"</span><span class="op">,</span><span class="vs">`translate(</span><span class="sc">${</span>m<span class="op">.</span><span class="at">left</span><span class="sc">}</span><span class="vs">,</span><span class="sc">${</span>m<span class="op">.</span><span class="at">top</span><span class="sc">}</span><span class="vs">)`</span>)<span class="op">;</span></span>
+<span id="cb1-260"><a href=""></a>  <span class="co">// line</span></span>
+<span id="cb1-261"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"path"</span>)<span class="op">.</span><span class="fu">datum</span>(errors)</span>
+<span id="cb1-262"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"none"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke"</span><span class="op">,</span><span class="st">"#4ecdc4"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke-width"</span><span class="op">,</span><span class="dv">2</span>)</span>
+<span id="cb1-263"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"d"</span><span class="op">,</span> d3<span class="op">.</span><span class="fu">line</span>()<span class="op">.</span><span class="fu">x</span>((_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">x</span>(i<span class="op">+</span><span class="dv">1</span>))<span class="op">.</span><span class="fu">y</span>(d<span class="kw">=&gt;</span><span class="fu">y</span>(d)))<span class="op">;</span></span>
+<span id="cb1-264"><a href=""></a>  <span class="co">// dots</span></span>
+<span id="cb1-265"><a href=""></a>  g<span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"circle"</span>)<span class="op">.</span><span class="fu">data</span>(errors)<span class="op">.</span><span class="fu">join</span>(<span class="st">"circle"</span>)</span>
+<span id="cb1-266"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"cx"</span><span class="op">,</span>(_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">x</span>(i<span class="op">+</span><span class="dv">1</span>))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"cy"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">y</span>(d))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"r"</span><span class="op">,</span><span class="dv">3</span>)</span>
+<span id="cb1-267"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> i<span class="op">+</span><span class="dv">1</span> <span class="op">===</span> currentD <span class="op">?</span> <span class="st">"#ff6b6b"</span> <span class="op">:</span> <span class="st">"#4ecdc4"</span>)<span class="op">;</span></span>
+<span id="cb1-268"><a href=""></a>  <span class="co">// current vertical line</span></span>
+<span id="cb1-269"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"line"</span>)</span>
+<span id="cb1-270"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x1"</span><span class="op">,</span> <span class="fu">x</span>(currentD))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x2"</span><span class="op">,</span> <span class="fu">x</span>(currentD))</span>
+<span id="cb1-271"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"y1"</span><span class="op">,</span> <span class="dv">0</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y2"</span><span class="op">,</span> ih)</span>
+<span id="cb1-272"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke"</span><span class="op">,</span><span class="st">"#ff6b6b"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke-dasharray"</span><span class="op">,</span><span class="st">"4,3"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke-width"</span><span class="op">,</span><span class="fl">1.5</span>)<span class="op">;</span></span>
+<span id="cb1-273"><a href=""></a>  <span class="co">// axes</span></span>
+<span id="cb1-274"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"g"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"transform"</span><span class="op">,</span><span class="vs">`translate(0,</span><span class="sc">${</span>ih<span class="sc">}</span><span class="vs">)`</span>)</span>
+<span id="cb1-275"><a href=""></a>    <span class="op">.</span><span class="fu">call</span>(d3<span class="op">.</span><span class="fu">axisBottom</span>(x)<span class="op">.</span><span class="fu">ticks</span>(<span class="dv">10</span>)<span class="op">.</span><span class="fu">tickFormat</span>(d3<span class="op">.</span><span class="fu">format</span>(<span class="st">"d"</span>)))</span>
+<span id="cb1-276"><a href=""></a>    <span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"text,line,path"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"stroke"</span><span class="op">,</span><span class="st">"#666"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#888"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"10px"</span>)<span class="op">;</span></span>
+<span id="cb1-277"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"g"</span>)<span class="op">.</span><span class="fu">call</span>(d3<span class="op">.</span><span class="fu">axisLeft</span>(y)<span class="op">.</span><span class="fu">ticks</span>(<span class="dv">4</span>))</span>
+<span id="cb1-278"><a href=""></a>    <span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"text,line,path"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"stroke"</span><span class="op">,</span><span class="st">"#666"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#888"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"10px"</span>)<span class="op">;</span></span>
+<span id="cb1-279"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"text"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,</span> iw<span class="op">/</span><span class="dv">2</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,</span> ih<span class="op">+</span><span class="dv">28</span>)</span>
+<span id="cb1-280"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"text-anchor"</span><span class="op">,</span><span class="st">"middle"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#888"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"11px"</span>)<span class="op">.</span><span class="fu">text</span>(<span class="st">"d"</span>)<span class="op">;</span></span>
+<span id="cb1-281"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"text"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"transform"</span><span class="op">,</span><span class="st">"rotate(-90)"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,-</span>ih<span class="op">/</span><span class="dv">2</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,-</span><span class="dv">40</span>)</span>
+<span id="cb1-282"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"text-anchor"</span><span class="op">,</span><span class="st">"middle"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#888"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"11px"</span>)<span class="op">.</span><span class="fu">text</span>(<span class="st">"Reconstruction error"</span>)<span class="op">;</span></span>
+<span id="cb1-283"><a href=""></a>  <span class="cf">return</span> svg<span class="op">.</span><span class="fu">node</span>()<span class="op">;</span></span>
+<span id="cb1-284"><a href=""></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div id="ojs-recon-setup-1">
 <div id="ojs-cell-1-1" data-nodetype="declaration">
@@ -428,22 +451,22 @@ input[type=range] { width: 140px; accent-color: #4ecdc4; }
 </div>
 </div>
 <div id="ojs-recon-vis" class="cell">
-<div class="sourceCode cell-code hidden" id="cb2" data-startfrom="281" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 280;"><span id="cb2-281"><a href=""></a>viewof d_val <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">1</span><span class="op">,</span> <span class="dv">20</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">5</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"d (eigenvectors)"</span>})</span>
-<span id="cb2-282"><a href=""></a></span>
-<span id="cb2-283"><a href=""></a>Ar <span class="op">=</span> <span class="fu">buildRecon</span>(d_val)</span>
-<span id="cb2-284"><a href=""></a>residual <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> N}<span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> N}<span class="op">,</span> (_<span class="op">,</span>j) <span class="kw">=&gt;</span> A_mat[i][j] <span class="op">-</span> Ar[i][j]))</span>
-<span id="cb2-285"><a href=""></a>maxAr    <span class="op">=</span> d3<span class="op">.</span><span class="fu">max</span>(<span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span>N<span class="op">*</span>N}<span class="op">,</span> (_<span class="op">,</span>k) <span class="kw">=&gt;</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">abs</span>(Ar[<span class="bu">Math</span><span class="op">.</span><span class="fu">floor</span>(k<span class="op">/</span>N)][k<span class="op">%</span>N])))</span>
-<span id="cb2-286"><a href=""></a>curErr   <span class="op">=</span> recon_errors[d_val <span class="op">-</span> <span class="dv">1</span>]</span>
-<span id="cb2-287"><a href=""></a></span>
-<span id="cb2-288"><a href=""></a>htA   <span class="op">=</span> <span class="fu">heatSVG</span>(A_mat<span class="op">,</span>   {<span class="dt">title</span><span class="op">:</span><span class="st">"Original A"</span><span class="op">,</span>         <span class="dt">sz</span><span class="op">:</span><span class="dv">6</span><span class="op">,</span> <span class="dt">div</span><span class="op">:</span><span class="kw">false</span>})</span>
-<span id="cb2-289"><a href=""></a>htAr  <span class="op">=</span> <span class="fu">heatSVG</span>(Ar<span class="op">,</span>      {<span class="dt">title</span><span class="op">:</span><span class="vs">`Reconstructed (d=</span><span class="sc">${</span>d_val<span class="sc">}</span><span class="vs">)`</span><span class="op">,</span> <span class="dt">sz</span><span class="op">:</span><span class="dv">6</span><span class="op">,</span> <span class="dt">div</span><span class="op">:</span><span class="kw">true</span><span class="op">,</span> <span class="dt">clamp</span><span class="op">:</span>[<span class="op">-</span>maxAr<span class="op">,</span> maxAr]})</span>
-<span id="cb2-290"><a href=""></a>htRes <span class="op">=</span> <span class="fu">heatSVG</span>(residual<span class="op">,</span>{<span class="dt">title</span><span class="op">:</span><span class="vs">`Residual (err=</span><span class="sc">${</span>curErr<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">0</span>)<span class="sc">}</span><span class="vs">)`</span><span class="op">,</span> <span class="dt">sz</span><span class="op">:</span><span class="dv">6</span><span class="op">,</span> <span class="dt">div</span><span class="op">:</span><span class="kw">true</span><span class="op">,</span> <span class="dt">clamp</span><span class="op">:</span>[<span class="op">-</span><span class="fl">0.6</span><span class="op">,</span><span class="fl">0.6</span>]})</span>
-<span id="cb2-291"><a href=""></a>cv    <span class="op">=</span> <span class="fu">curveSVG</span>(recon_errors<span class="op">,</span> d_val)</span>
-<span id="cb2-292"><a href=""></a></span>
-<span id="cb2-293"><a href=""></a><span class="fu">html</span><span class="vs">`&lt;div style="display:flex;gap:10px;align-items:flex-start;justify-content:center;flex-wrap:wrap"&gt;</span></span>
-<span id="cb2-294"><a href=""></a><span class="vs">  </span><span class="sc">${</span>htA<span class="sc">}${</span>htAr<span class="sc">}${</span>htRes<span class="sc">}</span></span>
-<span id="cb2-295"><a href=""></a><span class="vs">  &lt;div&gt;</span><span class="sc">${</span>cv<span class="sc">}</span><span class="vs">&lt;/div&gt;</span></span>
-<span id="cb2-296"><a href=""></a><span class="vs">&lt;/div&gt;`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb2" data-startfrom="289" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 288;"><span id="cb2-289"><a href=""></a>viewof d_val <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">1</span><span class="op">,</span> <span class="dv">20</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">5</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"d (eigenvectors)"</span>})</span>
+<span id="cb2-290"><a href=""></a></span>
+<span id="cb2-291"><a href=""></a>Ar <span class="op">=</span> <span class="fu">buildRecon</span>(d_val)</span>
+<span id="cb2-292"><a href=""></a>residual <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> N}<span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> N}<span class="op">,</span> (_<span class="op">,</span>j) <span class="kw">=&gt;</span> A_mat[i][j] <span class="op">-</span> Ar[i][j]))</span>
+<span id="cb2-293"><a href=""></a>maxAr    <span class="op">=</span> d3<span class="op">.</span><span class="fu">max</span>(<span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span>N<span class="op">*</span>N}<span class="op">,</span> (_<span class="op">,</span>k) <span class="kw">=&gt;</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">abs</span>(Ar[<span class="bu">Math</span><span class="op">.</span><span class="fu">floor</span>(k<span class="op">/</span>N)][k<span class="op">%</span>N])))</span>
+<span id="cb2-294"><a href=""></a>curErr   <span class="op">=</span> recon_errors[d_val <span class="op">-</span> <span class="dv">1</span>]</span>
+<span id="cb2-295"><a href=""></a></span>
+<span id="cb2-296"><a href=""></a>htA   <span class="op">=</span> <span class="fu">heatSVG</span>(A_mat<span class="op">,</span>   {<span class="dt">title</span><span class="op">:</span><span class="st">"Original A"</span><span class="op">,</span>         <span class="dt">sz</span><span class="op">:</span><span class="dv">6</span><span class="op">,</span> <span class="dt">div</span><span class="op">:</span><span class="kw">false</span>})</span>
+<span id="cb2-297"><a href=""></a>htAr  <span class="op">=</span> <span class="fu">heatSVG</span>(Ar<span class="op">,</span>      {<span class="dt">title</span><span class="op">:</span><span class="vs">`Reconstructed (d=</span><span class="sc">${</span>d_val<span class="sc">}</span><span class="vs">)`</span><span class="op">,</span> <span class="dt">sz</span><span class="op">:</span><span class="dv">6</span><span class="op">,</span> <span class="dt">div</span><span class="op">:</span><span class="kw">true</span><span class="op">,</span> <span class="dt">clamp</span><span class="op">:</span>[<span class="op">-</span>maxAr<span class="op">,</span> maxAr]})</span>
+<span id="cb2-298"><a href=""></a>htRes <span class="op">=</span> <span class="fu">heatSVG</span>(residual<span class="op">,</span>{<span class="dt">title</span><span class="op">:</span><span class="vs">`Residual (err=</span><span class="sc">${</span>curErr<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">0</span>)<span class="sc">}</span><span class="vs">)`</span><span class="op">,</span> <span class="dt">sz</span><span class="op">:</span><span class="dv">6</span><span class="op">,</span> <span class="dt">div</span><span class="op">:</span><span class="kw">true</span><span class="op">,</span> <span class="dt">clamp</span><span class="op">:</span>[<span class="op">-</span><span class="fl">0.6</span><span class="op">,</span><span class="fl">0.6</span>]})</span>
+<span id="cb2-299"><a href=""></a>cv    <span class="op">=</span> <span class="fu">curveSVG</span>(recon_errors<span class="op">,</span> d_val)</span>
+<span id="cb2-300"><a href=""></a></span>
+<span id="cb2-301"><a href=""></a><span class="fu">html</span><span class="vs">`&lt;div style="display:flex;gap:10px;align-items:flex-start;justify-content:center;flex-wrap:wrap"&gt;</span></span>
+<span id="cb2-302"><a href=""></a><span class="vs">  </span><span class="sc">${</span>htA<span class="sc">}${</span>htAr<span class="sc">}${</span>htRes<span class="sc">}</span></span>
+<span id="cb2-303"><a href=""></a><span class="vs">  &lt;div&gt;</span><span class="sc">${</span>cv<span class="sc">}</span><span class="vs">&lt;/div&gt;</span></span>
+<span id="cb2-304"><a href=""></a><span class="vs">&lt;/div&gt;`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div id="ojs-recon-vis-1">
 <div id="ojs-cell-2-1" data-nodetype="declaration">
@@ -518,54 +541,54 @@ input[type=range] { width: 140px; accent-color: #4ecdc4; }
 </section>
 <section id="idea-2-graph-cut" class="slide level2">
 <h2>Idea 2: Graph Cut ✂️</h2>
-<p><strong>Graph Cut Problem</strong>: Partition nodes into two disjoint sets <span class="math inline">\(Q\)</span> and <span class="math inline">\(S\)</span> by cutting the fewest edges:</p>
-<p><span class="math display">\[
+<p><strong>Graph Cut Problem</strong>: Partition nodes into two disjoint sets <span class="math inline">Q</span> and <span class="math inline">S</span> by cutting the fewest edges:</p>
+<p><span class="math display">
 \min_{Q,S} \;\text{cut}(Q,S) = \sum_{i \in Q}\sum_{j \in S} A_{ij}
-\]</span></p>
+</span></p>
 <div class="columns">
 <div class="column" style="width:60%;">
 <p>Minimizing raw cut is bad — it tends to isolate a single node. We need a <strong>balanced</strong> cut.</p>
 <p><strong>Ratio Cut</strong> penalizes imbalanced partitions:</p>
-<p><span class="math display">\[
+<p><span class="math display">
 \text{RatioCut}(Q,S) = \sum_{i \in Q}\sum_{j \in S} A_{ij}\left(\frac{1}{|Q|}+\frac{1}{|S|}\right)
-\]</span></p>
+</span></p>
 </div><div class="column" style="width:40%;">
 <p><strong>Normalized Cut</strong> uses volume instead of size:</p>
-<p><span class="math display">\[
+<p><span class="math display">
 \text{NC}(Q,S) = \frac{\text{cut}(Q,S)}{\text{vol}(Q)} + \frac{\text{cut}(Q,S)}{\text{vol}(S)}
-\]</span></p>
-<p>where <span class="math inline">\(\text{vol}(Q) = \sum_{i \in Q} k_i\)</span>.</p>
+</span></p>
+<p>where <span class="math inline">\text{vol}(Q) = \sum_{i \in Q} k_i</span>.</p>
 </div></div>
 </section>
 <section id="ratio-cut-laplacian-form" class="slide level2 scrollable">
 <h2>Ratio Cut → Laplacian Form</h2>
-<p>Define the indicator vector: <span class="math display">\[
+<p>Define the indicator vector: <span class="math display">
 x_i = \begin{cases}\sqrt{|S|/|Q|} &amp; i \in Q \\ -\sqrt{|Q|/|S|} &amp; i \in S\end{cases}
 \qquad\Rightarrow\qquad \sum_i x_i = 0,\quad \sum_i x_i^2 = N
-\]</span></p>
-<p>Note <span class="math inline">\((x_i - x_j)^2 = 0\)</span> when <span class="math inline">\(i,j\)</span> are in the same partition, and <span class="math inline">\((x_i-x_j)^2 = N^2/(|Q||S|)\)</span> otherwise. Then:</p>
-<p><span class="math display">\[
+</span></p>
+<p>Note <span class="math inline">(x_i - x_j)^2 = 0</span> when <span class="math inline">i,j</span> are in the same partition, and <span class="math inline">(x_i-x_j)^2 = N^2/(|Q||S|)</span> otherwise. Then:</p>
+<p><span class="math display">
 \begin{aligned}
 \text{RatioCut}(Q,S)
 &amp;= \frac{1}{2N}\sum_{i,j}A_{ij}(x_i-x_j)^2
 = \frac{1}{N}\sum_{i,j}L_{ij}\,x_i x_j
 = \frac{1}{N}\,\mathbf{x}^\top\mathbf{L}\mathbf{x}
 \end{aligned}
-\]</span></p>
-<p>where the <strong>combinatorial Laplacian</strong> is <span class="math inline">\(\mathbf{L} = \mathbf{D} - \mathbf{A}\)</span>.</p>
+</span></p>
+<p>where the <strong>combinatorial Laplacian</strong> is <span class="math inline">\mathbf{L} = \mathbf{D} - \mathbf{A}</span>.</p>
 <p>So minimizing RatioCut is equivalent to:</p>
-<p><span class="math display">\[
+<p><span class="math display">
 \min_{\mathbf{x}}\;\mathbf{x}^\top\mathbf{L}\mathbf{x}
 \quad\text{s.t.}\quad \mathbf{x}^\top\mathbf{1}=0,\;\mathbf{x}^\top\mathbf{x}=N,\;x_i\in\left\{\sqrt{|S|/|Q|},-\sqrt{|Q|/|S|}\right\}
-\]</span></p>
+</span></p>
 <p>This is <strong>NP-hard</strong>. Let’s relax the discrete constraint.</p>
 </section>
 <section id="spectral-relaxation" class="slide level2">
 <h2>Spectral Relaxation</h2>
-<p>Relax <span class="math inline">\(x_i \in \mathbb{R}\)</span> with normalization <span class="math inline">\(\mathbf{x}^\top\mathbf{x}=1\)</span> and <span class="math inline">\(\mathbf{x}^\top\mathbf{1}=0\)</span>:</p>
-<p><span class="math display">\[\min_{\mathbf{x}}\;\mathbf{x}^\top\mathbf{L}\mathbf{x} \quad\text{s.t.}\quad \mathbf{x}^\top\mathbf{x}=1,\;\mathbf{x}\perp\mathbf{1}\]</span></p>
-<p>From the eigenvalue equation <span class="math inline">\(\mathbf{L}\mathbf{x}=\lambda\mathbf{x}\)</span>:</p>
-<p><span class="math display">\[\mathbf{x}^\top\mathbf{L}\mathbf{x} = \lambda\,\mathbf{x}^\top\mathbf{x} = \lambda\]</span></p>
+<p>Relax <span class="math inline">x_i \in \mathbb{R}</span> with normalization <span class="math inline">\mathbf{x}^\top\mathbf{x}=1</span> and <span class="math inline">\mathbf{x}^\top\mathbf{1}=0</span>:</p>
+<p><span class="math display">\min_{\mathbf{x}}\;\mathbf{x}^\top\mathbf{L}\mathbf{x} \quad\text{s.t.}\quad \mathbf{x}^\top\mathbf{x}=1,\;\mathbf{x}\perp\mathbf{1}</span></p>
+<p>From the eigenvalue equation <span class="math inline">\mathbf{L}\mathbf{x}=\lambda\mathbf{x}</span>:</p>
+<p><span class="math display">\mathbf{x}^\top\mathbf{L}\mathbf{x} = \lambda\,\mathbf{x}^\top\mathbf{x} = \lambda</span></p>
 <p>So the minimum is achieved at the <strong>smallest eigenvalue</strong>… but wait:</p>
 <div class="callout callout-warning callout-titled callout-style-default">
 <div class="callout-body">
@@ -576,7 +599,7 @@ x_i = \begin{cases}\sqrt{|S|/|Q|} &amp; i \in Q \\ -\sqrt{|Q|/|S|} &amp; i \in S
 <p><strong>Warning</strong></p>
 </div>
 <div class="callout-content">
-<p>The smallest eigenvalue <span class="math inline">\(\lambda_1 = 0\)</span> of <span class="math inline">\(\mathbf{L}\)</span> has eigenvector <span class="math inline">\(\mathbf{x}_1 \propto \mathbf{1}\)</span>, which violates <span class="math inline">\(\mathbf{x}\perp\mathbf{1}\)</span>. The <strong>second smallest</strong> eigenvector <span class="math inline">\(\mathbf{x}_2\)</span> (the <strong>Fiedler vector</strong>) is the true solution. For <span class="math inline">\(k\)</span>-way partitioning, use eigenvectors <span class="math inline">\(\mathbf{x}_2, \ldots, \mathbf{x}_{k}\)</span>.</p>
+<p>The smallest eigenvalue <span class="math inline">\lambda_1 = 0</span> of <span class="math inline">\mathbf{L}</span> has eigenvector <span class="math inline">\mathbf{x}_1 \propto \mathbf{1}</span>, which violates <span class="math inline">\mathbf{x}\perp\mathbf{1}</span>. The <strong>second smallest</strong> eigenvector <span class="math inline">\mathbf{x}_2</span> (the <strong>Fiedler vector</strong>) is the true solution. For <span class="math inline">k</span>-way partitioning, use eigenvectors <span class="math inline">\mathbf{x}_2, \ldots, \mathbf{x}_{k}</span>.</p>
 </div>
 </div>
 </div>
@@ -584,105 +607,105 @@ x_i = \begin{cases}\sqrt{|S|/|Q|} &amp; i \in Q \\ -\sqrt{|Q|/|S|} &amp; i \in S
 <section id="interactive-spectral-clustering" class="slide level2">
 <h2>🔬 Interactive: Spectral Clustering</h2>
 <div id="ojs-clust-setup" class="cell">
-<div class="sourceCode cell-code hidden" id="cb3" data-startfrom="388" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 387;"><span id="cb3-388"><a href=""></a><span class="kw">function</span> <span class="fu">graphSVG</span>(positions<span class="op">,</span> edges<span class="op">,</span> colors<span class="op">,</span> walkPath<span class="op">,</span> {W<span class="op">=</span><span class="dv">420</span><span class="op">,</span> H<span class="op">=</span><span class="dv">380</span><span class="op">,</span> rNode<span class="op">=</span><span class="dv">5</span>} <span class="op">=</span> {}) {</span>
-<span id="cb3-389"><a href=""></a>  <span class="co">// Scale positions from [-1,1] to SVG coords</span></span>
-<span id="cb3-390"><a href=""></a>  <span class="kw">const</span> xs <span class="op">=</span> positions<span class="op">.</span><span class="fu">map</span>(p<span class="kw">=&gt;</span>p[<span class="dv">0</span>])<span class="op">,</span> ys <span class="op">=</span> positions<span class="op">.</span><span class="fu">map</span>(p<span class="kw">=&gt;</span>p[<span class="dv">1</span>])<span class="op">;</span></span>
-<span id="cb3-391"><a href=""></a>  <span class="kw">const</span> xExt <span class="op">=</span> d3<span class="op">.</span><span class="fu">extent</span>(xs)<span class="op">,</span> yExt <span class="op">=</span> d3<span class="op">.</span><span class="fu">extent</span>(ys)<span class="op">;</span></span>
-<span id="cb3-392"><a href=""></a>  <span class="kw">const</span> pad <span class="op">=</span> <span class="dv">30</span><span class="op">;</span></span>
-<span id="cb3-393"><a href=""></a>  <span class="kw">const</span> scX <span class="op">=</span> d3<span class="op">.</span><span class="fu">scaleLinear</span>()<span class="op">.</span><span class="fu">domain</span>(xExt)<span class="op">.</span><span class="fu">range</span>([pad<span class="op">,</span> W<span class="op">-</span>pad])<span class="op">;</span></span>
-<span id="cb3-394"><a href=""></a>  <span class="kw">const</span> scY <span class="op">=</span> d3<span class="op">.</span><span class="fu">scaleLinear</span>()<span class="op">.</span><span class="fu">domain</span>(yExt)<span class="op">.</span><span class="fu">range</span>([H<span class="op">-</span>pad<span class="op">,</span> pad])<span class="op">;</span></span>
-<span id="cb3-395"><a href=""></a></span>
-<span id="cb3-396"><a href=""></a>  <span class="kw">const</span> svg <span class="op">=</span> d3<span class="op">.</span><span class="fu">create</span>(<span class="st">"svg"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"width"</span><span class="op">,</span>W)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"height"</span><span class="op">,</span>H)</span>
-<span id="cb3-397"><a href=""></a>    <span class="op">.</span><span class="fu">style</span>(<span class="st">"background"</span><span class="op">,</span><span class="st">"#0d1117"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"border-radius"</span><span class="op">,</span><span class="st">"6px"</span>)<span class="op">;</span></span>
-<span id="cb3-398"><a href=""></a></span>
-<span id="cb3-399"><a href=""></a>  <span class="co">// Edges</span></span>
-<span id="cb3-400"><a href=""></a>  svg<span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"line"</span>)<span class="op">.</span><span class="fu">data</span>(edges)<span class="op">.</span><span class="fu">join</span>(<span class="st">"line"</span>)</span>
-<span id="cb3-401"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x1"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">scX</span>(positions[d<span class="op">.</span><span class="at">s</span>][<span class="dv">0</span>]))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y1"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">scY</span>(positions[d<span class="op">.</span><span class="at">s</span>][<span class="dv">1</span>]))</span>
-<span id="cb3-402"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x2"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">scX</span>(positions[d<span class="op">.</span><span class="at">t</span>][<span class="dv">0</span>]))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y2"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">scY</span>(positions[d<span class="op">.</span><span class="at">t</span>][<span class="dv">1</span>]))</span>
-<span id="cb3-403"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke"</span><span class="op">,</span>d <span class="kw">=&gt;</span> {</span>
-<span id="cb3-404"><a href=""></a>      <span class="cf">if</span> (<span class="op">!</span>walkPath) <span class="cf">return</span> <span class="st">"#444"</span><span class="op">;</span></span>
-<span id="cb3-405"><a href=""></a>      <span class="kw">const</span> inWalk <span class="op">=</span> walkPath<span class="op">.</span><span class="fu">some</span>(([a<span class="op">,</span>b])<span class="kw">=&gt;</span>(a<span class="op">===</span>d<span class="op">.</span><span class="at">s</span><span class="op">&amp;&amp;</span>b<span class="op">===</span>d<span class="op">.</span><span class="at">t</span>)<span class="op">||</span>(a<span class="op">===</span>d<span class="op">.</span><span class="at">t</span><span class="op">&amp;&amp;</span>b<span class="op">===</span>d<span class="op">.</span><span class="at">s</span>))<span class="op">;</span></span>
-<span id="cb3-406"><a href=""></a>      <span class="cf">return</span> inWalk <span class="op">?</span> <span class="st">"#ff6b6b"</span> <span class="op">:</span> <span class="st">"#333"</span><span class="op">;</span></span>
-<span id="cb3-407"><a href=""></a>    })</span>
-<span id="cb3-408"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke-width"</span><span class="op">,</span> d <span class="kw">=&gt;</span> {</span>
-<span id="cb3-409"><a href=""></a>      <span class="cf">if</span> (<span class="op">!</span>walkPath) <span class="cf">return</span> <span class="fl">0.8</span><span class="op">;</span></span>
-<span id="cb3-410"><a href=""></a>      <span class="kw">const</span> inWalk <span class="op">=</span> walkPath<span class="op">.</span><span class="fu">some</span>(([a<span class="op">,</span>b])<span class="kw">=&gt;</span>(a<span class="op">===</span>d<span class="op">.</span><span class="at">s</span><span class="op">&amp;&amp;</span>b<span class="op">===</span>d<span class="op">.</span><span class="at">t</span>)<span class="op">||</span>(a<span class="op">===</span>d<span class="op">.</span><span class="at">t</span><span class="op">&amp;&amp;</span>b<span class="op">===</span>d<span class="op">.</span><span class="at">s</span>))<span class="op">;</span></span>
-<span id="cb3-411"><a href=""></a>      <span class="cf">return</span> inWalk <span class="op">?</span> <span class="fl">2.5</span> <span class="op">:</span> <span class="fl">0.6</span><span class="op">;</span></span>
-<span id="cb3-412"><a href=""></a>    })</span>
-<span id="cb3-413"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"opacity"</span><span class="op">,</span> d <span class="kw">=&gt;</span> {</span>
-<span id="cb3-414"><a href=""></a>      <span class="cf">if</span> (<span class="op">!</span>walkPath) <span class="cf">return</span> <span class="fl">0.6</span><span class="op">;</span></span>
-<span id="cb3-415"><a href=""></a>      <span class="kw">const</span> inWalk <span class="op">=</span> walkPath<span class="op">.</span><span class="fu">some</span>(([a<span class="op">,</span>b])<span class="kw">=&gt;</span>(a<span class="op">===</span>d<span class="op">.</span><span class="at">s</span><span class="op">&amp;&amp;</span>b<span class="op">===</span>d<span class="op">.</span><span class="at">t</span>)<span class="op">||</span>(a<span class="op">===</span>d<span class="op">.</span><span class="at">t</span><span class="op">&amp;&amp;</span>b<span class="op">===</span>d<span class="op">.</span><span class="at">s</span>))<span class="op">;</span></span>
-<span id="cb3-416"><a href=""></a>      <span class="cf">return</span> inWalk <span class="op">?</span> <span class="dv">1</span> <span class="op">:</span> <span class="fl">0.25</span><span class="op">;</span></span>
-<span id="cb3-417"><a href=""></a>    })<span class="op">;</span></span>
-<span id="cb3-418"><a href=""></a></span>
-<span id="cb3-419"><a href=""></a>  <span class="co">// Nodes</span></span>
-<span id="cb3-420"><a href=""></a>  svg<span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"circle"</span>)<span class="op">.</span><span class="fu">data</span>(colors)<span class="op">.</span><span class="fu">join</span>(<span class="st">"circle"</span>)</span>
-<span id="cb3-421"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"cx"</span><span class="op">,</span> (_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">scX</span>(positions[i][<span class="dv">0</span>]))</span>
-<span id="cb3-422"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"cy"</span><span class="op">,</span> (_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">scY</span>(positions[i][<span class="dv">1</span>]))</span>
-<span id="cb3-423"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"r"</span><span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> {</span>
-<span id="cb3-424"><a href=""></a>      <span class="cf">if</span> (<span class="op">!</span>walkPath) <span class="cf">return</span> rNode<span class="op">;</span></span>
-<span id="cb3-425"><a href=""></a>      <span class="kw">const</span> inWalk <span class="op">=</span> walkPath<span class="op">.</span><span class="fu">flat</span>()<span class="op">.</span><span class="fu">includes</span>(i)<span class="op">;</span></span>
-<span id="cb3-426"><a href=""></a>      <span class="cf">return</span> inWalk <span class="op">?</span> rNode <span class="op">+</span> <span class="dv">2</span> <span class="op">:</span> rNode<span class="op">;</span></span>
-<span id="cb3-427"><a href=""></a>    })</span>
-<span id="cb3-428"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span> d <span class="kw">=&gt;</span> d)</span>
-<span id="cb3-429"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke"</span><span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> {</span>
-<span id="cb3-430"><a href=""></a>      <span class="cf">if</span> (<span class="op">!</span>walkPath) <span class="cf">return</span> <span class="st">"#222"</span><span class="op">;</span></span>
-<span id="cb3-431"><a href=""></a>      <span class="cf">if</span> (walkPath<span class="op">.</span><span class="at">length</span> <span class="op">&amp;&amp;</span> walkPath[<span class="dv">0</span>][<span class="dv">0</span>]<span class="op">===</span>i) <span class="cf">return</span> <span class="st">"#fff"</span><span class="op">;</span></span>
-<span id="cb3-432"><a href=""></a>      <span class="cf">if</span> (walkPath<span class="op">.</span><span class="at">length</span> <span class="op">&amp;&amp;</span> walkPath[walkPath<span class="op">.</span><span class="at">length</span><span class="op">-</span><span class="dv">1</span>][<span class="dv">1</span>]<span class="op">===</span>i) <span class="cf">return</span> <span class="st">"#ffd700"</span><span class="op">;</span></span>
-<span id="cb3-433"><a href=""></a>      <span class="cf">return</span> <span class="st">"#222"</span><span class="op">;</span></span>
-<span id="cb3-434"><a href=""></a>    })</span>
-<span id="cb3-435"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke-width"</span><span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> {</span>
-<span id="cb3-436"><a href=""></a>      <span class="cf">if</span> (<span class="op">!</span>walkPath) <span class="cf">return</span> <span class="fl">0.8</span><span class="op">;</span></span>
-<span id="cb3-437"><a href=""></a>      <span class="cf">if</span> (walkPath<span class="op">.</span><span class="at">length</span> <span class="op">&amp;&amp;</span> (walkPath[<span class="dv">0</span>][<span class="dv">0</span>]<span class="op">===</span>i <span class="op">||</span> walkPath[walkPath<span class="op">.</span><span class="at">length</span><span class="op">-</span><span class="dv">1</span>][<span class="dv">1</span>]<span class="op">===</span>i)) <span class="cf">return</span> <span class="dv">2</span><span class="op">;</span></span>
-<span id="cb3-438"><a href=""></a>      <span class="cf">return</span> <span class="fl">0.5</span><span class="op">;</span></span>
-<span id="cb3-439"><a href=""></a>    })<span class="op">;</span></span>
-<span id="cb3-440"><a href=""></a></span>
-<span id="cb3-441"><a href=""></a>  <span class="co">// Node labels (small)</span></span>
-<span id="cb3-442"><a href=""></a>  svg<span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"text"</span>)<span class="op">.</span><span class="fu">data</span>(colors)<span class="op">.</span><span class="fu">join</span>(<span class="st">"text"</span>)</span>
-<span id="cb3-443"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,</span> (_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">scX</span>(positions[i][<span class="dv">0</span>]))</span>
-<span id="cb3-444"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,</span> (_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">scY</span>(positions[i][<span class="dv">1</span>])<span class="op">+</span><span class="fl">3.5</span>)</span>
-<span id="cb3-445"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"text-anchor"</span><span class="op">,</span><span class="st">"middle"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"6.5px"</span>)</span>
-<span id="cb3-446"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#fff"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"pointer-events"</span><span class="op">,</span><span class="st">"none"</span>)</span>
-<span id="cb3-447"><a href=""></a>    <span class="op">.</span><span class="fu">text</span>((_<span class="op">,</span>i)<span class="kw">=&gt;</span>i)<span class="op">;</span></span>
+<div class="sourceCode cell-code hidden" id="cb3" data-startfrom="396" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 395;"><span id="cb3-396"><a href=""></a><span class="kw">function</span> <span class="fu">graphSVG</span>(positions<span class="op">,</span> edges<span class="op">,</span> colors<span class="op">,</span> walkPath<span class="op">,</span> {W<span class="op">=</span><span class="dv">420</span><span class="op">,</span> H<span class="op">=</span><span class="dv">380</span><span class="op">,</span> rNode<span class="op">=</span><span class="dv">5</span>} <span class="op">=</span> {}) {</span>
+<span id="cb3-397"><a href=""></a>  <span class="co">// Scale positions from [-1,1] to SVG coords</span></span>
+<span id="cb3-398"><a href=""></a>  <span class="kw">const</span> xs <span class="op">=</span> positions<span class="op">.</span><span class="fu">map</span>(p<span class="kw">=&gt;</span>p[<span class="dv">0</span>])<span class="op">,</span> ys <span class="op">=</span> positions<span class="op">.</span><span class="fu">map</span>(p<span class="kw">=&gt;</span>p[<span class="dv">1</span>])<span class="op">;</span></span>
+<span id="cb3-399"><a href=""></a>  <span class="kw">const</span> xExt <span class="op">=</span> d3<span class="op">.</span><span class="fu">extent</span>(xs)<span class="op">,</span> yExt <span class="op">=</span> d3<span class="op">.</span><span class="fu">extent</span>(ys)<span class="op">;</span></span>
+<span id="cb3-400"><a href=""></a>  <span class="kw">const</span> pad <span class="op">=</span> <span class="dv">30</span><span class="op">;</span></span>
+<span id="cb3-401"><a href=""></a>  <span class="kw">const</span> scX <span class="op">=</span> d3<span class="op">.</span><span class="fu">scaleLinear</span>()<span class="op">.</span><span class="fu">domain</span>(xExt)<span class="op">.</span><span class="fu">range</span>([pad<span class="op">,</span> W<span class="op">-</span>pad])<span class="op">;</span></span>
+<span id="cb3-402"><a href=""></a>  <span class="kw">const</span> scY <span class="op">=</span> d3<span class="op">.</span><span class="fu">scaleLinear</span>()<span class="op">.</span><span class="fu">domain</span>(yExt)<span class="op">.</span><span class="fu">range</span>([H<span class="op">-</span>pad<span class="op">,</span> pad])<span class="op">;</span></span>
+<span id="cb3-403"><a href=""></a></span>
+<span id="cb3-404"><a href=""></a>  <span class="kw">const</span> svg <span class="op">=</span> d3<span class="op">.</span><span class="fu">create</span>(<span class="st">"svg"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"width"</span><span class="op">,</span>W)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"height"</span><span class="op">,</span>H)</span>
+<span id="cb3-405"><a href=""></a>    <span class="op">.</span><span class="fu">style</span>(<span class="st">"background"</span><span class="op">,</span><span class="st">"#0d1117"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"border-radius"</span><span class="op">,</span><span class="st">"6px"</span>)<span class="op">;</span></span>
+<span id="cb3-406"><a href=""></a></span>
+<span id="cb3-407"><a href=""></a>  <span class="co">// Edges</span></span>
+<span id="cb3-408"><a href=""></a>  svg<span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"line"</span>)<span class="op">.</span><span class="fu">data</span>(edges)<span class="op">.</span><span class="fu">join</span>(<span class="st">"line"</span>)</span>
+<span id="cb3-409"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x1"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">scX</span>(positions[d<span class="op">.</span><span class="at">s</span>][<span class="dv">0</span>]))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y1"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">scY</span>(positions[d<span class="op">.</span><span class="at">s</span>][<span class="dv">1</span>]))</span>
+<span id="cb3-410"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x2"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">scX</span>(positions[d<span class="op">.</span><span class="at">t</span>][<span class="dv">0</span>]))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y2"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">scY</span>(positions[d<span class="op">.</span><span class="at">t</span>][<span class="dv">1</span>]))</span>
+<span id="cb3-411"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke"</span><span class="op">,</span>d <span class="kw">=&gt;</span> {</span>
+<span id="cb3-412"><a href=""></a>      <span class="cf">if</span> (<span class="op">!</span>walkPath) <span class="cf">return</span> <span class="st">"#444"</span><span class="op">;</span></span>
+<span id="cb3-413"><a href=""></a>      <span class="kw">const</span> inWalk <span class="op">=</span> walkPath<span class="op">.</span><span class="fu">some</span>(([a<span class="op">,</span>b])<span class="kw">=&gt;</span>(a<span class="op">===</span>d<span class="op">.</span><span class="at">s</span><span class="op">&amp;&amp;</span>b<span class="op">===</span>d<span class="op">.</span><span class="at">t</span>)<span class="op">||</span>(a<span class="op">===</span>d<span class="op">.</span><span class="at">t</span><span class="op">&amp;&amp;</span>b<span class="op">===</span>d<span class="op">.</span><span class="at">s</span>))<span class="op">;</span></span>
+<span id="cb3-414"><a href=""></a>      <span class="cf">return</span> inWalk <span class="op">?</span> <span class="st">"#ff6b6b"</span> <span class="op">:</span> <span class="st">"#333"</span><span class="op">;</span></span>
+<span id="cb3-415"><a href=""></a>    })</span>
+<span id="cb3-416"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke-width"</span><span class="op">,</span> d <span class="kw">=&gt;</span> {</span>
+<span id="cb3-417"><a href=""></a>      <span class="cf">if</span> (<span class="op">!</span>walkPath) <span class="cf">return</span> <span class="fl">0.8</span><span class="op">;</span></span>
+<span id="cb3-418"><a href=""></a>      <span class="kw">const</span> inWalk <span class="op">=</span> walkPath<span class="op">.</span><span class="fu">some</span>(([a<span class="op">,</span>b])<span class="kw">=&gt;</span>(a<span class="op">===</span>d<span class="op">.</span><span class="at">s</span><span class="op">&amp;&amp;</span>b<span class="op">===</span>d<span class="op">.</span><span class="at">t</span>)<span class="op">||</span>(a<span class="op">===</span>d<span class="op">.</span><span class="at">t</span><span class="op">&amp;&amp;</span>b<span class="op">===</span>d<span class="op">.</span><span class="at">s</span>))<span class="op">;</span></span>
+<span id="cb3-419"><a href=""></a>      <span class="cf">return</span> inWalk <span class="op">?</span> <span class="fl">2.5</span> <span class="op">:</span> <span class="fl">0.6</span><span class="op">;</span></span>
+<span id="cb3-420"><a href=""></a>    })</span>
+<span id="cb3-421"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"opacity"</span><span class="op">,</span> d <span class="kw">=&gt;</span> {</span>
+<span id="cb3-422"><a href=""></a>      <span class="cf">if</span> (<span class="op">!</span>walkPath) <span class="cf">return</span> <span class="fl">0.6</span><span class="op">;</span></span>
+<span id="cb3-423"><a href=""></a>      <span class="kw">const</span> inWalk <span class="op">=</span> walkPath<span class="op">.</span><span class="fu">some</span>(([a<span class="op">,</span>b])<span class="kw">=&gt;</span>(a<span class="op">===</span>d<span class="op">.</span><span class="at">s</span><span class="op">&amp;&amp;</span>b<span class="op">===</span>d<span class="op">.</span><span class="at">t</span>)<span class="op">||</span>(a<span class="op">===</span>d<span class="op">.</span><span class="at">t</span><span class="op">&amp;&amp;</span>b<span class="op">===</span>d<span class="op">.</span><span class="at">s</span>))<span class="op">;</span></span>
+<span id="cb3-424"><a href=""></a>      <span class="cf">return</span> inWalk <span class="op">?</span> <span class="dv">1</span> <span class="op">:</span> <span class="fl">0.25</span><span class="op">;</span></span>
+<span id="cb3-425"><a href=""></a>    })<span class="op">;</span></span>
+<span id="cb3-426"><a href=""></a></span>
+<span id="cb3-427"><a href=""></a>  <span class="co">// Nodes</span></span>
+<span id="cb3-428"><a href=""></a>  svg<span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"circle"</span>)<span class="op">.</span><span class="fu">data</span>(colors)<span class="op">.</span><span class="fu">join</span>(<span class="st">"circle"</span>)</span>
+<span id="cb3-429"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"cx"</span><span class="op">,</span> (_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">scX</span>(positions[i][<span class="dv">0</span>]))</span>
+<span id="cb3-430"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"cy"</span><span class="op">,</span> (_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">scY</span>(positions[i][<span class="dv">1</span>]))</span>
+<span id="cb3-431"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"r"</span><span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> {</span>
+<span id="cb3-432"><a href=""></a>      <span class="cf">if</span> (<span class="op">!</span>walkPath) <span class="cf">return</span> rNode<span class="op">;</span></span>
+<span id="cb3-433"><a href=""></a>      <span class="kw">const</span> inWalk <span class="op">=</span> walkPath<span class="op">.</span><span class="fu">flat</span>()<span class="op">.</span><span class="fu">includes</span>(i)<span class="op">;</span></span>
+<span id="cb3-434"><a href=""></a>      <span class="cf">return</span> inWalk <span class="op">?</span> rNode <span class="op">+</span> <span class="dv">2</span> <span class="op">:</span> rNode<span class="op">;</span></span>
+<span id="cb3-435"><a href=""></a>    })</span>
+<span id="cb3-436"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span> d <span class="kw">=&gt;</span> d)</span>
+<span id="cb3-437"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke"</span><span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> {</span>
+<span id="cb3-438"><a href=""></a>      <span class="cf">if</span> (<span class="op">!</span>walkPath) <span class="cf">return</span> <span class="st">"#222"</span><span class="op">;</span></span>
+<span id="cb3-439"><a href=""></a>      <span class="cf">if</span> (walkPath<span class="op">.</span><span class="at">length</span> <span class="op">&amp;&amp;</span> walkPath[<span class="dv">0</span>][<span class="dv">0</span>]<span class="op">===</span>i) <span class="cf">return</span> <span class="st">"#fff"</span><span class="op">;</span></span>
+<span id="cb3-440"><a href=""></a>      <span class="cf">if</span> (walkPath<span class="op">.</span><span class="at">length</span> <span class="op">&amp;&amp;</span> walkPath[walkPath<span class="op">.</span><span class="at">length</span><span class="op">-</span><span class="dv">1</span>][<span class="dv">1</span>]<span class="op">===</span>i) <span class="cf">return</span> <span class="st">"#ffd700"</span><span class="op">;</span></span>
+<span id="cb3-441"><a href=""></a>      <span class="cf">return</span> <span class="st">"#222"</span><span class="op">;</span></span>
+<span id="cb3-442"><a href=""></a>    })</span>
+<span id="cb3-443"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke-width"</span><span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> {</span>
+<span id="cb3-444"><a href=""></a>      <span class="cf">if</span> (<span class="op">!</span>walkPath) <span class="cf">return</span> <span class="fl">0.8</span><span class="op">;</span></span>
+<span id="cb3-445"><a href=""></a>      <span class="cf">if</span> (walkPath<span class="op">.</span><span class="at">length</span> <span class="op">&amp;&amp;</span> (walkPath[<span class="dv">0</span>][<span class="dv">0</span>]<span class="op">===</span>i <span class="op">||</span> walkPath[walkPath<span class="op">.</span><span class="at">length</span><span class="op">-</span><span class="dv">1</span>][<span class="dv">1</span>]<span class="op">===</span>i)) <span class="cf">return</span> <span class="dv">2</span><span class="op">;</span></span>
+<span id="cb3-446"><a href=""></a>      <span class="cf">return</span> <span class="fl">0.5</span><span class="op">;</span></span>
+<span id="cb3-447"><a href=""></a>    })<span class="op">;</span></span>
 <span id="cb3-448"><a href=""></a></span>
-<span id="cb3-449"><a href=""></a>  <span class="cf">return</span> svg<span class="op">.</span><span class="fu">node</span>()<span class="op">;</span></span>
-<span id="cb3-450"><a href=""></a>}</span>
-<span id="cb3-451"><a href=""></a></span>
-<span id="cb3-452"><a href=""></a><span class="kw">function</span> <span class="fu">scatterSVG</span>(xs<span class="op">,</span> ys<span class="op">,</span> colors<span class="op">,</span> {W<span class="op">=</span><span class="dv">330</span><span class="op">,</span> H<span class="op">=</span><span class="dv">310</span><span class="op">,</span> xlabel<span class="op">=</span><span class="st">"x₂"</span><span class="op">,</span> ylabel<span class="op">=</span><span class="st">"x₃"</span>} <span class="op">=</span> {}) {</span>
-<span id="cb3-453"><a href=""></a>  <span class="kw">const</span> m <span class="op">=</span> {<span class="dt">top</span><span class="op">:</span><span class="dv">15</span><span class="op">,</span> <span class="dt">right</span><span class="op">:</span><span class="dv">15</span><span class="op">,</span> <span class="dt">bottom</span><span class="op">:</span><span class="dv">35</span><span class="op">,</span> <span class="dt">left</span><span class="op">:</span><span class="dv">45</span>}<span class="op">;</span></span>
-<span id="cb3-454"><a href=""></a>  <span class="kw">const</span> iw <span class="op">=</span> W<span class="op">-</span>m<span class="op">.</span><span class="at">left</span><span class="op">-</span>m<span class="op">.</span><span class="at">right</span><span class="op">,</span> ih <span class="op">=</span> H<span class="op">-</span>m<span class="op">.</span><span class="at">top</span><span class="op">-</span>m<span class="op">.</span><span class="at">bottom</span><span class="op">;</span></span>
-<span id="cb3-455"><a href=""></a>  <span class="kw">const</span> sx <span class="op">=</span> d3<span class="op">.</span><span class="fu">scaleLinear</span>()<span class="op">.</span><span class="fu">domain</span>(d3<span class="op">.</span><span class="fu">extent</span>(xs))<span class="op">.</span><span class="fu">nice</span>()<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> iw])<span class="op">;</span></span>
-<span id="cb3-456"><a href=""></a>  <span class="kw">const</span> sy <span class="op">=</span> d3<span class="op">.</span><span class="fu">scaleLinear</span>()<span class="op">.</span><span class="fu">domain</span>(d3<span class="op">.</span><span class="fu">extent</span>(ys))<span class="op">.</span><span class="fu">nice</span>()<span class="op">.</span><span class="fu">range</span>([ih<span class="op">,</span> <span class="dv">0</span>])<span class="op">;</span></span>
-<span id="cb3-457"><a href=""></a>  <span class="kw">const</span> svg <span class="op">=</span> d3<span class="op">.</span><span class="fu">create</span>(<span class="st">"svg"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"width"</span><span class="op">,</span>W)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"height"</span><span class="op">,</span>H)</span>
-<span id="cb3-458"><a href=""></a>    <span class="op">.</span><span class="fu">style</span>(<span class="st">"background"</span><span class="op">,</span><span class="st">"#0d1117"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"border-radius"</span><span class="op">,</span><span class="st">"6px"</span>)<span class="op">;</span></span>
-<span id="cb3-459"><a href=""></a>  <span class="kw">const</span> g <span class="op">=</span> svg<span class="op">.</span><span class="fu">append</span>(<span class="st">"g"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"transform"</span><span class="op">,</span><span class="vs">`translate(</span><span class="sc">${</span>m<span class="op">.</span><span class="at">left</span><span class="sc">}</span><span class="vs">,</span><span class="sc">${</span>m<span class="op">.</span><span class="at">top</span><span class="sc">}</span><span class="vs">)`</span>)<span class="op">;</span></span>
-<span id="cb3-460"><a href=""></a>  <span class="co">// grid</span></span>
-<span id="cb3-461"><a href=""></a>  g<span class="op">.</span><span class="fu">selectAll</span>(<span class="st">".gx"</span>)<span class="op">.</span><span class="fu">data</span>(sx<span class="op">.</span><span class="fu">ticks</span>(<span class="dv">5</span>))<span class="op">.</span><span class="fu">join</span>(<span class="st">"line"</span>)</span>
-<span id="cb3-462"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x1"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">sx</span>(d))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x2"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">sx</span>(d))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y1"</span><span class="op">,</span><span class="dv">0</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y2"</span><span class="op">,</span>ih)</span>
-<span id="cb3-463"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke"</span><span class="op">,</span><span class="st">"#1e2535"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke-width"</span><span class="op">,</span><span class="dv">1</span>)<span class="op">;</span></span>
-<span id="cb3-464"><a href=""></a>  g<span class="op">.</span><span class="fu">selectAll</span>(<span class="st">".gy"</span>)<span class="op">.</span><span class="fu">data</span>(sy<span class="op">.</span><span class="fu">ticks</span>(<span class="dv">5</span>))<span class="op">.</span><span class="fu">join</span>(<span class="st">"line"</span>)</span>
-<span id="cb3-465"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x1"</span><span class="op">,</span><span class="dv">0</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x2"</span><span class="op">,</span>iw)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y1"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">sy</span>(d))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y2"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">sy</span>(d))</span>
-<span id="cb3-466"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke"</span><span class="op">,</span><span class="st">"#1e2535"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke-width"</span><span class="op">,</span><span class="dv">1</span>)<span class="op">;</span></span>
-<span id="cb3-467"><a href=""></a>  <span class="co">// points</span></span>
-<span id="cb3-468"><a href=""></a>  g<span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"circle"</span>)<span class="op">.</span><span class="fu">data</span>(colors)<span class="op">.</span><span class="fu">join</span>(<span class="st">"circle"</span>)</span>
-<span id="cb3-469"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"cx"</span><span class="op">,</span>(_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">sx</span>(xs[i]))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"cy"</span><span class="op">,</span>(_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">sy</span>(ys[i]))</span>
-<span id="cb3-470"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"r"</span><span class="op">,</span><span class="dv">4</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span>d<span class="kw">=&gt;</span>d)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"opacity"</span><span class="op">,</span><span class="fl">0.85</span>)<span class="op">;</span></span>
-<span id="cb3-471"><a href=""></a>  <span class="co">// labels</span></span>
-<span id="cb3-472"><a href=""></a>  g<span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"text.lbl"</span>)<span class="op">.</span><span class="fu">data</span>(colors)<span class="op">.</span><span class="fu">join</span>(<span class="st">"text"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"class"</span><span class="op">,</span><span class="st">"lbl"</span>)</span>
-<span id="cb3-473"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,</span>(_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">sx</span>(xs[i])<span class="op">+</span><span class="dv">5</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,</span>(_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">sy</span>(ys[i])<span class="op">+</span><span class="dv">3</span>)</span>
-<span id="cb3-474"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"6px"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#888"</span>)<span class="op">.</span><span class="fu">text</span>((_<span class="op">,</span>i)<span class="kw">=&gt;</span>i)<span class="op">;</span></span>
-<span id="cb3-475"><a href=""></a>  <span class="co">// axes</span></span>
-<span id="cb3-476"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"g"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"transform"</span><span class="op">,</span><span class="vs">`translate(0,</span><span class="sc">${</span>ih<span class="sc">}</span><span class="vs">)`</span>)</span>
-<span id="cb3-477"><a href=""></a>    <span class="op">.</span><span class="fu">call</span>(d3<span class="op">.</span><span class="fu">axisBottom</span>(sx)<span class="op">.</span><span class="fu">ticks</span>(<span class="dv">4</span>))</span>
-<span id="cb3-478"><a href=""></a>    <span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"text,path,line"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#888"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"stroke"</span><span class="op">,</span><span class="st">"#555"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"10px"</span>)<span class="op">;</span></span>
-<span id="cb3-479"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"g"</span>)<span class="op">.</span><span class="fu">call</span>(d3<span class="op">.</span><span class="fu">axisLeft</span>(sy)<span class="op">.</span><span class="fu">ticks</span>(<span class="dv">4</span>))</span>
-<span id="cb3-480"><a href=""></a>    <span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"text,path,line"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#888"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"stroke"</span><span class="op">,</span><span class="st">"#555"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"10px"</span>)<span class="op">;</span></span>
-<span id="cb3-481"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"text"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,</span>iw<span class="op">/</span><span class="dv">2</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,</span>ih<span class="op">+</span><span class="dv">30</span>)</span>
-<span id="cb3-482"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"text-anchor"</span><span class="op">,</span><span class="st">"middle"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#aaa"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"11px"</span>)<span class="op">.</span><span class="fu">text</span>(xlabel)<span class="op">;</span></span>
-<span id="cb3-483"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"text"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"transform"</span><span class="op">,</span><span class="st">"rotate(-90)"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,-</span>ih<span class="op">/</span><span class="dv">2</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,-</span><span class="dv">35</span>)</span>
-<span id="cb3-484"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"text-anchor"</span><span class="op">,</span><span class="st">"middle"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#aaa"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"11px"</span>)<span class="op">.</span><span class="fu">text</span>(ylabel)<span class="op">;</span></span>
-<span id="cb3-485"><a href=""></a>  <span class="cf">return</span> svg<span class="op">.</span><span class="fu">node</span>()<span class="op">;</span></span>
-<span id="cb3-486"><a href=""></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-449"><a href=""></a>  <span class="co">// Node labels (small)</span></span>
+<span id="cb3-450"><a href=""></a>  svg<span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"text"</span>)<span class="op">.</span><span class="fu">data</span>(colors)<span class="op">.</span><span class="fu">join</span>(<span class="st">"text"</span>)</span>
+<span id="cb3-451"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,</span> (_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">scX</span>(positions[i][<span class="dv">0</span>]))</span>
+<span id="cb3-452"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,</span> (_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">scY</span>(positions[i][<span class="dv">1</span>])<span class="op">+</span><span class="fl">3.5</span>)</span>
+<span id="cb3-453"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"text-anchor"</span><span class="op">,</span><span class="st">"middle"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"6.5px"</span>)</span>
+<span id="cb3-454"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#fff"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"pointer-events"</span><span class="op">,</span><span class="st">"none"</span>)</span>
+<span id="cb3-455"><a href=""></a>    <span class="op">.</span><span class="fu">text</span>((_<span class="op">,</span>i)<span class="kw">=&gt;</span>i)<span class="op">;</span></span>
+<span id="cb3-456"><a href=""></a></span>
+<span id="cb3-457"><a href=""></a>  <span class="cf">return</span> svg<span class="op">.</span><span class="fu">node</span>()<span class="op">;</span></span>
+<span id="cb3-458"><a href=""></a>}</span>
+<span id="cb3-459"><a href=""></a></span>
+<span id="cb3-460"><a href=""></a><span class="kw">function</span> <span class="fu">scatterSVG</span>(xs<span class="op">,</span> ys<span class="op">,</span> colors<span class="op">,</span> {W<span class="op">=</span><span class="dv">330</span><span class="op">,</span> H<span class="op">=</span><span class="dv">310</span><span class="op">,</span> xlabel<span class="op">=</span><span class="st">"x₂"</span><span class="op">,</span> ylabel<span class="op">=</span><span class="st">"x₃"</span>} <span class="op">=</span> {}) {</span>
+<span id="cb3-461"><a href=""></a>  <span class="kw">const</span> m <span class="op">=</span> {<span class="dt">top</span><span class="op">:</span><span class="dv">15</span><span class="op">,</span> <span class="dt">right</span><span class="op">:</span><span class="dv">15</span><span class="op">,</span> <span class="dt">bottom</span><span class="op">:</span><span class="dv">35</span><span class="op">,</span> <span class="dt">left</span><span class="op">:</span><span class="dv">45</span>}<span class="op">;</span></span>
+<span id="cb3-462"><a href=""></a>  <span class="kw">const</span> iw <span class="op">=</span> W<span class="op">-</span>m<span class="op">.</span><span class="at">left</span><span class="op">-</span>m<span class="op">.</span><span class="at">right</span><span class="op">,</span> ih <span class="op">=</span> H<span class="op">-</span>m<span class="op">.</span><span class="at">top</span><span class="op">-</span>m<span class="op">.</span><span class="at">bottom</span><span class="op">;</span></span>
+<span id="cb3-463"><a href=""></a>  <span class="kw">const</span> sx <span class="op">=</span> d3<span class="op">.</span><span class="fu">scaleLinear</span>()<span class="op">.</span><span class="fu">domain</span>(d3<span class="op">.</span><span class="fu">extent</span>(xs))<span class="op">.</span><span class="fu">nice</span>()<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> iw])<span class="op">;</span></span>
+<span id="cb3-464"><a href=""></a>  <span class="kw">const</span> sy <span class="op">=</span> d3<span class="op">.</span><span class="fu">scaleLinear</span>()<span class="op">.</span><span class="fu">domain</span>(d3<span class="op">.</span><span class="fu">extent</span>(ys))<span class="op">.</span><span class="fu">nice</span>()<span class="op">.</span><span class="fu">range</span>([ih<span class="op">,</span> <span class="dv">0</span>])<span class="op">;</span></span>
+<span id="cb3-465"><a href=""></a>  <span class="kw">const</span> svg <span class="op">=</span> d3<span class="op">.</span><span class="fu">create</span>(<span class="st">"svg"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"width"</span><span class="op">,</span>W)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"height"</span><span class="op">,</span>H)</span>
+<span id="cb3-466"><a href=""></a>    <span class="op">.</span><span class="fu">style</span>(<span class="st">"background"</span><span class="op">,</span><span class="st">"#0d1117"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"border-radius"</span><span class="op">,</span><span class="st">"6px"</span>)<span class="op">;</span></span>
+<span id="cb3-467"><a href=""></a>  <span class="kw">const</span> g <span class="op">=</span> svg<span class="op">.</span><span class="fu">append</span>(<span class="st">"g"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"transform"</span><span class="op">,</span><span class="vs">`translate(</span><span class="sc">${</span>m<span class="op">.</span><span class="at">left</span><span class="sc">}</span><span class="vs">,</span><span class="sc">${</span>m<span class="op">.</span><span class="at">top</span><span class="sc">}</span><span class="vs">)`</span>)<span class="op">;</span></span>
+<span id="cb3-468"><a href=""></a>  <span class="co">// grid</span></span>
+<span id="cb3-469"><a href=""></a>  g<span class="op">.</span><span class="fu">selectAll</span>(<span class="st">".gx"</span>)<span class="op">.</span><span class="fu">data</span>(sx<span class="op">.</span><span class="fu">ticks</span>(<span class="dv">5</span>))<span class="op">.</span><span class="fu">join</span>(<span class="st">"line"</span>)</span>
+<span id="cb3-470"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x1"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">sx</span>(d))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x2"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">sx</span>(d))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y1"</span><span class="op">,</span><span class="dv">0</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y2"</span><span class="op">,</span>ih)</span>
+<span id="cb3-471"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke"</span><span class="op">,</span><span class="st">"#1e2535"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke-width"</span><span class="op">,</span><span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb3-472"><a href=""></a>  g<span class="op">.</span><span class="fu">selectAll</span>(<span class="st">".gy"</span>)<span class="op">.</span><span class="fu">data</span>(sy<span class="op">.</span><span class="fu">ticks</span>(<span class="dv">5</span>))<span class="op">.</span><span class="fu">join</span>(<span class="st">"line"</span>)</span>
+<span id="cb3-473"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x1"</span><span class="op">,</span><span class="dv">0</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x2"</span><span class="op">,</span>iw)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y1"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">sy</span>(d))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y2"</span><span class="op">,</span>d<span class="kw">=&gt;</span><span class="fu">sy</span>(d))</span>
+<span id="cb3-474"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke"</span><span class="op">,</span><span class="st">"#1e2535"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"stroke-width"</span><span class="op">,</span><span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb3-475"><a href=""></a>  <span class="co">// points</span></span>
+<span id="cb3-476"><a href=""></a>  g<span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"circle"</span>)<span class="op">.</span><span class="fu">data</span>(colors)<span class="op">.</span><span class="fu">join</span>(<span class="st">"circle"</span>)</span>
+<span id="cb3-477"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"cx"</span><span class="op">,</span>(_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">sx</span>(xs[i]))<span class="op">.</span><span class="fu">attr</span>(<span class="st">"cy"</span><span class="op">,</span>(_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">sy</span>(ys[i]))</span>
+<span id="cb3-478"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"r"</span><span class="op">,</span><span class="dv">4</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span>d<span class="kw">=&gt;</span>d)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"opacity"</span><span class="op">,</span><span class="fl">0.85</span>)<span class="op">;</span></span>
+<span id="cb3-479"><a href=""></a>  <span class="co">// labels</span></span>
+<span id="cb3-480"><a href=""></a>  g<span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"text.lbl"</span>)<span class="op">.</span><span class="fu">data</span>(colors)<span class="op">.</span><span class="fu">join</span>(<span class="st">"text"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"class"</span><span class="op">,</span><span class="st">"lbl"</span>)</span>
+<span id="cb3-481"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,</span>(_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">sx</span>(xs[i])<span class="op">+</span><span class="dv">5</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,</span>(_<span class="op">,</span>i)<span class="kw">=&gt;</span><span class="fu">sy</span>(ys[i])<span class="op">+</span><span class="dv">3</span>)</span>
+<span id="cb3-482"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"6px"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#888"</span>)<span class="op">.</span><span class="fu">text</span>((_<span class="op">,</span>i)<span class="kw">=&gt;</span>i)<span class="op">;</span></span>
+<span id="cb3-483"><a href=""></a>  <span class="co">// axes</span></span>
+<span id="cb3-484"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"g"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"transform"</span><span class="op">,</span><span class="vs">`translate(0,</span><span class="sc">${</span>ih<span class="sc">}</span><span class="vs">)`</span>)</span>
+<span id="cb3-485"><a href=""></a>    <span class="op">.</span><span class="fu">call</span>(d3<span class="op">.</span><span class="fu">axisBottom</span>(sx)<span class="op">.</span><span class="fu">ticks</span>(<span class="dv">4</span>))</span>
+<span id="cb3-486"><a href=""></a>    <span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"text,path,line"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#888"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"stroke"</span><span class="op">,</span><span class="st">"#555"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"10px"</span>)<span class="op">;</span></span>
+<span id="cb3-487"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"g"</span>)<span class="op">.</span><span class="fu">call</span>(d3<span class="op">.</span><span class="fu">axisLeft</span>(sy)<span class="op">.</span><span class="fu">ticks</span>(<span class="dv">4</span>))</span>
+<span id="cb3-488"><a href=""></a>    <span class="op">.</span><span class="fu">selectAll</span>(<span class="st">"text,path,line"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#888"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"stroke"</span><span class="op">,</span><span class="st">"#555"</span>)<span class="op">.</span><span class="fu">style</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"10px"</span>)<span class="op">;</span></span>
+<span id="cb3-489"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"text"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,</span>iw<span class="op">/</span><span class="dv">2</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,</span>ih<span class="op">+</span><span class="dv">30</span>)</span>
+<span id="cb3-490"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"text-anchor"</span><span class="op">,</span><span class="st">"middle"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#aaa"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"11px"</span>)<span class="op">.</span><span class="fu">text</span>(xlabel)<span class="op">;</span></span>
+<span id="cb3-491"><a href=""></a>  g<span class="op">.</span><span class="fu">append</span>(<span class="st">"text"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"transform"</span><span class="op">,</span><span class="st">"rotate(-90)"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,-</span>ih<span class="op">/</span><span class="dv">2</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,-</span><span class="dv">35</span>)</span>
+<span id="cb3-492"><a href=""></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"text-anchor"</span><span class="op">,</span><span class="st">"middle"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"fill"</span><span class="op">,</span><span class="st">"#aaa"</span>)<span class="op">.</span><span class="fu">attr</span>(<span class="st">"font-size"</span><span class="op">,</span><span class="st">"11px"</span>)<span class="op">.</span><span class="fu">text</span>(ylabel)<span class="op">;</span></span>
+<span id="cb3-493"><a href=""></a>  <span class="cf">return</span> svg<span class="op">.</span><span class="fu">node</span>()<span class="op">;</span></span>
+<span id="cb3-494"><a href=""></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div id="ojs-clust-setup-1">
 <div id="ojs-cell-3-1" data-nodetype="declaration">
@@ -699,54 +722,54 @@ x_i = \begin{cases}\sqrt{|S|/|Q|} &amp; i \in Q \\ -\sqrt{|Q|/|S|} &amp; i \in S
 </div>
 </div>
 <div id="ojs-clust-vis" class="cell">
-<div class="sourceCode cell-code hidden" id="cb4" data-startfrom="491" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 490;"><span id="cb4-491"><a href=""></a>viewof k_val <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">2</span><span class="op">,</span> <span class="dv">5</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"k (clusters)"</span>})</span>
-<span id="cb4-492"><a href=""></a></span>
-<span id="cb4-493"><a href=""></a>TAB10 <span class="op">=</span> [<span class="st">"#4c78a8"</span><span class="op">,</span><span class="st">"#f58518"</span><span class="op">,</span><span class="st">"#e45756"</span><span class="op">,</span><span class="st">"#72b7b2"</span><span class="op">,</span><span class="st">"#54a24b"</span><span class="op">,</span><span class="st">"#eeca3b"</span><span class="op">,</span><span class="st">"#b279a2"</span><span class="op">,</span><span class="st">"#ff9da6"</span><span class="op">,</span><span class="st">"#9d755d"</span><span class="op">,</span><span class="st">"#bab0ac"</span>]</span>
-<span id="cb4-494"><a href=""></a></span>
-<span id="cb4-495"><a href=""></a>clust_labels <span class="op">=</span> {</span>
-<span id="cb4-496"><a href=""></a>  <span class="co">// Use Fiedler eigenvectors (skip eigvec 0 = const)</span></span>
-<span id="cb4-497"><a href=""></a>  <span class="kw">const</span> vecs <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> N}<span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> k_val<span class="op">-</span><span class="dv">1</span>}<span class="op">,</span> (_<span class="op">,</span>k) <span class="kw">=&gt;</span> U_lap[i][k<span class="op">+</span><span class="dv">1</span>]))<span class="op">;</span></span>
-<span id="cb4-498"><a href=""></a>  <span class="cf">if</span> (k_val <span class="op">===</span> <span class="dv">2</span>) <span class="cf">return</span> vecs<span class="op">.</span><span class="fu">map</span>(v <span class="kw">=&gt;</span> v[<span class="dv">0</span>] <span class="op">&gt;=</span> <span class="dv">0</span> <span class="op">?</span> <span class="dv">0</span> <span class="op">:</span> <span class="dv">1</span>)<span class="op">;</span></span>
-<span id="cb4-499"><a href=""></a>  <span class="co">// Simple k-means</span></span>
-<span id="cb4-500"><a href=""></a>  <span class="kw">let</span> cents <span class="op">=</span> vecs<span class="op">.</span><span class="fu">slice</span>(<span class="dv">0</span><span class="op">,</span> k_val)<span class="op">.</span><span class="fu">map</span>(v <span class="kw">=&gt;</span> [<span class="op">...</span>v])<span class="op">;</span></span>
-<span id="cb4-501"><a href=""></a>  <span class="kw">let</span> labs   <span class="op">=</span> <span class="kw">new</span> <span class="bu">Array</span>(N)<span class="op">.</span><span class="fu">fill</span>(<span class="dv">0</span>)<span class="op">;</span></span>
-<span id="cb4-502"><a href=""></a>  <span class="cf">for</span> (<span class="kw">let</span> iter <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> iter <span class="op">&lt;</span> <span class="dv">80</span><span class="op">;</span> iter<span class="op">++</span>) {</span>
-<span id="cb4-503"><a href=""></a>    <span class="cf">for</span> (<span class="kw">let</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> N<span class="op">;</span> i<span class="op">++</span>) {</span>
-<span id="cb4-504"><a href=""></a>      <span class="kw">let</span> best <span class="op">=</span> <span class="dv">0</span><span class="op">,</span> bestD <span class="op">=</span> <span class="kw">Infinity</span><span class="op">;</span></span>
-<span id="cb4-505"><a href=""></a>      <span class="cf">for</span> (<span class="kw">let</span> c <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> c <span class="op">&lt;</span> k_val<span class="op">;</span> c<span class="op">++</span>) {</span>
-<span id="cb4-506"><a href=""></a>        <span class="kw">const</span> d2 <span class="op">=</span> vecs[i]<span class="op">.</span><span class="fu">reduce</span>((s<span class="op">,</span>v<span class="op">,</span>j)<span class="kw">=&gt;</span>s<span class="op">+</span>(v<span class="op">-</span>cents[c][j])<span class="op">**</span><span class="dv">2</span><span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span>
-<span id="cb4-507"><a href=""></a>        <span class="cf">if</span> (d2 <span class="op">&lt;</span> bestD) { bestD<span class="op">=</span>d2<span class="op">;</span> best<span class="op">=</span>c<span class="op">;</span> }</span>
-<span id="cb4-508"><a href=""></a>      }</span>
-<span id="cb4-509"><a href=""></a>      labs[i] <span class="op">=</span> best<span class="op">;</span></span>
-<span id="cb4-510"><a href=""></a>    }</span>
-<span id="cb4-511"><a href=""></a>    <span class="cf">for</span> (<span class="kw">let</span> c <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> c <span class="op">&lt;</span> k_val<span class="op">;</span> c<span class="op">++</span>) {</span>
-<span id="cb4-512"><a href=""></a>      <span class="kw">const</span> members <span class="op">=</span> vecs<span class="op">.</span><span class="fu">filter</span>((_<span class="op">,</span>i)<span class="kw">=&gt;</span>labs[i]<span class="op">===</span>c)<span class="op">;</span></span>
-<span id="cb4-513"><a href=""></a>      <span class="cf">if</span> (members<span class="op">.</span><span class="at">length</span>) cents[c] <span class="op">=</span> cents[c]<span class="op">.</span><span class="fu">map</span>((_<span class="op">,</span>j)<span class="kw">=&gt;</span>d3<span class="op">.</span><span class="fu">mean</span>(members<span class="op">,</span> v<span class="kw">=&gt;</span>v[j]))<span class="op">;</span></span>
-<span id="cb4-514"><a href=""></a>    }</span>
-<span id="cb4-515"><a href=""></a>  }</span>
-<span id="cb4-516"><a href=""></a>  <span class="cf">return</span> labs<span class="op">;</span></span>
-<span id="cb4-517"><a href=""></a>}</span>
-<span id="cb4-518"><a href=""></a></span>
-<span id="cb4-519"><a href=""></a>node_colors_clust <span class="op">=</span> clust_labels<span class="op">.</span><span class="fu">map</span>(c <span class="kw">=&gt;</span> TAB10[c])</span>
-<span id="cb4-520"><a href=""></a></span>
-<span id="cb4-521"><a href=""></a>g_clust  <span class="op">=</span> <span class="fu">graphSVG</span>(npos<span class="op">,</span> edges_js<span class="op">,</span> node_colors_clust<span class="op">,</span> <span class="kw">null</span><span class="op">,</span> {<span class="dt">W</span><span class="op">:</span><span class="dv">420</span><span class="op">,</span> <span class="dt">H</span><span class="op">:</span><span class="dv">360</span>})</span>
-<span id="cb4-522"><a href=""></a>scatter  <span class="op">=</span> <span class="fu">scatterSVG</span>(</span>
-<span id="cb4-523"><a href=""></a>  <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span>N}<span class="op">,</span>(_<span class="op">,</span>i)<span class="kw">=&gt;</span>U_lap[i][<span class="dv">1</span>])<span class="op">,</span></span>
-<span id="cb4-524"><a href=""></a>  <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span>N}<span class="op">,</span>(_<span class="op">,</span>i)<span class="kw">=&gt;</span>k_val <span class="op">&gt;</span> <span class="dv">2</span> <span class="op">?</span> U_lap[i][<span class="dv">2</span>] <span class="op">:</span> U_lap[i][<span class="dv">1</span>] <span class="op">*</span> <span class="dv">0</span> <span class="op">+</span> (<span class="bu">Math</span><span class="op">.</span><span class="fu">random</span>()<span class="op">-</span><span class="fl">0.5</span>)<span class="op">*</span><span class="fl">0.01</span>)<span class="op">,</span></span>
-<span id="cb4-525"><a href=""></a>  node_colors_clust<span class="op">,</span></span>
-<span id="cb4-526"><a href=""></a>  {<span class="dt">W</span><span class="op">:</span><span class="dv">330</span><span class="op">,</span> <span class="dt">H</span><span class="op">:</span><span class="dv">360</span><span class="op">,</span> <span class="dt">xlabel</span><span class="op">:</span><span class="st">"Fiedler vector x₂"</span><span class="op">,</span> <span class="dt">ylabel</span><span class="op">:</span> k_val <span class="op">&gt;</span> <span class="dv">2</span> <span class="op">?</span> <span class="st">"x₃"</span> <span class="op">:</span> <span class="st">"(jitter)"</span>}</span>
-<span id="cb4-527"><a href=""></a>)</span>
+<div class="sourceCode cell-code hidden" id="cb4" data-startfrom="499" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 498;"><span id="cb4-499"><a href=""></a>viewof k_val <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">2</span><span class="op">,</span> <span class="dv">5</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"k (clusters)"</span>})</span>
+<span id="cb4-500"><a href=""></a></span>
+<span id="cb4-501"><a href=""></a>TAB10 <span class="op">=</span> [<span class="st">"#4c78a8"</span><span class="op">,</span><span class="st">"#f58518"</span><span class="op">,</span><span class="st">"#e45756"</span><span class="op">,</span><span class="st">"#72b7b2"</span><span class="op">,</span><span class="st">"#54a24b"</span><span class="op">,</span><span class="st">"#eeca3b"</span><span class="op">,</span><span class="st">"#b279a2"</span><span class="op">,</span><span class="st">"#ff9da6"</span><span class="op">,</span><span class="st">"#9d755d"</span><span class="op">,</span><span class="st">"#bab0ac"</span>]</span>
+<span id="cb4-502"><a href=""></a></span>
+<span id="cb4-503"><a href=""></a>clust_labels <span class="op">=</span> {</span>
+<span id="cb4-504"><a href=""></a>  <span class="co">// Use Fiedler eigenvectors (skip eigvec 0 = const)</span></span>
+<span id="cb4-505"><a href=""></a>  <span class="kw">const</span> vecs <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> N}<span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> k_val<span class="op">-</span><span class="dv">1</span>}<span class="op">,</span> (_<span class="op">,</span>k) <span class="kw">=&gt;</span> U_lap[i][k<span class="op">+</span><span class="dv">1</span>]))<span class="op">;</span></span>
+<span id="cb4-506"><a href=""></a>  <span class="cf">if</span> (k_val <span class="op">===</span> <span class="dv">2</span>) <span class="cf">return</span> vecs<span class="op">.</span><span class="fu">map</span>(v <span class="kw">=&gt;</span> v[<span class="dv">0</span>] <span class="op">&gt;=</span> <span class="dv">0</span> <span class="op">?</span> <span class="dv">0</span> <span class="op">:</span> <span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb4-507"><a href=""></a>  <span class="co">// Simple k-means</span></span>
+<span id="cb4-508"><a href=""></a>  <span class="kw">let</span> cents <span class="op">=</span> vecs<span class="op">.</span><span class="fu">slice</span>(<span class="dv">0</span><span class="op">,</span> k_val)<span class="op">.</span><span class="fu">map</span>(v <span class="kw">=&gt;</span> [<span class="op">...</span>v])<span class="op">;</span></span>
+<span id="cb4-509"><a href=""></a>  <span class="kw">let</span> labs   <span class="op">=</span> <span class="kw">new</span> <span class="bu">Array</span>(N)<span class="op">.</span><span class="fu">fill</span>(<span class="dv">0</span>)<span class="op">;</span></span>
+<span id="cb4-510"><a href=""></a>  <span class="cf">for</span> (<span class="kw">let</span> iter <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> iter <span class="op">&lt;</span> <span class="dv">80</span><span class="op">;</span> iter<span class="op">++</span>) {</span>
+<span id="cb4-511"><a href=""></a>    <span class="cf">for</span> (<span class="kw">let</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> N<span class="op">;</span> i<span class="op">++</span>) {</span>
+<span id="cb4-512"><a href=""></a>      <span class="kw">let</span> best <span class="op">=</span> <span class="dv">0</span><span class="op">,</span> bestD <span class="op">=</span> <span class="kw">Infinity</span><span class="op">;</span></span>
+<span id="cb4-513"><a href=""></a>      <span class="cf">for</span> (<span class="kw">let</span> c <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> c <span class="op">&lt;</span> k_val<span class="op">;</span> c<span class="op">++</span>) {</span>
+<span id="cb4-514"><a href=""></a>        <span class="kw">const</span> d2 <span class="op">=</span> vecs[i]<span class="op">.</span><span class="fu">reduce</span>((s<span class="op">,</span>v<span class="op">,</span>j)<span class="kw">=&gt;</span>s<span class="op">+</span>(v<span class="op">-</span>cents[c][j])<span class="op">**</span><span class="dv">2</span><span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span>
+<span id="cb4-515"><a href=""></a>        <span class="cf">if</span> (d2 <span class="op">&lt;</span> bestD) { bestD<span class="op">=</span>d2<span class="op">;</span> best<span class="op">=</span>c<span class="op">;</span> }</span>
+<span id="cb4-516"><a href=""></a>      }</span>
+<span id="cb4-517"><a href=""></a>      labs[i] <span class="op">=</span> best<span class="op">;</span></span>
+<span id="cb4-518"><a href=""></a>    }</span>
+<span id="cb4-519"><a href=""></a>    <span class="cf">for</span> (<span class="kw">let</span> c <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> c <span class="op">&lt;</span> k_val<span class="op">;</span> c<span class="op">++</span>) {</span>
+<span id="cb4-520"><a href=""></a>      <span class="kw">const</span> members <span class="op">=</span> vecs<span class="op">.</span><span class="fu">filter</span>((_<span class="op">,</span>i)<span class="kw">=&gt;</span>labs[i]<span class="op">===</span>c)<span class="op">;</span></span>
+<span id="cb4-521"><a href=""></a>      <span class="cf">if</span> (members<span class="op">.</span><span class="at">length</span>) cents[c] <span class="op">=</span> cents[c]<span class="op">.</span><span class="fu">map</span>((_<span class="op">,</span>j)<span class="kw">=&gt;</span>d3<span class="op">.</span><span class="fu">mean</span>(members<span class="op">,</span> v<span class="kw">=&gt;</span>v[j]))<span class="op">;</span></span>
+<span id="cb4-522"><a href=""></a>    }</span>
+<span id="cb4-523"><a href=""></a>  }</span>
+<span id="cb4-524"><a href=""></a>  <span class="cf">return</span> labs<span class="op">;</span></span>
+<span id="cb4-525"><a href=""></a>}</span>
+<span id="cb4-526"><a href=""></a></span>
+<span id="cb4-527"><a href=""></a>node_colors_clust <span class="op">=</span> clust_labels<span class="op">.</span><span class="fu">map</span>(c <span class="kw">=&gt;</span> TAB10[c])</span>
 <span id="cb4-528"><a href=""></a></span>
-<span id="cb4-529"><a href=""></a><span class="fu">html</span><span class="vs">`&lt;div style="display:flex;gap:16px;align-items:flex-start;justify-content:center"&gt;</span></span>
-<span id="cb4-530"><a href=""></a><span class="vs">  &lt;div&gt;</span></span>
-<span id="cb4-531"><a href=""></a><span class="vs">    &lt;div style="color:#aaa;font-size:11px;text-align:center;margin-bottom:4px"&gt;Graph (Karate Club)&lt;/div&gt;</span></span>
-<span id="cb4-532"><a href=""></a><span class="vs">    </span><span class="sc">${</span>g_clust<span class="sc">}</span></span>
-<span id="cb4-533"><a href=""></a><span class="vs">  &lt;/div&gt;</span></span>
-<span id="cb4-534"><a href=""></a><span class="vs">  &lt;div&gt;</span></span>
-<span id="cb4-535"><a href=""></a><span class="vs">    &lt;div style="color:#aaa;font-size:11px;text-align:center;margin-bottom:4px"&gt;Laplacian Eigenmap&lt;/div&gt;</span></span>
-<span id="cb4-536"><a href=""></a><span class="vs">    </span><span class="sc">${</span>scatter<span class="sc">}</span></span>
-<span id="cb4-537"><a href=""></a><span class="vs">  &lt;/div&gt;</span></span>
-<span id="cb4-538"><a href=""></a><span class="vs">&lt;/div&gt;`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-529"><a href=""></a>g_clust  <span class="op">=</span> <span class="fu">graphSVG</span>(npos<span class="op">,</span> edges_js<span class="op">,</span> node_colors_clust<span class="op">,</span> <span class="kw">null</span><span class="op">,</span> {<span class="dt">W</span><span class="op">:</span><span class="dv">420</span><span class="op">,</span> <span class="dt">H</span><span class="op">:</span><span class="dv">360</span>})</span>
+<span id="cb4-530"><a href=""></a>scatter  <span class="op">=</span> <span class="fu">scatterSVG</span>(</span>
+<span id="cb4-531"><a href=""></a>  <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span>N}<span class="op">,</span>(_<span class="op">,</span>i)<span class="kw">=&gt;</span>U_lap[i][<span class="dv">1</span>])<span class="op">,</span></span>
+<span id="cb4-532"><a href=""></a>  <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span>N}<span class="op">,</span>(_<span class="op">,</span>i)<span class="kw">=&gt;</span>k_val <span class="op">&gt;</span> <span class="dv">2</span> <span class="op">?</span> U_lap[i][<span class="dv">2</span>] <span class="op">:</span> U_lap[i][<span class="dv">1</span>] <span class="op">*</span> <span class="dv">0</span> <span class="op">+</span> (<span class="bu">Math</span><span class="op">.</span><span class="fu">random</span>()<span class="op">-</span><span class="fl">0.5</span>)<span class="op">*</span><span class="fl">0.01</span>)<span class="op">,</span></span>
+<span id="cb4-533"><a href=""></a>  node_colors_clust<span class="op">,</span></span>
+<span id="cb4-534"><a href=""></a>  {<span class="dt">W</span><span class="op">:</span><span class="dv">330</span><span class="op">,</span> <span class="dt">H</span><span class="op">:</span><span class="dv">360</span><span class="op">,</span> <span class="dt">xlabel</span><span class="op">:</span><span class="st">"Fiedler vector x₂"</span><span class="op">,</span> <span class="dt">ylabel</span><span class="op">:</span> k_val <span class="op">&gt;</span> <span class="dv">2</span> <span class="op">?</span> <span class="st">"x₃"</span> <span class="op">:</span> <span class="st">"(jitter)"</span>}</span>
+<span id="cb4-535"><a href=""></a>)</span>
+<span id="cb4-536"><a href=""></a></span>
+<span id="cb4-537"><a href=""></a><span class="fu">html</span><span class="vs">`&lt;div style="display:flex;gap:16px;align-items:flex-start;justify-content:center"&gt;</span></span>
+<span id="cb4-538"><a href=""></a><span class="vs">  &lt;div&gt;</span></span>
+<span id="cb4-539"><a href=""></a><span class="vs">    &lt;div style="color:#aaa;font-size:11px;text-align:center;margin-bottom:4px"&gt;Graph (Karate Club)&lt;/div&gt;</span></span>
+<span id="cb4-540"><a href=""></a><span class="vs">    </span><span class="sc">${</span>g_clust<span class="sc">}</span></span>
+<span id="cb4-541"><a href=""></a><span class="vs">  &lt;/div&gt;</span></span>
+<span id="cb4-542"><a href=""></a><span class="vs">  &lt;div&gt;</span></span>
+<span id="cb4-543"><a href=""></a><span class="vs">    &lt;div style="color:#aaa;font-size:11px;text-align:center;margin-bottom:4px"&gt;Laplacian Eigenmap&lt;/div&gt;</span></span>
+<span id="cb4-544"><a href=""></a><span class="vs">    </span><span class="sc">${</span>scatter<span class="sc">}</span></span>
+<span id="cb4-545"><a href=""></a><span class="vs">  &lt;/div&gt;</span></span>
+<span id="cb4-546"><a href=""></a><span class="vs">&lt;/div&gt;`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div id="ojs-clust-vis-1">
 <div id="ojs-cell-4-1" data-nodetype="declaration">
@@ -801,18 +824,18 @@ x_i = \begin{cases}\sqrt{|S|/|Q|} &amp; i \in Q \\ -\sqrt{|Q|/|S|} &amp; i \in S
 <section id="laplacian-eigenmap" class="slide level2">
 <h2>Laplacian Eigenmap 🔄</h2>
 <p>A closely related embedding: position connected nodes <strong>close together</strong> in Euclidean space.</p>
-<p><strong>Objective</strong>: <span class="math display">\[
+<p><strong>Objective</strong>: <span class="math display">
 \min_{\mathbf{u}}\;\sum_{i,j}A_{ij}\|\mathbf{u}_i - \mathbf{u}_j\|^2
 = \min_{\mathbf{U}}\;\text{tr}(\mathbf{U}^\top\mathbf{L}\mathbf{U})
 \quad\text{s.t.}\quad \mathbf{U}^\top\mathbf{D}\mathbf{U} = \mathbf{I}
-\]</span></p>
-<p><strong>Solution</strong>: The columns of <span class="math inline">\(\mathbf{U}\)</span> are the eigenvectors <span class="math inline">\(\mathbf{x}_2, \ldots, \mathbf{x}_{d+1}\)</span> of the generalized eigenvalue problem:</p>
-<p><span class="math display">\[\mathbf{L}\mathbf{x} = \lambda\,\mathbf{D}\mathbf{x}\]</span></p>
+</span></p>
+<p><strong>Solution</strong>: The columns of <span class="math inline">\mathbf{U}</span> are the eigenvectors <span class="math inline">\mathbf{x}_2, \ldots, \mathbf{x}_{d+1}</span> of the generalized eigenvalue problem:</p>
+<p><span class="math display">\mathbf{L}\mathbf{x} = \lambda\,\mathbf{D}\mathbf{x}</span></p>
 <p>The <strong>interactive spectral clustering</strong> demo above shows these eigenvectors directly. The Laplacian eigenmap is exactly the coordinate system where graph structure becomes geometry.</p>
 </section>
 <section id="neural-embedding-the-key-idea" class="slide level2">
 <h2>Neural Embedding: The Key Idea</h2>
-<p>Spectral methods require eigendecomposition (<span class="math inline">\(\mathcal{O}(N^3)\)</span>). For large networks, we need something faster.</p>
+<p>Spectral methods require eigendecomposition (<span class="math inline">\mathcal{O}(N^3)</span>). For large networks, we need something faster.</p>
 <p><strong>Insight from NLP</strong>: <em>word2vec</em> learns word vectors by predicting which words appear near each other in sentences. If two words appear in similar contexts, they get similar vectors.</p>
 <p><strong>The translation to graphs</strong>:</p>
 <ol type="1">
@@ -820,7 +843,7 @@ x_i = \begin{cases}\sqrt{|S|/|Q|} &amp; i \in Q \\ -\sqrt{|Q|/|S|} &amp; i \in S
 <li>Treat node sequences like word sequences</li>
 <li>Train <strong>word2vec (skip-gram)</strong> to predict which nodes co-occur in walks</li>
 </ol>
-<p><span class="math display">\[\mathcal{L} = \sum_t \sum_{0 &lt; |j| \le c} \log P(v_{t+j} \mid v_t), \qquad P(v_O \mid v_I) = \frac{\exp(\mathbf{u}_{v_O}^\top \mathbf{u}_{v_I})}{\sum_v \exp(\mathbf{u}_v^\top \mathbf{u}_{v_I})}\]</span></p>
+<p><span class="math display">\mathcal{L} = \sum_t \sum_{0 &lt; |j| \le c} \log P(v_{t+j} \mid v_t), \qquad P(v_O \mid v_I) = \frac{\exp(\mathbf{u}_{v_O}^\top \mathbf{u}_{v_I})}{\sum_v \exp(\mathbf{u}_v^\top \mathbf{u}_{v_I})}</span></p>
 <p><strong>DeepWalk</strong> (Perozzi et al., 2014) does exactly this with uniform random walks.</p>
 </section>
 <section id="node2vec-biased-random-walks" class="slide level2">
@@ -828,20 +851,20 @@ x_i = \begin{cases}\sqrt{|S|/|Q|} &amp; i \in Q \\ -\sqrt{|Q|/|S|} &amp; i \in S
 <p><strong>node2vec</strong> (Grover &amp; Leskovec, 2016) extends DeepWalk with a <em>biased</em> walk controlled by two parameters:</p>
 <div class="columns">
 <div class="column" style="width:55%;">
-<p><span class="math display">\[
+<p><span class="math display">
 P(\text{next}=x \mid v, t) \propto
 \begin{cases}
 1/p &amp; d(t,x) = 0 \text{ (backtrack to } t)\\
 1   &amp; d(t,x) = 1 \text{ (shared neighbor)}\\
 1/q &amp; d(t,x) = 2 \text{ (explore further)}
 \end{cases}
-\]</span></p>
+</span></p>
 <ul>
-<li><strong>Low <span class="math inline">\(p\)</span></strong>: frequent backtracking → <strong>BFS-like</strong>, explores local neighborhood → captures <em>structural equivalence</em></li>
-<li><strong>Low <span class="math inline">\(q\)</span></strong>: frequent exploration → <strong>DFS-like</strong>, ventures far → captures <em>community membership</em></li>
+<li><strong>Low <span class="math inline">p</span></strong>: frequent backtracking → <strong>BFS-like</strong>, explores local neighborhood → captures <em>structural equivalence</em></li>
+<li><strong>Low <span class="math inline">q</span></strong>: frequent exploration → <strong>DFS-like</strong>, ventures far → captures <em>community membership</em></li>
 </ul>
 </div><div class="column" style="width:45%;">
-<p>The walk at node <span class="math inline">\(v\)</span> (came from <span class="math inline">\(t\)</span>) assigns unnormalized weights to neighbors <span class="math inline">\(x\)</span>:</p>
+<p>The walk at node <span class="math inline">v</span> (came from <span class="math inline">t</span>) assigns unnormalized weights to neighbors <span class="math inline">x</span>:</p>
 <pre><code>x == t      →  weight 1/p
 x ~ t       →  weight 1
 otherwise   →  weight 1/q</code></pre>
@@ -851,74 +874,74 @@ otherwise   →  weight 1/q</code></pre>
 <section id="interactive-node2vec-random-walk" class="slide level2">
 <h2>🔬 Interactive: node2vec Random Walk</h2>
 <div id="ojs-n2v" class="cell">
-<div class="sourceCode cell-code hidden" id="cb6" data-startfrom="617" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 616;"><span id="cb6-617"><a href=""></a>viewof rw_start <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> N<span class="op">-</span><span class="dv">1</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"Start node"</span>})</span>
-<span id="cb6-618"><a href=""></a>viewof rw_steps <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">3</span><span class="op">,</span> <span class="dv">30</span>]<span class="op">,</span>  {<span class="dt">value</span><span class="op">:</span> <span class="dv">12</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"Steps"</span>})</span>
-<span id="cb6-619"><a href=""></a>viewof rw_p     <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="fl">0.1</span><span class="op">,</span> <span class="dv">4</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="fl">1.0</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">0.1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"p (return)"</span>})</span>
-<span id="cb6-620"><a href=""></a>viewof rw_q     <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="fl">0.1</span><span class="op">,</span> <span class="dv">4</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="fl">1.0</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">0.1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"q (explore)"</span>})</span>
-<span id="cb6-621"><a href=""></a></span>
-<span id="cb6-622"><a href=""></a><span class="co">// ── Build adjacency list ───────────────────────────────</span></span>
-<span id="cb6-623"><a href=""></a>adj_list <span class="op">=</span> {</span>
-<span id="cb6-624"><a href=""></a>  <span class="kw">const</span> al <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> N}<span class="op">,</span> () <span class="kw">=&gt;</span> [])<span class="op">;</span></span>
-<span id="cb6-625"><a href=""></a>  <span class="cf">for</span> (<span class="kw">const</span> e <span class="kw">of</span> edges_js) { al[e<span class="op">.</span><span class="at">s</span>]<span class="op">.</span><span class="fu">push</span>(e<span class="op">.</span><span class="at">t</span>)<span class="op">;</span> al[e<span class="op">.</span><span class="at">t</span>]<span class="op">.</span><span class="fu">push</span>(e<span class="op">.</span><span class="at">s</span>)<span class="op">;</span> }</span>
-<span id="cb6-626"><a href=""></a>  <span class="cf">return</span> al<span class="op">;</span></span>
-<span id="cb6-627"><a href=""></a>}</span>
-<span id="cb6-628"><a href=""></a></span>
-<span id="cb6-629"><a href=""></a><span class="co">// ── Biased random walk ────────────────────────────────</span></span>
-<span id="cb6-630"><a href=""></a>walk <span class="op">=</span> {</span>
-<span id="cb6-631"><a href=""></a>  <span class="kw">const</span> seed_val <span class="op">=</span> rw_start <span class="op">*</span> <span class="dv">31</span> <span class="op">+</span> rw_steps<span class="op">;</span>  <span class="co">// pseudo-seed for stability</span></span>
-<span id="cb6-632"><a href=""></a>  <span class="kw">const</span> rng <span class="op">=</span> (() <span class="kw">=&gt;</span> { <span class="kw">let</span> s <span class="op">=</span> seed_val<span class="op">;</span> <span class="cf">return</span> () <span class="kw">=&gt;</span> { s <span class="op">=</span> (s <span class="op">*</span> <span class="dv">1664525</span> <span class="op">+</span> <span class="dv">1013904223</span>) <span class="op">&amp;</span> <span class="bn">0xffffffff</span><span class="op">;</span> <span class="cf">return</span> (s <span class="op">&gt;&gt;&gt;</span> <span class="dv">0</span>) <span class="op">/</span> <span class="dv">4294967296</span><span class="op">;</span> }<span class="op">;</span> })()<span class="op">;</span></span>
-<span id="cb6-633"><a href=""></a>  <span class="kw">const</span> w <span class="op">=</span> [rw_start]<span class="op">;</span></span>
-<span id="cb6-634"><a href=""></a>  <span class="kw">let</span> prev <span class="op">=</span> <span class="kw">null</span><span class="op">;</span></span>
-<span id="cb6-635"><a href=""></a>  <span class="cf">for</span> (<span class="kw">let</span> step <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> step <span class="op">&lt;</span> rw_steps <span class="op">-</span> <span class="dv">1</span><span class="op">;</span> step<span class="op">++</span>) {</span>
-<span id="cb6-636"><a href=""></a>    <span class="kw">const</span> cur   <span class="op">=</span> w[w<span class="op">.</span><span class="at">length</span> <span class="op">-</span> <span class="dv">1</span>]<span class="op">;</span></span>
-<span id="cb6-637"><a href=""></a>    <span class="kw">const</span> nbrs  <span class="op">=</span> adj_list[cur]<span class="op">;</span></span>
-<span id="cb6-638"><a href=""></a>    <span class="cf">if</span> (<span class="op">!</span>nbrs<span class="op">.</span><span class="at">length</span>) <span class="cf">break</span><span class="op">;</span></span>
-<span id="cb6-639"><a href=""></a>    <span class="cf">if</span> (prev <span class="op">===</span> <span class="kw">null</span>) {</span>
-<span id="cb6-640"><a href=""></a>      w<span class="op">.</span><span class="fu">push</span>(nbrs[<span class="bu">Math</span><span class="op">.</span><span class="fu">floor</span>(<span class="fu">rng</span>() <span class="op">*</span> nbrs<span class="op">.</span><span class="at">length</span>)])<span class="op">;</span></span>
-<span id="cb6-641"><a href=""></a>    } <span class="cf">else</span> {</span>
-<span id="cb6-642"><a href=""></a>      <span class="kw">const</span> wts <span class="op">=</span> nbrs<span class="op">.</span><span class="fu">map</span>(x <span class="kw">=&gt;</span> {</span>
-<span id="cb6-643"><a href=""></a>        <span class="cf">if</span> (x <span class="op">===</span> prev) <span class="cf">return</span> <span class="dv">1</span> <span class="op">/</span> rw_p<span class="op">;</span></span>
-<span id="cb6-644"><a href=""></a>        <span class="cf">if</span> (A_mat[prev][x] <span class="op">&gt;</span> <span class="dv">0</span>) <span class="cf">return</span> <span class="fl">1.0</span><span class="op">;</span></span>
-<span id="cb6-645"><a href=""></a>        <span class="cf">return</span> <span class="dv">1</span> <span class="op">/</span> rw_q<span class="op">;</span></span>
-<span id="cb6-646"><a href=""></a>      })<span class="op">;</span></span>
-<span id="cb6-647"><a href=""></a>      <span class="kw">const</span> total <span class="op">=</span> wts<span class="op">.</span><span class="fu">reduce</span>((a<span class="op">,</span>b)<span class="kw">=&gt;</span>a<span class="op">+</span>b<span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span>
-<span id="cb6-648"><a href=""></a>      <span class="kw">let</span> r <span class="op">=</span> <span class="fu">rng</span>() <span class="op">*</span> total<span class="op">,</span> chosen <span class="op">=</span> nbrs[nbrs<span class="op">.</span><span class="at">length</span><span class="op">-</span><span class="dv">1</span>]<span class="op">;</span></span>
-<span id="cb6-649"><a href=""></a>      <span class="cf">for</span> (<span class="kw">let</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> nbrs<span class="op">.</span><span class="at">length</span><span class="op">;</span> i<span class="op">++</span>) { r <span class="op">-=</span> wts[i]<span class="op">;</span> <span class="cf">if</span> (r <span class="op">&lt;=</span> <span class="dv">0</span>) { chosen <span class="op">=</span> nbrs[i]<span class="op">;</span> <span class="cf">break</span><span class="op">;</span> } }</span>
-<span id="cb6-650"><a href=""></a>      w<span class="op">.</span><span class="fu">push</span>(chosen)<span class="op">;</span></span>
-<span id="cb6-651"><a href=""></a>    }</span>
-<span id="cb6-652"><a href=""></a>    prev <span class="op">=</span> cur<span class="op">;</span></span>
-<span id="cb6-653"><a href=""></a>  }</span>
-<span id="cb6-654"><a href=""></a>  <span class="cf">return</span> w<span class="op">;</span></span>
-<span id="cb6-655"><a href=""></a>}</span>
-<span id="cb6-656"><a href=""></a></span>
-<span id="cb6-657"><a href=""></a>walk_edges <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> walk<span class="op">.</span><span class="at">length</span><span class="op">-</span><span class="dv">1</span>}<span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> [walk[i]<span class="op">,</span> walk[i<span class="op">+</span><span class="dv">1</span>]])</span>
-<span id="cb6-658"><a href=""></a>walk_colors <span class="op">=</span> faction<span class="op">.</span><span class="fu">map</span>((f<span class="op">,</span>i) <span class="kw">=&gt;</span> {</span>
-<span id="cb6-659"><a href=""></a>  <span class="cf">if</span> (i <span class="op">===</span> walk[<span class="dv">0</span>]) <span class="cf">return</span> <span class="st">"#ffffff"</span><span class="op">;</span></span>
-<span id="cb6-660"><a href=""></a>  <span class="cf">if</span> (i <span class="op">===</span> walk[walk<span class="op">.</span><span class="at">length</span><span class="op">-</span><span class="dv">1</span>]) <span class="cf">return</span> <span class="st">"#ffd700"</span><span class="op">;</span></span>
-<span id="cb6-661"><a href=""></a>  <span class="cf">if</span> (walk<span class="op">.</span><span class="fu">includes</span>(i)) <span class="cf">return</span> <span class="st">"#ff8c00"</span><span class="op">;</span></span>
-<span id="cb6-662"><a href=""></a>  <span class="cf">return</span> f <span class="op">===</span> <span class="dv">0</span> <span class="op">?</span> <span class="st">"#4c78a8"</span> <span class="op">:</span> <span class="st">"#e45756"</span><span class="op">;</span></span>
-<span id="cb6-663"><a href=""></a>})</span>
+<div class="sourceCode cell-code hidden" id="cb6" data-startfrom="625" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 624;"><span id="cb6-625"><a href=""></a>viewof rw_start <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> N<span class="op">-</span><span class="dv">1</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"Start node"</span>})</span>
+<span id="cb6-626"><a href=""></a>viewof rw_steps <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">3</span><span class="op">,</span> <span class="dv">30</span>]<span class="op">,</span>  {<span class="dt">value</span><span class="op">:</span> <span class="dv">12</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"Steps"</span>})</span>
+<span id="cb6-627"><a href=""></a>viewof rw_p     <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="fl">0.1</span><span class="op">,</span> <span class="dv">4</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="fl">1.0</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">0.1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"p (return)"</span>})</span>
+<span id="cb6-628"><a href=""></a>viewof rw_q     <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="fl">0.1</span><span class="op">,</span> <span class="dv">4</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="fl">1.0</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">0.1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"q (explore)"</span>})</span>
+<span id="cb6-629"><a href=""></a></span>
+<span id="cb6-630"><a href=""></a><span class="co">// ── Build adjacency list ───────────────────────────────</span></span>
+<span id="cb6-631"><a href=""></a>adj_list <span class="op">=</span> {</span>
+<span id="cb6-632"><a href=""></a>  <span class="kw">const</span> al <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> N}<span class="op">,</span> () <span class="kw">=&gt;</span> [])<span class="op">;</span></span>
+<span id="cb6-633"><a href=""></a>  <span class="cf">for</span> (<span class="kw">const</span> e <span class="kw">of</span> edges_js) { al[e<span class="op">.</span><span class="at">s</span>]<span class="op">.</span><span class="fu">push</span>(e<span class="op">.</span><span class="at">t</span>)<span class="op">;</span> al[e<span class="op">.</span><span class="at">t</span>]<span class="op">.</span><span class="fu">push</span>(e<span class="op">.</span><span class="at">s</span>)<span class="op">;</span> }</span>
+<span id="cb6-634"><a href=""></a>  <span class="cf">return</span> al<span class="op">;</span></span>
+<span id="cb6-635"><a href=""></a>}</span>
+<span id="cb6-636"><a href=""></a></span>
+<span id="cb6-637"><a href=""></a><span class="co">// ── Biased random walk ────────────────────────────────</span></span>
+<span id="cb6-638"><a href=""></a>walk <span class="op">=</span> {</span>
+<span id="cb6-639"><a href=""></a>  <span class="kw">const</span> seed_val <span class="op">=</span> rw_start <span class="op">*</span> <span class="dv">31</span> <span class="op">+</span> rw_steps<span class="op">;</span>  <span class="co">// pseudo-seed for stability</span></span>
+<span id="cb6-640"><a href=""></a>  <span class="kw">const</span> rng <span class="op">=</span> (() <span class="kw">=&gt;</span> { <span class="kw">let</span> s <span class="op">=</span> seed_val<span class="op">;</span> <span class="cf">return</span> () <span class="kw">=&gt;</span> { s <span class="op">=</span> (s <span class="op">*</span> <span class="dv">1664525</span> <span class="op">+</span> <span class="dv">1013904223</span>) <span class="op">&amp;</span> <span class="bn">0xffffffff</span><span class="op">;</span> <span class="cf">return</span> (s <span class="op">&gt;&gt;&gt;</span> <span class="dv">0</span>) <span class="op">/</span> <span class="dv">4294967296</span><span class="op">;</span> }<span class="op">;</span> })()<span class="op">;</span></span>
+<span id="cb6-641"><a href=""></a>  <span class="kw">const</span> w <span class="op">=</span> [rw_start]<span class="op">;</span></span>
+<span id="cb6-642"><a href=""></a>  <span class="kw">let</span> prev <span class="op">=</span> <span class="kw">null</span><span class="op">;</span></span>
+<span id="cb6-643"><a href=""></a>  <span class="cf">for</span> (<span class="kw">let</span> step <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> step <span class="op">&lt;</span> rw_steps <span class="op">-</span> <span class="dv">1</span><span class="op">;</span> step<span class="op">++</span>) {</span>
+<span id="cb6-644"><a href=""></a>    <span class="kw">const</span> cur   <span class="op">=</span> w[w<span class="op">.</span><span class="at">length</span> <span class="op">-</span> <span class="dv">1</span>]<span class="op">;</span></span>
+<span id="cb6-645"><a href=""></a>    <span class="kw">const</span> nbrs  <span class="op">=</span> adj_list[cur]<span class="op">;</span></span>
+<span id="cb6-646"><a href=""></a>    <span class="cf">if</span> (<span class="op">!</span>nbrs<span class="op">.</span><span class="at">length</span>) <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb6-647"><a href=""></a>    <span class="cf">if</span> (prev <span class="op">===</span> <span class="kw">null</span>) {</span>
+<span id="cb6-648"><a href=""></a>      w<span class="op">.</span><span class="fu">push</span>(nbrs[<span class="bu">Math</span><span class="op">.</span><span class="fu">floor</span>(<span class="fu">rng</span>() <span class="op">*</span> nbrs<span class="op">.</span><span class="at">length</span>)])<span class="op">;</span></span>
+<span id="cb6-649"><a href=""></a>    } <span class="cf">else</span> {</span>
+<span id="cb6-650"><a href=""></a>      <span class="kw">const</span> wts <span class="op">=</span> nbrs<span class="op">.</span><span class="fu">map</span>(x <span class="kw">=&gt;</span> {</span>
+<span id="cb6-651"><a href=""></a>        <span class="cf">if</span> (x <span class="op">===</span> prev) <span class="cf">return</span> <span class="dv">1</span> <span class="op">/</span> rw_p<span class="op">;</span></span>
+<span id="cb6-652"><a href=""></a>        <span class="cf">if</span> (A_mat[prev][x] <span class="op">&gt;</span> <span class="dv">0</span>) <span class="cf">return</span> <span class="fl">1.0</span><span class="op">;</span></span>
+<span id="cb6-653"><a href=""></a>        <span class="cf">return</span> <span class="dv">1</span> <span class="op">/</span> rw_q<span class="op">;</span></span>
+<span id="cb6-654"><a href=""></a>      })<span class="op">;</span></span>
+<span id="cb6-655"><a href=""></a>      <span class="kw">const</span> total <span class="op">=</span> wts<span class="op">.</span><span class="fu">reduce</span>((a<span class="op">,</span>b)<span class="kw">=&gt;</span>a<span class="op">+</span>b<span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span>
+<span id="cb6-656"><a href=""></a>      <span class="kw">let</span> r <span class="op">=</span> <span class="fu">rng</span>() <span class="op">*</span> total<span class="op">,</span> chosen <span class="op">=</span> nbrs[nbrs<span class="op">.</span><span class="at">length</span><span class="op">-</span><span class="dv">1</span>]<span class="op">;</span></span>
+<span id="cb6-657"><a href=""></a>      <span class="cf">for</span> (<span class="kw">let</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> nbrs<span class="op">.</span><span class="at">length</span><span class="op">;</span> i<span class="op">++</span>) { r <span class="op">-=</span> wts[i]<span class="op">;</span> <span class="cf">if</span> (r <span class="op">&lt;=</span> <span class="dv">0</span>) { chosen <span class="op">=</span> nbrs[i]<span class="op">;</span> <span class="cf">break</span><span class="op">;</span> } }</span>
+<span id="cb6-658"><a href=""></a>      w<span class="op">.</span><span class="fu">push</span>(chosen)<span class="op">;</span></span>
+<span id="cb6-659"><a href=""></a>    }</span>
+<span id="cb6-660"><a href=""></a>    prev <span class="op">=</span> cur<span class="op">;</span></span>
+<span id="cb6-661"><a href=""></a>  }</span>
+<span id="cb6-662"><a href=""></a>  <span class="cf">return</span> w<span class="op">;</span></span>
+<span id="cb6-663"><a href=""></a>}</span>
 <span id="cb6-664"><a href=""></a></span>
-<span id="cb6-665"><a href=""></a>g_walk <span class="op">=</span> <span class="fu">graphSVG</span>(npos<span class="op">,</span> edges_js<span class="op">,</span> walk_colors<span class="op">,</span> walk_edges<span class="op">,</span> {<span class="dt">W</span><span class="op">:</span><span class="dv">520</span><span class="op">,</span> <span class="dt">H</span><span class="op">:</span><span class="dv">400</span>})</span>
-<span id="cb6-666"><a href=""></a></span>
-<span id="cb6-667"><a href=""></a>walk_str <span class="op">=</span> walk<span class="op">.</span><span class="fu">join</span>(<span class="st">" → "</span>)</span>
-<span id="cb6-668"><a href=""></a></span>
-<span id="cb6-669"><a href=""></a><span class="fu">html</span><span class="vs">`&lt;div style="display:flex;gap:20px;align-items:flex-start;justify-content:center"&gt;</span></span>
-<span id="cb6-670"><a href=""></a><span class="vs">  &lt;div&gt;</span></span>
-<span id="cb6-671"><a href=""></a><span class="vs">    </span><span class="sc">${</span>g_walk<span class="sc">}</span></span>
-<span id="cb6-672"><a href=""></a><span class="vs">    &lt;div style="color:#888;font-size:10px;margin-top:4px;text-align:center"&gt;</span></span>
-<span id="cb6-673"><a href=""></a><span class="vs">      ⬜ start &amp;nbsp; 🟡 end &amp;nbsp; 🟠 visited &amp;nbsp; 🔵/🔴 faction</span></span>
-<span id="cb6-674"><a href=""></a><span class="vs">    &lt;/div&gt;</span></span>
-<span id="cb6-675"><a href=""></a><span class="vs">  &lt;/div&gt;</span></span>
-<span id="cb6-676"><a href=""></a><span class="vs">  &lt;div style="max-width:340px"&gt;</span></span>
-<span id="cb6-677"><a href=""></a><span class="vs">    &lt;div style="color:#aaa;font-size:11px;margin-bottom:8px"&gt;&lt;b&gt;Walk sequence:&lt;/b&gt;&lt;/div&gt;</span></span>
-<span id="cb6-678"><a href=""></a><span class="vs">    &lt;div style="color:#4ecdc4;font-size:10px;word-break:break-all;line-height:1.6;background:#0d1117;padding:8px;border-radius:4px"&gt;</span><span class="sc">${</span>walk_str<span class="sc">}</span><span class="vs">&lt;/div&gt;</span></span>
-<span id="cb6-679"><a href=""></a><span class="vs">    &lt;div style="color:#888;font-size:10.5px;margin-top:10px;line-height:1.7"&gt;</span></span>
-<span id="cb6-680"><a href=""></a><span class="vs">      &lt;b style="color:#aaa"&gt;p = </span><span class="sc">${</span>rw_p<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">1</span>)<span class="sc">}</span><span class="vs">&lt;/b&gt; — </span><span class="sc">${</span>rw_p <span class="op">&lt;</span> <span class="dv">1</span> <span class="op">?</span> <span class="st">"Low p: frequent backtracking (BFS-like)"</span> <span class="op">:</span> rw_p <span class="op">&gt;</span> <span class="dv">2</span> <span class="op">?</span> <span class="st">"High p: rarely returns (DFS-like)"</span> <span class="op">:</span> <span class="st">"Balanced return"</span><span class="sc">}</span><span class="vs">&lt;br&gt;</span></span>
-<span id="cb6-681"><a href=""></a><span class="vs">      &lt;b style="color:#aaa"&gt;q = </span><span class="sc">${</span>rw_q<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">1</span>)<span class="sc">}</span><span class="vs">&lt;/b&gt; — </span><span class="sc">${</span>rw_q <span class="op">&lt;</span> <span class="dv">1</span> <span class="op">?</span> <span class="st">"Low q: stays local (BFS-like, structural roles)"</span> <span class="op">:</span> rw_q <span class="op">&gt;</span> <span class="dv">2</span> <span class="op">?</span> <span class="st">"High q: explores far (DFS-like, community)"</span> <span class="op">:</span> <span class="st">"Balanced exploration"</span><span class="sc">}</span></span>
+<span id="cb6-665"><a href=""></a>walk_edges <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> walk<span class="op">.</span><span class="at">length</span><span class="op">-</span><span class="dv">1</span>}<span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> [walk[i]<span class="op">,</span> walk[i<span class="op">+</span><span class="dv">1</span>]])</span>
+<span id="cb6-666"><a href=""></a>walk_colors <span class="op">=</span> faction<span class="op">.</span><span class="fu">map</span>((f<span class="op">,</span>i) <span class="kw">=&gt;</span> {</span>
+<span id="cb6-667"><a href=""></a>  <span class="cf">if</span> (i <span class="op">===</span> walk[<span class="dv">0</span>]) <span class="cf">return</span> <span class="st">"#ffffff"</span><span class="op">;</span></span>
+<span id="cb6-668"><a href=""></a>  <span class="cf">if</span> (i <span class="op">===</span> walk[walk<span class="op">.</span><span class="at">length</span><span class="op">-</span><span class="dv">1</span>]) <span class="cf">return</span> <span class="st">"#ffd700"</span><span class="op">;</span></span>
+<span id="cb6-669"><a href=""></a>  <span class="cf">if</span> (walk<span class="op">.</span><span class="fu">includes</span>(i)) <span class="cf">return</span> <span class="st">"#ff8c00"</span><span class="op">;</span></span>
+<span id="cb6-670"><a href=""></a>  <span class="cf">return</span> f <span class="op">===</span> <span class="dv">0</span> <span class="op">?</span> <span class="st">"#4c78a8"</span> <span class="op">:</span> <span class="st">"#e45756"</span><span class="op">;</span></span>
+<span id="cb6-671"><a href=""></a>})</span>
+<span id="cb6-672"><a href=""></a></span>
+<span id="cb6-673"><a href=""></a>g_walk <span class="op">=</span> <span class="fu">graphSVG</span>(npos<span class="op">,</span> edges_js<span class="op">,</span> walk_colors<span class="op">,</span> walk_edges<span class="op">,</span> {<span class="dt">W</span><span class="op">:</span><span class="dv">520</span><span class="op">,</span> <span class="dt">H</span><span class="op">:</span><span class="dv">400</span>})</span>
+<span id="cb6-674"><a href=""></a></span>
+<span id="cb6-675"><a href=""></a>walk_str <span class="op">=</span> walk<span class="op">.</span><span class="fu">join</span>(<span class="st">" → "</span>)</span>
+<span id="cb6-676"><a href=""></a></span>
+<span id="cb6-677"><a href=""></a><span class="fu">html</span><span class="vs">`&lt;div style="display:flex;gap:20px;align-items:flex-start;justify-content:center"&gt;</span></span>
+<span id="cb6-678"><a href=""></a><span class="vs">  &lt;div&gt;</span></span>
+<span id="cb6-679"><a href=""></a><span class="vs">    </span><span class="sc">${</span>g_walk<span class="sc">}</span></span>
+<span id="cb6-680"><a href=""></a><span class="vs">    &lt;div style="color:#888;font-size:10px;margin-top:4px;text-align:center"&gt;</span></span>
+<span id="cb6-681"><a href=""></a><span class="vs">      ⬜ start &amp;nbsp; 🟡 end &amp;nbsp; 🟠 visited &amp;nbsp; 🔵/🔴 faction</span></span>
 <span id="cb6-682"><a href=""></a><span class="vs">    &lt;/div&gt;</span></span>
 <span id="cb6-683"><a href=""></a><span class="vs">  &lt;/div&gt;</span></span>
-<span id="cb6-684"><a href=""></a><span class="vs">&lt;/div&gt;`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-684"><a href=""></a><span class="vs">  &lt;div style="max-width:340px"&gt;</span></span>
+<span id="cb6-685"><a href=""></a><span class="vs">    &lt;div style="color:#aaa;font-size:11px;margin-bottom:8px"&gt;&lt;b&gt;Walk sequence:&lt;/b&gt;&lt;/div&gt;</span></span>
+<span id="cb6-686"><a href=""></a><span class="vs">    &lt;div style="color:#4ecdc4;font-size:10px;word-break:break-all;line-height:1.6;background:#0d1117;padding:8px;border-radius:4px"&gt;</span><span class="sc">${</span>walk_str<span class="sc">}</span><span class="vs">&lt;/div&gt;</span></span>
+<span id="cb6-687"><a href=""></a><span class="vs">    &lt;div style="color:#888;font-size:10.5px;margin-top:10px;line-height:1.7"&gt;</span></span>
+<span id="cb6-688"><a href=""></a><span class="vs">      &lt;b style="color:#aaa"&gt;p = </span><span class="sc">${</span>rw_p<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">1</span>)<span class="sc">}</span><span class="vs">&lt;/b&gt; — </span><span class="sc">${</span>rw_p <span class="op">&lt;</span> <span class="dv">1</span> <span class="op">?</span> <span class="st">"Low p: frequent backtracking (BFS-like)"</span> <span class="op">:</span> rw_p <span class="op">&gt;</span> <span class="dv">2</span> <span class="op">?</span> <span class="st">"High p: rarely returns (DFS-like)"</span> <span class="op">:</span> <span class="st">"Balanced return"</span><span class="sc">}</span><span class="vs">&lt;br&gt;</span></span>
+<span id="cb6-689"><a href=""></a><span class="vs">      &lt;b style="color:#aaa"&gt;q = </span><span class="sc">${</span>rw_q<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">1</span>)<span class="sc">}</span><span class="vs">&lt;/b&gt; — </span><span class="sc">${</span>rw_q <span class="op">&lt;</span> <span class="dv">1</span> <span class="op">?</span> <span class="st">"Low q: stays local (BFS-like, structural roles)"</span> <span class="op">:</span> rw_q <span class="op">&gt;</span> <span class="dv">2</span> <span class="op">?</span> <span class="st">"High q: explores far (DFS-like, community)"</span> <span class="op">:</span> <span class="st">"Balanced exploration"</span><span class="sc">}</span></span>
+<span id="cb6-690"><a href=""></a><span class="vs">    &lt;/div&gt;</span></span>
+<span id="cb6-691"><a href=""></a><span class="vs">  &lt;/div&gt;</span></span>
+<span id="cb6-692"><a href=""></a><span class="vs">&lt;/div&gt;`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div id="ojs-n2v-1">
 <div id="ojs-cell-5-1" data-nodetype="declaration">
@@ -1014,27 +1037,27 @@ otherwise   →  weight 1/q</code></pre>
 <tbody>
 <tr class="odd">
 <td>Spectral emb.</td>
-<td><span class="math inline">\(\mathbf{A}\)</span></td>
-<td>Top-<span class="math inline">\(d\)</span> (largest <span class="math inline">\(\lambda\)</span>)</td>
+<td><span class="math inline">\mathbf{A}</span></td>
+<td>Top-<span class="math inline">d</span> (largest <span class="math inline">\lambda</span>)</td>
 </tr>
 <tr class="even">
 <td>Ratio Cut</td>
-<td><span class="math inline">\(\mathbf{L}\)</span></td>
-<td>2nd–<span class="math inline">\((k+1)\)</span>th smallest</td>
+<td><span class="math inline">\mathbf{L}</span></td>
+<td>2nd–<span class="math inline">(k+1)</span>th smallest</td>
 </tr>
 <tr class="odd">
 <td>Norm. Cut</td>
-<td><span class="math inline">\(\mathbf{L}_n\)</span></td>
-<td>2nd–<span class="math inline">\((k+1)\)</span>th smallest</td>
+<td><span class="math inline">\mathbf{L}_n</span></td>
+<td>2nd–<span class="math inline">(k+1)</span>th smallest</td>
 </tr>
 <tr class="even">
 <td>Lap. Eigenmap</td>
-<td><span class="math inline">\(\mathbf{L}\)</span></td>
+<td><span class="math inline">\mathbf{L}</span></td>
 <td>Same as Ratio Cut</td>
 </tr>
 </tbody>
 </table>
-<p>Pros: principled, interpretable. Cons: <span class="math inline">\(\mathcal{O}(N^3)\)</span> eigendecomposition.</p>
+<p>Pros: principled, interpretable. Cons: <span class="math inline">\mathcal{O}(N^3)</span> eigendecomposition.</p>
 </div><div class="column" style="width:50%;">
 <p><strong>Neural methods</strong> — sample random walks, train word2vec</p>
 <table class="caption-top">
@@ -1052,19 +1075,19 @@ otherwise   →  weight 1/q</code></pre>
 <td>Community</td>
 </tr>
 <tr class="even">
-<td>node2vec (low <span class="math inline">\(q\)</span>)</td>
+<td>node2vec (low <span class="math inline">q</span>)</td>
 <td>DFS-like</td>
 <td>Community</td>
 </tr>
 <tr class="odd">
-<td>node2vec (low <span class="math inline">\(p\)</span>)</td>
+<td>node2vec (low <span class="math inline">p</span>)</td>
 <td>BFS-like</td>
 <td>Structural roles</td>
 </tr>
 </tbody>
 </table>
 <p>Pros: scalable, flexible. Cons: hyperparameter tuning, less interpretable.</p>
-<p>Both families embed nodes into <span class="math inline">\(\mathbb{R}^d\)</span> — downstream tasks (clustering, classification, link prediction) then use standard ML on the vectors.</p>
+<p>Both families embed nodes into <span class="math inline">\mathbb{R}^d</span> — downstream tasks (clustering, classification, link prediction) then use standard ML on the vectors.</p>
 </div></div>
 
 </section>
@@ -1088,7 +1111,6 @@ otherwise   →  weight 1/q</code></pre>
   <script src="slide08_files/libs/revealjs/plugin/notes/notes.js"></script>
   <script src="slide08_files/libs/revealjs/plugin/search/search.js"></script>
   <script src="slide08_files/libs/revealjs/plugin/zoom/zoom.js"></script>
-  <script src="slide08_files/libs/revealjs/plugin/math/math.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>
@@ -1256,27 +1278,9 @@ otherwise   →  weight 1/q</code></pre>
         // Factor of the display size that should remain empty around the content
         margin: 6.0e-2,
 
-        math: {
-          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js',
-          config: 'TeX-AMS_HTML-full',
-          tex2jax: {
-            inlineMath: [['\\(','\\)']],
-            displayMath: [['\\[','\\]']],
-            balanceBraces: true,
-            processEscapes: false,
-            processRefs: true,
-            processEnvironments: true,
-            preview: 'TeX',
-            skipTags: ['script','noscript','style','textarea','pre','code'],
-            ignoreClass: 'tex2jax_ignore',
-            processClass: 'tex2jax_process'
-          },
-        },
-
         // reveal.js plugins
         plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
 
-          RevealMath,
           RevealNotes,
           RevealSearch,
           RevealZoom
