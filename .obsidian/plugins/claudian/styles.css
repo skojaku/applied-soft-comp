@@ -24,6 +24,7 @@
   height: 100%;
   padding: 0;
   overflow: hidden;
+  font-family: var(--font-text);
 }
 
 
@@ -1206,7 +1207,7 @@ body.theme-light .claudian-message-content pre {
 /* ============================================
    components/status-panel.css
    ============================================ */
-/* Status Panel - persistent bottom panel for async subagents and todos */
+/* Status Panel - persistent bottom panel for todos and command output */
 
 .claudian-status-panel-container {
   flex-shrink: 0;
@@ -1215,53 +1216,6 @@ body.theme-light .claudian-message-content pre {
 
 .claudian-status-panel {
   padding-top: 12px;
-}
-
-/* Async Subagent Section */
-
-.claudian-status-panel-subagents {
-  margin-bottom: 4px;
-}
-
-.claudian-status-panel-done-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 2px 0;
-}
-
-.claudian-status-panel-combined-row {
-  justify-content: flex-start;
-}
-
-.claudian-status-panel-combined-row .claudian-status-panel-done-text {
-  flex: 1;
-}
-
-.claudian-status-panel-icon.claudian-status-panel-done-icon {
-  color: var(--color-green);
-}
-
-.claudian-status-panel-icon.claudian-status-panel-bot-icon {
-  color: var(--interactive-accent);
-}
-
-.claudian-status-panel-done-text {
-  font-family: var(--font-monospace);
-  font-size: 13px;
-  color: var(--text-normal);
-}
-
-.claudian-status-panel-running-row {
-  display: flex;
-  justify-content: flex-end;
-  padding: 2px 0;
-}
-
-.claudian-status-panel-running-text {
-  font-family: var(--font-monospace);
-  font-size: 13px;
-  color: var(--color-cyan);
 }
 
 /* Todo Section */
@@ -2093,12 +2047,19 @@ body.theme-light .claudian-message-content pre {
 /* ============================================
    toolbar/thinking-selector.css
    ============================================ */
-/* Thinking budget selector */
+/* Thinking selector (effort for adaptive models, token budget for custom) */
 .claudian-thinking-selector {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-left: 12px;
+}
+
+/* Effort / budget container (shared layout) */
+.claudian-thinking-effort,
+.claudian-thinking-budget {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .claudian-thinking-label-text {
@@ -3109,6 +3070,11 @@ code .claudian-file-link:hover {
   border-radius: 2px;
   padding: 3px 0;
   margin: -3px 0;
+}
+
+/* Preview mode selection highlight via CSS Custom Highlight API */
+::highlight(claudian-selection) {
+  background: var(--text-selection);
 }
 
 /* CM6 widget container - ensure transparent background */

@@ -4,6 +4,10 @@
  *   applied-soft-comp/docs/lecture-note/assets/custom.css
  *
  * Marimo public theming API: https://docs.marimo.io/guides/configuration/theming/
+ *
+ * Use App(css_file="this-file.css") so styles apply to the whole app. Injecting CSS with
+ * mo.Html and a literal style element only affects that cell output; KaTeX in mo.md() is
+ * rendered in the main app, so those rules do not reliably change display math size.
  */
 
 :root {
@@ -27,23 +31,25 @@ h2, h3 {
   color: #1a1a1a;
 }
 
-/* Display-mode LaTeX ($$...$$  or  \[...\]).
-   Marimo uses KaTeX; it hard-codes font-size:110% on .katex, so we must
-   override that inner element directly. 115% is large enough to stand out
-   from body text while staying within slide/column width. */
-.katex-display .katex {
-  font-size: 115% !important;
+/* KaTeX inline: match body text scale (paragraph is 1.2rem) */
+.katex {
+  font-size: 1.05em !important;
+}
+
+/*
+ * Display math ($$...$$): marimo wraps TeX in <marimo-tex class="arithmatex">; the client renders KaTeX
+ * with .katex-display around block equations. Target both so size wins over KaTeX defaults.
+ */
+.katex-display .katex,
+marimo-tex .katex-display .katex,
+marimo-tex.arithmatex .katex-display .katex {
+  font-size: 1.35rem !important;
 }
 
 .katex-display {
-  margin: 0.6em 0 !important;
+  margin: 0.75em 0 !important;
   overflow-x: auto;
   overflow-y: hidden;
-}
-
-/* Inline math: match surrounding text exactly */
-:not(.katex-display) > .katex {
-  font-size: 100% !important;
 }
 
 /*
